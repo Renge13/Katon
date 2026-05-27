@@ -1,5 +1,5 @@
 // ============================================================
-// Navbar — minimal RENA top nav (Home + Methodology stub)
+// Navbar — minimal KATON top nav (Home + Methodology stub)
 // ============================================================
 // Methodology has no route yet; the link is a visual placeholder
 // that hints "coming soon" via reduced opacity. Implement the

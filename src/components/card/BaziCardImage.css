@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+.katon-card-image {
+  position: relative;
+  width: 390px;
+  height: 693px;
+  overflow: hidden;
+  user-select: none;
+  font-family: 'Spectral', Georgia, serif;
+}
+
+.katon-card-image .rci-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.katon-card-image .rci-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.katon-card-image .rci-zone {
+  position: absolute;
+}
+
+/* Zone A — top metadata */
+.katon-card-image .rci-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.katon-card-image .rci-element-label {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 500;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.katon-card-image .rci-birth-date {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 400;
+  font-size: 8.5px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: #8B6A52;
+}
+
+/* Zone B — tagline. Smaller + tighter tracking to land on one line. */
+.katon-card-image .rci-tagline {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Zone C — KBD body blocks */
+.katon-card-image .rci-kbd-body {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 400;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: #3A2010;
+}
+
+/* Zone D — element dots */
+.katon-card-image .rci-dot-group {
+  display: flex;
+  gap: 4px;
+}
+
+.katon-card-image .rci-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+/* Zone E — element note */
+.katon-card-image .rci-element-note {
+  font-family: 'Spectral', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Zone F — harmonis / konflik */
+.katon-card-image .rci-pair-names {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.katon-card-image .rci-pair-note {
+  font-family: 'Spectral', Georgia, serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 9px;
+  line-height: 1.5;
+  color: #6A5040;
+}
+
+/* Zone G — Footer overlay. Opaque cream box that covers the baked-in
+   "rena.io" footer pixels in the template image, with "katon.app" rendered
+   on top. Paper color sampled from the template (rgb 252,245,235). When the
+   template is regenerated with the new domain baked in, this rule can be
+   removed and the JSX block dropped. */
+.katon-card-image .rci-footer-overlay {
+  position: absolute;
+  top: 97.3%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgb(252, 245, 235);
+  /* Asymmetric padding pushes the uppercase glyphs down a touch so the
+     visual baseline lands on the hairline at 97.3% instead of sitting
+     above it (uppercase Latin sits high in the line box). */
+  padding: 4px 6px 1px;
+  color: #51433A;
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 500;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+}

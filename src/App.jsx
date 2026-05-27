@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { calculateBaziChart, getInterpretation, runValidation } from '@/lib/bazi'
 import BaziCard from '@/components/card/BaziCard.jsx'
+import BaziCardImage from '@/components/card/BaziCardImage.jsx'
 import Report from '@/components/Report.jsx'
 import { exportCardAsPNG } from '@/utils/exportCard.jsx'
+import { exportCardImage } from '@/utils/exportCardImage.jsx'
 import { ARCHETYPE_EMOJI } from '@/lib/bazi/elementConfig.js'
 import { PILLAR_STEM_MEANINGS } from '@/lib/bazi/interpretation/pillarMeanings.js'
+import { chartToCardData } from '@/lib/bazi/interpretation/cardCopy.js'
 import './App.css'
 
 const ELEMENT_LABEL = {
@@ -233,6 +236,23 @@ function App() {
     }
   }
 
+  /* Export handler for the image-overlay BaziCardImage (used on archetypes
+     that have a template, currently just 丙). Filename includes archetype
+     id and birth date so multiple exports don't collide. */
+  async function onDownloadImage(cardData) {
+    if (!cardData) return
+    setExporting(true)
+    setExportError(null)
+    try {
+      const filename = `katon-${cardData.archetypeId}-${result.birthDate}.png`
+      await exportCardImage('bazi-card', filename)
+    } catch (err) {
+      setExportError(err?.message || 'Gagal menyimpan gambar.')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const maxBalance = result
     ? Math.max(...ELEMENTS.map((el) => result.elementBalance[el] || 0), 1)
     : 1
@@ -241,7 +261,7 @@ function App() {
     <main className="app">
 
       {/* Top-left brand mark — small, quiet, scrolls with page */}
-      <div className="site-logo">RENA</div>
+      <div className="site-logo">KATON</div>
 
       {/* Landing — centered hero (title + sub only) */}
       <header className="landing">
@@ -354,26 +374,49 @@ function App() {
             }
           </div>
 
-          {/* BaziCard — watercolor canvas, 7-zone TCG layout */}
-          {result.interpretation && (
-            <div className="bazi-card-preview">
-              <div className="section-title">Persona</div>
-              <BaziCard
-                chart={result}
-                interpretation={result.interpretation}
-                mode="preview"
-              />
-              <button
-                className="bazi-card-download"
-                type="button"
-                onClick={onDownload}
-                disabled={exporting}
-              >
-                {exporting ? 'Menyimpan...' : 'Simpan Gambar'}
-              </button>
-              {exportError && <div className="error">{exportError}</div>}
-            </div>
-          )}
+          {/* Persona / sharecard surface.
+              For archetypes with an image template (currently only 丙), use the
+              new image-overlay BaziCardImage. Other archetypes fall back to the
+              legacy code-rendered BaziCard with no behavior change. */}
+          {result.interpretation && (() => {
+            const cardData = chartToCardData(result, result.interpretation)
+            if (cardData) {
+              return (
+                <div className="bazi-card-preview">
+                  <div className="section-title">Persona</div>
+                  <BaziCardImage cardData={cardData} id="bazi-card" />
+                  <button
+                    className="bazi-card-download"
+                    type="button"
+                    onClick={() => onDownloadImage(cardData)}
+                    disabled={exporting}
+                  >
+                    {exporting ? 'Menyimpan...' : 'Simpan Gambar'}
+                  </button>
+                  {exportError && <div className="error">{exportError}</div>}
+                </div>
+              )
+            }
+            return (
+              <div className="bazi-card-preview">
+                <div className="section-title">Persona</div>
+                <BaziCard
+                  chart={result}
+                  interpretation={result.interpretation}
+                  mode="preview"
+                />
+                <button
+                  className="bazi-card-download"
+                  type="button"
+                  onClick={onDownload}
+                  disabled={exporting}
+                >
+                  {exporting ? 'Menyimpan...' : 'Simpan Gambar'}
+                </button>
+                {exportError && <div className="error">{exportError}</div>}
+              </div>
+            )
+          })()}
 
           {/* Archetype hero */}
           {result.interpretation && (result.interpretation.dayMasterName || result.interpretation.heroDescription || result.interpretation.shareTagline) && (

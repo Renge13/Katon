@@ -234,7 +234,7 @@ export default function BaziCard({ chart, interpretation, mode = 'preview' }) {
           color:         BASE.muted,
           fontWeight:    500,
         }}>
-          RENA
+          KATON
         </span>
       </div>
 

@@ -1,9 +1,9 @@
-# RENA — emotional reflection webapp
+# KATON — emotional reflection webapp
 
-Personal project. Live at https://rena-id.vercel.app (renamed from `dirimu.vercel.app` — `rena.vercel.app` was taken by another Vercel account, so `-id` locale suffix used. Old URL 307-redirects to new). Code at https://github.com/Renge13/Rena (after user's GitHub rename — was `Renge13/Dirimu`).
+Personal project. Brand history: **DIRIMU → RENA → KATON** (current). The previous rebrand to RENA stalled when `rena.id` turned out to be unavailable; current brand is **KATON** with domain `katon.app`. Live at https://rena-id.vercel.app today; cutover to `katon.app` is in progress (GitHub repo rename `Renge13/Rena` → `Renge13/Katon`, Vercel project rename, DNS — all done outside Claude). Old URL 307-redirects to new once cutover completes. The filesystem path is still `D:\claude-projects\rena` for now (renaming to `katon` is optional cleanup).
 
-**Brand positioning (RENA, rebranded from DIRIMU):**
-RENA is a **modern emotional reflection brand** that quietly uses BaZi / Four Pillars behind the scenes but does **NOT** lead with metaphysics terminology in marketing surfaces. Brand feel: serene, emotionally intimate, literary, psychologically elegant, premium. Visual: watercolor on textured cream paper, "Muji + premium psychology journal + watercolor editorial design + Apple-level polish". The product is positioned as a reflective lens, not fortune-telling or astrology.
+**Brand positioning (KATON, rebranded from RENA, originally DIRIMU):**
+KATON is a **modern emotional reflection brand** that quietly uses BaZi / Four Pillars behind the scenes but does **NOT** lead with metaphysics terminology in marketing surfaces. Brand feel: serene, emotionally intimate, literary, psychologically elegant, premium. Visual: watercolor on textured cream paper, "Muji + premium psychology journal + watercolor editorial design + Apple-level polish". The product is positioned as a reflective lens, not fortune-telling or astrology.
 
 Inner pages (post-form) retain light BaZi vocabulary (`EMPAT PILARMU` section header, sharecard Chinese characters like `丙火 · API`) as aesthetic signature — brand discipline applies to **landing surfaces only**.
 
@@ -14,7 +14,9 @@ Inner pages (post-form) retain light BaZi vocabulary (`EMPAT PILARMU` section he
 ## Current state (handoff snapshot)
 
 **Latest commit on `main`**: see `git log --oneline -5`. The recent arc:
-- **DIRIMU → RENA rebrand in progress** — identity sweep (`Dirimu`/`DIRIMU`/`dirimu` → `RENA`/`RENA`/`rena` in user-facing strings, `package.json`, HTML title, sharecard Zone 1 eyebrow) and homepage redesign (new minimal navbar with Home + Methodology stub, reflection-first hero `Kamu punya pola.` + `Dan mungkin selama ini, kamu belum pernah melihatnya.`, dropped `Ba Zi · 八字` chrome from landing, CTA `Lihat Empat Pilarku →` → `Lihat Refleksiku`, static watercolor bloom background, form labels Title Case). Inner pages unchanged (`EMPAT PILARMU`, `KOMPOSISI ENERGIMU`, sharecard Chinese characters all stay — brand discipline applies to landing surfaces only). Filesystem rename + git remote URL update + GitHub/Vercel rename are done outside Claude session.
+- **Image-overlay sharecard pilot landed for 丙** — new component `BaziCardImage.jsx` + `BaziCardImage.css` overlays dynamic copy on a pre-baked watercolor template PNG at `public/cards/matahari-template.png`. Card 390×693 display, exports 1080×1920 PNG via `html-to-image` (in `src/utils/exportCardImage.jsx`). Demo at `/?cardDemo=1` (route check in `src/main.jsx`). Pilot toggle `USE_IMAGE_CARD` in App.jsx (default false). Legacy `BaziCard.jsx` untouched. Expand-to-9-archetypes is the next big task.
+- **RENA → KATON rebrand (in progress, current)** — code-string sweep done: wordmark on landing + sharecard, `package.json` name, HTML title, export filename defaults (`rena-matahari.png` → `katon-matahari.png`), `BaziCardImage` CSS class (`.rena-card-image` → `.katon-card-image`), comments in App.css + Navbar.jsx. Outside Claude: GitHub repo rename `Renge13/Rena` → `Renge13/Katon`, Vercel project rename + custom domain `katon.app`, `git remote set-url origin`, optional filesystem rename `D:\claude-projects\rena` → `D:\claude-projects\katon`. The sharecard template at `public/cards/matahari-template.png` still bakes in a `rena.io` footer; user is regenerating the template with `katon.app` footer (and the other 9 archetype templates while at it).
+- **DIRIMU → RENA rebrand (superseded, partial)** — identity sweep (`Dirimu`/`DIRIMU`/`dirimu` → `RENA`/`RENA`/`rena` in user-facing strings, `package.json`, HTML title, sharecard Zone 1 eyebrow) and homepage redesign (new minimal navbar with Home + Methodology stub, reflection-first hero `Kamu punya pola.` + `Dan mungkin selama ini, kamu belum pernah melihatnya.`, dropped `Ba Zi · 八字` chrome from landing, CTA `Lihat Empat Pilarku →` → `Lihat Refleksiku`, static watercolor bloom background, form labels Title Case). Inner pages unchanged (`EMPAT PILARMU`, `KOMPOSISI ENERGIMU`, sharecard Chinese characters all stay — brand discipline applies to landing surfaces only). Most of this work carried forward into KATON; only the brand word was swapped.
 - **Phase 7d landed** — pillarMeanings.js audit. Two surgical fixes: `year['己']` swapped `selalu` → `sering` (banned forecast word slipped through Bank 9e), and all 10 `day[*]` entries softened from declarative opener `Inti dirimu adalah X` to observation-first `Inti dirimu sering tampak sebagai X` for cohesion with Phase 7c locks. Other 30 lines audited and left intact (audit, not demolish).
 - **Phase 7c COMPLETE (10/10)** — reading-page surfaces (hero / identityPills / traits) now in formal+spoken register for every archetype. Batch 4 (壬 Samudra + 癸 Hujan) was the cleanest C2 delivery of the session — every drift the prompt flagged was caught and fixed in-batch, zero inline corrections needed.
 - **Phase 7b COMPLETE (10/10)** with 己 catch-up (silently missed by earlier batches).
@@ -131,6 +133,32 @@ scripts/
 
 ---
 
+## Image-overlay sharecard (current pilot)
+
+Replaces the code-rendered `BaziCard.jsx` for 丙 (others still on legacy). The
+watercolor template PNG is the full-bleed background; code overlays only the
+dynamic copy in absolutely-positioned percentage-based zones.
+
+**Files:**
+- `src/components/card/BaziCardImage.jsx` + `BaziCardImage.css` — overlay component
+- `src/utils/exportCardImage.jsx` — `html-to-image` export at 1080×1920
+- `src/pages/CardDemo.jsx` — standalone demo with chart switcher
+- `public/cards/{archetype}-template.png` — bare templates, lowercase filename, ≥1080×1920
+
+**What's baked vs. overlaid (per template):** baked = archetype title, KEKUATAN/BAYANGAN/DAMPAK + HARMONIS/KONFLIK ghost labels, element icons, sun illustration, decorative hairlines, footer hairlines. Overlaid = top metadata, tagline, KBD body copy, element dots, italic element note, harmonis/konflik names + flavor notes, footer brand mark.
+
+**Font system:** Spectral throughout (Google Fonts). Tagline/labels: 500 uppercase tracked. KBD body / pair note: 400 regular. Element note: italic 400. Pair names: 700.
+
+**Footer overlay hack (temporary):** `.rci-footer-overlay` is an opaque cream-colored div (`rgb(252,245,235)` sampled from the template) that covers the baked `rena.io` text and renders `KATON.APP` on top. Delete this div + CSS rule once templates are regenerated with `katon.app` baked in.
+
+**Calibration workflow (use this for each new archetype template):**
+1. Save bare template at `public/cards/{archetype}-template.png` (lowercase) and **restart Vite dev server** (Vite doesn't HMR new `public/` files).
+2. Open `/?cardDemo=1` and run pixel-scan via `preview_eval`: load template into a canvas, scan for dark warm pixels (`r<200 && g<100 && b<80`) in the left strip (x=10–30%) to find ghost-label y-centers and bottoms; scan for saturated/non-paper pixels in the icon band to find icon center x-positions.
+3. Set each overlay zone's top% to label-bottom + ~0.8% for equal gaps. Set dot x-positions to detected icon centers.
+4. Verify via export — `html-to-image` requires `await document.fonts.ready` (already in exportCardImage) or fonts fall back to system serifs in the PNG.
+
+---
+
 ## Voice rules (non-negotiable)
 
 Carried across every passage bank. Violations are bugs.
@@ -169,7 +197,7 @@ Reyner himself is **丙 Matahari** (1989-09-13 09:00 → 丙子日). All voice l
 
 ## Reading flow (App.jsx surfaces, top to bottom)
 
-1. Hero — minimal navbar (Home + Methodology stub) → `RENA` wordmark + `Refleksi personal dari waktu kelahiranmu.` supporting line → `Kamu punya pola.` main statement + reflective sub. Replaces the old `DIRIMU` + `Empat Pilar Nasibmu` + `Ba Zi · 八字` eyebrow hero (rebranded for RENA).
+1. Hero — minimal navbar (Home + Methodology stub) → `KATON` wordmark + `Refleksi personal dari waktu kelahiranmu.` supporting line → `Kamu punya pola.` main statement + reflective sub. Replaces the old `DIRIMU` + `Empat Pilar Nasibmu` + `Ba Zi · 八字` eyebrow hero (rebranded through RENA to KATON).
 2. Form — date selectors + optional time + `Lihat Empat Pilarku →` submit (smooth-scrolls to result)
 3. **Empat Pilarmu** — 4-pillar grid with `Energi Intimu` badge on day pillar, per-pillar meaning captions
 4. **Persona** = sharecard (BaziCard) + Simpan Gambar (PNG download)
@@ -275,7 +303,7 @@ Pending content work:
 - **Phase 5a–b** — first tester legibility pass: archetype subtitles, person-first Ladang traits, BAYANGAN → SISI LAIN, SELARAS/PEMICU → COCOK DENGAN / PERLU DIJAGA DENGAN with archetype emoji
 - **Phase 4** — long-form report engine (composer + 70 passage cores)
 - **Phase 3** — TCG-style 7-zone sharecard on watercolor canvas (later reduced to 6 zones)
-- **Phase 2** — initial sharecard + project relocated from C:\ to D:\claude-projects\dirimu (later renamed to D:\claude-projects\rena as part of the RENA rebrand)
+- **Phase 2** — initial sharecard + project relocated from C:\ to D:\claude-projects\dirimu (later renamed to D:\claude-projects\rena as part of the RENA rebrand; KATON rebrand keeps the same path for now)
 - **Phase 0–1** — Vite scaffold + BaZi engine integration
 
 ---
@@ -297,4 +325,7 @@ Pending content work:
 - Confirm the user wants you to write code before doing anything destructive. Default to plan mode for sizeable changes.
 - For copy work: draft a tightly-scoped C2 prompt, never write Indonesian copy directly unless the user explicitly delegates it.
 - Smoke chart is **1989-09-13 09:00** (Reyner, 丙 Matahari) unless the user is testing a different archetype.
-- Commit attribution must be the personal identity (`reynersoendojo@gmail.com`). Push only to `Renge13/Rena` (renamed from `Renge13/Dirimu` as part of the RENA rebrand).
+- Commit attribution must be the personal identity (`reynersoendojo@gmail.com`). Push to `Renge13/Katon` (the GitHub repo rename `Dirimu` → `Rena` → `Katon` happens outside Claude; once the user runs `git remote set-url origin`, this is the canonical push target). Until the rename lands the remote may still read `Renge13/Rena` — that's fine, GitHub redirects.
+- **Vite is case-sensitive on `public/` paths**, even on Windows NTFS. `/cards/matahari-template.png` ≠ `/cards/Matahari-template.png`. The fetch returns 200 OK for the wrong case but with `content-type: text/html` (Vite's SPA fallback). Always use lowercase filenames in `public/`.
+- **New files in `public/` require a Vite dev-server restart** (HMR ignores them). Restart via `preview_stop` + `preview_start`, not just a browser reload.
+- **`preview_screenshot` can intermittently time out** while the page is fully responsive. Fall back to `preview_eval` with DOM queries (`getBoundingClientRect`, `getComputedStyle`) for measurement — they keep working during screenshot stalls.

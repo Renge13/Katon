@@ -1,4 +1,4 @@
-/* ── Body watercolor canvas (RENA brand: paper + soft pigment blooms) ─── */
+/* ── Body watercolor canvas (KATON brand: paper + soft pigment blooms) ─── */
 /* Layered radial gradients simulate watercolor blooms on cream paper.
    Very low opacity (4-7%) so the canvas reads as texture, not decoration.
    background-attachment: fixed so the bloom feels like a property of the
@@ -91,7 +91,7 @@ body {
   padding: 32px;
   margin: 0 auto 48px;
   max-width: 520px;
-  /* Subtle paper-on-paper lift (per RENA brand: 'subtle depth') */
+  /* Subtle paper-on-paper lift (per KATON brand: 'subtle depth') */
   box-shadow:
     0 1px 2px rgba(42, 37, 32, 0.04),
     0 8px 32px rgba(42, 37, 32, 0.04);
