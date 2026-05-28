@@ -26,6 +26,10 @@ const MATAHARI_BASE = {
     note:  'Bumi menyerap energi, bisa menguras jika tidak dijaga.',
   },
   templateSrc: '/cards/matahari-template.png',
+  /* Matches the current Matahari template (labels + hairlines + rena.io
+     footer all baked into the image). Flip to false when the template is
+     regenerated with the stripped design. */
+  bakedLabels: true,
 }
 
 const CHART_REYNER = {

@@ -38,6 +38,14 @@ export const ARCHETYPE_CARD_COPY = {
 
     templateSrc: '/cards/matahari-template.png',
 
+    /* Transitional flag. The current Matahari template has section labels
+       (KEKUATAN/BAYANGAN/DAMPAK/HARMONIS/KONFLIK), decorative hairlines, and
+       a baked `rena.io` footer baked into the image. New 9 archetype
+       templates will use a stripped design (background + illustration +
+       title + 5 element icons only) — code renders everything else uniformly.
+       Set this to false when the Matahari template is regenerated to match. */
+    bakedLabels: true,
+
     /* Element-note variants keyed by chart shape.
        Selection rule (see pickElementNote below):
          - If home element (Fire for 丙) is missing → missingFire

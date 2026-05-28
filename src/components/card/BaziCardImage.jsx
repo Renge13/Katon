@@ -91,6 +91,7 @@ export default function BaziCardImage({ cardData, id = 'bazi-card' }) {
     elementBalance,
     elementNote,
     templateSrc = '/cards/matahari-template.png',
+    bakedLabels = false,
   } = cardData
 
   return (
@@ -133,6 +134,27 @@ export default function BaziCardImage({ cardData, id = 'bazi-card' }) {
           {tagline}
         </div>
 
+        {/* Zone C — Section labels (KEKUATAN/BAYANGAN/DAMPAK).
+            Rendered in code when the template doesn't bake them in. Positioned
+            at the ghost-label y-centers measured against the original Matahari
+            template, so they land in the same spots a baked template would. */}
+        {!bakedLabels && (
+          <>
+            <div
+              className="rci-zone rci-section-label"
+              style={{ top: '46.4%', left: '12%', color: colors.deep }}
+            >KEKUATAN</div>
+            <div
+              className="rci-zone rci-section-label"
+              style={{ top: '54.8%', left: '12%', color: colors.deep }}
+            >BAYANGAN</div>
+            <div
+              className="rci-zone rci-section-label"
+              style={{ top: '62.1%', left: '12%', color: colors.deep }}
+            >DAMPAK</div>
+          </>
+        )}
+
         {/* Zone C — KBD body blocks. Body left-edge aligns with ghost label
             at 12%. Tops calibrated to sit ~0.8% below each label's bottom,
             so all three gaps read equal. */}
@@ -168,6 +190,21 @@ export default function BaziCardImage({ cardData, id = 'bazi-card' }) {
           />
         </div>
 
+        {/* Zone F — HARMONIS / KONFLIK section labels. Code-rendered when
+            template doesn't bake them in. Positioned at the ghost label y. */}
+        {!bakedLabels && (
+          <>
+            <div
+              className="rci-zone rci-section-label"
+              style={{ top: '85.4%', left: '12%', color: colors.deep }}
+            >HARMONIS</div>
+            <div
+              className="rci-zone rci-section-label"
+              style={{ top: '85.4%', left: '58%', color: colors.deep }}
+            >KONFLIK</div>
+          </>
+        )}
+
         {/* Zone F — harmonis column. Left edge 12% matches HARMONIS ghost
             label left-edge measured from template. */}
         <div
@@ -198,11 +235,27 @@ export default function BaziCardImage({ cardData, id = 'bazi-card' }) {
           <div className="rci-pair-note">{konflik.note}</div>
         </div>
 
-        {/* Zone G — Footer overlay. Until the template image is regenerated
-            with a "katon.app" footer baked in, this overlays an opaque
-            cream-colored box over the baked "rena.io" pixels and renders
-            "katon.app" on top. Centered at the original footer y-position. */}
-        <div className="rci-footer-overlay">katon.app</div>
+        {/* Zone G — Footer hairlines + brand mark.
+            Legacy template (bakedLabels=true): an opaque cream box covers the
+            baked "rena.io" pixels and renders "katon.app" on top, while the
+            hairlines flanking the footer come from the template image itself.
+            Stripped template (bakedLabels=false): brand mark sits over a clean
+            paper background, with hairlines code-rendered on either side. */}
+        {bakedLabels ? (
+          <div className="rci-footer-overlay">katon.app</div>
+        ) : (
+          <>
+            <div
+              className="rci-footer-hairline"
+              style={{ top: '97.3%', left: '15%', width: '20%', background: colors.deep }}
+            />
+            <div className="rci-footer-mark" style={{ color: colors.deep }}>katon.app</div>
+            <div
+              className="rci-footer-hairline"
+              style={{ top: '97.3%', right: '15%', width: '20%', background: colors.deep }}
+            />
+          </>
+        )}
       </div>
     </div>
   )

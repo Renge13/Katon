@@ -113,11 +113,52 @@
   color: #6A5040;
 }
 
-/* Zone G — Footer overlay. Opaque cream box that covers the baked-in
-   "rena.io" footer pixels in the template image, with "katon.app" rendered
-   on top. Paper color sampled from the template (rgb 252,245,235). When the
-   template is regenerated with the new domain baked in, this rule can be
-   removed and the JSX block dropped. */
+/* Section labels (KEKUATAN/BAYANGAN/DAMPAK/HARMONIS/KONFLIK) — rendered in
+   code when the template doesn't bake them in. Same tracked-uppercase
+   register as the tagline + top metadata. */
+.katon-card-image .rci-section-label {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+  /* Center the geometric label center on the `top:` position so it lands on
+     the same y as the ghost label would in a baked template. */
+  transform: translateY(-50%);
+}
+
+/* Footer hairlines — short horizontal strokes flanking KATON.APP. Only
+   rendered when template doesn't bake the footer decoration in. */
+.katon-card-image .rci-footer-hairline {
+  position: absolute;
+  height: 1px;
+  transform: translateY(-50%);
+  opacity: 0.55;
+}
+
+/* Footer brand mark, stripped-template variant — sits over clean paper, no
+   cover box. Same tracked-uppercase register as the overlay variant. */
+.katon-card-image .rci-footer-mark {
+  position: absolute;
+  top: 97.3%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 4px 6px 1px;
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 500;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* Zone G — Footer overlay (legacy template only). Opaque cream box that
+   covers the baked-in "rena.io" footer pixels in the original Matahari
+   template image, with "katon.app" rendered on top. Paper color sampled
+   from the template (rgb 252,245,235). When the Matahari template is
+   regenerated with the new stripped design, set bakedLabels=false in
+   cardCopy.js and this rule no longer applies. */
 .katon-card-image .rci-footer-overlay {
   position: absolute;
   top: 97.3%;
