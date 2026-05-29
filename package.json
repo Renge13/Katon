@@ -8,9 +8,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "dev:vite": "vite",
-    "build:vite": "vite build",
-    "preview:vite": "vite preview",
     "generate:solar-terms": "node scripts/generate-solar-terms.js",
     "check:copy": "node scripts/check-copy.js",
     "test:bazi": "node scripts/validate-bazi.mjs"
@@ -19,7 +16,6 @@
     "@supabase/supabase-js": "^2.106.2",
     "@tabler/icons-react": "^3.44.0",
     "html-to-image": "^1.11.13",
-    "html2canvas": "^1.4.1",
     "nanoid": "^5.1.11",
     "next": "^15.5.18",
     "react": "^19.2.6",
@@ -31,12 +27,9 @@
     "@types/node": "^25.7.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
     "astronomia": "^4.2.0",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.6.0",
-    "vite": "^8.0.12"
+    "globals": "^17.6.0"
   }
 }

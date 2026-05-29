@@ -32,7 +32,7 @@ export async function POST(request) {
 
   // Resolve the authoritative reading id + paid state.
   let readingId;
-  let paidConfirmed = false;
+  let paidConfirmed;
 
   if (process.env.XENDIT_SECRET_KEY) {
     // PROD: re-fetch the invoice and trust ONLY Xendit's own record.

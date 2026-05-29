@@ -35,6 +35,7 @@ export default function Funnel() {
     if (!day || !month || !year) { setError('Isi tanggal lahirmu dulu ya.'); return; }
     const birthDate = `${year}-${pad(month)}-${pad(day)}`;
     const birthTime = hour !== '' ? `${pad(hour)}:${pad(minute || 0)}` : null;
+    setStep(0);
     setPhase('calculating');
     try {
       const [res] = await Promise.all([
@@ -55,7 +56,6 @@ export default function Funnel() {
 
   useEffect(() => {
     if (phase !== 'calculating') return;
-    setStep(0);
     const t1 = setTimeout(() => setStep(1), 850);
     const t2 = setTimeout(() => setStep(2), 1700);
     return () => { clearTimeout(t1); clearTimeout(t2); };
@@ -351,7 +351,6 @@ function FourPillars({ id, chart, token, onUpdate }) {
   const [minute, setMinute] = useState('');
   const [busy, setBusy] = useState(false);
   if (!p) return null;
-  const cols = [p.tahun, p.bulan, p.hari, p.jam];
 
   async function addHour(e) {
     e.preventDefault();
