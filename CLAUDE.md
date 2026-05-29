@@ -13,20 +13,35 @@ Inner pages (post-form) retain light BaZi vocabulary (`EMPAT PILARMU` section he
 
 ## Current state (handoff snapshot)
 
-**Latest commit on `main`**: see `git log --oneline -5`. The recent arc:
+**Latest commit on `main`**: see `git log --oneline -5`. The recent arc (most recent first).
+
+> **Merge note (2026-05-29):** two parallel lines that both forked from `9a0fe93` were merged here. Line A = the **image-overlay sharecard pilot + RENA→KATON rebrand** (this folder's local work). Line B = **Phase 8b paid-tier + tester-2 UX cuts** (pushed to remote elsewhere). Both are now on `main`. The `USE_IMAGE_CARD` sharecard toggle and the Phase 8b `deepInsight` report path are independent and coexist.
+
+**Line A — image-overlay sharecard + KATON rebrand:**
 - **Image-overlay sharecard pilot landed for 丙** — new component `BaziCardImage.jsx` + `BaziCardImage.css` overlays dynamic copy on a pre-baked watercolor template PNG at `public/cards/matahari-template.png`. Card 390×693 display, exports 1080×1920 PNG via `html-to-image` (in `src/utils/exportCardImage.jsx`). Demo at `/?cardDemo=1` (route check in `src/main.jsx`). Pilot toggle `USE_IMAGE_CARD` in App.jsx (default false). Legacy `BaziCard.jsx` untouched. Expand-to-9-archetypes is the next big task.
-- **RENA → KATON rebrand (in progress, current)** — code-string sweep done: wordmark on landing + sharecard, `package.json` name, HTML title, export filename defaults (`rena-matahari.png` → `katon-matahari.png`), `BaziCardImage` CSS class (`.rena-card-image` → `.katon-card-image`), comments in App.css + Navbar.jsx. Outside Claude: GitHub repo rename `Renge13/Rena` → `Renge13/Katon`, Vercel project rename + custom domain `katon.app`, `git remote set-url origin`, optional filesystem rename `D:\claude-projects\rena` → `D:\claude-projects\katon`. The sharecard template at `public/cards/matahari-template.png` still bakes in a `rena.io` footer; user is regenerating the template with `katon.app` footer (and the other 9 archetype templates while at it).
-- **DIRIMU → RENA rebrand (superseded, partial)** — identity sweep (`Dirimu`/`DIRIMU`/`dirimu` → `RENA`/`RENA`/`rena` in user-facing strings, `package.json`, HTML title, sharecard Zone 1 eyebrow) and homepage redesign (new minimal navbar with Home + Methodology stub, reflection-first hero `Kamu punya pola.` + `Dan mungkin selama ini, kamu belum pernah melihatnya.`, dropped `Ba Zi · 八字` chrome from landing, CTA `Lihat Empat Pilarku →` → `Lihat Refleksiku`, static watercolor bloom background, form labels Title Case). Inner pages unchanged (`EMPAT PILARMU`, `KOMPOSISI ENERGIMU`, sharecard Chinese characters all stay — brand discipline applies to landing surfaces only). Most of this work carried forward into KATON; only the brand word was swapped.
-- **Phase 7d landed** — pillarMeanings.js audit. Two surgical fixes: `year['己']` swapped `selalu` → `sering` (banned forecast word slipped through Bank 9e), and all 10 `day[*]` entries softened from declarative opener `Inti dirimu adalah X` to observation-first `Inti dirimu sering tampak sebagai X` for cohesion with Phase 7c locks. Other 30 lines audited and left intact (audit, not demolish).
-- **Phase 7c COMPLETE (10/10)** — reading-page surfaces (hero / identityPills / traits) now in formal+spoken register for every archetype. Batch 4 (壬 Samudra + 癸 Hujan) was the cleanest C2 delivery of the session — every drift the prompt flagged was caught and fixed in-batch, zero inline corrections needed.
-- **Phase 7b COMPLETE (10/10)** with 己 catch-up (silently missed by earlier batches).
-- **Sharecard layout uniformity** — `SIFAT` zone merged into Zone 4 as a 4th `DimRow` (was a standalone 76px Zone 5 that looked visually larger than KEKUATAN/SISI LAIN/DAMPAK). All four dimensions share one packed container with consistent dividers. Zone 6 grown 56→76 with bumped bottom padding so `ENERGI MENYOKONG`/`ENERGI MENGUJI` chips have breathing room from the card edge. Card total unchanged at 420px.
-- **Sharecard chip relabel** — `COCOK DENGAN` / `PERLU DIJAGA DENGAN` → `ENERGI MENYOKONG` / `ENERGI MENGUJI` (element-family signal, separate from chart-specific Relasi Cabang).
-- **Element note simplification** — single-paragraph format; open-loop framing lives in the Bridge alone.
-- **Element note simplification** — `DOMINANT_ELEMENT` and `MISSING_ELEMENT` entries are now single-paragraph. The rhetorical-question paragraph-2 tail was stripped from all 10 entries. Open-loop framing lives in the Bridge alone.
-- **Sharecard chip relabel** — sharecard now says `ENERGI MENYOKONG` / `ENERGI MENGUJI` (signals element-family, universal for the archetype). Reading-page Relasi Cabang keeps `Cocok Dengan` / `Perlu Dijaga Dengan` (chart-specific, from day branch's 六合/六冲). Identical-looking labels were collapsing the architectural distinction; tester saw the mismatch as a bug.
-- **Phase 8a complete** (free tier polish + open-loop teasers, consolidated into the bridge section).
-- **Phase 8b not started**: paid tier content (Karier, Cinta, Kesehatan, Rezeki) inside the unified report.
+- **RENA → KATON rebrand (in progress, current)** — code-string sweep done: wordmark on landing + sharecard, `package.json` name, HTML title, export filename defaults (`rena-matahari.png` → `katon-matahari.png`), `BaziCardImage` CSS class (`.rena-card-image` → `.katon-card-image`), comments in App.css + Navbar.jsx. Outside Claude: GitHub repo rename `Renge13/Rena` → `Renge13/Katon` (DONE — remote now `Renge13/Katon`), Vercel project rename + custom domain `katon.app`, `git remote set-url origin` (DONE), filesystem rename `D:\claude-projects\rena` → `D:\claude-projects\katon` (DONE). The sharecard template at `public/cards/matahari-template.png` still bakes in a `rena.io` footer (covered by the temporary `.rci-footer-overlay` hack); user is regenerating the template with `katon.app` footer (and the other 9 archetype templates while at it).
+- **DIRIMU → RENA rebrand (superseded, partial)** — identity sweep and homepage redesign (minimal navbar, reflection-first hero `Kamu punya pola.`, dropped `Ba Zi · 八字` chrome from landing, static watercolor bloom background). Inner pages unchanged. Most of this carried forward into KATON; only the brand word was swapped.
+
+**Line B — Phase 8b paid tier + tester-2 UX cuts:**
+- **Path 2D shipped** (commit `9e0c1ac`) — chapters with `deepInsight` suppress the Refleksi narrative. The 8b deepInsight becomes the chapter's primary content (pola paragraph gets the drop cap, no WAWASAN LEBIH DALAM divider). Graceful fallback: archetypes without deepInsight (8 of 10) keep full Refleksi cores. Driven by tester 2 feedback: *"intinya selalu diulang2, cuman dicocoklogiin dengan asmara, pekerjaan, dsb"* — the 7-chapter `archetype × life domain` shape was inviting each chapter to restate the same thesis. Gating in `sectionFromPassage`: `paragraphs = deepInsight ? [] : parts`. UI in `Report.jsx` adds `.deep-insight--primary` mode that drops the divider when paragraphs empty.
+- **Relasi Cabang cut entirely** (commit `658d80e`) — tester 2 confused by two compatibility lists (Sharecard `ENERGI MENYOKONG/MENGUJI` vs Relasi Cabang `Cocok Dengan`). For 癸丑 specifically: self-match bug (六合 partner 子's primary stem = 癸 = user's own archetype, reads as "compatible with yourself"). Same bug fires for 壬寅 / 丙申 / 丁未. Plus content mismatch in `dayBranches.js`. One compatibility surface remains: sharecard's `ENERGI MENYOKONG/MENGUJI`.
+- **Bab 1 rewritten as lens-frame, not label** (commit `4222917`, R5) — all 10 Bab 1 cores reframed from "Hujan/Matahari dilambangkan sebagai..." into "Hujan di bacaan ini bukan label untuk kelembutanmu, melainkan cara melihat...". Each Bab 1 now teaches the reader how to read the next 6 chapters as a pattern observer.
+- **Redundancy cuts shipped** (commit `98c2bcb`, R6+R2+R8) — universal Bab 1 opener cut from all 10 archetypes (Entry Moment now carries that framing). Duplicate identityPills trimmed for 丙 + 癸 (6 → 4 pills each). Sifat-sifatmu standalone trait list removed from App.jsx.
+- **8b pilot content shipped** for 丙 (commit `7a20de4`) and 癸 (commit `9ca8ef9`, plus pola rewrite at `3234592`). 4 paid-tier deepInsight blocks per archetype: Cinta/Karier/Rezeki/Kesehatan. 5-beat anatomy: `pola` (mechanism revelation) → `simpul` (recurring contradiction) → `bentukHidup` (3 bullets) → `saatMenguras` (3 bullets) → `yangStabilkan` (3 bullets). Each pola names the UNCONSCIOUS MECHANISM, not the surface pattern.
+- **Plumbing for 8b** (commit `3389424`) — `passage.deepInsight` block added to data shape; `Report.jsx` render branch with hairline + ✦ + "Wawasan lebih dalam" label + 5-beat structure. `yangStabilkan` visually distinguished with gold tint.
+- **Tier-1 pilot polish** (commit `74f3459`) — Entry Moment paragraph (~55 words italic serif) between report header and accordion. 丙 Kesehatan yangStabilkan de-slopped to Matahari-specific.
+- **Price tag hidden during tester validation** (commit `62964a8`) — `display: none` on `.paywall-price`. Easy revert when QRIS lands.
+- **Scroll-anchor + meta cleanup** (commit `2bb3395`).
+- **Bank 9d-extended COMPLETE** — 5/5 Refleksi middle-section files audited (41 swaps total): polaDiHubungan (11), polaDiPekerjaan (9), polaDiTubuh (10), hubunganDenganRezeki (6), penutup (5).
+- Earlier locks (still in force): Phase 7b/7c/7d COMPLETE (reading-page surfaces formal+spoken, pillarMeanings audit), Phase 8a free-tier polish, sharecard layout uniformity + chip relabel (`ENERGI MENYOKONG`/`ENERGI MENGUJI`), element-note single-paragraph simplification.
+
+### Tester 2 validation cycle (active)
+
+Tester 2 is **癸 Hujan** (1992-06-06 07:44). He read the 8b pilot pre-Path 2D and flagged two issues, both addressed:
+1. Self-match + label mismatch. Fixed by cutting Relasi Cabang.
+2. Repetition across chapters (*"intinya selalu diulang2"*). Fixed by Path 2D.
+
+Awaiting his second read. Scaling 8b to remaining 8 archetypes is gated on his validation.
 
 ### Voice register (LOCKED — formal + spoken)
 
@@ -41,20 +56,24 @@ The smart-friend voice is "well-spoken intelligent observer" — premium signal 
 
 ### Unified report architecture
 
-ONE report titled "Bacaan Mendalam":
-- Collapsed state = bridge section (text + 4-domain list + italic CTA link). Sits between Relasi Cabang and the expanded report. NO container, centered, italic serif.
-- Expanded state = accordion with chapters. Currently 7 free chapters (pattern reflection). Phase 8b will add 4 paid directional chapters (Karier, Cinta, Kesehatan, Rezeki) inside the same report.
-- Standalone `.paid-hook-card` REMOVED. All open-loop CTAs consolidated into the bridge.
+ONE report titled "Bacaan Mendalam" — entire 7-chapter accordion IS the paid tier (currently free-with-click, payment infra deferred):
+
+- **Above the paywall (free):** hero → form → 4 pillars → sharecard → archetype card → Komposisi Energimu → paywall preview.
+- **Paywall preview (free, locked copy):** "Beberapa pola dalam dirimu tidak selalu terlihat saat dijalani." + body promising "arah / langkah praktis" + 5 feature pills (Refleksi Diri / Arah Karier & Rezeki / Relasi & Kecocokan / Keseimbangan Energi / Langkah Praktis). Price `Rp79.000` hidden during tester validation.
+- **Click "Buka Refleksiku"** (the paywall CTA, currently no payment) → expanded state.
+- **Expanded state:** Entry Moment paragraph (italic serif, ~55 words, centered) → 7-chapter accordion. Scroll auto-anchors to report-body top on first open; to clicked bab on subsequent chapter clicks.
+- **8b deepInsight** = optional structured block on chapters 3-6 (Hubungan / Pekerjaan / Rezeki / Tubuh). When present, it BECOMES the chapter's primary content (pola gets drop cap; no "Wawasan lebih dalam" divider). When absent (non-pilot archetypes), chapter falls back to Refleksi narrative.
 
 ### Pending C2 work
 
-- **Phase 7e** (next): 70 Refleksi passage cores. Biggest content lift remaining in the free tier — 7 sections × 10 archetypes, each a multi-paragraph reflective passage with conditional inserts. Should be batched (probably section-by-section, 10 archetypes per batch = 7 batches).
-- **Phase 8b**: paid tier content — Karier / Cinta / Kesehatan / Rezeki × 10 archetypes (~7,000-10,000 words)
+- **Phase 8b scaling** — gated on tester 2's reaction to the polished pilot (Path 2D shipped). If validated, scale 8b across remaining 8 archetypes (4 sections × 8 archetypes = 32 more deepInsight blocks, ~10k words). Same anatomy as 丙 + 癸 pilots.
+- **Phase 7e DEPRIORITIZED** — was full 70-Refleksi-passage audit. Path 2D makes this less urgent for pilot archetypes (Refleksi is suppressed for chapters 3-6). Bab 2 (Cara Kamu Hadir) Refleksi cores still render unconditionally and may still feel archetype-descriptive. Revisit if tester 2 flags Bab 2.
+- **`dayBranches.js` content fidelity** — the 12 branch entries were written assuming reader's element matches the branch element. Now hidden (Relasi Cabang cut), but data still emitted by `getInterpretation` for future use. Re-parameterize by stem before re-introducing.
 
 ### Open UX issues (lower priority)
 
-- Old dead CSS rules in App.css (`.paid-hook-card`, `.paid-hook`, `.paid-cta`, `.archetype-teaser`) — harmless but should clean up
-- 戊 bridge UI iterated commit `[next]` with italic link CTA + hairlines + ornament. If user feedback still says it feels cheap, next iteration could move further toward editorial-magazine register (drop the ornament glyph, add more vertical breathing)
+- Old dead CSS rules in App.css (`.paid-hook-card`, `.paid-hook`, `.paid-cta`, `.archetype-teaser`, plus now `.relations-card` family) — harmless but should clean up
+- Bab 2 (Cara Kamu Hadir) Refleksi cores still archetype-descriptive — flagged out-of-scope for current tester 2 cycle but may need rewrite if his second read still points there.
 
 ### Reading the plan history
 
@@ -118,7 +137,10 @@ src/
         features.js                # ~15 chart-feature detectors (used by inserts)
         prompts.js                 # reflection prompts library (intentionally empty — see decisions)
         sections/                  # 7 composers, one per section
+          _helpers.js              # sectionFromPassage — gates paragraphs on deepInsight presence (Path 2D)
         passages/                  # 7 banks, one per section, each keyed by stem
+                                   # passage[stem] shape: { core, inserts, deepInsight? }
+                                   # deepInsight shape (Phase 8b): { pola, simpul, bentukHidup[3], saatMenguras[3], yangStabilkan[3] }
   components/
     Report.jsx + Report.css        # accordion-style 7-chapter reader
     card/
@@ -198,38 +220,45 @@ Reyner himself is **丙 Matahari** (1989-09-13 09:00 → 丙子日). All voice l
 ## Reading flow (App.jsx surfaces, top to bottom)
 
 1. Hero — minimal navbar (Home + Methodology stub) → `KATON` wordmark + `Refleksi personal dari waktu kelahiranmu.` supporting line → `Kamu punya pola.` main statement + reflective sub. Replaces the old `DIRIMU` + `Empat Pilar Nasibmu` + `Ba Zi · 八字` eyebrow hero (rebranded through RENA to KATON).
-2. Form — date selectors + optional time + `Lihat Empat Pilarku →` submit (smooth-scrolls to result)
+2. Form — date selectors + optional time + `Lihat Refleksiku` submit (smooth-scrolls to result)
 3. **Empat Pilarmu** — 4-pillar grid with `Energi Intimu` badge on day pillar, per-pillar meaning captions
-4. **Persona** = sharecard (BaziCard) + Simpan Gambar (PNG download)
-5. **Archetype card** — hero description + identity pills
-6. **Sifat-sifatmu** — personality traits list
-7. **Komposisi Energimu** — 5-element bars with plain-Indonesian meaning per element, dominant/missing prose note
-8. **Relasi Cabang** — `Cocok Dengan / Perlu Dijaga Dengan` archetype chips (with emoji)
-9. **Refleksi** (gated behind `Buka Refleksi →` CTA) — opens to accordion with 7 chapters
-10. **Bacaan Mendalam** — gold-foil bordered paywall block
+4. **Persona** = sharecard (BaziCard) + Simpan Gambar (PNG download). Sharecard `ENERGI MENYOKONG/MENGUJI` is the only compatibility surface (element-cycle, universal per archetype).
+5. **Archetype card** — hero description + 4 identity pills (down from 6 for 丙 + 癸 after R2 dedupe)
+6. **Komposisi Energimu** — 5-element bars with plain-Indonesian meaning per element, dominant/missing prose note
+7. **Bacaan Mendalam paywall preview** — locked promise copy (Beberapa pola... + 3 feature rows + 5 feature pills + CTA). Price hidden during tester validation.
+8. **Click → expanded state** — Entry Moment italic paragraph + 7-chapter accordion (single-open). For 丙 + 癸 only: chapters 3-6 render the 8b deepInsight as primary content. Other 8 archetypes render full Refleksi narrative as before.
+
+**Cuts from this section since v1:**
+- Old `Sifat-sifatmu` standalone trait list — removed (R8, commit `98c2bcb`); sharecard SIFAT zone covers
+- Old `Relasi Cabang` section (Cocok Dengan / Perlu Dijaga chips with branch-harmony text) — removed (`658d80e`); confusing-with-sharecard + self-match bug + Earth-voice-on-Water mismatch
 
 ---
 
 ## Refleksi (the deep read)
 
-7 chapters, accordion pattern (shadcn-style, single-open, Bab 1 default-open). Click any closed row to expand; previous one collapses. Click the open row = no-op.
+7 chapters, accordion pattern (shadcn-style, single-open, Bab 1 default-open). Click any closed row to expand; previous one collapses. Click the open row = no-op. Scroll auto-anchors to clicked bab via `useRef` + `useEffect` in `Report.jsx`.
 
 | Bab | Section title | Source file | Purpose |
 |-----|--------------|-------------|---------|
-| 1 | Pola Dasar | `passages/pembukaan.js` | Orientation. Frames the archetype as metaphor. |
+| 1 | Pola Dasar | `passages/pembukaan.js` | **Lens-frame** (R5 rewrite). Reframes archetype from noun (label) to verb (way of seeing). Hands off to Bab 2. |
 | 2 | Cara Kamu Hadir | `passages/caraKamuHadir.js` | Personality pattern. How this archetype shows up. |
-| 3 | Pola di Hubungan | `passages/polaDiHubungan.js` | Relationship pattern. |
-| 4 | Pola di Pekerjaan | `passages/polaDiPekerjaan.js` | Work pattern. |
-| 5 | Hubunganmu dengan Rezeki | `passages/hubunganDenganRezeki.js` | Relationship with money (not financial advice). |
-| 6 | Tubuh & Energi | `passages/polaDiTubuh.js` | Body/energy pattern (not wellness advice). |
+| 3 | Pola di Hubungan | `passages/polaDiHubungan.js` | Relationship pattern. **8b deepInsight if defined** (丙 + 癸 only currently). |
+| 4 | Pola di Pekerjaan | `passages/polaDiPekerjaan.js` | Work pattern. **8b deepInsight if defined.** |
+| 5 | Hubunganmu dengan Rezeki | `passages/hubunganDenganRezeki.js` | Relationship with money (not financial advice). **8b deepInsight if defined.** |
+| 6 | Tubuh & Energi | `passages/polaDiTubuh.js` | Body/energy pattern (not wellness advice). **8b deepInsight if defined.** |
 | 7 | Refleksi Akhir | `passages/penutup.js` | Closing. Names central tension + open declarative invitation. |
 
 **Variation structure:**
 - Each section has 10 unique cores keyed by stem (`'甲' / '乙' / ... / '癸'`) → **70 unique passages site-wide**.
 - Within each core, conditional inserts fire based on chart features (`missing_Water`, `fireExcess`, `doubleBranch_巳`, etc.) — defined in `report/features.js`.
 - Same chart → same output (deterministic seeded `pickN`). Different charts of the same archetype can read differently.
-- The ONLY content shared across all 10 archetypes is the unified Pola Dasar opener: `"Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari."` That's product framing, not archetype voice.
 - `prompts.js` is intentionally empty — partner directive: "deliver epiphany, not rhetorics". Renderer skips the italic prompt line when empty.
+
+**8b deepInsight (Phase 8b paid-tier deepening):**
+- Optional structured block on chapters 3-6 only. Keyed by stem on each passage object: `passage[stem].deepInsight = { pola, simpul, bentukHidup[], saatMenguras[], yangStabilkan[] }`.
+- 5-beat anatomy: `pola` (mechanism reveal: unconscious belief or motivation behind the pattern) → `simpul` (recurring contradiction) → `bentukHidup` (3 bullets, lived structures) → `saatMenguras` (3 bullets, early warnings) → `yangStabilkan` (3 bullets, stabilizing conditions — visually distinguished with gold tint as the load-bearing answer section).
+- **Path 2D gating** (commit `9e0c1ac`): when `passage.deepInsight` is non-empty, `sectionFromPassage` returns `paragraphs: []` so the Refleksi narrative is suppressed. `Report.jsx` switches to `.deep-insight--primary` mode: no "Wawasan lebih dalam" divider, pola paragraph styled as `.report-paragraph--first` (drop cap). Reader sees only the 8b structure.
+- Currently filled for 丙 + 癸 only. Other 8 archetypes fall back to full Refleksi narrative for chapters 3-6.
 
 ---
 
@@ -285,19 +314,32 @@ Content is drafted by an external copywriter referenced as "C2". The workflow fo
 5. Tester reads live. New flags become next bank's brief.
 
 Bank history (most recent first):
+- **R5 Bab 1 lens rewrite** — 10 archetypes. Bab 1 cores rewritten from archetype-paraphrase ("X dilambangkan sebagai...") to lens-frame ("X di bacaan ini bukan label untuk Y, melainkan cara melihat..."). Mix of syntax markers to avoid templating. (commit `4222917`)
+- **8b 癸 Hujan pilot pola rewrite** — 8 pola paragraphs (4 domains × 2 pilot archetypes) rewritten to reveal the UNCONSCIOUS MECHANISM behind the pattern, not paraphrase Refleksi. Standouts: 丙 "ekonomi cahaya", 癸 "memahami pasangan adalah tabungan tak kasat mata against ditinggalkan", 癸 Rezeki "memasang harga adalah mengubah air yang seharusnya bebas menjadi barang yang harus dibeli". (commit `3234592`)
+- **8b 癸 Hujan pilot v1** — 4 paid-tier deepInsight blocks (Cinta/Karier/Rezeki/Kesehatan, ~1400 words). 5-beat anatomy. 11 em-dashes + 5 forecast `akan` instances caught by guard and rewritten pre-commit. (commit `9ca8ef9`)
+- **Tier-1 polish for 丙 pilot** — Entry Moment paragraph, 丙 Kesehatan yangStabilkan rewrite (killed wellness-app slop), gold-tint visual distinction for yangStabilkan section. (commit `74f3459`)
+- **8b 丙 Matahari pilot v1** — 4 paid-tier deepInsight blocks for 丙 (Cinta/Karier/Rezeki/Kesehatan, ~1400 words). First Phase 8b content. (commit `7a20de4`)
+- **8b plumbing** — `passage.deepInsight` data shape, `Report.jsx` render branch with hairline + ✦ + label + 5 beats. `Report.css` palette-matched styling. (commit `3389424`)
+- **Bank 9d-extended COMPLETE** — 5/5 Refleksi middle-section files audited. 41 swaps total across polaDiHubungan (11), polaDiPekerjaan (9), polaDiTubuh (10), hubunganDenganRezeki (6), penutup (5). One metaphor system per phrase + formal Indonesian + no forecast verbs locked across all middle sections.
 - **Bank 9d** — 庚 metaphor fixes (4) + systemic Penutup opener pattern rewrite (10 archetypes, "X hidup di tegangan ini:" → "Kekuatan terbesarmu sebagai X sering juga menjadi sumber kelelahannya:")
 - **Bank 9c-pilot** — 己 Ladang trait audit (8 traits + 12 pills); editorial guardrail "one metaphor system per phrase" established
 - **Bank 9a** — 10 person-first archetype subtitles for the card
 - **Banks 1–7** — the 7 reflection sections × 10 archetypes filled (70 cores)
 
 Pending content work:
-- **Bank 9c-extended** — propagate the trait audit to the other 9 archetypes (after 己 voice locks in user review)
-- Potential 9d-style metaphor audit on the other 9 archetypes' middle sections (Hubungan / Pekerjaan / Tubuh / Rezeki / Penutup) — Pedang is unlikely to be the only one with awkward stretch
+- **8b scaling to remaining 8 archetypes** (gated on tester 2's reaction): 32 more deepInsight blocks, ~10k words. Same 5-beat anatomy. C2 brief template from pilot cycles is reusable.
+- **Bab 2 (Cara Kamu Hadir) rewrite** — potentially still archetype-descriptive for pilot archetypes, would need rewrite if tester 2's second read flags it.
 
 ---
 
 ## Recent UX evolution (most recent first)
 
+- **Path 2D** — Refleksi narrative suppressed for chapters where 8b deepInsight present. Chapter opens at the mechanism layer (pola with drop cap). Driven by tester 2 repetition feedback.
+- **Relasi Cabang removed** — entire `.relations-card` section cut. Self-match bug for 癸丑/壬寅/丙申/丁未 + label confusion with sharecard ENERGI MENYOKONG/MENGUJI. Sharecard becomes the only compatibility surface.
+- **Phase 8b pilot for 丙 + 癸** — 4 paid-tier deepInsight blocks per archetype with 5-beat mechanism-revelation anatomy. Entry Moment paragraph added between header and accordion. `yangStabilkan` section gold-tinted for findability. Scroll-anchor on report open + chapter click.
+- **R5 Bab 1 lens rewrite** — all 10 Bab 1 cores reframed from archetype-paraphrase to lens-frame ("X di bacaan ini bukan label..., melainkan cara melihat..."). Hands off explicitly to Bab 2.
+- **Redundancy audit R6+R2+R8** — universal Bab 1 opener cut, duplicate identityPills trimmed (丙 + 癸 6 → 4), Sifat-sifatmu standalone trait list removed (sharecard SIFAT zone already covers).
+- **Bank 9d-extended COMPLETE** — voice polish propagated across all 5 Refleksi middle-section files (41 swaps). "One metaphor system per phrase" locked everywhere.
 - **Phase 6** — full watercolor canvas redesign (palette migration, shadcn accordion for Refleksi, gold-foil paywall branding, form hug-content, scroll-to-result anchor, sharecard padding fix, footer redundancy removed)
 - **Phase 5c** — accordion back-nav fix, form compact-pill submit
 - **Phase 5a–b** — first tester legibility pass: archetype subtitles, person-first Ladang traits, BAYANGAN → SISI LAIN, SELARAS/PEMICU → COCOK DENGAN / PERLU DIJAGA DENGAN with archetype emoji

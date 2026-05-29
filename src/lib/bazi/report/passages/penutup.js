@@ -14,7 +14,7 @@ export default {
   '甲': {
     core: `Kekuatan terbesarmu sebagai Pohon Oak sering juga menjadi sumber kelelahannya: keteguhan yang membuatmu diandalkan, tapi juga membuatmu sulit bertumpu pada orang lain. Bukan karena kamu tidak mau, tapi karena terlalu sering kamu jadi yang dituju, bukan yang menuju. Akarmu menembus jauh ke dalam, dan itu memberimu daya tahan yang langka. Tapi akar yang sama juga yang membuatmu sulit berpindah saat ladang sudah tidak subur, sulit melepaskan meski beban sudah melampaui kapasitas. Mungkin ini saat untuk membiarkan satu daun gugur tanpa merasa pohonmu runtuh. Percaya bahwa sesuatu yang melepas bukan berarti kehilangan dirinya.`,
     inserts: {
-      missing_Water: `Tanpa Air yang cukup, kamu mungkin lupa seperti apa rasanya terisi kembali. Tapi mungkin justru di situ letak ketangguhanmu: kamu belajar berdiri bahkan di musim kering, meski itu bukan berarti kekeringan harus kau jalani selamanya.`,
+      missing_Water: `Tanpa Air yang cukup, kamu mungkin lupa seperti apa rasanya terisi kembali. Tapi mungkin justru di situ letak ketangguhanmu: kamu belajar berdiri bahkan di musim kering, meski itu bukan berarti kekeringan harus kamu jalani selamanya.`,
     },
   },
 
@@ -40,14 +40,14 @@ export default {
   },
 
   '戊': {
-    core: `Kekuatan terbesarmu sebagai Gunung sering juga menjadi sumber kelelahannya: stabilitas yang membuatmu diandalkan, tapi juga membuatmu sulit bergerak saat keadaan memintamu berubah. Kamu adalah fondasi, tempat orang bersandar, jangkar di tengah badai. Tapi diam terlalu lama bisa berubah menjadi terisolasi. Tidak banyak yang bertanya apakah kamu ingin diguncang sesekali, atau apakah di balik permukaan batumu ada magma yang sudah lama ingin bergerak. Mungkin ini saat untuk mengakui bahwa gunung pun bisa longsor sedikit, dan itu bukan kehancuran. Hanya pergeseran kecil yang sudah lama tertunda.`,
+    core: `Kekuatan terbesarmu sebagai Gunung sering juga menjadi sumber kelelahannya: stabilitas yang membuatmu diandalkan, tapi juga membuatmu sulit bergerak saat keadaan memintamu berubah. Kamu adalah fondasi, tempat orang bersandar, batu yang bertahan di tengah badai. Tapi diam terlalu lama bisa berubah menjadi terisolasi. Tidak banyak yang bertanya apakah kamu ingin diguncang sesekali, atau apakah di balik permukaan batumu ada magma yang sudah lama ingin bergerak. Mungkin ini saat untuk mengakui bahwa gunung pun bisa longsor sedikit, dan itu bukan kehancuran. Hanya pergeseran kecil yang sudah lama tertunda.`,
     inserts: {
       missing_Wood: `Tanpa Kayu yang cukup, permukaanmu gundul dan jarang disentuh angin segar. Tapi justru di situ letak kejujuran lanskapmu: kamu tidak bersembunyi di balik dedaunan. Hanya saja, mungkin satu tunas kecil bukan ancaman.`,
     },
   },
 
   '己': {
-    core: `Kekuatan terbesarmu sebagai Ladang sering juga menjadi sumber kelelahannya: kesuburan yang membuatmu menumbuhkan begitu banyak untuk orang lain, tapi juga membuatmu jarang menyisakan panen untuk diri sendiri. Kamu memberi ruang, menyediakan hara, dan menyirami tanpa diminta. Tapi tanah yang terus memberi tanpa diistirahatkan akhirnya kehilangan mineralnya. Mungkin ini saat untuk membiarkan satu petak kosong, tidak ditanami apa pun, dan melihat apa yang tumbuh secara liar dari dirimu sendiri ketika kamu tidak sedang merawat orang lain.`,
+    core: `Kekuatan terbesarmu sebagai Ladang sering juga menjadi sumber kelelahannya: kesuburan yang membuatmu menumbuhkan begitu banyak untuk orang lain, tapi juga membuatmu jarang menyisakan panen untuk diri sendiri. Kamu memberi ruang, menyediakan hara, dan menumbuhkan tanpa diminta. Tapi tanah yang terus memberi tanpa diistirahatkan akhirnya kehilangan mineralnya. Mungkin ini saat untuk membiarkan satu petak kosong, tidak ditanami apa pun, dan melihat apa yang tumbuh secara liar dari dirimu sendiri ketika kamu tidak sedang merawat orang lain.`,
     inserts: {
       missing_Fire: `Tanpa Api yang cukup, kehangatanmu untuk diri sendiri sering terasa kurang. Tapi mungkin itulah caramu: kamu tidak butuh api besar untuk menjadi tempat orang lain tumbuh. Hanya saja, sedikit matahari untuk ladangmu sendiri bukan kemewahan.`,
     },
@@ -63,7 +63,7 @@ export default {
   '辛': {
     core: `Kekuatan terbesarmu sebagai Permata sering juga menjadi sumber kelelahannya: standar tinggi yang membuat hasil kerjamu bernilai langka, tapi juga membuatmu jarang merasa cukup. Kamu memoles berulang kali, menilai dengan teliti, dan hanya sedikit yang lolos dari seleksimu. Termasuk dirimu sendiri. Mungkin ini saat untuk membiarkan satu sisi dibiarkan mentah, tidak dipoles, tidak dinilai. Ada kemungkinan bahwa justru di retakan alami itulah cahaya menemukan jalannya masuk, dan kilaumu tidak berkurang karenanya.`,
     inserts: {
-      missing_Earth: `Tanpa Bumi yang cukup, kamu melayang tanpa pijakan yang kokoh. Tapi mungkin justru di situ letak kebebasanmu: kamu tidak terikat pada satu tempat. Hanya saja, satu jangkar kecil bukan berarti kehilangan sayap.`,
+      missing_Earth: `Tanpa Bumi yang cukup, kamu melayang tanpa pijakan yang kokoh. Tapi mungkin justru di situ letak kebebasanmu: kamu tidak terikat pada satu tempat. Hanya saja, satu pijakan kecil bukan berarti kehilangan kilau.`,
     },
   },
 
@@ -77,7 +77,7 @@ export default {
   '癸': {
     core: `Kekuatan terbesarmu sebagai Hujan sering juga menjadi sumber kelelahannya: kelembutan yang membuatmu meresap ke hati orang lain, tapi juga membuatmu sering kehilangan batas. Kamu memahami tanpa perlu dijelaskan, hadir tanpa perlu diumumkan, dan memberi tanpa perlu diminta. Tapi menyerap terus-menerus membuatmu lupa bahwa kamu juga butuh menguap dan kembali ke langit. Mungkin ini saat untuk membiarkan dirimu naik sejenak, meninggalkan tanah yang basah, dan percaya bahwa hujan yang pergi bukan berarti tidak kembali.`,
     inserts: {
-      missing_Fire: `Tanpa Api yang cukup, kamu jarang merasakan kehangatan yang kamu sendiri berikan. Tapi mungkin justru di situ letak caramu yang khas: kamu tidak butuh menyala untuk menerangi. Hanya saja, sedikit sinar matahari setelah hujan bukan sesuatu yang harus kau tolak.`,
+      missing_Fire: `Tanpa Api yang cukup, kamu jarang merasakan kehangatan yang kamu sendiri berikan. Tapi mungkin justru di situ letak caramu yang khas: kamu tidak butuh menyala untuk menerangi. Hanya saja, sedikit sinar matahari setelah hujan bukan sesuatu yang harus kamu tolak.`,
     },
   },
 }

@@ -1,81 +1,66 @@
 // ============================================================
 // Passages — Pembukaan (Opening)
 // ============================================================
-// ~100 word reflective opener per archetype. Sets the
-// "cermin bukan ramalan" frame and names the archetype as
-// metaphor. NO closing reflection prompt (per editorial decision:
-// Pembukaan is the orienting section — too early to ask. First
-// prompt lands at the end of Cara Kamu Hadir).
+// ~100 word reflective opener per archetype. Names the archetype
+// as metaphor and primes the next 6 chapters. NO closing reflection
+// prompt (per editorial decision: Pembukaan is the orienting
+// section — too early to ask. First prompt lands at the end of
+// Cara Kamu Hadir).
+//
+// The "cermin bukan ramalan" anti-mystical framing used to lead
+// every archetype's core. It was cut once the Entry Moment in
+// Report.jsx (rendered just above the accordion) took over that
+// job — keeping it in Bab 1 doubled the framing for every reader.
 // ============================================================
 
 export default {
   '甲': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-Di kerangka simbolik 八字, 甲 diibaratkan pohon oak yang menjulang kokoh. Bagi orang dengan konfigurasi ini, pola yang sering muncul adalah menjadi tumpuan, bahkan tanpa sengaja mencarinya. Kamu mungkin sering menemukan diri sebagai tempat orang bertanya, bersandar, atau meminta keputusan, meski tidak ada yang resmi menunjukmu. Prinsipmu kuat, kadang lebih kuat dari keinginan untuk disukai. Ini bukan berarti kamu selalu siap memikul semuanya. Hanya saja, ada semacam kode dalam dirimu: jika ada yang harus berdiri, mungkin itu kamu.`,
+    core: `Bila akar yang tak terlihat dijadikan cara melihat, hidupmu bukan cerita tentang keteguhan, tapi tentang perhitungan diam-diam. Yang menarik bukan apakah kamu kuat menahan beban (kamu sudah tahu itu). Yang menarik adalah bagaimana "kekokohan" menentukan kalkulasi setiap langkah: kapan kamu memilih diam, kapan kamu bertahan meski ingin pergi, dan bagaimana kamu menimbang risiko sebelum memberi ruang pada orang lain. Enam bab berikut menelusuri jejak perhitungan itu, mulai dari cara paling halus kamu hadir di hadapan sekitar.`,
     inserts: {},
   },
 
   '乙': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-乙 dalam tradisi ini dipahami sebagai tanaman rambat: lentur, pandai mencari celah, dan sulit dimatikan. Pola yang sering kelihatan pada konfigurasi ini bukan tentang terburu-buru, melainkan tentang ketekunan yang diam. Kamu mungkin terbiasa menyesuaikan diri dengan lingkungan, bukan karena tidak punya bentuk sendiri, tapi karena kamu paham bahwa maju tidak harus selalu lurus. Kadang orang meremehkanmu karena sikapmu yang tidak konfrontatif. Tapi jangan salah, itu bukan kelemahan. Akarmu mencengkeram kuat meski batangmu merambat pelan.`,
+    core: `Merambat adalah cara melihat yang sering disalahpahami. Ini bukan tentang kelenturan atau kemampuan menyesuaikan diri, itu hanya permukaan. Yang sesungguhnya terjadi: setiap celah yang kamu baca, setiap isyarat yang kamu tangkap, adalah pemetaan tanpa suara. Kamu membentuk peta kemungkinan sebelum melangkah, tapi justru di sanalah letak paradoksnya: semakin banyak arah yang terpetakan, semakin kabur di mana akarmu sendiri. Enam bab ke depan menelusuri bagaimana lensa "merambat" ini membentuk pilihan-pilihanmu, diawali dari caramu hadir yang jarang disadari orang.`,
     inserts: {},
   },
 
   '丙': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-丙 digambarkan sebagai matahari: sumber terang yang alami memancarkan kehangatan dan menarik perhatian. Pola pada orang dengan konfigurasi ini sering berupa kebutuhan untuk memberi energi pada sekitar. Kamu mungkin merasa dunia menjadi lebih hidup ketika kamu tampil, bicara, atau berbagi optimisme. Tapi ada juga bayangan dari menjadi matahari: sulit untuk padam, dan kamu jarang ditanya apakah kamu sendiri butuh dihangatkan. Kelelahan yang paling sering muncul justru berasal dari memberi terlalu banyak cahaya tanpa jeda.`,
+    core: `Bersinar di sini bukan sifat, ia adalah cara kamu mengecek apakah kamu nyata. Bagi Matahari, keterlihatan bukan sekadar panggung; ia adalah alat ukur: jika tidak ada yang melihat, apakah aku masih ada? Pertanyaan itulah yang diam-diam menggerakkan banyak keputusanmu: proyek mana yang kamu pilih, kata-kata mana yang kamu ucapkan lebih dulu, dan ke mana energimu mengalir. Enam bab selanjutnya membedah mekanisme ini, mulai dari yang paling kasat mata: bagaimana kamu hadir di ruangan yang masih ragu.`,
     inserts: {},
   },
 
   '丁': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-丁 diibaratkan lilin: nyala kecil, fokus, dan hanya benar-benar terlihat maknanya saat gelap. Orang dengan konfigurasi ini sering menunjukkan pola pendalaman. Di tengah keramaian, perhatianmu bukan ke arah suara paling lantang, melainkan ke detail yang nyaris tak terucap, gestur sekilas, atau jeda yang terlalu panjang. Kamu mungkin lebih banyak menyimpan daripada mengungkapkan, karena kata-kata sering terasa terlalu kasar untuk menampung semua yang kamu tangkap. Ini bukan sikap tertutup, melainkan cara menghormati kompleksitas. Kamu tidak menyala untuk semua mata, tetapi ketika seseorang benar-benar mendekat, hangatmu terasa tanpa perlu dijelaskan.`,
+    core: `Nyala kecil yang setia jarang dipilih sebagai lensa justru karena ia tidak mencolok. Tapi di situ letak kekuatan bacaan ini: "lilin" bukan tentang redup atau terang, melainkan tentang fokus yang nyaris obsesif. Kamu cenderung menyeleksi sudut mana yang pantas diterangi, dan diam-diam habis di sana. Cara melihat ini menentukan bukan hanya seberapa banyak kamu memberi, tapi juga seberapa banyak yang kamu sembunyikan dari penglihatan orang lain. Mulai dari pola kehadiranmu, enam bab berikutnya menelusuri bagaimana fokus itu membentuk ulang tiap bidang hidupmu.`,
     inserts: {},
   },
 
   '戊': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-戊 adalah gunung: masif, diam, dan tidak mudah bergeser. Dalam konfigurasi ini, pola yang sering muncul adalah keandalan. Orang datang kepadamu karena kamu tidak goyah ketika situasi gemetar. Kamu mungkin sering menjadi jangkar, baik di keluarga, kerja, atau pertemanan. Stabilitasmu memberi rasa aman. Tapi gunung juga bisa terisolasi. Tidak banyak yang bertanya apakah kamu ingin bergerak. Bahkan kamu sendiri kadang lupa bahwa diam bukan berarti tidak bisa retak.`,
+    core: `Menjadi fondasi yang diam bukanlah nasib; itu adalah strategi membaca dunia. Gunung di sini berfungsi sebagai pertanyaan: apa yang terjadi pada seseorang yang mengukur nilainya dari seberapa banyak ia bisa menahan? Kamu mungkin sudah terbiasa memikul beban, tapi yang lebih menarik adalah kalkulasi di baliknya: kapan kamu memutuskan untuk menopang, kapan kamu merasa tidak boleh goyah, dan bagaimana kelelahanmu disimpan di lapisan yang tak terlihat. Enam bab ke depan menyusuri lapisan itu, dimulai dari caramu hadir yang tenang dan penuh perhitungan.`,
     inserts: {},
   },
 
   '己': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-己 digambarkan sebagai ladang: tanah subur yang menumbuhkan tanpa perlu sorakan. Pola pada konfigurasi ini sering berupa kemampuan memberi dukungan yang diam-diam. Kamu mungkin tipe yang mendengar lebih banyak daripada bicara, yang mengurus hal-hal kecil sebelum diminta. Orang di sekitarmu berkembang, kadang tanpa sadar bahwa kamulah yang menyediakan hara. Tapi ada harga: susah mengatakan tidak. Lapisan tanahmu menyerap begitu banyak, sering tanpa kamu sadari, sampai batas antara ingin membantu dan merasa kewalahan menjadi kabur.`,
+    core: `Ladang dalam bacaan ini bukan gambaran tentang kesuburanmu, melainkan tentang syarat yang tak terucap: kamu tumbuh dengan memberi tempat. Kamu mungkin sering memilih siapa yang layak tumbuh di atas tanahmu, dan keputusan itu tidak selalu sadar. Menariknya, kamu bisa begitu teliti merawat benih orang lain, tapi lupa menyirami dirimu sendiri. Enam bab berikutnya mengikuti bagaimana mekanisme "memberi tempat" ini beroperasi di berbagai wilayah hidupmu, dimulai dari pola kehadiran yang sering dianggap remeh.`,
     inserts: {},
   },
 
   '庚': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-庚 disimbolkan sebagai pedang: tajam, tegas, dan tanpa basa-basi. Orang dengan konfigurasi ini sering menunjukkan pola kejujuran yang langsung. Kamu tidak suka bertele-tele, dan prinsip sering ditempatkan di atas kenyamanan perasaan. Ini membuatmu diandalkan saat keputusan sulit harus diambil. Namun ketajaman juga bisa menciptakan jarak. Ada kemungkinan kamu pernah dianggap terlalu keras, padahal niatmu justru memotong kebingungan, bukan melukai. Kamu setia pada kebenaran versimu, meski itu berarti berdiri sendiri.`,
+    core: `Pedang di sini bukan senjata; ia adalah cara menentukan prioritas. Memotong yang tidak perlu adalah mekanisme yang begitu dalam sehingga kamu mungkin tidak sadar sedang melakukannya. Lensa ini tidak hanya memutus proyek atau percakapan, tapi juga mengatur siapa yang boleh dekat dan seberapa dalam mereka bisa masuk. Yang jarang kamu lihat adalah konsekuensi dari ketajaman itu: apa yang tersisa setelah yang tidak perlu pergi. Perjalanan enam bab ini menelusuri jejak potongan itu, mulai dari caramu hadir yang lugas dan tanpa basa-basi.`,
     inserts: {},
   },
 
   '辛': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-辛 adalah permata: terbentuk oleh tekanan panjang, presisi, dan tidak untuk sembarang mata. Pola yang kerap muncul pada konfigurasi ini adalah selektivitas tinggi. Kamu tidak mudah membuka diri, dan hanya sedikit yang bisa masuk ke lingkaran dalammu. Selera dan standarmu mungkin sering dianggap terlalu ketat. Tapi bagimu, ini bukan kesombongan, melainkan penghormatan pada kualitas. Kamu lebih memilih sedikit yang bermakna daripada banyak yang dangkal. Hanya saja, memilih hanya sedikit kadang terasa sepi.`,
+    core: `Permata di sini bukan tentang kilau, melainkan tentang seleksi. Kamu memiliki standar yang diam-diam bertindak sebagai penjaga pintu: hanya yang cukup teliti, cukup sabar, cukup layak yang bisa membaca nilaimu. Pertanyaannya bukan apa yang kamu miliki, tapi apa yang kamu pilih untuk tidak kamu tunjukkan. Lensa "kelangkaan" ini membentuk cara kamu mencintai, bekerja, dan membelanjakan uang. Enam bab berikut menyusuri bagaimana seleksi itu bekerja, dimulai dari kehadiranmu yang sering diabaikan oleh yang tidak jeli.`,
     inserts: {},
   },
 
   '壬': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-壬 dibayangkan sebagai samudra: luas, dalam, dan sulit didefinisikan garis pantainya. Orang dengan konfigurasi ini sering memiliki dunia batin yang sangat kaya, visioner, tapi tidak mudah dipegang oleh definisi sederhana. Kamu mungkin merasa bergerak antara keterbukaan besar dan misteri yang tidak bisa dijelaskan. Pikiranmu sering melampaui keadaan saat ini, membuatmu kadang tidak sinkron dengan obrolan ringan. Banyak yang merasa mengenalmu, tapi hanya sedikit yang benar-benar menyelam.`,
+    core: `Samudra di bacaan ini tidak mendeskripsikan kedalaman dirimu, tapi menawarkan cara membaca arus yang tidak kasat mata. Kamu mungkin sudah tahu bahwa di permukaanmu tenang, tapi yang lebih penting: bagaimana pasang dan surutmu menentukan keputusan, komitmen, dan jarak yang kamu ambil dari orang lain. Lensa "keluasan" ini sering membuatmu sulit dipegang, bukan karena kamu sengaja menjauh, tapi karena hanya sebagian kecil dari dirimu yang pernah muncul ke permukaan. Mulai dari caramu hadir, enam bab ke depan menelusuri bagaimana arus itu bekerja di berbagai ranah.`,
     inserts: {},
   },
 
   '癸': {
-    core: `Bukan ramalan tentang masa depan. Tapi cermin pola yang sering muncul tanpa kamu sadari.
-
-癸 dilambangkan sebagai hujan: lembut, meresap, dan tiba tanpa suara. Pola yang sering muncul pada konfigurasi ini adalah kemampuan intuitif menyerap atmosfer emosi di sekitar. Kamu mungkin masuk ke sebuah ruangan dan langsung merasakan ketegangan yang tidak diucapkan. Batas antara perasaan sendiri dan perasaan orang lain gampang kabur. Ini anugerah, tapi juga bisa menjadi beban saat kamu lupa membawa payung. Kamu memahami orang dengan cara yang tidak membutuhkan banyak kata, hanya saja kadang kamu lupa bahwa kamu juga perlu kering.`,
+    core: `Hujan di bacaan ini bukan label untuk kelembutanmu, melainkan cara melihat bagaimana kamu menyerap tanpa sadar. Yang menarik bukan apakah kamu peka (kamu sudah tahu itu). Yang menarik adalah bagaimana "meresap" menjadi operasi tersembunyi di balik berbagai pilihan: siapa yang kamu dengarkan, kapan kamu akhirnya bicara, dan bagaimana kamu menyimpan lelah yang bukan milikmu. Enam bab berikutnya mengikuti rembesan itu, mulai dari yang paling halus: cara kamu hadir di ruangan tanpa perlu mengumumkan kedatanganmu.`,
     inserts: {},
   },
 }

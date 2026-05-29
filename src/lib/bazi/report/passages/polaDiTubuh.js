@@ -1,11 +1,11 @@
 // ============================================================
-// Passages — Pola di Tubuh & Energi (Body & Energy Patterns)
+// Passages - Pola di Tubuh & Energi (Body & Energy Patterns)
 // ============================================================
 // ~100 word reflective core per archetype on somatic patterns.
 // NEVER prescriptive. Frame as "what your body might be telling
 // you", never "what to do about it". Voice locked from Banks 1–4.
 //
-// Per-archetype framing for element excess/missing — each
+// Per-archetype framing for element excess/missing - each
 // archetype experiences imbalance somatically through its own lens.
 // ============================================================
 
@@ -34,6 +34,25 @@ export default {
       fireExcess: `Api berlebih membuatmu seperti mesin yang terus menyala tanpa pendingin. Bahkan setelah pekerjaan selesai, putaran dalam dirimu tidak ikut berhenti. Tubuhmu menyimpan panas yang tidak bisa dilepaskan begitu saja; ini bukan demam, tapi suhu dari semua antusiasme yang tidak menemukan tombol "cukup."`,
       missingWater: `Tanpa Air yang memadai, sistem pendinginmu nyaris tidak ada. Kamu sulit benar-benar relaks, bahkan di akhir pekan. Tidurmu mungkin dangkal, dan kamu terbangun dengan rasa lelah yang sama seperti sebelum tidur, karena tidak ada kedalaman yang bisa menampung panasmu.`,
       earthExcess: `Bumi berlebih menambahkan lapisan berat pada nyalamu. Energi yang seharusnya melenting ke atas malah tertahan, menciptakan sensasi gerah di dalam: perut terasa penuh, napas pendek, seperti ada tanggung jawab yang mengendap dan menolak untuk dicerna.`,
+    },
+    deepInsight: {
+      pola: `Yang sebenarnya kamu jaga dengan menolak padam bukanlah energi, melainkan ilusi bahwa Matahari tak pernah butuh tenggelam. Kamu mungkin percaya bahwa berhenti adalah pengakuan bahwa sinarmu terbatas, dan pengakuan itu sama dengan kehilangan identitas. Tubuhmu terus dipaksa menyala sampai saklarnya patah sendiri.`,
+      simpul: `Simpul yang muncul berkali-kali: kamu ingin menjaga energi agar bisa terus memberi, tapi caramu memulihkan sering kali baru dimulai setelah hampir padam. Kamu mungkin menganggap istirahat sama dengan kehilangan fungsi, padahal Matahari pun punya waktu tenggelam. Tegangannya terletak di sini: kamu merasa paling hidup saat bersinar, tapi sinar itu terus-menerus kamu paksakan, sampai tubuh yang membayar.`,
+      bentukHidup: [
+        `Sering terjadi, kamu menerima terlalu banyak tanggung jawab sekaligus, dan semua dikerjakan dengan semangat membara, lalu seminggu kemudian, kamu terbaring lesu dan bertanya-tanya kenapa pagi ini terasa begitu berat.`,
+        `Kamu mungkin punya siklus: begadang demi menyelesaikan sesuatu yang membuatmu bersemangat, lalu keesokan harinya menebus dengan tidur panjang yang tidak memulihkan, karena tidurmu diisi mimpi tentang hal-hal yang belum selesai.`,
+        `Ada dinamika di mana kamu merasa bersalah saat beristirahat, seolah setiap menit tanpa cahaya adalah menit yang terbuang; tubuhmu menjadi medan perang antara kebutuhan diam dan ketakutan akan redup.`,
+      ],
+      saatMenguras: [
+        `Kopi tidak lagi membangunkan, hanya menunda ambruk; dan saat ambruk tiba, rasanya seperti seluruh sistem dimatikan paksa.`,
+        `Kamu mulai sering sakit di hari libur, seolah tubuh sengaja menagih istirahat begitu panggung sepi.`,
+        `Senyum masih bisa dipasang, tapi di dalam ada kabut tebal yang membuatmu lamban berpikir, dan kamu tidak ingat kapan terakhir kali kepala terasa jernih.`,
+      ],
+      yangStabilkan: [
+        `Matahari sering merasa lebih utuh setelah satu malam tanpa harus jadi yang menyemangati siapapun, bahkan jika itu artinya pergi tidur sebelum ada yang mengirim pesan.`,
+        `Tubuh sering terasa lebih ringan saat ada satu pekan di mana tidak ada batas waktu yang menempelkan namamu di atasnya, dan kelelahanmu boleh muncul tanpa harus dibungkus menjadi cerita.`,
+        `Beberapa Matahari merasa pulih bukan dari istirahat yang panjang, tapi dari satu jam yang dilewati tanpa ada yang tahu di mana mereka berada, tanpa harus melaporkan apa-apa setelahnya.`,
+      ],
     },
   },
 
@@ -97,6 +116,25 @@ export default {
       waterExcess: `Air berlebih membuatmu menjadi spons yang tidak pernah kering. Kamu menampung lebih banyak dari yang bisa kamu lepaskan, dan tubuhmu menyimpannya sebagai rasa berat di seluruh anggota badan. Ada sensasi terus-menerus "basah" secara energetik, dan kamu mungkin tidak ingat kapan terakhir kali merasa ringan.`,
       missingFire: `Tanpa Api yang cukup, ekstremitasmu terasa dingin dan ada kelesuan yang tidak bisa dijelaskan. Energimu rendah, dan kamu mungkin merasa seperti hujan yang turun tanpa henti di musim yang salah, tidak ada matahari yang cukup untuk menguapkan.`,
       earthExcess: `Bumi berlebih membantumu menampung, tapi juga membuatmu stagnan. Semua air yang kamu serap mengendap menjadi lumpur di dalam: perut terasa berat, langkah lambat, dan kamu mungkin merasa tersumbat secara fisik dan emosional, seperti saluran yang sudah terlalu penuh.`,
+    },
+    deepInsight: {
+      pola: `Yang sebenarnya kamu jaga dengan tidak mendengarkan tubuhmu bukanlah ketenangan orang lain, melainkan keyakinan bahwa fungsi dirimu adalah menampung. Kamu mungkin percaya bahwa mengakui kelelahan sendiri sama dengan menolak peranmu sebagai tempat air, dan itu risiko yang tidak berani kamu ambil.`,
+      simpul: `Simpul yang terus berulang: tubuhmu adalah alat perasa yang sangat peka, tapi kamu jarang memberinya jeda untuk kembali ke titik nol. Kamu mungkin tahu persis kapan temanmu butuh istirahat, tapi tidak bisa membaca sinyal yang sama untuk dirimu sendiri. Kelelahan sering baru dikenali setelah berubah menjadi gejala fisik, karena bagimu "merasakan" adalah fungsi alami yang tidak perlu dihentikan. Padahal, air yang terus meresap tanpa menguap menggenang dan kehilangan kejernihannya.`,
+      bentukHidup: [
+        `Kamu sering jatuh sakit tepat setelah periode intens mendampingi orang lain, seolah tubuhmu sengaja memaksamu berhenti karena kamu tidak akan berhenti sendiri.`,
+        `Ketegangan di rahang, leher, atau perut muncul bukan saat kamu sendiri yang punya masalah, melainkan saat orang terdekat sedang kacau, dan kamu menanggungnya secara fisik tanpa sadar.`,
+        `Tidurmu mungkin penuh mimpi yang mengolah kisah-kisah yang kamu serap seharian, sehingga bangun tidur terasa seperti melanjutkan pekerjaan emosional yang belum selesai.`,
+      ],
+      saatMenguras: [
+        `Bahu terasa semakin berat setelah percakapan yang seharusnya ringan, dan kamu tidak bisa menjelaskan kenapa.`,
+        `Kopi atau teh tidak lagi menyegarkan, hanya menunda rasa lelah yang mendekati permukaan seperti genangan yang siap meluap.`,
+        `Kamu tidak bisa lagi membedakan apakah kamu lelah karena hidupmu sendiri atau karena kamu menampung kehidupan orang lain.`,
+      ],
+      yangStabilkan: [
+        `Hujan sering merasa lebih pulih setelah satu hari di mana ia tidak diminta mengerti siapapun, bukan karena mengisolasi diri, tapi karena lingkungan kebetulan tidak membutuhkan kepekaannya.`,
+        `Beberapa orang dengan pola ini menemukan bahwa berada di dekat air (danau, sungai, atau sekadar berendam lama) membantu meluruhkan emosi yang bukan miliknya; seolah air di luar menarik air di dalam kembali ke asalnya.`,
+        `Ada yang mulai mengenali batas tubuhnya setelah membiasakan satu pertanyaan sebelum tidur: "apakah rasa lelah ini milikku?", dan perlahan tubuh belajar membedakan.`,
+      ],
     },
   },
 }

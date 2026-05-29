@@ -128,11 +128,9 @@ export const DAY_MASTERS = {
     hero: 'Kamu sering jadi orang pertama yang bicara saat ruangan masih ragu, dan setelah itu yang lain ikut bersuara. Energimu biasa menularkan keberanian pada orang di sekitar, seolah mereka baru sadar bisa melangkah karena kamu sudah lebih dulu. Di balik itu, ada kelelahan yang jarang kamu tunjukkan, karena orang lebih sering melihat nyalamu daripada menanyakan apakah panasmu mulai surut.',
     identityPills: [
       'Pencair suasana yang alami',
-      'Energi yang menular ke sekitar',
       'Pulih cepat dari konflik',
       'Kerja keras sampai lupa lelah',
       'Butuh apresiasi untuk menyala',
-      'Membuat orang berani bergerak',
     ],
     traits: [
       'Kamu melihat peluang di tempat orang lain hanya melihat masalah',
@@ -442,9 +440,7 @@ export const DAY_MASTERS = {
     tagline: 'Aku tidak selalu terlihat, tapi aku yang membuat segalanya tumbuh.',
     hero: 'Kamu sering hadir tanpa suara, tapi setelah kepergianmu, semuanya terasa lebih hidup. Tidak semua orang menyadari kehadiranmu sampai mereka melihat tunas muncul di tanah yang kemarin masih kering. Namun, kelembutan yang meresap begitu dalam itu kadang membuatmu menyerap terlalu banyak, dan batas antara dirimu dan orang lain menjadi kabur.',
     identityPills: [
-      'Datang tanpa suara',
       'Merembes, bukan menghantam',
-      'Menyuburkan yang layu',
       'Tidak pernah memaksa',
       'Tidak terlihat tapi terasa',
       'Kelembutan yang meresap',

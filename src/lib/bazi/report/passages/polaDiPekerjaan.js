@@ -1,5 +1,5 @@
 // ============================================================
-// Passages — Pola di Pekerjaan (Work Patterns)
+// Passages - Pola di Pekerjaan (Work Patterns)
 // ============================================================
 // ~150 word reflective core per archetype on recurring work
 // patterns. NOT career advice. Voice locked from Banks 1 + 2.
@@ -31,6 +31,25 @@ export default {
     inserts: {
       fireExcess: `Api berlebih membuatmu menyala tanpa saklar untuk padam. Tenggat demi tenggat kamu terjang, tapi pola ini sering membuatmu mengabaikan istirahat. Di mata rekan, kamu terlihat tidak pernah lelah, padahal di dalam kamu sudah berjalan dengan sisa bahan bakar yang makin tipis.`,
       metalAtDay: `Logam di cabang hari memberimu ketajaman eksekusi yang tersembunyi. Di balik sorotan panggung, kamu menyimpan kemampuan menyelesaikan pekerjaan teknis dengan presisi yang mengejutkan, seolah itu adalah harga diri pribadi yang tidak bisa ditawar.`,
+    },
+    deepInsight: {
+      pola: `Di balik kebutuhan akan sorotan, ada keyakinan yang mungkin tak terucap: pekerjaan yang tidak dilihat tidak benar-benar terjadi. Bagi Matahari, kehadiran penonton bukan sekadar penyemangat, melainkan saksi yang mengubah usahamu menjadi nyata. Fase sunyi terasa begitu menguras bukan karena tidak ada yang memberi semangat, tapi karena tanpa pantulan, kamu mulai meragukan apakah yang kamu kerjakan ada.`,
+      simpul: `Simpul yang kerap berulang: kamu membutuhkan pengakuan sebagai bahan bakar, tapi pengakuan biasanya datang setelah hasil terlihat. Fase sebelum hasil (saat ide masih mentah, saat kamu bekerja sendirian) sering terasa lebih panjang dan menguras. Kamu mungkin terus memulai hal baru untuk menghindari kehampaan fase sunyi itu, dan tanpa sadar meninggalkan jejak proyek yang tidak tuntas.`,
+      bentukHidup: [
+        `Sering kali, kamu menjadi "matahari darurat" di tim: orang yang dipanggil saat semangat kolektif turun, lalu setelah semua terang kembali, kamu ditinggal sendiri memulihkan tenaga.`,
+        `Kariermu mungkin dipenuhi siklus: periode sorotan yang intens diikuti kemerosotan minat yang dalam, dan jeda di antaranya terasa seperti krisis identitas: "siapa aku tanpa panggung?"`,
+        `Ada kemungkinan kamu terus mencari peran yang menjanjikan apresiasi, tapi begitu apresiasi itu rutin, ia kehilangan panasnya, lalu kamu mulai melirik ke tempat lain.`,
+      ],
+      saatMenguras: [
+        `Kamu mulai merasa enggan memulai sebelum ada yang melihat, dan ide-ide yang dulu menyala kini terasa beban.`,
+        `Rapat yang seharusnya rutin tiba-tiba menguras habis energi, dan kamu pulang dengan perasaan dipakai tapi tidak diisi.`,
+        `Kritik kecil terasa lebih dalam daripada pujian besar; satu komentar negatif bisa memadamkan semangat seharian.`,
+      ],
+      yangStabilkan: [
+        `Sering terasa lebih ringan saat kamu punya satu proyek panjang yang tidak bergantung pada pengakuan instan (misalnya menulis, membangun sistem, atau mengajar), di mana hasilnya terlihat nanti, tapi prosesnya tetap hangat.`,
+        `Beberapa Matahari menemukan ritme saat bekerja berdampingan dengan satu rekan yang diam-diam mencatat kemajuanmu tanpa banyak sorak, seperti pantulan yang konsisten tapi tidak menyilaukan.`,
+        `Ada yang merasa jelas kembali setelah menyadari bahwa fase sunyi bukan berarti kegagalan, melainkan bagian dari siklus harian Matahari: terbit, mencapai puncak, lalu tenggelam; dan tenggelam bukan menghilang selamanya.`,
+      ],
     },
   },
 
@@ -87,6 +106,25 @@ export default {
     inserts: {
       waterExcess: `Air berlebih membuat kepekaan ini semakin intens. Kamu menyerap atmosfer kantor seperti spons, dan tanpa sistem drainase yang baik, kamu bisa tenggelam dalam emosi kolektif yang sebenarnya bukan tanggung jawabmu.`,
       earthDominant: `Bumi dominan sebagai elemen yang membendung Air membuatmu mampu menampung banyak emosi sekitar, tapi akhirnya bisa merasa tersumbat sendiri. Kamu menahan semuanya dengan sabar, namun tanpa saluran untuk melepaskan, beban itu mengendap dan membuatmu berat melangkah.`,
+    },
+    deepInsight: {
+      pola: `Di balik diam yang penuh wawasan, ada keyakinan tak terucap bahwa menyampaikan gagasan secara langsung adalah risiko merusak harmoni yang membuatmu diterima. Bagi Hujan, kedamaian ruang kerja terasa sebagai taruhan; kamu mungkin percaya bahwa begitu suaramu meninggi, kenyamananmu sebagai tempat orang berlindung ikut mencair.`,
+      simpul: `Simpul yang sering muncul: kamu memiliki wawasan yang dalam, tapi menyampaikannya secara asertif terasa berisiko, karena kamu juga bisa merasakan bagaimana kata-katamu didengar. Kamu ingin diakui, tapi tidak mau mengganggu harmoni. Akibatnya, ide-idemu sering disampaikan sebagai bisikan di sela rapat, bukan sebagai pijakan keputusan. Orang mungkin menganggapmu penurut, padahal kamu hanya tidak ingin menginjak perasaan siapapun saat melangkah.`,
+      bentukHidup: [
+        `Kamu sering menjadi konselor tidak resmi di tim: rekan kerja curhat soal atasan atau masalah pribadi, lalu kamu menyerap semuanya, dan pulang membawa beban yang bukan pekerjaanmu.`,
+        `Ada kecenderungan melakukan kerja emosional yang tidak dibayar, seperti meredakan ketegangan, menjadi penengah, atau memastikan semua merasa didengar, sementara pencapaianmu sendiri jarang kamu suarakan.`,
+        `Dalam rapat, kamu mungkin menyampaikan ide sebagai pertanyaan lembut alih-alih pernyataan, sehingga gagasanmu mudah terlewat di ruang yang menghargai volume.`,
+      ],
+      saatMenguras: [
+        `Kamu mulai merasa bahwa satu-satunya fungsimu adalah menjadi tempat sampah emosi rekan kerja, tanpa ada yang menanyakan kabarmu yang sebenarnya.`,
+        `Pikiran tentang rapat berikutnya memunculkan rasa berat yang tidak bisa dijelaskan, karena kamu tahu ada lagi suasana yang harus kamu kelola.`,
+        `Kamu meragukan nilaimu sendiri karena tidak pernah "bersuara lantang", dan mulai percaya bahwa kontribusi yang diam tidak dihitung.`,
+      ],
+      yangStabilkan: [
+        `Hujan sering bekerja lebih jelas ketika diberi ruang untuk menuliskan pemikirannya alih-alih harus bersaing secara lisan, karena kejernihan muncul saat tidak ada arus orang yang harus dibaca.`,
+        `Beberapa orang dengan pola ini merasa lebih dihargai ketika memiliki atasan yang peka membaca kontribusi diam mereka, sehingga mereka tidak perlu menjual diri dengan cara yang asing.`,
+        `Ada yang menemukan ritme stabil saat tim mengakui perannya sebagai penyeimbang, bukan sebagai "yang mengerti semua", melainkan sebagai yang membuat suasana tetap layak dihuni.`,
+      ],
     },
   },
 }

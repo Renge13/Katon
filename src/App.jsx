@@ -443,17 +443,11 @@ function App() {
             </div>
           )}
 
-          {/* Personality traits */}
-          {result.interpretation && result.interpretation.personalityTraits.length > 0 && (
-            <div className="info-card traits-card">
-              <div className="section-title">Sifat-sifatmu</div>
-              <ul className="traits-list">
-                {result.interpretation.personalityTraits.map((t, i) => (
-                  <li key={i}>{t}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Personality traits section removed — the sharecard SIFAT
+              zone already covers the at-a-glance trait scan, so the
+              standalone list above the element bars was a duplicate
+              surface. The `personalityTraits` data is still emitted by
+              getInterpretation and could be re-attached later if needed. */}
 
           {/* Element balance — bars + plain-Indonesian meaning per element */}
           <div className="info-card balance-card">
@@ -490,58 +484,18 @@ function App() {
             )}
           </div>
 
-          {/* Relasi Cabang — branch 六合/六冲 dynamics (different from
-              sharecard's stem-cycle harmony). Chips use branch's primary
-              archetype so chip + description match. Each block's
-              description ends with an open-loop CTA into Bacaan Mendalam. */}
-          {((result.interpretation?.compatibleBranchArchetypes?.length > 0) ||
-            (result.interpretation?.clashBranchArchetypes?.length > 0)) && (
-            <div className="relations-card">
-              <div className="section-title">Relasi Cabang</div>
-
-              {result.interpretation?.compatibleBranchArchetypes?.length > 0 && (
-                <div className="relation-block relation-block--harmony">
-                  <div className="relation-header">
-                    <span className="relation-label">Cocok Dengan</span>
-                    <span className="relation-chips">
-                      {result.interpretation.compatibleBranchArchetypes.map((a) => (
-                        <span className="chip chip--harmony" key={a.branch}>
-                          <span className="chip-emoji" aria-hidden="true">{ARCHETYPE_EMOJI[a.stem] || ''}</span>
-                          {a.name}
-                        </span>
-                      ))}
-                    </span>
-                  </div>
-                  {result.interpretation?.compatibleDescription && (
-                    <div className="relation-description">
-                      <OpenLoopText text={result.interpretation.compatibleDescription} />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {result.interpretation?.clashBranchArchetypes?.length > 0 && (
-                <div className="relation-block relation-block--clash">
-                  <div className="relation-header">
-                    <span className="relation-label">Perlu Dijaga Dengan</span>
-                    <span className="relation-chips">
-                      {result.interpretation.clashBranchArchetypes.map((a) => (
-                        <span className="chip chip--clash" key={a.branch}>
-                          <span className="chip-emoji" aria-hidden="true">{ARCHETYPE_EMOJI[a.stem] || ''}</span>
-                          {a.name}
-                        </span>
-                      ))}
-                    </span>
-                  </div>
-                  {result.interpretation?.clashDescription && (
-                    <div className="relation-description">
-                      <OpenLoopText text={result.interpretation.clashDescription} />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Relasi Cabang section removed — the branch 六合/六冲 mechanic
+              conflicted with the sharecard's ENERGI MENYOKONG/MENGUJI
+              (element-cycle compatibility). Two compatibility lists
+              that didn't match confused tester 2, and a self-match bug
+              (harmony partner's primary stem == day stem) hit charts
+              like 癸丑 / 壬寅 / 丙申 / 丁未. Plus the dayBranches.js text
+              assumed reader's element matched the branch element, so
+              癸丑 readers were called "kaku" (Earth-archetype voice on
+              a Water reader). Section cut entirely; sharecard's
+              ENERGI MENYOKONG/MENGUJI is now the only compatibility
+              surface. Data fields stay in InterpretationJSON in case
+              we re-introduce a stem-aware version later. */}
 
           {/* Bacaan Mendalam — collapsed state is the preview + paywall
               gate; expanded state is the 7-chapter accordion. */}

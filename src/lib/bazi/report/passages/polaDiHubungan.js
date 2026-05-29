@@ -1,5 +1,5 @@
 // ============================================================
-// Passages — Pola di Hubungan (Relationship Patterns)
+// Passages - Pola di Hubungan (Relationship Patterns)
 // ============================================================
 // ~150 word core per archetype on how this archetype gives,
 // receives, and withholds in close relationships. Inserts ~60-90
@@ -36,6 +36,25 @@ export default {
       dayBranchWood: `Kayu di cabang hari adalah bahan bakar bagi Apimu. Kamu mungkin tertarik pada pasangan visioner yang idealismenya menyulut semangatmu. Hubungan ini bisa saling mengisi: dia memberi arah, kamu memberi energi. Tapi hati-hati, dua elemen yang saling membesar bisa membakar lebih cepat dari yang disadari.`,
       fireExcess: `Dengan Api berlebih, intensitas emosimu sulit dipendam. Kamu mencintai dengan sepenuh hati; separuh-separuh bukan caramu. Pasangan bisa kewalahan oleh suhu yang cepat meninggi, sementara kamu sendiri mungkin sulit menemukan tombol untuk meredam. Mencintai dengan cara ini melelahkan, terutama jika balasannya tak sebanding.`,
       dayBranchWater: `Air di cabang hari adalah unsur yang mengontrol Apimu. Kamu mungkin tertarik pada pasangan yang tenang dan dalam, yang bisa menenangkan nyalamu saat hampir membakar segalanya. Tapi ini bukan hubungan yang mudah; tarik-menarik antara panas dan dingin bisa menjadi medan ketegangan yang terus berulang.`,
+    },
+    deepInsight: {
+      pola: `Bagi Matahari, cinta diam-diam beroperasi sebagai ekonomi cahaya. Kamu mungkin percaya bahwa disayangi berarti harus terus menjadi sumber kehangatan, dan meredup adalah undangan untuk ditinggalkan. Itu sebabnya kamu terus menerangi, bukan hanya dari kemurahan hati, tapi karena ketakutan bahwa sinarmu yang pudar bisa membuatmu tak lagi layak tinggal di hati seseorang.`,
+      simpul: `Yang sering menjadi simpul: kamu ingin dicintai karena sinarmu, tapi juga ingin dilihat saat sinar itu meredup. Namun, momen redup itu sering kamu sembunyikan, seolah menunjukkan lelah adalah pengakuan bahwa Matahari bisa padam. Tegangan ini berulang: kamu memberi panas tanpa meminta, lalu bertanya-tanya kenapa tidak ada yang menawarkan selimut.`,
+      bentukHidup: [
+        `Sering jadi sosok yang memulai pembicaraan serius, lalu merasa sendiri saat butuh didengarkan, bukan karena tidak ada yang peduli, tapi karena kamu jarang bilang.`,
+        `Tanpa sadar memilih pasangan yang butuh cahayamu, lalu mengulang pola menjadi poros emosional; hubungan terasa intens tapi tidak seimbang, karena bagianmu yang ingin dirawat jarang muncul ke permukaan.`,
+        `Ada dinamika yang tercipta berulang: saat pasangan tidak merespons dengan antusiasme yang kamu harapkan, kamu mulai meragukan nilaimu sendiri, seolah sinarmu tidak lagi cukup, padahal mereka hanya tidak tahu harus memantulkan apa.`,
+      ],
+      saatMenguras: [
+        `Kamu mulai menghitung berapa kali kamu memberi perhatian, dan merasa kosong saat tidak ada yang menghitungmu balik.`,
+        `Senyum terasa sebagai penampilan, dan setelah berdua, kelelahan lebih terasa daripada kehangatan.`,
+        `Suara di kepala mulai mempertanyakan: "Aku sudah bersinar seterang ini, kenapa belum cukup?"`,
+      ],
+      yangStabilkan: [
+        `Matahari sering merasa lebih tenang saat ada satu kebiasaan kecil yang hanya dimiliki berdua, tanpa perlu sorotan, seperti menulis catatan pendek yang tidak dituntut untuk puitis.`,
+        `Ada yang menemukan ritme ketika sesekali sengaja mematikan panggung: mengambil jeda di mana tidak ada yang perlu dihibur, dan pasangan hanya hadir sebagai teman diam yang tidak mengharapkan cahaya.`,
+        `Beberapa orang dengan pola ini merasa lebih utuh saat bisa berbagi kelelahan tanpa merusak citra; hubungan terasa lebih dalam setelah melewati satu momen jujur yang tidak perlu dikemas apik.`,
+      ],
     },
   },
 
@@ -99,6 +118,25 @@ export default {
       dayBranchWood: `Kayu di cabang hari adalah output dari Air: sesuatu yang tumbuh dari hujanmu. Kamu mungkin tertarik pada pasangan yang bisa menerjemahkan kepekaanmu menjadi tindakan atau karya. Dialah tunas yang menjadikan segala yang kamu serap menjadi berarti.`,
       waterExcess: `Air berlebih membuatmu semakin sulit memisahkan dirimu dari pasangan. Kamu bisa larut sepenuhnya, merasakan apa yang dia rasakan, dan itu menciptakan keintiman yang luar biasa. Tapi tanpa batas, dua hujan yang bertemu bisa menciptakan banjir yang meluluhlantakkan kalian berdua.`,
       doubledEnergies: `Hujan ganda bisa menjadi simfoni yang lembut atau kabut tebal yang tidak bisa ditembus. Kamu mungkin mendapati hubungan dengan orang yang sama-sama intuitif dan sensitif. Ini bisa menjadi tempat paling aman di dunia, atau ruang yang terlalu lembap untuk bernapas.`,
+    },
+    deepInsight: {
+      pola: `Polamu bukan sekadar kelembutan, itu cara memastikan kamu tetap diperlukan. Bagi Hujan, memahami pasangan adalah tabungan tak kasat mata: setiap isyarat yang kamu baca menjadi simpanan, dan diam-diam kamu mungkin percaya bahwa hari di mana kamu berhenti mengerti adalah hari di mana ruangmu di hati orang itu lenyap.`,
+      simpul: `Yang sering menjadi simpul: kamu ingin dikenal sepenuhnya, tapi begitu sibuk mengenali pasanganmu sehingga lupa menampakkan diri. Kamu mungkin merasa bahwa mengungkapkan kebutuhan adalah beban, seolah permintaan adalah setitik polusi di genangan yang harus tetap jernih. Padahal, justru dalam menahan itulah bentukmu perlahan hilang. Keinginan untuk menyatu tanpa batas bisa berubah menjadi ketakutan bahwa dirimu sendiri tidak layak untuk ditampung.`,
+      bentukHidup: [
+        `Sering menjadi pihak yang bertanya "kamu kenapa?" dengan telinga yang sungguh-sungguh mendengar, tapi setelahnya pulang dengan keheningan sendiri, karena tidak ada yang balik menanyakan hal yang sama dengan kedalaman setara.`,
+        `Tanpa sadar memilih pasangan yang sedang butuh dipahami, lalu mengulang pola menjadi penampung emosional yang tidak pernah kehabisan tempat; bagian dirimu yang ingin merawat malah dihabiskan untuk orang yang belum siap merawat balik.`,
+        `Ada hubungan di mana kamu tinggal terlalu lama bukan karena masih cinta, melainkan karena masih bisa merasakan luka pasangan; empatimu mengaburkan batas antara peduli dan mengorbankan diri.`,
+      ],
+      saatMenguras: [
+        `Kamu mulai menghitung berapa kali kamu mendengarkan, dan merasa kosong saat sadar tidak ada yang menghitungmu.`,
+        `Suaramu sendiri terdengar asing ketika kamu mencoba menjelaskan perasaanmu, karena lebih terbiasa menyuarakan perasaan orang lain.`,
+        `Keheningan di antara kalian terasa bukan sebagai kedekatan, melainkan sebagai kelelahan yang tidak sempat diungkapkan.`,
+      ],
+      yangStabilkan: [
+        `Hujan sering merasa lebih utuh saat ada satu hubungan di mana ia tidak perlu menjadi yang paling memahami; di sana, ia boleh sesekali bilang "aku tidak tahu" tanpa merasa gagal.`,
+        `Beberapa orang dengan pola ini menemukan kelegaan ketika percakapan berlangsung tanpa mereka harus memimpin kedalaman: hanya kehadiran yang saling menerima tanpa ada yang harus ditampung.`,
+        `Ada yang mulai kembali mengenali batasnya ketika diberi ruang untuk menyebut satu keinginan tanpa harus menjelaskan kenapa; "aku ingin ini" cukup tanpa disambung "karena kamu..."`,
+      ],
     },
   },
 }

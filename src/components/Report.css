@@ -252,6 +252,11 @@
 }
 
 .paywall-price {
+  /* Hidden during tester validation — price was deterring tester
+     clicks before they could read the 8b content. Re-enable when
+     payment infra (QRIS) lands. Revert by removing the `display:
+     none` line below. */
+  display: none;
   font-family: Georgia, 'Playfair Display', serif;
   font-size: clamp(28px, 4.8vw, 34px);
   font-weight: 400;
@@ -556,6 +561,151 @@
   border-radius: 4px;
 }
 
+/* ── Entry moment (above accordion) ─────────────────────
+   ~55-word framing paragraph that pivots the reader from
+   "who you are" (free surfaces) to "how your patterns move
+   through life" (paid Bacaan Mendalam). Sits between the
+   report header and the first chapter. */
+
+.report-entry {
+  font-family: Georgia, 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--rpt-ink-soft);
+  text-align: center;
+  max-width: 540px;
+  margin: 0 auto 36px;
+  padding: 0 8px;
+}
+
+@media (max-width: 600px) {
+  .report-entry {
+    font-size: 14.5px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+}
+
+/* ── Deep insight (Phase 8b deepening) ─────────────────
+   Rendered below the Refleksi narrative inside chapters
+   3/4/5/6. Visual break + label signals "deeper layer
+   starts here." Same vocabulary as the bridge section. */
+
+.deep-insight {
+  margin: 36px 0 0;
+}
+
+/* When deepInsight is the chapter's PRIMARY content (no Refleksi
+   narrative above), zero out the top margin so the pola paragraph
+   sits flush under BAB heading + drop cap, and shrink vertical
+   rhythm so it reads as the chapter's main flow not as a deeper
+   layer dropped in. */
+.deep-insight--primary {
+  margin-top: 0;
+}
+
+.deep-insight-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto 14px;
+  width: 180px;
+}
+.deep-insight-rule-line {
+  flex: 1;
+  height: 1px;
+  background: var(--emas-glow);
+  opacity: 0.6;
+}
+.deep-insight-rule-dot {
+  font-family: Georgia, serif;
+  font-size: 14px;
+  color: var(--emas);
+  opacity: 0.8;
+  line-height: 1;
+}
+
+.deep-insight-label {
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--rpt-muted);
+  margin: 0 0 22px;
+}
+
+.deep-insight-para {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--rpt-ink);
+  margin: 0 0 16px;
+}
+
+.deep-insight-h {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--rpt-accent);
+  margin: 26px 0 12px;
+}
+
+.deep-insight-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.deep-insight-list li {
+  position: relative;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--rpt-ink-soft);
+  padding: 0 0 0 18px;
+  margin: 0 0 12px;
+}
+.deep-insight-list li:last-child {
+  margin-bottom: 0;
+}
+.deep-insight-list li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 12px;
+  width: 6px;
+  height: 1px;
+  background: var(--kayu);
+  opacity: 0.55;
+}
+
+/* Visual lift for `yangStabilkan` — the load-bearing
+   "what helps stabilize" section. Subtle gold-tint block
+   so the reader's eye can find it without scanning the
+   whole chapter. The other two sub-sections (bentukHidup,
+   saatMenguras) stay unmarked. */
+.deep-insight-stabilkan {
+  margin-top: 26px;
+  padding: 18px 20px 14px;
+  background: rgba(176, 132, 66, 0.06); /* --emas at 6% */
+  border-left: 2px solid var(--emas-glow);
+  border-radius: 6px;
+}
+
+.deep-insight-stabilkan .deep-insight-h {
+  margin-top: 0;
+  color: var(--emas);
+}
+
+.deep-insight-stabilkan .deep-insight-list li::before {
+  background: var(--emas);
+  opacity: 0.7;
+}
+
 /* ── Collapse button ───────────────────────────────────── */
 
 .report-collapse-btn {
@@ -596,4 +746,6 @@
   .report-paragraph--first::first-letter { font-size: 44px; }
   .bab-title           { font-size: 16px; }
   .bab-row             { grid-template-columns: 32px 1fr 24px; gap: 12px; }
+  .deep-insight-para   { font-size: 14px; }
+  .deep-insight-list li { font-size: 13.5px; }
 }

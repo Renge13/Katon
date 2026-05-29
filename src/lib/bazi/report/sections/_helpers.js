@@ -48,10 +48,29 @@ export function sectionFromPassage({ title, sectionKey, passage, chart, rules, p
     }
   }
 
+  // Phase 8b — optional deeper-insight block. When present, it
+  // becomes the chapter's PRIMARY content (no longer "deeper than"
+  // the Refleksi narrative). The Refleksi narrative is suppressed
+  // for that chapter because the 8b deepInsight already does the
+  // domain-specific work the Refleksi was attempting (and was
+  // creating cross-chapter repetition per tester 2 feedback).
+  //
+  // Graceful fallback: archetypes without deepInsight (8 of 10
+  // currently) still render their Refleksi narrative as before.
+  // Shape: { pola, simpul, bentukHidup[], saatMenguras[], yangStabilkan[] }.
+  // Gated on `pola` being non-empty so a partially-filled entry
+  // doesn't render half a block.
+  const di = passage.deepInsight
+  const deepInsight = di && di.pola && di.pola.trim() ? di : null
+
   return {
     sectionKey,
     title,
-    paragraphs: parts,
+    // Suppress Refleksi narrative when deepInsight will carry the
+    // chapter alone. Other chapters (no deepInsight) keep their
+    // Refleksi paragraphs intact.
+    paragraphs: deepInsight ? [] : parts,
     reflectionPrompt: prompt && prompt.trim() ? prompt : null,
+    deepInsight,
   }
 }
