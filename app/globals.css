@@ -145,3 +145,37 @@ select, input[type="text"], input[type="tel"] {
 .rule-card { background: #fff6ec; border: 1px solid var(--wash); border-radius: 12px; padding: 18px; margin-top: 12px; }
 .rule-card .rule { font-family: var(--serif); font-size: 19px; color: var(--accent-deep); font-style: italic; }
 .closing { color: var(--ink-soft); font-style: italic; margin-top: 24px; font-size: 14px; }
+
+/* ---- back link ---- */
+.back-link { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; padding: 18px 0 0; font-family: var(--sans); }
+
+/* ---- post-pay TOC ---- */
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 8px; position: sticky; top: 0; background: var(--paper); padding: 10px 0; z-index: 2; }
+.toc button { font-size: 12px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--paper-2); color: var(--ink-soft); cursor: pointer; }
+
+/* ---- Four Pillars ---- */
+.pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 6px 0 18px; }
+.pillar { text-align: center; border: 1px solid var(--border); border-radius: 12px; padding: 12px 6px; background: var(--paper-2); }
+.pillar-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.pillar-chars { font-family: var(--serif); font-size: 24px; color: var(--ink); margin: 6px 0 2px; }
+.pillar-el { font-size: 11px; color: var(--ink-soft); }
+.pillar--empty { border-style: dashed; opacity: 0.6; }
+.pillar--empty .pillar-chars { color: var(--muted); }
+
+/* ---- element bars ---- */
+.element-bars { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+.ebar-row { display: grid; grid-template-columns: 44px 1fr 28px; align-items: center; gap: 8px; }
+.ebar-label { font-size: 12px; color: var(--ink-soft); }
+.ebar-track { height: 8px; background: var(--divider); border-radius: 6px; overflow: hidden; }
+.ebar-fill { display: block; height: 100%; border-radius: 6px; }
+.ebar-val { font-size: 11px; color: var(--muted); text-align: right; }
+
+/* ---- hour door ---- */
+.hour-door { margin-top: 14px; padding: 14px; border: 1px dashed var(--border); border-radius: 12px; background: #fffaf3; }
+.hour-door-copy { font-size: 13px; color: var(--ink-soft); }
+
+/* ---- upsell ---- */
+.upsell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--paper-2); margin-bottom: 8px; }
+.upsell-title { font-family: var(--serif); font-size: 15px; color: var(--ink); }
+.upsell-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.upsell-lock { color: var(--muted); }

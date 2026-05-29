@@ -1,14 +1,15 @@
 import { nanoid } from 'nanoid';
 import { createReading } from '@/lib/readingStore';
-import { getFreeContent, getTeaser, hasArchetype } from '@/lib/content';
+import { hasArchetype } from '@/lib/content';
 import { computeChartInputs } from '@/lib/chart';
+import { freeViewFromChart } from '@/lib/readingView';
 import { json, badRequest, VALID_DOMAINS } from '@/lib/http';
 
 export const runtime = 'nodejs';
 
 // POST /api/reading
-// Compute the chart server-side, resolve element_variant server-side, create a
-// row with a CSPRNG bearer token, and return ONLY free content + the token.
+// Compute the chart server-side, resolve element_variant server-side, persist the
+// raw birth inputs (SERVER-ONLY) + a CSPRNG token, return ONLY free content.
 export async function POST(request) {
   let body;
   try {
@@ -25,37 +26,30 @@ export async function POST(request) {
     return badRequest(`domain must be one of ${VALID_DOMAINS.join(', ')} or omitted`);
   }
 
-  // SERVER-SIDE chart computation. The client never supplies day_master or
-  // element_variant — they are derived here and persisted, so they can't be
-  // tampered with.
+  // SERVER-SIDE chart computation. day_master + element_variant are derived here,
+  // never supplied by the client.
   const { dayMaster, elementVariant, chart } = computeChartInputs({ birthDate, birthTime });
 
   if (!hasArchetype(dayMaster)) {
-    // Until all 10 content files land, only resolvable archetypes can be served.
-    return json(
-      { error: 'archetype_content_unavailable', dayMaster },
-      501,
-    );
+    return json({ error: 'archetype_content_unavailable', dayMaster }, 501);
   }
 
   const id = nanoid(21); // CSPRNG token (nanoid uses crypto), never sequential
-  const row = {
+  await createReading({
     id,
     day_master: dayMaster,
     element_variant: elementVariant,
     domain,
     paid: false,
     wa_number: null,
-  };
-  await createReading(row);
-
-  // Card branches are computed from the chart's actual day branch (overriding the
-  // content file's static reference branches). Teaser is client-safe (cut mid-reframe).
-  const freeContent = getFreeContent(dayMaster, elementVariant, domain, {
-    harmonyBranches: chart.harmonyBranches,
-    clashBranches: chart.clashBranches,
+    // SERVER-ONLY: stored so the chart can be recomputed on every read. Never
+    // returned to the client, never logged.
+    birth_date: birthDate,
+    birth_time: birthTime,
   });
-  const teaser = domain ? getTeaser(dayMaster, domain) : null;
-  // birthDate echoed back for the card header (client already has it; not sensitive).
-  return json({ token: id, domain, birthDate, freeContent, teaser });
+
+  // Response carries ONLY server-derived content — no birthDate/birthTime echo.
+  // (The client already has the birthdate it typed for any local display.)
+  const { freeContent, teaser } = freeViewFromChart(chart, domain);
+  return json({ token: id, domain, freeContent, teaser });
 }

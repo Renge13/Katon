@@ -4,7 +4,7 @@
 // Display 360×640; exportCard scales ×3 to 1080×1920.
 
 import { ELEMENT_CONFIG } from '@/lib/bazi/elementConfig.js';
-import { branchesToZodiac } from '@/lib/zodiac.js';
+import { branchesToTaggable } from '@/lib/zodiac.js';
 
 const BASE = {
   bg: '#F6F1E8', border: '#E4DAD0', divider: '#EDE5DC',
@@ -19,13 +19,27 @@ function fmtDate(iso) {
   return mi >= 0 && mi < 12 ? `${parseInt(d, 10)} ${ID_MONTHS[mi]} ${y}` : iso;
 }
 
+function TaggableCol({ label, items, ink, muted, pad }) {
+  return (
+    <div style={{ paddingLeft: pad ? 12 : 0 }}>
+      <div style={{ fontSize: 9, letterSpacing: 1, color: muted, fontWeight: 600, marginBottom: 5 }}>{label}</div>
+      {(items && items.length ? items : null) ? items.map((t, i) => (
+        <div key={i} style={{ marginBottom: 5 }}>
+          <div style={{ fontSize: 13, color: ink, lineHeight: 1.15 }}>{t.archetype}</div>
+          <div style={{ fontSize: 9.5, color: muted }}>lahir tahun {t.zodiac}</div>
+        </div>
+      )) : <div style={{ fontSize: 13, color: ink }}>—</div>}
+    </div>
+  );
+}
+
 export default function Sharecard({ data, birthDate, id = 'sharecard' }) {
   if (!data) return null;
   const cfg = ELEMENT_CONFIG[data.dayMasterElement] || ELEMENT_CONFIG.Fire;
   const dims = data.card?.dimensions || {};
   const lines = [dims.kekuatan, dims.polaTersembunyi, dims.yangOrangNggakSadar].filter(Boolean);
-  const selaras = branchesToZodiac(data.card?.compatibleBranches);
-  const pemicu = branchesToZodiac(data.card?.clashBranches);
+  const selaras = data.card?.selaras || branchesToTaggable(data.card?.compatibleBranches);
+  const pemicu = data.card?.pemicu || branchesToTaggable(data.card?.clashBranches);
 
   return (
     <div
@@ -79,17 +93,11 @@ export default function Sharecard({ data, birthDate, id = 'sharecard' }) {
         ))}
       </div>
 
-      {/* harmony / clash */}
+      {/* harmony / clash — archetype name primary, zodiac as secondary hint */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', padding: '16px 22px', borderTop: `1px solid ${BASE.divider}`, position: 'relative' }}>
-        <div>
-          <div style={{ fontSize: 9, letterSpacing: 1, color: BASE.muted, fontWeight: 600, marginBottom: 4 }}>SELARAS DENGAN</div>
-          <div style={{ fontSize: 13, color: BASE.ink }}>{selaras.join(' · ') || '—'}</div>
-        </div>
+        <TaggableCol label="SELARAS DENGAN" items={selaras} ink={BASE.ink} muted={BASE.muted} />
         <div style={{ background: BASE.border }} />
-        <div style={{ paddingLeft: 12 }}>
-          <div style={{ fontSize: 9, letterSpacing: 1, color: BASE.muted, fontWeight: 600, marginBottom: 4 }}>DIUJI OLEH</div>
-          <div style={{ fontSize: 13, color: BASE.ink }}>{pemicu.join(' · ') || '—'}</div>
-        </div>
+        <TaggableCol label="DIUJI OLEH" items={pemicu} ink={BASE.ink} muted={BASE.muted} pad />
       </div>
 
       {/* footer */}

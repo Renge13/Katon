@@ -1,11 +1,13 @@
-import { getReading, setWaNumber } from '@/lib/readingStore';
+import { getReading, setInvoice } from '@/lib/readingStore';
+import { createQrisInvoice } from '@/lib/xendit';
+import { PRICE_IDR } from '@/lib/pricing';
 import { json, notFound, badRequest } from '@/lib/http';
 
 export const runtime = 'nodejs';
 
 // POST /api/pay/[id]   body: { wa_number }
-// Captures the WhatsApp number and (Phase 4a) creates the Xendit QRIS invoice.
-// This route NEVER sets paid=true — only the verified webhook can.
+// Captures the WhatsApp number and creates the Xendit QRIS invoice
+// (external_id = reading id). NEVER sets paid=true — only the verified webhook can.
 export async function POST(request, { params }) {
   const { id } = await params;
   const row = await getReading(id);
@@ -23,16 +25,22 @@ export async function POST(request, { params }) {
     return badRequest('wa_number is required');
   }
 
-  await setWaNumber(id, waNumber);
-
-  // TODO(Phase 4a): create a Xendit QRIS invoice with external_id = id (so the
-  // webhook can correlate the callback back to this reading), then return the QR
-  // string / checkout payload. Until then, the WA number is stored and the
-  // client should show the "menunggu konfirmasi pembayaran" pending state.
-  return json({
-    ok: true,
-    pending: true,
-    invoice: null,
-    note: 'Xendit QRIS invoice creation lands in Phase 4a.',
-  });
+  try {
+    const { invoiceId, invoiceUrl } = await createQrisInvoice({
+      readingId: id,
+      amount: PRICE_IDR,
+      description: `Katon — Bacaan Mendalam (${row.domain})`,
+    });
+    await setInvoice(id, { invoiceId, waNumber });
+    return json({ ok: true, pending: true, invoiceUrl });
+  } catch (e) {
+    if (e.code === 'not_configured') {
+      // Dev fallback (no Xendit keys): store the WA number and report pending so
+      // the funnel shows the pending state. Unlock still requires the verified
+      // webhook (triggered manually in dev).
+      await setInvoice(id, { waNumber });
+      return json({ ok: true, pending: true, invoiceUrl: null, dev: true });
+    }
+    return json({ error: 'invoice_failed' }, 502);
+  }
 }
