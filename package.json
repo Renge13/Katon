@@ -4,19 +4,26 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "dev:vite": "vite",
+    "build:vite": "vite build",
+    "preview:vite": "vite preview",
     "generate:solar-terms": "node scripts/generate-solar-terms.js",
     "check:copy": "node scripts/check-copy.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
     "@tabler/icons-react": "^3.44.0",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
+    "nanoid": "^5.1.11",
+    "next": "^15.5.18",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

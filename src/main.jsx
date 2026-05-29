@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import CardDemo from './pages/CardDemo.jsx'
+import CardDemo from './demo/CardDemo.jsx'
 
 /* Pilot route: /?cardDemo=1 renders the standalone image-card demo. */
 const isCardDemo = new URLSearchParams(window.location.search).has('cardDemo')

@@ -34,8 +34,9 @@ self-discovery / reflection lens, not predictive astrology.
 
 ## Stack (decided)
 
-Next.js 14 (App Router, JS to match repo) + Supabase (Postgres) + Xendit QRIS +
-Vercel. Migration verdict: **B — fresh Next.js scaffold, heavy reuse.** Same repo
+Next.js 15 (App Router, JS to match repo) + Supabase (Postgres) + Xendit QRIS +
+Vercel. (React 19, kept from the Vite app — Next 15 is the React-19 release.)
+Migration verdict: **B — fresh Next.js scaffold, heavy reuse.** Same repo
 (`Renge13/Katon`). Port `lib/bazi/` and presentational components verbatim; build
 orchestration + server layer + server-gated paywall new. Keep old Vite `src/` as
 reference until 丙 renders end-to-end, then delete in cleanup.
