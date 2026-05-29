@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { createReading } from '@/lib/readingStore';
-import { getFreeContent, hasArchetype } from '@/lib/content';
+import { getFreeContent, getTeaser, hasArchetype } from '@/lib/content';
 import { computeChartInputs } from '@/lib/chart';
 import { json, badRequest, VALID_DOMAINS } from '@/lib/http';
 
@@ -27,8 +27,8 @@ export async function POST(request) {
 
   // SERVER-SIDE chart computation. The client never supplies day_master or
   // element_variant — they are derived here and persisted, so they can't be
-  // tampered with. (Phase 2 replaces the stub in lib/chart.js with the real port.)
-  const { dayMaster, elementVariant } = computeChartInputs({ birthDate, birthTime });
+  // tampered with.
+  const { dayMaster, elementVariant, chart } = computeChartInputs({ birthDate, birthTime });
 
   if (!hasArchetype(dayMaster)) {
     // Until all 10 content files land, only resolvable archetypes can be served.
@@ -49,6 +49,13 @@ export async function POST(request) {
   };
   await createReading(row);
 
-  const freeContent = getFreeContent(dayMaster, elementVariant, domain);
-  return json({ token: id, domain, freeContent });
+  // Card branches are computed from the chart's actual day branch (overriding the
+  // content file's static reference branches). Teaser is client-safe (cut mid-reframe).
+  const freeContent = getFreeContent(dayMaster, elementVariant, domain, {
+    harmonyBranches: chart.harmonyBranches,
+    clashBranches: chart.clashBranches,
+  });
+  const teaser = domain ? getTeaser(dayMaster, domain) : null;
+  // birthDate echoed back for the card header (client already has it; not sensitive).
+  return json({ token: id, domain, birthDate, freeContent, teaser });
 }
