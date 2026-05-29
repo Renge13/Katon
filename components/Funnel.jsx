@@ -188,15 +188,23 @@ function Paywall({ reading }) {
   const [stage, setStage] = useState('teaser'); // teaser | offer | wa | pending | unlocked
   const [wa, setWa] = useState('');
   const [full, setFull] = useState(null);
+  const [invoiceUrl, setInvoiceUrl] = useState(null);
   const pollRef = useRef(null);
 
   async function submitWa(e) {
     e.preventDefault();
     if (!/^[0-9+]{8,}$/.test(wa.replace(/\s/g, ''))) return;
-    await fetch(`/api/pay/${reading.token}`, {
+    const res = await fetch(`/api/pay/${reading.token}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ wa_number: wa }),
-    }).catch(() => {});
+    }).then((r) => r.json()).catch(() => null);
+    // Open the Xendit checkout (QRIS) in a new tab; this tab keeps polling /full
+    // and unlocks when the verified webhook flips paid. (Triggered from the
+    // submit gesture, so it isn't popup-blocked; a fallback link shows below too.)
+    if (res?.invoiceUrl) {
+      setInvoiceUrl(res.invoiceUrl);
+      window.open(res.invoiceUrl, '_blank', 'noopener');
+    }
     setStage('pending');
   }
 
@@ -224,6 +232,12 @@ function Paywall({ reading }) {
         <div className="spinner" />
         <p style={{ fontWeight: 600, color: 'var(--ink)' }}>Menunggu konfirmasi pembayaran…</p>
         <p style={{ fontSize: 13 }}>Begitu masuk, bacaanmu langsung kebuka di sini.</p>
+        {invoiceUrl && (
+          <p style={{ fontSize: 13, marginTop: 12 }}>
+            Halaman pembayaran nggak kebuka?{' '}
+            <a href={invoiceUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-deep)', fontWeight: 600 }}>Buka di sini ↗</a>
+          </p>
+        )}
       </div>
     );
   }
