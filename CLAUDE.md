@@ -36,6 +36,8 @@ self-discovery / reflection lens, not predictive astrology.
 
 Next.js 15 (App Router, JS to match repo) + Supabase (Postgres) + Xendit QRIS +
 Vercel. (React 19, kept from the Vite app — Next 15 is the React-19 release.)
+Production deploys on Vercel project `katon` (katon-eta.vercel.app); the old `rena`
+project is deprecated.
 Migration verdict: **B — fresh Next.js scaffold, heavy reuse.** Same repo
 (`Renge13/Katon`). Port `lib/bazi/` and presentational components verbatim; build
 orchestration + server layer + server-gated paywall new. Keep old Vite `src/` as

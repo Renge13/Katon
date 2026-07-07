@@ -105,32 +105,44 @@ of problem (values hand-set per cell instead of flowing from one source) and wan
 the same solution shape: define once, reference everywhere, grep to prove no
 duplicates remain.**
 
-## Shared blocker: deployment config on the stale `rena` Vercel project (gates #3 CI AND live e2e)
-**CONFIRMED (dashboard-verified) cause of #3's red Vercel check:** NOT env, NOT a build
-break. The Next.js build **succeeded** on Vercel (compiled, linted, generated all 6
-pages, printed the route table). The failure is post-build project misconfig:
-*"No Output Directory named 'dist' found after the Build completed."* The stale `rena`
-project is set to expect `dist/` output, but this is a Next.js app → output is `.next/`.
-So `0fa4936` compiles clean on Vercel's own infra — the content is fine; the red is a
-project-config artifact.
-- **Before e2e, fix deployment config** — either remove the `dist/` Output Directory
-  override (let it default to `.next/`) / add a correct `vercel.json`, OR (cleaner) stand
-  up a properly-named **Katon** Vercel project linked to the repo. This is the same
-  project that will run the live Supabase + Xendit e2e, so it must be right regardless.
-- **Also still required for e2e:** preview/prod env vars (`SUPABASE_URL`,
-  `SUPABASE_SERVICE_ROLE_KEY`, `XENDIT_SECRET_KEY`, `XENDIT_WEBHOOK_TOKEN`,
-  `NEXT_PUBLIC_BASE_URL`) — the same env behind the local `/api/reading` 500.
-- Treat "deployment config (output dir + project) + env" as one shared task; fixing it
-  clears #3 CI and unblocks e2e.
+## Deployment state — IN PROGRESS (resume here next session)
+Vercel deploy is set up but NOT yet green. None of this lives in code, so capture it:
+
+- **`katon` project (katon-eta.vercel.app) — THE KEEPER.** Connected to
+  `Renge13/Katon`, framework preset **Next.js**. `vercel.json` (framework `nextjs`, no
+  `outputDirectory`) is committed on this redesign branch and fixes the old `dist/`
+  Output-Directory failure. All 5 env vars set + correctly scoped (NAMES/scope only —
+  values live in Vercel, NEVER in the repo):
+  - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` → Production + Preview
+  - `XENDIT_SECRET_KEY`, `XENDIT_WEBHOOK_TOKEN` → Preview only (test-mode keys)
+  - `NEXT_PUBLIC_BASE_URL` = `https://katon-eta.vercel.app` → Production + Preview
+- **`rena` project — stale duplicate.** Connected to the SAME repo, serving an old
+  pre-redesign build. Retire later: rena → Settings → Git → Disconnect. Harmless for
+  now except it posts a duplicate check on PRs.
+- **No editable Production Branch on this Vercel plan — it infers `main`.** `main` is
+  pre-migration and has no app, so any build targeting `main` fails with
+  "No Next.js detected" — EXPECTED, ignore it. PR #4 only needs a **Preview** deploy of
+  the redesign branch, which does not depend on the production branch.
+- **NEXT STEP to resume:** Code pushes an empty commit to
+  `redesign/claude-design-sunyi` → `katon` builds it as a Preview → read PR #4's check.
+  Green = done. Red = read the ACTUAL build log, don't guess.
+- (History: #3's original red was the `rena` project's `dist/` Output-Directory
+  misconfig — build succeeded, output-dir resolution failed. Confirmed non-content;
+  fixed by standing up the keeper `katon` project + `vercel.json`.)
 - **Lint debt (non-blocking):** the Next ESLint-plugin warning + the 8 pre-existing
-  `scripts/build-content.mjs` lint errors surface on Vercel too. Build passes (scripts/
-  isn't linted by `next build`); clean this up when next in the content pipeline.
+  `scripts/build-content.mjs` lint errors also surface on Vercel. Build passes (scripts/
+  isn't linted by `next build`); clean when next in the content pipeline.
 
 ## Known / open items
-- **Local `/api/reading` 500:** the configured Supabase insert fails in this local env
-  (env/DB issue, NOT a redesign regression — `createReading` and the insert row are
-  unchanged, and the 500 precedes any redesign code). Full e2e needs a working Supabase +
-  Xendit webhook; covered here via forge tests + mocked-API visual walkthrough.
-- **Not committed yet.** Next step: commit on `redesign/claude-design-sunyi` and open its
-  own PR (separate from content PR #3). Awaiting go.
+- **Redesign committed + PR #4 open** (`redesign/claude-design-sunyi` → base
+  `next-migration`): https://github.com/Renge13/Katon/pull/4. Content PR #3 already
+  merged into `next-migration` (`f8f4f2d`). Phase-4 infra still held back / uncommitted.
+- **Deploy not yet green** — see "Deployment state" above (resume: empty commit → read PR #4 check).
+- **Follow-up:** flip `NEXT_PUBLIC_BASE_URL` to `https://katon.app` once the custom
+  domain is attached to the `katon` project (currently `katon-eta.vercel.app`).
+- **Pre-launch gate:** live end-to-end Supabase + Xendit pass is now UNBLOCKED (env
+  finally exists on a working project). This is the real remaining pre-launch gate,
+  alongside **KBLI 63900 sync on the NIB**.
+- **Local `/api/reading` 500:** the configured Supabase insert fails in the local env
+  (env/DB, NOT a redesign regression). Real e2e runs on the `katon` Vercel project now.
 - Post-launch: Balanced sameness copy revisit (see content flag above).
