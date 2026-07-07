@@ -8,7 +8,7 @@ import { json, badRequest, VALID_DOMAINS } from '@/lib/http';
 export const runtime = 'nodejs';
 
 // POST /api/reading
-// Compute the chart server-side, resolve element_variant server-side, persist the
+// Compute the chart server-side, resolve element-state server-side, persist the
 // raw birth inputs (SERVER-ONLY) + a CSPRNG token, return ONLY free content.
 export async function POST(request) {
   let body;
@@ -26,9 +26,9 @@ export async function POST(request) {
     return badRequest(`domain must be one of ${VALID_DOMAINS.join(', ')} or omitted`);
   }
 
-  // SERVER-SIDE chart computation. day_master + element_variant are derived here,
+  // SERVER-SIDE chart computation. day_master + state are derived here,
   // never supplied by the client.
-  const { dayMaster, elementVariant, chart } = computeChartInputs({ birthDate, birthTime });
+  const { dayMaster, state, chart } = computeChartInputs({ birthDate, birthTime });
 
   if (!hasArchetype(dayMaster)) {
     return json({ error: 'archetype_content_unavailable', dayMaster }, 501);
@@ -38,7 +38,7 @@ export async function POST(request) {
   await createReading({
     id,
     day_master: dayMaster,
-    element_variant: elementVariant,
+    state,
     domain,
     paid: false,
     wa_number: null,
@@ -50,6 +50,6 @@ export async function POST(request) {
 
   // Response carries ONLY server-derived content — no birthDate/birthTime echo.
   // (The client already has the birthdate it typed for any local display.)
-  const { freeContent, teaser } = freeViewFromChart(chart, domain);
-  return json({ token: id, domain, freeContent, teaser });
+  const { freeContent, teaser, chart: chartView } = freeViewFromChart(chart, domain);
+  return json({ token: id, domain, freeContent, teaser, chart: chartView });
 }

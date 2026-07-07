@@ -6,7 +6,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 // Flat config for the Katon Next.js app. Server route handlers + lib use Node
 // globals (process, Buffer); client components use browser globals. JSX enabled.
 export default defineConfig([
-  globalIgnores(['.next', 'dist', 'node_modules', 'out', '.claude']),
+  globalIgnores(['.next', 'dist', 'node_modules', 'out', '.claude', 'Katon Design System']),
   {
     files: ['**/*.{js,jsx,mjs}'],
     extends: [js.configs.recommended, reactHooks.configs.flat.recommended],
