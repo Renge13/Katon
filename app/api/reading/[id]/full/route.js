@@ -1,6 +1,5 @@
 import { getReading } from '@/lib/readingStore';
-import { buildFullView } from '@/lib/readingView';
-import { getTeaser } from '@/lib/content';
+import { buildFullView, buildFreeView } from '@/lib/readingView';
 import { json, notFound, badRequest } from '@/lib/http';
 
 export const runtime = 'nodejs';
@@ -22,7 +21,7 @@ export async function GET(_request, { params }) {
     return json(view);
   }
 
-  // Not paid → teaser only.
-  const teaser = getTeaser(row.day_master, row.domain);
+  // Not paid → teaser only (recomputed deterministically; no paid copy).
+  const { teaser } = buildFreeView(row);
   return json({ token: id, paid: false, domain: row.domain, teaser });
 }

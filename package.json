@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "generate:solar-terms": "node scripts/generate-solar-terms.js",
     "check:copy": "node scripts/check-copy.js",
-    "test:bazi": "node scripts/validate-bazi.mjs"
+    "test:bazi": "node scripts/validate-bazi.mjs",
+    "test:forge": "node scripts/forge-tests.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
