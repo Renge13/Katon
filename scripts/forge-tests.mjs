@@ -4,10 +4,15 @@
 // assertion here is that the payment path fails CLOSED in production when the Xendit
 // secrets are unset — so the dev bypass can't silently ship at cutover.
 //
-//   node scripts/forge-tests.mjs           # fence unit tests (no server needed)
-//   node scripts/forge-tests.mjs --live    # + live checks vs http://localhost:3000
+//   npm run test:forge                     # fence + store unit tests (no server needed)
+//   npm run test:forge -- --live           # + live checks vs http://localhost:3000
+//
+// NOTE: run with `node --conditions=react-server` (the npm script does this). The
+// store tests import lib/readingStore.js, whose `server-only` guard resolves to an
+// empty stub under that condition — the same way Next's RSC bundle resolves it.
 import assert from 'node:assert';
 import { paymentFenceReason, devBypassAllowed } from '../lib/paymentFence.js';
+import { createReading, claimWaSend, releaseWaSend } from '../lib/readingStore.js';
 
 let pass = 0, fail = 0;
 const ok = (name) => { pass++; console.log(`  ✓ ${name}`); };
@@ -56,6 +61,39 @@ t('development + no secret → allowed (dev bypass on)', () => {
     assert.strictEqual(paymentFenceReason(), null);
     assert.strictEqual(devBypassAllowed(), true);
   });
+});
+
+// STORE (WA claim/release transition semantics) — REQUIRED.
+// No DB/server needed: with no Supabase env the store uses its process-local
+// in-memory Map. This locks the mutex + retryability contract the webhook relies on.
+console.log('\nSTORE (WA claim/release) — REQUIRED');
+const at = async (name, fn) => { try { await fn(); ok(name); } catch (e) { bad(name, e); } };
+
+// (1) mutex: claim transitions once; a second claim (Xendit double-fire) is refused.
+await at('claimWaSend → true first, false second (mutex holds vs double-fire)', async () => {
+  const id = 'wa-mutex-' + Date.now();
+  await createReading({ id, day_master: '丙', domain: 'hubungan' });
+  assert.strictEqual(await claimWaSend(id), true, 'first claim should transition false→true');
+  assert.strictEqual(await claimWaSend(id), false, 'second claim must NOT re-fire the send');
+});
+
+// (2) retryable: after a release, the same id can be claimed again (failed-send recovery).
+await at('releaseWaSend then claimWaSend → succeeds again (released claim is retryable)', async () => {
+  const id = 'wa-retry-' + Date.now();
+  await createReading({ id, day_master: '丙', domain: 'hubungan' });
+  assert.strictEqual(await claimWaSend(id), true, 'initial claim');
+  assert.strictEqual(await releaseWaSend(id), true, 'release should transition true→false');
+  assert.strictEqual(await claimWaSend(id), true, 're-claim after release must succeed');
+});
+
+// (3) safe no-op: releasing an unclaimed/already-false id flips nothing.
+await at('releaseWaSend on unclaimed id → no-op, nothing corrupted', async () => {
+  const id = 'wa-noop-' + Date.now();
+  await createReading({ id, day_master: '丙', domain: 'hubungan' });
+  assert.strictEqual(await releaseWaSend(id), false, 'release on already-false must be a no-op');
+  assert.strictEqual(await claimWaSend(id), true, 'a fresh claim is still available after no-op release');
+  assert.strictEqual(await releaseWaSend(id), true, 'now-claimed slot releases once');
+  assert.strictEqual(await releaseWaSend(id), false, 'double release is a no-op');
 });
 
 // Light live checks (opt-in): the core gate + webhook rejects unauthenticated POST.
