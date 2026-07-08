@@ -13,6 +13,7 @@
 import assert from 'node:assert';
 import { paymentFenceReason, devBypassAllowed } from '../lib/paymentFence.js';
 import { createReading, claimWaSend, releaseWaSend } from '../lib/readingStore.js';
+import { decideWaOutcome } from '../lib/wa.js';
 
 let pass = 0, fail = 0;
 const ok = (name) => { pass++; console.log(`  ✓ ${name}`); };
@@ -94,6 +95,31 @@ await at('releaseWaSend on unclaimed id → no-op, nothing corrupted', async () 
   assert.strictEqual(await claimWaSend(id), true, 'a fresh claim is still available after no-op release');
   assert.strictEqual(await releaseWaSend(id), true, 'now-claimed slot releases once');
   assert.strictEqual(await releaseWaSend(id), false, 'double release is a no-op');
+});
+
+// DECISION (decideWaOutcome — pure) — REQUIRED. The webhook's WA branching extracted
+// so it is testable without a running server. Must fail toward 'retry', never toward a
+// silently-kept claim.
+console.log('\nDECISION (decideWaOutcome) — REQUIRED');
+
+t("{ sent: true } → 'sent' (delivered: keep claim, 200)", () => {
+  assert.strictEqual(decideWaOutcome({ sent: true }), 'sent');
+});
+t("{ sent: false, reason: 'no_provider' } → 'skip_no_provider' (release, 200, no retry)", () => {
+  assert.strictEqual(decideWaOutcome({ sent: false, reason: 'no_provider' }), 'skip_no_provider');
+});
+t("{ sent: false, reason: 'provider_error' } → 'retry' (release, 502)", () => {
+  assert.strictEqual(decideWaOutcome({ sent: false, reason: 'provider_error' }), 'retry');
+});
+t("thrown error (threw=true) → 'retry'", () => {
+  assert.strictEqual(decideWaOutcome(null, true), 'retry');
+});
+t("falsy / malformed result → 'retry' (fail toward retry, not silent claim)", () => {
+  assert.strictEqual(decideWaOutcome(null), 'retry');
+  assert.strictEqual(decideWaOutcome(undefined), 'retry');
+  assert.strictEqual(decideWaOutcome('nope'), 'retry');
+  assert.strictEqual(decideWaOutcome({}), 'retry'); // no sent, no reason
+  assert.strictEqual(decideWaOutcome({ sent: false }), 'retry'); // sent:false, no reason
 });
 
 // Light live checks (opt-in): the core gate + webhook rejects unauthenticated POST.

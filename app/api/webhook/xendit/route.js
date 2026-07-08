@@ -1,7 +1,7 @@
 import { getReading, markReadingPaid, claimWaSend, releaseWaSend } from '@/lib/readingStore';
 import { verifyCallbackToken, getInvoice, PAID_STATUSES } from '@/lib/xendit';
 import { PRICE_IDR } from '@/lib/pricing';
-import { sendReadingLink } from '@/lib/wa';
+import { sendReadingLink, decideWaOutcome } from '@/lib/wa';
 import { json, badRequest, unauthorized, notConfigured } from '@/lib/http';
 import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
 
@@ -70,26 +70,51 @@ export async function POST(request) {
 
     // 3. Idempotent flip (false→true only). 4. WA-send guarded by a claim that acts
     //    as a mutex: a genuine Xendit double-fire finds the slot already claimed and
-    //    sends at most once. But the claim is only KEPT on a confirmed send — if the
-    //    send fails, we release it and return non-2xx so Xendit retries and a later
-    //    fire can re-claim + re-attempt. This prevents a transient WhatsApp failure
-    //    from permanently losing the user's link.
+    //    sends at most once. But the claim is only KEPT on a CONFIRMED delivery — so
+    //    wa_sent means "actually delivered", not "attempted". Failure is signalled two
+    //    ways and BOTH must behave identically: sendReadingLink may THROW, or it may
+    //    RETURN a falsy result / { sent: false } (see lib/wa.js). On either, we release
+    //    the claim (keeping the send retryable) and return non-2xx so Xendit retries.
+    //    The one exception is the expected MVP state — no WA provider wired
+    //    (reason 'no_provider'): that is NOT a failure, so we release the claim to keep
+    //    wa_sent an honest false (nothing was delivered; content still unlocks via the
+    //    in-session poll) but return 200 so Xendit does NOT retry-loop every payment.
     const transitioned = await markReadingPaid(readingId, new Date().toISOString());
     const paidNow = transitioned || row.paid === true;
     if (paidNow) {
       const claimed = await claimWaSend(readingId);
       if (claimed) {
+        let result;
+        let threw = false;
         try {
-          await sendReadingLink({ waNumber: row.wa_number, token: readingId });
+          result = await sendReadingLink({ waNumber: row.wa_number, token: readingId });
         } catch (err) {
-          // Send failed: release the claim so the send stays retryable, log it so the
-          // failure is observable, and signal Xendit to retry via a non-2xx status.
-          console.error(`[webhook/xendit] sendReadingLink failed for reading ${readingId}:`, err);
+          threw = true;
+          console.error(`[webhook/xendit] sendReadingLink threw for reading ${readingId}:`, err);
+        }
+
+        // Pure decision (see lib/wa.js#decideWaOutcome) → execute the action.
+        const outcome = decideWaOutcome(result, threw);
+        if (outcome === 'skip_no_provider') {
+          // Expected pilot state: nothing to deliver. Release so wa_sent stays false
+          // (accurate), and fall through to 200 — no retry loop.
+          await releaseWaSend(readingId).catch((e) =>
+            console.error(`[webhook/xendit] releaseWaSend failed for reading ${readingId}:`, e),
+          );
+        } else if (outcome === 'retry') {
+          // Real failure: release the claim so the send stays retryable, log it (no PII),
+          // and signal Xendit to retry via non-2xx.
+          if (!threw) {
+            console.error(
+              `[webhook/xendit] sendReadingLink failed for reading ${readingId}: ${result?.reason || 'unknown'}`,
+            );
+          }
           await releaseWaSend(readingId).catch((e) =>
             console.error(`[webhook/xendit] releaseWaSend failed for reading ${readingId}:`, e),
           );
           return json({ error: 'wa_send_failed' }, 502);
         }
+        // else outcome === 'sent' → delivered, claim stays, fall through to 200.
       }
     }
   }

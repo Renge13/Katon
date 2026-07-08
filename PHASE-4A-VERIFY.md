@@ -47,3 +47,27 @@ never over-grants), but it would silently block real payments.
 Confirm against a real Xendit invoice payload that `amount` is a JSON number. If it
 can be a string, coerce with `Number(data.amount)` in `lib/xendit.js`'s `getInvoice`
 mapping (do the coercion there, once, not in the webhook).
+
+## 3. WhatsApp provider wiring contract (when a provider is chosen)
+
+`lib/wa.js`'s `sendReadingLink` is a provider-gated **no-op** in the MVP: with no
+`WA_PROVIDER_TOKEN` it returns `{ sent: false, reason: 'no_provider' }` and makes no
+network call. The webhook already handles all three cases, so honour this contract
+when wiring a real provider:
+
+- **On success:** return `{ sent: true }`. The webhook keeps the `wa_sent` claim and
+  returns 200. `wa_sent === true` therefore means **actually delivered**.
+- **On failure:** either **throw** OR **return `{ sent: false, reason: '<something other than no_provider>' }`**.
+  Both lead to the identical outcome: the webhook releases the `wa_sent` claim (so the
+  send stays retryable) and returns **502**, so Xendit retries and a later fire
+  re-attempts. Do **not** swallow provider errors into a `sent: true`.
+- **Reserve `reason: 'no_provider'`** for the genuinely-unconfigured state only. It is
+  treated as the expected pilot state — webhook returns **200, no retry**, and leaves
+  `wa_sent` **false**. Do not reuse that reason string for real send failures, or a
+  failed send will be silently treated as "intentionally skipped."
+
+**Pilot-data note:** until a provider is wired, every paid reading has `paid = true`
+with `wa_sent = false`. That is correct and intended — `wa_sent = false` is your queue
+of "delivered nothing via WA" (in the pilot, everyone unlocked in-session and needs
+no hand-send). Once a provider is live, `paid = true AND wa_sent = false` becomes the
+straggler queue to investigate.
