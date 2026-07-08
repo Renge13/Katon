@@ -1,7 +1,8 @@
 import { getReading, setInvoice } from '@/lib/readingStore';
 import { createQrisInvoice } from '@/lib/xendit';
 import { PRICE_IDR } from '@/lib/pricing';
-import { json, notFound, badRequest } from '@/lib/http';
+import { json, notFound, badRequest, notConfigured } from '@/lib/http';
+import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
 
 export const runtime = 'nodejs';
 
@@ -9,6 +10,10 @@ export const runtime = 'nodejs';
 // Captures the WhatsApp number and creates the Xendit QRIS invoice
 // (external_id = reading id). NEVER sets paid=true — only the verified webhook can.
 export async function POST(request, { params }) {
+  // Fail-closed: in production the payment path must be fully configured, or refuse.
+  const fence = paymentFenceReason();
+  if (fence) return notConfigured(`payment_not_configured:${fence}`);
+
   const { id } = await params;
   const row = await getReading(id);
   if (!row) return notFound();
@@ -34,10 +39,11 @@ export async function POST(request, { params }) {
     await setInvoice(id, { invoiceId, waNumber });
     return json({ ok: true, pending: true, invoiceUrl });
   } catch (e) {
-    if (e.code === 'not_configured') {
-      // Dev fallback (no Xendit keys): store the WA number and report pending so
-      // the funnel shows the pending state. Unlock still requires the verified
-      // webhook (triggered manually in dev).
+    if (e.code === 'not_configured' && devBypassAllowed()) {
+      // Dev fallback (no Xendit keys, non-production ONLY): store the WA number and
+      // report pending so the funnel shows the pending state. Unlock still requires
+      // the verified webhook (triggered manually in dev). Structurally unreachable in
+      // production — the fence above already refused before we got here.
       await setInvoice(id, { waNumber });
       return json({ ok: true, pending: true, invoiceUrl: null, dev: true });
     }
