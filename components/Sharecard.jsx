@@ -1,15 +1,22 @@
 'use client';
-// Sharecard — 9:16 watercolor card rendered from the new bing.js-shape free
-// content. Inline styles (not CSS classes) so html-to-image exports reliably.
+import { elColor, alpha } from './kit.jsx';
+// Sharecard — 9:16 "sanctuary" poster rendered from state-keyed free content.
+// Inline styles only (no CSS classes) so html-to-image exports reliably.
 // Display 360×640; exportCard scales ×3 to 1080×1920.
+//
+// Per-archetype distinction (so 10 archetypes never collapse into one frame):
+//   1. Element pigment family (5)  — dark tinted canvas + glow, from the chart element.
+//   2. Unique stem glyph (10)      — the Day Master character as a giant watermark.
+//   3. Polarity (Yin/Yang)         — splits the two same-element archetypes: glyph
+//                                     placement + bloom character + a Yang top accent.
+//   4. Per-archetype copy          — name, modifier, dimension, feed/drain.
 
-import { ELEMENT_CONFIG } from '@/lib/bazi/elementConfig.js';
-import { branchesToTaggable } from '@/lib/zodiac.js';
+const YANG = new Set(['甲', '丙', '戊', '庚', '壬']); // else Yin
 
-const BASE = {
-  bg: '#F6F1E8', border: '#E4DAD0', divider: '#EDE5DC',
-  ink: '#2A2520', inkSoft: '#5A4A3A', muted: '#A8927E',
-};
+const SERIF = 'var(--font-spectral), Georgia, "Times New Roman", serif';
+const SANS = 'var(--font-hanken), system-ui, -apple-system, sans-serif';
+const LIGHT = '#EFE7D8';
+const SOFT = 'rgba(239,231,216,0.66)';
 
 const ID_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 function fmtDate(iso) {
@@ -19,89 +26,95 @@ function fmtDate(iso) {
   return mi >= 0 && mi < 12 ? `${parseInt(d, 10)} ${ID_MONTHS[mi]} ${y}` : iso;
 }
 
-function TaggableCol({ label, items, ink, muted, pad }) {
+// Element-based feed/drain column: archetype NAMES (the share hook — "which are you?").
+function FeedDrainCol({ label, names, glow, pad }) {
+  const list = names && names.length ? names : null;
   return (
-    <div style={{ paddingLeft: pad ? 12 : 0 }}>
-      <div style={{ fontSize: 9, letterSpacing: 1, color: muted, fontWeight: 600, marginBottom: 5 }}>{label}</div>
-      {(items && items.length ? items : null) ? items.map((t, i) => (
-        <div key={i} style={{ marginBottom: 5 }}>
-          <div style={{ fontSize: 13, color: ink, lineHeight: 1.15 }}>{t.archetype}</div>
-          <div style={{ fontSize: 9.5, color: muted }}>lahir tahun {t.zodiac}</div>
-        </div>
-      )) : <div style={{ fontSize: 13, color: ink }}>—</div>}
+    <div style={{ paddingLeft: pad ? 14 : 0 }}>
+      <div style={{ fontFamily: SANS, fontSize: 9, letterSpacing: 1.4, color: alpha(glow, 0.85), fontWeight: 600, textTransform: 'uppercase', marginBottom: 6 }}>{label}</div>
+      {list ? list.map((name, i) => (
+        <div key={i} style={{ fontFamily: SERIF, fontSize: 14, color: LIGHT, lineHeight: 1.35 }}>{name}</div>
+      )) : <div style={{ fontFamily: SERIF, fontSize: 14, color: LIGHT }}>—</div>}
     </div>
   );
 }
 
 export default function Sharecard({ data, birthDate, id = 'sharecard' }) {
   if (!data) return null;
-  const cfg = ELEMENT_CONFIG[data.dayMasterElement] || ELEMENT_CONFIG.Fire;
-  const dims = data.card?.dimensions || {};
-  const lines = [dims.kekuatan, dims.polaTersembunyi, dims.yangOrangNggakSadar].filter(Boolean);
-  const selaras = data.card?.selaras || branchesToTaggable(data.card?.compatibleBranches);
-  const pemicu = data.card?.pemicu || branchesToTaggable(data.card?.clashBranches);
+  const el = elColor(data.dayMasterElement);
+  const card = data.card || {};
+  const stem = data.dayMasterChinese || '';
+  const isYang = YANG.has(stem);
+  const polarity = isYang ? 'Yang' : 'Yin';
 
   return (
     <div
       id={id}
       style={{
         width: 360, height: 640, position: 'relative', overflow: 'hidden',
-        borderRadius: 18, background: BASE.bg, color: BASE.ink,
-        boxShadow: `0 0 0 1px ${BASE.border}`,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        display: 'flex', flexDirection: 'column',
+        borderRadius: 22, background: el.bg, color: LIGHT,
+        boxShadow: `inset 0 0 0 1px ${alpha(el.glow, 0.18)}`,
+        fontFamily: SANS, display: 'flex', flexDirection: 'column',
       }}
     >
-      {/* watercolor bloom */}
+      {/* giant Day Master glyph — unique per archetype; placement varies by polarity */}
       <div style={{
-        position: 'absolute', top: -90, right: -70, width: 280, height: 280, borderRadius: '50%',
-        background: `radial-gradient(circle at 45% 40%, ${cfg.wash}, rgba(255,255,255,0) 70%)`,
-        opacity: 0.9, pointerEvents: 'none',
-      }} />
+        position: 'absolute', fontFamily: SERIF, fontSize: 300, lineHeight: 0.8,
+        color: alpha(el.glow, isYang ? 0.22 : 0.16), pointerEvents: 'none', userSelect: 'none',
+        ...(isYang
+          ? { top: 34, right: -26, transform: 'none' }
+          : { bottom: 64, left: -30, transform: 'rotate(-8deg)' }),
+      }}>{stem}</div>
+
+      {/* watercolor bloom — tight top-right for Yang, diffuse lower-left for Yin */}
       <div style={{
-        position: 'absolute', bottom: -110, left: -80, width: 300, height: 300, borderRadius: '50%',
-        background: `radial-gradient(circle at 50% 50%, ${cfg.wash}, rgba(255,255,255,0) 68%)`,
-        opacity: 0.55, pointerEvents: 'none',
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: isYang
+          ? `radial-gradient(60% 42% at 80% 10%, ${alpha(el.glow, 0.16)}, transparent 55%)`
+          : `radial-gradient(88% 62% at 20% 90%, ${alpha(el.glow, 0.15)}, transparent 62%)`,
       }} />
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(60% 40% at 24% 8%, rgba(255,255,255,0.05), transparent 55%)' }} />
 
       {/* header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '18px 22px 0', fontSize: 10, color: BASE.muted, position: 'relative' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px 24px 0', fontSize: 10, color: SOFT, position: 'relative', letterSpacing: 0.5 }}>
         <span>{fmtDate(birthDate)}</span>
-        <span style={{ letterSpacing: 2 }}>KATON · 八字</span>
+        <span style={{ letterSpacing: 2.4 }}>KATON · 八字</span>
       </div>
+
+      {/* Yang gets a quiet top accent line; Yin does not (a calmer, softer frame) */}
+      {isYang && <div style={{ position: 'relative', height: 1, margin: '16px 24px 0', background: `linear-gradient(90deg, ${alpha(el.glow, 0.5)}, transparent)` }} />}
 
       {/* identity */}
-      <div style={{ padding: '30px 22px 0', position: 'relative' }}>
-        <div style={{ fontSize: 11, letterSpacing: 1.5, color: cfg.mid, marginBottom: 6 }}>
-          {data.dayMasterChinese} · {cfg.label}
-        </div>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: 40, fontWeight: 700, letterSpacing: 3, color: cfg.deep, lineHeight: 1, textTransform: 'uppercase' }}>
+      <div style={{ padding: isYang ? '20px 24px 0' : '26px 24px 0', position: 'relative' }}>
+        <div style={{ fontSize: 10, letterSpacing: 2.6, textTransform: 'uppercase', color: alpha(el.glow, 0.95), fontWeight: 600 }}>Persona</div>
+        <div style={{ fontFamily: SERIF, fontSize: 46, letterSpacing: 1, color: '#FBF6EE', lineHeight: 1, marginTop: 12, textTransform: 'uppercase' }}>
           {data.archetypeName}
         </div>
-        <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: 14, color: BASE.inkSoft, marginTop: 14, lineHeight: 1.45 }}>
-          {data.card?.tagline}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 13, fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: SOFT }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: el.glow }} />
+          {el.label} · {polarity} · {stem}
         </div>
-      </div>
-
-      {/* three dimension lines (three-shapes rule) */}
-      <div style={{ padding: '26px 22px 0', position: 'relative', flex: 1 }}>
-        {lines.map((line, i) => (
-          <div key={i} style={{ display: 'flex', gap: 10, padding: '13px 0', borderTop: i === 0 ? 'none' : `1px solid ${BASE.divider}` }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.mid, marginTop: 7, flexShrink: 0 }} />
-            <span style={{ fontSize: 13.5, lineHeight: 1.45, color: BASE.ink }}>{line}</span>
+        {card.modifier && (
+          <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 19, color: alpha(el.glow, 0.95), marginTop: 14, lineHeight: 1.25 }}>
+            {card.modifier}
           </div>
-        ))}
+        )}
       </div>
 
-      {/* harmony / clash — archetype name primary, zodiac as secondary hint */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', padding: '16px 22px', borderTop: `1px solid ${BASE.divider}`, position: 'relative' }}>
-        <TaggableCol label="SELARAS DENGAN" items={selaras} ink={BASE.ink} muted={BASE.muted} />
-        <div style={{ background: BASE.border }} />
-        <TaggableCol label="DIUJI OLEH" items={pemicu} ink={BASE.ink} muted={BASE.muted} pad />
+      {/* dimension — the literary line */}
+      <div style={{ padding: '20px 24px 0', position: 'relative', flex: 1 }}>
+        <p style={{ fontFamily: SERIF, fontSize: 14.5, lineHeight: 1.55, color: 'rgba(239,231,216,0.92)', margin: 0 }}>{card.dimension}</p>
+      </div>
+
+      {/* feed / drain — element-based, archetype names primary */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', padding: '16px 24px', borderTop: `1px solid ${alpha(el.glow, 0.22)}`, position: 'relative' }}>
+        <FeedDrainCol label="Yang menenangkan" names={card.feed} glow={el.glow} />
+        <div style={{ background: alpha(el.glow, 0.22) }} />
+        <FeedDrainCol label="Yang melelahkan" names={card.drain} glow={el.glow} pad />
       </div>
 
       {/* footer */}
-      <div style={{ padding: '0 22px 18px', fontSize: 10, color: BASE.muted, letterSpacing: 1, position: 'relative' }}>
+      <div style={{ padding: '0 24px 20px', fontSize: 10, color: SOFT, letterSpacing: 1.4, position: 'relative' }}>
         katon.app
       </div>
     </div>

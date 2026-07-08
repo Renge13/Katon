@@ -34,3 +34,6 @@ next-env.d.ts
 
 # Claude Code local config
 .claude/
+
+# Claude Design reference bundle (kept locally as reference, not shipped/linted)
+Katon Design System/

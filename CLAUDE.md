@@ -36,6 +36,8 @@ self-discovery / reflection lens, not predictive astrology.
 
 Next.js 15 (App Router, JS to match repo) + Supabase (Postgres) + Xendit QRIS +
 Vercel. (React 19, kept from the Vite app — Next 15 is the React-19 release.)
+Production deploys on Vercel project `katon` (katon-eta.vercel.app); the old `rena`
+project is deprecated.
 Migration verdict: **B — fresh Next.js scaffold, heavy reuse.** Same repo
 (`Renge13/Katon`). Port `lib/bazi/` and presentational components verbatim; build
 orchestration + server layer + server-gated paywall new. Keep old Vite `src/` as
@@ -83,8 +85,18 @@ keep it only as tone reference.
   unlock.
 - Sharecard first: 3 dimension lines (three-shapes rule), Share/Save here, 9:16
   PNG export.
-- Free read: siapa kamu → komposisi energimu (missing/dominant element = sharpest
-  personalization) → pola dasar + cara kamu hadir.
+- Free read: siapa kamu → **Empat Pilarmu + komposisi energimu** (missing/dominant
+  element = sharpest personalization) → pola dasar + cara kamu hadir.
+- **FREE-CHART BOUNDARY (spec ruling).** The chart — Four Pillars + element
+  composition — renders in the FREE reading, but with **neutral, descriptive
+  labels AND neutral data only**: stems/branches, element names, polarity,
+  per-element glosses that describe the ELEMENT (not the person), and
+  dominant/thinnest markers. Element bars ship **`pct` (ratio) only** — the raw
+  weighted counts (`value`) are NOT in the payload, so counts never reach the
+  client. ALL interpretive/prescriptive copy (the `explanation`, hourNote, and
+  every paid beat) stays PAID. The chart is server-derived, not paid prescription
+  content, so it is included in the free `/api/reading` payload — but it must never
+  carry an evaluative sentence. (Boundary lives in the DATA, not just the labels.)
 - Bridge: the domain-matched question. Names the live decision, withholds answer.
 - Paywall: teaser = first 1-2 sentences of the REAL domain reading, cut
   mid-sentence on the `yangSebenernyaKejadian` beat + a FROSTED PLACEHOLDER (not
