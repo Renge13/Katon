@@ -75,9 +75,10 @@ export default function Sharecard({ data, birthDate, id = 'sharecard' }) {
       }} />
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(60% 40% at 24% 8%, rgba(255,255,255,0.05), transparent 55%)' }} />
 
-      {/* header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px 24px 0', fontSize: 10, color: SOFT, position: 'relative', letterSpacing: 0.5 }}>
-        <span>{fmtDate(birthDate)}</span>
+      {/* header — date omitted entirely when birthDate is absent (e.g. re-access via
+          /r/[token], where raw birth data never leaves the server); KATON stays right. */}
+      <div style={{ display: 'flex', justifyContent: birthDate ? 'space-between' : 'flex-end', padding: '20px 24px 0', fontSize: 10, color: SOFT, position: 'relative', letterSpacing: 0.5 }}>
+        {birthDate && <span>{fmtDate(birthDate)}</span>}
         <span style={{ letterSpacing: 2.4 }}>KATON · 八字</span>
       </div>
 

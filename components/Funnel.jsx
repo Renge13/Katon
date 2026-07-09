@@ -66,7 +66,11 @@ export default function Funnel() {
   const [reading, setReading] = useState(null);
   const [step, setStep] = useState(0);
 
-  function reset() { setReading(null); setError(null); setPhase('input'); }
+  function reset() {
+    setReading(null); setError(null); setPhase('input');
+    // Return the URL to root (additive; pushState only — no route remount).
+    if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
+  }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -87,6 +91,10 @@ export default function Funnel() {
       ]);
       if (res.error) { setError(readableError(res)); setPhase('input'); return; }
       setReading({ ...res, birthDate }); // birthDate kept client-side for the card header
+      // Make the reading bookmarkable/shareable without remounting: swap the URL to
+      // /r/<id> via history.pushState (NOT router.push, which would mount the /r route
+      // and discard this in-session state). In-session unlock behavior is unchanged.
+      if (res.token && typeof window !== 'undefined') window.history.pushState(null, '', `/r/${res.token}`);
       setPhase('result');
     } catch {
       setError('Ada yang salah. Coba lagi sebentar.');
@@ -216,7 +224,7 @@ function Anticipation({ step }) {
 }
 
 /* ---------------- Reading (one continuous scroll) ---------------- */
-function Reading({ reading, onReset }) {
+function Reading({ reading, onReset, initialFull }) {
   const fc = reading.freeContent;
   const chart = reading.chart;
   const domainLabel = DOMAIN_LABEL[reading.domain] || '';
@@ -309,16 +317,18 @@ function Reading({ reading, onReset }) {
       )}
 
       {/* paywall */}
-      <div style={{ marginTop: 36 }}><Paywall reading={reading} /></div>
+      <div style={{ marginTop: 36 }}><Paywall reading={reading} initialFull={initialFull} /></div>
     </div>
   );
 }
 
 /* ---------------- Paywall (progressive disclosure, server-gated) ---------------- */
-function Paywall({ reading }) {
-  const [stage, setStage] = useState('teaser'); // teaser | wa | pending | unlocking | unlocked
+function Paywall({ reading, initialFull }) {
+  // initialFull (optional): when provided (re-access to an already-paid reading), the
+  // paywall opens straight to the unlocked view. Omitted in the funnel → default flow.
+  const [stage, setStage] = useState(initialFull ? 'unlocked' : 'teaser'); // teaser | wa | pending | unlocking | unlocked
   const [wa, setWa] = useState('');
-  const [full, setFull] = useState(null);
+  const [full, setFull] = useState(initialFull || null);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const pollRef = useRef(null);
 
@@ -632,6 +642,80 @@ function SegeraRow({ token, domain, label }) {
         </form>
       )}
       {done && <div style={{ fontSize: 12.5, color: 'rgba(234,241,242,.6)', marginTop: 10 }}>Oke. Kami kabari kamu kalau bacaan {label} sudah siap.</div>}
+    </div>
+  );
+}
+
+/* ---------------- Re-access route: /r/[token] ----------------
+   The receiving end of the link the app builds (sendReadingLink → /r/<id>) and of
+   the URL the funnel now pushes on reading creation. `token` is the reading id.
+   Fetches the SAME server-gated endpoints the funnel uses — no new gating path:
+     - GET /api/reading/[token]        → free view + `paid` flag (always safe)
+     - GET /api/reading/[token]/full   → paid content ONLY if paid===true
+   Render: paid → full reading (free portrait + Unlocked, reusing <Reading>);
+   unpaid → teaser + paywall only (decision at the top); invalid token → not-found. */
+export function ReadingByToken({ token }) {
+  const [status, setStatus] = useState('loading'); // loading | notfound | ready
+  const [freeView, setFreeView] = useState(null);
+  const [full, setFull] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/reading/${token}`);
+        if (!res.ok) { if (!cancelled) setStatus('notfound'); return; }
+        const fv = await res.json();
+        if (!fv || fv.error || !fv.token) { if (!cancelled) setStatus('notfound'); return; }
+        let paidFull = null;
+        if (fv.paid) {
+          const fr = await fetch(`/api/reading/${token}/full`).then((r) => r.json()).catch(() => null);
+          if (fr && fr.paid && fr.paidContent) paidFull = fr;
+        }
+        if (!cancelled) { setFreeView(fv); setFull(paidFull); setStatus('ready'); }
+      } catch {
+        if (!cancelled) setStatus('notfound');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [token]);
+
+  const goHome = () => { if (typeof window !== 'undefined') window.location.href = '/'; };
+
+  if (status === 'loading') return <ReadingLoading />;
+  if (status === 'notfound') return <ReadingNotFound onHome={goHome} />;
+
+  // PAID → full reading (free portrait + Unlocked), reusing <Reading> with initialFull.
+  if (full) return <Reading reading={freeView} onReset={goHome} initialFull={full} />;
+
+  // UNPAID → teaser + paywall ONLY (returning visitor already saw the free portrait;
+  // put the unlock decision at the top rather than below a re-scroll).
+  return (
+    <div style={{ ...wrap, ...themeVars(freeView.chart?.dayMasterElement), paddingTop: 26 }}>
+      <button onClick={goHome} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '0 0 20px', fontFamily: 'var(--font-sans)' }}>← Beranda</button>
+      <Reveal><Wordmark /></Reveal>
+      <div style={{ marginTop: 22 }}><Paywall reading={freeView} /></div>
+    </div>
+  );
+}
+
+function ReadingLoading() {
+  return (
+    <div style={{ ...wrap, paddingTop: 120, textAlign: 'center' }}>
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--muted-warm)', margin: 0 }}>Membuka bacaanmu…</p>
+    </div>
+  );
+}
+
+function ReadingNotFound({ onHome }) {
+  return (
+    <div style={{ ...wrap, paddingTop: 96, textAlign: 'center' }}>
+      <Reveal><div style={{ display: 'flex', justifyContent: 'center' }}><Wordmark /></div></Reveal>
+      <Reveal delay={0.08} style={{ marginTop: 40 }}>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 28, lineHeight: 1.15, color: 'var(--tinta)', margin: 0 }}>Bacaan tidak ditemukan.</h1>
+      </Reveal>
+      <Reveal delay={0.14}><p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '12px 0 0' }}>Tautannya mungkin keliru atau sudah tidak berlaku.</p></Reveal>
+      <Reveal delay={0.2} style={{ marginTop: 28, display: 'flex', justifyContent: 'center' }}><Button onClick={onHome}>Mulai dari awal</Button></Reveal>
     </div>
   );
 }
