@@ -91,15 +91,16 @@ export default function Sharecard({ data, birthDate, id = 'sharecard' }) {
         <div style={{ fontFamily: SERIF, fontSize: 46, letterSpacing: 1, color: '#FBF6EE', lineHeight: 1, marginTop: 12, textTransform: 'uppercase' }}>
           {data.archetypeName}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 13, fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: SOFT }}>
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: el.glow }} />
-          {el.label} · {polarity} · {stem}
-        </div>
+        {/* modifier sits directly under the title as one unit; element tag moved below it */}
         {card.modifier && (
-          <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 19, color: alpha(el.glow, 0.95), marginTop: 14, lineHeight: 1.25 }}>
+          <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 19, color: alpha(el.glow, 0.95), marginTop: 12, lineHeight: 1.25 }}>
             {card.modifier}
           </div>
         )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: SOFT }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: el.glow }} />
+          {el.label} · {polarity} · {stem}
+        </div>
       </div>
 
       {/* dimension — the literary line */}
