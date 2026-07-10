@@ -527,7 +527,6 @@ function Unlocked({ full, token, onUpdate }) {
   const H = BEAT_HEADINGS;
   const domainLabel = DOMAIN_LABEL[full.domain] || '';
   const chinese = full.chart?.dayMasterChinese || '';
-  const scrollTo = (id) => () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   if (!c) return null;
 
   const BEAT = { marginBottom: 34 };
@@ -536,20 +535,11 @@ function Unlocked({ full, token, onUpdate }) {
   const label4 = { fontSize: 11, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW, opacity: 0.8 };
   const kicker = (t) => <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '.18em', textTransform: 'uppercase', color: GLOW, opacity: 0.8, marginBottom: 10 }}>{t}</div>;
 
-  const toc = [['b3', 'Yang Sebenarnya'], ['b4', 'Menenangkan vs Melelahkan'], ['b5', 'Empat Pilarmu'], ['b6', 'Cara Memutuskannya']];
-  if (full.segeraDomains?.length) toc.push(['b-domains', 'Domain Lain']);
-
   return (
     <div className="k-fade" style={{ background: SANCTUARY, borderRadius: 26, padding: '30px 22px 40px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
       <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.2em', textTransform: 'uppercase', color: GLOW }}>Bacaan Mendalam{chinese ? ` · ${chinese}` : ''}</div>
       <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 34, lineHeight: 1.05, color: '#fff', margin: '12px 0 0' }}>{domainLabel}</h2>
       <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 15.5, lineHeight: 1.7, color: 'rgba(234,241,242,.72)', margin: '14px 0 0' }}>Bukan ramalan, bukan nasihat. Satu cara melihat pola yang sama lebih dekat.</p>
-
-      <div className="k-toc" style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: '22px 0 6px', paddingBottom: 4 }}>
-        {toc.map(([id, txt]) => (
-          <button key={id} onClick={scrollTo(id)} style={{ flex: '0 0 auto', fontSize: 12, padding: '7px 12px', borderRadius: 999, border: '1px solid var(--el-g30)', background: 'rgba(9,18,21,.3)', color: 'rgba(234,241,242,.8)', cursor: 'pointer', whiteSpace: 'nowrap' }}>{txt}</button>
-        ))}
-      </div>
 
       <div style={{ margin: '22px 0 30px' }}><Rule light /></div>
 

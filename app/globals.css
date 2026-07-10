@@ -163,10 +163,6 @@ input[type="number"]:focus {
 /* deep-read drop cap */
 .k-dropcap::first-letter { font-family: var(--font-serif); font-size: 50px; line-height: .78; float: left; margin: 6px 10px 0 0; color: var(--el-glow, #6FA0AE); font-weight: 500; }
 
-/* sticky TOC (dark deep-read) */
-.k-toc { scrollbar-width: none; -ms-overflow-style: none; }
-.k-toc::-webkit-scrollbar { display: none; }
-
 @media (prefers-reduced-motion: reduce) {
   .k-ring { animation: none; opacity: .25; }
   .k-gleam { animation: none; opacity: 0; }
