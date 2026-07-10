@@ -27,7 +27,10 @@ const ANTICIPATION = ['Membaca tanggal lahirmu', 'Menyusun empat pilarmu', 'Meng
 const ELEMENT_GLOSS = { Kayu: 'tumbuh dan menjangkau', Api: 'menyala dan menghangatkan', Bumi: 'menopang dan menampung', Logam: 'memadat dan menajam', Air: 'mengalir dan meresap' };
 const ELEMENT_ID = { Wood: 'Kayu', Fire: 'Api', Earth: 'Bumi', Metal: 'Logam', Water: 'Air' };
 const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-const YEARS = (() => { const a = []; for (let y = 2012; y >= 1940; y--) a.push(y); return a; })();
+// Birth year: 1900 through the current year inclusive. The BaZi calc engine supports
+// 1900–2030 (lib/bazi/solarTerms.js), so the current year is always within range.
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = (() => { const a = []; for (let y = CURRENT_YEAR; y >= 1900; y--) a.push(y); return a; })();
 const RANGE = (n, from = 0) => Array.from({ length: n }, (_, i) => i + from);
 
 // The paid/deep-read accent + canvas resolve from the element theme via CSS vars
@@ -174,20 +177,9 @@ function Home({ form, setForm, error, onSubmit }) {
                 <select value={form.minute} onChange={set('minute')} aria-label="Menit"><option value="">Menit</option>{RANGE(60).map((m) => <option key={m} value={m}>{pad(m)}</option>)}</select>
               </div>
               <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Isi kalau kamu ingat. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.</div>
-
-              <div style={{ height: 18 }} />
-              <FieldLabel>Yang sedang kamu pikirkan · opsional</FieldLabel>
-              <div style={{ display: 'flex', background: 'var(--kertas-3)', border: '1px solid var(--border)', borderRadius: 12, padding: 4, gap: 4 }}>
-                {DOMAINS.map((d) => {
-                  const active = form.domain === d.key;
-                  return (
-                    <button type="button" key={d.key} aria-pressed={active} onClick={() => setForm((f) => ({ ...f, domain: d.key }))}
-                      style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 13.5, fontWeight: 500, padding: '8px 0', borderRadius: 9, border: 'none', cursor: 'pointer', transition: '.2s', background: active ? '#fff' : 'transparent', color: active ? 'var(--clay)' : 'var(--tinta-soft)', boxShadow: active ? '0 2px 8px -3px rgba(196,98,42,.4)' : 'none' }}>
-                      {d.label}
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Domain selector removed from the front door — moved to the paywall (the
+                  live-decision prompt). Reading still defaults domain to "hubungan"
+                  (Funnel form state), so free-reading generation is unaffected. */}
             </div>
           </Reveal>
 
@@ -227,7 +219,6 @@ function Anticipation({ step }) {
 function Reading({ reading, onReset, initialFull }) {
   const fc = reading.freeContent;
   const chart = reading.chart;
-  const domainLabel = DOMAIN_LABEL[reading.domain] || '';
   const el = elColor(chart?.dayMasterElement || fc?.dayMasterElement);
   const [saving, setSaving] = useState(false);
   async function save() {
@@ -253,12 +244,13 @@ function Reading({ reading, onReset, initialFull }) {
       {/* persona */}
       <Reveal><Eyebrow>Refleksimu</Eyebrow></Reveal>
       <Reveal delay={0.06}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 44, lineHeight: 1, color: el.deep, margin: '16px 0 0' }}>{titleName}</div></Reveal>
-      <Reveal delay={0.1}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--tinta-soft)' }}>
+      {/* modifier sits directly under the title as one unit; element tag moved below it */}
+      {fc.card?.modifier && <Reveal delay={0.1}><p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--kayu)', margin: '12px 0 0' }}>{fc.card.modifier}</p></Reveal>}
+      <Reveal delay={0.14}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--tinta-soft)' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: el.mid }} /> {elLabel}{polarity ? ` · ${polarity}` : ''}{chinese ? ` · ${chinese}` : ''}
         </div>
       </Reveal>
-      {fc.card?.modifier && <Reveal delay={0.14}><p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--kayu)', margin: '16px 0 0' }}>{fc.card.modifier}</p></Reveal>}
       {fc.river?.siapaKamu && <Reveal delay={0.18}><Para style={{ marginTop: 16 }}>{fc.river.siapaKamu}</Para></Reveal>}
 
       {/* Empat Pilarmu — FREE, neutral labels only */}
@@ -308,8 +300,7 @@ function Reading({ reading, onReset, initialFull }) {
       {fc.bridge?.[0] && (
         <Reveal delay={0.04} style={{ marginTop: 52 }}>
           <div style={{ background: `radial-gradient(120% 80% at 50% 0%, ${el.wash}, var(--kertas-2))`, border: '1px solid var(--border)', borderRadius: 20, padding: '30px 24px', textAlign: 'center' }}>
-            <Eyebrow color={el.mid}>Yang lagi kamu bawa{domainLabel ? ` · ${domainLabel}` : ''}</Eyebrow>
-            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.4, letterSpacing: '-.01em', color: 'var(--kayu)', margin: '16px 0 0' }}>{fc.bridge[0]}</p>
+            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.4, letterSpacing: '-.01em', color: 'var(--kayu)', margin: 0 }}>{fc.bridge[0]}</p>
             <div style={{ margin: '22px auto' }}><Rule width={120} /></div>
             <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13.5, lineHeight: 1.65, color: 'var(--tinta-soft)', margin: 0 }}>Bacaan mendalam menelusuri pola ini lebih jauh, tanpa menyuruhmu memilih.</p>
           </div>
@@ -330,6 +321,10 @@ function Paywall({ reading, initialFull }) {
   const [wa, setWa] = useState('');
   const [full, setFull] = useState(initialFull || null);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
+  // Domain choice now lives at the paywall (moved from the front door). Defaults to the
+  // reading's domain (itself "hubungan" by default). Only "hubungan" is live; Karier/Uang
+  // are "Segera" demand-capture. The live pay flow uses the reading as created (hubungan).
+  const [selectedDomain, setSelectedDomain] = useState(reading.domain || 'hubungan');
   const pollRef = useRef(null);
 
   async function submitWa(e) {
@@ -372,7 +367,7 @@ function Paywall({ reading, initialFull }) {
   if (stage === 'unlocking') return <Unlocking />;
   if (stage === 'pending') return <Pending invoiceUrl={invoiceUrl} />;
   if (stage === 'wa') return <WaCapture wa={wa} setWa={setWa} onSubmit={submitWa} />;
-  return <Teaser reading={reading} onOpen={() => setStage('wa')} />;
+  return <Teaser reading={reading} onOpen={() => setStage('wa')} selectedDomain={selectedDomain} setSelectedDomain={setSelectedDomain} />;
 }
 
 // Frosted placeholder — generic blurred bars, NEVER the real locked copy.
@@ -391,36 +386,65 @@ function LockedLines() {
 
 // Teaser + price in ONE sanctuary card (price shown with the teaser; WA asked only
 // after "Buka"). See PROGRESS.md — deliberate collapse of the old teaser→offer tap.
-function Teaser({ reading, onOpen }) {
+function Teaser({ reading, onOpen, selectedDomain, setSelectedDomain }) {
   const t = reading.teaser;
-  const domainLabel = DOMAIN_LABEL[reading.domain] || '';
+  const domain = selectedDomain || reading.domain || 'hubungan';
+  const domainLabel = DOMAIN_LABEL[domain] || '';
+  const isLive = domain === 'hubungan'; // only Hubungan is a live paid read; others = Segera
   return (
     <Reveal>
       <div style={{ position: 'relative', overflow: 'hidden', background: SANCTUARY, borderRadius: 26, padding: '30px 24px 26px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.22em', textTransform: 'uppercase', color: GLOW, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Icon.sparkle size={14} /> Bacaan Mendalam{domainLabel ? ` · ${domainLabel}` : ''}
         </div>
-        {t?.lead && <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '16px 0 0' }}>{t.lead}<span style={{ color: 'rgba(234,241,242,.45)' }}> …</span></p>}
-        <LockedLines />
-        <div style={{ height: 24 }} />
-        <div style={{ background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g22)', borderRadius: 16, padding: 18 }}>
-          <div style={{ fontSize: 12.5, color: 'rgba(234,241,242,.6)' }}>Sekali konsultasi biasanya Rp 300-500rb.</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, margin: '6px 0 0' }}>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff' }}>Rp 49.000</div>
-            <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW }}>sekali bayar</div>
-          </div>
-          <div style={{ marginTop: 16 }}>
-            <Button onClick={onOpen} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>Buka Refleksiku <Icon.arrow size={17} /></Button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 11.5, color: GLOW, opacity: 0.85, marginTop: 14 }}><Icon.lock size={13} /> Sekali baca. Milikmu selamanya.</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--el-g16)', opacity: 0.5 }}>
-            <div>
-              <div style={{ fontSize: 14, color: 'rgba(234,241,242,.75)' }}>Rp 249rb / tahun</div>
-              <div style={{ fontSize: 11, color: 'rgba(234,241,242,.45)' }}>Semua domain</div>
-            </div>
-            <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', border: '1px solid var(--el-g30)', borderRadius: 999, padding: '4px 10px', color: 'rgba(234,241,242,.55)' }}>Segera</span>
+
+        {/* Domain selector (moved here from the front door) — the live-decision prompt.
+            Hubungan = live paid read; Karier/Uang = Segera demand-capture (not wired live). */}
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, lineHeight: 1.4, color: '#F2F6F6', marginBottom: 12 }}>Yang lagi kamu bawa sekarang?</div>
+          <div style={{ display: 'flex', background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g20)', borderRadius: 12, padding: 4, gap: 4 }}>
+            {DOMAINS.map((d) => {
+              const active = domain === d.key;
+              return (
+                <button type="button" key={d.key} aria-pressed={active} onClick={() => setSelectedDomain(d.key)}
+                  style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 13.5, fontWeight: 500, padding: '9px 0', borderRadius: 9, border: 'none', cursor: 'pointer', transition: '.2s', background: active ? GLOW : 'transparent', color: active ? '#0b1417' : 'rgba(234,241,242,.7)' }}>
+                  {d.label}
+                </button>
+              );
+            })}
           </div>
         </div>
+
+        {isLive ? (
+          <>
+            {t?.lead && <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '20px 0 0' }}>{t.lead}<span style={{ color: 'rgba(234,241,242,.45)' }}> …</span></p>}
+            <LockedLines />
+            <div style={{ height: 24 }} />
+            <div style={{ background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g22)', borderRadius: 16, padding: 18 }}>
+              <div style={{ fontSize: 12.5, color: 'rgba(234,241,242,.6)' }}>Sekali konsultasi biasanya Rp 300-500rb.</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, margin: '6px 0 0' }}>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff' }}>Rp 49.000</div>
+                <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW }}>sekali bayar</div>
+              </div>
+              <div style={{ marginTop: 16 }}>
+                <Button onClick={onOpen} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>Buka Refleksiku <Icon.arrow size={17} /></Button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 11.5, color: GLOW, opacity: 0.85, marginTop: 14 }}><Icon.lock size={13} /> Sekali baca. Milikmu selamanya.</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--el-g16)', opacity: 0.5 }}>
+                <div>
+                  <div style={{ fontSize: 14, color: 'rgba(234,241,242,.75)' }}>Rp 249rb / tahun</div>
+                  <div style={{ fontSize: 11, color: 'rgba(234,241,242,.45)' }}>Semua domain</div>
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', border: '1px solid var(--el-g30)', borderRadius: 999, padding: '4px 10px', color: 'rgba(234,241,242,.55)' }}>Segera</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div style={{ marginTop: 20 }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13.5, lineHeight: 1.65, color: 'rgba(234,241,242,.7)', margin: '0 0 12px' }}>Bacaan {domainLabel} sedang disiapkan. Tinggalkan nomor kalau mau dikabari begitu siap.</p>
+            <SegeraRow token={reading.token} domain={domain} label={domainLabel} />
+          </div>
+        )}
       </div>
     </Reveal>
   );
