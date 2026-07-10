@@ -164,7 +164,7 @@ function Home({ form, setForm, error, onSubmit }) {
           <Reveal delay={0.22} style={{ marginTop: 28 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
               <FieldLabel>Tanggal lahir</FieldLabel>
-              <div style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.35fr 1.2fr', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '0.8fr 1.45fr 1.2fr', gap: 8 }}>
                 <select value={form.day} onChange={set('day')} aria-label="Tanggal"><option value="">Tgl</option>{RANGE(31, 1).map((d) => <option key={d} value={d}>{d}</option>)}</select>
                 <select value={form.month} onChange={set('month')} aria-label="Bulan"><option value="">Bulan</option>{MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}</select>
                 <select value={form.year} onChange={set('year')} aria-label="Tahun"><option value="">Tahun</option>{YEARS.map((y) => <option key={y} value={y}>{y}</option>)}</select>
@@ -430,13 +430,6 @@ function Teaser({ reading, onOpen, selectedDomain, setSelectedDomain }) {
                 <Button onClick={onOpen} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>Buka Refleksiku <Icon.arrow size={17} /></Button>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 11.5, color: GLOW, opacity: 0.85, marginTop: 14 }}><Icon.lock size={13} /> Sekali baca. Milikmu selamanya.</div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--el-g16)', opacity: 0.5 }}>
-                <div>
-                  <div style={{ fontSize: 14, color: 'rgba(234,241,242,.75)' }}>Rp 249rb / tahun</div>
-                  <div style={{ fontSize: 11, color: 'rgba(234,241,242,.45)' }}>Semua domain</div>
-                </div>
-                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', border: '1px solid var(--el-g30)', borderRadius: 999, padding: '4px 10px', color: 'rgba(234,241,242,.55)' }}>Segera</span>
-              </div>
             </div>
           </>
         ) : (
