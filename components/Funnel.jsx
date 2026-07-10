@@ -219,7 +219,6 @@ function Anticipation({ step }) {
 function Reading({ reading, onReset, initialFull }) {
   const fc = reading.freeContent;
   const chart = reading.chart;
-  const domainLabel = DOMAIN_LABEL[reading.domain] || '';
   const el = elColor(chart?.dayMasterElement || fc?.dayMasterElement);
   const [saving, setSaving] = useState(false);
   async function save() {
@@ -301,8 +300,7 @@ function Reading({ reading, onReset, initialFull }) {
       {fc.bridge?.[0] && (
         <Reveal delay={0.04} style={{ marginTop: 52 }}>
           <div style={{ background: `radial-gradient(120% 80% at 50% 0%, ${el.wash}, var(--kertas-2))`, border: '1px solid var(--border)', borderRadius: 20, padding: '30px 24px', textAlign: 'center' }}>
-            <Eyebrow color={el.mid}>Yang lagi kamu bawa{domainLabel ? ` · ${domainLabel}` : ''}</Eyebrow>
-            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.4, letterSpacing: '-.01em', color: 'var(--kayu)', margin: '16px 0 0' }}>{fc.bridge[0]}</p>
+            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.4, letterSpacing: '-.01em', color: 'var(--kayu)', margin: 0 }}>{fc.bridge[0]}</p>
             <div style={{ margin: '22px auto' }}><Rule width={120} /></div>
             <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13.5, lineHeight: 1.65, color: 'var(--tinta-soft)', margin: 0 }}>Bacaan mendalam menelusuri pola ini lebih jauh, tanpa menyuruhmu memilih.</p>
           </div>
