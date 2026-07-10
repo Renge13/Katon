@@ -60,6 +60,9 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+/* Kill the browser-default blue tap-flash on every tappable element (buttons,
+   selects, links, onClick divs). On-brand pressed states live on the elements. */
+html { -webkit-tap-highlight-color: transparent; }
 body {
   background-color: var(--kertas);
   background-image: var(--bloom-page);
@@ -70,12 +73,18 @@ body {
   line-height: 1.6;
 }
 
+/* Subtle, intentional pressed state for every button — replaces the default
+   flash and matches the primary button's existing translateY press. */
+button { -webkit-tap-highlight-color: transparent; }
+button:not(:disabled):active { transform: translateY(1px); }
+
 /* ── Form controls (birthday selects + WhatsApp/tel inputs) ── */
 select,
 input[type="text"],
 input[type="tel"],
 input[type="number"] {
   width: 100%;
+  min-width: 0; /* allow shrink inside grid/flex tracks — no overflow/clip on narrow mobile */
   padding: 13px 14px;
   font-family: var(--font-sans);
   font-size: 15px;
@@ -93,6 +102,24 @@ select {
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 34px;
+}
+
+/* Narrow mobile (~≤400px): trim horizontal padding + arrow gutter + a touch of
+   font-size so long option labels ("September", "Tahun", "Menit") render in full
+   inside the tight date/time grid tracks. */
+@media (max-width: 400px) {
+  select,
+  input[type="text"],
+  input[type="tel"],
+  input[type="number"] {
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 14px;
+  }
+  select {
+    padding-right: 24px;
+    background-position: right 7px center;
+  }
 }
 input::placeholder { color: var(--faint); }
 select:hover,
