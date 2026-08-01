@@ -160,23 +160,30 @@ export interface Pillars {
   /** null when the birth time is unknown. Never defaulted to midnight. */
   hour: Pillar | null;
   /**
-   * 命宮 Life Palace. DISPLAY ONLY — no interpretation, no hierarchy score, no
-   * reading fact. It appears in Joey's "Personal Chart Details" block, so a user
-   * cross-checking notices its absence, and that block exists for legitimacy.
+   * 命宮 Life Palace is DELIBERATELY ABSENT. Removed 2026-08-01 (D1b) after four
+   * more Joey values were collected: no candidate convention reproduces him.
    *
-   * NULL WHEN THE HOUR IS UNKNOWN, which is a large slice of users. The
-   * derivation reads the hour branch, so there is nothing to compute without it —
-   * and it must NOT be derived from the noon probe, which would fabricate a
-   * palace from an hour the user never gave.
+   *   solar-term month branch (tyme4ts getOwnSign)  4/5 — fails chart 2
+   *   lunar month number (the obvious alternative)  3/5 — fails charts 7 and 10
    *
-   * Convention: tyme4ts getOwnSign(), which is
-   *   yearStemIndex x 12 + (27 - monthBranchIndex - hourBranchIndex) % 12 + 2
-   * verified against Joey's printed 命宮 丁卯 for fixture chart 1. 命宮 has more
-   * than one convention in circulation; this is the one that matches Joey.
-   * Caveat: that is ONE data point — his plotter is now behind a sign-in, so no
-   * further values were collectable. Re-check if more become available.
+   * So a shipped value would be wrong on roughly 1 in 5 charts. The palace block
+   * exists ONLY as the legitimacy object a curious user cross-checks against
+   * Joey, and there a wrong value is strictly worse than an absent one: absent
+   * reads as "they left that field out", wrong reads as "their calculation
+   * disagrees with Joey's" in the one place designed to prove it does not.
+   *
+   * It is fragile by construction, not by accident. 命宮 consumes the YEAR STEM,
+   * the MONTH and the HOUR, so it compounds three independent convention choices
+   * and every boundary ambiguity in the engine lands in this one field at once.
+   * That is why it fails precisely on the charts that are already edge cases —
+   * chart 2 is a CNY/solar-term mismatch, chart 7 is 晚子時, chart 10 is 立春.
+   *
+   * The derivation is still reachable as `lifePalaceCandidate()` below so the
+   * finding stays executable, but nothing computes or displays it. To un-defer:
+   * settle the convention against 10+ Joey values including a CNY/solar mismatch,
+   * a 晚子時 birth and a 立春 birth. Nothing interprets it, so it costs nothing
+   * to leave out.
    */
-  lifePalace: Pillar | null;
   /**
    * 胎元 Conception Palace. DISPLAY ONLY, same reasoning.
    *
@@ -341,6 +348,29 @@ function checkHourEdge(
   return { boundary: { flagged: false }, reason: null };
 }
 
+/**
+ * 命宮 under the solar-term-month convention — NOT FOR DISPLAY.
+ *
+ * Exported only so the recorded failure stays executable: tests/palaces.spec.mjs
+ * asserts this reproduces Joey on 4 of 5 collected charts and names the one it
+ * misses. Without it the 4/5 finding would be a comment, and a comment does not
+ * fail when someone re-adds the field.
+ *
+ * DO NOT wire this into a chart object or a view. It is wrong on roughly 1 in 5
+ * charts and the palace block's only job is to be cross-checkable against Joey.
+ * See the 命宮 note on the Pillars interface for the full reasoning.
+ *
+ * @returns the candidate palace, or null when the hour is unknown
+ */
+export function lifePalaceCandidate({ date, time }: { date: string; time?: string | null }): Pillar | null {
+  const hasTime = time !== null && time !== undefined && time !== '';
+  if (!hasTime) return null; // reads the hour branch; never fabricate from the probe
+  const { y, m, d } = parseDate(date);
+  const { h, mi } = parseTime(time as string);
+  const sign = SolarTime.fromYmdHms(y, m, d, h, mi, 0).getLunarHour().getEightChar().getOwnSign();
+  return { stem: sign.getHeavenStem().getName(), branch: sign.getEarthBranch().getName() };
+}
+
 // ── Season-turn lookup (for the season gate) ───────────────
 
 export interface SeasonTurn {
@@ -458,8 +488,8 @@ export function computePillars({ date, time = null, tz = null, termSide = null, 
     // 命宮 reads the hour branch, so with no birth time there is nothing to
     // compute. Deriving it from the noon probe would fabricate a palace out of an
     // hour the user never supplied — the same trap as inventing an hour pillar.
-    lifePalace: hasTime ? pillar(eightChar.getOwnSign()) : null,
-    // 胎元 needs only the month pillar, so it is always real.
+    // 命宮 is deliberately NOT emitted — see the note on Pillars above.
+    // 胎元 needs only the month pillar, so it is always real, and it is 5/5.
     conceptionPalace: pillar(eightChar.getFetalOrigin()),
     boundary: { solarTerm, hourEdge, timeLikelyRounded },
     boundaryFlag,

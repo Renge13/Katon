@@ -414,24 +414,23 @@ function Reading({ reading, onReset, initialFull }) {
               })}
             </div>
           </Reveal>
-          {/* 命宮 / 胎元 — display only, no interpretation. They appear on every
-              Joey chart, so their absence is what a cross-checking user notices. */}
-          {chart.palaces && (
+          {/* 胎元 — display only, no interpretation. It appears on every Joey
+              chart, so its absence is what a cross-checking user notices.
+              命宮 is deliberately not here: no convention reproduces Joey better
+              than 4/5, and a wrong value in a legitimacy block is worse than a
+              missing one. See docs/prompts/D1b-remove-life-palace.md. */}
+          {chart.palaces?.konsepsi && (
             <Reveal delay={0.12} style={{ marginTop: 14 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
-                {[chart.palaces.hidup, chart.palaces.konsepsi].map((pl, i) => (
-                  <div key={i} style={{ textAlign: 'center', border: '1px solid var(--divider)', borderRadius: 12, padding: '10px 4px', background: 'var(--kertas-2)' }}>
-                    <div style={{ fontSize: 9.5, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>
-                      {pl ? pl.label : 'Istana Hidup'}
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--tinta)', margin: '5px 0 2px' }}>
-                      {pl ? `${pl.stem}${pl.branch}` : '··'}
-                    </div>
-                    <div style={{ fontSize: 10.5, color: 'var(--muted-warm)' }}>
-                      {pl ? `${pl.elementId} · ${pl.animal}` : 'perlu jam lahir'}
-                    </div>
-                  </div>
-                ))}
+              <div style={{ textAlign: 'center', border: '1px solid var(--divider)', borderRadius: 12, padding: '10px 4px', background: 'var(--kertas-2)', maxWidth: 180, margin: '0 auto' }}>
+                <div style={{ fontSize: 9.5, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>
+                  {chart.palaces.konsepsi.label}
+                </div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--tinta)', margin: '5px 0 2px' }}>
+                  {chart.palaces.konsepsi.stem}{chart.palaces.konsepsi.branch}
+                </div>
+                <div style={{ fontSize: 10.5, color: 'var(--muted-warm)' }}>
+                  {chart.palaces.konsepsi.elementId} · {chart.palaces.konsepsi.animal}
+                </div>
               </div>
             </Reveal>
           )}
