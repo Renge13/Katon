@@ -34,7 +34,7 @@ export async function POST(request, { params }) {
     const { invoiceId, invoiceUrl } = await createQrisInvoice({
       readingId: id,
       amount: PRICE_IDR,
-      description: `Katon — Bacaan Mendalam (${row.domain})`,
+      description: `Katon: Bacaan Mendalam (${row.domain})`,
     });
     await setInvoice(id, { invoiceId, waNumber });
     return json({ ok: true, pending: true, invoiceUrl });

@@ -34,7 +34,7 @@ function FeedDrainCol({ label, names, glow, pad }) {
       <div style={{ fontFamily: SANS, fontSize: 9, letterSpacing: 1.4, color: alpha(glow, 0.85), fontWeight: 600, textTransform: 'uppercase', marginBottom: 6 }}>{label}</div>
       {list ? list.map((name, i) => (
         <div key={i} style={{ fontFamily: SERIF, fontSize: 14, color: LIGHT, lineHeight: 1.35 }}>{name}</div>
-      )) : <div style={{ fontFamily: SERIF, fontSize: 14, color: LIGHT }}>—</div>}
+      )) : <div style={{ fontFamily: SERIF, fontSize: 14, color: LIGHT }}>-</div>}
     </div>
   );
 }

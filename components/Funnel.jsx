@@ -19,7 +19,7 @@ const BEAT_HEADINGS = {
   2: 'Bagaimana Ini Muncul',
   3: 'Yang Sebenarnya Terjadi',
   4: 'Yang Menenangkan vs Yang Melelahkan',
-  5: 'Empat Pilarmu · 八字',
+  5: 'Empat Pilarmu (Four Pillars)',
   6: 'Cara Memutuskannya',
   7: 'Apa Artinya',
 };
@@ -315,7 +315,7 @@ function SeasonGate({ season, onAnswer }) {
 
       <Reveal delay={0.22}>
         <Para style={{ color: 'var(--tinta)' }}>
-          Kamu lahir sebelum atau setelah jam itu? Jawabannya menentukan pilar bulanmu, inti dari seluruh bacaan.
+          Kamu lahir sebelum atau setelah jam itu? Jawabannya menentukan pilar bulanmu: inti dari seluruh bacaan.
         </Para>
       </Reveal>
 
@@ -755,7 +755,7 @@ function PaidPillars({ id, chart, token, onUpdate, explanation, hourNote, kicker
   return (
     <div id={id} style={{ marginBottom: 34 }}>
       {kicker}
-      <h3 style={H3}>Empat Pilarmu · 八字</h3>
+      <h3 style={H3}>Empat Pilarmu (Four Pillars)</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, margin: '6px 0 16px' }}>
         {['tahun', 'bulan', 'hari', 'jam'].map((k) => {
           const pl = p[k];
