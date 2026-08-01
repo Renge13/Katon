@@ -33,7 +33,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { SolarTerm } from 'tyme4ts';
 
-import { computePillars } from '../lib/bazi/pillars.ts';
+import { computePillars, seasonTurnOnDate } from '../lib/bazi/pillars.ts';
 
 const str = (p: { stem: string; branch: string } | null) => (p ? `${p.stem}${p.branch}` : '——');
 
@@ -166,6 +166,63 @@ test('no time on a 節 day flags solarTerm with no minutesFrom', () => {
   // An ordinary day with no time flags nothing.
   const ordinary = computePillars({ date: '1989-09-13', time: null });
   assert.equal(ordinary.boundaryFlag, false);
+});
+
+// ── Season gate: termSide resolution ───────────────────────
+// On a 節 day with no birth time the month pillar is otherwise a coin toss.
+// termSide is the user answering which side of the turn they were born on.
+
+test('seasonTurnOnDate finds the turn only on 節 days', () => {
+  const turn = seasonTurnOnDate('1989-02-04');
+  assert.equal(turn?.term, '立春');
+  assert.equal(turn?.at, '04:27');
+
+  assert.equal(seasonTurnOnDate('1989-09-13'), null, 'ordinary day carries no turn');
+  assert.equal(seasonTurnOnDate('1989-02-05'), null, 'the day AFTER the turn is ordinary');
+});
+
+test('termSide resolves the month pillar without inventing an hour', () => {
+  const before = computePillars({ date: '1989-02-04', time: null, termSide: 'before' });
+  const after = computePillars({ date: '1989-02-04', time: null, termSide: 'after' });
+
+  // 'before' must reproduce the ground-truth chart of the real 04:00 birth
+  // (fixture 13, transcribed from Joey) minus the hour pillar.
+  assert.equal(`${before.year.stem}${before.year.branch}`, '戊辰');
+  assert.equal(`${before.month.stem}${before.month.branch}`, '乙丑');
+  assert.equal(`${after.year.stem}${after.year.branch}`, '己巳');
+  assert.equal(`${after.month.stem}${after.month.branch}`, '丙寅');
+
+  // THE INVARIANT: resolving the month must never fabricate a fourth pillar.
+  assert.equal(before.hour, null);
+  assert.equal(after.hour, null);
+
+  for (const p of [before, after]) {
+    assert.equal(p.boundary.solarTerm.flagged, false, 'the coin toss is resolved');
+    assert.equal(p.boundary.solarTerm.resolvedBy, 'termSide');
+    assert.equal(p.boundary.solarTerm.term, '立春');
+    assert.equal(p.boundaryFlag, false);
+    assert.equal(p.boundaryReason, undefined);
+  }
+
+  // Without it, the noon probe picks the majority branch and stays flagged.
+  const unresolved = computePillars({ date: '1989-02-04', time: null });
+  assert.equal(`${unresolved.month.stem}${unresolved.month.branch}`, '丙寅');
+  assert.equal(unresolved.boundary.solarTerm.flagged, true);
+});
+
+test('a real birth time outranks termSide, and an ordinary day ignores it', () => {
+  // A known time is strictly better information — it also yields the hour pillar.
+  const real = computePillars({ date: '1989-02-04', time: '04:00', termSide: 'after' });
+  assert.equal(`${real.month.stem}${real.month.branch}`, '乙丑', 'the clock wins, not the hint');
+  assert.notEqual(real.hour, null, 'a known time still produces the hour pillar');
+  assert.equal(`${real.hour?.stem}${real.hour?.branch}`, '戊寅');
+
+  // No turn in the day → nothing to resolve → termSide changes nothing.
+  const plain = computePillars({ date: '1989-09-13', time: null });
+  for (const side of ['before', 'after'] as const) {
+    const withSide = computePillars({ date: '1989-09-13', time: null, termSide: side });
+    assert.deepEqual(withSide, plain, `termSide "${side}" must be inert on an ordinary day`);
+  }
 });
 
 test('boundaryFlag equals solarTerm.flagged || hourEdge.flagged', () => {

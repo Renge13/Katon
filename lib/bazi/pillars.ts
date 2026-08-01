@@ -70,6 +70,16 @@ export interface PillarsInput {
    * data. Reading this field in pillar math would break oracle parity.
    */
   tz?: string | null;
+  /**
+   * Which side of the in-day 節 the birth falls on, when the exact time is
+   * unknown. ONLY consulted when `time` is null AND a 節 falls inside the birth
+   * day — the one case where the month pillar is otherwise a coin toss.
+   *
+   * This resolves the MONTH pillar without inventing an HOUR pillar: `hour`
+   * stays null. Never fabricate a birth time to stand in for this — a made-up
+   * hour would render as a real fourth pillar.
+   */
+  termSide?: 'before' | 'after' | null;
 }
 
 export interface Pillar {
@@ -98,6 +108,12 @@ export interface SolarTermBoundary {
    * the uncertainty spans the whole day rather than a couple of minutes.
    */
   minutesFrom?: number;
+  /**
+   * Set when a 節 fell inside the birth day but the caller supplied `termSide`,
+   * so the month pillar is determined after all. `flagged` is false in that
+   * case — the risk is gone — and this records how.
+   */
+  resolvedBy?: 'termSide';
 }
 
 /**
@@ -233,6 +249,20 @@ function jieWithinDay(
 }
 
 /**
+ * A probe minute that is unambiguously on `side` of a 節 instant, or null if
+ * that side has no room inside the birth day (a 節 in the first or last minute).
+ *
+ * One minute of clearance is enough and is robust to the 節's seconds: a 節 at
+ * 04:27:09 is strictly after 04:26 and strictly before 04:28.
+ */
+function probeForSide(instant: SolarTime, side: 'before' | 'after'): { h: number; mi: number } | null {
+  const minuteOfDay = instant.getHour() * 60 + instant.getMinute();
+  const target = side === 'before' ? minuteOfDay - 1 : minuteOfDay + 1;
+  if (target < 0 || target > 1439) return null;
+  return { h: Math.floor(target / 60), mi: target % 60 };
+}
+
+/**
  * 時辰 edge check. 時辰 open on the odd hours (子 at 23:00, 丑 at 01:00, …), so
  * -60 covers the previous day's 23:00 for a birth just after midnight.
  *
@@ -267,6 +297,42 @@ function checkHourEdge(
   return { boundary: { flagged: false }, reason: null };
 }
 
+// ── Season-turn lookup (for the season gate) ───────────────
+
+export interface SeasonTurn {
+  /** The 節 that falls inside this date, e.g. '立春'. */
+  term: string;
+  /** Local clock time of the turn, 'HH:MM'. */
+  at: string;
+  /** Hour and minute of the turn, for callers that want to format it themselves. */
+  hour: number;
+  minute: number;
+}
+
+/**
+ * The 節 falling inside a given calendar date, or null on the ~353 ordinary days.
+ *
+ * Pure calendar arithmetic — no birth time, no chart, no reading content. This
+ * is what the season gate asks before creating a reading: on one of the ~12 days
+ * a year this returns non-null, a birth with no time has an undetermined month
+ * pillar and the user is the only one who can resolve it.
+ */
+export function seasonTurnOnDate(date: string): SeasonTurn | null {
+  const { y, m, d } = parseDate(date);
+  const probe = SolarTime.fromYmdHms(y, m, d, NO_TIME_PROBE_HOUR, 0, 0);
+  const jie = jieWithinDay(probe, y, m, d);
+  if (!jie) return null;
+
+  const hour = jie.instant.getHour();
+  const minute = jie.instant.getMinute();
+  return {
+    term: jie.term.getName(),
+    at: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+    hour,
+    minute,
+  };
+}
+
 // ── Main export ────────────────────────────────────────────
 
 /**
@@ -276,23 +342,20 @@ function checkHourEdge(
  * computePillars({ date: '1989-09-13', time: '09:00' });
  * // → year 己巳, month 癸酉, day 丙子, hour 癸巳
  */
-export function computePillars({ date, time = null, tz = null }: PillarsInput): Pillars {
+export function computePillars({ date, time = null, tz = null, termSide = null }: PillarsInput): Pillars {
   void tz; // see PillarsInput.tz — persisted upstream, never read here.
 
   const { y, m, d } = parseDate(date);
   const hasTime = time !== null && time !== undefined && time !== '';
   const { h, mi } = hasTime ? parseTime(time as string) : { h: NO_TIME_PROBE_HOUR, mi: 0 };
 
-  const at = SolarTime.fromYmdHms(y, m, d, h, mi, 0);
-  const eightChar = at.getLunarHour().getEightChar();
-
-  const pillar = (cycle: { getHeavenStem(): { getName(): string }; getEarthBranch(): { getName(): string } }): Pillar => ({
-    stem: cycle.getHeavenStem().getName(),
-    branch: cycle.getEarthBranch().getName(),
-  });
-
   const timeLikelyRounded = hasTime && (mi === 0 || mi === 30);
   const reasons: string[] = [];
+
+  // The instant the pillars are read from. For a known birth time this IS the
+  // birth instant; with no time it is a probe, which the 節-day branch below may
+  // move onto the correct side of the boundary.
+  let at = SolarTime.fromYmdHms(y, m, d, h, mi, 0);
 
   let solarTerm: SolarTermBoundary;
   let hourEdge: HourEdgeBoundary = { flagged: false };
@@ -306,22 +369,36 @@ export function computePillars({ date, time = null, tz = null }: PillarsInput): 
     hourEdge = edge.boundary;
     if (edge.reason) reasons.push(edge.reason);
   } else {
-    // No time on a 節 day: the month pillar genuinely cannot be determined —
-    // the boundary falls inside the birth day. NO_TIME_PROBE_HOUR picks the
-    // majority branch; the caller still needs to know it was a coin toss.
-    // minutesFrom is deliberately absent — the uncertainty is a whole day wide,
-    // not a couple of minutes.
     const jieToday = jieWithinDay(at, y, m, d);
-    if (jieToday) {
-      solarTerm = { flagged: true, term: jieToday.term.getName() };
-      reasons.push(
-        `birth time unknown and a 節 falls on ${formatInstant(jieToday.instant)} — ` +
-        `month pillar resolved to the branch covering most of the day`,
-      );
-    } else {
+    if (!jieToday) {
+      // Ordinary day: every hour yields the same month pillar. Nothing at risk.
       solarTerm = { flagged: false };
+    } else {
+      // A 節 falls inside the birth day, so the month pillar depends on which
+      // side of it the birth sits — and with no time that is otherwise a coin
+      // toss. `termSide` is the user telling us which side.
+      const probe = termSide ? probeForSide(jieToday.instant, termSide) : null;
+      if (probe) {
+        at = SolarTime.fromYmdHms(y, m, d, probe.h, probe.mi, 0);
+        solarTerm = { flagged: false, term: jieToday.term.getName(), resolvedBy: 'termSide' };
+      } else {
+        // Unresolved: NO_TIME_PROBE_HOUR picks the branch covering most of the
+        // day. minutesFrom is deliberately absent — the uncertainty is a whole
+        // day wide, not a couple of minutes.
+        solarTerm = { flagged: true, term: jieToday.term.getName() };
+        reasons.push(
+          `birth time unknown and a 節 falls on ${formatInstant(jieToday.instant)} — ` +
+          `month pillar resolved to the branch covering most of the day`,
+        );
+      }
     }
   }
+
+  const eightChar = at.getLunarHour().getEightChar();
+  const pillar = (cycle: { getHeavenStem(): { getName(): string }; getEarthBranch(): { getName(): string } }): Pillar => ({
+    stem: cycle.getHeavenStem().getName(),
+    branch: cycle.getEarthBranch().getName(),
+  });
 
   const boundaryFlag = solarTerm.flagged || hourEdge.flagged;
 
@@ -329,6 +406,7 @@ export function computePillars({ date, time = null, tz = null }: PillarsInput): 
     year: pillar(eightChar.getYear()),
     month: pillar(eightChar.getMonth()),
     day: pillar(eightChar.getDay()),
+    // Still null: termSide resolves the MONTH, it never invents an hour pillar.
     hour: hasTime ? pillar(eightChar.getHour()) : null,
     boundary: { solarTerm, hourEdge, timeLikelyRounded },
     boundaryFlag,
