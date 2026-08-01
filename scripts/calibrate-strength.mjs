@@ -1,29 +1,37 @@
 // ============================================================
-// STRENGTH_PARAMS calibration harness
+// STRENGTH_PARAMS calibration + attribution harness
 // ============================================================
-// Grid-searches the five 得令 seasonal multipliers against Oracle 2 (Joey's bar
-// rank order) and reports the best achievable score, plus two structural
-// diagnostics that say WHY the ceiling is where it is.
-//
 // Run: npm run calibrate:strength
 //
-// WHAT THIS ESTABLISHED (2026-08-01, 25,000 combinations)
-// The ceiling is 2/13 exact top-3 rank order. The target is 11/13. The five
-// seasonal multipliers CANNOT reach it at any setting, so the remaining gap is
-// a model-shape problem, not a tuning problem. Do not keep turning these knobs
-// expecting 11/13 — see the two diagnostics below for where the shape is wrong.
+// Uses the SHARED Oracle 2 metric (tests/oracle2-metric.mjs). It must not carry
+// its own copy: a calibration run and a validation run that score differently is
+// how you tune against the wrong target.
 //
-// This script mutates STRENGTH_PARAMS in memory only. It writes nothing.
+// WHAT THIS HAS ESTABLISHED SO FAR
+//
+// Session 1 — the five 得令 seasonal multipliers cannot reach the target at any
+// setting (25,000 combinations, ceiling 2/13 on the old exact-order metric).
+// The gap is model shape, not tuning.
+//
+// Session 2 — ruling A (pair distribution) is numerically a WASH, and the reason
+// is diagnostic 1 below: the within-element split was already almost right
+// (5/6 correct pairs), so redistributing inside the pair had nothing to fix.
+// The failure is CROSS-element ordering (15/31, near chance).
+//
+// Diagnostic 2 is the finding that matters: the engine's ELEMENT ranking can
+// host Joey's top-3 in only 6/13 charts. That is a hard ceiling for ANY Ten God
+// projection, so no projection scheme can pass the 11/13 target. The element
+// strength computation is the defect.
 // ============================================================
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
-import { computeStrength, STRENGTH_PARAMS } from '../lib/bazi/strength.ts';
+import { computeStrength, STRENGTH_PARAMS, ELEMENTS } from '../lib/bazi/strength.ts';
 import { VALIDATION_CHARTS } from '../tests/bazi-validation.fixture.js';
+import { scoreBars, aggregate, formatAggregate } from '../tests/oracle2-metric.mjs';
 import { STEM_ELEMENTS } from '../lib/bazi/stems.js';
 
 const GENERATES = { Wood: 'Fire', Fire: 'Earth', Earth: 'Metal', Metal: 'Water', Water: 'Wood' };
 const CONTROLS = { Wood: 'Earth', Fire: 'Metal', Earth: 'Water', Metal: 'Wood', Water: 'Fire' };
-const ELEMENTS = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
 
 /** The element a Ten God stands for, relative to a Day Master element. */
 function godElement(dm, god) {
@@ -41,90 +49,148 @@ function godElement(dm, god) {
 const CHARTS = VALIDATION_CHARTS.map((tc) => ({
   tc,
   chart: calculateBaziChart({ birthDate: tc.date, birthTime: tc.time }),
-  expected: tc.expect.topThreeBars.map((b) => b.god),
+  dm: STEM_ELEMENTS[calculateBaziChart({ birthDate: tc.date, birthTime: tc.time }).day.stem],
 }));
 
-const top3Of = (s) => Object.entries(s.tenGodStrength).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([g]) => g);
+const measure = () => aggregate(CHARTS.map(({ tc, chart }) =>
+  scoreBars(computeStrength(chart).tenGodStrength, tc.expect.topThreeBars)));
 
-function score() {
-  let exact = 0;
-  let overlap = 0;
-  for (const { chart, expected } of CHARTS) {
-    const top3 = top3Of(computeStrength(chart));
-    if (top3.every((g, i) => g === expected[i])) exact++;
-    overlap += top3.filter((g) => expected.includes(g)).length;
+const line = (label, a) =>
+  `${label.padEnd(34)} set ${String(a.setMatch).padStart(2)}/${a.n}  concord ${String(a.concordant).padStart(2)}/${a.comparable} = ${(a.concordance * 100).toFixed(1)}%  exact ${a.exactOrder}/${a.n}`;
+
+const snapshot = () => ({
+  season: { ...STRENGTH_PARAMS.season },
+  projection: STRENGTH_PARAMS.tenGodProjection,
+  lambda: STRENGTH_PARAMS.pairPresenceWeight,
+  polarity: STRENGTH_PARAMS.pairPolarityWeight,
+});
+const restore = (s) => {
+  Object.assign(STRENGTH_PARAMS.season, s.season);
+  STRENGTH_PARAMS.tenGodProjection = s.projection;
+  STRENGTH_PARAMS.pairPresenceWeight = s.lambda;
+  STRENGTH_PARAMS.pairPolarityWeight = s.polarity;
+};
+const ORIGINAL = snapshot();
+
+console.log('\n══ CURRENT CONFIGURATION ══');
+console.log(`  projection ${STRENGTH_PARAMS.tenGodProjection} (lambda ${STRENGTH_PARAMS.pairPresenceWeight})`);
+console.log(formatAggregate(measure()));
+
+// ── Projection-mode comparison ─────────────────────────────
+
+console.log('\n══ PROJECTION MODES ══');
+STRENGTH_PARAMS.tenGodProjection = 'contributor-polarity';
+console.log(line('contributor-polarity (session 1)', measure()));
+for (const lambda of [0, 0.25, 0.5, 0.75, 1.0]) {
+  STRENGTH_PARAMS.tenGodProjection = 'pair-presence';
+  STRENGTH_PARAMS.pairPresenceWeight = lambda;
+  console.log(line(`pair-presence lambda ${lambda.toFixed(2)}${lambda === 1 ? ' (ruling A)' : ''}`, measure()));
+}
+for (const w of [0.4, 0.5, 0.6]) {
+  STRENGTH_PARAMS.tenGodProjection = 'pair-polarity';
+  STRENGTH_PARAMS.pairPolarityWeight = w;
+  console.log(line(`pair-polarity w ${w.toFixed(2)}`, measure()));
+}
+restore(ORIGINAL);
+
+// ── Diagnostic 1 — where does the rank error actually live? ──
+
+function concordanceSplit() {
+  const within = [0, 0];
+  const cross = [0, 0];
+  for (const { tc, chart, dm } of CHARTS) {
+    const bars = computeStrength(chart).tenGodStrength;
+    const pub = tc.expect.topThreeBars;
+    for (let i = 0; i < pub.length; i++) {
+      for (let j = i + 1; j < pub.length; j++) {
+        const a = pub[i];
+        const b = pub[j];
+        if (a.score == null || b.score == null || a.score === b.score) continue;
+        const hi = a.score > b.score ? a : b;
+        const lo = a.score > b.score ? b : a;
+        const box = godElement(dm, a.god) === godElement(dm, b.god) ? within : cross;
+        box[1]++;
+        if (bars[hi.god] > bars[lo.god]) box[0]++;
+      }
+    }
   }
-  return { exact, overlap };
+  return { within, cross };
 }
 
-// ── 1. Grid search ─────────────────────────────────────────
+console.log('\n══ DIAGNOSTIC 1 — within-element vs cross-element ordering ══');
+for (const [mode, lambda] of [['contributor-polarity', null], ['pair-presence', 1.0], ['pair-presence', 0.0]]) {
+  STRENGTH_PARAMS.tenGodProjection = mode;
+  if (lambda !== null) STRENGTH_PARAMS.pairPresenceWeight = lambda;
+  const r = concordanceSplit();
+  const label = lambda === null ? mode : `${mode} lambda ${lambda.toFixed(1)}`;
+  console.log(`  ${label.padEnd(30)} within-element ${r.within[0]}/${r.within[1]}   cross-element ${r.cross[0]}/${r.cross[1]}`);
+}
+restore(ORIGINAL);
+console.log('  => The within-element split is already close to correct, so ruling A had');
+console.log('     little to fix. Cross-element ordering is near chance, and that is the gap.');
 
-const baseline = score();
-const original = { ...STRENGTH_PARAMS.season };
+// ── Diagnostic 2 — the projection-independent ceiling ───────
+
+console.log('\n══ DIAGNOSTIC 2 — can the ELEMENT ranking host Joey\'s top-3? ══');
+console.log('  Under any pair projection an element\'s two gods sum to its base, so Joey\'s');
+console.log('  top-3 can only be reproduced if their elements are the engine\'s top elements.');
+let hostable = 0;
+const engineTop = {};
+const joeyTop = {};
+for (const { tc, chart, dm } of CHARTS) {
+  const s = computeStrength(chart);
+  const need = {};
+  for (const b of tc.expect.topThreeBars) {
+    const e = godElement(dm, b.god);
+    need[e] = (need[e] ?? 0) + 1;
+  }
+  const ranked = Object.entries(s.elementStrength).sort((a, b) => b[1] - a[1]).map(([e]) => e);
+  const distinct = Object.keys(need).length;
+  const topK = new Set(ranked.slice(0, distinct));
+  const ok = Object.keys(need).every((e) => topK.has(e));
+  if (ok) hostable++;
+  engineTop[ranked[0]] = (engineTop[ranked[0]] ?? 0) + 1;
+  const joeyFirst = godElement(dm, tc.expect.topThreeBars[0].god);
+  joeyTop[joeyFirst] = (joeyTop[joeyFirst] ?? 0) + 1;
+  console.log(
+    `  #${String(tc.id).padStart(2)} ${ok ? 'OK  ' : 'FAIL'} needs {${Object.entries(need).map(([e, n]) => `${e}x${n}`).join(', ')}}` +
+    `  engine top${distinct}: ${ranked.slice(0, distinct).join(',')}`,
+  );
+}
+console.log(`\n  element ranking can host Joey's top-3: ${hostable}/${CHARTS.length}  <= HARD CEILING for any projection`);
+console.log(`  engine #1 element frequency: ${JSON.stringify(engineTop)}`);
+console.log(`  Joey   #1 element frequency: ${JSON.stringify(joeyTop)}`);
+console.log('  => Earth over-tops. It is a hidden stem in eight of the twelve branches, so it');
+console.log('     accumulates mass structurally. This is ruling B (土旺於四季), still open.');
+
+// ── Seasonal grid search, now scored on the primary metric ──
 
 const SWEEP = [0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0];
-let best = { exact: -1, overlap: -1 };
+let best = { setMatch: -1, concordance: -1 };
 let evaluated = 0;
-
 for (const prosperous of [1.4, 1.6, 1.8, 2.0, 2.4]) {
   for (const supported of SWEEP) {
     for (const resting of SWEEP) {
       for (const trapped of SWEEP) {
         for (const dead of [0.05, 0.1, 0.2, 0.4, 0.6]) {
           Object.assign(STRENGTH_PARAMS.season, { prosperous, supported, resting, trapped, dead });
-          const r = score();
+          const a = measure();
           evaluated++;
-          if (r.exact > best.exact || (r.exact === best.exact && r.overlap > best.overlap)) {
-            best = { ...r, params: { prosperous, supported, resting, trapped, dead } };
+          if (a.setMatch > best.setMatch || (a.setMatch === best.setMatch && a.concordance > best.concordance)) {
+            best = { ...a, params: { prosperous, supported, resting, trapped, dead } };
           }
         }
       }
     }
   }
 }
-Object.assign(STRENGTH_PARAMS.season, original);
+restore(ORIGINAL);
 
-console.log(`\n══ GRID SEARCH — ${evaluated} combinations of the five seasonal multipliers ══`);
-console.log(`  baseline (spec defaults) : ${baseline.exact}/13 exact · ${baseline.overlap}/39 overlap`);
-console.log(`  best achievable          : ${best.exact}/13 exact · ${best.overlap}/39 overlap`);
-console.log(`  at                       : ${JSON.stringify(best.params)}`);
-console.log(`  target                   : 11/13`);
-if (best.exact < 11) {
-  console.log('\n  => The knobs cannot reach the target. The gap is MODEL SHAPE, not tuning.');
+console.log(`\n══ SEASONAL GRID SEARCH — ${evaluated} combinations, scored on top-3 set match ══`);
+console.log(`  best: set ${best.setMatch}/${best.n}  concord ${(best.concordance * 100).toFixed(1)}%`);
+console.log(`  at  : ${JSON.stringify(best.params)}`);
+console.log(`  target: 11/${best.n}`);
+if (best.setMatch < 11) {
+  console.log('\n  => Still unreachable by tuning. Consistent with diagnostic 2: the ceiling is');
+  console.log('     set by which ELEMENTS rank top, and these knobs barely move that ordering.');
 }
-
-// ── 2. Structural diagnostics ──────────────────────────────
-
-let pairInTop3 = 0;
-let topElementHit = 0;
-const engineTopElementCount = {};
-const joeyTopElementCount = {};
-
-console.log('\n══ DIAGNOSTIC A — does Joey pair the yin/yang gods of one element? ══');
-for (const { tc, chart } of CHARTS) {
-  const dm = STEM_ELEMENTS[chart.day.stem];
-  const els = tc.expect.topThreeBars.map((b) => godElement(dm, b.god));
-  const paired = new Set(els).size < els.length;
-  if (paired) pairInTop3++;
-  const s = computeStrength(chart);
-  const engineRank = Object.entries(s.elementStrength).sort((a, b) => b[1] - a[1]);
-  if (els[0] === engineRank[0][0]) topElementHit++;
-  engineTopElementCount[engineRank[0][0]] = (engineTopElementCount[engineRank[0][0]] ?? 0) + 1;
-  joeyTopElementCount[els[0]] = (joeyTopElementCount[els[0]] ?? 0) + 1;
-  console.log(
-    `  #${String(tc.id).padStart(2)} ${paired ? 'PAIRED  ' : '        '} Joey ` +
-    tc.expect.topThreeBars.map((b, i) => `${b.god}/${els[i]}${b.score}`).join(' '),
-  );
-}
-console.log(`\n  Joey's top-3 contains BOTH gods of one element: ${pairInTop3}/13`);
-console.log('  => The engine assigns an element\'s whole mass to one god by the CONTRIBUTOR\'s');
-console.log('     polarity, so the pair splits unevenly and one half falls out of the top 3.');
-
-console.log('\n══ DIAGNOSTIC B — element ranking agreement ══');
-console.log(`  Joey's #1 bar element == engine's #1 element: ${topElementHit}/13`);
-console.log(`  engine #1 element frequency: ${JSON.stringify(engineTopElementCount)}`);
-console.log(`  Joey   #1 element frequency: ${JSON.stringify(joeyTopElementCount)}`);
-console.log('  => Watch Earth. It is a hidden stem in eight of the twelve branches, so it');
-console.log('     accumulates mass structurally. Classical 旺相休囚死 gives Earth special');
-console.log('     treatment (prosperous only in the tail of each season, not as a full');
-console.log('     season ruler); this model treats 辰未戌丑 as ordinary Earth months.');

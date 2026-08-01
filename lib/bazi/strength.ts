@@ -99,7 +99,7 @@ export const STRENGTH_PARAMS = {
    *
    * Kept as a switch rather than a replacement so before/after is attributable.
    */
-  tenGodProjection: 'contributor-polarity' as 'contributor-polarity' | 'pair-presence' | 'pair-polarity',
+  tenGodProjection: 'pair-presence' as 'contributor-polarity' | 'pair-presence' | 'pair-polarity',
 
   /**
    * 'pair-presence' blend. 1.0 = fully proportional to stem presence (ruling A
