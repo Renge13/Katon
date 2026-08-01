@@ -1,0 +1,180 @@
+{
+  "engine_version": "0.3.0-provecell",
+  "target_language": "id",
+  "hour_known": true,
+  "quiet_chart": false,
+  "boundary_flag": false,
+  "core": {
+    "day_master": "丙",
+    "element": "Api",
+    "archetype_key": "matahari",
+    "main_profile": "正財",
+    "main_profile_display": "Aspek Pengelola",
+    "main_profile_bracket": "Direct Wealth"
+  },
+  "strength": {
+    "verdict": "lean",
+    "confidence": "low",
+    "provisional": true,
+    "favorable": ["Kayu", "Api"],
+    "unfavorable": ["Air", "Logam", "Tanah"],
+    "note_for_reyner": "[REYNER] Derived by hand pending Prompt C. 丙 in 酉 = 死. Wood 0.00 so no Resource at all. Drain 72.5%. Two 巳 (臨官) roots, but 巳酉 半合 pulls them toward Logam. Marginal chart on purpose, so the fixture exercises confidence:low rather than the happy path."
+  },
+  "chart": {
+    "year": "己巳", "month": "癸酉", "day": "丙子", "hour": "癸巳",
+    "animals": { "year": "Ular", "month": "Ayam", "day": "Tikus", "hour": "Ular" },
+    "palaces": { "year": "Pilar Akar", "month": "Pilar Kerja", "day": "Pilar Diri", "hour": "Pilar Arah" },
+    "element_presence": { "Air": 37.5, "Api": 27.5, "Logam": 20.0, "Tanah": 15.0, "Kayu": 0.0 },
+    "element_presence_note": "display distribution only, never a strength score",
+    "missing_element": "Kayu"
+  },
+  "facts": [
+    {
+      "id": "strength_lean",
+      "importance": 97,
+      "type": "core",
+      "provenance": "Kamu lahir sebagai Api di bulan Ayam, musim Logam. Di musim itu Api sedang di titik paling redup sepanjang tahun. Unsur terbanyak di baganmu adalah Air, dan Air adalah unsur yang memadamkan Api.",
+      "label": "Api Lemah",
+      "label_bracket": "Weak Day Master",
+      "label_meaning": "Lemah di sini bicara soal cadangan, bukan soal kemampuan. Api Lemah artinya kamu bisa menyala sangat terang ketika ada bahan bakar, dan habis jauh lebih cepat dari dugaan orang ketika bahan bakarnya tidak ada.",
+      "gift": "Kamu tahu persis berapa banyak yang kamu punya, jadi kamu tidak pernah membuang tenaga untuk hal yang tidak penting. Orang dengan cadangan besar jarang belajar itu.",
+      "cost": "Kamu pulih lebih lambat daripada kelihatannya. Setelah periode berat, kamu butuh waktu lebih panjang dari yang kamu izinkan untuk dirimu sendiri.",
+      "actionable": "Jeda perlu dijadwalkan lebih dulu, bukan diambil dari sisa. Kalau menunggu sisa, tidak akan pernah ada sisanya.",
+      "confidence": "low",
+      "note_for_reyner": "CR-5 LIFTED 07-30 (Keynan finding): 'lemah'/'kuat' are permitted. The friction 'what do you mean I'm weak?' IS beat 2 of the reading loop, and it pulls the reader into beat 3. Euphemism blunts it. CONDITION: the explanation must land in the same breath, never a paragraph later, and never bare on the sharecard where there is no room for beat 3."
+    },
+    {
+      "id": "profile_drains_self",
+      "importance": 95,
+      "type": "tension",
+      "coherence_rule": "CR-1",
+      "provenance": "Nama utamamu di peta Sepuluh Aspek diambil dari cabang bulanmu, Ayam, yang berisi Logam. Untuk Api, Logam adalah unsur yang kamu kelola sekaligus unsur yang menguras kamu.",
+      "label": "Aspek Pengelola",
+      "label_bracket": "Direct Wealth",
+      "label_meaning": "Aspek Pengelola adalah orang yang dipercaya memegang dan merawat hal yang bernilai. Rapi, bertanggung jawab, tidak gampang lepas tangan.",
+      "gift": "Kemampuanmu mengelola adalah hal yang paling dikenali orang darimu. Itu bukan kebetulan, itu memang inti namamu di peta ini.",
+      "cost": "Hal yang paling kamu kuasai juga hal yang paling menguras kamu. Semakin banyak yang kamu pegang, semakin sedikit yang tersisa untuk dirimu sendiri.",
+      "note_for_reyner": "[REYNER] This is the first live CR-1 trigger: profile element (Logam) is unfavorable against a lean verdict. 'Your gift and your cost are the same current.' Confirm the framing."
+    },
+    {
+      "id": "void_month_stack",
+      "importance": 93,
+      "type": "tension",
+      "provenance": "Cabang bulanmu adalah Ayam. Dihitung dari pilar harimu, Ayam justru jatuh di posisi kosong.",
+      "label": "Tanda Kekosongan",
+      "label_bracket": "Void",
+      "label_meaning": "Tanda Kekosongan menandai bidang di mana orang lain melihat kamu berhasil, dan kamu sendiri sering merasa belum pantas menyandangnya. Bukan karena hasilnya kurang. Karena rasa memilikinya tidak pernah ikut datang.",
+      "palace": "Pilar Kerja",
+      "gift": "Kamu tidak pernah bersandar pada bidang ini. Apa pun yang kamu punya di sana, kamu bangun dengan kerja, bukan dengan mengandalkan sesuatu yang datang gratis.",
+      "cost": "Pengakuan tidak menempel. Orang lain sudah lama menganggapmu ahli, dan kamu masih menunggu bukti berikutnya.",
+      "actionable": "Pengakuan di bidang ini tidak akan datang sendiri dan tidak akan menempel sendiri. Sebut hasil kerjamu dengan lantang, meskipun rasanya berlebihan."
+    },
+    {
+      "id": "peach_blossom",
+      "importance": 86,
+      "type": "badge",
+      "provenance": "Dihitung dari cabang harimu, Tikus, tanda ini jatuh di Ayam. Ayam ada di baganmu, di Pilar Kerja.",
+      "label": "Bunga Persik",
+      "label_bracket": "Peach Blossom",
+      "label_meaning": "Bunga Persik adalah tanda daya tarik. Orang dengan tanda ini gampang diingat setelah satu pertemuan, dan sering jadi pusat perhatian tanpa berusaha.",
+      "palace": "Pilar Kerja",
+      "gift": "Daya tarikmu bekerja paling kuat di ruang kerja. Orang mengingatmu sebelum mereka mengenalmu.",
+      "cost": "Perhatian datang lebih cepat daripada kedekatan. Orang tertarik dulu, mengenalmu belakangan, dan jarak itu kadang tidak pernah tertutup.",
+      "actionable": "Kesan pertamamu adalah aset terkuatmu. Pakai di awal, jangan disimpan sampai orang sudah membentuk pendapat sendiri."
+    },
+    {
+      "id": "wood_missing",
+      "importance": 89,
+      "type": "extremity",
+      "provenance": "Tidak ada satu pun unsur Kayu di delapan karakter tanggal lahirmu. Untuk Api, Kayu adalah bahan bakarnya.",
+      "label": null,
+      "label_bracket": null,
+      "label_meaning": "Kayu mewakili dorongan tumbuh dan alasan untuk pindah arah. Orang tanpa Kayu jarang menunggu inspirasi, dan jarang juga merasa gelisah tanpa sebab.",
+      "label_note": "Deliberately null. An absent element is a CONDITION, not a badge you carry. Giving it a label produced the garble 'Tidak ada satu pun Unsur yang Hilang (Missing Element) berupa Kayu'.",
+      "gift": "Kamu tidak butuh alasan besar untuk mulai. Kamu berjalan dari apa yang ada di depan mata, dan itu membuatmu bergerak saat orang lain masih menimbang.",
+      "cost": "Bahan bakarmu memang tidak ada di dalam. Tanpa sesuatu dari luar yang menyalakan, kamu bisa bertahan bertahun-tahun di tempat yang sudah lama tidak cocok, dan tetap merasa itu wajar.",
+      "actionable": "Pemicu arah baru tidak akan muncul dari dalam. Itu harus kamu pasang dari luar, dalam bentuk tenggat, orang, atau ruang yang memaksa kamu bergerak."
+    },
+    {
+      "id": "nobleman",
+      "importance": 80,
+      "type": "badge",
+      "provenance": "Dari batang harimu, Api, tanda ini jatuh di Ayam dan Babi. Ayam ada di baganmu.",
+      "label": "Bintang Penolong",
+      "label_bracket": "Nobleman",
+      "label_meaning": "Bintang Penolong menandai orang-orang yang muncul membantu tepat di saat sempit. Orang dengan tanda ini jarang benar-benar sendirian saat mentok, meskipun sering merasa begitu.",
+      "palace": "Pilar Kerja",
+      "gift": "Pertolongan datang lewat pekerjaan dan orang-orang di sekitarnya.",
+      "cost": "Pertolongan itu perlu dijemput. Kamu terbiasa menyelesaikan sendiri sampai lupa bahwa ada yang bisa dimintai.",
+      "actionable": "Bantuan di baganmu ada, dan bentuknya menunggu diminta. Minta lebih awal dari yang terasa nyaman."
+    },
+    {
+      "id": "officer_convergence",
+      "importance": 91,
+      "type": "convergence",
+      "provenance": "Unsur Air muncul di batang bulan, di batang jam, dan sekali lagi di Fondasi Pasanganmu. Tiga posisi, satu tema.",
+      "label": "Aspek Pengatur dan Aspek Penantang",
+      "label_bracket": "Direct Officer & Seven Killings",
+      "label_meaning": "Dua aspek ini mewakili aturan, standar, dan tanggung jawab yang datang dari luar diri. Orang dengan keduanya menonjol biasanya sudah dipercaya memegang hal penting sejak usia muda.",
+      "gift": "Kamu jadi orang yang dipercaya memegang aturan dan standar. Orang menaruh tanggung jawab padamu tanpa perlu diminta.",
+      "cost": "Tuntutan untuk selalu benar tidak pernah berhenti. Lelahmu datang dari tidak pernah memberi dirimu izin untuk longgar."
+    },
+    {
+      "id": "spouse_palace_7k",
+      "importance": 78,
+      "type": "tension",
+      "relational": true,
+      "provenance": "Fondasi Pasanganmu, cabang hari, ditempati Air. Untuk Api, Air adalah unsur yang menekan.",
+      "label": "Fondasi Pasangan",
+      "label_bracket": "Spouse Palace",
+      "label_meaning": "Fondasi Pasangan adalah tempat hubungan paling dekat dibaca. Isinya menunjukkan tekstur yang terasa wajar bagi orang tersebut, bahkan ketika orang lain menganggapnya berat.",
+      "palace": "Pilar Diri",
+      "gift": "Hubungan yang mudah tidak menarik untukmu. Kamu tumbuh bersama orang yang berani menantangmu.",
+      "cost": "Fondasi hubungan terdekatmu bertekstur. Gesekan di sana wajar bagimu, dan tidak menandakan ada yang salah."
+    },
+    {
+      "id": "metal_half_trine",
+      "importance": 74,
+      "type": "combination",
+      "provenance": "Ular dan Ayam di baganmu saling tarik dan menguat jadi Logam. Logam adalah wilayah rezeki dan hasil kerja bagi Api.",
+      "label": "Setengah Gabungan",
+      "label_bracket": "Half Combination",
+      "label_meaning": "Dua cabang yang saling tarik akan menguatkan satu unsur bersama, dan unsur itu jadi tema yang berulang sepanjang hidup.",
+      "gift": "Urusan rezeki dan hasil kerja punya jalur yang menguat sendiri. Kamu jarang benar-benar kehabisan pintu.",
+      "cost": "Jalur itu juga yang paling banyak menagih tenagamu, dan ia akan kembali menagih di setiap fase hidup yang berbeda."
+    },
+    {
+      "id": "steward_vs_selfreliant",
+      "importance": 72,
+      "type": "tension",
+      "provenance": "Cabang bulanmu membawa Aspek Pengelola. Dua cabang Ular membawa Aspek Setara, sisi yang berdiri sendiri.",
+      "label": "Aspek Setara",
+      "label_bracket": "Friend",
+      "label_meaning": "Aspek Setara adalah kemampuan berdiri tanpa bersandar, dan penolakan untuk diatur. Jarang muncul sekuat ini berdampingan dengan Aspek Pengelola.",
+      "gift": "Kamu bisa mengurus orang lain dan bertahan sendirian.",
+      "cost": "Ada tarik-menarik tetap antara ingin dipercaya memegang sesuatu dan ingin tidak diatur siapa pun."
+    },
+    {
+      "id": "day_master_fire",
+      "importance": 68,
+      "type": "core",
+      "provenance": "Batang hari kelahiranmu adalah Api. Ini yang disebut inti diri.",
+      "label": "Api",
+      "label_bracket": "Yang Fire",
+      "label_meaning": "Api adalah unsur yang terlihat. Ia menerangi sekitarnya lebih dulu sebelum menghangatkan dirinya sendiri.",
+      "gift": "Kehadiranmu terasa di ruangan, dan orang cenderung berkumpul di sekitarmu.",
+      "cost": "Api butuh bahan bakar dari luar. Kamu tidak bisa menyala terus-menerus dari cadangan sendiri."
+    }
+  ],
+  "required_points": [
+    "Inti diri: Api, dan bahwa nyalanya bergantung pada bahan bakar dari luar",
+    "Nama utamamu, Aspek Pengelola, adalah juga unsur yang menguras kamu. Gift dan cost-nya satu arus yang sama",
+    "Tanda Kekosongan di Pilar Kerja, dan bahwa nama utama, Bunga Persik, dan Bintang Penolong semuanya menumpuk di cabang yang sama",
+    "Kayu nol, dan bahwa Kayu justru bahan bakar yang paling kamu butuhkan",
+    "Tekanan aturan dan tanggung jawab sebagai tema utama hidup",
+    "Fondasi Pasangan bertekstur, dan gesekan di sana wajar",
+    "Tarik-menarik antara sisi pengelola dan sisi mandiri, yang tidak pernah selesai dan tidak perlu diselesaikan",
+    "Penutup berupa verdict yang percaya diri, bukan pertanyaan"
+  ],
+  "safety_flags": ["no_fatalism", "no_medical", "no_financial", "no_god_ranking"]
+}
