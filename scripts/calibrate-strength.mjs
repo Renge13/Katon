@@ -3,31 +3,37 @@
 // ============================================================
 // Run: npm run calibrate:strength
 //
-// Uses the SHARED Oracle 2 metric (tests/oracle-metrics.mjs). It must not carry
+// Uses the SHARED oracle metrics (tests/oracle-metrics.mjs). It must not carry
 // its own copy: a calibration run and a validation run that score differently is
 // how you tune against the wrong target.
 //
-// WHAT THIS HAS ESTABLISHED SO FAR
+// THE OBJECTIVE IS ORACLE 3 — element rank order (C4 step 3). Five values rather
+// than ten, and it is where the defect lives. Scored on Spearman because it is
+// continuous and can separate settings that share an exact-order count.
 //
-// Session 1 — the five 得令 seasonal multipliers cannot reach the target at any
-// setting (25,000 combinations, ceiling 2/13 on the old exact-order metric).
-// The gap is model shape, not tuning.
+// WHAT THIS HARNESS HAS ESTABLISHED
 //
-// Session 2 — ruling A (pair distribution) is numerically a WASH, and the reason
-// is diagnostic 1 below: the within-element split was already almost right
-// (5/6 correct pairs), so redistributing inside the pair had nothing to fix.
-// The failure is CROSS-element ordering (15/31, near chance).
+// Session 1 — the five 得令 multipliers alone cannot reach the Ten God target at
+// any setting. The gap was model shape, not tuning.
 //
-// Diagnostic 2 is the finding that matters: the engine's ELEMENT ranking can
-// host Joey's top-3 in only 6/13 charts. That is a hard ceiling for ANY Ten God
-// projection, so no projection scheme can pass the 11/13 target. The element
-// strength computation is the defect.
+// Session 2 — ruling A (element base shared across a god pair) was a numerical
+// wash, and diagnostic 1 said why: the within-element split was already almost
+// right, so there was nothing inside the pair to fix. Cross-element ordering was
+// the gap. Ruling A was later REFUTED outright by the zero-presence law (C4).
+//
+// Session 3 — with the full ten-bar data, the 土旺於四季 treatment of 辰未戌丑 was
+// tested on Oracle 3 and ADOPTED: rho 0.682 -> 0.782, concordance 79.8% -> 84.5%,
+// four of five Earth-month charts better, none worse, and every non-Earth-month
+// chart bit-identical. The grid search then moved back TOWARD the spec defaults
+// (distance 3.20 -> 1.60) and regained a monotone descending shape, which is what
+// C4 step 7 predicted would happen if the season mapping was the real defect.
 // ============================================================
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { computeStrength, STRENGTH_PARAMS, tenGodElement } from '../lib/bazi/strength.ts';
 import { VALIDATION_CHARTS } from '../tests/bazi-validation.fixture.js';
-import { scoreBars, aggregate, formatAggregate } from '../tests/oracle-metrics.mjs';
+import { scoreBars, aggregate, rankAgreement, aggregateRanks, formatRanks } from '../tests/oracle-metrics.mjs';
+import { elementBarsFrom } from '../tests/joey-bars.mjs';
 import { STEM_ELEMENTS } from '../lib/bazi/stems.js';
 
 // The god -> element relation is engine knowledge and lives in strength.ts. This
@@ -35,11 +41,23 @@ import { STEM_ELEMENTS } from '../lib/bazi/stems.js';
 // engine about which element a god belongs to would tune against the wrong thing.
 const godElement = tenGodElement;
 
-const CHARTS = VALIDATION_CHARTS.map((tc) => ({
-  tc,
-  chart: calculateBaziChart({ birthDate: tc.date, birthTime: tc.time }),
-  dm: STEM_ELEMENTS[calculateBaziChart({ birthDate: tc.date, birthTime: tc.time }).day.stem],
-}));
+const CHARTS = VALIDATION_CHARTS.map((tc) => {
+  const chart = calculateBaziChart({ birthDate: tc.date, birthTime: tc.time });
+  return {
+    tc,
+    chart,
+    dm: STEM_ELEMENTS[chart.day.stem],
+    joeyElements: elementBarsFrom(tc.expect.allBars, tc.expect.dayMasterElement),
+  };
+});
+
+/** ORACLE 3 — the primary objective as of C4 step 3. Element rank order. */
+const measureElements = () => aggregateRanks(CHARTS.map(({ chart, joeyElements }) =>
+  rankAgreement(computeStrength(chart).elementStrength, joeyElements)));
+
+/** ORACLE 2 over the full ten bars. */
+const measureBars = () => aggregateRanks(CHARTS.map(({ tc, chart }) =>
+  rankAgreement(computeStrength(chart).tenGodStrength, tc.expect.allBars)));
 
 const measure = () => aggregate(CHARTS.map(({ tc, chart }) =>
   scoreBars(computeStrength(chart).tenGodStrength, tc.expect.topThreeBars)));
@@ -52,18 +70,65 @@ const snapshot = () => ({
   projection: STRENGTH_PARAMS.tenGodProjection,
   lambda: STRENGTH_PARAMS.pairPresenceWeight,
   polarity: STRENGTH_PARAMS.pairPolarityWeight,
+  earth: STRENGTH_PARAMS.earthMonthRuler,
 });
 const restore = (s) => {
   Object.assign(STRENGTH_PARAMS.season, s.season);
   STRENGTH_PARAMS.tenGodProjection = s.projection;
   STRENGTH_PARAMS.pairPresenceWeight = s.lambda;
   STRENGTH_PARAMS.pairPolarityWeight = s.polarity;
+  STRENGTH_PARAMS.earthMonthRuler = s.earth;
 };
 const ORIGINAL = snapshot();
 
 console.log('\n══ CURRENT CONFIGURATION ══');
-console.log(`  projection ${STRENGTH_PARAMS.tenGodProjection} (lambda ${STRENGTH_PARAMS.pairPresenceWeight})`);
-console.log(formatAggregate(measure()));
+console.log(`  projection ${STRENGTH_PARAMS.tenGodProjection} · earthMonthRuler ${STRENGTH_PARAMS.earthMonthRuler}`);
+console.log(formatRanks('ORACLE 3 element rank (PRIMARY GATE)', measureElements()));
+console.log(formatRanks('ORACLE 2 ten bars', measureBars()));
+
+// ── The 辰未戌丑 treatment ──────────────────────────────────
+
+console.log('\n══ EARTH-MONTH TREATMENT (土旺於四季) — measured on Oracle 3 ══');
+for (const mode of ['earth', 'season-tail']) {
+  STRENGTH_PARAMS.earthMonthRuler = mode;
+  const el = measureElements();
+  const bars = measureBars();
+  console.log(
+    `  ${mode.padEnd(12)} O3 exact ${el.exactOrder}/13  rho ${el.spearman.toFixed(3)}  concord ${(el.concordance * 100).toFixed(1)}%` +
+    `   |  O2 rho ${bars.spearman.toFixed(3)}  concord ${(bars.concordance * 100).toFixed(1)}%`,
+  );
+}
+restore(ORIGINAL);
+
+// Per-chart attribution. The switch touches ONLY 辰未戌丑, so every other chart
+// must be bit-identical — that is what makes the comparison surgical rather than
+// a global reshuffle that happens to score better.
+console.log('\n  per-chart Oracle-3 Spearman, earth -> season-tail:');
+const EARTH_MONTHS = new Set(['辰', '未', '戌', '丑']);
+let improved = 0;
+let regressed = 0;
+let controlsMoved = 0;
+for (const { tc, chart, joeyElements } of CHARTS) {
+  STRENGTH_PARAMS.earthMonthRuler = 'earth';
+  const a = rankAgreement(computeStrength(chart).elementStrength, joeyElements);
+  STRENGTH_PARAMS.earthMonthRuler = 'season-tail';
+  const b = rankAgreement(computeStrength(chart).elementStrength, joeyElements);
+  const isEarth = EARTH_MONTHS.has(chart.month.branch);
+  const delta = (b.spearman ?? 0) - (a.spearman ?? 0);
+  if (delta > 1e-9) improved++;
+  if (delta < -1e-9) regressed++;
+  if (!isEarth && Math.abs(delta) > 1e-9) controlsMoved++;
+  const verdict = delta > 1e-9 ? 'BETTER' : delta < -1e-9 ? 'WORSE' : 'same';
+  console.log(
+    `    #${String(tc.id).padStart(2)} month ${chart.month.branch} ${isEarth ? '[EARTH]' : '       '} ` +
+    `rho ${(a.spearman ?? 0).toFixed(2)} -> ${(b.spearman ?? 0).toFixed(2)}  ${verdict}`,
+  );
+}
+restore(ORIGINAL);
+console.log(`\n    improved ${improved} · regressed ${regressed} · non-Earth-month charts that moved ${controlsMoved}`);
+if (controlsMoved === 0 && regressed === 0) {
+  console.log('    => surgical and monotone: only the charts it should touch, and none worse.');
+}
 
 // ── Projection-mode comparison ─────────────────────────────
 
@@ -149,13 +214,16 @@ for (const { tc, chart, dm } of CHARTS) {
 console.log(`\n  element ranking can host Joey's top-3: ${hostable}/${CHARTS.length}  <= HARD CEILING for any projection`);
 console.log(`  engine #1 element frequency: ${JSON.stringify(engineTop)}`);
 console.log(`  Joey   #1 element frequency: ${JSON.stringify(joeyTop)}`);
-console.log('  => Earth over-tops. It is a hidden stem in eight of the twelve branches, so it');
-console.log('     accumulates mass structurally. This is ruling B (土旺於四季), still open.');
+console.log('  => Earth over-topping is REDUCED but not gone. 土旺於四季 took the engine from');
+console.log('     Earth-first in 7 charts to 5, against Joey\'s 4, and lifted the ceiling from');
+console.log('     6/13 to 7/13. The residual is the next question: C4 2(b) flags a concave');
+console.log('     transform on presence, which is untested and is the likelier remaining term.');
 
 // ── Seasonal grid search, now scored on the primary metric ──
 
 const SWEEP = [0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0];
-let best = { setMatch: -1, concordance: -1 };
+const DEFAULTS = { prosperous: 1.4, supported: 1.2, resting: 1.0, trapped: 0.8, dead: 0.6 };
+let best = { spearman: -Infinity };
 let evaluated = 0;
 for (const prosperous of [1.4, 1.6, 1.8, 2.0, 2.4]) {
   for (const supported of SWEEP) {
@@ -163,9 +231,11 @@ for (const prosperous of [1.4, 1.6, 1.8, 2.0, 2.4]) {
       for (const trapped of SWEEP) {
         for (const dead of [0.05, 0.1, 0.2, 0.4, 0.6]) {
           Object.assign(STRENGTH_PARAMS.season, { prosperous, supported, resting, trapped, dead });
-          const a = measure();
+          const a = measureElements();
           evaluated++;
-          if (a.setMatch > best.setMatch || (a.setMatch === best.setMatch && a.concordance > best.concordance)) {
+          // Objective is Oracle 3 Spearman: continuous, so it can distinguish
+          // between settings that share an exact-order count.
+          if (a.spearman > best.spearman) {
             best = { ...a, params: { prosperous, supported, resting, trapped, dead } };
           }
         }
@@ -174,12 +244,18 @@ for (const prosperous of [1.4, 1.6, 1.8, 2.0, 2.4]) {
   }
 }
 restore(ORIGINAL);
+const baseline = measureElements();
 
-console.log(`\n══ SEASONAL GRID SEARCH — ${evaluated} combinations, scored on top-3 set match ══`);
-console.log(`  best: set ${best.setMatch}/${best.n}  concord ${(best.concordance * 100).toFixed(1)}%`);
-console.log(`  at  : ${JSON.stringify(best.params)}`);
-console.log(`  target: 11/${best.n}`);
-if (best.setMatch < 11) {
-  console.log('\n  => Still unreachable by tuning. Consistent with diagnostic 2: the ceiling is');
-  console.log('     set by which ELEMENTS rank top, and these knobs barely move that ordering.');
-}
+console.log(`\n══ SEASONAL GRID SEARCH — ${evaluated} combinations, scored on ORACLE 3 Spearman ══`);
+console.log(`  spec defaults : rho ${baseline.spearman.toFixed(3)}  exact ${baseline.exactOrder}/13  concord ${(baseline.concordance * 100).toFixed(1)}%`);
+console.log(`                  ${JSON.stringify(DEFAULTS)}`);
+console.log(`  best found    : rho ${best.spearman.toFixed(3)}  exact ${best.exactOrder}/13  concord ${(best.concordance * 100).toFixed(1)}%`);
+console.log(`                  ${JSON.stringify(best.params)}`);
+
+// C4 step 7: if the winner moves BACK toward the spec defaults now that the
+// season mapping is fixed, that is evidence the mapping was the real defect and
+// the earlier flattening was the optimiser routing around it.
+const drift = Object.keys(DEFAULTS).reduce((s, k) => s + Math.abs(best.params[k] - DEFAULTS[k]), 0);
+console.log(`\n  total distance from spec defaults: ${drift.toFixed(2)}`);
+console.log('  (session 2 winner was prosperous 2.4 with 相/休/囚/死 all flattened to 0.4,');
+console.log('   distance 3.20 — the shape that meant "only the season\'s own element counts")');
