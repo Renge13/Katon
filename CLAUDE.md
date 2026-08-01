@@ -80,14 +80,26 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     **The casual "old friend" register is DEAD** — killed by `docs/research/coldread-analysis.md`;
     the casual front door was itself causing "is this serious?" doubt.
     No slang (*ngerasa/bikin/kayak/capek*), no chat particles (*tuh/lho/deh*), not bureaucratic-baku.
-    Keyboard characters only — no em-dash, no curly quotes.
+    **Keyboard characters only — no em-dash, no curly quotes. This applies to USER-FACING STRINGS
+    ONLY.** Code comments and JSX comments are not user-facing; leave them alone. The audit surface is
+    rendered text, payment descriptions, headings, buttons, and error copy. Two known violations as of
+    2026-08-01: the Xendit invoice description in `app/api/pay/[id]/route.js`, and an em-dash used as
+    an empty-state placeholder in `components/Sharecard.jsx`.
 18. **"lemah"/"kuat" ARE permitted.** The friction ("what do you mean I'm weak?") pulls the reader
     deeper. Condition: the explanation lands in the same breath, and never bare on the sharecard.
 19. **Never use Joey Yap's trademarked profile names** (Director, Diplomat, Warrior — his IP).
-20. **Naming: Indonesian name first, English term in brackets once, NO Chinese characters in
-    user-facing copy.** `Aspek` = internal disposition, `Bintang` = external marker.
-    Collective term is **Sepuluh Aspek (Ten Gods)** — never "Dewa", which reads as a Hindu deity to a
-    Muslim-majority audience. Full table: `docs/content/glossary-naming.md`.
+20. **Naming: Indonesian name first, English term in brackets once.** `Aspek` = internal disposition,
+    `Bintang` = external marker. Collective term is **Sepuluh Aspek (Ten Gods)** — never "Dewa", which
+    reads as a Hindu deity to a Muslim-majority audience. Full table: `docs/content/glossary-naming.md`.
+
+    **Chinese characters — the line is data vs words (ruling 2026-08-01):**
+    - **KEEP** in the chart display. The eight characters in the pillar cells ARE the chart. They are
+      the legitimacy object and the thing that lets a user cross-check Katon against any other
+      calculator. Pair each with its Indonesian animal/element so it is readable, never bare.
+    - **REMOVE** everywhere they function as words the reader must decode: prose, headings, badge
+      names, button labels. `八字` as a heading is decoration with a comprehension tax — write
+      "Bagan Kelahiran" or similar.
+    - Rule of thumb: hanzi you can *point at* is fine. Hanzi you must *read* is not.
 21. Exactly **10 archetypes**, one per Day Master stem. Pure BaZi — no Weton, no Javanese pasaran.
 22. Ethics: no fatalism, no dated prophecy, no medical or financial advice, no ranking of gods or
     strength states as good/bad. Timing is *cuaca*, never *ramalan*.
