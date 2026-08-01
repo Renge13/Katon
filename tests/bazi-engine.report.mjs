@@ -17,6 +17,7 @@ import { computeChart } from '../lib/bazi/computeChart.js';
 import { tenGodsForChart } from '../lib/bazi/tenGods.js';
 import { mainProfile } from '../lib/bazi/mainProfile.js';
 import { tenGodTally, loudAlternatives, LOUD_MARGIN } from '../lib/bazi/tenGodTally.js';
+import { computeStrength, STRENGTH_PARAMS } from '../lib/bazi/strength.ts';
 import { VALIDATION_CHARTS, PILLAR_EDGE_CASES } from './bazi-validation.fixture.js';
 
 const tick = (ok) => (ok ? '✓' : '✗');
@@ -93,9 +94,40 @@ for (const tc of VALIDATION_CHARTS) {
     record(id, 'noHourStable', bits.join(', '));
   }
 
+  // ---- Task 8: strength engine (Prompt C) ----
+  const strength = computeStrength(chart);
+
+  // Oracle 2 — Joey's bar RANK ORDER, read off the strength model's Ten God
+  // projection. This is the hard, checkable oracle.
+  const strengthTop3 = Object.entries(strength.tenGodStrength)
+    .sort((a, b) => b[1] - a[1]).slice(0, 3).map(([g]) => g);
+  const strengthBarsOk = strengthTop3.every((g, i) => g === expTop3[i]);
+  // Softer companion metric: how many of Joey's top-3 appear in ours, ignoring
+  // order. Two fixture rows (9 and 13) have a TIE at the top, so strict order is
+  // not fully meaningful for them and set-overlap is the fairer read.
+  const strengthTop3Overlap = strengthTop3.filter((g) => expTop3.includes(g)).length;
+  if (!strengthBarsOk) {
+    record(id, 'strengthBars', `top3 [${strengthTop3.join(',')}] ≠ expected [${expTop3.join(',')}] (overlap ${strengthTop3Overlap}/3)`);
+  }
+
+  // Oracle 1 — no absurd verdicts. There is no published Joey verdict for all
+  // 13, so the pass condition is internal coherence: a chart with no Resource,
+  // a hostile season and a heavy drain must not come out 'strong'.
+  const absurd = [];
+  if (strength.verdict === 'strong' && strength.supportShare < STRENGTH_PARAMS.verdict.strongAbove) absurd.push('strong below threshold');
+  if (strength.verdict === 'weak' && strength.supportShare >= STRENGTH_PARAMS.verdict.weakBelow) absurd.push('weak at/above threshold');
+  if (strength.factors.deSheng === 0 && strength.factors.deLing <= 0.8 && strength.verdict === 'strong') {
+    absurd.push('no Resource + hostile season yet strong');
+  }
+  if (strength.followChart.detected && strength.factors.deSheng > 0) absurd.push('follow chart detected with Resource present');
+  if (strength.supportShare < 0 || strength.supportShare > 100) absurd.push('supportShare out of range');
+  const strengthSane = absurd.length === 0;
+  if (!strengthSane) record(id, 'strengthSanity', absurd.join(', '));
+
   results.push({
-    tc, chart, tg, profile, tally, loud, noHour,
+    tc, chart, tg, profile, tally, loud, noHour, strength,
     pillarsOk, tenGodsOk, profileOk, barsRankOk, noHourStable,
+    strengthBarsOk, strengthTop3, strengthTop3Overlap, strengthSane,
     edgeChecks, engineTop3, expTop3,
   });
 }
@@ -168,14 +200,48 @@ for (const r of results) {
   }
 }
 
+// ── Task 8a — strength: Oracle 1 (verdict coherence) ──
+console.log('\n\n══════════════ TASK 8a — STRENGTH VERDICT (Oracle 1) ══════════════');
+console.log('  Pass condition is internal coherence, not a published verdict.');
+console.log('  id | DM | mth | share | verdict  | conf | 得令 得地 得生 得勢 | follow | sane');
+console.log('  ---+----+-----+-------+----------+------+--------------------+--------+-----');
+for (const r of results) {
+  const s = r.strength;
+  const f = s.factors;
+  const fol = s.followChart.detected ? `YES ${s.followChart.type}` : `no ${(s.followChart.confidence ?? 0).toFixed(2)}`;
+  console.log(
+    `  ${String(r.tc.id).padStart(2)} | ${s.contributors.length ? r.chart.day.stem : '?'}  | ${r.chart.month.branch}   | ` +
+    `${String(s.supportShare).padStart(5)} | ${s.verdict.padEnd(8)} | ${s.confidence.padEnd(4)} | ` +
+    `${String(f.deLing).padEnd(4)} ${String(f.deDi).padEnd(4)} ${String(f.deSheng).padEnd(4)} ${String(f.deShi).padEnd(4)} | ${fol.padEnd(6)} | ${tick(r.strengthSane)}`,
+  );
+  for (const why of s.confidenceReasons) console.log(`     └─ low-confidence: ${why}`);
+}
+
+// ── Task 8b — strength: Oracle 2 (bar rank order) ──
+console.log('\n\n══════════════ TASK 8b — ELEMENT-STRENGTH BARS (Oracle 2, the hard one) ══════════════');
+let pStrengthBars = 0;
+let overlapTotal = 0;
+for (const r of results) {
+  if (r.strengthBarsOk) pStrengthBars++;
+  overlapTotal += r.strengthTop3Overlap;
+  const bars = Object.entries(r.strength.tenGodStrength)
+    .sort((a, b) => b[1] - a[1]).slice(0, 5).map(([g, v]) => `${g}${v}`).join(' ');
+  const expWithScores = r.tc.expect.topThreeBars.map((b) => `${b.god}${b.score ?? '?'}`).join(',');
+  console.log(`#${String(r.tc.id).padStart(2)} ${tick(r.strengthBarsOk)} engine[${r.strengthTop3.join(',')}] vs Joey[${expWithScores}]  overlap ${r.strengthTop3Overlap}/3`);
+  console.log(`     engine top5: ${bars}`);
+  console.log(`     elements   : ${Object.entries(r.strength.elementStrength).map(([e, v]) => `${e}${v}`).join(' ')}`);
+}
+console.log(`\n  Oracle 2 — exact top-3 rank order: ${pStrengthBars}/${VALIDATION_CHARTS.length}  (target >= 11)`);
+console.log(`  Oracle 2 — top-3 set overlap:      ${overlapTotal}/${VALIDATION_CHARTS.length * 3}`);
+
 // ── Task 7 ──
 console.log('\n\n══════════════ TASK 7 — SUMMARY ══════════════');
-console.log('  id | pillars | tenGods | profileA | barsRankB | noHourStable | loudAlts');
-console.log('  ---+---------+---------+----------+-----------+--------------+---------');
+console.log('  id | pillars | tenGods | profileA | barsRankB | noHourStable | strBars | strSane | loudAlts');
+console.log('  ---+---------+---------+----------+-----------+--------------+---------+---------+---------');
 for (const r of results) {
   const loudList = r.loud.alternatives.map((a) => a.hanzi).join(',') || '—';
   console.log(
-    `  ${String(r.tc.id).padStart(2)} |    ${tick(r.pillarsOk)}    |    ${tick(r.tenGodsOk)}    |    ${tick(r.profileOk)}     |     ${tick(r.barsRankOk)}     |      ${tick(r.noHourStable)}       | ${loudList}`,
+    `  ${String(r.tc.id).padStart(2)} |    ${tick(r.pillarsOk)}    |    ${tick(r.tenGodsOk)}    |    ${tick(r.profileOk)}     |     ${tick(r.barsRankOk)}     |      ${tick(r.noHourStable)}       |    ${tick(r.strengthBarsOk)}    |    ${tick(r.strengthSane)}    | ${loudList}`,
   );
 }
 
@@ -192,3 +258,6 @@ const tallies = {
 };
 const N = VALIDATION_CHARTS.length;
 console.log(`\n  Totals /${N} — pillars ${tallies.pillars} · tenGods ${tallies.tenGods} · profileA ${tallies.profileA} · barsRankB ${tallies.barsRankB} · noHourStable ${tallies.noHourStable}`);
+console.log(`  Strength /${N} — barRankOrder ${results.filter((r) => r.strengthBarsOk).length} · sane ${results.filter((r) => r.strengthSane).length}`);
+console.log(`\n  STRENGTH_PARAMS in force: season ${JSON.stringify(STRENGTH_PARAMS.season)}`);
+console.log(`                            verdict ${JSON.stringify(STRENGTH_PARAMS.verdict)} · stemWeight ${STRENGTH_PARAMS.stemWeight}`);

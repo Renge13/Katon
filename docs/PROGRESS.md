@@ -151,6 +151,19 @@ no 比肩 anywhere, so no month-rooting rule can emit Joey's headline). Track A 
 
 ---
 
+## RESOLVED — stop reporting these as open (2026-08-01)
+- **The 6 test rows in the live `reading` table are DELETED.** Removed manually via the Supabase SQL
+  editor; `select count(*)` confirmed at 24. Do not flag again.
+- **`docs/engine/solar-term-oracle-diff.mjs` was deleted deliberately.** It was a prototype;
+  `tests/solar-terms.spec.ts` supersedes it with real scraped HKO data and CI wiring. Two copies of
+  the same oracle is the bug `docs/README.md` warns about. Not an accident, not to be restored.
+- **Migration `0003_term_side.sql` is APPLIED in Supabase.** Column verified present. `main` is
+  deploy-safe.
+- **RLS on `public.reading` verified:** `relrowsecurity = true`, zero policies. That is the correct
+  secure default — service role only. The whole model rests on the service-role key never reaching
+  the browser. If a Supabase call is ever moved client-side it will silently return nothing; do NOT
+  "fix" that by adding a permissive policy.
+
 ## OPEN / TODO (priority order, revised 07-30 evening)
 
 1. **STRENGTH ENGINE** — un-parked, ~2 weeks. 得令/得地/得生/得勢, follow-chart (從格) as a strict

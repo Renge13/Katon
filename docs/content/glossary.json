@@ -1,0 +1,91 @@
+{
+  "_README": {
+    "purpose": "Engine-owned content. Stage 3 reads label / label_meaning / gift_seed / cost_seed from here into the semantic JSON. Written once per badge, reused by everyone who carries it.",
+    "status": "BATCH 1 of 6 — the Ten Aspek. Register-setting batch. Reyner reviews before the other 54 are written.",
+    "remaining_batches": ["symbolic stars (8)", "elements (5)", "missing element (5)", "animals/branches (12)", "branch relations (~20)", "palaces (4)"],
+    "rules": [
+      "label_meaning MUST describe a felt experience, never define a concept. If a sentence could appear in a dictionary, rewrite it. Abstraction is the failure mode that produced the two 'hard to understand' defects in run 3.",
+      "gift and cost here are SEEDS. The engine conditions them per chart by palace, strength verdict and interactions. They are defaults, not final copy.",
+      "Gift before cost, always.",
+      "Indonesian name first, English in brackets once at first mention. No Chinese characters in user-facing copy. Hanzi here is the internal key only.",
+      "Aspek = internal disposition. Bintang = external marker. Never mix the prefixes.",
+      "Keyboard characters only. No em-dash, no curly quotes.",
+      "No slang (ngerasa/bikin/kayak/capek), no chat particles (tuh/lho/deh), not bureaucratic-baku.",
+      "Never rank an Aspek as good or bad. Every one has a gift and a cost."
+    ],
+    "authority": "Reyner is the sole authority on Indonesian register. Every string here is a proposal."
+  },
+
+  "aspek": {
+    "比肩": {
+      "name_id": "Aspek Setara",
+      "name_en": "Friend",
+      "label_meaning": "Kamu terbiasa menyelesaikan sendiri. Meminta tolong terasa lebih berat daripada mengerjakan dua kali lipat.",
+      "gift_seed": "Kamu tidak runtuh saat tidak ada yang menopang. Orang tahu kamu bisa dititipi apa pun dan tidak akan menghilang di tengah jalan.",
+      "cost_seed": "Bantuan sering datang terlambat karena kamu tidak pernah memintanya. Orang mengira kamu tidak membutuhkannya."
+    },
+    "劫財": {
+      "name_id": "Aspek Pendorong",
+      "name_en": "Rob Wealth",
+      "label_meaning": "Kamu bergerak lebih cepat saat ada yang mengejar. Situasi tanpa lawan terasa datar.",
+      "gift_seed": "Kamu berani mengambil langkah yang orang lain tunda. Keberanian itu yang sering membuka pintu lebih dulu.",
+      "cost_seed": "Yang datang cepat juga pergi cepat. Kamu sulit menahan sesuatu cukup lama sampai ia mengendap."
+    },
+    "食神": {
+      "name_id": "Aspek Karya",
+      "name_en": "Eating God",
+      "label_meaning": "Kamu senang mengerjakan sesuatu sampai jadi, tanpa perlu ada yang menonton. Prosesnya sendiri sudah cukup memuaskan.",
+      "gift_seed": "Kamu bisa menikmati pekerjaan tanpa menunggu hasilnya diakui. Itu yang membuatmu bertahan jauh lebih lama di hal yang kamu sukai.",
+      "cost_seed": "Kamu jarang menagih. Karyamu sering dipakai orang lain tanpa namamu ikut disebut."
+    },
+    "傷官": {
+      "name_id": "Aspek Pijar",
+      "name_en": "Hurting Officer",
+      "label_meaning": "Kamu melihat cara yang lebih baik dan sulit diam soal itu. Mengikuti aturan yang tidak masuk akal terasa menyakitkan.",
+      "gift_seed": "Kamu paling cepat melihat celah dan paling berani menyebutnya. Ide yang tajam biasanya datang darimu.",
+      "cost_seed": "Kejujuranmu mahal harganya. Orang yang kamu koreksi sering mengingat caranya, bukan isinya."
+    },
+    "正財": {
+      "name_id": "Aspek Pengelola",
+      "name_en": "Direct Wealth",
+      "label_meaning": "Kamu dipercaya memegang hal yang penting, dan kamu memegangnya dengan rapi. Orang tenang kalau kamu yang mengurus.",
+      "gift_seed": "Apa yang kamu urus jarang berantakan. Kepercayaan datang sendiri tanpa perlu kamu minta.",
+      "cost_seed": "Semakin banyak yang kamu pegang, semakin sedikit yang tersisa untuk dirimu sendiri."
+    },
+    "偏財": {
+      "name_id": "Aspek Peluang",
+      "name_en": "Indirect Wealth",
+      "label_meaning": "Kamu melihat peluang di tempat yang orang lain lewati begitu saja. Uang dan kesempatan terasa mudah datang, dan sama mudahnya pergi.",
+      "gift_seed": "Kamu tidak takut pada ketidakpastian. Pintu sering terbuka justru karena kamu berani mengetuk lebih dulu.",
+      "cost_seed": "Yang datang besar juga hilang besar. Kamu jarang menyimpannya cukup lama untuk merasa aman."
+    },
+    "正官": {
+      "name_id": "Aspek Pengatur",
+      "name_en": "Direct Officer",
+      "label_meaning": "Kamu tahu apa yang seharusnya dilakukan, dan kamu melakukannya meskipun tidak ada yang mengawasi. Melanggar terasa lebih melelahkan daripada patuh.",
+      "gift_seed": "Orang menaruh tanggung jawab padamu sejak muda. Kamu menjadi tempat bersandar tanpa pernah meminta posisi itu.",
+      "cost_seed": "Tuntutan untuk selalu benar tidak pernah berhenti. Kamu jarang memberi dirimu izin untuk longgar."
+    },
+    "七殺": {
+      "name_id": "Aspek Penantang",
+      "name_en": "Seven Killings",
+      "label_meaning": "Kamu tumbuh paling cepat saat ditekan. Keadaan yang terlalu aman justru membuatmu gelisah.",
+      "gift_seed": "Kamu tidak lumpuh saat keadaan memburuk. Justru di titik itu pikiranmu paling jernih.",
+      "cost_seed": "Kamu sering mencari tekanan yang sebenarnya tidak perlu ada. Istirahat terasa seperti kehilangan arah."
+    },
+    "正印": {
+      "name_id": "Aspek Pelindung",
+      "name_en": "Direct Resource",
+      "label_meaning": "Kamu belajar cepat dan orang senang mengajarimu. Selalu ada yang muncul membantu tepat pada waktunya.",
+      "gift_seed": "Kamu jarang benar-benar sendirian. Dukungan datang dari tempat yang tidak kamu duga.",
+      "cost_seed": "Kenyamanan itu memperlambat langkahmu. Kamu bisa terlalu lama bersiap sebelum benar-benar mulai."
+    },
+    "偏印": {
+      "name_id": "Aspek Pemikir",
+      "name_en": "Indirect Resource",
+      "label_meaning": "Kamu memahami sesuatu lewat jalan yang sulit dijelaskan ke orang lain. Kesimpulanmu sering benar sebelum kamu bisa menunjukkan alasannya.",
+      "gift_seed": "Kamu melihat pola yang tidak terlihat orang lain. Firasatmu punya dasar, meski dasarnya sulit diucapkan.",
+      "cost_seed": "Kamu sering merasa berjarak. Menjelaskan isi kepalamu lebih melelahkan daripada memikirkannya sendiri."
+    }
+  }
+}

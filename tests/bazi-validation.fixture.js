@@ -1,8 +1,9 @@
 // ============================================================
-// BaZi 12-chart validation fixture
+// BaZi 13-chart validation fixture
 // ============================================================
 // Ground truth transcribed from Joey Yap's calculator, verified against the
 // source PDFs. This is the authoritative table the engine is validated against.
+// It is EVIDENCE. Never edit a row to make a failing test pass.
 //
 // Schema per row:
 //   { id, date:'YYYY-MM-DD', time:'HH:MM', gender:'M'|'F',
@@ -17,28 +18,40 @@
 //     } }
 //
 // ── topThreeBars ──
-// Only the RANK ORDER is asserted (Task 5a) — we do NOT match Joey's proprietary
-// normalization constants. `god` is the Ten God hanzi; `score` is the PDF's
-// numeric bar value, which was NOT provided to this engine build, so it is
-// stored as null. Fill in the real PDF numbers here when available; nothing in
-// this phase depends on them.
+// `god` is the Ten God hanzi; `score` is Joey's published bar value, taken from
+// docs/engine/engine-session-state.md. Only RANK ORDER is asserted — Katon does
+// not reproduce Joey's proprietary normalisation constants — but the magnitudes
+// are recorded because calibration needs to see near-ties (charts 9 and 13 each
+// have a tie at the top, which makes their rank order intrinsically soft).
 //
-// Ten God label ↔ hanzi (Katon canonical + Joey-name aliases seen in the PDFs):
-//   比肩 The Self-Reliant  (Joey: Friend)
-//   劫財 The Mover         (Joey: Rob Wealth / "Warrior" *)
-//   食神 The Creator       (Joey: Artist)
-//   傷官 The Dazzler       (Joey: Performer)
-//   正財 The Steward       (Joey: Direct Wealth)
-//   偏財 The Trailblazer   (Joey: Pioneer)
-//   正官 The Keeper        (Joey: "Diplomat" * / Director)
-//   七殺 The Fighter       (Joey: 7 Killings)
-//   正印 The Learner       (Joey: Analyzer)
-//   偏印 The Thinker       (Joey: Philosopher)
-// * Chart 2's top-3 was given in raw Joey nomenclature ("Warrior", "Diplomat").
-//   Mapped Warrior→劫財, Diplomat→正官 as the best fit — FLAG for confirmation.
+// ── Joey's profile names → Ten God hanzi ──
+// Joey's ten profile names, resolved against the published bar rows:
+//   比肩 The Self-Reliant  = Friend
+//   劫財 The Mover         = Leader          (chart 4: Leader64 -> third bar)
+//   食神 The Creator       = Artist
+//   傷官 The Dazzler       = Performer / Perf
+//   正財 The Steward       = Dir             (Dir = DIRECT WEALTH, not "Director")
+//   偏財 The Trailblazer   = Pioneer / Pio
+//   正官 The Keeper        = Diplomat
+//   七殺 The Fighter       = Warrior
+//   正印 The Learner       = Analyzer
+//   偏印 The Thinker       = Philosopher / Phil
+//
+// TWO TRANSCRIPTION CORRECTIONS, 2026-08-01 — both were mapping errors in this
+// file, not changes to Joey's numbers:
+//
+//  1. Chart 2's "Warrior83" was mapped to 劫財 with a FLAG-for-confirmation note.
+//     It is 七殺. Charts 6 (Warrior63) and 12 (Warrior70) were already mapped to
+//     七殺 in this same file, and chart 4's third bar is "Leader64", which is the
+//     name 劫財 actually carries. Two corroborations against one flagged guess.
+//
+//  2. Chart 13's "Dir78" was mapped to 正官 by reading "Dir" as "Director".
+//     It is 正財. Chart 1's published row is Dir88/Friend85/Pioneer80 and its
+//     independently transcribed top-3 is 正財/比肩/偏財, which fixes Dir = 正財
+//     (Direct Wealth). 正官 is Diplomat, which appears in chart 2.
 // ============================================================
 
-const bar = (god) => ({ god, score: null });
+const bar = (god, score) => ({ god, score });
 
 export const VALIDATION_CHARTS = [
   {
@@ -47,7 +60,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '丙', dayMasterElement: 'Fire', monthBranch: '酉',
       mainProfileHanzi: '正財', mainProfileLabel: 'The Steward', mainStructure: 'Managers',
-      topThreeBars: [bar('正財'), bar('比肩'), bar('偏財')], // Steward, Self-Reliant, Trailblazer
+      // Dir 88 / Friend 85 / Pioneer 80 — the strength-engine calibration anchor.
+      topThreeBars: [bar('正財', 88), bar('比肩', 85), bar('偏財', 80)],
     },
   },
   {
@@ -56,7 +70,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '戊', dayMasterElement: 'Earth', monthBranch: '寅',
       mainProfileHanzi: '比肩', mainProfileLabel: 'The Self-Reliant', mainStructure: 'Connectors',
-      topThreeBars: [bar('比肩'), bar('劫財'), bar('正官')], // Friend, Warrior*, Diplomat*
+      // Friend 87 / Warrior 83 / Diplomat 80 — see correction 1 in the header.
+      topThreeBars: [bar('比肩', 87), bar('七殺', 83), bar('正官', 80)],
     },
   },
   {
@@ -65,7 +80,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '丙', dayMasterElement: 'Fire', monthBranch: '辰',
       mainProfileHanzi: '偏印', mainProfileLabel: 'The Thinker', mainStructure: 'Thinkers',
-      topThreeBars: [bar('偏印'), bar('食神'), bar('正印')], // Thinker, Creator, Learner
+      // Phil 98 / Artist 94 / Analyzer 80
+      topThreeBars: [bar('偏印', 98), bar('食神', 94), bar('正印', 80)],
     },
   },
   {
@@ -74,7 +90,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '癸', dayMasterElement: 'Water', monthBranch: '巳',
       mainProfileHanzi: '正財', mainProfileLabel: 'The Steward', mainStructure: 'Creators',
-      topThreeBars: [bar('正財'), bar('食神'), bar('劫財')], // Steward, Creator, Mover
+      // Dir 83 / Artist 79 / Leader 64
+      topThreeBars: [bar('正財', 83), bar('食神', 79), bar('劫財', 64)],
     },
   },
   {
@@ -83,7 +100,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '丙', dayMasterElement: 'Fire', monthBranch: '未',
       mainProfileHanzi: '傷官', mainProfileLabel: 'The Dazzler', mainStructure: 'Creators',
-      topThreeBars: [bar('傷官'), bar('比肩'), bar('食神')], // Dazzler, Self-Reliant, Creator
+      // Perf 100 / Friend 88 / Artist 82
+      topThreeBars: [bar('傷官', 100), bar('比肩', 88), bar('食神', 82)],
     },
   },
   {
@@ -92,7 +110,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '壬', dayMasterElement: 'Water', monthBranch: '寅',
       mainProfileHanzi: '偏財', mainProfileLabel: 'The Trailblazer', mainStructure: 'Managers',
-      topThreeBars: [bar('偏財'), bar('食神'), bar('七殺')], // Trailblazer, Creator, Fighter
+      // Pio 100 / Artist 83 / Warrior 63
+      topThreeBars: [bar('偏財', 100), bar('食神', 83), bar('七殺', 63)],
     },
   },
   {
@@ -101,7 +120,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '甲', dayMasterElement: 'Wood', monthBranch: '午',
       mainProfileHanzi: '正印', mainProfileLabel: 'The Learner', mainStructure: 'Creators',
-      topThreeBars: [bar('正印'), bar('傷官'), bar('食神')], // Learner, Dazzler, Creator
+      // Analyzer 85 / Perf 83 / Artist 76
+      topThreeBars: [bar('正印', 85), bar('傷官', 83), bar('食神', 76)],
     },
   },
   {
@@ -110,7 +130,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '庚', dayMasterElement: 'Metal', monthBranch: '子',
       mainProfileHanzi: '傷官', mainProfileLabel: 'The Dazzler', mainStructure: 'Creators',
-      topThreeBars: [bar('傷官'), bar('偏印'), bar('比肩')], // Dazzler, Thinker, Self-Reliant
+      // Perf 98 / Phil 64 / Friend 62
+      topThreeBars: [bar('傷官', 98), bar('偏印', 64), bar('比肩', 62)],
     },
   },
   {
@@ -119,8 +140,10 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '甲', dayMasterElement: 'Wood', monthBranch: '未',
       mainProfileHanzi: '正財', mainProfileLabel: 'The Steward', mainStructure: 'Creators',
-      // profile ≠ top bar: Track A → 正財, but top element bar is Creator (食神)
-      topThreeBars: [bar('食神'), bar('傷官'), bar('正財')], // Creator, Dazzler, Steward
+      // Artist 98 / Perf 98 / Dir 95 — profile != top bar. The discriminator that
+      // proved the bars are seasonal strength, not a token tally. 98/98 is a TIE,
+      // so the top-two order is not meaningfully asserted.
+      topThreeBars: [bar('食神', 98), bar('傷官', 98), bar('正財', 95)],
     },
   },
   {
@@ -129,7 +152,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '甲', dayMasterElement: 'Wood', monthBranch: '寅',
       mainProfileHanzi: '偏財', mainProfileLabel: 'The Trailblazer', mainStructure: 'Managers',
-      topThreeBars: [bar('偏財'), bar('比肩'), bar('食神')], // Trailblazer, Self-Reliant, Creator
+      // Pio 87 / Friend 83 / Artist 82
+      topThreeBars: [bar('偏財', 87), bar('比肩', 83), bar('食神', 82)],
       // 立春 boundary: year pillar must roll on 立春, not Jan 1.
       yearPillar: '乙丑', monthPillar: '戊寅',
     },
@@ -140,7 +164,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '庚', dayMasterElement: 'Metal', monthBranch: '丑',
       mainProfileHanzi: '正印', mainProfileLabel: 'The Learner', mainStructure: 'Thinkers',
-      topThreeBars: [bar('正印'), bar('傷官'), bar('偏印')], // Learner, Dazzler, Thinker
+      // Analyzer 82 / Perf 80 / Phil 69
+      topThreeBars: [bar('正印', 82), bar('傷官', 80), bar('偏印', 69)],
     },
   },
   {
@@ -149,7 +174,8 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '癸', dayMasterElement: 'Water', monthBranch: '午',
       mainProfileHanzi: '偏財', mainProfileLabel: 'The Trailblazer', mainStructure: 'Managers',
-      topThreeBars: [bar('偏財'), bar('七殺'), bar('食神')], // Trailblazer, Fighter, Creator
+      // Pio 98 / Warrior 70 / Artist 52
+      topThreeBars: [bar('偏財', 98), bar('七殺', 70), bar('食神', 52)],
     },
   },
   {
@@ -165,13 +191,9 @@ export const VALIDATION_CHARTS = [
     expect: {
       dayMaster: '乙', dayMasterElement: 'Wood', monthBranch: '丑',
       mainProfileHanzi: '比肩', mainProfileLabel: 'The Self-Reliant', mainStructure: 'Managers',
-      // Real PDF bar values for this row (Friend 80, Philosopher 80 — a tie,
-      // Director 78, Pioneer 72). Only rank order is asserted.
-      topThreeBars: [
-        { god: '比肩', score: 80 },  // Friend
-        { god: '偏印', score: 80 },  // Philosopher
-        { god: '正官', score: 78 },  // Director
-      ],
+      // Friend 80 / Phil 80 / Dir 78 / Pio 72 — see correction 2 in the header.
+      // 80/80 is a TIE, so the top-two order is not meaningfully asserted.
+      topThreeBars: [bar('比肩', 80), bar('偏印', 80), bar('正財', 78)],
     },
   },
 ];
