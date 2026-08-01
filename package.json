@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "check:copy": "node scripts/check-copy.js",
     "typecheck": "tsc -p tsconfig.check.json",
+    "calibrate:strength": "node scripts/calibrate-strength.mjs",
     "gen:solar-terms": "node scripts/gen-solar-term-fixture.mjs",
     "test:bazi": "node scripts/validate-bazi.mjs",
     "test:solar-terms": "node --test tests/solar-terms.spec.ts",
