@@ -48,11 +48,13 @@ needs a second birthdate, so the free mirror must ship and acquire first. Theref
 - `prompts/C2-rulings.md` .............. metric fix, pair-distribution, 旺相休囚死 vs 十二長生.
 - `prompts/C3-ruling-B.md` ............. get the full ten bars; Earth deferred.
 - `prompts/C4-data-and-two-corrections.md` . the 子 fix + ruling A refuted.
-- `prompts/C5-earth-adopted-transform-next.md` . CURRENT. 土旺於四季 adopted; the 16% inversion finding.
+- `prompts/C5-earth-adopted-transform-next.md` . 土旺於四季 adopted; the 16% inversion finding.
+- `prompts/C6-sqrt-adopted-oracle4.md` . CURRENT. sqrt adopted; Oracle 4 for the verdict layer.
 
 ### Engine
 - `engine/joey-bars-13.json` ........... GROUND TRUTH. 13 charts x 10 bars, presence + element totals.
                                          Collected from Joey's plotter directly. The fixture imports it.
+- `engine/joey-implied-strength.json` .. ORACLE 4 data. supportShare derived from Joey own element totals.
 - `engine/joey-profile-mapping.md` ..... profile name -> Ten God, from Joey's printed legend. Do not re-derive.
 - `engine/calculator-decision.md` ...... calculator + time convention. CLOSED.
 - `engine/engine-session-state.md` ..... method spec. NOTE: strength engine is UN-PARKED and in progress.
@@ -178,14 +180,18 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | Oracle 2 Ten God top-3 set match | 2/13 | 07-31 | hard threshold on a noisy tail; see Spearman below before concluding anything |
 | Oracle 2 mean Spearman | 0.783 | 08-01 | full ten bars |
 | Oracle 2 pair concordance | 82.2% | 08-01 | |
-| **Oracle 3 element rank exact** | **3/13** | 08-01 | **PRIMARY GATE** |
-| **Oracle 3 mean Spearman** | **0.782** | 08-01 | was 0.682 before 土旺於四季 |
-| **Oracle 3 pair concordance** | **84.5%** | 08-01 | was 79.8% |
+| **Oracle 3 element rank exact** | **4/13** | 08-01 | **PRIMARY GATE**; 3/13 before sqrt |
+| **Oracle 3 top-1 element** | **9/13** | 08-01 | was 6/13 before sqrt |
+| **Oracle 3 mean Spearman** | **0.874** | 08-01 | 0.682 -> 0.782 (土旺於四季) -> 0.874 (sqrt) |
+| **Oracle 3 pair concordance** | **89.9%** | 08-01 | 79.8% -> 84.5% -> 89.9% |
+| Verdict distribution | 5 weak / 8 balanced / 0 strong | 08-01 | Joey-implied is 7/6/0 — NOT a regression |
+| Joey-implied supportShare range | 20.1% to 55.3% | 08-01 | `engine/joey-implied-strength.json`; no chart reaches 60 |
+| Oracle 4 (engine vs Joey supportShare) | not yet measured | — | correlate BEFORE touching thresholds |
 | Zero-presence law | 130/130 | 08-01 | verified against Joey's own presence figures |
 | Projection-independent ceiling | 7/13 | 08-01 | was 6/13 |
 | Engine Earth-first | 5 charts | 08-01 | was 7; Joey's is 4 |
-| Within-element presence inversions | 9/57 (16%) | 08-01 | no monotone transform can fix these; residual factor unidentified |
-| Grid-search best (NOT adopted) | rho 0.863 | 08-01 | {2.4,1.2,0.8,0.6,0.4}; only 旺 deviates, confounded with the untested concave transform |
+| Within-element agreement | 48/57 (9 inversions) | 08-01 | **transform-INVARIANT** under linear/sqrt/log1p. Needs a MECHANISM, not a reweighting. Diagnostic 0 in the harness. |
+| 旺 re-fit after sqrt (NOT adopted) | +0.020 rho | 08-01 | optimum collapsed 2.4 -> flat 1.6-1.8 plateau. Rule 13 demonstrated numerically. Left at 1.4. |
 | Solar-term boundaries, day-level | 0 disagreements / 1212 | 07-30 | three oracles |
 | Joey #1 element distribution | Earth 5, Fire 4, Wood 3, Metal 1, Water 0 | 08-01 | from full ten bars |
 

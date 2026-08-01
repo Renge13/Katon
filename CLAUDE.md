@@ -82,21 +82,21 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     real cause is never learned. One change, one measurement, always.
 
 ### Architecture
-11. **The engine owns ALL facts, hierarchy and structure. The LLM chooses only words.** If the LLM
+14. **The engine owns ALL facts, hierarchy and structure. The LLM chooses only words.** If the LLM
     is ever in a position to decide something true, the design is wrong.
-12. **Runtime LLM rendering is ON** (reversal of the old rule) — for the RENDERING layer only.
+15. **Runtime LLM rendering is ON** (reversal of the old rule) — for the RENDERING layer only.
     Gemini primary, OpenAI secondary, both behind one provider interface.
-13. Every reading is **result-cached** on `hash(semantic_JSON + engine_version)`. Deterministic
+16. Every reading is **result-cached** on `hash(semantic_JSON + engine_version)`. Deterministic
     after first generation.
-14. **Nothing reaches a user without passing Stage-6 post-validation.** LLM output is guilty until
+17. **Nothing reaches a user without passing Stage-6 post-validation.** LLM output is guilty until
     validated. Module assembly is the always-available floor.
-15. **Paywall is server-gated.** `paid` flips only in the verified Xendit webhook, never from any
+18. **Paywall is server-gated.** `paid` flips only in the verified Xendit webhook, never from any
     client path. Paid content is imported only by the `/full` route.
-16. Rate-limit per IP/session. No bulk endpoint. No enumerable reading URLs. The real abuse risk is
+19. Rate-limit per IP/session. No bulk endpoint. No enumerable reading URLs. The real abuse risk is
     content harvesting, not API cost (the entire mirror space costs ~$115 to cache forever).
 
 ### Voice and naming
-17. **ONE VOICE EVERYWHERE, including chrome.** Plain, precise, everyday Indonesian. Composed and
+20. **ONE VOICE EVERYWHERE, including chrome.** Plain, precise, everyday Indonesian. Composed and
     direct. Accessible words, short sentences, no verbosity. Warmth through precision.
     **The casual "old friend" register is DEAD** — killed by `docs/research/coldread-analysis.md`;
     the casual front door was itself causing "is this serious?" doubt.
@@ -106,10 +106,10 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     rendered text, payment descriptions, headings, buttons, and error copy. Two known violations as of
     2026-08-01: the Xendit invoice description in `app/api/pay/[id]/route.js`, and an em-dash used as
     an empty-state placeholder in `components/Sharecard.jsx`.
-18. **"lemah"/"kuat" ARE permitted.** The friction ("what do you mean I'm weak?") pulls the reader
+21. **"lemah"/"kuat" ARE permitted.** The friction ("what do you mean I'm weak?") pulls the reader
     deeper. Condition: the explanation lands in the same breath, and never bare on the sharecard.
-19. **Never use Joey Yap's trademarked profile names** (Director, Diplomat, Warrior — his IP).
-20. **Naming: Indonesian name first, English term in brackets once.** `Aspek` = internal disposition,
+22. **Never use Joey Yap's trademarked profile names** (Director, Diplomat, Warrior — his IP).
+23. **Naming: Indonesian name first, English term in brackets once.** `Aspek` = internal disposition,
     `Bintang` = external marker. Collective term is **Sepuluh Aspek (Ten Gods)** — never "Dewa", which
     reads as a Hindu deity to a Muslim-majority audience. Full table: `docs/content/glossary-naming.md`.
 
@@ -121,8 +121,8 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
       names, button labels. `八字` as a heading is decoration with a comprehension tax — write
       "Bagan Kelahiran" or similar.
     - Rule of thumb: hanzi you can *point at* is fine. Hanzi you must *read* is not.
-21. Exactly **10 archetypes**, one per Day Master stem. Pure BaZi — no Weton, no Javanese pasaran.
-22. Ethics: no fatalism, no dated prophecy, no medical or financial advice, no ranking of gods or
+24. Exactly **10 archetypes**, one per Day Master stem. Pure BaZi — no Weton, no Javanese pasaran.
+25. Ethics: no fatalism, no dated prophecy, no medical or financial advice, no ranking of gods or
     strength states as good/bad. Timing is *cuaca*, never *ramalan*.
 
 ---
