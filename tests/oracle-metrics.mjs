@@ -13,14 +13,17 @@
 // ordering unassertable, and the engine's own ties make its top-3 membership
 // ambiguous at the boundary.
 //
-// NOTE ON SPEARMAN. Ruling E asks for a Spearman correlation "over all ten".
-// That is not computable from this fixture: it records only Joey's top 3 (top 4
-// for chart 13), not all ten of his bars. A correlation needs both full
-// rankings. The nearest valid measure over the data we actually have is
-// PAIRWISE CONCORDANCE across Joey's published gods, which is Kendall's tau
-// numerator, is well defined at n=3, and handles ties by exclusion rather than
-// by inventing a rank. If the remaining seven bars per chart are ever
-// transcribed, full Spearman becomes available and should replace it.
+// SPEARMAN IS NOW COMPUTABLE (C4 step 4). All ten bars exist for all 13 charts,
+// so `rankAgreement` below does real Spearman with tied ranks averaged. Pairwise
+// concordance is kept alongside it because it answers a different question —
+// Spearman measures whole-shape agreement, concordance counts how many ordered
+// pairs are right — and because it is what the session-2 numbers were reported
+// in, so the series stays comparable.
+//
+// ORACLE 3 (element rank order) is the PRIMARY GATE as of C4 step 3. It is five
+// values instead of ten, it is where the defect actually lives, and it is far
+// less noisy than the Ten God projection layered on top of it. Both oracles run
+// through the same `rankAgreement`, just over different projections.
 // ============================================================
 
 /**
@@ -80,6 +83,110 @@ export function scoreBars(engineScores, published) {
     /** Set overlap 0..3, kept for continuity with the session-1 numbers. */
     overlap: published.filter((p) => engineTop3.includes(p.god)).length,
   };
+}
+
+// ── Generic rank agreement ─────────────────────────────────
+// Used for BOTH oracles: Oracle 3 over the five elements (primary gate) and
+// Oracle 2 over the ten Ten Gods. One implementation, two projections.
+
+/** Competition-free ranks with ties averaged, which is what Spearman requires. */
+function tiedRanks(values) {
+  const sorted = [...values].map((v, i) => ({ v, i })).sort((a, b) => b.v - a.v);
+  const ranks = new Array(values.length);
+  let i = 0;
+  while (i < sorted.length) {
+    let j = i;
+    while (j + 1 < sorted.length && sorted[j + 1].v === sorted[i].v) j++;
+    const avg = (i + j) / 2 + 1; // 1-based, averaged across the tied block
+    for (let k = i; k <= j; k++) ranks[sorted[k].i] = avg;
+    i = j + 1;
+  }
+  return ranks;
+}
+
+function pearson(a, b) {
+  const n = a.length;
+  const ma = a.reduce((s, v) => s + v, 0) / n;
+  const mb = b.reduce((s, v) => s + v, 0) / n;
+  let num = 0;
+  let da = 0;
+  let db = 0;
+  for (let i = 0; i < n; i++) {
+    num += (a[i] - ma) * (b[i] - mb);
+    da += (a[i] - ma) ** 2;
+    db += (b[i] - mb) ** 2;
+  }
+  // Zero variance means every value is tied; there is no ordering to correlate.
+  if (da === 0 || db === 0) return null;
+  return num / Math.sqrt(da * db);
+}
+
+/**
+ * Compare an engine distribution against Joey's over the same keys.
+ *
+ * @param {Record<string, number>} engine
+ * @param {Record<string, number>} joey
+ */
+export function rankAgreement(engine, joey) {
+  const keys = Object.keys(joey);
+  const e = keys.map((k) => engine[k] ?? 0);
+  const j = keys.map((k) => joey[k]);
+
+  const spearman = pearson(tiedRanks(e), tiedRanks(j));
+
+  // Pair concordance: only pairs Joey actually separates carry order information.
+  let comparable = 0;
+  let concordant = 0;
+  for (let a = 0; a < keys.length; a++) {
+    for (let b = a + 1; b < keys.length; b++) {
+      if (j[a] === j[b]) continue;
+      comparable++;
+      const joeyHigherIsA = j[a] > j[b];
+      if (e[a] === e[b]) continue; // engine tie -> not concordant
+      if ((e[a] > e[b]) === joeyHigherIsA) concordant++;
+    }
+  }
+
+  // Exact order, tie-tolerant: every pair Joey separates must be ordered right.
+  const exactOrder = comparable > 0 && concordant === comparable;
+
+  // Top-1 agreement, tie-tolerant on Joey's side.
+  const joeyMax = Math.max(...j);
+  const engineMax = Math.max(...e);
+  const joeyTop = keys.filter((k, i) => j[i] === joeyMax);
+  const engineTop = keys.filter((k, i) => e[i] === engineMax);
+  const top1 = engineTop.some((k) => joeyTop.includes(k));
+
+  return { spearman, comparable, concordant, exactOrder, top1, keys };
+}
+
+/** Aggregate rank-agreement results across charts. */
+export function aggregateRanks(results) {
+  const usable = results.filter((r) => r.spearman != null);
+  const comparable = results.reduce((s, r) => s + r.comparable, 0);
+  const concordant = results.reduce((s, r) => s + r.concordant, 0);
+  return {
+    n: results.length,
+    exactOrder: results.filter((r) => r.exactOrder).length,
+    top1: results.filter((r) => r.top1).length,
+    comparable,
+    concordant,
+    concordance: comparable === 0 ? 0 : concordant / comparable,
+    /** Mean Spearman across charts where it is defined. */
+    spearman: usable.length === 0 ? null : usable.reduce((s, r) => s + r.spearman, 0) / usable.length,
+    spearmanCharts: usable.length,
+  };
+}
+
+export function formatRanks(label, agg) {
+  const sp = agg.spearman == null ? 'n/a' : agg.spearman.toFixed(3);
+  return [
+    `  ${label}`,
+    `    exact order (tie-tolerant)  ${agg.exactOrder}/${agg.n}`,
+    `    top-1 element/god correct   ${agg.top1}/${agg.n}`,
+    `    mean Spearman               ${sp}   (over ${agg.spearmanCharts} charts)`,
+    `    pair concordance            ${agg.concordant}/${agg.comparable} = ${(agg.concordance * 100).toFixed(1)}%`,
+  ].join('\n');
 }
 
 /** Aggregate per-chart results into the three headline numbers. */

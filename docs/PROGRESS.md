@@ -151,6 +151,22 @@ no 比肩 anywhere, so no month-rooting rule can emit Joey's headline). Track A 
 
 ---
 
+## MEASUREMENTS — dated observations, not locked constants
+Update these when they move. A DROP is a regression to investigate. A RISE after an input correction
+is expected. Never copy these numbers into CLAUDE.md as locked values.
+
+| Metric | Value | As of | Note |
+|---|---|---|---|
+| Pillars vs fixture | 13/13 | 08-01 | |
+| **Pillars vs Joey's own printed pillars** | **13/13** | 08-01 | first full cross-check; came free with the ten-bar collection |
+| Ten Gods | 13/13 | 08-01 | |
+| Track A profile | **8/13** | 08-01 | was 7/13; rose when the 子 hidden stem was corrected. Track A itself untouched. |
+| Oracle 1 strength verdicts sane | 13/13 | 08-01 | |
+| Oracle 2 Ten God top-3 set match | 2/13 | 07-31 | ceiling is 6/13 under any projection; element ranking is the constraint |
+| Oracle 3 element rank order | not yet built | — | primary gate once built |
+| Solar-term boundaries, day-level | 0 disagreements / 1212 | 07-30 | three oracles |
+| Joey #1 element distribution | Earth 5, Fire 4, Wood 3, Metal 1, Water 0 | 08-01 | from full ten bars |
+
 ## RESOLVED — stop reporting these as open (2026-08-01)
 - **The 6 test rows in the live `reading` table are DELETED.** Removed manually via the Supabase SQL
   editor; `select count(*)` confirmed at 24. Do not flag again.

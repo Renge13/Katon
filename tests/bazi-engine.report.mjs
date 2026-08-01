@@ -18,7 +18,8 @@ import { tenGodsForChart } from '../lib/bazi/tenGods.js';
 import { mainProfile } from '../lib/bazi/mainProfile.js';
 import { tenGodTally, loudAlternatives, LOUD_MARGIN } from '../lib/bazi/tenGodTally.js';
 import { computeStrength, STRENGTH_PARAMS } from '../lib/bazi/strength.ts';
-import { scoreBars, aggregate, formatAggregate } from './oracle2-metric.mjs';
+import { scoreBars, aggregate, formatAggregate, rankAgreement, aggregateRanks, formatRanks } from './oracle-metrics.mjs';
+import { elementBarsFrom } from './joey-bars.mjs';
 import { VALIDATION_CHARTS, PILLAR_EDGE_CASES } from './bazi-validation.fixture.js';
 
 const tick = (ok) => (ok ? '✓' : '✗');
@@ -99,7 +100,7 @@ for (const tc of VALIDATION_CHARTS) {
   const strength = computeStrength(chart);
 
   // Oracle 2 — Joey's bars, read off the strength model's Ten God projection.
-  // Tie-tolerant on both sides; see tests/oracle2-metric.mjs and ruling E.
+  // Tie-tolerant on both sides; see tests/oracle-metrics.mjs and ruling E.
   // The PRIMARY metric is top-3 set match, not exact order.
   const barScore = scoreBars(strength.tenGodStrength, expect.topThreeBars);
   const strengthBarsOk = barScore.setMatch;
@@ -108,6 +109,24 @@ for (const tc of VALIDATION_CHARTS) {
       `top-3 set [${barScore.engineTop3.join(',')}] ≠ Joey [${expTop3.join(',')}] ` +
       `(overlap ${barScore.overlap}/3, concordance ${barScore.concordant}/${barScore.comparable})`);
   }
+
+  // Oracle 3 — ELEMENT rank order. THE PRIMARY GATE (C4 step 3). Five values
+  // instead of ten, and it targets where the defect actually lives: session 2
+  // proved the element ranking caps the Ten God projection at 6/13 regardless of
+  // how the projection is done.
+  const joeyElements = elementBarsFrom(expect.allBars, expect.dayMasterElement);
+  const elementAgreement = rankAgreement(strength.elementStrength, joeyElements);
+  const elementOk = elementAgreement.exactOrder;
+  if (!elementOk) {
+    const engRank = Object.entries(strength.elementStrength).sort((a, b) => b[1] - a[1]).map(([e]) => e);
+    const joeyRank = Object.entries(joeyElements).sort((a, b) => b[1] - a[1]).map(([e]) => e);
+    record(id, 'ORACLE3-element',
+      `[${engRank.join('>')}] ≠ Joey [${joeyRank.join('>')}]  ` +
+      `(rho ${elementAgreement.spearman?.toFixed(2) ?? 'n/a'}, pairs ${elementAgreement.concordant}/${elementAgreement.comparable})`);
+  }
+
+  // Oracle 2 — now over ALL TEN bars, so real Spearman is available.
+  const barAgreement = rankAgreement(strength.tenGodStrength, expect.allBars);
 
   // Oracle 1 — no absurd verdicts. There is no published Joey verdict for all
   // 13, so the pass condition is internal coherence: a chart with no Resource,
@@ -127,6 +146,7 @@ for (const tc of VALIDATION_CHARTS) {
     tc, chart, tg, profile, tally, loud, noHour, strength,
     pillarsOk, tenGodsOk, profileOk, barsRankOk, noHourStable,
     strengthBarsOk, barScore, strengthSane,
+    elementOk, elementAgreement, barAgreement, joeyElements,
     edgeChecks, engineTop3, expTop3,
   });
 }
@@ -234,8 +254,30 @@ for (const r of results) {
   console.log(`     elements   : ${Object.entries(r.strength.elementStrength).map(([e, v]) => `${e}${v}`).join(' ')}`);
 }
 const agg = aggregate(results.map((r) => r.barScore));
-console.log('\n  ORACLE 2 —');
+console.log('\n  ORACLE 2 — top-3 view (session-2 series, kept comparable)');
 console.log(formatAggregate(agg));
+console.log('\n  ORACLE 2 — full ten bars, real Spearman');
+console.log(formatRanks('Ten God distribution vs Joey (10 values x 13 charts)',
+  aggregateRanks(results.map((r) => r.barAgreement))));
+
+// ── Task 8c — ORACLE 3, the primary gate ──
+console.log('\n\n══════════════ TASK 8c — ELEMENT RANK ORDER (ORACLE 3 — PRIMARY GATE) ══════════════');
+console.log('  Five values, 13 charts. This is where the defect lives: the element ranking');
+console.log('  caps the Ten God projection regardless of how the projection is done.');
+for (const r of results) {
+  const eng = Object.entries(r.strength.elementStrength).sort((a, b) => b[1] - a[1]);
+  const joey = Object.entries(r.joeyElements).sort((a, b) => b[1] - a[1]);
+  const a = r.elementAgreement;
+  console.log(
+    `#${String(r.tc.id).padStart(2)} ${tick(r.elementOk)} top1 ${tick(a.top1)} rho ${(a.spearman ?? 0).toFixed(2).padStart(5)} ` +
+    `pairs ${a.concordant}/${a.comparable}`,
+  );
+  console.log(`     engine ${eng.map(([e, v]) => `${e}${v}`).join(' ')}`);
+  console.log(`     Joey   ${joey.map(([e, v]) => `${e}${v}`).join(' ')}`);
+}
+const aggEl = aggregateRanks(results.map((r) => r.elementAgreement));
+console.log('\n  ORACLE 3 —');
+console.log(formatRanks('ELEMENT rank order vs Joey (5 values x 13 charts) — PRIMARY GATE', aggEl));
 
 // ── Task 7 ──
 console.log('\n\n══════════════ TASK 7 — SUMMARY ══════════════');

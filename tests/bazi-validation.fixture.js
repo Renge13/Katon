@@ -73,6 +73,14 @@
 //     (Direct Wealth). 正官 is Diplomat, which appears in chart 2.
 // ============================================================
 
+// Joey's full ten bars for all 13 charts, collected browser-driven from his
+// plotter (docs/engine/joey-bars-13.json). IMPORTED, never re-typed: hand
+// transcription has produced three errors in this fixture's history (Warrior,
+// Dir, and the 子 hidden stem), so the 130 numbers are read from the collected
+// artifact and the hand-written `topThreeBars` below stays as an INDEPENDENT
+// cross-check against it. tests/joey-bars.spec.mjs asserts the two agree.
+import JOEY_BARS from '../docs/engine/joey-bars-13.json' with { type: 'json' };
+
 const bar = (god, score) => ({ god, score });
 
 export const VALIDATION_CHARTS = [
@@ -216,20 +224,36 @@ export const VALIDATION_CHARTS = [
       // Friend 80 / Phil 80 / Dir 78 / Pio 72 — see correction 2 in the header.
       // 80/80 is a TIE, so the top-two order is not meaningfully asserted.
       topThreeBars: [bar('比肩', 80), bar('偏印', 80), bar('正財', 78)],
-      // FULL TEN, transcribed from the PDF page-2 strength chart.
-      // 正印 (壬) and 正官 (庚) are 0 because neither stem appears anywhere in this
-      // chart, as a visible stem or a hidden one. That is the load-bearing detail:
-      // a pure element-base model cannot produce it (Water totals 80 and would
-      // have to put all of it somewhere), so it is direct evidence for the
-      // pair-presence projection — and it sits at the BOTTOM of the ranking,
-      // where a top-3 metric structurally cannot see it.
-      allBars: {
-        比肩: 80, 偏印: 80, 正財: 78, 偏財: 72, 七殺: 55,
-        劫財: 55, 傷官: 17, 食神: 17, 正印: 0, 正官: 0,
-      },
+      // allBars is attached below from the collected data, like every other row.
+      // Kept in mind for whoever reads this row first: 正印 (壬) and 正官 (庚) are
+      // both 0 here because neither stem appears anywhere in the chart. That is
+      // the zero-presence law, which holds 130/130 across all 13 charts and is
+      // what refuted the shared-element-base model.
     },
   },
 ];
+
+// ── Attach Joey's collected ten bars ──────────────────────
+// Done here rather than inline per row so the 130 scores have exactly one source.
+// `joeyPresence` carries Joey's per-stem presence figures alongside, because the
+// presence-to-bar relationship is what the saturating-transform question needs
+// (C4: presence is not monotone with the bar — 癸 at 3.0 scores below 庚 at 0.6).
+for (const tc of VALIDATION_CHARTS) {
+  const row = JOEY_BARS[String(tc.id)];
+  if (!row) continue;
+  tc.expect.allBars = {};
+  tc.expect.joeyPresence = {};
+  tc.expect.joeyStem = {};
+  for (const [god, v] of Object.entries(row.joeyBars)) {
+    tc.expect.allBars[god] = v.score;
+    tc.expect.joeyPresence[god] = v.presence;
+    tc.expect.joeyStem[god] = v.stem;
+  }
+  // Joey's own pillars/day master/month branch, for cross-checking the engine.
+  tc.expect.joeyPillars = row.pillars;
+  tc.expect.joeyDayMaster = row.dayMaster;
+  tc.expect.joeyMonthBranch = row.monthBranch;
+}
 
 // Full-pillar expectations for the boundary edge cases (Task 2), keyed by id.
 export const PILLAR_EDGE_CASES = {

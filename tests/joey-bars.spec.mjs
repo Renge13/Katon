@@ -21,8 +21,66 @@ import { ALL_TEN_GODS } from '../lib/bazi/strength.ts';
 
 const withFullBars = VALIDATION_CHARTS.filter(hasFullBars);
 
-test('at least one chart carries the full ten bars', () => {
-  assert.ok(withFullBars.length >= 1, 'chart 13 should be transcribed');
+test('all 13 charts carry the full ten bars', () => {
+  assert.equal(withFullBars.length, VALIDATION_CHARTS.length);
+  assert.equal(withFullBars.length, 13);
+});
+
+test('Joey\'s own pillars, day master and month branch match the fixture', () => {
+  // The collected data carries Joey's printed pillars. They must agree with what
+  // the fixture independently asserts, or the two describe different charts.
+  for (const tc of withFullBars) {
+    assert.equal(tc.expect.joeyDayMaster, tc.expect.dayMaster, `chart ${tc.id} day master`);
+    assert.equal(tc.expect.joeyMonthBranch, tc.expect.monthBranch, `chart ${tc.id} month branch`);
+    assert.equal(tc.expect.joeyPillars.day.charAt(0), tc.expect.dayMaster, `chart ${tc.id} day pillar stem`);
+    assert.equal(tc.expect.joeyPillars.month.charAt(1), tc.expect.monthBranch, `chart ${tc.id} month pillar branch`);
+  }
+});
+
+test('the zero-presence law holds 130/130', () => {
+  // C4 correction 2, and the finding that refuted the shared-element-base model:
+  // a god scores exactly 0 if and only if its stem is absent from the chart.
+  // Verified against JOEY'S OWN presence figures, so this checks his data for
+  // internal consistency rather than checking our engine against itself.
+  let slots = 0;
+  const violations = [];
+  for (const tc of withFullBars) {
+    for (const god of ALL_TEN_GODS) {
+      slots++;
+      const score = tc.expect.allBars[god];
+      const presence = tc.expect.joeyPresence[god];
+      const zeroScore = score === 0;
+      const zeroPresence = presence === 0;
+      if (zeroScore !== zeroPresence) {
+        violations.push(`chart ${tc.id} ${god} (${tc.expect.joeyStem[god]}): score ${score}, presence ${presence}`);
+      }
+    }
+  }
+  assert.equal(slots, 130);
+  assert.deepEqual(violations, [], violations.join('; '));
+});
+
+test('element rank order matches the table published in C4', () => {
+  // Locks what Oracle 3 is graded against. If these ever shift, the data changed.
+  const EXPECTED = {
+    1: 'Metal>Earth>Fire>Water>Wood',
+    2: 'Wood>Earth>Fire>Water>Metal',
+    3: 'Wood>Water>Earth>Fire>Metal',
+    4: 'Wood>Water>Fire>Earth>Metal',
+    5: 'Earth>Fire>Wood>Water>Metal',
+    6: 'Fire>Water>Wood>Earth>Metal',
+    7: 'Fire>Earth>Water>Wood>Metal',
+    8: 'Earth>Metal>Water>Wood>Fire',
+    9: 'Fire>Earth>Wood>Water>Metal',
+    10: 'Fire>Wood>Earth>Metal>Water',
+    11: 'Earth>Metal>Wood>Water>Fire',
+    12: 'Earth>Fire>Water>Wood>Metal',
+    13: 'Earth>Wood>Water>Metal>Fire',
+  };
+  for (const tc of withFullBars) {
+    const got = elementRankFrom(tc.expect.allBars, tc.expect.dayMasterElement).join('>');
+    assert.equal(got, EXPECTED[tc.id], `chart ${tc.id}`);
+  }
 });
 
 test('pending rows are null, never partially filled', () => {

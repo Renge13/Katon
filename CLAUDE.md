@@ -53,8 +53,17 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
 
 ### Engine
 7. **Do not touch `lib/bazi/tenGods.js` or `lib/bazi/mainProfile.js`.**
-8. **Track A canonical profile at 7/13 is CORRECT.** It is the intended divergence from Joey's
-   proprietary two-source tiebreak; Katon uses month-branch structural profile only. **Do not "fix" it.**
+8. **Track A divergence from Joey is INTENDED. Do not chase 13/13.** Katon's canonical profile uses
+   month-branch structural rooting only; Joey uses a proprietary two-source tiebreak we deliberately
+   did not reproduce. Some charts will never match and that is correct.
+
+   **The principle is locked. The number is not.** Measured 7/13 until 2026-08-01, then **8/13** after
+   the 子 hidden-stem correction — chart 8 started matching Joey once its input was right. Track A
+   itself was never touched. Record the current figure as a dated observation in
+   `docs/PROGRESS.md`, never as a locked constant here: a number in a locked rule goes stale the
+   moment an upstream input is fixed, and then it either protects a bug or blocks a real improvement.
+   A **drop** below the last recorded figure is a regression and must be investigated. A **rise** after
+   an input correction is expected.
 9. `buildElementBars` is **display normalisation only**, never a strength score. The seasonal
    strength distribution is a different computation in a different file. Never conflate them.
 10. Joey's element bars are a **seasonal element-strength distribution**, not a Ten-God token count.

@@ -32,8 +32,12 @@ Joey's own output for chart 1 prints:
 ```
 
 **子 hides 癸 (Yin Water), not 壬.** The mainstream 藏干 table agrees. This is my error and it is in the
-accuracy core — every chart containing 子 has been assigning Water to the wrong god. Charts 1, 6, 7, 8,
-11 and 12 in the fixture all contain 子.
+accuracy core — every chart containing 子 has been assigning Water to the wrong god.
+
+**CORRECTED 2026-08-01: four fixture charts contain 子, not six.** Charts **1, 6, 7, 8**. Charts 11
+(庚午 己丑 庚辰 戊寅) and 12 (庚午 壬午 癸卯 戊午) do not, and my listing them was a prose error — the
+zero-presence check in the same analysis found exactly four violations, in exactly those four charts.
+The data contradicted the sentence I wrote next to it.
 
 I verified all twelve branches against Joey's printed hidden stems. **Only 子 was wrong.** The rest of
 the table stands exactly as specified:

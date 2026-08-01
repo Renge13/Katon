@@ -87,31 +87,27 @@ export const STRENGTH_PARAMS = {
   /**
    * How seasonal element strength is projected onto the ten Ten Gods.
    *
-   * 'contributor-polarity' — session 1. Each contributor's mass goes wholly to
-   *   the god implied by its OWN stem's polarity. Measured 0/13 exact order;
-   *   structurally cannot produce Joey's tied pairs (chart 9 食神 98 / 傷官 98).
+   * 'per-stem-seasonal' — CORRECT, and the default. Each god's bar is its own
+   *   stem's presence times that stem's element's seasonal multiplier. Nothing
+   *   is shared between the two gods of an element.
    *
-   * 'pair-presence' — ruling A. Both gods of an element inherit the element's
-   *   base, each modulated by how much its own stem appears in the chart.
+   *   THE EVIDENCE (C4 correction 2): the zero-presence law. A god scores
+   *   exactly 0 if and only if its stem is absent from the chart — 130/130
+   *   slots across all 13 charts, verified against Joey's own presence figures.
+   *   Chart 1 is decisive: 比肩 丙 presence 2.2 -> bar 85, while 劫財 丁
+   *   presence 0.0 -> bar 0. Same element, one god at 85 and the other at 0.
    *
-   * 'pair-polarity' — ruling A's stated fallback. Both gods inherit the base;
-   *   the modulator is polarity match with the Day Master instead of presence.
-   *
-   * Kept as a switch rather than a replacement so before/after is attributable.
+   * 'pair-presence' / 'pair-polarity' — REFUTED (ruling A, retracted in C4).
+   *   Both shared an element base across the god pair, which cannot put one god
+   *   of a pair at zero while the other is high. Kept selectable for the record
+   *   and so the refutation stays reproducible. DO NOT make either the default.
    */
-  tenGodProjection: 'pair-presence' as 'contributor-polarity' | 'pair-presence' | 'pair-polarity',
+  tenGodProjection: 'per-stem-seasonal' as 'per-stem-seasonal' | 'pair-presence' | 'pair-polarity',
 
-  /**
-   * 'pair-presence' blend. 1.0 = fully proportional to stem presence (ruling A
-   * as literally written); 0.0 = both gods split the element base evenly.
-   * Anything between is a gentler version of the same idea.
-   */
+  /** 'pair-presence' blend. REFUTED mode; retained only for reproducibility. */
   pairPresenceWeight: 1.0,
 
-  /**
-   * 'pair-polarity' share given to the god whose stem polarity MATCHES the Day
-   * Master. 0.5 is an even split, i.e. pure pairing with no modulation.
-   */
+  /** 'pair-polarity' share. REFUTED mode; retained only for reproducibility. */
   pairPolarityWeight: 0.5,
 };
 
@@ -305,15 +301,15 @@ export function tenGodElement(dmElement: Element, god: string): Element {
 }
 
 /**
- * Distribute seasonal element strength across the ten Ten Gods.
+ * Distribute seasonal strength across the ten Ten Gods.
  *
- * Joey publishes TEN bars but there are only FIVE elements, so each element maps
- * to exactly two gods — one yin, one yang. Chart 9's 食神 98 / 傷官 98 is an exact
- * tie between the two Fire gods, which a model that hands an element's whole
- * mass to one god by contributor polarity cannot produce at all. Hence the pair
- * modes.
+ * The correct model is PER STEM: each god's bar is its own stem's presence times
+ * that stem's element's seasonal multiplier. Summing the ten gods still recovers
+ * the five element totals, because each element's two stems are its two gods —
+ * but nothing is shared between them, and that is what lets one god of a pair
+ * sit at zero while the other is high (the zero-presence law, 130/130).
  *
- * Total mass is conserved in every mode, so the modes are directly comparable.
+ * Total mass is conserved in every mode, so the modes stay directly comparable.
  */
 export function projectToTenGods(
   dayMaster: string,
@@ -323,7 +319,9 @@ export function projectToTenGods(
   const out: Record<string, number> = {};
   for (const g of ALL_TEN_GODS) out[g] = 0;
 
-  if (STRENGTH_PARAMS.tenGodProjection === 'contributor-polarity') {
+  if (STRENGTH_PARAMS.tenGodProjection === 'per-stem-seasonal') {
+    // c.weighted is raw presence x seasonal multiplier, and c.tenGod is the god
+    // of c's own stem — so summing per god IS per-stem presence x seasonal.
     for (const c of contributors) out[c.tenGod] += c.weighted;
     return out;
   }

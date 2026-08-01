@@ -3,7 +3,7 @@
 // ============================================================
 // Run: npm run calibrate:strength
 //
-// Uses the SHARED Oracle 2 metric (tests/oracle2-metric.mjs). It must not carry
+// Uses the SHARED Oracle 2 metric (tests/oracle-metrics.mjs). It must not carry
 // its own copy: a calibration run and a validation run that score differently is
 // how you tune against the wrong target.
 //
@@ -27,7 +27,7 @@
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { computeStrength, STRENGTH_PARAMS, tenGodElement } from '../lib/bazi/strength.ts';
 import { VALIDATION_CHARTS } from '../tests/bazi-validation.fixture.js';
-import { scoreBars, aggregate, formatAggregate } from '../tests/oracle2-metric.mjs';
+import { scoreBars, aggregate, formatAggregate } from '../tests/oracle-metrics.mjs';
 import { STEM_ELEMENTS } from '../lib/bazi/stems.js';
 
 // The god -> element relation is engine knowledge and lives in strength.ts. This
@@ -68,8 +68,8 @@ console.log(formatAggregate(measure()));
 // ── Projection-mode comparison ─────────────────────────────
 
 console.log('\n══ PROJECTION MODES ══');
-STRENGTH_PARAMS.tenGodProjection = 'contributor-polarity';
-console.log(line('contributor-polarity (session 1)', measure()));
+STRENGTH_PARAMS.tenGodProjection = 'per-stem-seasonal';
+console.log(line('per-stem-seasonal (CORRECT)', measure()));
 for (const lambda of [0, 0.25, 0.5, 0.75, 1.0]) {
   STRENGTH_PARAMS.tenGodProjection = 'pair-presence';
   STRENGTH_PARAMS.pairPresenceWeight = lambda;
@@ -107,7 +107,7 @@ function concordanceSplit() {
 }
 
 console.log('\n══ DIAGNOSTIC 1 — within-element vs cross-element ordering ══');
-for (const [mode, lambda] of [['contributor-polarity', null], ['pair-presence', 1.0], ['pair-presence', 0.0]]) {
+for (const [mode, lambda] of [['per-stem-seasonal', null], ['pair-presence', 1.0], ['pair-presence', 0.0]]) {
   STRENGTH_PARAMS.tenGodProjection = mode;
   if (lambda !== null) STRENGTH_PARAMS.pairPresenceWeight = lambda;
   const r = concordanceSplit();
