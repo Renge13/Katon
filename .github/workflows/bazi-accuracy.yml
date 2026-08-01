@@ -56,6 +56,10 @@ jobs:
       - name: Punishment table lock
         run: npm run test:punishment
 
+      # 命宮/胎元 conventions + the no-hour null contract.
+      - name: Palace derivation lock
+        run: npm run test:palaces
+
       # Independent day-pillar cross-check (astronomia) + Reyner's chart.
       - name: Day-pillar cross-check
         run: npm run test:bazi

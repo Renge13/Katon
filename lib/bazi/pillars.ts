@@ -145,6 +145,35 @@ export interface Pillars {
   /** null when the birth time is unknown. Never defaulted to midnight. */
   hour: Pillar | null;
   /**
+   * 命宮 Life Palace. DISPLAY ONLY — no interpretation, no hierarchy score, no
+   * reading fact. It appears in Joey's "Personal Chart Details" block, so a user
+   * cross-checking notices its absence, and that block exists for legitimacy.
+   *
+   * NULL WHEN THE HOUR IS UNKNOWN, which is a large slice of users. The
+   * derivation reads the hour branch, so there is nothing to compute without it —
+   * and it must NOT be derived from the noon probe, which would fabricate a
+   * palace from an hour the user never gave.
+   *
+   * Convention: tyme4ts getOwnSign(), which is
+   *   yearStemIndex x 12 + (27 - monthBranchIndex - hourBranchIndex) % 12 + 2
+   * verified against Joey's printed 命宮 丁卯 for fixture chart 1. 命宮 has more
+   * than one convention in circulation; this is the one that matches Joey.
+   * Caveat: that is ONE data point — his plotter is now behind a sign-in, so no
+   * further values were collectable. Re-check if more become available.
+   */
+  lifePalace: Pillar | null;
+  /**
+   * 胎元 Conception Palace. DISPLAY ONLY, same reasoning.
+   *
+   * Always available: derived from the MONTH pillar alone (stem +1, branch +3),
+   * so it survives an unknown birth hour.
+   *
+   * Triple-verified: Joey's printed 胎元 甲子 for chart 1, tyme4ts
+   * getFetalOrigin(), and the standard formula computed by hand — all three agree
+   * across five charts.
+   */
+  conceptionPalace: Pillar;
+  /**
    * The two risks, kept apart. They are not comparable: a 節 boundary can move
    * the month pillar and therefore the reading; a 時辰 edge can only move the
    * hour pillar. Consumers should branch on `boundary.solarTerm.flagged`.
@@ -408,6 +437,12 @@ export function computePillars({ date, time = null, tz = null, termSide = null }
     day: pillar(eightChar.getDay()),
     // Still null: termSide resolves the MONTH, it never invents an hour pillar.
     hour: hasTime ? pillar(eightChar.getHour()) : null,
+    // 命宮 reads the hour branch, so with no birth time there is nothing to
+    // compute. Deriving it from the noon probe would fabricate a palace out of an
+    // hour the user never supplied — the same trap as inventing an hour pillar.
+    lifePalace: hasTime ? pillar(eightChar.getOwnSign()) : null,
+    // 胎元 needs only the month pillar, so it is always real.
+    conceptionPalace: pillar(eightChar.getFetalOrigin()),
     boundary: { solarTerm, hourEdge, timeLikelyRounded },
     boundaryFlag,
     ...(reasons.length > 0 ? { boundaryReason: reasons.join('; ') } : {}),

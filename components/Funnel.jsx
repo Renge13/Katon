@@ -414,6 +414,27 @@ function Reading({ reading, onReset, initialFull }) {
               })}
             </div>
           </Reveal>
+          {/* 命宮 / 胎元 — display only, no interpretation. They appear on every
+              Joey chart, so their absence is what a cross-checking user notices. */}
+          {chart.palaces && (
+            <Reveal delay={0.12} style={{ marginTop: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+                {[chart.palaces.hidup, chart.palaces.konsepsi].map((pl, i) => (
+                  <div key={i} style={{ textAlign: 'center', border: '1px solid var(--divider)', borderRadius: 12, padding: '10px 4px', background: 'var(--kertas-2)' }}>
+                    <div style={{ fontSize: 9.5, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>
+                      {pl ? pl.label : 'Istana Hidup'}
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--tinta)', margin: '5px 0 2px' }}>
+                      {pl ? `${pl.stem}${pl.branch}` : '··'}
+                    </div>
+                    <div style={{ fontSize: 10.5, color: 'var(--muted-warm)' }}>
+                      {pl ? `${pl.elementId} · ${pl.animal}` : 'perlu jam lahir'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          )}
         </Section>
       )}
 

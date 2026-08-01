@@ -17,6 +17,7 @@
     "test:joey-bars": "node --test tests/joey-bars.spec.mjs",
     "test:hidden-stems": "node --test tests/hidden-stems.spec.mjs",
     "test:punishment": "node --test tests/punishment.spec.mjs",
+    "test:palaces": "node --test tests/palaces.spec.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:engine": "node tests/bazi-engine.report.mjs",
     "test:forge": "node --conditions=react-server scripts/forge-tests.mjs"
