@@ -64,42 +64,84 @@ const pad = (n) => String(n).padStart(2, '0');
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export default function Funnel() {
-  const [phase, setPhase] = useState('input'); // input | calculating | result
+  const [phase, setPhase] = useState('input'); // input | calculating | season | result
   const [form, setForm] = useState({ day: '', month: '', year: '', hour: '', minute: '', domain: 'hubungan' });
   const [error, setError] = useState(null);
   const [reading, setReading] = useState(null);
   const [step, setStep] = useState(0);
+  // Set only on the ~12 days a year a season turns inside the birth date AND no
+  // birth time was given: { birthDate, term, at }. See <SeasonGate>.
+  const [season, setSeason] = useState(null);
 
   function reset() {
-    setReading(null); setError(null); setPhase('input');
+    setReading(null); setError(null); setSeason(null); setPhase('input');
     // Return the URL to root (additive; pushState only — no route remount).
     if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
+  }
+
+  // Create the reading and reveal it. `resolution` carries whatever the season
+  // gate learned: a real birthTime, a termSide, or neither.
+  async function createReading(birthDate, birthTime, resolution = {}) {
+    const res = await fetch('/api/reading', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        birthDate,
+        birthTime: resolution.birthTime ?? birthTime,
+        termSide: resolution.termSide ?? null,
+        domain: form.domain,
+      }),
+    }).then((r) => r.json());
+    if (res.error) { setError(readableError(res)); setSeason(null); setPhase('input'); return; }
+    setReading({ ...res, birthDate }); // birthDate kept client-side for the card header
+    // Make the reading bookmarkable/shareable without remounting: swap the URL to
+    // /r/<id> via history.pushState (NOT router.push, which would mount the /r route
+    // and discard this in-session state). In-session unlock behavior is unchanged.
+    if (res.token && typeof window !== 'undefined') window.history.pushState(null, '', `/r/${res.token}`);
+    setSeason(null);
+    setPhase('result');
   }
 
   async function onSubmit(e) {
     e.preventDefault();
     setError(null);
-    const { day, month, year, hour, minute, domain } = form;
+    const { day, month, year, hour, minute } = form;
     if (!day || !month || !year) { setError('Isi tanggal lahirmu dulu.'); return; }
     const birthDate = `${year}-${pad(month)}-${pad(day)}`;
     const birthTime = hour !== '' ? `${pad(hour)}:${pad(minute || 0)}` : null;
     setStep(0);
     setPhase('calculating');
     try {
-      const [res] = await Promise.all([
-        fetch('/api/reading', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ birthDate, birthTime, domain }),
-        }).then((r) => r.json()),
+      // With no birth time, ask whether a season turns inside this date BEFORE
+      // creating the reading — so the row is written once, already resolved,
+      // rather than written and then mutated. Runs inside the anticipation
+      // pause; on ~353 days of the year it just returns needsHour: false.
+      const [turn] = await Promise.all([
+        birthTime === null
+          ? fetch('/api/season-check', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ birthDate }),
+            }).then((r) => r.json()).catch(() => null)
+          : Promise.resolve(null),
         delay(2500),
       ]);
-      if (res.error) { setError(readableError(res)); setPhase('input'); return; }
-      setReading({ ...res, birthDate }); // birthDate kept client-side for the card header
-      // Make the reading bookmarkable/shareable without remounting: swap the URL to
-      // /r/<id> via history.pushState (NOT router.push, which would mount the /r route
-      // and discard this in-session state). In-session unlock behavior is unchanged.
-      if (res.token && typeof window !== 'undefined') window.history.pushState(null, '', `/r/${res.token}`);
-      setPhase('result');
+
+      if (turn?.needsHour) {
+        setSeason({ birthDate, term: turn.term, at: turn.at });
+        setPhase('season');
+        return;
+      }
+      await createReading(birthDate, birthTime);
+    } catch {
+      setError('Ada yang salah. Coba lagi sebentar.');
+      setPhase('input');
+    }
+  }
+
+  // Answer from the season gate. `resolution` is { termSide } | { birthTime } | {}.
+  async function onSeasonAnswer(resolution) {
+    setError(null);
+    try {
+      await createReading(season.birthDate, null, resolution);
     } catch {
       setError('Ada yang salah. Coba lagi sebentar.');
       setPhase('input');
@@ -115,6 +157,7 @@ export default function Funnel() {
 
   if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} />;
   if (phase === 'calculating') return <Anticipation step={step} />;
+  if (phase === 'season') return <SeasonGate season={season} onAnswer={onSeasonAnswer} />;
   return <Reading reading={reading} onReset={reset} />;
 }
 
@@ -212,6 +255,109 @@ function Anticipation({ step }) {
           <div key={i} style={{ position: 'absolute', inset: 0, fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--tinta-soft)', opacity: step === i ? 1 : 0, transform: step === i ? 'none' : 'translateY(6px)', transition: 'all .6s var(--ease-quiet)' }}>{l}…</div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ---------------- Season gate ----------------
+   Fires ONLY when a 節 (solar term) falls inside the birth date AND no birth
+   time was given — roughly 12 days a year. On those dates the month pillar
+   depends on which side of the turn the birth sits, and with no time nothing
+   can recover it: probing noon only picks the likelier branch, silently.
+
+   Placed AFTER the anticipation pause, not at the input step. At input it would
+   read as one more form field before any value has been delivered. Here the
+   user has already committed, so it lands as the engine knowing something a
+   generic calculator does not — which is what this moment is.
+
+   The ask is a consequence, never the headline. Lead with the rarity.
+
+   Answers resolve the MONTH pillar only (termSide) unless the user actually
+   knows their hour. We never turn "pagi" into a fabricated clock time — that
+   would render as a real fourth pillar built out of a guess. */
+function SeasonGate({ season, onAnswer }) {
+  const [mode, setMode] = useState('choose'); // choose | exact
+  const [hour, setHour] = useState('');
+  const [minute, setMinute] = useState('');
+  const [busy, setBusy] = useState(false);
+  const at = season?.at || '';
+
+  function answer(resolution) {
+    if (busy) return;
+    setBusy(true);
+    onAnswer(resolution);
+  }
+
+  const choice = {
+    width: '100%', textAlign: 'left', fontFamily: 'var(--font-sans)', fontSize: 15.5,
+    fontWeight: 500, color: 'var(--tinta)', background: 'var(--kertas-2)',
+    border: '1px solid var(--border)', borderRadius: 14, padding: '15px 18px',
+    cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.5 : 1, transition: 'background .2s',
+  };
+
+  return (
+    <div className="k-fade" style={{ ...wrap, paddingTop: 72 }}>
+      <Reveal><Eyebrow>Hari yang jarang</Eyebrow></Reveal>
+
+      <Reveal delay={0.06}>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 30, lineHeight: 1.16, letterSpacing: '-.01em', color: 'var(--tinta)', margin: '16px 0 0' }}>
+          Tanggal lahirmu jatuh tepat di hari pergantian musim.
+        </h1>
+      </Reveal>
+
+      <Reveal delay={0.12}>
+        <Para style={{ marginTop: 14 }}>
+          Hanya 12 hari dalam setahun seperti ini. Di tahun kelahiranmu, musimnya berganti tepat jam {at}.
+        </Para>
+      </Reveal>
+
+      <Reveal delay={0.18} style={{ margin: '26px 0' }}><Rule width={120} /></Reveal>
+
+      <Reveal delay={0.22}>
+        <Para style={{ color: 'var(--tinta)' }}>
+          Kamu lahir sebelum atau setelah jam itu? Jawabannya menentukan pilar bulanmu, inti dari seluruh bacaan.
+        </Para>
+      </Reveal>
+
+      {mode === 'choose' ? (
+        <Reveal delay={0.28} style={{ display: 'grid', gap: 10, marginTop: 22 }}>
+          <button type="button" style={choice} disabled={busy} onClick={() => answer({ termSide: 'before' })}>
+            Sebelum jam {at}
+          </button>
+          <button type="button" style={choice} disabled={busy} onClick={() => answer({ termSide: 'after' })}>
+            Setelah jam {at}
+          </button>
+          <button type="button" style={choice} disabled={busy} onClick={() => setMode('exact')}>
+            Aku ingat jam lahirku
+          </button>
+          <button type="button" style={{ ...choice, background: 'transparent', border: 'none', color: 'var(--muted-warm)', fontSize: 14, textAlign: 'center', padding: '10px 0' }}
+            disabled={busy} onClick={() => answer({})}>
+            Aku tidak yakin
+          </button>
+        </Reveal>
+      ) : (
+        <Reveal style={{ marginTop: 22 }}>
+          <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
+            <FieldLabel>Jam lahir</FieldLabel>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <select value={hour} onChange={(e) => setHour(e.target.value)} aria-label="Jam"><option value="">Jam</option>{RANGE(24).map((h) => <option key={h} value={h}>{pad(h)}</option>)}</select>
+              <select value={minute} onChange={(e) => setMinute(e.target.value)} aria-label="Menit"><option value="">Menit</option>{RANGE(60).map((m) => <option key={m} value={m}>{pad(m)}</option>)}</select>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>
+              Jamnya saja sudah cukup. Dengan ini kamu juga mendapat pilar keempat.
+            </div>
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <Button onClick={() => answer({ birthTime: `${pad(hour)}:${pad(minute || 0)}` })} disabled={busy || hour === ''}>
+              {busy ? 'Menyusun ulang…' : 'Lanjut'}
+            </Button>
+          </div>
+          <button type="button" onClick={() => setMode('choose')} disabled={busy}
+            style={{ display: 'block', margin: '14px auto 0', background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13.5, cursor: 'pointer', fontFamily: 'var(--font-sans)' }}>
+            ← Kembali
+          </button>
+        </Reveal>
+      )}
     </div>
   );
 }
