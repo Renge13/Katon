@@ -18,6 +18,7 @@ import { tenGodsForChart } from '../lib/bazi/tenGods.js';
 import { mainProfile } from '../lib/bazi/mainProfile.js';
 import { tenGodTally, loudAlternatives, LOUD_MARGIN } from '../lib/bazi/tenGodTally.js';
 import { computeStrength, STRENGTH_PARAMS } from '../lib/bazi/strength.ts';
+import { scoreBars, aggregate, formatAggregate } from './oracle2-metric.mjs';
 import { VALIDATION_CHARTS, PILLAR_EDGE_CASES } from './bazi-validation.fixture.js';
 
 const tick = (ok) => (ok ? '✓' : '✗');
@@ -97,17 +98,15 @@ for (const tc of VALIDATION_CHARTS) {
   // ---- Task 8: strength engine (Prompt C) ----
   const strength = computeStrength(chart);
 
-  // Oracle 2 — Joey's bar RANK ORDER, read off the strength model's Ten God
-  // projection. This is the hard, checkable oracle.
-  const strengthTop3 = Object.entries(strength.tenGodStrength)
-    .sort((a, b) => b[1] - a[1]).slice(0, 3).map(([g]) => g);
-  const strengthBarsOk = strengthTop3.every((g, i) => g === expTop3[i]);
-  // Softer companion metric: how many of Joey's top-3 appear in ours, ignoring
-  // order. Two fixture rows (9 and 13) have a TIE at the top, so strict order is
-  // not fully meaningful for them and set-overlap is the fairer read.
-  const strengthTop3Overlap = strengthTop3.filter((g) => expTop3.includes(g)).length;
+  // Oracle 2 — Joey's bars, read off the strength model's Ten God projection.
+  // Tie-tolerant on both sides; see tests/oracle2-metric.mjs and ruling E.
+  // The PRIMARY metric is top-3 set match, not exact order.
+  const barScore = scoreBars(strength.tenGodStrength, expect.topThreeBars);
+  const strengthBarsOk = barScore.setMatch;
   if (!strengthBarsOk) {
-    record(id, 'strengthBars', `top3 [${strengthTop3.join(',')}] ≠ expected [${expTop3.join(',')}] (overlap ${strengthTop3Overlap}/3)`);
+    record(id, 'strengthBars',
+      `top-3 set [${barScore.engineTop3.join(',')}] ≠ Joey [${expTop3.join(',')}] ` +
+      `(overlap ${barScore.overlap}/3, concordance ${barScore.concordant}/${barScore.comparable})`);
   }
 
   // Oracle 1 — no absurd verdicts. There is no published Joey verdict for all
@@ -127,7 +126,7 @@ for (const tc of VALIDATION_CHARTS) {
   results.push({
     tc, chart, tg, profile, tally, loud, noHour, strength,
     pillarsOk, tenGodsOk, profileOk, barsRankOk, noHourStable,
-    strengthBarsOk, strengthTop3, strengthTop3Overlap, strengthSane,
+    strengthBarsOk, barScore, strengthSane,
     edgeChecks, engineTop3, expTop3,
   });
 }
@@ -218,21 +217,25 @@ for (const r of results) {
 }
 
 // ── Task 8b — strength: Oracle 2 (bar rank order) ──
-console.log('\n\n══════════════ TASK 8b — ELEMENT-STRENGTH BARS (Oracle 2, the hard one) ══════════════');
-let pStrengthBars = 0;
-let overlapTotal = 0;
+console.log('\n\n══════════════ TASK 8b — ELEMENT-STRENGTH BARS (Oracle 2) ══════════════');
+console.log(`  Projection mode: ${STRENGTH_PARAMS.tenGodProjection}`);
+console.log('  Tie-tolerant both sides. PRIMARY metric is top-3 SET match, not exact order.');
 for (const r of results) {
-  if (r.strengthBarsOk) pStrengthBars++;
-  overlapTotal += r.strengthTop3Overlap;
+  const b = r.barScore;
   const bars = Object.entries(r.strength.tenGodStrength)
-    .sort((a, b) => b[1] - a[1]).slice(0, 5).map(([g, v]) => `${g}${v}`).join(' ');
-  const expWithScores = r.tc.expect.topThreeBars.map((b) => `${b.god}${b.score ?? '?'}`).join(',');
-  console.log(`#${String(r.tc.id).padStart(2)} ${tick(r.strengthBarsOk)} engine[${r.strengthTop3.join(',')}] vs Joey[${expWithScores}]  overlap ${r.strengthTop3Overlap}/3`);
+    .sort((x, y) => y[1] - x[1]).slice(0, 5).map(([g, v]) => `${g}${v}`).join(' ');
+  const expWithScores = r.tc.expect.topThreeBars.map((x) => `${x.god}${x.score ?? '?'}`).join(',');
+  const tieNote = b.tiedTopSize > 3 ? ` [engine ties ${b.tiedTopSize} at the cut]` : '';
+  console.log(
+    `#${String(r.tc.id).padStart(2)} set ${tick(b.setMatch)} order ${tick(b.exactOrder)} ` +
+    `concord ${b.concordant}/${b.comparable} | engine[${b.engineTop3.join(',')}] vs Joey[${expWithScores}]${tieNote}`,
+  );
   console.log(`     engine top5: ${bars}`);
   console.log(`     elements   : ${Object.entries(r.strength.elementStrength).map(([e, v]) => `${e}${v}`).join(' ')}`);
 }
-console.log(`\n  Oracle 2 — exact top-3 rank order: ${pStrengthBars}/${VALIDATION_CHARTS.length}  (target >= 11)`);
-console.log(`  Oracle 2 — top-3 set overlap:      ${overlapTotal}/${VALIDATION_CHARTS.length * 3}`);
+const agg = aggregate(results.map((r) => r.barScore));
+console.log('\n  ORACLE 2 —');
+console.log(formatAggregate(agg));
 
 // ── Task 7 ──
 console.log('\n\n══════════════ TASK 7 — SUMMARY ══════════════');

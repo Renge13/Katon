@@ -23,7 +23,7 @@
 // branch in scoring code is a bug, not a calibration.
 // ============================================================
 
-import { STEM_ELEMENTS, HIDDEN_STEMS } from './stems.js';
+import { STEM_ELEMENTS, STEM_POLARITY, HIDDEN_STEMS } from './stems.js';
 import { tenGod } from './tenGods.js';
 
 export type Element = 'Wood' | 'Fire' | 'Earth' | 'Metal' | 'Water';
@@ -83,6 +83,45 @@ export const STRENGTH_PARAMS = {
    * element scores at least this seasonally (i.e. 旺 or 相).
    */
   followSeasonSupportMin: 1.2,
+
+  /**
+   * How seasonal element strength is projected onto the ten Ten Gods.
+   *
+   * 'contributor-polarity' — session 1. Each contributor's mass goes wholly to
+   *   the god implied by its OWN stem's polarity. Measured 0/13 exact order;
+   *   structurally cannot produce Joey's tied pairs (chart 9 食神 98 / 傷官 98).
+   *
+   * 'pair-presence' — ruling A. Both gods of an element inherit the element's
+   *   base, each modulated by how much its own stem appears in the chart.
+   *
+   * 'pair-polarity' — ruling A's stated fallback. Both gods inherit the base;
+   *   the modulator is polarity match with the Day Master instead of presence.
+   *
+   * Kept as a switch rather than a replacement so before/after is attributable.
+   */
+  tenGodProjection: 'contributor-polarity' as 'contributor-polarity' | 'pair-presence' | 'pair-polarity',
+
+  /**
+   * 'pair-presence' blend. 1.0 = fully proportional to stem presence (ruling A
+   * as literally written); 0.0 = both gods split the element base evenly.
+   * Anything between is a gentler version of the same idea.
+   */
+  pairPresenceWeight: 1.0,
+
+  /**
+   * 'pair-polarity' share given to the god whose stem polarity MATCHES the Day
+   * Master. 0.5 is an even split, i.e. pure pairing with no modulation.
+   */
+  pairPolarityWeight: 0.5,
+};
+
+/** The yang stem then the yin stem of each element. */
+const STEMS_BY_ELEMENT: Record<Element, [string, string]> = {
+  Wood: ['甲', '乙'],
+  Fire: ['丙', '丁'],
+  Earth: ['戊', '己'],
+  Metal: ['庚', '辛'],
+  Water: ['壬', '癸'],
 };
 
 // ── Five-element relations ─────────────────────────────────
@@ -235,6 +274,69 @@ function collectContributors(chart: StrengthChartInput, dayMaster: string, month
   return out;
 }
 
+// ── Step 7 — projecting element strength onto the ten Ten Gods ──
+
+export const ALL_TEN_GODS = ['比肩', '劫財', '食神', '傷官', '正財', '偏財', '正官', '七殺', '正印', '偏印'];
+
+/**
+ * Distribute seasonal element strength across the ten Ten Gods.
+ *
+ * Joey publishes TEN bars but there are only FIVE elements, so each element maps
+ * to exactly two gods — one yin, one yang. Chart 9's 食神 98 / 傷官 98 is an exact
+ * tie between the two Fire gods, which a model that hands an element's whole
+ * mass to one god by contributor polarity cannot produce at all. Hence the pair
+ * modes.
+ *
+ * Total mass is conserved in every mode, so the modes are directly comparable.
+ */
+export function projectToTenGods(
+  dayMaster: string,
+  elementTotals: Record<Element, number>,
+  contributors: Contributor[],
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const g of ALL_TEN_GODS) out[g] = 0;
+
+  if (STRENGTH_PARAMS.tenGodProjection === 'contributor-polarity') {
+    for (const c of contributors) out[c.tenGod] += c.weighted;
+    return out;
+  }
+
+  // RAW presence per stem — deliberately NOT seasonally weighted. Ruling A
+  // step 3 is "how much its OWN stem actually appears in the chart (stems at
+  // 1.0, hidden stems at their qi share)", which is a presence quantity; the
+  // seasonal weighting is already carried by the element base being modulated.
+  const presence: Record<string, number> = {};
+  for (const c of contributors) presence[c.stem] = (presence[c.stem] ?? 0) + c.raw;
+
+  const dmPolarity = STEM_POLARITY[dayMaster];
+
+  for (const element of ELEMENTS) {
+    const base = elementTotals[element];
+    if (base === 0) continue;
+    const [yangStem, yinStem] = STEMS_BY_ELEMENT[element];
+
+    let shareYang: number;
+    if (STRENGTH_PARAMS.tenGodProjection === 'pair-presence') {
+      const pYang = presence[yangStem] ?? 0;
+      const pYin = presence[yinStem] ?? 0;
+      const total = pYang + pYin;
+      // An element can only have mass if one of its stems appears, so total is
+      // normally > 0; the 0.5 guard is for completeness, not an expected path.
+      const proportional = total === 0 ? 0.5 : pYang / total;
+      const lambda = STRENGTH_PARAMS.pairPresenceWeight;
+      shareYang = (1 - lambda) / 2 + lambda * proportional;
+    } else {
+      const w = STRENGTH_PARAMS.pairPolarityWeight;
+      shareYang = STEM_POLARITY[yangStem] === dmPolarity ? w : 1 - w;
+    }
+
+    out[tenGod(dayMaster, yangStem).hanzi] += base * shareYang;
+    out[tenGod(dayMaster, yinStem).hanzi] += base * (1 - shareYang);
+  }
+  return out;
+}
+
 // ── Step 3 — 得地, rooting (categorical gate, not a score) ──
 
 function computeRooting(chart: StrengthChartInput, dayMaster: string): Rooting {
@@ -295,11 +397,11 @@ export function computeStrength(chart: StrengthChartInput): Strength {
 
   // Element totals, seasonally weighted.
   const elementTotals: Record<Element, number> = { Wood: 0, Fire: 0, Earth: 0, Metal: 0, Water: 0 };
-  const tenGodTotals: Record<string, number> = {};
-  for (const c of contributors) {
-    elementTotals[c.element] += c.weighted;
-    tenGodTotals[c.tenGod] = (tenGodTotals[c.tenGod] ?? 0) + c.weighted;
-  }
+  for (const c of contributors) elementTotals[c.element] += c.weighted;
+
+  // Element strength is projection-independent; only the Ten God split changes
+  // with the mode. That is what makes a mode change attributable.
+  const tenGodTotals = projectToTenGods(dayMaster, elementTotals, contributors);
 
   // Step 4 — support vs drain, relative to the Day Master.
   const resourceEl = producerOf(dmElement);        // 印
@@ -367,7 +469,6 @@ export function computeStrength(chart: StrengthChartInput): Strength {
 
   // Every Ten God appears, including absent ones at 0 — a missing key would
   // silently rank below a present zero and corrupt the bar comparison.
-  const ALL_TEN_GODS = ['比肩', '劫財', '食神', '傷官', '正財', '偏財', '正官', '七殺', '正印', '偏印'];
   const filledTenGods: Record<string, number> = {};
   for (const g of ALL_TEN_GODS) filledTenGods[g] = tenGodTotals[g] ?? 0;
   const tenGodStrength = normalise(filledTenGods);

@@ -25,7 +25,10 @@
 // have a tie at the top, which makes their rank order intrinsically soft).
 //
 // ── Joey's profile names → Ten God hanzi ──
-// Joey's ten profile names, resolved against the published bar rows:
+// AUTHORITY: docs/engine/joey-profile-mapping.md, transcribed from Joey's own
+// printed legend ("JOEY YAP'S BAZI PROFILING SYSTEM / 10 PROFILES STRENGTH
+// CHART"). That file is primary source — do not re-derive this mapping, and if
+// the two ever disagree, that file wins. Reproduced here only for readability:
 //   比肩 The Self-Reliant  = Friend
 //   劫財 The Mover         = Leader          (chart 4: Leader64 -> third bar)
 //   食神 The Creator       = Artist
