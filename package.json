@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "generate:solar-terms": "node scripts/generate-solar-terms.js",
     "check:copy": "node scripts/check-copy.js",
+    "typecheck": "tsc -p tsconfig.check.json",
     "test:bazi": "node scripts/validate-bazi.mjs",
+    "test:pillars": "node --test tests/time-convention.spec.ts",
+    "test:engine": "node tests/bazi-engine.report.mjs",
     "test:forge": "node --conditions=react-server scripts/forge-tests.mjs"
   },
   "dependencies": {
@@ -21,7 +24,8 @@
     "next": "^15.5.18",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "tyme4ts": "^1.5.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -31,6 +35,7 @@
     "astronomia": "^4.2.0",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "globals": "^17.6.0"
+    "globals": "^17.6.0",
+    "typescript": "^7.0.2"
   }
 }

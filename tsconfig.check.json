@@ -1,0 +1,25 @@
+{
+  // Type-checks the TypeScript surface only: lib/bazi/pillars.ts and its spec.
+  //
+  // Deliberately NOT named tsconfig.json. Next.js auto-detects a root
+  // tsconfig.json and would switch the whole project into TypeScript mode,
+  // superseding jsconfig.json (and its @/* alias). The app stays JS; only the
+  // pillar engine is typed, because that is where tyme4ts's types pay off.
+  //
+  // Run: npm run typecheck
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    // pillars.ts is imported by .js callers with an explicit .ts extension, so
+    // both Node's native type stripping and Next's bundler resolve it.
+    "allowImportingTsExtensions": true
+  },
+  "include": ["lib/bazi/pillars.ts", "tests/time-convention.spec.ts"]
+}

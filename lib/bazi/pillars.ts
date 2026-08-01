@@ -1,0 +1,240 @@
+// ============================================================
+// Four Pillars (四柱) — solar-term engine
+// ============================================================
+// The ONLY place in Katon that turns a birth date/time into Heavenly Stems and
+// Earthly Branches. Backed by tyme4ts (MIT, zero deps), which is the 寿星天文历
+// engine — the same ephemeris as sxtwl — in pure TypeScript.
+//
+// WHY A LIBRARY AND NOT OUR OWN MATH
+// The hand-rolled calculator this replaces passed 12 fixture dates. 12 dates is
+// not the ~1,212 節 (month-boundary) instants between 1930 and 2030 that a real
+// user base will land on, and the Month Branch those boundaries decide is the
+// heaviest input to the strength engine (得令). Measured across all 1,212 節
+// boundaries 1930–2030, sxtwl, tyme4ts and astronomy-engine (an independent
+// ephemeris) have zero day-level disagreements.
+//
+// Do NOT reintroduce local solar-term arithmetic. If a pillar looks wrong, the
+// fixture (tests/bazi-validation.fixture.js) or the convention below is the
+// thing to argue with — not this file's math.
+// ============================================================
+
+import {
+  LunarHour,
+  LunarSect2EightCharProvider,
+  SolarTerm,
+  SolarTime,
+} from 'tyme4ts';
+
+// ── 流派2 / 晚子時 convention (REQUIRED, set once) ──────────
+// tyme4ts's default provider rolls the DAY pillar at 23:00. Katon uses 流派2:
+// the day rolls at midnight, and the 子 hour opening at 23:00 takes its stem
+// from the incoming day. Validation chart 7 (1993-06-12 23:30) is the lock —
+// it must yield day 甲子 / hour 丙子. The default provider yields day 乙丑.
+LunarHour.provider = new LunarSect2EightCharProvider();
+
+// ── Time convention (LOCKED — matches the validation oracle) ──
+// The entered local wall-clock time is used DIRECTLY:
+//   · no conversion to UTC
+//   · no IANA timezone resolution
+//   · no True Solar Time / longitude correction
+// Joey Yap's plotter — the oracle every fixture row is transcribed from — has
+// no city field and no timezone field, so it applies none of these. Matching it
+// is the requirement. Raw Y/M/D/h/m go to SolarTime.fromYmdHms and tyme4ts's
+// +08-framed solar-term table governs.
+// tests/time-convention.spec.ts locks this. See also KATON-calculator-decision.md.
+
+/**
+ * Probe hour used ONLY to resolve year/month/day when the birth time is unknown.
+ *
+ * Under 流派2 the day pillar is identical for every hour of a calendar day, so
+ * this only matters on a 節 day, where the month (and possibly year) pillar
+ * changes partway through. Noon is the maximum-likelihood choice: a day holds
+ * exactly one 節 instant, so the branch governing noon is always the branch
+ * covering more than half the day. Such cases are reported via `boundaryFlag`.
+ *
+ * This probe NEVER produces an hour pillar — `time: null` yields `hour: null`.
+ */
+const NO_TIME_PROBE_HOUR = 12;
+
+/** A birth instant this close to a boundary is not safely resolvable. */
+const BOUNDARY_MINUTES = 2;
+
+export interface PillarsInput {
+  /** Local civil date, 'YYYY-MM-DD'. */
+  date: string;
+  /** Local civil time, 'HH:MM'. null / omitted = unknown (no hour pillar). */
+  time?: string | null;
+  /**
+   * DELIBERATELY UNUSED BY THE CALCULATION. Accepted and persisted only so the
+   * time convention above can be revisited later without re-collecting user
+   * data. Reading this field in pillar math would break oracle parity.
+   */
+  tz?: string | null;
+}
+
+export interface Pillar {
+  /** Heavenly Stem (天干) hanzi. */
+  stem: string;
+  /** Earthly Branch (地支) hanzi. */
+  branch: string;
+}
+
+export interface Pillars {
+  year: Pillar;
+  month: Pillar;
+  day: Pillar;
+  /** null when the birth time is unknown. Never defaulted to midnight. */
+  hour: Pillar | null;
+  /** True when the birth instant sits too close to a boundary to trust. */
+  boundaryFlag: boolean;
+  /** Human-readable explanation, present only when boundaryFlag is true. */
+  boundaryReason?: string;
+}
+
+// ── Input parsing ──────────────────────────────────────────
+
+function parseDate(date: string): { y: number; m: number; d: number } {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date ?? '').trim());
+  if (!match) throw new Error(`Invalid birth date "${date}" — expected YYYY-MM-DD`);
+  const [, y, m, d] = match;
+  return { y: Number(y), m: Number(m), d: Number(d) };
+}
+
+function parseTime(time: string): { h: number; mi: number } {
+  const match = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(String(time).trim());
+  if (!match) throw new Error(`Invalid birth time "${time}" — expected HH:MM`);
+  const h = Number(match[1]);
+  const mi = Number(match[2]);
+  if (h > 23 || mi > 59) throw new Error(`Invalid birth time "${time}" — out of range`);
+  return { h, mi };
+}
+
+// ── Boundary detection ─────────────────────────────────────
+
+/** Naive wall-clock minutes. Both operands are +08-framed, so the frame cancels. */
+function minutesBetween(a: SolarTime, b: SolarTime): number {
+  const ms = (t: SolarTime) =>
+    Date.UTC(t.getYear(), t.getMonth() - 1, t.getDay(), t.getHour(), t.getMinute(), t.getSecond());
+  return (ms(a) - ms(b)) / 60000;
+}
+
+/**
+ * The 節 governing this instant's month pillar.
+ *
+ * getTerm() returns the term in effect, which may be a 氣 (mid-month); the 節
+ * is then the previous term. The 12 節 are the odd SolarTerm indices — tyme4ts
+ * answers that with isJie().
+ */
+function governingJie(at: SolarTime): SolarTerm {
+  const term = at.getTerm();
+  return term.isJie() ? term : term.next(-1);
+}
+
+function formatInstant(t: SolarTime): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${t.getYear()}-${pad(t.getMonth())}-${pad(t.getDay())} ${pad(t.getHour())}:${pad(t.getMinute())}`;
+}
+
+/**
+ * Month-pillar boundary check.
+ *
+ * Both sides of a month boundary carry the same risk — a birth 1 minute BEFORE
+ * the next 節 is as unresolvable as one 1 minute after the governing 節 — so
+ * the nearest of the two is what gets measured. That is what "±2 minutes of the
+ * governing 節" means in practice.
+ */
+function monthBoundaryReason(at: SolarTime): string | null {
+  const jie = governingJie(at);
+  const next = jie.next(2);
+
+  for (const term of [jie, next]) {
+    const instant = term.getJulianDay().getSolarTime();
+    const delta = minutesBetween(at, instant);
+    if (Math.abs(delta) <= BOUNDARY_MINUTES) {
+      const side = delta < 0 ? 'before' : 'after';
+      return (
+        `節 ${term.getName()} at ${formatInstant(instant)} — birth is ` +
+        `${Math.abs(delta).toFixed(1)} min ${side} the month boundary`
+      );
+    }
+  }
+  return null;
+}
+
+/**
+ * 時辰 boundary check. 時辰 open on the odd hours (子 at 23:00, 丑 at 01:00, …),
+ * so -60 covers the previous day's 23:00 for a birth just after midnight.
+ */
+function hourBoundaryReason(h: number, mi: number): string | null {
+  const minutes = h * 60 + mi;
+  const edges = [-60, 60, 180, 300, 420, 540, 660, 780, 900, 1020, 1140, 1260, 1380];
+
+  for (const edge of edges) {
+    const delta = minutes - edge;
+    if (Math.abs(delta) <= BOUNDARY_MINUTES) {
+      const edgeHour = ((edge / 60) % 24 + 24) % 24;
+      const side = delta < 0 ? 'before' : 'after';
+      return (
+        `時辰 edge at ${String(edgeHour).padStart(2, '0')}:00 — birth is ` +
+        `${Math.abs(delta)} min ${side} it`
+      );
+    }
+  }
+  return null;
+}
+
+// ── Main export ────────────────────────────────────────────
+
+/**
+ * Compute the Four Pillars for a birth date/time.
+ *
+ * @example
+ * computePillars({ date: '1989-09-13', time: '09:00' });
+ * // → year 己巳, month 癸酉, day 丙子, hour 癸巳
+ */
+export function computePillars({ date, time = null, tz = null }: PillarsInput): Pillars {
+  void tz; // see PillarsInput.tz — persisted upstream, never read here.
+
+  const { y, m, d } = parseDate(date);
+  const hasTime = time !== null && time !== undefined && time !== '';
+  const { h, mi } = hasTime ? parseTime(time as string) : { h: NO_TIME_PROBE_HOUR, mi: 0 };
+
+  const at = SolarTime.fromYmdHms(y, m, d, h, mi, 0);
+  const eightChar = at.getLunarHour().getEightChar();
+
+  const pillar = (cycle: { getHeavenStem(): { getName(): string }; getEarthBranch(): { getName(): string } }): Pillar => ({
+    stem: cycle.getHeavenStem().getName(),
+    branch: cycle.getEarthBranch().getName(),
+  });
+
+  const reasons: string[] = [];
+  const monthReason = monthBoundaryReason(at);
+  if (monthReason) reasons.push(monthReason);
+
+  if (hasTime) {
+    const hourReason = hourBoundaryReason(h, mi);
+    if (hourReason) reasons.push(hourReason);
+  } else {
+    // No time on a 節 day: the month pillar genuinely cannot be determined —
+    // the boundary falls inside the birth day. NO_TIME_PROBE_HOUR picks the
+    // majority branch; the caller still needs to know it was a coin toss.
+    const jieToday = [governingJie(at), governingJie(at).next(2)]
+      .map((term) => term.getJulianDay().getSolarTime())
+      .find((i) => i.getYear() === y && i.getMonth() === m && i.getDay() === d);
+    if (jieToday) {
+      reasons.push(
+        `birth time unknown and a 節 falls on ${formatInstant(jieToday)} — ` +
+        `month pillar resolved to the branch covering most of the day`,
+      );
+    }
+  }
+
+  return {
+    year: pillar(eightChar.getYear()),
+    month: pillar(eightChar.getMonth()),
+    day: pillar(eightChar.getDay()),
+    hour: hasTime ? pillar(eightChar.getHour()) : null,
+    boundaryFlag: reasons.length > 0,
+    ...(reasons.length > 0 ? { boundaryReason: reasons.join('; ') } : {}),
+  };
+}
