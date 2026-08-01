@@ -46,6 +46,11 @@ jobs:
       - name: Joey bar fixture shape
         run: npm run test:joey-bars
 
+      # The 藏干 table. An error here is an error in every derived fact at once —
+      # 子 was wrong as 壬 for the whole build and cost a measurement cycle.
+      - name: Hidden-stem table lock
+        run: npm run test:hidden-stems
+
       # Independent day-pillar cross-check (astronomia) + Reyner's chart.
       - name: Day-pillar cross-check
         run: npm run test:bazi

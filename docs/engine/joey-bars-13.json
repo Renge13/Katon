@@ -1,0 +1,1146 @@
+{
+ "1": {
+  "date": "1989-09-13",
+  "time": "09:00",
+  "pillars": {
+   "year": "己巳",
+   "month": "癸酉",
+   "day": "丙子",
+   "hour": "癸巳"
+  },
+  "dayMaster": "丙",
+  "monthBranch": "酉",
+  "joeyBars": {
+   "正財": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 88,
+    "presence": 1
+   },
+   "比肩": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 85,
+    "presence": 2.2
+   },
+   "偏財": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 80,
+    "presence": 0.6
+   },
+   "正官": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 78,
+    "presence": 3
+   },
+   "食神": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 50,
+    "presence": 0.2
+   },
+   "傷官": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 42,
+    "presence": 1
+   },
+   "正印": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 0,
+    "presence": 0
+   },
+   "偏印": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 0,
+    "presence": 0
+   },
+   "七殺": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 0,
+    "presence": 0
+   },
+   "劫財": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 0,
+   "Fire": 85,
+   "Earth": 92,
+   "Metal": 168,
+   "Water": 78
+  },
+  "joeyElementRank": [
+   "Metal",
+   "Earth",
+   "Fire",
+   "Water",
+   "Wood"
+  ]
+ },
+ "2": {
+  "date": "1990-03-04",
+  "time": "14:00",
+  "pillars": {
+   "year": "庚午",
+   "month": "戊寅",
+   "day": "戊辰",
+   "hour": "己未"
+  },
+  "dayMaster": "戊",
+  "monthBranch": "寅",
+  "joeyBars": {
+   "比肩": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 87,
+    "presence": 2.7
+   },
+   "七殺": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 83,
+    "presence": 0.6
+   },
+   "正官": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 80,
+    "presence": 0.4
+   },
+   "劫財": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 70,
+    "presence": 2
+   },
+   "偏印": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 60,
+    "presence": 0.3
+   },
+   "正印": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 60,
+    "presence": 0.9
+   },
+   "正財": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 41,
+    "presence": 0.1
+   },
+   "食神": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 29,
+    "presence": 1
+   },
+   "偏財": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 0,
+    "presence": 0
+   },
+   "傷官": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 163,
+   "Fire": 120,
+   "Earth": 157,
+   "Metal": 29,
+   "Water": 41
+  },
+  "joeyElementRank": [
+   "Wood",
+   "Earth",
+   "Fire",
+   "Water",
+   "Metal"
+  ]
+ },
+ "3": {
+  "date": "1992-04-20",
+  "time": "08:00",
+  "pillars": {
+   "year": "壬申",
+   "month": "甲辰",
+   "day": "丙寅",
+   "hour": "壬辰"
+  },
+  "dayMaster": "丙",
+  "monthBranch": "辰",
+  "joeyBars": {
+   "偏印": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 98,
+    "presence": 1.6
+   },
+   "食神": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 94,
+    "presence": 1.4
+   },
+   "正印": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 80,
+    "presence": 0.6
+   },
+   "七殺": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 67,
+    "presence": 2.3
+   },
+   "正官": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 64,
+    "presence": 0.2
+   },
+   "比肩": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 60,
+    "presence": 1.3
+   },
+   "偏財": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 42,
+    "presence": 0.6
+   },
+   "正財": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 0,
+    "presence": 0
+   },
+   "劫財": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 0,
+    "presence": 0
+   },
+   "傷官": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 178,
+   "Fire": 60,
+   "Earth": 94,
+   "Metal": 42,
+   "Water": 131
+  },
+  "joeyElementRank": [
+   "Wood",
+   "Water",
+   "Earth",
+   "Fire",
+   "Metal"
+  ]
+ },
+ "4": {
+  "date": "1995-06-01",
+  "time": "06:00",
+  "pillars": {
+   "year": "乙亥",
+   "month": "辛巳",
+   "day": "癸亥",
+   "hour": "乙卯"
+  },
+  "dayMaster": "癸",
+  "monthBranch": "巳",
+  "joeyBars": {
+   "正財": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 83,
+    "presence": 0.6
+   },
+   "食神": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 79,
+    "presence": 3
+   },
+   "劫財": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 64,
+    "presence": 1.2
+   },
+   "正官": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 60,
+    "presence": 0.1
+   },
+   "傷官": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 50,
+    "presence": 0.8
+   },
+   "正印": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 29,
+    "presence": 0.3
+   },
+   "比肩": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 29,
+    "presence": 1
+   },
+   "偏印": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 20,
+    "presence": 1
+   },
+   "偏財": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 0,
+    "presence": 0
+   },
+   "七殺": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 129,
+   "Fire": 83,
+   "Earth": 60,
+   "Metal": 49,
+   "Water": 93
+  },
+  "joeyElementRank": [
+   "Wood",
+   "Water",
+   "Fire",
+   "Earth",
+   "Metal"
+  ]
+ },
+ "5": {
+  "date": "1988-07-10",
+  "time": "22:00",
+  "pillars": {
+   "year": "戊辰",
+   "month": "己未",
+   "day": "丙寅",
+   "hour": "己亥"
+  },
+  "dayMaster": "丙",
+  "monthBranch": "未",
+  "joeyBars": {
+   "傷官": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 100,
+    "presence": 2.6
+   },
+   "比肩": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 88,
+    "presence": 1.3
+   },
+   "食神": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 82,
+    "presence": 1.7
+   },
+   "劫財": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 75,
+    "presence": 0.3
+   },
+   "正印": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 64,
+    "presence": 0.4
+   },
+   "偏印": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 61,
+    "presence": 1
+   },
+   "七殺": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 42,
+    "presence": 0.6
+   },
+   "正官": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 29,
+    "presence": 0.1
+   },
+   "偏財": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 0,
+    "presence": 0
+   },
+   "正財": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 125,
+   "Fire": 163,
+   "Earth": 182,
+   "Metal": 0,
+   "Water": 71
+  },
+  "joeyElementRank": [
+   "Earth",
+   "Fire",
+   "Wood",
+   "Water",
+   "Metal"
+  ]
+ },
+ "6": {
+  "date": "1989-03-03",
+  "time": "00:15",
+  "pillars": {
+   "year": "己巳",
+   "month": "丙寅",
+   "day": "壬戌",
+   "hour": "庚子"
+  },
+  "dayMaster": "壬",
+  "monthBranch": "寅",
+  "joeyBars": {
+   "偏財": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 100,
+    "presence": 1.9
+   },
+   "食神": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 83,
+    "presence": 0.6
+   },
+   "七殺": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 63,
+    "presence": 0.8
+   },
+   "劫財": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 52,
+    "presence": 1
+   },
+   "正財": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 45,
+    "presence": 0.1
+   },
+   "比肩": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 42,
+    "presence": 1
+   },
+   "偏印": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 41,
+    "presence": 1.3
+   },
+   "正印": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 29,
+    "presence": 0.3
+   },
+   "正官": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 20,
+    "presence": 1
+   },
+   "傷官": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 83,
+   "Fire": 145,
+   "Earth": 83,
+   "Metal": 70,
+   "Water": 94
+  },
+  "joeyElementRank": [
+   "Fire",
+   "Water",
+   "Wood",
+   "Earth",
+   "Metal"
+  ]
+ },
+ "7": {
+  "date": "1993-06-12",
+  "time": "23:30",
+  "pillars": {
+   "year": "癸酉",
+   "month": "戊午",
+   "day": "甲子",
+   "hour": "丙子"
+  },
+  "dayMaster": "甲",
+  "monthBranch": "午",
+  "joeyBars": {
+   "正印": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 85,
+    "presence": 3
+   },
+   "傷官": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 83,
+    "presence": 0.6
+   },
+   "食神": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 76,
+    "presence": 1
+   },
+   "正財": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 60,
+    "presence": 0.4
+   },
+   "偏財": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 48,
+    "presence": 1
+   },
+   "比肩": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 42,
+    "presence": 1
+   },
+   "正官": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 27,
+    "presence": 1
+   },
+   "七殺": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 0,
+    "presence": 0
+   },
+   "偏印": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 0,
+    "presence": 0
+   },
+   "劫財": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 42,
+   "Fire": 159,
+   "Earth": 108,
+   "Metal": 27,
+   "Water": 85
+  },
+  "joeyElementRank": [
+   "Fire",
+   "Earth",
+   "Water",
+   "Wood",
+   "Metal"
+  ]
+ },
+ "8": {
+  "date": "1992-01-05",
+  "time": "08:00",
+  "pillars": {
+   "year": "辛未",
+   "month": "庚子",
+   "day": "庚辰",
+   "hour": "庚辰"
+  },
+  "dayMaster": "庚",
+  "monthBranch": "子",
+  "joeyBars": {
+   "傷官": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 98,
+    "presence": 1.2
+   },
+   "偏印": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 64,
+    "presence": 1.2
+   },
+   "比肩": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 62,
+    "presence": 3
+   },
+   "正財": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 55,
+    "presence": 0.7
+   },
+   "正印": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 42,
+    "presence": 0.6
+   },
+   "劫財": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 42,
+    "presence": 1
+   },
+   "正官": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 17,
+    "presence": 0.3
+   },
+   "七殺": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 0,
+    "presence": 0
+   },
+   "食神": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 0,
+    "presence": 0
+   },
+   "偏財": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 55,
+   "Fire": 17,
+   "Earth": 106,
+   "Metal": 104,
+   "Water": 98
+  },
+  "joeyElementRank": [
+   "Earth",
+   "Metal",
+   "Water",
+   "Wood",
+   "Fire"
+  ]
+ },
+ "9": {
+  "date": "1990-08-07",
+  "time": "10:00",
+  "pillars": {
+   "year": "庚午",
+   "month": "癸未",
+   "day": "甲辰",
+   "hour": "己巳"
+  },
+  "dayMaster": "甲",
+  "monthBranch": "未",
+  "joeyBars": {
+   "食神": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 98,
+    "presence": 0.6
+   },
+   "傷官": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 98,
+    "presence": 0.9
+   },
+   "正財": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 95,
+    "presence": 2
+   },
+   "劫財": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 64,
+    "presence": 0.4
+   },
+   "偏財": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 60,
+    "presence": 0.7
+   },
+   "比肩": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 42,
+    "presence": 1
+   },
+   "正印": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 41,
+    "presence": 1.1
+   },
+   "七殺": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 40,
+    "presence": 1.3
+   },
+   "偏印": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 0,
+    "presence": 0
+   },
+   "正官": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 106,
+   "Fire": 196,
+   "Earth": 155,
+   "Metal": 40,
+   "Water": 41
+  },
+  "joeyElementRank": [
+   "Fire",
+   "Earth",
+   "Wood",
+   "Water",
+   "Metal"
+  ]
+ },
+ "10": {
+  "date": "1985-02-04",
+  "time": "12:00",
+  "pillars": {
+   "year": "乙丑",
+   "month": "戊寅",
+   "day": "甲戌",
+   "hour": "庚午"
+  },
+  "dayMaster": "甲",
+  "monthBranch": "寅",
+  "joeyBars": {
+   "偏財": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 87,
+    "presence": 1.7
+   },
+   "比肩": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 83,
+    "presence": 1.6
+   },
+   "食神": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 82,
+    "presence": 0.3
+   },
+   "傷官": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 82,
+    "presence": 0.7
+   },
+   "劫財": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 76,
+    "presence": 1
+   },
+   "正印": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 41,
+    "presence": 0.3
+   },
+   "正財": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 39,
+    "presence": 1
+   },
+   "正官": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 38,
+    "presence": 0.4
+   },
+   "七殺": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 29,
+    "presence": 1
+   },
+   "偏印": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 159,
+   "Fire": 164,
+   "Earth": 126,
+   "Metal": 67,
+   "Water": 41
+  },
+  "joeyElementRank": [
+   "Fire",
+   "Wood",
+   "Earth",
+   "Metal",
+   "Water"
+  ]
+ },
+ "11": {
+  "date": "1991-01-10",
+  "time": "04:00",
+  "pillars": {
+   "year": "庚午",
+   "month": "己丑",
+   "day": "庚辰",
+   "hour": "戊寅"
+  },
+  "dayMaster": "庚",
+  "monthBranch": "丑",
+  "joeyBars": {
+   "正印": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 82,
+    "presence": 2
+   },
+   "傷官": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 80,
+    "presence": 0.4
+   },
+   "偏印": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 69,
+    "presence": 1.7
+   },
+   "偏財": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 55,
+    "presence": 0.6
+   },
+   "劫財": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 55,
+    "presence": 0.1
+   },
+   "比肩": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 52,
+    "presence": 2
+   },
+   "正財": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 45,
+    "presence": 0.3
+   },
+   "正官": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 27,
+    "presence": 0.6
+   },
+   "七殺": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 17,
+    "presence": 0.3
+   },
+   "食神": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 100,
+   "Fire": 44,
+   "Earth": 151,
+   "Metal": 107,
+   "Water": 80
+  },
+  "joeyElementRank": [
+   "Earth",
+   "Metal",
+   "Wood",
+   "Water",
+   "Fire"
+  ]
+ },
+ "12": {
+  "date": "1990-06-07",
+  "time": "12:00",
+  "pillars": {
+   "year": "庚午",
+   "month": "壬午",
+   "day": "癸卯",
+   "hour": "戊午"
+  },
+  "dayMaster": "癸",
+  "monthBranch": "午",
+  "joeyBars": {
+   "偏財": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 98,
+    "presence": 1.8
+   },
+   "七殺": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 70,
+    "presence": 1.2
+   },
+   "食神": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 52,
+    "presence": 1
+   },
+   "正官": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 48,
+    "presence": 1
+   },
+   "劫財": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 29,
+    "presence": 1
+   },
+   "比肩": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 29,
+    "presence": 1
+   },
+   "正印": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 20,
+    "presence": 1
+   },
+   "偏印": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 0,
+    "presence": 0
+   },
+   "傷官": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 0,
+    "presence": 0
+   },
+   "正財": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 52,
+   "Fire": 98,
+   "Earth": 118,
+   "Metal": 20,
+   "Water": 58
+  },
+  "joeyElementRank": [
+   "Earth",
+   "Fire",
+   "Water",
+   "Wood",
+   "Metal"
+  ]
+ },
+ "13": {
+  "date": "1989-02-04",
+  "time": "04:00",
+  "pillars": {
+   "year": "戊辰",
+   "month": "乙丑",
+   "day": "乙未",
+   "hour": "戊寅"
+  },
+  "dayMaster": "乙",
+  "monthBranch": "丑",
+  "joeyBars": {
+   "比肩": {
+    "stem": "乙",
+    "element": "Wood",
+    "score": 80,
+    "presence": 2.4
+   },
+   "偏印": {
+    "stem": "癸",
+    "element": "Water",
+    "score": 80,
+    "presence": 0.4
+   },
+   "正財": {
+    "stem": "戊",
+    "element": "Earth",
+    "score": 78,
+    "presence": 2.7
+   },
+   "偏財": {
+    "stem": "己",
+    "element": "Earth",
+    "score": 72,
+    "presence": 1.2
+   },
+   "七殺": {
+    "stem": "辛",
+    "element": "Metal",
+    "score": 55,
+    "presence": 0.1
+   },
+   "劫財": {
+    "stem": "甲",
+    "element": "Wood",
+    "score": 55,
+    "presence": 0.6
+   },
+   "傷官": {
+    "stem": "丙",
+    "element": "Fire",
+    "score": 17,
+    "presence": 0.3
+   },
+   "食神": {
+    "stem": "丁",
+    "element": "Fire",
+    "score": 17,
+    "presence": 0.3
+   },
+   "正印": {
+    "stem": "壬",
+    "element": "Water",
+    "score": 0,
+    "presence": 0
+   },
+   "正官": {
+    "stem": "庚",
+    "element": "Metal",
+    "score": 0,
+    "presence": 0
+   }
+  },
+  "joeyElementTotals": {
+   "Wood": 135,
+   "Fire": 34,
+   "Earth": 150,
+   "Metal": 55,
+   "Water": 80
+  },
+  "joeyElementRank": [
+   "Earth",
+   "Wood",
+   "Water",
+   "Metal",
+   "Fire"
+  ]
+ }
+}
