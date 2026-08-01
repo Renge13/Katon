@@ -80,6 +80,21 @@ export interface PillarsInput {
    * hour would render as a real fourth pillar.
    */
   termSide?: 'before' | 'after' | null;
+  /**
+   * Optional, default null. Accepted and persisted; it does NOT affect anything
+   * this function returns.
+   *
+   * Gender affects EXACTLY ONE THING: luck-pillar (大運) direction — forward for
+   * yang-year males and yin-year females, reverse otherwise. It does not touch the
+   * natal chart, Ten Gods, strength, badges, palaces or compatibility, all of
+   * which read the natal chart only. Luck pillars are not built yet, so there is
+   * no consumer; the field exists so it does not have to be re-collected later.
+   *
+   * When luck pillars ARE built, use tyme4ts's gender-aware API
+   * (ChildLimit.fromSolarTime(solarTime, Gender) -> DecadeFortune) rather than
+   * deriving the direction by hand.
+   */
+  gender?: 'male' | 'female' | null;
 }
 
 export interface Pillar {
@@ -371,8 +386,11 @@ export function seasonTurnOnDate(date: string): SeasonTurn | null {
  * computePillars({ date: '1989-09-13', time: '09:00' });
  * // → year 己巳, month 癸酉, day 丙子, hour 癸巳
  */
-export function computePillars({ date, time = null, tz = null, termSide = null }: PillarsInput): Pillars {
+export function computePillars({ date, time = null, tz = null, termSide = null, gender = null }: PillarsInput): Pillars {
   void tz; // see PillarsInput.tz — persisted upstream, never read here.
+  // see PillarsInput.gender — luck-pillar direction only, and luck pillars do not
+  // exist yet. Reading it anywhere in the natal computation would be a bug.
+  void gender;
 
   const { y, m, d } = parseDate(date);
   const hasTime = time !== null && time !== undefined && time !== '';
