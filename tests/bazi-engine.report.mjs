@@ -1,7 +1,7 @@
 // ============================================================
 // BaZi engine validation report (Tasks 2–7)
 // ============================================================
-// Runs the engine against the 12-chart ground-truth fixture and prints:
+// Runs the engine against the ground-truth fixture (13 charts) and prints:
 //   Task 2 — four pillars, computed vs expected (incl. boundary edge cases)
 //   Task 3 — every Ten God assignment per chart (PDF spot-check)
 //   Task 4 — Track A canonical Main Profile === expected  [12/12 target]
@@ -14,7 +14,7 @@
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { computeChart } from '../lib/bazi/computeChart.js';
-import { tenGodsForChart, TEN_GOD_LABEL } from '../lib/bazi/tenGods.js';
+import { tenGodsForChart } from '../lib/bazi/tenGods.js';
 import { mainProfile } from '../lib/bazi/mainProfile.js';
 import { tenGodTally, loudAlternatives, LOUD_MARGIN } from '../lib/bazi/tenGodTally.js';
 import { VALIDATION_CHARTS, PILLAR_EDGE_CASES } from './bazi-validation.fixture.js';
@@ -67,7 +67,6 @@ for (const tc of VALIDATION_CHARTS) {
   // ---- Task 4: Track A ----
   const profileOk = profile.hanzi === expect.mainProfileHanzi;
   if (!profileOk) {
-    const inBranch = (chart.month.branch, true); // detail printed below
     record(id, 'profileA',
       `got ${profile.hanzi}/${profile.label} (root ${profile.rootQi}-qi ${profile.rootStem}` +
       `${profile.fallback ? ',FALLBACK' : ',revealed'}) ≠ expected ${expect.mainProfileHanzi}/${expect.mainProfileLabel}`);
@@ -126,7 +125,6 @@ console.log('\n\n══════════════ TASK 4 — TRACK A C
 let pA = 0;
 for (const r of results) {
   if (r.profileOk) pA++;
-  const branchHiddenGods = (r.chart.month.branch);
   console.log(`#${String(r.tc.id).padStart(2)} ${tick(r.profileOk)} got ${r.profile.hanzi}/${r.profile.label} (root ${r.profile.rootQi}-qi ${r.profile.rootStem}, ${r.profile.fallback ? 'FALLBACK' : 'revealed'}) | expect ${r.tc.expect.mainProfileHanzi}/${r.tc.expect.mainProfileLabel}`);
 }
 console.log(`\n  Track A: ${pA}/${VALIDATION_CHARTS.length} match ground truth`);

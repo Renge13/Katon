@@ -8,7 +8,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "generate:solar-terms": "node scripts/generate-solar-terms.js",
     "check:copy": "node scripts/check-copy.js",
     "typecheck": "tsc -p tsconfig.check.json",
     "test:bazi": "node scripts/validate-bazi.mjs",
@@ -36,6 +35,7 @@
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
-    "typescript": "^7.0.2"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.65.0"
   }
 }

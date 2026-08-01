@@ -109,16 +109,75 @@ test('time: null yields hour: null and does not default to midnight', () => {
 
 // ── Boundary flag ──────────────────────────────────────────
 
-test('boundaryFlag fires within ±2 min of a 節 and of a 時辰 edge', () => {
+test('solarTerm fires within ±2 min of a 節 — the risk that moves the month pillar', () => {
   const nearJie = computePillars({ date: '1989-02-04', time: '04:26' });
+  assert.equal(nearJie.boundary.solarTerm.flagged, true);
+  assert.equal(nearJie.boundary.solarTerm.term, '立春');
+  // Fractional: 立春 fires at 04:27:09, so 04:26 is 69 s = 1.15 min before it.
+  assert.equal(nearJie.boundary.solarTerm.minutesFrom, -1.15);
+  assert.equal(nearJie.boundary.hourEdge.flagged, false);
   assert.equal(nearJie.boundaryFlag, true);
   assert.match(nearJie.boundaryReason ?? '', /立春/);
 
-  const nearShiChen = computePillars({ date: '1989-09-13', time: '09:01' });
-  assert.equal(nearShiChen.boundaryFlag, true);
-  assert.match(nearShiChen.boundaryReason ?? '', /時辰/);
+  // 27 min away is not a boundary, even though it IS a 立春 day.
+  const sameDayClear = computePillars({ date: '1989-02-04', time: '04:00' });
+  assert.equal(sameDayClear.boundary.solarTerm.flagged, false);
+  assert.equal(sameDayClear.boundaryFlag, false);
+});
 
-  const clear = computePillars({ date: '1989-09-13', time: '09:30' });
-  assert.equal(clear.boundaryFlag, false);
-  assert.equal(clear.boundaryReason, undefined);
+test('a round hour does NOT trip hourEdge — rounding is not precision', () => {
+  // 09:00 IS the 巳時 edge. Flagging it would fire on a large share of all
+  // charts and carry no information, so timeLikelyRounded suppresses it.
+  const round = computePillars({ date: '1989-09-13', time: '09:00' });
+  assert.equal(round.boundary.timeLikelyRounded, true);
+  assert.equal(round.boundary.hourEdge.flagged, false);
+  assert.equal(round.boundaryFlag, false);
+  assert.equal(round.boundaryReason, undefined);
+
+  // 09:30 is rounded too, and nowhere near an edge either way.
+  const halfPast = computePillars({ date: '1989-09-13', time: '09:30' });
+  assert.equal(halfPast.boundary.timeLikelyRounded, true);
+  assert.equal(halfPast.boundaryFlag, false);
+});
+
+test('hourEdge fires only on a precise time near an edge', () => {
+  const precise = computePillars({ date: '1989-09-13', time: '09:01' });
+  assert.equal(precise.boundary.timeLikelyRounded, false);
+  assert.equal(precise.boundary.hourEdge.flagged, true);
+  assert.equal(precise.boundary.hourEdge.minutesFrom, 1);
+  assert.equal(precise.boundary.solarTerm.flagged, false);
+  assert.match(precise.boundaryReason ?? '', /時辰/);
+
+  const away = computePillars({ date: '1989-09-13', time: '09:14' });
+  assert.equal(away.boundary.hourEdge.flagged, false);
+  assert.equal(away.boundary.hourEdge.minutesFrom, undefined);
+  assert.equal(away.boundaryFlag, false);
+});
+
+test('no time on a 節 day flags solarTerm with no minutesFrom', () => {
+  // The boundary is somewhere inside the day, so the uncertainty is a whole day
+  // wide — not a near miss. minutesFrom would be meaningless here.
+  const b = computePillars({ date: '1989-02-04', time: null }).boundary;
+  assert.equal(b.solarTerm.flagged, true);
+  assert.equal(b.solarTerm.term, '立春');
+  assert.equal(b.solarTerm.minutesFrom, undefined);
+  assert.equal(b.timeLikelyRounded, false, 'no time was entered, so nothing was rounded');
+
+  // An ordinary day with no time flags nothing.
+  const ordinary = computePillars({ date: '1989-09-13', time: null });
+  assert.equal(ordinary.boundaryFlag, false);
+});
+
+test('boundaryFlag equals solarTerm.flagged || hourEdge.flagged', () => {
+  for (const [date, time] of [
+    ['1989-02-04', '04:26'], ['1989-09-13', '09:00'], ['1989-09-13', '09:01'],
+    ['1989-09-13', '09:14'], ['1989-02-04', null], ['1993-06-12', '23:30'],
+  ] as [string, string | null][]) {
+    const p = computePillars({ date, time });
+    assert.equal(
+      p.boundaryFlag,
+      p.boundary.solarTerm.flagged || p.boundary.hourEdge.flagged,
+      `${date} ${time}`,
+    );
+  }
 });

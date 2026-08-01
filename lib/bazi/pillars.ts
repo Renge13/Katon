@@ -79,13 +79,66 @@ export interface Pillar {
   branch: string;
 }
 
+/**
+ * Solar-term (節) proximity — the boundary that decides the MONTH pillar.
+ *
+ * This is the one that matters. The Month Branch is the heaviest input to 得令
+ * in the strength engine, so getting it wrong moves the whole reading.
+ */
+export interface SolarTermBoundary {
+  flagged: boolean;
+  /** The 節 in question. Present iff `flagged`. */
+  term?: string;
+  /**
+   * Signed minutes from that 節 — negative means born before it. FRACTIONAL:
+   * 節 instants carry seconds (立春 1989 fires at 04:27:09).
+   *
+   * Present iff `flagged` AND the birth instant is known. It is ABSENT in the
+   * time-unknown case, where the 節 falls somewhere inside the birth day and
+   * the uncertainty spans the whole day rather than a couple of minutes.
+   */
+  minutesFrom?: number;
+}
+
+/**
+ * 時辰 edge proximity — decides the HOUR pillar only. Much lower stakes, and
+ * usually caused by the user rounding their own birth time rather than by
+ * anything astronomical. Suppressed entirely when `timeLikelyRounded`.
+ */
+export interface HourEdgeBoundary {
+  flagged: boolean;
+  /** Signed minutes from the edge — negative means before. Present iff `flagged`. */
+  minutesFrom?: number;
+}
+
+export interface Boundary {
+  solarTerm: SolarTermBoundary;
+  hourEdge: HourEdgeBoundary;
+  /**
+   * The entered minute is `00` or `30`. Someone typing "09:00" almost certainly
+   * means "sekitar jam 9", not 09:00:00 — so their rounding must not be read as
+   * astronomical precision. False when no time was given.
+   */
+  timeLikelyRounded: boolean;
+}
+
 export interface Pillars {
   year: Pillar;
   month: Pillar;
   day: Pillar;
   /** null when the birth time is unknown. Never defaulted to midnight. */
   hour: Pillar | null;
-  /** True when the birth instant sits too close to a boundary to trust. */
+  /**
+   * The two risks, kept apart. They are not comparable: a 節 boundary can move
+   * the month pillar and therefore the reading; a 時辰 edge can only move the
+   * hour pillar. Consumers should branch on `boundary.solarTerm.flagged`.
+   */
+  boundary: Boundary;
+  /**
+   * Derived convenience: `solarTerm.flagged || hourEdge.flagged`. A plain
+   * property rather than an accessor so it survives JSON round-trips.
+   * Prefer `boundary` — this cannot tell the two risks apart.
+   */
   boundaryFlag: boolean;
   /** Human-readable explanation, present only when boundaryFlag is true. */
   boundaryReason?: string;
@@ -136,36 +189,65 @@ function formatInstant(t: SolarTime): string {
 }
 
 /**
- * Month-pillar boundary check.
+ * Month-pillar (節) boundary check.
  *
  * Both sides of a month boundary carry the same risk — a birth 1 minute BEFORE
  * the next 節 is as unresolvable as one 1 minute after the governing 節 — so
  * the nearest of the two is what gets measured. That is what "±2 minutes of the
  * governing 節" means in practice.
  */
-function monthBoundaryReason(at: SolarTime): string | null {
+function checkSolarTerm(at: SolarTime): { boundary: SolarTermBoundary; reason: string | null } {
   const jie = governingJie(at);
-  const next = jie.next(2);
 
-  for (const term of [jie, next]) {
+  for (const term of [jie, jie.next(2)]) {
     const instant = term.getJulianDay().getSolarTime();
     const delta = minutesBetween(at, instant);
     if (Math.abs(delta) <= BOUNDARY_MINUTES) {
       const side = delta < 0 ? 'before' : 'after';
-      return (
-        `節 ${term.getName()} at ${formatInstant(instant)} — birth is ` +
-        `${Math.abs(delta).toFixed(1)} min ${side} the month boundary`
-      );
+      return {
+        boundary: { flagged: true, term: term.getName(), minutesFrom: delta },
+        reason:
+          `節 ${term.getName()} at ${formatInstant(instant)} — birth is ` +
+          `${Math.abs(delta).toFixed(1)} min ${side} the month boundary`,
+      };
     }
   }
-  return null;
+  return { boundary: { flagged: false }, reason: null };
 }
 
 /**
- * 時辰 boundary check. 時辰 open on the odd hours (子 at 23:00, 丑 at 01:00, …),
- * so -60 covers the previous day's 23:00 for a birth just after midnight.
+ * The 節 falling inside the birth day, if there is one. Only meaningful when the
+ * birth time is unknown: the boundary is somewhere in the day, so the month
+ * pillar is a coin toss rather than a near miss.
  */
-function hourBoundaryReason(h: number, mi: number): string | null {
+function jieWithinDay(
+  at: SolarTime,
+  y: number,
+  m: number,
+  d: number,
+): { term: SolarTerm; instant: SolarTime } | undefined {
+  const jie = governingJie(at);
+  return [jie, jie.next(2)]
+    .map((term) => ({ term, instant: term.getJulianDay().getSolarTime() }))
+    .find(({ instant: i }) => i.getYear() === y && i.getMonth() === m && i.getDay() === d);
+}
+
+/**
+ * 時辰 edge check. 時辰 open on the odd hours (子 at 23:00, 丑 at 01:00, …), so
+ * -60 covers the previous day's 23:00 for a birth just after midnight.
+ *
+ * Suppressed when the minute is a round `00`/`30`, which is the overwhelmingly
+ * common case: every odd o'clock IS an edge, so without this the flag would
+ * fire on a large share of all charts and mean nothing. A user who types a round
+ * hour is reporting an approximation, not claiming second-level precision.
+ */
+function checkHourEdge(
+  h: number,
+  mi: number,
+  timeLikelyRounded: boolean,
+): { boundary: HourEdgeBoundary; reason: string | null } {
+  if (timeLikelyRounded) return { boundary: { flagged: false }, reason: null };
+
   const minutes = h * 60 + mi;
   const edges = [-60, 60, 180, 300, 420, 540, 660, 780, 900, 1020, 1140, 1260, 1380];
 
@@ -174,13 +256,15 @@ function hourBoundaryReason(h: number, mi: number): string | null {
     if (Math.abs(delta) <= BOUNDARY_MINUTES) {
       const edgeHour = ((edge / 60) % 24 + 24) % 24;
       const side = delta < 0 ? 'before' : 'after';
-      return (
-        `時辰 edge at ${String(edgeHour).padStart(2, '0')}:00 — birth is ` +
-        `${Math.abs(delta)} min ${side} it`
-      );
+      return {
+        boundary: { flagged: true, minutesFrom: delta },
+        reason:
+          `時辰 edge at ${String(edgeHour).padStart(2, '0')}:00 — birth is ` +
+          `${Math.abs(delta)} min ${side} it`,
+      };
     }
   }
-  return null;
+  return { boundary: { flagged: false }, reason: null };
 }
 
 // ── Main export ────────────────────────────────────────────
@@ -207,34 +291,47 @@ export function computePillars({ date, time = null, tz = null }: PillarsInput): 
     branch: cycle.getEarthBranch().getName(),
   });
 
+  const timeLikelyRounded = hasTime && (mi === 0 || mi === 30);
   const reasons: string[] = [];
-  const monthReason = monthBoundaryReason(at);
-  if (monthReason) reasons.push(monthReason);
+
+  let solarTerm: SolarTermBoundary;
+  let hourEdge: HourEdgeBoundary = { flagged: false };
 
   if (hasTime) {
-    const hourReason = hourBoundaryReason(h, mi);
-    if (hourReason) reasons.push(hourReason);
+    const term = checkSolarTerm(at);
+    solarTerm = term.boundary;
+    if (term.reason) reasons.push(term.reason);
+
+    const edge = checkHourEdge(h, mi, timeLikelyRounded);
+    hourEdge = edge.boundary;
+    if (edge.reason) reasons.push(edge.reason);
   } else {
     // No time on a 節 day: the month pillar genuinely cannot be determined —
     // the boundary falls inside the birth day. NO_TIME_PROBE_HOUR picks the
     // majority branch; the caller still needs to know it was a coin toss.
-    const jieToday = [governingJie(at), governingJie(at).next(2)]
-      .map((term) => term.getJulianDay().getSolarTime())
-      .find((i) => i.getYear() === y && i.getMonth() === m && i.getDay() === d);
+    // minutesFrom is deliberately absent — the uncertainty is a whole day wide,
+    // not a couple of minutes.
+    const jieToday = jieWithinDay(at, y, m, d);
     if (jieToday) {
+      solarTerm = { flagged: true, term: jieToday.term.getName() };
       reasons.push(
-        `birth time unknown and a 節 falls on ${formatInstant(jieToday)} — ` +
+        `birth time unknown and a 節 falls on ${formatInstant(jieToday.instant)} — ` +
         `month pillar resolved to the branch covering most of the day`,
       );
+    } else {
+      solarTerm = { flagged: false };
     }
   }
+
+  const boundaryFlag = solarTerm.flagged || hourEdge.flagged;
 
   return {
     year: pillar(eightChar.getYear()),
     month: pillar(eightChar.getMonth()),
     day: pillar(eightChar.getDay()),
     hour: hasTime ? pillar(eightChar.getHour()) : null,
-    boundaryFlag: reasons.length > 0,
+    boundary: { solarTerm, hourEdge, timeLikelyRounded },
+    boundaryFlag,
     ...(reasons.length > 0 ? { boundaryReason: reasons.join('; ') } : {}),
   };
 }
