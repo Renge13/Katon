@@ -1,0 +1,57 @@
+# The accuracy gate.
+#
+# Katon's readings are only as good as its solar-term boundaries: a 節 on the
+# wrong day gives someone the wrong Month Branch, which changes 得令 and with it
+# the whole reading. Adopting tyme4ts made that a dependency question, and this
+# workflow is what turns "do I trust it?" into "did it change?" — answered on
+# every push, in about a second.
+#
+# scripts/oracle-sxtwl.py is deliberately NOT here: it needs a Python toolchain,
+# and it checks port fidelity rather than correctness. Run it by hand when
+# bumping tyme4ts.
+name: bazi-accuracy
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  accuracy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+
+      # 1,212 節 boundaries 1930-2030 vs an independent ephemeris, plus the
+      # Hong Kong Observatory published tables. Fails on any +08 date
+      # disagreement.
+      - name: Solar-term regression lock
+        run: npm run test:solar-terms
+
+      # The 13-chart Joey Yap fixture: pillars, Ten Gods, no-hour stability.
+      - name: Engine validation report
+        run: npm run test:engine
+
+      # Locks the naive-wall-clock convention and the 流派2 provider.
+      - name: Time-convention lock
+        run: npm run test:pillars
+
+      # Independent day-pillar cross-check (astronomia) + Reyner's chart.
+      - name: Day-pillar cross-check
+        run: npm run test:bazi
+
+      # Paywall fail-closed fence + webhook idempotency.
+      - name: Paywall forge tests
+        run: npm run test:forge
+
+      - name: Types
+        run: npm run typecheck
+
+      - name: Lint
+        run: npx eslint .
+        continue-on-error: true # pre-existing errors in scripts/build-content.mjs
