@@ -160,6 +160,29 @@ export function rankAgreement(engine, joey) {
   return { spearman, comparable, concordant, exactOrder, top1, keys };
 }
 
+/**
+ * ORACLE 4 — correlation between two paired continuous series across charts.
+ *
+ * Used for the verdict layer: the engine's supportShare against the same
+ * quantity implied by Joey's own element totals. Reported as a CORRELATION and
+ * not as a label-agreement count, deliberately — there is no ground truth for
+ * the weak/balanced/strong labels, only for the number underneath them. Cutting
+ * thresholds to make a distribution look right would be fitting to a prior on 13
+ * charts (C6, and the standing instruction not to touch 40/60).
+ *
+ * Pearson answers "is it the same number", Spearman "is it the same ordering".
+ * Both are reported because they fail differently: a systematic scale or offset
+ * error drops Pearson while leaving Spearman high.
+ */
+export function correlate(xs, ys) {
+  if (xs.length !== ys.length) throw new Error(`series length mismatch: ${xs.length} vs ${ys.length}`);
+  return {
+    n: xs.length,
+    pearson: pearson(xs, ys),
+    spearman: pearson(tiedRanks(xs), tiedRanks(ys)),
+  };
+}
+
 /** Aggregate rank-agreement results across charts. */
 export function aggregateRanks(results) {
   const usable = results.filter((r) => r.spearman != null);

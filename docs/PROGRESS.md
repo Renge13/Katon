@@ -186,7 +186,11 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **Oracle 3 pair concordance** | **89.9%** | 08-01 | 79.8% -> 84.5% -> 89.9% |
 | Verdict distribution | 5 weak / 8 balanced / 0 strong | 08-01 | Joey-implied is 7/6/0 — NOT a regression |
 | Joey-implied supportShare range | 20.1% to 55.3% | 08-01 | `engine/joey-implied-strength.json`; no chart reaches 60 |
-| Oracle 4 (engine vs Joey supportShare) | not yet measured | — | correlate BEFORE touching thresholds |
+| **Oracle 4 Pearson r** | **0.929** | 08-01 | engine supportShare vs Joey-implied, 13 charts. The verdict layer's underlying number is SOUND. |
+| **Oracle 4 Spearman rho** | **0.934** | 08-01 | same ordering as Joey |
+| Oracle 4 mean SIGNED error | +3.6 pts | 08-01 | engine reads systematically HIGH — an offset, not noise. Relevant when thresholds are eventually chosen. |
+| Oracle 4 mean abs error | 5.0 pts | 08-01 | max 10.2 (charts 10 and 6) |
+| Oracle 4 label agreement | 11/13 | 08-01 | informational only — the labels have no ground truth. Both misses (6, 10) straddle the 40 cut. |
 | Zero-presence law | 130/130 | 08-01 | verified against Joey's own presence figures |
 | Projection-independent ceiling | 7/13 | 08-01 | was 6/13 |
 | Engine Earth-first | 5 charts | 08-01 | was 7; Joey's is 4 |
