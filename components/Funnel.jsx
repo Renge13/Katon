@@ -315,7 +315,7 @@ function SeasonGate({ season, onAnswer }) {
 
       <Reveal delay={0.22}>
         <Para style={{ color: 'var(--tinta)' }}>
-          Kamu lahir sebelum atau setelah jam itu? Jawabannya menentukan pilar bulanmu — inti dari seluruh bacaan.
+          Kamu lahir sebelum atau setelah jam itu? Jawabannya menentukan pilar bulanmu, inti dari seluruh bacaan.
         </Para>
       </Reveal>
 
