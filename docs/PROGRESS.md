@@ -38,38 +38,50 @@ needs a second birthdate, so the free mirror must ship and acquire first. Theref
 
 ---
 
-## DETAIL FILES (pull as needed)
-### CLAUDE CODE HANDOVER PROMPTS — run in this order
-- **KATON-prompt-A-calculator-swap.md** ... 1st. tyme4ts swap + time-convention lock. Then commit Phase 1.
-- **KATON-prompt-B-regression-lock.md** ... 2nd. CI-only solar-term oracle. Harness already written.
-- **KATON-prompt-C-strength-engine.md** ... 3rd, TODO #1, ~2-3 sessions. Gates the whole paid catalogue.
+## DETAIL FILES — paths are relative to docs/
+### Claude Code handover prompts, in run order
+- `prompts/A-calculator-swap.md` ....... DONE. tyme4ts swap + time-convention lock.
+- `prompts/A2-followups.md` ............ DONE. boundary split, season gate (option B).
+- `prompts/B-regression-lock.md` ....... DONE. CI solar-term oracle, three sources.
+- `prompts/C-strength-engine.md` ....... the base spec. NOTE: its 子 hidden-stem row and its
+                                         Oracle-2 metric were both wrong; C4/C5 supersede them.
+- `prompts/C2-rulings.md` .............. metric fix, pair-distribution, 旺相休囚死 vs 十二長生.
+- `prompts/C3-ruling-B.md` ............. get the full ten bars; Earth deferred.
+- `prompts/C4-data-and-two-corrections.md` . the 子 fix + ruling A refuted.
+- `prompts/C5-earth-adopted-transform-next.md` . CURRENT. 土旺於四季 adopted; the 16% inversion finding.
 
-### Other detail files
-- **KATON-renderer-prompt.txt** .. THE Stage-5 system prompt. Single source of truth. Paste this.
-- **KATON-glossary-naming.md** ... LOCKED naming: Sepuluh Aspek, the 10 Aspek, the Bintang badges,
-                                the palaces, and the felt-not-defined rule. **Read before authoring content.**
-- **KATON-paid-product-map.md** .. the full paid surface, ranked. Annual reading + parent→child are
-                                the two products not previously counted. **Read for roadmap/pricing.**
-- **KATON-provecell-01.md** ...... the renderer test kit + rubric. `provecell-01-USER.json` is the fixture.
-- **KATON-master-prompt.md** ..... documentation of the renderer prompt + what the 3 live runs proved.
-- **KATON-launch-decisions.md** ... 07-30. Pricing, the paid-PDF upsell, competitor teardown
-                                (imajidiri), abuse/cost math. NOTE: its "park compat / card-first"
-                                recommendation was REVERSED later the same day — see this file's
-                                STRATEGY RESET and TODO. **Read for launch work, not sequencing.**
-- **KATON-calculator-decision.md** . NEW 07-30. Calculator + time convention, CLOSED. Contains the two
-                                copy-pasteable Claude Code prompts (A = swap, B = regression lock).
-- solar-term-oracle-diff.mjs ..... runnable triple-oracle boundary diff. Drop in `scripts/`. Passes.
-- KATON-pipeline-spec.md ......... THE build spec. 7 stages, failstates, fallback, payload, cache. CURRENT.
-- KATON-coldread-analysis.md ..... why the drafts failed (6 root clusters). Still the QA rubric. CURRENT.
-- KATON-mechanism-inventory.md ... what facts the chart can yield + which are real personalization axes. CURRENT.
-- KATON-engine-session-state.md .. engine build state. Still valid for the strength engine, but that
-                                work is now PARKED — read only when un-parking.
-- katon-bazi-blueprint.md ........ feature map, pull-power, coherence rules CR-1..6. Read for reading-gen.
-- KATON-master-prompt.md ......... **~60% STALE, 3 direct contradictions with locked rules. FIX BEFORE USE.**
-- KATON-compatibility-reading-spec.md . good, but PARKED (v2).
-- KATON-full-mechanism-architecture.md . STALE PREMISE ("same complete reading as a master") — that is
-                                the rabbit-hole thesis we just rejected. Do not build from it.
-- KATON-calcdump-CxD.md, KATON-helper-brief.md, KATON-design-prompt.md ... superseded (pre-pivot era).
+### Engine
+- `engine/joey-bars-13.json` ........... GROUND TRUTH. 13 charts x 10 bars, presence + element totals.
+                                         Collected from Joey's plotter directly. The fixture imports it.
+- `engine/joey-profile-mapping.md` ..... profile name -> Ten God, from Joey's printed legend. Do not re-derive.
+- `engine/calculator-decision.md` ...... calculator + time convention. CLOSED.
+- `engine/engine-session-state.md` ..... method spec. NOTE: strength engine is UN-PARKED and in progress.
+- `engine/bazi-blueprint.md` ........... feature map, pull-power, coherence rules CR-1..6.
+- `engine/pipeline-spec.md` ............ the 7-stage build spec. CURRENT.
+
+### Content
+- `content/renderer-prompt.txt` ........ THE Stage-5 system prompt. Single source of truth. Paste this.
+- `content/renderer-prompt-notes.md` ... what the live runs proved and why each rule exists.
+- `content/glossary-naming.md` ......... LOCKED naming. Read before authoring any content.
+- `content/glossary.json` .............. the engine content table. Batch 1 of 6 written (Ten Aspek).
+- `content/provecell-01-*` ............. renderer test kit + fixture + rubric.
+- `content/bazi-card-skill-v4.md` ...... sharecard spec. NEEDS A READ before the card is built.
+- `content/_STATIC-STRINGS.md` ......... system copy. Needs a one-voice + keyboard-chars audit.
+
+### Product
+- `product/paid-product-map.md` ........ the full paid surface, ranked. Annual reading and parent->child
+                                         are the two products not previously counted.
+- `product/launch-decisions.md` ........ pricing, the 19k upsell, imajidiri teardown, abuse math.
+                                         Its build order was REVERSED; see STRATEGY RESET above.
+- `product/compatibility-reading-spec.md` . the 合婚 spec. Next after the engine.
+- `product/PRELAUNCH-security-checklist.md` . run before taking real money.
+
+### Research and archive
+- `research/coldread-analysis.md` ...... why the old drafts failed. Still the QA rubric.
+- `research/mechanism-inventory.md` .... which facts are real personalization axes.
+- `research/` others ................... mixed currency. Mine for insight, never treat as spec.
+- `archive/` ........................... DEAD. Never build from these.
+- `DOC-STANDARD.md` .................... one file per topic, no addendums. Follow it.
 
 ---
 
@@ -99,8 +111,9 @@ Rows 1–12 in KATON-engine-session-state.md. Added 07-30 from Joey PDF:
 ```
 13  1989-02-04 04:00 | 乙 | 丑 | 比肩 | Managers | Friend80/Phil80/Dir78/Pio72
 ```
-Boundary chart, and a **fourth** instance of the intended Katon-vs-Joey divergence (丑 hides 辛己癸 —
-no 比肩 anywhere, so no month-rooting rule can emit Joey's headline). Track A at 7/12 is CORRECT.
+Boundary chart. **All 13 charts now carry Joey's full ten bars** in `engine/joey-bars-13.json`, and the
+fixture imports that file rather than re-typing numbers. Pillars agree with Joey's own printed pillars
+13/13. For Track A see MEASUREMENTS above and CLAUDE.md rule 8 — the principle is locked, the number is not.
 
 ---
 
@@ -162,8 +175,17 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | Ten Gods | 13/13 | 08-01 | |
 | Track A profile | **8/13** | 08-01 | was 7/13; rose when the 子 hidden stem was corrected. Track A itself untouched. |
 | Oracle 1 strength verdicts sane | 13/13 | 08-01 | |
-| Oracle 2 Ten God top-3 set match | 2/13 | 07-31 | ceiling is 6/13 under any projection; element ranking is the constraint |
-| Oracle 3 element rank order | not yet built | — | primary gate once built |
+| Oracle 2 Ten God top-3 set match | 2/13 | 07-31 | hard threshold on a noisy tail; see Spearman below before concluding anything |
+| Oracle 2 mean Spearman | 0.783 | 08-01 | full ten bars |
+| Oracle 2 pair concordance | 82.2% | 08-01 | |
+| **Oracle 3 element rank exact** | **3/13** | 08-01 | **PRIMARY GATE** |
+| **Oracle 3 mean Spearman** | **0.782** | 08-01 | was 0.682 before 土旺於四季 |
+| **Oracle 3 pair concordance** | **84.5%** | 08-01 | was 79.8% |
+| Zero-presence law | 130/130 | 08-01 | verified against Joey's own presence figures |
+| Projection-independent ceiling | 7/13 | 08-01 | was 6/13 |
+| Engine Earth-first | 5 charts | 08-01 | was 7; Joey's is 4 |
+| Within-element presence inversions | 9/57 (16%) | 08-01 | no monotone transform can fix these; residual factor unidentified |
+| Grid-search best (NOT adopted) | rho 0.863 | 08-01 | {2.4,1.2,0.8,0.6,0.4}; only 旺 deviates, confounded with the untested concave transform |
 | Solar-term boundaries, day-level | 0 disagreements / 1212 | 07-30 | three oracles |
 | Joey #1 element distribution | Earth 5, Fire 4, Wood 3, Metal 1, Water 0 | 08-01 | from full ten bars |
 

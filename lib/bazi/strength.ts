@@ -62,6 +62,16 @@ export const STRENGTH_PARAMS = {
     trapped: 0.8,    // 囚 — element controls the season's ruler
     dead: 0.6,       // 死 — element is controlled by the season's ruler
   } satisfies Record<SeasonStage, number>,
+  // 旺 RE-FIT AGAINST THE RESIDUAL, 2026-08-01, after the sqrt transform landed.
+  // Left at the classical 1.4 pending a ruling. The measurement, 相/休/囚/死 held:
+  //   旺  1.2   1.3   1.4*  1.6   1.8   2.0   2.4     (* = current)
+  //   rho .853  .882  .874  .882  .894  .886  .871
+  // The optimum collapsed from 2.4 (pre-transform) to a flat 1.6-1.8 plateau, and
+  // re-fitting now buys only +0.020 rho. That is the confounding C5 predicted,
+  // quantified: the steepened 旺 was standing in for the missing transform. The
+  // remaining +0.02 is not worth banking while an unmodelled mechanism is still
+  // on the table (the 16% within-element inversions), or it repeats the same
+  // mistake one level down.
 
   /** Base weight of one Heavenly Stem. Each branch distributes 1.0 across its hidden stems. */
   stemWeight: 1.0,
@@ -135,7 +145,63 @@ export const STRENGTH_PARAMS = {
    * Chart 9 (未 month) goes rho 0.20 -> 0.90.
    */
   earthMonthRuler: 'season-tail' as 'earth' | 'season-tail',
+
+  /**
+   * Concave transform applied to a stem's TOTAL presence, BEFORE the seasonal
+   * multiplier (C4 2(b) / C5 step 1).
+   *
+   *   strength(stem) = transform(totalPresence(stem)) x seasonMultiplier(element)
+   *
+   * WHY: Joey's bars saturate hard. Chart 1 spans a 15x presence range
+   * (0.2 to 3.0) inside a 46-point band, and 癸 at presence 3.0 scores BELOW 庚 at
+   * 0.6. Something is compressing the top.
+   *
+   * ORDER MATTERS AND IS EASY TO GET WRONG. The transform is applied to presence
+   * ITSELF, on the per-stem TOTAL, not per occurrence and not after the seasonal
+   * multiplier. Applying it per occurrence would make it depend on how presence
+   * happens to be split across pillars; applying it afterwards would compress the
+   * seasonal signal instead of the presence signal.
+   *
+   * Every option maps 0 -> 0, so the zero-presence law (130/130) survives, and
+   * every option is monotone increasing, so NO option can reorder two stems of
+   * the same element. That is load-bearing — see the falsifiable prediction in
+   * docs/prompts/C5-earth-adopted-transform-next.md.
+   *
+   * sqrt ADOPTED 2026-08-01, measured on Oracle 3:
+   *
+   *                        linear    sqrt
+   *   exact rank order      3/13     4/13
+   *   top-1 element         6/13     9/13
+   *   mean Spearman        0.782    0.874
+   *   pair concordance     84.5%    89.9%
+   *
+   * sqrt beat log1p (0.821) and every fitted power exponent, AND takes no
+   * parameter, so it was preferred on parsimony as well as score.
+   *
+   * COST, recorded honestly: compressing presence compresses supportShare toward
+   * 50%, so five verdicts moved and the fixture now yields ZERO 'strong' charts
+   * (was three). Oracle 1's coherence checks still pass 13/13 and there are no
+   * follow-chart false positives, but the verdict layer has lost discrimination
+   * at the top end. The 40/60 thresholds were fitted before this transform
+   * existed and are the obvious next thing to re-examine — NOT changed here,
+   * because that would be a second term in the same measurement (rule 13).
+   */
+  presenceTransform: 'sqrt' as 'linear' | 'sqrt' | 'power' | 'log1p',
+
+  /** Exponent for presenceTransform 'power'. Below 1 is concave. */
+  presencePower: 0.5,
 };
+
+/** Monotone, zero-preserving transforms of a stem's total presence. */
+export function transformPresence(presence: number): number {
+  if (presence <= 0) return 0; // preserves the zero-presence law in every mode
+  switch (STRENGTH_PARAMS.presenceTransform) {
+    case 'sqrt': return Math.sqrt(presence);
+    case 'power': return presence ** STRENGTH_PARAMS.presencePower;
+    case 'log1p': return Math.log1p(presence);
+    default: return presence;
+  }
+}
 
 /** The yang stem then the yin stem of each element. */
 const STEMS_BY_ELEMENT: Record<Element, [string, string]> = {
@@ -353,14 +419,17 @@ export function projectToTenGods(
   dayMaster: string,
   elementTotals: Record<Element, number>,
   contributors: Contributor[],
+  stemStrength: Record<string, number>,
 ): Record<string, number> {
   const out: Record<string, number> = {};
   for (const g of ALL_TEN_GODS) out[g] = 0;
 
   if (STRENGTH_PARAMS.tenGodProjection === 'per-stem-seasonal') {
-    // c.weighted is raw presence x seasonal multiplier, and c.tenGod is the god
-    // of c's own stem — so summing per god IS per-stem presence x seasonal.
-    for (const c of contributors) out[c.tenGod] += c.weighted;
+    // Each god IS one stem, so its bar is that stem's strength directly. No
+    // sharing, which is what lets one god of a pair sit at zero.
+    for (const [stem, strength] of Object.entries(stemStrength)) {
+      out[tenGod(dayMaster, stem).hanzi] += strength;
+    }
     return out;
   }
 
@@ -458,12 +527,28 @@ export function computeStrength(chart: StrengthChartInput): Strength {
   const partial = !chart.hour;
 
   // Element totals, seasonally weighted.
+  // Per-stem strength is the atomic quantity everything else derives from:
+  //   transform(total presence of the stem) x seasonal multiplier of its element
+  // Aggregating presence per stem BEFORE the transform matters — a concave
+  // transform applied per occurrence would depend on how the same stem happens
+  // to be split across pillars, which is not a real distinction.
+  const stemPresence: Record<string, number> = {};
+  for (const c of contributors) stemPresence[c.stem] = (stemPresence[c.stem] ?? 0) + c.raw;
+
+  const stemStrength: Record<string, number> = {};
+  for (const [stem, presence] of Object.entries(stemPresence)) {
+    const element = STEM_ELEMENTS[stem] as Element;
+    stemStrength[stem] = transformPresence(presence) * seasonMultiplier(monthBranch, element);
+  }
+
   const elementTotals: Record<Element, number> = { Wood: 0, Fire: 0, Earth: 0, Metal: 0, Water: 0 };
-  for (const c of contributors) elementTotals[c.element] += c.weighted;
+  for (const [stem, strength] of Object.entries(stemStrength)) {
+    elementTotals[STEM_ELEMENTS[stem] as Element] += strength;
+  }
 
   // Element strength is projection-independent; only the Ten God split changes
   // with the mode. That is what makes a mode change attributable.
-  const tenGodTotals = projectToTenGods(dayMaster, elementTotals, contributors);
+  const tenGodTotals = projectToTenGods(dayMaster, elementTotals, contributors, stemStrength);
 
   // Step 4 — support vs drain, relative to the Day Master.
   const resourceEl = producerOf(dmElement);        // 印

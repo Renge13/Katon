@@ -147,6 +147,52 @@ for (const w of [0.4, 0.5, 0.6]) {
 }
 restore(ORIGINAL);
 
+// ── Diagnostic 0 — what NO monotone transform can fix ───────
+// Within a single element the seasonal multiplier is identical and cancels, so a
+// disagreement here is presence-vs-bar and nothing else. Joey inverts 9 of 57
+// such pairs. A monotone transform preserves order, so it cannot fix any of
+// them — and the engine's score here must therefore be INVARIANT across every
+// presenceTransform setting. If it ever moves, the transform stopped being
+// monotone or is being applied in the wrong place.
+
+console.log('\n══ DIAGNOSTIC 0 — within-element presence-vs-bar (transform-invariant) ══');
+const withinPairs = [];
+for (const { tc } of CHARTS) {
+  const byElement = {};
+  for (const [god, score] of Object.entries(tc.expect.allBars)) {
+    const el = godElement(tc.expect.dayMasterElement, god);
+    (byElement[el] ??= []).push({ god, score, presence: tc.expect.joeyPresence[god], stem: tc.expect.joeyStem[god] });
+  }
+  for (const [el, gods] of Object.entries(byElement)) {
+    for (let i = 0; i < gods.length; i++) {
+      for (let j = i + 1; j < gods.length; j++) {
+        const a = gods[i];
+        const b = gods[j];
+        if (a.score === b.score || a.presence === b.presence) continue;
+        withinPairs.push({ id: tc.id, el, a, b, joeyInverted: (a.presence > b.presence) !== (a.score > b.score) });
+      }
+    }
+  }
+}
+const joeyInversions = withinPairs.filter((p) => p.joeyInverted);
+console.log(`  comparable within-element pairs ${withinPairs.length} · inversions in Joey's data ${joeyInversions.length} (${Math.round(100 * joeyInversions.length / withinPairs.length)}%)`);
+for (const mode of ['linear', 'sqrt', 'log1p']) {
+  STRENGTH_PARAMS.presenceTransform = mode;
+  let agree = 0;
+  let invAgree = 0;
+  for (const p of withinPairs) {
+    const bars = computeStrength(CHARTS.find((c) => c.tc.id === p.id).chart).tenGodStrength;
+    const hi = p.a.score > p.b.score ? p.a : p.b;
+    const lo = p.a.score > p.b.score ? p.b : p.a;
+    if (bars[hi.god] > bars[lo.god]) { agree++; if (p.joeyInverted) invAgree++; }
+  }
+  console.log(`  ${mode.padEnd(7)} engine agrees on ${agree}/${withinPairs.length} · of the ${joeyInversions.length} inversions ${invAgree}`);
+}
+restore(ORIGINAL);
+console.log('  => invariant across transforms, as it must be. The 16% residual needs a');
+console.log('     different MECHANISM, not a reweighting. C5 lists four candidates;');
+console.log('     十二長生 is the most interesting because it is genuinely different.');
+
 // ── Diagnostic 1 — where does the rank error actually live? ──
 
 function concordanceSplit() {

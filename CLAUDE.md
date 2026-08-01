@@ -68,6 +68,18 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
    strength distribution is a different computation in a different file. Never conflate them.
 10. Joey's element bars are a **seasonal element-strength distribution**, not a Ten-God token count.
     A token tally provably inverts on fixture charts 1 and 9.
+11. **土旺於四季 — Earth does not rule a season of its own** (adopted 2026-08-01, `earthMonthRuler`).
+    The four Earth branches sit at the tail of the other four seasons: 辰 Wood, 未 Fire, 戌 Metal,
+    丑 Water. Evidence: all nine non-Earth-month charts bit-identical, four of five Earth-month charts
+    improve, nothing regresses, chart 9 rho 0.20 to 0.90. Classically grounded and empirically
+    supported. Magnitude is fitted on five charts — re-check if the fixture grows.
+12. **The bars are per-stem presence x seasonal, NOT an element base shared across a god pair.**
+    The zero-presence law is 130/130: a god scores exactly 0 if and only if its stem is absent from
+    the chart. Chart 1 is decisive — same element, 比肩 丙 at 85 and 劫財 丁 at 0. Pair-projection
+    modes are REFUTED; they remain selectable only so the refutation stays reproducible.
+13. **Never fit two candidate model terms in one measurement.** A steepened 旺 and a concave presence
+    transform are confounded; whichever is fitted first absorbs the other's explanatory work and the
+    real cause is never learned. One change, one measurement, always.
 
 ### Architecture
 11. **The engine owns ALL facts, hierarchy and structure. The LLM chooses only words.** If the LLM
