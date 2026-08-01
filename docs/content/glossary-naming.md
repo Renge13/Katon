@@ -50,12 +50,12 @@ self, 神煞 are stars that mark you from outside. Two systems, two prefixes, ne
 
 | Classical | English (locked) | Indonesian | What it actually is |
 |---|---|---|---|
-| 比肩 | The Self-Reliant | **Aspek Setara** | Standing on your own. Peers, not hierarchy. |
+| 比肩 | The Self-Reliant | **Aspek Pendamping** | Standing on your own. Peers, not hierarchy. |
 | 劫財 | The Mover | **Aspek Pendorong** | Competitive drive. Moves fast, spends fast. |
-| 食神 | The Creator | **Aspek Karya** | Gentle output. Makes things, enjoys making them. |
-| 傷官 | The Dazzler | **Aspek Pijar** | Sharp expression. Brilliant, breaks rules. |
+| 食神 | The Creator | **Aspek Perajin** | Gentle output. Makes things, enjoys making them. |
+| 傷官 | The Dazzler | **Aspek Pemijar** | Sharp expression. Brilliant, breaks rules. |
 | 正財 | The Steward | **Aspek Pengelola** | Steady stewardship. Holds what matters. |
-| 偏財 | The Trailblazer | **Aspek Peluang** | Opportunity, windfall, big swings. |
+| 偏財 | The Trailblazer | **Aspek Peraih** | Opportunity, windfall, big swings. |
 | 正官 | The Keeper | **Aspek Pengatur** | Rules, duty, legitimate authority. |
 | 七殺 | The Fighter | **Aspek Penantang** | Pressure, challenge, unconventional power. |
 | 正印 | The Learner | **Aspek Pelindung** | Support, learning, being cared for. |

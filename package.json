@@ -14,6 +14,7 @@
     "gen:solar-terms": "node scripts/gen-solar-term-fixture.mjs",
     "test:bazi": "node scripts/validate-bazi.mjs",
     "test:solar-terms": "node --test tests/solar-terms.spec.ts",
+    "test:joey-bars": "node --test tests/joey-bars.spec.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:engine": "node tests/bazi-engine.report.mjs",
     "test:forge": "node --conditions=react-server scripts/forge-tests.mjs"

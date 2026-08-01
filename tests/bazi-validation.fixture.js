@@ -17,6 +17,25 @@
 //       topThreeBars: [{ god, score }],  // Track B expected top-3 RANK ORDER
 //     } }
 //
+// ── allBars — Joey's FULL ten, page 2 "10 PROFILES STRENGTH CHART" ──
+// PENDING for 12 of 13 charts. Chart 13 is transcribed; the rest are being
+// collected. `null` means not-yet-transcribed, NOT zero — never treat a null row
+// as data, and never infer the missing seven bars from the top three.
+//
+// Why this field is the important one (docs/prompts/C3-ruling-B.md): ten bars
+// carry exactly five elements' worth of information, because each element maps
+// to two gods (one yin, one yang). Summing a god pair recovers that element's
+// strength, so allBars exposes JOEY'S ELEMENT DISTRIBUTION directly — five known
+// values per chart. Session 2 proved the element ranking is the defect and that
+// it can host Joey's top-3 in only 6/13 charts; fitting an element model through
+// the top 3 alone was the keyhole.
+//
+// The five element totals are deliberately NOT stored beside allBars. They are
+// derived by tests/joey-bars.mjs (elementBarsFrom) from this one source, so the
+// two can never drift apart. tests/joey-bars.spec.mjs asserts the derivation
+// reproduces the element totals published in C3-ruling-B.md for chart 13, and
+// cross-checks every populated row against its own topThreeBars.
+//
 // ── topThreeBars ──
 // `god` is the Ten God hanzi; `score` is Joey's published bar value, taken from
 // docs/engine/engine-session-state.md. Only RANK ORDER is asserted — Katon does
@@ -197,6 +216,17 @@ export const VALIDATION_CHARTS = [
       // Friend 80 / Phil 80 / Dir 78 / Pio 72 — see correction 2 in the header.
       // 80/80 is a TIE, so the top-two order is not meaningfully asserted.
       topThreeBars: [bar('比肩', 80), bar('偏印', 80), bar('正財', 78)],
+      // FULL TEN, transcribed from the PDF page-2 strength chart.
+      // 正印 (壬) and 正官 (庚) are 0 because neither stem appears anywhere in this
+      // chart, as a visible stem or a hidden one. That is the load-bearing detail:
+      // a pure element-base model cannot produce it (Water totals 80 and would
+      // have to put all of it somewhere), so it is direct evidence for the
+      // pair-presence projection — and it sits at the BOTTOM of the ranking,
+      // where a top-3 metric structurally cannot see it.
+      allBars: {
+        比肩: 80, 偏印: 80, 正財: 78, 偏財: 72, 七殺: 55,
+        劫財: 55, 傷官: 17, 食神: 17, 正印: 0, 正官: 0,
+      },
     },
   },
 ];

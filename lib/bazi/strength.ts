@@ -279,6 +279,32 @@ function collectContributors(chart: StrengthChartInput, dayMaster: string, month
 export const ALL_TEN_GODS = ['比肩', '劫財', '食神', '傷官', '正財', '偏財', '正官', '七殺', '正印', '偏印'];
 
 /**
+ * The element a Ten God stands for, relative to a Day Master element.
+ *
+ * Each element maps to exactly two gods, one yin one yang, which is why ten
+ * bars carry only five elements' worth of information. Summing a god pair
+ * recovers that element's strength — that is how Joey's published bars can be
+ * read as an element distribution.
+ *
+ * Exported so the fixture helpers and the calibration harness share one
+ * definition instead of each keeping a copy.
+ */
+export function tenGodElement(dmElement: Element, god: string): Element {
+  const resource = producerOf(dmElement);
+  const officer = ELEMENTS.find((e) => CONTROLS[e] === dmElement)!;
+  const table: Record<string, Element> = {
+    比肩: dmElement, 劫財: dmElement,
+    食神: GENERATES[dmElement], 傷官: GENERATES[dmElement],
+    正財: CONTROLS[dmElement], 偏財: CONTROLS[dmElement],
+    正官: officer, 七殺: officer,
+    正印: resource, 偏印: resource,
+  };
+  const el = table[god];
+  if (!el) throw new Error(`Unknown Ten God "${god}"`);
+  return el;
+}
+
+/**
  * Distribute seasonal element strength across the ten Ten Gods.
  *
  * Joey publishes TEN bars but there are only FIVE elements, so each element maps

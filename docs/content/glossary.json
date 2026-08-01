@@ -18,7 +18,7 @@
 
   "aspek": {
     "比肩": {
-      "name_id": "Aspek Setara",
+      "name_id": "Aspek Pendamping",
       "name_en": "Friend",
       "label_meaning": "Kamu terbiasa menyelesaikan sendiri. Meminta tolong terasa lebih berat daripada mengerjakan dua kali lipat.",
       "gift_seed": "Kamu tidak runtuh saat tidak ada yang menopang. Orang tahu kamu bisa dititipi apa pun dan tidak akan menghilang di tengah jalan.",
@@ -32,14 +32,14 @@
       "cost_seed": "Yang datang cepat juga pergi cepat. Kamu sulit menahan sesuatu cukup lama sampai ia mengendap."
     },
     "食神": {
-      "name_id": "Aspek Karya",
+      "name_id": "Aspek Perajin",
       "name_en": "Eating God",
       "label_meaning": "Kamu senang mengerjakan sesuatu sampai jadi, tanpa perlu ada yang menonton. Prosesnya sendiri sudah cukup memuaskan.",
       "gift_seed": "Kamu bisa menikmati pekerjaan tanpa menunggu hasilnya diakui. Itu yang membuatmu bertahan jauh lebih lama di hal yang kamu sukai.",
       "cost_seed": "Kamu jarang menagih. Karyamu sering dipakai orang lain tanpa namamu ikut disebut."
     },
     "傷官": {
-      "name_id": "Aspek Pijar",
+      "name_id": "Aspek Pemijar",
       "name_en": "Hurting Officer",
       "label_meaning": "Kamu melihat cara yang lebih baik dan sulit diam soal itu. Mengikuti aturan yang tidak masuk akal terasa menyakitkan.",
       "gift_seed": "Kamu paling cepat melihat celah dan paling berani menyebutnya. Ide yang tajam biasanya datang darimu.",
@@ -53,7 +53,7 @@
       "cost_seed": "Semakin banyak yang kamu pegang, semakin sedikit yang tersisa untuk dirimu sendiri."
     },
     "偏財": {
-      "name_id": "Aspek Peluang",
+      "name_id": "Aspek Peraih",
       "name_en": "Indirect Wealth",
       "label_meaning": "Kamu melihat peluang di tempat yang orang lain lewati begitu saja. Uang dan kesempatan terasa mudah datang, dan sama mudahnya pergi.",
       "gift_seed": "Kamu tidak takut pada ketidakpastian. Pintu sering terbuka justru karena kamu berani mengetuk lebih dulu.",

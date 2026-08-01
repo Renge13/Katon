@@ -41,6 +41,11 @@ jobs:
       - name: Time-convention lock
         run: npm run test:pillars
 
+      # Fixture-shape lock for Joey's full ten bars. Catches a transcription slip
+      # in a new row before any model is fitted to it.
+      - name: Joey bar fixture shape
+        run: npm run test:joey-bars
+
       # Independent day-pillar cross-check (astronomia) + Reyner's chart.
       - name: Day-pillar cross-check
         run: npm run test:bazi

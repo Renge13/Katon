@@ -25,26 +25,15 @@
 // ============================================================
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
-import { computeStrength, STRENGTH_PARAMS, ELEMENTS } from '../lib/bazi/strength.ts';
+import { computeStrength, STRENGTH_PARAMS, tenGodElement } from '../lib/bazi/strength.ts';
 import { VALIDATION_CHARTS } from '../tests/bazi-validation.fixture.js';
 import { scoreBars, aggregate, formatAggregate } from '../tests/oracle2-metric.mjs';
 import { STEM_ELEMENTS } from '../lib/bazi/stems.js';
 
-const GENERATES = { Wood: 'Fire', Fire: 'Earth', Earth: 'Metal', Metal: 'Water', Water: 'Wood' };
-const CONTROLS = { Wood: 'Earth', Fire: 'Metal', Earth: 'Water', Metal: 'Wood', Water: 'Fire' };
-
-/** The element a Ten God stands for, relative to a Day Master element. */
-function godElement(dm, god) {
-  const resource = ELEMENTS.find((e) => GENERATES[e] === dm);
-  const officer = ELEMENTS.find((e) => CONTROLS[e] === dm);
-  return {
-    比肩: dm, 劫財: dm,
-    食神: GENERATES[dm], 傷官: GENERATES[dm],
-    正財: CONTROLS[dm], 偏財: CONTROLS[dm],
-    正官: officer, 七殺: officer,
-    正印: resource, 偏印: resource,
-  }[god];
-}
+// The god -> element relation is engine knowledge and lives in strength.ts. This
+// harness must not keep its own copy: a calibration run that disagrees with the
+// engine about which element a god belongs to would tune against the wrong thing.
+const godElement = tenGodElement;
 
 const CHARTS = VALIDATION_CHARTS.map((tc) => ({
   tc,
