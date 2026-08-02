@@ -228,6 +228,9 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | Stage 3 CR-1 fire rate | 4/13 | 08-02 | charts 1, 7, 9, 12. **9/13 without the balanced-verdict exclusion** — see the 08-02 Stage 3 section. |
 | Stage 3 void_stack fire rate | 1/13 | 08-02 | chart 1 only, at stack size 3. The exemplar the target file describes. |
 | Stage 3 glossary gaps | 1 fact type | 08-02 | `strength_<verdict>` has no glossary entry at all. Every other fact type is fully backed. |
+| **Stage 3 chart-1 rank rho vs hand-written** | **0.81** | 08-02 | Spearman over the 11 facts the target file carries. **Top-3 SET is exact.** Not a gate — a record, so a change that scrambles ordering shows as a drop. |
+| **Bintang Penolong in top-3** | **0/13** | 08-02 | the load-bearing D2 assertion. Engine ranks it 11th of 11 on chart 1 where the hand file put it 7th; the engine applies the never-headline rule more consistently than the hand scoring did. |
+| Stage 3 quiet_chart rate | 2/13 | 08-02 | charts 5 and 13, at `quietFloor` 70. Unfitted default. |
 
 ## DECIDED 2026-08-02 — Stage 3 PHASE 1 landed (fact inventory + badge anchors)
 
@@ -299,6 +302,59 @@ Cendekia" — the glossary says 華蓋 is **Bintang Sunyi** and 文昌 is Bintan
 `lib/readingView.js` renders Earth as "Bumi" while the glossary says "Tanah"; that surface predates the
 glossary and is out of Stage 3's scope, but it is exactly the drift `lib/semantic/glossary.js` derives
 its element map to prevent.
+
+## DECIDED 2026-08-02 — Stage 3 PHASE 2 landed (hierarchy scoring)
+
+`lib/semantic/hierarchy.js` + `tests/stage3-hierarchy.spec.mjs`. Both D2 non-negotiables hold:
+**Bintang Penolong is top-3 on 0 of 13 charts**, and 11 of 13 charts are not quiet.
+
+**NOTHING IS FITTED.** Rule 13 — the scoring logic and the constants that tune it cannot land in the
+same commit, or whichever is fitted first absorbs the other's explanatory work. Every constant is in
+`HIERARCHY_PARAMS` at a reasoned default, and a test asserts those defaults so that editing them IS the
+calibration and needs its own measurement.
+
+**D2's four axes do not rank the spine, so there is a fifth term, and it is flagged as an addition.**
+The four always-present facts — Day Master, strength verdict, main profile, spouse palace — are by
+construction not extreme, not convergent and not paradoxical. On the four axes alone they sink to the
+bottom of every chart, and a reading whose lowest-ranked fact is the Day Master is not a reading. So
+`role` is a BASE, not an axis: spine facts start at 55 and the axes move them, findings start at 25 and
+must earn their place. The hand-written target does the same thing implicitly, scoring the Day Master at
+68 with no axis to justify it.
+
+**Tension is GRADED, not binary.** CR-1 100, void stack 90, 刑 70, 冲 60, spouse palace 50, 害 45. A flat
+bonus would let six minor frictions outrank the one real paradox.
+
+**Chart-1 diff against the hand-written file** (D2 asks for this table; exact numbers were judgment
+calls and are not targeted):
+
+| target fact | hand | Stage 3 | in hand top-3 | in S3 top-3 |
+|---|---|---|---|---|
+| strength_lean -> strength_weak | 97 | 78 | YES | YES |
+| profile_drains_self -> profile_vs_favorable | 95 | 85 | YES | YES |
+| void_month_stack -> void_stack_month | 93 | 100 | YES | YES |
+| officer_convergence -> aspek_convergence_正官 | 91 | 70 | - | - |
+| wood_missing -> element_missing_Wood | 89 | 70 | - | - |
+| peach_blossom -> badge_桃花 | 86 | 65 | - | - |
+| nobleman -> badge_天乙貴人 | 80 | 43 | - | - |
+| spouse_palace_7k -> spouse_palace | 78 | 70 | - | - |
+| metal_half_trine -> relation_半合_巳酉 | 74 | 69 | - | - |
+| steward_vs_selfreliant -> aspek_convergence_比肩 | 72 | 44 | - | - |
+| day_master_fire -> day_master_Fire | 68 | 55 | - | - |
+| *(engine only)* badge_空亡 | - | 59 | - | - |
+| *(engine only)* main_profile | - | 55 | - | - |
+| *(engine only)* aspek_convergence_偏財 | - | 34 | - | - |
+| *(engine only)* element_dominant_Water | - | 31 | - | - |
+| *(engine only)* aspek_convergence_食神 | - | 28 | - | - |
+
+**Top-3 set is exact. Spearman 0.81 over the 11 mapped facts.** The one large divergence is Bintang
+Penolong, hand 7th of 11 and engine 11th — intended, and the hand file's own note ("never headline it,
+77% is not extremity") is the reason.
+
+**The obvious first target for a fitting pass, when one is authorised:** the scale is compressed and ties
+at exactly 70 are common (chart 3 has three). Ties break deterministically on emission order, so the
+cache is safe, but the ordering among them is arbitrary rather than editorial. Second target: branch
+relations float to the top of quiet charts because each type is individually rare, which may be right and
+has not been checked against anything.
 
 ## DECIDED 2026-08-02 — archetype names, fixed tags, EN display layer
 
