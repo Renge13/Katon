@@ -166,7 +166,10 @@ for (const testChart of charts) {
       const fallback = result.source === 'module_assembly';
       // Did the gate ever get to see anything? If no attempt reached Stage 6,
       // the fallback says nothing about quality.
-      const reachedGate = attempts.some((a) => a.stage6 || a.ok === true);
+      // "Did the model produce anything usable" - Stage 6 ran, OR it returned
+      // output so malformed the parser rejected it. Both are quality signals.
+      // Only a genuine provider failure (HTTP, timeout, socket) is NOT.
+      const reachedGate = attempts.some((a) => a.stage6 || a.ok === true || a.shape);
 
       if (firstPass) s.firstPass += 1;
       if (!fallback) s.shipped += 1;
@@ -178,7 +181,8 @@ for (const testChart of charts) {
       }
       for (const a of attempts) {
         if (!a.error) continue;
-        s.transportErrors.set(errorClass(a.error), (s.transportErrors.get(errorClass(a.error)) || 0) + 1);
+        const cls = errorClass(a.error, a.shape);
+        s.transportErrors.set(cls, (s.transportErrors.get(cls) || 0) + 1);
       }
 
       for (const attempt of attempts) {
@@ -203,7 +207,7 @@ for (const testChart of charts) {
         first_pass: firstPass,
         regenerated,
         failed_checks: attempts.flatMap((a) => a.stage6 || []),
-        transport_errors: attempts.filter((a) => a.error).map((a) => errorClass(a.error)),
+        transport_errors: attempts.filter((a) => a.error).map((a) => errorClass(a.error, a.shape)),
       });
 
       if (!fallback) perArm[model] = result;

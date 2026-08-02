@@ -28,6 +28,7 @@ import { assembleFallback } from '../lib/render/fallback.js';
 import { renderReading, persistRendered } from '../lib/render/index.js';
 import { readCache, __clearMemCache } from '../lib/render/cache.js';
 import { MASTER_PROMPT } from '../lib/render/prompt.js';
+import { parseRenderResponse } from '../lib/render/schema.js';
 import { scrubInternal, internalFieldNames } from '../lib/render/payload.js';
 import {
   validateRendering, stricterDirective, STAGE6_VERSION, CATEGORIES,
@@ -627,4 +628,21 @@ test('a blocklist entry may override the default regex flags', () => {
   const entry = BLOCKLIST.style.bare_polarity[0];
   assert.equal(entry.flags, 'u', 'bare_polarity must stay case-sensitive');
   assert.ok(entry.note.includes('CASE-SENSITIVE'), 'and must say why in its note');
+});
+
+test('a malformed response counts as a MODEL failure, not a transport failure', () => {
+  // The harness splits fallbacks into quality vs provider. A schema violation is
+  // the model failing to produce a reading, so crediting it to "transport" would
+  // let a model that emits garbage look like a provider outage. Observed
+  // 2026-08-02: one rider run was mislabelled exactly this way.
+  const shapeErr = (() => {
+    try { parseRenderResponse('not json at all'); return null; } catch (e) { return e; }
+  })();
+  assert.equal(shapeErr.name, 'RenderShapeError');
+
+  // The chain tags it, and the tag is what the harness reads.
+  const tagged = { provider: 'gemini', ok: false, error: shapeErr.message, shape: true };
+  const transport = { provider: 'gemini', ok: false, error: 'gemini 503: boom' };
+  assert.equal(tagged.shape, true);
+  assert.ok(!transport.shape, 'an HTTP failure must not be tagged as a shape failure');
 });
