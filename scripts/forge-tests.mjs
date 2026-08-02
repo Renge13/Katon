@@ -14,6 +14,10 @@ import assert from 'node:assert';
 import { paymentFenceReason, devBypassAllowed } from '../lib/paymentFence.js';
 import { createReading, claimWaSend, releaseWaSend } from '../lib/readingStore.js';
 import { decideWaOutcome } from '../lib/wa.js';
+import {
+  SKUS, LAUNCH_PRICING, SELLABLE_SKUS, DEFAULT_SKU,
+  priceFor, isSellable, amountMatchesSku,
+} from '../lib/pricing.js';
 
 let pass = 0, fail = 0;
 const ok = (name) => { pass++; console.log(`  ✓ ${name}`); };
@@ -120,6 +124,81 @@ t("falsy / malformed result → 'retry' (fail toward retry, not silent claim)", 
   assert.strictEqual(decideWaOutcome('nope'), 'retry');
   assert.strictEqual(decideWaOutcome({}), 'retry'); // no sent, no reason
   assert.strictEqual(decideWaOutcome({ sent: false }), 'retry'); // sent:false, no reason
+});
+
+// PRICING (the SKU table) — REQUIRED. Structural properties of the price
+// architecture, so a future price edit that breaks the ladder fails here rather
+// than on a checkout page.
+console.log('\nPRICING (SKU table) — REQUIRED');
+
+t('every SKU has launch <= list (the discount only ever moves down)', () => {
+  for (const [sku, tiers] of Object.entries(SKUS)) {
+    assert.ok(Number.isInteger(tiers.list) && tiers.list > 0, `${sku}.list`);
+    assert.ok(Number.isInteger(tiers.launch) && tiers.launch > 0, `${sku}.launch`);
+    assert.ok(tiers.launch <= tiers.list, `${sku}: launch ${tiers.launch} > list ${tiers.list}`);
+  }
+});
+
+t('compat > artifact at BOTH tiers (compat stays clearly the premium product)', () => {
+  assert.ok(SKUS.compat.list > SKUS.artifact.list, 'list ladder');
+  assert.ok(SKUS.compat.launch > SKUS.artifact.launch, 'launch ladder');
+});
+
+t('priceFor returns the live tier, and the override reaches the other one', () => {
+  assert.strictEqual(priceFor('artifact'), LAUNCH_PRICING ? 19000 : 25000);
+  assert.strictEqual(priceFor('artifact', { launch: true }), 19000);
+  assert.strictEqual(priceFor('artifact', { launch: false }), 25000);
+  assert.strictEqual(priceFor('compat', { launch: true }), 29000);
+  assert.strictEqual(priceFor('compat', { launch: false }), 45000);
+  assert.throws(() => priceFor('nope'), /Unknown SKU/);
+});
+
+t('compat is priced but NOT sellable until Prompt E ships its fulfillment', () => {
+  assert.deepStrictEqual(SELLABLE_SKUS, ['artifact']);
+  assert.strictEqual(isSellable('artifact'), true);
+  assert.strictEqual(isSellable('compat'), false, 'no taking money for an unbuilt product');
+  assert.strictEqual(isSellable('anything-else'), false);
+  assert.strictEqual(isSellable(undefined), false);
+  assert.ok(isSellable(DEFAULT_SKU), 'the default must itself be sellable');
+});
+
+// WEBHOOK AMOUNT GATE (amountMatchesSku — pure) — REQUIRED.
+// This is the regression that protects rule 18 when prices change. The webhook
+// unlocks on this boolean and nothing else, so it must fail CLOSED on every way
+// an amount can be wrong: wrong tier, wrong SKU, unknown SKU, missing SKU.
+console.log('\nWEBHOOK AMOUNT GATE (amountMatchesSku) — REQUIRED');
+
+t('the live tier for the right SKU unlocks', () => {
+  assert.strictEqual(amountMatchesSku(priceFor('artifact'), 'artifact'), true);
+});
+
+t('the WRONG TIER does not unlock (list paid while launch pricing is active)', () => {
+  const wrongTier = LAUNCH_PRICING ? SKUS.artifact.list : SKUS.artifact.launch;
+  assert.strictEqual(amountMatchesSku(wrongTier, 'artifact'), false);
+});
+
+t('the WRONG SKU price does not unlock (a compat amount on an artifact row)', () => {
+  assert.strictEqual(amountMatchesSku(priceFor('compat'), 'artifact'), false);
+  assert.strictEqual(amountMatchesSku(priceFor('artifact'), 'compat'), false);
+});
+
+t('a missing or unknown sku FAILS CLOSED (rows predating the sku column)', () => {
+  assert.strictEqual(amountMatchesSku(19000, null), false);
+  assert.strictEqual(amountMatchesSku(19000, undefined), false);
+  assert.strictEqual(amountMatchesSku(19000, 'ghost'), false);
+});
+
+t('the retired Rp 49.000 pre-pivot price unlocks nothing', () => {
+  for (const sku of Object.keys(SKUS)) {
+    assert.strictEqual(amountMatchesSku(49000, sku), false, `49000 must not unlock ${sku}`);
+  }
+});
+
+t('a non-numeric or malformed amount fails closed', () => {
+  assert.strictEqual(amountMatchesSku('19000', 'artifact'), false, 'a string is not an amount');
+  assert.strictEqual(amountMatchesSku(NaN, 'artifact'), false);
+  assert.strictEqual(amountMatchesSku(undefined, 'artifact'), false);
+  assert.strictEqual(amountMatchesSku(0, 'artifact'), false);
 });
 
 // Light live checks (opt-in): the core gate + webhook rejects unauthenticated POST.
