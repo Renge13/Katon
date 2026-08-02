@@ -27,11 +27,11 @@ running:** the reading should be thin exactly where `strength_weak` sits, becaus
 and has no `label_meaning`, `gift` or `cost`. Thinness anywhere else means the JSON is wrong, and
 diffing against `provecell-01-USER.json` will say where.
 
-**2. Two things need Reyner before anything downstream is real.** Both are content, not code:
-- **The strength verdict has NO glossary entry.** `glossary.json` has no `kekuatan` section, so
-  `weak` / `balanced` / `strong` carry no label, no `label_meaning`, no gift and no cost. It is the
-  top-ranked fact on most charts and the single most delicate string in the product — CR-5 permits
-  "lemah" only when the explanation lands in the same breath.
+**2. One thing still needs Reyner before anything downstream is real:**
+- ~~The strength verdict has NO glossary entry~~ **RESOLVED 2026-08-02**: `glossary.json` now has a
+  `kekuatan` section (weak/balanced/strong), Reyner-reviewed. Its `_note` carries a Stage-6
+  requirement for Prompt H: the label never renders bare — lemah/kuat must co-occur with its
+  meaning sentence.
 - **`provenance` and `required_points` ship as STRUCTURED DATA, not Indonesian sentences.** That was
   a deliberate deferral, not an omission — the sentences exist in no glossary entry, so writing them
   is Stage 3 authoring user-facing copy. Decide whether the renderer verbalises from the data (rule
