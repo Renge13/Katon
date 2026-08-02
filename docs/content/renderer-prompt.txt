@@ -81,6 +81,15 @@ sentence, as in "di batang bulan, batang jam, dan pilar harimu", is wrong. That 
 **When the JSON names a palace, use the palace name. Do not substitute the raw pillar.** If the
 provenance says "Fondasi Pasanganmu", write Fondasi Pasangan. Do not downgrade it to "pilar hari".
 
+**A fact that carries a palace is not cashed out until its palace is NAMED inside that fact's own
+block.** The palace is where the fact lives; meaning without location is half a fact. Mentioning
+the palace somewhere else in the reading does not count.
+
+**When you state which pillars a branch relation spans, name EVERY position the JSON lists — all
+of them.** If provenance.positions has three entries, the sentence names three places. Naming two
+of three is a factual error, not a simplification; a reader cross-checking her chart will see the
+third and stop trusting you.
+
 Write "Fondasi Pasanganmu ditempati ...", never "Rumah tempat hubungan paling dekatmu dibaca, yaitu
 pilar hari, ditempati ...".
 
