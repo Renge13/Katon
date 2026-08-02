@@ -167,6 +167,10 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   and the currently-live readings — **do not delete them** until the new pipeline ships.
 - Reyner is the **sole authority on Indonesian register**. Propose wording, flag it, never
   auto-decide.
+- **A code-fact written into any doc carries the command that produced it, and its date.** A claim
+  about the code without its grep is a memory, not a fact. Error 13 (COWORK-BRIEF §4) entered this
+  locked file exactly that way and every session inherited it as truth. Re-run the command before
+  propagating the claim into a prompt; a check older than the code it describes proves nothing.
 
 ---
 
