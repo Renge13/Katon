@@ -1,91 +1,603 @@
 {
-  "_README": {
-    "purpose": "Engine-owned content. Stage 3 reads label / label_meaning / gift_seed / cost_seed from here into the semantic JSON. Written once per badge, reused by everyone who carries it.",
-    "status": "BATCH 1 of 6 — the Ten Aspek. Register-setting batch. Reyner reviews before the other 54 are written.",
-    "remaining_batches": ["symbolic stars (8)", "elements (5)", "missing element (5)", "animals/branches (12)", "branch relations (~20)", "palaces (4)"],
-    "rules": [
-      "label_meaning MUST describe a felt experience, never define a concept. If a sentence could appear in a dictionary, rewrite it. Abstraction is the failure mode that produced the two 'hard to understand' defects in run 3.",
-      "gift and cost here are SEEDS. The engine conditions them per chart by palace, strength verdict and interactions. They are defaults, not final copy.",
-      "Gift before cost, always.",
-      "Indonesian name first, English in brackets once at first mention. No Chinese characters in user-facing copy. Hanzi here is the internal key only.",
-      "Aspek = internal disposition. Bintang = external marker. Never mix the prefixes.",
-      "Keyboard characters only. No em-dash, no curly quotes.",
-      "No slang (ngerasa/bikin/kayak/capek), no chat particles (tuh/lho/deh), not bureaucratic-baku.",
-      "Never rank an Aspek as good or bad. Every one has a gift and a cost."
-    ],
-    "authority": "Reyner is the sole authority on Indonesian register. Every string here is a proposal."
+ "_README": {
+  "purpose": "Engine-owned content. Stage 3 reads label / label_meaning / gift_seed / cost_seed from here into the semantic JSON. Written once per entry, reused by everyone who carries it.",
+  "status": "REVIEWED by Reyner 2026-08-01. All Indonesian strings, including salah_dikira, are his corrected versions.",
+  "rules": [
+   "label_meaning MUST describe a felt experience, never define a concept. If a sentence could appear in a dictionary, rewrite it.",
+   "gift and cost here are SEEDS. The engine conditions them per chart by palace, strength verdict and interactions. They are defaults, not final copy.",
+   "Gift before cost, always.",
+   "Indonesian name first, English in brackets once at first mention. No Chinese characters in user-facing copy. Hanzi here is the internal key only.",
+   "Aspek = internal disposition. Bintang = external marker. Never mix the prefixes.",
+   "Keyboard characters only. No em-dash, no curly quotes.",
+   "No slang (ngerasa/bikin/kayak/capek), no chat particles (tuh/lho/deh), not bureaucratic-baku.",
+   "Never rank an entry as good or bad. Every one has a gift and a cost.",
+   "A badge is something the person HAS. If it is a condition rather than a badge, set name_id null and let the renderer describe it."
+  ],
+  "authority": "Reyner is the sole authority on Indonesian register. Every string here is a proposal.",
+  "two_edits_on_top": [
+   "Aspek Pelindung cost: a typo was corrected to \"langkahmu\".",
+   "Tanda Kekosongan arti: rewritten as two sentences to avoid the banned negation-contrast construction, meaning unchanged."
+  ]
+ },
+ "aspek": {
+  "比肩": {
+   "name_id": "Aspek Pendamping",
+   "name_en": "Friend",
+   "label_meaning": "Kamu terbiasa menyelesaikan semuanya sendiri. Meminta tolong terasa lebih berat daripada mengerjakan sesuatu dua kali lipat.",
+   "gift_seed": "Kamu tidak runtuh saat tidak ada yang menopang. Orang tahu kamu bisa dititipi hal penting dan tidak akan hilang di tengah jalan.",
+   "cost_seed": "Bantuan sering datang terlambat karena kamu tidak pernah memintanya. Orang mengira kamu tidak membutuhkannya."
   },
-
-  "aspek": {
-    "比肩": {
-      "name_id": "Aspek Pendamping",
-      "name_en": "Friend",
-      "label_meaning": "Kamu terbiasa menyelesaikan sendiri. Meminta tolong terasa lebih berat daripada mengerjakan dua kali lipat.",
-      "gift_seed": "Kamu tidak runtuh saat tidak ada yang menopang. Orang tahu kamu bisa dititipi apa pun dan tidak akan menghilang di tengah jalan.",
-      "cost_seed": "Bantuan sering datang terlambat karena kamu tidak pernah memintanya. Orang mengira kamu tidak membutuhkannya."
-    },
-    "劫財": {
-      "name_id": "Aspek Pendorong",
-      "name_en": "Rob Wealth",
-      "label_meaning": "Kamu bergerak lebih cepat saat ada yang mengejar. Situasi tanpa lawan terasa datar.",
-      "gift_seed": "Kamu berani mengambil langkah yang orang lain tunda. Keberanian itu yang sering membuka pintu lebih dulu.",
-      "cost_seed": "Yang datang cepat juga pergi cepat. Kamu sulit menahan sesuatu cukup lama sampai ia mengendap."
-    },
-    "食神": {
-      "name_id": "Aspek Perajin",
-      "name_en": "Eating God",
-      "label_meaning": "Kamu senang mengerjakan sesuatu sampai jadi, tanpa perlu ada yang menonton. Prosesnya sendiri sudah cukup memuaskan.",
-      "gift_seed": "Kamu bisa menikmati pekerjaan tanpa menunggu hasilnya diakui. Itu yang membuatmu bertahan jauh lebih lama di hal yang kamu sukai.",
-      "cost_seed": "Kamu jarang menagih. Karyamu sering dipakai orang lain tanpa namamu ikut disebut."
-    },
-    "傷官": {
-      "name_id": "Aspek Pemijar",
-      "name_en": "Hurting Officer",
-      "label_meaning": "Kamu melihat cara yang lebih baik dan sulit diam soal itu. Mengikuti aturan yang tidak masuk akal terasa menyakitkan.",
-      "gift_seed": "Kamu paling cepat melihat celah dan paling berani menyebutnya. Ide yang tajam biasanya datang darimu.",
-      "cost_seed": "Kejujuranmu mahal harganya. Orang yang kamu koreksi sering mengingat caranya, bukan isinya."
-    },
-    "正財": {
-      "name_id": "Aspek Pengelola",
-      "name_en": "Direct Wealth",
-      "label_meaning": "Kamu dipercaya memegang hal yang penting, dan kamu memegangnya dengan rapi. Orang tenang kalau kamu yang mengurus.",
-      "gift_seed": "Apa yang kamu urus jarang berantakan. Kepercayaan datang sendiri tanpa perlu kamu minta.",
-      "cost_seed": "Semakin banyak yang kamu pegang, semakin sedikit yang tersisa untuk dirimu sendiri."
-    },
-    "偏財": {
-      "name_id": "Aspek Peraih",
-      "name_en": "Indirect Wealth",
-      "label_meaning": "Kamu melihat peluang di tempat yang orang lain lewati begitu saja. Uang dan kesempatan terasa mudah datang, dan sama mudahnya pergi.",
-      "gift_seed": "Kamu tidak takut pada ketidakpastian. Pintu sering terbuka justru karena kamu berani mengetuk lebih dulu.",
-      "cost_seed": "Yang datang besar juga hilang besar. Kamu jarang menyimpannya cukup lama untuk merasa aman."
-    },
-    "正官": {
-      "name_id": "Aspek Pengatur",
-      "name_en": "Direct Officer",
-      "label_meaning": "Kamu tahu apa yang seharusnya dilakukan, dan kamu melakukannya meskipun tidak ada yang mengawasi. Melanggar terasa lebih melelahkan daripada patuh.",
-      "gift_seed": "Orang menaruh tanggung jawab padamu sejak muda. Kamu menjadi tempat bersandar tanpa pernah meminta posisi itu.",
-      "cost_seed": "Tuntutan untuk selalu benar tidak pernah berhenti. Kamu jarang memberi dirimu izin untuk longgar."
-    },
-    "七殺": {
-      "name_id": "Aspek Penantang",
-      "name_en": "Seven Killings",
-      "label_meaning": "Kamu tumbuh paling cepat saat ditekan. Keadaan yang terlalu aman justru membuatmu gelisah.",
-      "gift_seed": "Kamu tidak lumpuh saat keadaan memburuk. Justru di titik itu pikiranmu paling jernih.",
-      "cost_seed": "Kamu sering mencari tekanan yang sebenarnya tidak perlu ada. Istirahat terasa seperti kehilangan arah."
-    },
-    "正印": {
-      "name_id": "Aspek Pelindung",
-      "name_en": "Direct Resource",
-      "label_meaning": "Kamu belajar cepat dan orang senang mengajarimu. Selalu ada yang muncul membantu tepat pada waktunya.",
-      "gift_seed": "Kamu jarang benar-benar sendirian. Dukungan datang dari tempat yang tidak kamu duga.",
-      "cost_seed": "Kenyamanan itu memperlambat langkahmu. Kamu bisa terlalu lama bersiap sebelum benar-benar mulai."
-    },
-    "偏印": {
-      "name_id": "Aspek Pemikir",
-      "name_en": "Indirect Resource",
-      "label_meaning": "Kamu memahami sesuatu lewat jalan yang sulit dijelaskan ke orang lain. Kesimpulanmu sering benar sebelum kamu bisa menunjukkan alasannya.",
-      "gift_seed": "Kamu melihat pola yang tidak terlihat orang lain. Firasatmu punya dasar, meski dasarnya sulit diucapkan.",
-      "cost_seed": "Kamu sering merasa berjarak. Menjelaskan isi kepalamu lebih melelahkan daripada memikirkannya sendiri."
-    }
+  "劫財": {
+   "name_id": "Aspek Pendorong",
+   "name_en": "Rob Wealth",
+   "label_meaning": "Kamu bergerak lebih cepat saat ada persaingan. Situasi tanpa tantangan terasa datar.",
+   "gift_seed": "Kamu berani mengambil langkah yang ditunda orang lain. Keberanian itu sering membukakan pintu lebih dulu.",
+   "cost_seed": "Hasil yang datang cepat juga bisa pergi cepat. Kamu sulit menahan sesuatu cukup lama sampai ia benar-benar mengendap."
+  },
+  "食神": {
+   "name_id": "Aspek Perajin",
+   "name_en": "Eating God",
+   "label_meaning": "Kamu senang mengerjakan sesuatu sampai selesai tanpa perlu ditonton. Prosesnya sendiri sudah memberi kepuasan.",
+   "gift_seed": "Kamu menikmati pekerjaan tanpa bergantung pada pengakuan orang lain. Ini membuatmu bertahan jauh lebih lama di bidang yang kamu sukai.",
+   "cost_seed": "Kamu jarang menagih hakmu. Karyamu sering dipakai orang lain tanpa namamu ikut disebut."
+  },
+  "傷官": {
+   "name_id": "Aspek Pemijar",
+   "name_en": "Hurting Officer",
+   "label_meaning": "Kamu cepat melihat cara yang lebih baik dan sulit diam saat melihat hal yang tidak efisien. Mengikuti aturan yang tidak masuk akal terasa menyiksa.",
+   "gift_seed": "Kamu paling cepat menemukan celah dan paling berani menyuarakan kebenaran. Ide yang tajam biasanya datang darimu.",
+   "cost_seed": "Kejujuranmu mahal harganya. Orang yang kamu koreksi sering mengingat rasa sakitnya, bukan kebenarannya."
+  },
+  "正財": {
+   "name_id": "Aspek Pengelola",
+   "name_en": "Direct Wealth",
+   "label_meaning": "Kamu dipercaya memegang hal penting dan merawatnya dengan rapi. Orang merasa tenang saat kamu yang memegang kendali.",
+   "gift_seed": "Apa yang kamu urus jarang berantakan. Kepercayaan datang sendiri tanpa perlu kamu minta.",
+   "cost_seed": "Semakin banyak yang kamu pegang, semakin sedikit energi yang tersisa untuk dirimu sendiri."
+  },
+  "偏財": {
+   "name_id": "Aspek Peraih",
+   "name_en": "Indirect Wealth",
+   "label_meaning": "Kamu melihat peluang di tempat yang dilewati orang lain. Kesempatan dan hasil terasa mudah datang, tetapi juga mudah lepas.",
+   "gift_seed": "Kamu tidak takut pada ketidakpastian. Pintu sering terbuka justru karena kamu berani mengetuk lebih dulu.",
+   "cost_seed": "Yang datang besar bisa hilang besar. Kamu jarang menyimpannya cukup lama untuk benar-benar merasa aman."
+  },
+  "正官": {
+   "name_id": "Aspek Pengatur",
+   "name_en": "Direct Officer",
+   "label_meaning": "Kamu tahu apa yang seharusnya dilakukan dan tetap menjalankannya meski tidak ada yang melihat. Melanggar aturan terasa lebih melelahkan daripada mematuhinya.",
+   "gift_seed": "Orang menaruh tanggung jawab padamu sejak muda. Kamu menjadi tempat bersandar tanpa pernah meminta posisi itu.",
+   "cost_seed": "Tuntutan untuk selalu benar tidak pernah berhenti. Kamu jarang memberi izin pada dirimu sendiri untuk bersikap longgar."
+  },
+  "七殺": {
+   "name_id": "Aspek Penantang",
+   "name_en": "Seven Killings",
+   "label_meaning": "Kamu tumbuh paling cepat saat berada di bawah tekanan. Keadaan yang terlalu aman justru membuatmu gelisah.",
+   "gift_seed": "Kamu tidak lumpuh saat situasi memburuk. Justru di titik itu pikiranmu paling jernih.",
+   "cost_seed": "Kamu sering mencari tekanan yang sebenarnya tidak perlu. Istirahat terasa seperti kehilangan arah."
+  },
+  "正印": {
+   "name_id": "Aspek Pelindung",
+   "name_en": "Direct Resource",
+   "label_meaning": "Kamu cepat menyerap ilmu dan orang lain senang membimbingmu. Selalu ada bantuan yang muncul tepat pada waktunya.",
+   "gift_seed": "Kamu jarang benar-benar sendirian. Bantuan datang dari tempat yang tidak kamu duga.",
+   "cost_seed": "Kenyamanan itu bisa memperlambat langkahmu. Kamu sering terlalu lama bersiap sebelum benar-benar mulai melangkah."
+  },
+  "偏印": {
+   "name_id": "Aspek Pemikir",
+   "name_en": "Indirect Resource",
+   "label_meaning": "Kamu memahami sesuatu lewat jalan intuitif yang sulit dijelaskan. Kesimpulanmu sering benar sebelum kamu sempat membuktikannya.",
+   "gift_seed": "Kamu melihat pola yang luput dari pandangan orang lain. Firasatmu punya dasar, meski sulit diutarakan dengan kata-kata.",
+   "cost_seed": "Kamu sering merasa berjarak dari lingkungan sekitar. Menjelaskan isi kepalamu terasa lebih melelahkan daripada memikirkannya sendiri."
   }
+ },
+ "bintang": {
+  "桃花": {
+   "name_id": "Bunga Persik",
+   "name_en": "Peach Blossom",
+   "label_meaning": "Orang mengingatmu setelah satu pertemuan tanpa kamu perlu berusaha keras. Perhatian datang tanpa harus kamu kejar.",
+   "gift_seed": "Pintu terbuka lebih cepat untukmu karena orang penasaran ingin mengenalmu lebih jauh. Kesan pertamamu bekerja sebelum kamu mulai bicara.",
+   "cost_seed": "Perhatian datang lebih cepat daripada kedekatan. Orang tertarik dulu pada penampilan atau kebiasaanmu, dan jarak menuju kedekatan sungguhan kadang tidak pernah tertutup.",
+   "actionable_seed": "Kesan pertamamu adalah aset terkuatmu. Pakai di awal, jangan disimpan sampai orang sudah membentuk pendapat sendiri."
+  },
+  "天乙貴人": {
+   "name_id": "Bintang Penolong",
+   "name_en": "Nobleman",
+   "label_meaning": "Saat kamu benar-benar jalan buntu, selalu ada orang yang muncul membantu. Sering kali orang yang tidak kamu duga dan datang di saat yang tepat.",
+   "gift_seed": "Kamu jarang benar-benar sendirian di titik tersempit. Ada jalur bantuan yang terbuka untukmu.",
+   "cost_seed": "Bantuan itu perlu kamu jemput. Kamu terbiasa menyelesaikan semuanya sendiri sampai lupa bahwa ada yang bisa dimintai bantuan.",
+   "actionable_seed": "Minta bantuan lebih awal dari yang terasa nyaman. Pertolongan di baganmu ada, bentuknya menunggu diminta."
+  },
+  "驛馬": {
+   "name_id": "Bintang Perantau",
+   "name_en": "Sky Horse",
+   "label_meaning": "Diam terlalu lama di satu tempat membuatmu gelisah tanpa sebab. Pindah lokasi, bepergian, atau berganti suasana sering menyelesaikan masalah yang tidak selesai lewat berpikir.",
+   "gift_seed": "Kamu tidak takut memulai kembali di tempat baru. Perpindahan yang terasa berat bagi orang lain adalah hal wajar bagimu.",
+   "cost_seed": "Hubungan atau usaha butuh waktu untuk mengakar, dan kamu sering berpindah sebelum itu terjadi. Hal yang butuh waktu bertahun-tahun kadang terlewat begitu saja."
+  },
+  "空亡": {
+   "name_id": "Tanda Kekosongan",
+   "name_en": "Void",
+   "label_meaning": "Orang lain melihat kamu berhasil di bidang ini, tetapi kamu sendiri sering merasa belum pantas menyandangnya. Hasilnya tidak pernah kurang. Rasa memilikinya yang tidak pernah ikut hadir.",
+   "gift_seed": "Kamu tidak pernah bersandar pada keberuntungan di bidang ini. Apa pun yang kamu capai di sana, kamu bangun murni dengan kerja keras.",
+   "cost_seed": "Pengakuan orang lain tidak pernah menempel di dalam dirimu. Orang sudah menganggapmu ahli, tetapi kamu masih terus menunggu bukti berikutnya.",
+   "actionable_seed": "Pengakuan di bidang ini tidak akan menempel dengan sendirinya. Sebut hasil kerjamu dengan lantang, meskipun rasanya canggung.",
+   "note_for_reyner": "[REYNER] 空亡 interpretation varies by school. This framing (present but hard to hold as yours) is the one used in the prove-cell runs. Confirm before it ships."
+  },
+  "羊刃": {
+   "name_id": "Mata Pisau",
+   "name_en": "Yang Blade",
+   "label_meaning": "Ada titik di mana kamu berhenti menimbang dan langsung mengambil keputusan tegas. Orang di sekitarmu sering kaget dengan seberapa cepat perubahan itu terjadi.",
+   "gift_seed": "Kamu sanggup mengambil keputusan sulit yang ditunda orang lain. Ketegasan itu sering menyelamatkan situasi kritis.",
+   "cost_seed": "Ketajaman yang sama bisa melukai hubungan atau situasi yang tidak perlu dirusak. Apa yang terputus di titik ini sulit untuk disambung kembali.",
+   "note_for_reyner": "[REYNER] Yang stems only (甲 -> 卯, 丙/戊 -> 午, 庚 -> 酉, 壬 -> 子). Yin stems never carry this."
+  },
+  "文昌": {
+   "name_id": "Bintang Cendekia",
+   "name_en": "Academic Star",
+   "label_meaning": "Kamu menyerap hal baru lebih cepat daripada orang di sekitarmu, terutama lewat membaca dan mengamati secara mandiri.",
+   "gift_seed": "Proses belajar tidak terasa sebagai beban. Bidang baru terbuka untukmu jauh lebih cepat daripada orang lain.",
+   "cost_seed": "Memahami suatu teori membuatmu merasa seolah-olah sudah menyelesaikannya. Jarak antara paham dan benar-benar mengeksekusinya sering kali terulur panjang."
+  },
+  "孤辰": {
+   "name_id": "Penyendiri",
+   "name_en": "Solitary",
+   "label_meaning": "Kamu bisa berada di tengah keramaian dan tetap merasa sedang mengamati dari luar. Waktu sendirian tidak pernah terasa sebagai hukuman.",
+   "gift_seed": "Kamu tidak membutuhkan persetujuan orang lain untuk merasa utuh. Keputusan besar bisa kamu ambil tanpa perlu ditopang siapa pun.",
+   "cost_seed": "Orang mengira kamu sengaja menutup diri. Jarak yang kamu buat untuk kenyamanan pribadi sering dianggap sebagai penolakan oleh orang lain."
+  },
+  "華蓋": {
+   "name_id": "Bintang Sunyi",
+   "name_en": "Solitude Star",
+   "label_meaning": "Kamu tertarik pada hal-hal yang mendalam atau sunyi. Keramaian menyedot energimu jauh lebih cepat dari yang kamu akui.",
+   "gift_seed": "Kamu memiliki ruang batin yang kokoh dan tidak mudah digoyang orang lain. Pekerjaan yang membutuhkan perenungan panjang sangat cocok untukmu.",
+   "cost_seed": "Apa yang kamu pikirkan sulit dibagikan ke orang lain. Orang terdekat pun sering tidak tahu proses besar yang sedang terjadi di dalam kepalamu.",
+   "note_for_reyner": "[REYNER] Added beyond the original 7. Common on Joey charts. Drop it if you would rather keep the badge set tight."
+  }
+ },
+ "elemen": {
+  "木": {
+   "name_id": "Kayu",
+   "name_en": "Wood",
+   "label_meaning": "Kamu tumbuh dengan menjangkau hal baru. Berhenti berkembang terasa lebih buruk bagimu daripada salah arah.",
+   "gift_seed": "Kamu memiliki dorongan alami untuk maju dan memperbaiki keadaan. Orang di sekitarmu ikut terdorong oleh energimu.",
+   "cost_seed": "Kamu sulit melambat, bahkan di saat tubuh dan pikiranmu sangat membutuhkan istirahat.",
+   "fed_by": "水",
+   "drained_by": "火",
+   "controlled_by": "金",
+   "controls": "土"
+  },
+  "火": {
+   "name_id": "Api",
+   "name_en": "Fire",
+   "label_meaning": "Kehadiranmu langsung terasa sebelum kamu bicara. Kamu menerangi sekitarmu lebih dulu sebelum menghangatkan dirimu sendiri.",
+   "gift_seed": "Orang-orang berkumpul di sekitarmu tanpa perlu kamu undang. Suasana ruangan berubah saat kamu masuk.",
+   "cost_seed": "Api selalu membutuhkan bahan bakar dari luar. Kamu tidak bisa terus menyala hanya dari cadangan energimu sendiri.",
+   "fed_by": "木",
+   "drained_by": "土",
+   "controlled_by": "水",
+   "controls": "金"
+  },
+  "土": {
+   "name_id": "Tanah",
+   "name_en": "Earth",
+   "label_meaning": "Orang menaruh hal-hal penting padamu karena kamu tidak gampang goyah. Kamu menampung lebih banyak beban dari yang terlihat di permukaan.",
+   "gift_seed": "Kamu adalah tempat orang lain berpijak. Apa yang dititipkan padamu tidak akan dibiarkan jatuh.",
+   "cost_seed": "Kamu menyerap beban tanpa pernah mengeluh. Apa yang tertahan terlalu lama di dalam akhirnya mengeras dan menjadi beban dingin.",
+   "fed_by": "火",
+   "drained_by": "金",
+   "controlled_by": "木",
+   "controls": "水"
+  },
+  "金": {
+   "name_id": "Logam",
+   "name_en": "Metal",
+   "label_meaning": "Kamu tahu kapan sesuatu harus dihentikan atau dipotong. Pekerjaan yang setengah jadi terasa lebih mengganggu bagimu daripada bagi orang lain.",
+   "gift_seed": "Standarmu tinggi dan kamu tegas menyelesaikannya. Apa yang melewati tanganmu selesai dengan rapi dan jelas.",
+   "cost_seed": "Kamu sering memotong proses terlalu cepat. Beberapa hal sebenarnya butuh waktu untuk berantakan dulu sebelum menemukan bentuk terbaiknya.",
+   "fed_by": "土",
+   "drained_by": "水",
+   "controlled_by": "火",
+   "controls": "木"
+  },
+  "水": {
+   "name_id": "Air",
+   "name_en": "Water",
+   "label_meaning": "Kamu menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Orang lain sering kesulitan menebak langkahmu berikutnya.",
+   "gift_seed": "Kamu mampu menembus situasi yang buntu bagi orang lain. Jalan selalu ada karena kamu tidak kaku pada satu cara.",
+   "cost_seed": "Sesuatu yang mengalir terus sulit untuk diikat. Komitmen jangka panjang pada satu bentuk kaku terasa amat berat bagimu.",
+   "fed_by": "金",
+   "drained_by": "木",
+   "controlled_by": "土",
+   "controls": "火"
+  }
+ },
+ "elemen_hilang": {
+  "木": {
+   "name_id": null,
+   "name_en": "Missing Wood",
+   "label_meaning": "Kamu jarang menunggu inspirasi dan tidak pernah gelisah tanpa alasan. Dorongan untuk berpindah arah tidak pernah muncul otomatis dari dalam diri.",
+   "gift_seed": "Kamu tidak butuh alasan besar untuk mulai bergerak. Kamu fokus bekerja dari apa yang ada di depan mata.",
+   "cost_seed": "Tanpa pemicu dari luar, kamu bisa bertahan bertahun-tahun di tempat atau situasi yang sudah tidak cocok, dan tetap menganggapnya wajar.",
+   "actionable_seed": "Pemicu perubahan harus kamu pasang sengaja dari luar, berupa tenggat waktu, komitmen dengan orang lain, atau ruang baru yang memaksa kamu melangkah."
+  },
+  "火": {
+   "name_id": null,
+   "name_en": "Missing Fire",
+   "label_meaning": "Kehadiranmu tidak otomatis terlihat oleh orang banyak. Butuh waktu bagi orang lain untuk menyadari peranmu di dalam ruangan.",
+   "gift_seed": "Kamu bekerja murni fokus pada hasil tanpa butuh panggung. Pekerjaanmu bebas dari kebutuhan untuk tampil.",
+   "cost_seed": "Apa yang sudah kamu kerjakan sering luput dari perhatian orang yang perlu tahu. Kehangatan relasi juga tidak datang sendiri, harus kamu usahakan secara sadar."
+  },
+  "土": {
+   "name_id": null,
+   "name_en": "Missing Earth",
+   "label_meaning": "Kamu bergerak ringan dan sulit merasa benar-benar mengakar. Rutinitas harian cepat membuatmu merasa jenuh.",
+   "gift_seed": "Kamu tidak terikat pada satu pola hidup kaku. Perubahan besar tidak membuatmu cemas.",
+   "cost_seed": "Kamu tidak memiliki jangkar alami. Proses yang membutuhkan waktu bertahun-tahun untuk berbuah sering kamu tinggalkan sebelum waktunya."
+  },
+  "金": {
+   "name_id": null,
+   "name_en": "Missing Metal",
+   "label_meaning": "Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulainya. Kamu cenderung bertahan di situasi yang sudah jelas selesai.",
+   "gift_seed": "Kamu memberi kesempatan lebih banyak kepada orang lain. Hubungan atau pekerjaan jarang kamu putus secara tergesa-gesa.",
+   "cost_seed": "Hal-hal yang seharusnya sudah selesai terus menempel dan menguras energi. Batas tegas harus kamu buat secara sadar karena tidak akan muncul sendiri."
+  },
+  "水": {
+   "name_id": null,
+   "name_en": "Missing Water",
+   "label_meaning": "Kamu sangat lurus dan konsisten, tetapi kurang lentur saat situasi berubah secara mendadak.",
+   "gift_seed": "Orang tahu persis kualitas dirimu. Tidak ada versi lain dari dirimu yang berubah-ubah di ruangan berbeda.",
+   "cost_seed": "Menyesuaikan diri dengan keadaan sering terasa seperti mengkhianati prinsip diri. Situasi yang mengharuskanmu mengalah terasa sangat menguras emosi."
+  }
+ },
+ "shio": {
+  "子": {
+   "name_id": "Tikus",
+   "element": "水",
+   "trait": "Cepat membaca arah angin dan pandai menyesuaikan diri."
+  },
+  "丑": {
+   "name_id": "Kerbau",
+   "element": "土",
+   "trait": "Tahan banting dan tidak tergesa. Apa yang sudah dipegang jarang dilepas."
+  },
+  "寅": {
+   "name_id": "Macan",
+   "element": "木",
+   "trait": "Berani mengambil langkah pertama. Tidak betah diam saat melihat ada yang harus dikerjakan."
+  },
+  "卯": {
+   "name_id": "Kelinci",
+   "element": "木",
+   "trait": "Halus dan menghindari benturan langsung. Mencapai tujuan tanpa perlu memicu keributan."
+  },
+  "辰": {
+   "name_id": "Naga",
+   "element": "土",
+   "trait": "Menampung banyak hal besar sekaligus. Sulit ditebak batasan kemampuannya."
+  },
+  "巳": {
+   "name_id": "Ular",
+   "element": "火",
+   "trait": "Tenang di luar, sangat aktif berpikir di dalam. Menunggu momen yang tepat sebelum melangkah."
+  },
+  "午": {
+   "name_id": "Kuda",
+   "element": "火",
+   "trait": "Bergerak dulu, berpikir sambil berjalan. Berhentinya pergerakan terasa menyiksa."
+  },
+  "未": {
+   "name_id": "Kambing",
+   "element": "土",
+   "trait": "Peka pada detail yang dilewati orang lain. Lembut di luar, tetapi tidak gampang digoyahkan."
+  },
+  "申": {
+   "name_id": "Monyet",
+   "element": "金",
+   "trait": "Cepat menemukan jalan pintas. Mudah bosan pada proses yang monoton."
+  },
+  "酉": {
+   "name_id": "Ayam",
+   "element": "金",
+   "trait": "Cermat dan rapi. Ketidakberaturan di sekitarnya terasa sangat mengganggu."
+  },
+  "戌": {
+   "name_id": "Anjing",
+   "element": "土",
+   "trait": "Setia dan menjaga batas. Tahu pasti siapa yang layak dibela."
+  },
+  "亥": {
+   "name_id": "Babi",
+   "element": "水",
+   "trait": "Tulus dan tidak banyak menuntut. Memberi kebaikan tanpa sibuk menghitung untung rugi."
+  }
+ },
+ "relasi_cabang": {
+  "六合": {
+   "name_id": "Ikatan",
+   "name_en": "Combination",
+   "label_meaning": "Dua bagian dari baganmu saling mengunci. Area hidup yang diwakili keduanya berjalan berdampingan; saat satu bergerak, yang lain otomatis ikut terpengaruh.",
+   "gift_seed": "Ada dua bidang hidupmu yang saling menguatkan secara alami tanpa perlu kamu atur.",
+   "cost_seed": "Saat ada masalah, keduanya ikut terdampak bersamaan. Masalah di satu area jarang berhenti di sana saja.",
+   "pairs": [
+    "子丑",
+    "寅亥",
+    "卯戌",
+    "辰酉",
+    "巳申",
+    "午未"
+   ]
+  },
+  "三合": {
+   "name_id": "Gabungan Penuh",
+   "name_en": "Full Trine",
+   "label_meaning": "Tiga bagian baganmu ditarik kuat ke satu fokus unsur yang sama. Tema ini menjadi pola yang terus berulang sepanjang hidupmu.",
+   "gift_seed": "Ada satu wilayah hidup yang memiliki dorongan energi sangat kuat. Kamu jarang kehabisan peluang di area ini.",
+   "cost_seed": "Tema yang sama akan terus datang menagih energimu. Kamu harus menghadapinya kembali di setiap fase hidup yang berbeda.",
+   "sets": {
+    "申子辰": "水",
+    "巳酉丑": "金",
+    "寅午戌": "火",
+    "亥卯未": "木"
+   }
+  },
+  "半合": {
+   "name_id": "Setengah Gabungan",
+   "name_en": "Half Combination",
+   "label_meaning": "Dua dari tiga bagian sudah saling tarik. Arah geraknya sudah jelas, meski kekuatannya belum sepenuhnya padu.",
+   "gift_seed": "Kecenderungan energi ini sudah bekerja untukmu dan memberi arah yang jelas.",
+   "cost_seed": "Kondisi yang belum utuh ini membuatmu secara tidak sadar terus mencari elemen ketiga untuk melengkapinya."
+  },
+  "冲": {
+   "name_id": "Benturan",
+   "name_en": "Clash",
+   "label_meaning": "Dua bagian baganmu saling berhadapan langsung. Perubahan di area ini biasanya datang mendadak dan membawa guncangan, bukan lewat proses perlahan.",
+   "gift_seed": "Kamu terbiasa beradaptasi dengan guncangan cepat. Situasi sulit yang membuat orang lain panik sudah pernah kamu lewati.",
+   "cost_seed": "Ketenangan di area ini tidak datang otomatis. Kestabilannya butuh dijaga dengan usaha yang sadar dan terus-menerus.",
+   "pairs": [
+    "子午",
+    "丑未",
+    "寅申",
+    "卯酉",
+    "辰戌",
+    "巳亥"
+   ],
+   "note_for_reyner": "[REYNER] Golden rule 3: a clash is a forced upgrade, never destruction. Never render this as damage."
+  },
+  "害": {
+   "name_id": "Gesekan",
+   "name_en": "Harm",
+   "label_meaning": "Gesekan kecil yang terjadi terus-menerus, bukan benturan besar. Masalah-masalah sepele yang menumpuk perlahan hingga terasa memberatkan.",
+   "gift_seed": "Kamu sangat peka pada detail kecil yang diabaikan orang lain. Masalah jarang membesar tanpa terdeteksi olehmu lebih dulu.",
+   "cost_seed": "Gesekan kecil ini jarang selesai total dalam sekali tindakan. Ia sering muncul kembali dalam bentuk lain yang sedikit berbeda.",
+   "pairs": [
+    "子未",
+    "丑午",
+    "寅巳",
+    "卯辰",
+    "申亥",
+    "酉戌"
+   ]
+  },
+  "刑": {
+   "name_id": "Simpul",
+   "name_en": "Punishment",
+   "label_meaning": "Dua atau lebih bagian baganmu saling mengikat dengan cara yang menyulitkan. Pola ini kamu bawa sendiri, dan tanpa disadari cenderung kamu ulang.",
+   "gift_seed": "Kamu memahami situasi rumit yang tidak punya jawaban sederhana. Orang lain menyerah lebih awal di kondisi seperti ini.",
+   "cost_seed": "Kesulitan di area ini sering berawal dari keputusanmu sendiri. Menyalahkan keadaan tidak akan menyelesaikannya.",
+   "types": {
+    "self": {
+     "label_meaning": "Bagian yang sama muncul dua kali dan bergesekan dengan dirinya sendiri. Kamu cenderung berlebihan justru di wilayah yang paling kamu kuasai.",
+     "cost_seed": "Kekuatanmu di area ini bisa berbalik menekan dirimu sendiri kalau tidak kamu batasi.",
+     "branches": [
+      "辰",
+      "午",
+      "酉",
+      "亥"
+     ]
+    },
+    "trine": {
+     "label_meaning": "Tiga bagian baganmu terikat dalam satu simpul. Persoalan di sini jarang melibatkan satu pihak saja.",
+     "cost_seed": "Menyelesaikan satu sisi biasanya menggeser masalahnya ke sisi lain. Ketiganya perlu dibereskan bersamaan.",
+     "sets": [
+      [
+       "寅",
+       "巳",
+       "申"
+      ],
+      [
+       "丑",
+       "戌",
+       "未"
+      ]
+     ]
+    },
+    "pair": {
+     "label_meaning": "Dua bagian baganmu saling menahan. Yang satu tidak bisa maju tanpa membuat yang lain tertinggal.",
+     "cost_seed": "Kamu terbiasa memilih antara dua hal yang sebenarnya sama-sama kamu butuhkan.",
+     "pairs": [
+      [
+       "子",
+       "卯"
+      ]
+     ]
+    }
+   },
+   "note_for_reyner": "[REYNER-APPROVED 2026-08-02] Golden rule 3 as with 冲: this is entanglement and self-authored complication, NEVER punishment or damage. 'Hukuman' is banned in prose. Name decision: Simpul confirmed; Belitan was considered as an alternative (Ikatan-adjacency risk noted) and not taken. label_meaning was rewritten from the D2a draft to remove the banned negation-contrast construction; meaning unchanged. Branch data mirrors lib/bazi/stems.js and tests/punishment.spec.mjs - those stay the authority."
+  }
+ },
+ "pilar": {
+  "year": {
+   "name_id": "Pilar Akar",
+   "name_en": "Year Pillar",
+   "label_meaning": "Masa awal, asal-usul, dan hubungan keluarga dibaca di sini. Ini adalah fondasi yang kamu bawa sebelum kamu bisa memilih sendiri."
+  },
+  "month": {
+   "name_id": "Pilar Kerja",
+   "name_en": "Month Pillar",
+   "label_meaning": "Karier, lingkungan profesional, dan relasi kerja. Ini adalah panggung utama tempat orang lain menilai kemampuanmu."
+  },
+  "day": {
+   "name_id": "Pilar Diri",
+   "name_en": "Day Pillar",
+   "label_meaning": "Pusat dari seluruh peta. Batangnya adalah inti dirimu, sedangkan cabangnya adalah Fondasi Pasangan.",
+   "branch_name_id": "Fondasi Pasangan",
+   "branch_name_en": "Spouse Palace",
+   "branch_label_meaning": "Tempat membaca dinamika hubungan paling dekat. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain mungkin menganggapnya berat."
+  },
+  "hour": {
+   "name_id": "Pilar Arah",
+   "name_en": "Hour Pillar",
+   "label_meaning": "Pandangan ke depan, dorongan jangka panjang, dan apa yang kamu bangun setelah fondasi hidupmu terbentuk."
+  }
+ },
+ "salah_dikira": {
+  "_note": "'Often misunderstood as', one per Day Master. The gap between how you are read and who you are. SURFACE RULE: on the SHARECARD this line is used VERBATIM, because the card is rendered from data with no LLM in the loop, it must be screenshot-stable, and a fixed line per archetype is a signature rather than a limitation. In the READING it is a SEED like every other string, and the renderer rewrites it in context. Keyed by DM because the element is what people perceive first; role-level misperception is already carried by the Aspek cost_seed strings.",
+  "甲": {
+   "name_id": "Kayu Yang",
+   "line": "Orang mengira kamu keras kepala. Kamu hanya menolak bergeser dari hal yang kamu tahu benar."
+  },
+  "乙": {
+   "name_id": "Kayu Yin",
+   "line": "Orang mengira kamu gampang mengikuti arus. Kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah."
+  },
+  "丙": {
+   "name_id": "Api Yang",
+   "line": "Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."
+  },
+  "丁": {
+   "name_id": "Api Yin",
+   "line": "Orang mengira kamu gampang mengalah. Kamu hanya memilih dengan sangat hati-hati siapa yang layak kamu terangi."
+  },
+  "戊": {
+   "name_id": "Tanah Yang",
+   "line": "Orang mengira kamu tidak pernah terguncang. Kamu hanya menampung semuanya sendiri tanpa pernah mengeluh."
+  },
+  "己": {
+   "name_id": "Tanah Yin",
+   "line": "Orang mengira kamu mudah diatur. Kamu sebenarnya sedang menimbang mana yang memang layak kamu jaga."
+  },
+  "庚": {
+   "name_id": "Logam Yang",
+   "line": "Orang mengira kamu kaku dan dingin. Kamu hanya menolak berpura-pura ramah demi kenyamanan orang lain."
+  },
+  "辛": {
+   "name_id": "Logam Yin",
+   "line": "Orang mengira kamu terlalu pemilih. Kamu hanya tidak bisa memuji sesuatu yang kenyataannya belum sempurna."
+  },
+  "壬": {
+   "name_id": "Air Yang",
+   "line": "Orang mengira kamu sulit ditebak. Arah tujuanmu sebenarnya selalu sama, hanya jalurnya yang berganti-ganti."
+  },
+  "癸": {
+   "name_id": "Air Yin",
+   "line": "Orang mengira kamu acuh tak acuh. Padahal kamu menyerap hampir semua detail, lalu menyimpannya diam-diam."
+  }
+ },
+ "arketipe": {
+  "_note": "DECIDED 2026-08-02 by Reyner (review sheet: docs/content/archetype-tags-REVIEW.md). One name per Day Master stem, ID + EN display pair. The EN layer covers names + tags + card strings ONLY; the reading body stays Indonesian. Rule 23 unchanged for prose (Indonesian first, English in brackets once at first mention). On the SHARECARD no brackets ever: the card shows name_id or name_en per display variant, never both. name_en must be the SAME OBJECT as name_id - the watercolour is shared.",
+  "甲": {
+   "element": "Kayu Yang",
+   "name_id": "Jati",
+   "name_en": "The Teak"
+  },
+  "乙": {
+   "element": "Kayu Yin",
+   "name_id": "Bambu",
+   "name_en": "The Bamboo"
+  },
+  "丙": {
+   "element": "Api Yang",
+   "name_id": "Matahari",
+   "name_en": "The Sun"
+  },
+  "丁": {
+   "element": "Api Yin",
+   "name_id": "Api Unggun",
+   "name_en": "The Bonfire"
+  },
+  "戊": {
+   "element": "Tanah Yang",
+   "name_id": "Gunung",
+   "name_en": "The Mountain"
+  },
+  "己": {
+   "element": "Tanah Yin",
+   "name_id": "Taman",
+   "name_en": "The Garden"
+  },
+  "庚": {
+   "element": "Logam Yang",
+   "name_id": "Besi Tempa",
+   "name_en": "The Forge"
+  },
+  "辛": {
+   "element": "Logam Yin",
+   "name_id": "Permata",
+   "name_en": "The Jewel"
+  },
+  "壬": {
+   "element": "Air Yang",
+   "name_id": "Samudra",
+   "name_en": "The Ocean"
+  },
+  "癸": {
+   "element": "Air Yin",
+   "name_id": "Embun",
+   "name_en": "Morning Dew"
+  }
+ },
+ "tag_arketipe": {
+  "_note": "DECIDED 2026-08-02 (review sheet: docs/content/archetype-tags-REVIEW.md). The 3 FIXED tags per archetype - sharecard-spec decision 2 (3 fixed + 3 dynamic from the chart). Stored title-case; the card renders uppercase. 30 distinct strings, no word reused across archetypes - reuse would blur the family resemblance the fixed tags exist to create. tags_en pending the EN register pass.",
+  "甲": [
+   "Teguh",
+   "Menaungi",
+   "Konsisten"
+  ],
+  "乙": [
+   "Luwes",
+   "Ulet",
+   "Taktis"
+  ],
+  "丙": [
+   "Hangat",
+   "Bersemangat",
+   "Terbuka"
+  ],
+  "丁": [
+   "Peka",
+   "Setia",
+   "Penyayang"
+  ],
+  "戊": [
+   "Kokoh",
+   "Andal",
+   "Tenang"
+  ],
+  "己": [
+   "Sabar",
+   "Telaten",
+   "Mengayomi"
+  ],
+  "庚": [
+   "Tegas",
+   "Tangguh",
+   "Lugas"
+  ],
+  "辛": [
+   "Teliti",
+   "Anggun",
+   "Pemilih"
+  ],
+  "壬": [
+   "Dinamis",
+   "Gigih",
+   "Visioner"
+  ],
+  "癸": [
+   "Jeli",
+   "Halus",
+   "Pengertian"
+  ]
+ }
 }
