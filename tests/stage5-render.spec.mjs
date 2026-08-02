@@ -5,18 +5,24 @@
 //
 // No network. The provider adapters are exercised through an injected fetch, so
 // this spec never spends an API call and never depends on a key being present.
+//
+// NOTE: run with `node --conditions=react-server` (the npm script does this).
+// lib/render/cache.js carries a `server-only` guard, which resolves to an empty
+// stub under that condition — the same way Next's RSC bundle resolves it, and
+// the same arrangement scripts/forge-tests.mjs already uses.
 // ============================================================
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
-import { buildSemanticJson } from '../lib/semantic/index.js';
+import { buildSemanticJson, cacheKey } from '../lib/semantic/index.js';
 import { VALIDATION_CHARTS } from './bazi-validation.fixture.js';
 
 import { MASTER_PROMPT, PROMPT_VERSION, assertPromptLoaded } from '../lib/render/prompt.js';
 import { parseRenderResponse, RenderShapeError } from '../lib/render/schema.js';
 import { assembleFallback } from '../lib/render/fallback.js';
+import { readCache, writeCache, flagCache, __clearMemCache } from '../lib/render/cache.js';
 
 const jsonFor = (tc) => buildSemanticJson(calculateBaziChart({
   birthDate: tc.date, birthTime: tc.time,
@@ -166,4 +172,83 @@ test('the floor reports the two things it cannot say', () => {
   assert.equal(out.penutup, '');
   assert.equal(out.notes.penutup_unavailable, true);
   assert.equal(typeof out.notes.hour_known, 'boolean');
+});
+
+// ── the result cache (Stage 4 check + Stage 7 store) ───────
+// Against the in-memory dev backend. Supabase is not configured in tests, and
+// the two paths are the same shape by construction.
+
+test('a stored reading round-trips on its key, with its attribution', async () => {
+  __clearMemCache();
+  const key = cacheKey(CHART_1);
+  const out = assembleFallback(CHART_1);
+
+  await writeCache(key, {
+    engineVersion: CHART_1.engine_version,
+    blocks: out.blocks,
+    penutup: out.penutup,
+    source: 'gemini',
+    model: 'gemini-3.1-flash-lite',
+    promptVersion: PROMPT_VERSION,
+    stage6Version: 'test-gate-1',
+  });
+
+  const row = await readCache(key);
+  assert.equal(row.cache_key, key);
+  assert.equal(row.blocks.length, out.blocks.length);
+  // Flagged readings must be attributable to the exact model AND prompt.
+  assert.equal(row.model, 'gemini-3.1-flash-lite');
+  assert.equal(row.prompt_version, PROMPT_VERSION);
+  assert.equal(row.status, 'unreviewed');
+});
+
+test('a row written with no Stage 6 gate is never returned to a serve path', async () => {
+  // G task 3. This is the pre-H state: nothing validated it, so nothing serves
+  // it - and it stays unservable AFTER H lands, because the discriminator is the
+  // absent stage6_version rather than a status that H would start overwriting.
+  __clearMemCache();
+  const key = cacheKey(CHART_1);
+  await writeCache(key, {
+    engineVersion: CHART_1.engine_version,
+    blocks: assembleFallback(CHART_1).blocks,
+    penutup: '',
+    source: 'module_assembly',
+    stage6Version: null,
+  });
+
+  assert.equal(await readCache(key), null, 'an ungated row reached the serve path');
+  const qa = await readCache(key, { includeUnvalidated: true });
+  assert.ok(qa, 'QA must still be able to see it');
+  assert.equal(qa.stage6_version, null);
+});
+
+test('the cache refuses to store an empty reading', async () => {
+  __clearMemCache();
+  await assert.rejects(
+    () => writeCache('k', { engineVersion: 'v', blocks: [], source: 'gemini' }),
+    /empty reading/,
+  );
+  await assert.rejects(
+    () => writeCache('', { engineVersion: 'v', blocks: [{}], source: 'gemini' }),
+    /no cache key/,
+  );
+});
+
+test('a flagged reading keeps serving', async () => {
+  // pipeline-spec Stage 7: pulling it leaves a hole for every user who shares
+  // that semantic profile.
+  __clearMemCache();
+  const key = cacheKey(CHART_1);
+  await writeCache(key, {
+    engineVersion: CHART_1.engine_version,
+    blocks: assembleFallback(CHART_1).blocks,
+    penutup: 'x',
+    source: 'gemini',
+    stage6Version: 'test-gate-1',
+  });
+  await flagCache(key);
+
+  const row = await readCache(key);
+  assert.equal(row.status, 'flagged');
+  assert.ok(row.blocks.length > 0, 'a flagged reading still serves');
 });
