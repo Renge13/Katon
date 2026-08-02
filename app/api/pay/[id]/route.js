@@ -6,14 +6,14 @@ import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
 
 export const runtime = 'nodejs';
 
-// [REYNER] REGISTER REVIEW. This string is on the Xendit checkout page and on the
-// bank/e-wallet statement line, so it is user-facing chrome and rule 20 applies:
-// keyboard characters only, one composed voice. Proposal, not approved.
+// REYNER-APPROVED 2026-08-02. This string is on the Xendit checkout page and on
+// the bank/e-wallet statement line, so it is user-facing chrome and rule 20
+// applies: keyboard characters only, one composed voice.
 //
 // It replaces `Katon: Bacaan Mendalam (${row.domain})`, which sold the pre-pivot
 // domain reading — a product that no longer exists.
 const INVOICE_DESCRIPTION = {
-  artifact: 'Katon - Complete Edition (kartu resolusi tinggi + PDF)',
+  artifact: 'Katon - CE card + PDF reading',
 };
 
 // POST /api/pay/[id]   body: { wa_number, sku? }
