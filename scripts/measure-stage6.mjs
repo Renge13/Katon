@@ -101,8 +101,17 @@ const pairs = [];
 function armStats(model) {
   if (!stats.has(model)) {
     stats.set(model, {
-      runs: 0, firstPass: 0, shipped: 0, regenerated: 0, fallback: 0, hard: 0,
-      errors: 0, checks: new Map(),
+      runs: 0, firstPass: 0, shipped: 0, regenerated: 0, hard: 0, errors: 0,
+      // A fallback has two completely different causes and the summary used to
+      // show one number for both. The 2026-08-02 rider arm read as "100%
+      // fallback" when the truth was "every call 429'd and the gate never ran" -
+      // a provider/quota problem wearing a quality problem's clothes. Only a
+      // query against the raw run log distinguished them, which is exactly the
+      // work a summary exists to save.
+      fallbackGate: 0,
+      fallbackTransport: 0,
+      transportErrors: new Map(),
+      checks: new Map(),
       // Observed values of every UNFITTED threshold, passing runs included.
       // Rule 13: one change, one measurement - these are what a later fitting
       // pass measures against, and it needs the passes as much as the failures.
@@ -155,12 +164,22 @@ for (const testChart of charts) {
       const firstPass = Boolean(firstStage6?.ok);
       const regenerated = attempts.some((a) => a.regenerated);
       const fallback = result.source === 'module_assembly';
+      // Did the gate ever get to see anything? If no attempt reached Stage 6,
+      // the fallback says nothing about quality.
+      const reachedGate = attempts.some((a) => a.stage6 || a.ok === true);
 
       if (firstPass) s.firstPass += 1;
       if (!fallback) s.shipped += 1;
       if (regenerated) s.regenerated += 1;
-      if (fallback) s.fallback += 1;
       if (attempts.some((a) => a.hard)) s.hard += 1;
+      if (fallback) {
+        if (reachedGate) s.fallbackGate += 1;
+        else s.fallbackTransport += 1;
+      }
+      for (const a of attempts) {
+        if (!a.error) continue;
+        s.transportErrors.set(errorClass(a.error), (s.transportErrors.get(errorClass(a.error)) || 0) + 1);
+      }
 
       for (const attempt of attempts) {
         for (const check of attempt.stage6 || []) {
@@ -178,10 +197,13 @@ for (const testChart of charts) {
         chart: testChart.id,
         run,
         model,
-        outcome: fallback ? 'fallback' : 'served',
+        // Three outcomes, not two. `fallback_transport` is not a quality result.
+        outcome: fallback ? (reachedGate ? 'fallback_gate' : 'fallback_transport') : 'served',
+        reached_gate: reachedGate,
         first_pass: firstPass,
         regenerated,
         failed_checks: attempts.flatMap((a) => a.stage6 || []),
+        transport_errors: attempts.filter((a) => a.error).map((a) => errorClass(a.error)),
       });
 
       if (!fallback) perArm[model] = result;
@@ -213,16 +235,33 @@ console.log('\nSTAGE 6 MEASUREMENT');
 console.log(`prompt_version ${PROMPT_VERSION}   stage6_version ${STAGE6_VERSION}`);
 console.log(`charts ${charts.map((c) => c.id).join(',')}   n=${n} per chart per arm\n`);
 
-console.log('model                       runs  first-pass   shipped  regen  fallback  hard  err');
+console.log('model                       runs  first-pass   shipped  regen   fb-gate  fb-net  hard  err');
 for (const [model, s] of stats) {
   console.log(
     `${model.padEnd(26)}${String(s.runs).padStart(5)}`
     + `${pct(s.firstPass, s.runs).padStart(12)}`
     + `${pct(s.shipped, s.runs).padStart(10)}`
     + `${pct(s.regenerated, s.runs).padStart(7)}`
-    + `${pct(s.fallback, s.runs).padStart(10)}`
+    + `${pct(s.fallbackGate, s.runs).padStart(10)}`
+    + `${pct(s.fallbackTransport, s.runs).padStart(8)}`
     + `${String(s.hard).padStart(6)}${String(s.errors).padStart(5)}`,
   );
+}
+console.log('\n  fb-gate = reached Stage 6 and failed twice. A QUALITY number.');
+console.log('  fb-net  = never reached Stage 6. A provider/quota number, and not evidence');
+console.log('            about the prompt. Read the two separately or you will tune the');
+console.log('            prompt to fix an outage.');
+
+const anyTransport = [...stats.values()].some((s) => s.transportErrors.size > 0);
+if (anyTransport) {
+  console.log('\nTRANSPORT FAILURES BY CLASS (per attempt)');
+  for (const [model, s] of stats) {
+    if (s.transportErrors.size === 0) continue;
+    console.log(`\n  ${model}`);
+    for (const [cls, count] of [...s.transportErrors].sort((a, b) => b[1] - a[1])) {
+      console.log(`    ${cls.padEnd(34)} ${String(count).padStart(4)}`);
+    }
+  }
 }
 
 console.log('\nFAILURES BY CHECK (count of attempts each check rejected)');
@@ -272,6 +311,7 @@ writeFileSync(`${base}-runs.json`, `${JSON.stringify({
     ...s,
     checks: Object.fromEntries(s.checks),
     dist: Object.fromEntries(Object.entries(s.dist).map(([k, v]) => [k, summarise(v)])),
+    transportErrors: Object.fromEntries(s.transportErrors),
   }])),
   rows,
 }, null, 2)}\n`);
@@ -296,4 +336,20 @@ function readingText(result) {
     .map((b) => `${b.heading ? `## ${b.heading}\n` : ''}${b.text}`)
     .join('\n\n');
   return result.penutup ? `${body}\n\n${result.penutup}` : body;
+}
+
+/**
+ * Bucket a provider error message into something countable.
+ *
+ * HTTP status where there is one, because "429 x39" and "503 x39" call for
+ * completely different responses: the first is a quota or entitlement question
+ * about that model, the second is an outage to wait out.
+ */
+function errorClass(message) {
+  const http = /\b(gemini|openai) (\d{3})\b/.exec(message);
+  if (http) return `${http[1]} HTTP ${http[2]}`;
+  if (/abort/i.test(message)) return 'timeout (aborted)';
+  if (/request failed/i.test(message)) return 'network';
+  if (/no text/i.test(message)) return 'empty response';
+  return 'other';
 }
