@@ -135,7 +135,7 @@
   "文昌": {
    "name_id": "Bintang Cendekia",
    "name_en": "Academic Star",
-   "label_meaning": "Kamu menyerap hal baru lebih cepat daripada orang di sekitarmu, terutama lewat membaca dan mengamati secara mandiri.",
+   "label_meaning": "Kamu menyerap hal baru lebih cepat daripada orang di sekitarmu, terutama lewat membaca dan mengamati sendiri.",
    "gift_seed": "Proses belajar tidak terasa sebagai beban. Bidang baru terbuka untukmu jauh lebih cepat daripada orang lain.",
    "cost_seed": "Memahami suatu teori membuatmu merasa seolah-olah sudah menyelesaikannya. Jarak antara paham dan benar-benar mengeksekusinya sering kali terulur panjang."
   },
@@ -250,7 +250,7 @@
    "name_en": "Missing Fire",
    "label_meaning": "Kehadiranmu tidak otomatis terlihat oleh orang banyak. Butuh waktu bagi orang lain untuk menyadari peranmu di dalam ruangan.",
    "gift_seed": "Kamu bekerja murni fokus pada hasil tanpa butuh panggung. Pekerjaanmu bebas dari kebutuhan untuk tampil.",
-   "cost_seed": "Apa yang sudah kamu kerjakan sering luput dari perhatian orang yang perlu tahu. Kehangatan relasi juga tidak datang sendiri, harus kamu usahakan secara sadar."
+   "cost_seed": "Apa yang sudah kamu kerjakan sering luput dari perhatian orang yang perlu tahu. Kehangatan relasi juga tidak datang sendiri, harus kamu usahakan dengan sengaja."
   },
   "土": {
    "name_id": null,
@@ -262,14 +262,14 @@
   "金": {
    "name_id": null,
    "name_en": "Missing Metal",
-   "label_meaning": "Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulainya. Kamu cenderung bertahan di situasi yang sudah jelas selesai.",
-   "gift_seed": "Kamu memberi kesempatan lebih banyak kepada orang lain. Hubungan atau pekerjaan jarang kamu putus secara tergesa-gesa.",
-   "cost_seed": "Hal-hal yang seharusnya sudah selesai terus menempel dan menguras energi. Batas tegas harus kamu buat secara sadar karena tidak akan muncul sendiri."
+   "label_meaning": "Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulainya. Kamu bertahan di situasi yang sudah jelas selesai.",
+   "gift_seed": "Kamu memberi kesempatan lebih banyak kepada orang lain. Hubungan atau pekerjaan jarang kamu putus tergesa-gesa.",
+   "cost_seed": "Hal-hal yang seharusnya sudah selesai terus menempel dan menguras energi. Batas tegas harus kamu buat dengan sengaja karena tidak akan muncul sendiri."
   },
   "水": {
    "name_id": null,
    "name_en": "Missing Water",
-   "label_meaning": "Kamu sangat lurus dan konsisten, tetapi kurang lentur saat situasi berubah secara mendadak.",
+   "label_meaning": "Kamu sangat lurus dan konsisten, tetapi kurang lentur saat situasi berubah mendadak.",
    "gift_seed": "Orang tahu persis kualitas dirimu. Tidak ada versi lain dari dirimu yang berubah-ubah di ruangan berbeda.",
    "cost_seed": "Menyesuaikan diri dengan keadaan sering terasa seperti mengkhianati prinsip diri. Situasi yang mengharuskanmu mengalah terasa sangat menguras emosi."
   }
@@ -341,7 +341,7 @@
    "name_id": "Ikatan",
    "name_en": "Combination",
    "label_meaning": "Dua bagian dari baganmu saling mengunci. Area hidup yang diwakili keduanya berjalan berdampingan; saat satu bergerak, yang lain otomatis ikut terpengaruh.",
-   "gift_seed": "Ada dua bidang hidupmu yang saling menguatkan secara alami tanpa perlu kamu atur.",
+   "gift_seed": "Ada dua bidang hidupmu yang saling menguatkan dengan sendirinya tanpa perlu kamu atur.",
    "cost_seed": "Saat ada masalah, keduanya ikut terdampak bersamaan. Masalah di satu area jarang berhenti di sana saja.",
    "pairs": [
     "子丑",
@@ -369,8 +369,8 @@
    "name_id": "Setengah Gabungan",
    "name_en": "Half Combination",
    "label_meaning": "Dua dari tiga bagian sudah saling tarik. Arah geraknya sudah jelas, meski kekuatannya belum sepenuhnya padu.",
-   "gift_seed": "Kecenderungan energi ini sudah bekerja untukmu dan memberi arah yang jelas.",
-   "cost_seed": "Kondisi yang belum utuh ini membuatmu secara tidak sadar terus mencari elemen ketiga untuk melengkapinya."
+   "gift_seed": "Tarikan energi ini sudah bekerja untukmu dan memberi arah yang jelas.",
+   "cost_seed": "Kondisi yang belum utuh ini membuatmu terus mencari elemen ketiga untuk melengkapinya, sering tanpa kamu sadari."
   },
   "冲": {
    "name_id": "Benturan",
@@ -406,12 +406,12 @@
   "刑": {
    "name_id": "Simpul",
    "name_en": "Punishment",
-   "label_meaning": "Dua atau lebih bagian baganmu saling mengikat dengan cara yang menyulitkan. Pola ini kamu bawa sendiri, dan tanpa disadari cenderung kamu ulang.",
+   "label_meaning": "Dua atau lebih bagian baganmu saling mengikat dengan cara yang menyulitkan. Pola ini kamu bawa sendiri, dan tanpa kamu sadari terus kamu ulang.",
    "gift_seed": "Kamu memahami situasi rumit yang tidak punya jawaban sederhana. Orang lain menyerah lebih awal di kondisi seperti ini.",
    "cost_seed": "Kesulitan di area ini sering berawal dari keputusanmu sendiri. Menyalahkan keadaan tidak akan menyelesaikannya.",
    "types": {
     "self": {
-     "label_meaning": "Bagian yang sama muncul dua kali dan bergesekan dengan dirinya sendiri. Kamu cenderung berlebihan justru di wilayah yang paling kamu kuasai.",
+     "label_meaning": "Bagian yang sama muncul dua kali dan bergesekan dengan dirinya sendiri. Kamu justru berlebihan di wilayah yang paling kamu kuasai.",
      "cost_seed": "Kekuatanmu di area ini bisa berbalik menekan dirimu sendiri kalau tidak kamu batasi.",
      "branches": [
       "辰",
@@ -467,7 +467,7 @@
    "label_meaning": "Pusat dari seluruh peta. Batangnya adalah inti dirimu, sedangkan cabangnya adalah Fondasi Pasangan.",
    "branch_name_id": "Fondasi Pasangan",
    "branch_name_en": "Spouse Palace",
-   "branch_label_meaning": "Tempat membaca dinamika hubungan paling dekat. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain mungkin menganggapnya berat."
+   "branch_label_meaning": "Tempat membaca dinamika hubungan paling dekat. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain bisa menganggapnya berat."
   },
   "hour": {
    "name_id": "Pilar Arah",
