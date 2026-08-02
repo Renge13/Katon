@@ -425,6 +425,26 @@ own pick — premium heirloom wood, classical 甲, and the *jati diri* pun self-
 **EN display layer scoped:** names + tags + card strings only; the reading body stays Indonesian.
 Rule 23 amended: brackets convention is reading-prose only; the sharecard never shows brackets.
 
+**COMPAT FLOW — RECONCILED AND DECIDED** (review trail: `archive/compat-flow-REVIEW.md`; the spec
+body `product/compatibility-reading-spec.md` is corrected in place and is now buildable):
+- Funnel: enter B → **P0 tease FREE** (two faces + ONE named relational fact, zero explanation;
+  comparison card shareable pre-payment — it is compat's own acquisition engine) → paywall → P1-P8.
+- **Account + email created at first compat checkout.** The mirror stays anonymous — no login wall
+  (Joey's front-door login serves his lead-gen model, not ours). The account owns the chart address
+  book that P8's loop accumulates. Per-account rate limits on top of rule 19.
+- **No consent line for person B** (Reyner, deliberate): the reading is anonymous and does not
+  affect B; the P2 reframe copy carries the ethics alone.
+- **P6 Luck Pillar sync DESCOPED from v1** (rule 25 edge + optional gender + no female-set fixture).
+  Timing lives in the annual product later.
+- **P5 affinity/fit quadrants KEPT as a documented Katon ruling** — deterministic rule to be written
+  before implementation; no classical authority claimed for the 2x2 itself.
+- Pricing: **visible "harga peluncuran" cohorts, never silent A/B** (screenshot culture). List/launch
+  numbers to be set in launch-decisions.md; band stays 25-45k tested.
+- Engine additions inventoried for a future Prompt E (cross-chart relations, spouse-palace hits,
+  cross-chart complementarity with strength_confidence, quadrant rule, pair cache). No plotter
+  oracle exists for the pair layer; relation tables are already test-locked, pair-level rules are
+  Katon rulings and must be written in docs before implementation.
+
 **CARD VISUAL SYSTEM — direction and layout DECIDED** (same day, mockup trail in
 `content/sharecard-mockups-01.html` and `-02.html`; detailing/polish deferred, Reyner will tinker):
 - Direction: **typographic poster.** Colour field + one geometric mark per archetype + typography.

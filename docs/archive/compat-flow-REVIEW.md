@@ -1,5 +1,12 @@
 <!--
-STATUS: REVIEW SHEET for Reyner. Created 2026-08-02 by Cowork. DISPOSABLE after decisions land.
+STATUS: CLOSED 2026-08-02 — all seven decided by Reyner, landed in compatibility-reading-spec.md
+and PROGRESS.md. Kept in docs/archive/ as the decision trail only.
+DECISIONS: D1 = c (faces + one named fact free). D2 = a (comparison card shareable pre-payment).
+D3 = c (P6 Luck Pillar sync descoped from v1). D4 = a (quadrants kept as Katon ruling).
+D5 = harga peluncuran cohorts, never silent A/B. D6 = a, CONFIRMED deliberately (no consent line;
+P2 reframe copy carries the ethics; reading is anonymous and does not affect person B).
+D7 = no login at the mirror; account + email created at first compat checkout.
+ORIGINAL SHEET BELOW, unedited.
 JOB: reconcile product/compatibility-reading-spec.md (proposal, pre-lock) against the post-08-01
 engine and today's decisions, and define the input->output flow. Fill the Keputusan column;
 unmentioned rows follow the recommendation, per your standing convention.

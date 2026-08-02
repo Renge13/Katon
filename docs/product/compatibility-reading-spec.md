@@ -4,12 +4,13 @@ this session that it needed rescuing from the stale mirror was WRONG (see COWORK
 What was genuinely fixed: `product/paid-product-map.md` had been pointing at the old mirror filename,
 so this file looked absent when followed by reference.
 
-NOT YET RECONCILED against the post-2026-08-01 engine. Read it for the classical 合婚 workflow and the
-ethical spine, both of which stand. Before building from it, check it against:
-  - CLAUDE.md rules 20-25 (voice, naming, hanzi, ethics) — this predates the Aspek/Bintang naming lock
-  - content/glossary.json — the authoritative names
-  - the strength engine as built (Oracle 3 rho 0.874, Oracle 4 r 0.929)
-Any scoring or naming in here is a PROPOSAL, not a locked decision.
+RECONCILED 2026-08-02 (decision trail: the compat-flow review sheet, now in docs/archive/). Decisions
+landed in this body: tease-first funnel (paywall between P0 and P1), P0 free tease = faces + ONE named
+relational fact, comparison card shareable pre-payment, P6 Luck Pillar sync DESCOPED from v1,
+P5 quadrants kept as a documented Katon ruling, no consent line for person B (P2 reframe copy carries
+the ethics), account + email created at first compat checkout (mirror stays anon), price section
+replaced by the launch-decisions pointer. Names corrected to the 08-02 locked set.
+Voice sweep to the composed register still pending at authoring time.
 -->
 
 # Katon — Paid Compatibility Reading (合婚) Spec
@@ -47,13 +48,18 @@ literal score.
 
 ## THE PAID JOURNEY (descending hook, relational payoffs)
 
-Assume: user has read their free mirror, hit "how compatible are you with someone?", paid, and
-entered the second person's birth date (+ optional hour). They arrive emotionally primed and curious.
+Assume (funnel corrected 08-02 to match the decided paywall placement): user has read their free
+mirror, hit "how compatible are you with someone?", and entered the second person's birth date
+(+ optional hour). **P0 shows FREE. The paywall sits between P0 and P1.** Payment creates the
+account (email captured at checkout, transactionally framed); the mirror itself stays anonymous.
 
-### P0 — The pairing reveal (the spike)
-Both cards, side by side. Two archetype faces, two element-bar sets, visible at a glance.
-"[You, Hujan] × [Her, Permata]." The comparison card is itself shareable ("look how different we
-are"). No prose. Just the two chart-badges meeting. This is the P0 dopamine hit before any reading.
+### P0 — The pairing reveal (the FREE tease — decided 08-02, option c)
+Both cards, side by side. Two archetype faces at a glance, PLUS exactly ONE named relational fact
+with zero explanation (e.g. the seat relation named, not read). The machine proves it sees
+something relational; the explanation is what is behind the paywall.
+"[You, Embun] × [Her, Permata]." The comparison card is itself shareable PRE-PAYMENT ("look how
+different we are") — it is the compat product's own acquisition engine. No prose. This is the P0
+dopamine hit, and the itch the paywall converts.
 
 ### P1 — "How your two cores meet" (Day Master × Day Master)
 One tight fact: do your Day Masters combine, support, or clash?
@@ -82,7 +88,7 @@ The feed/drain rule, now BETWEEN TWO PEOPLE. The most actionable, warmest sectio
   can't generate for yourself.
 - Do you supply hers?
 - Or do you both pile into the same imbalance? → "two floods; no one is the bank for the other"
-  (reuse the Hujan-Hujan drain logic, now cross-chart).
+  (reuse the same-element drain logic from the mirror, now cross-chart).
 Payoff type: CONSEQUENTIAL + WARM ("so THAT's why I feel calmer/more drained around her").
 This is the section that feels like love language translation. High emotional value.
 
@@ -92,7 +98,9 @@ colliding (both assertive, both need to lead)? Read from the dominant Ten Gods o
 Payoff type: RECOGNITION, deeper ("this is literally our fights / our ease").
 Keep it behaviorally concrete — name the actual dynamic, not the god's Chinese term.
 
-### P5 — THE PULL: high affinity vs compatibility (the "gila keren" beat)
+### P5 — THE PULL: high affinity vs compatibility (KEPT 08-02 as a documented KATON RULING —
+the inputs are classical, the 2x2 framework is ours; the quadrant assignment must be a written
+deterministic rule before implementation, and we never claim classical authority for the framework)
 The sophisticated centerpiece emotionally. Separate ATTRACTION from FIT:
 - High affinity = the chart explains WHY you're magnetically drawn (the 'stories' fit).
 - Compatibility = whether the day-to-day energetics actually support each other.
@@ -102,7 +110,12 @@ Payoff type: REVELATION ("this explains every relationship I've ever had"). This
 quote to friends. It's also the ethical safety valve — you explain the pull to someone "wrong"
 without ever saying leave.
 
-### P6 — "Where you're in-phase, and what's coming" (Luck Pillar sync + dated triggers)
+### P6 — DESCOPED FROM V1 (decided 08-02). Luck Pillar sync + dated triggers.
+Three stacked reasons: dated year windows skirt rule 25 however cuaca-framed; gender is optional so
+the section silently vanishes for null-gender users (a paid beat that sometimes does not exist);
+and the 13-chart fixture was collected male-only, so the luck-pillar layer is UNVALIDATED (rule 4).
+Timing returns in the annual-reading product, validated properly with female-set fixtures.
+The original design is kept below for that product:
 The timing layer, relational.
 - Are you both in supportive phases now, or is one in a hard season?
 - Dated windows: "2027 stirs your Spouse Palace — a year that pressures OR deepens the bond,
@@ -169,7 +182,10 @@ over rule-based mechanics — same pattern as the free mirror.
 
 ---
 
-## THE PRICE POINT
-99k for a single pairing reads correct against the ~500k stated willingness-to-pay and the household
-3x signal. Consider: single pairing at 99k; household/annual bundle higher. The first paid pairing
-should slightly over-deliver to justify the next purchase (the household loop is the real LTV).
+## THE PRICE POINT — SUPERSEDED 08-02
+~~99k against ~500k stated willingness-to-pay~~ — dead; no market evidence. The band is 25-45k,
+TESTED, per launch-decisions.md and CLAUDE.md. Test mechanic decided 08-02: visible "harga
+peluncuran" cohorts (list price fixed, launch discount varies), never silent simultaneous A/B —
+screenshot culture makes silent price differences read as cheating. List/launch numbers are
+tracked in launch-decisions.md, not here. The first paid pairing should slightly over-deliver to
+justify the next purchase (the household loop is the real LTV — this part stands).
