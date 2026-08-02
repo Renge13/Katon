@@ -1,6 +1,6 @@
 <!--
 STATUS: HANDOVER — Claude Code build prompt. PROMPT A. Run this FIRST.
-Full reasoning behind every instruction: KATON-calculator-decision.md
+Full reasoning behind every instruction: ../engine/calculator-decision.md
 Sequence: A (this) -> commit Phase 1 -> B (regression lock) -> C (strength engine)
 -->
 
@@ -122,7 +122,7 @@ No renderer work and no strength code in this PR.
 
 ## FIXTURE — 13 charts
 
-Rows 1–12 are in `KATON-engine-session-state.md`. Row 13, added 2026-07-30 from a Joey PDF:
+Rows 1–12 are in `../engine/engine-session-state.md`. Row 13, added 2026-07-30 from a Joey PDF:
 
 ```
 13  1989-02-04 04:00 | 乙 | 丑 | 比肩 | Managers | Friend80/Phil80/Dir78/Pio72

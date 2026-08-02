@@ -45,6 +45,20 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
    Confirmed empirically: 1989-02-04 04:00 → 戊辰 乙丑 乙未 戊寅.
 4. **Never improvise BaZi rules.** LLM training data on BaZi is frequently wrong, especially near
    solar-term boundaries. If a rule is not written down in `docs/`, ask. Do not recall it.
+   **This applies to tables handed to you in a prompt as well** — verify against a second source and
+   stop if sources disagree. Many spec errors have been caught that way, all of them from Cowork.
+   The running ledger with the failure patterns is `docs/COWORK-BRIEF.md` section 4; a count does not
+   belong in a locked rule (rule 8).
+
+   **The `bazi-calculator` skill is NOT a valid source.** Its 藏干 table still reads `子: 壬(100%)`,
+   which is the exact error `cb43bc7` corrected and is very likely where that error came from. It has
+   no 刑 table and does not cover 命宮. The authority is `docs/` plus the repo's own locked tests
+   (`tests/hidden-stems.spec.mjs`, `tests/punishment.spec.mjs`, `tests/solar-terms.spec.ts`).
+
+   **`命宮` (Life Palace) is DELIBERATELY NOT IMPLEMENTED.** Two candidate conventions score 4/5 and
+   3/5 against Joey's own printed values; neither is right. It compounds three convention choices
+   (year stem, month, hour) so it fails on exactly the charts that are already boundary cases. See
+   `docs/prompts/D1b-remove-life-palace.md`. `胎元` is fine and stays (5/5, triple-verified).
 5. **The solar-term fixture is EVIDENCE, not output.** Never regenerate
    `tests/solar-terms.fixture.json` to make a failing test pass.
 6. **Trap:** tyme4ts's `getJulianDay().getDay()` is **UTC+8-based**, not UT. Naive JD arithmetic
@@ -82,36 +96,47 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     real cause is never learned. One change, one measurement, always.
 
 ### Architecture
-11. **The engine owns ALL facts, hierarchy and structure. The LLM chooses only words.** If the LLM
+14. **The engine owns ALL facts, hierarchy and structure. The LLM chooses only words.** If the LLM
     is ever in a position to decide something true, the design is wrong.
-12. **Runtime LLM rendering is ON** (reversal of the old rule) — for the RENDERING layer only.
+15. **Runtime LLM rendering is ON** (reversal of the old rule) — for the RENDERING layer only.
     Gemini primary, OpenAI secondary, both behind one provider interface.
-13. Every reading is **result-cached** on `hash(semantic_JSON + engine_version)`. Deterministic
+16. Every reading is **result-cached** on `hash(semantic_JSON + engine_version)`. Deterministic
     after first generation.
-14. **Nothing reaches a user without passing Stage-6 post-validation.** LLM output is guilty until
+17. **Nothing reaches a user without passing Stage-6 post-validation.** LLM output is guilty until
     validated. Module assembly is the always-available floor.
-15. **Paywall is server-gated.** `paid` flips only in the verified Xendit webhook, never from any
+18. **Paywall is server-gated.** `paid` flips only in the verified Xendit webhook, never from any
     client path. Paid content is imported only by the `/full` route.
-16. Rate-limit per IP/session. No bulk endpoint. No enumerable reading URLs. The real abuse risk is
+19. Rate-limit per IP/session. No bulk endpoint. No enumerable reading URLs. The real abuse risk is
     content harvesting, not API cost (the entire mirror space costs ~$115 to cache forever).
 
 ### Voice and naming
-17. **ONE VOICE EVERYWHERE, including chrome.** Plain, precise, everyday Indonesian. Composed and
+20. **ONE VOICE EVERYWHERE, including chrome.** Plain, precise, everyday Indonesian. Composed and
     direct. Accessible words, short sentences, no verbosity. Warmth through precision.
     **The casual "old friend" register is DEAD** — killed by `docs/research/coldread-analysis.md`;
     the casual front door was itself causing "is this serious?" doubt.
     No slang (*ngerasa/bikin/kayak/capek*), no chat particles (*tuh/lho/deh*), not bureaucratic-baku.
     **Keyboard characters only — no em-dash, no curly quotes. This applies to USER-FACING STRINGS
     ONLY.** Code comments and JSX comments are not user-facing; leave them alone. The audit surface is
-    rendered text, payment descriptions, headings, buttons, and error copy. Two known violations as of
-    2026-08-01: the Xendit invoice description in `app/api/pay/[id]/route.js`, and an em-dash used as
-    an empty-state placeholder in `components/Sharecard.jsx`.
-18. **"lemah"/"kuat" ARE permitted.** The friction ("what do you mean I'm weak?") pulls the reader
+    rendered text, payment descriptions, headings, buttons, and error copy.
+    (Correction 2026-08-02: the two "known violations" previously listed here were both FALSE - the
+    Sharecard em-dashes are all in comments and the old invoice description used a colon. The one
+    real violation, curly quotes at `components/Funnel.jsx:731`, was FIXED same day in `75f1901`; a
+    grep for curly quotes across `components/` now returns nothing. COWORK-BRIEF error 13. Audit by
+    grep, never from memory; a violation note in this file must carry its grep and close with its
+    fixing commit.)
+21. **"lemah"/"kuat" ARE permitted.** The friction ("what do you mean I'm weak?") pulls the reader
     deeper. Condition: the explanation lands in the same breath, and never bare on the sharecard.
-19. **Never use Joey Yap's trademarked profile names** (Director, Diplomat, Warrior — his IP).
-20. **Naming: Indonesian name first, English term in brackets once.** `Aspek` = internal disposition,
+22. **Never use Joey Yap's trademarked profile names** (Director, Diplomat, Warrior — his IP).
+23. **Naming: Indonesian name first, English term in brackets once.** `Aspek` = internal disposition,
     `Bintang` = external marker. Collective term is **Sepuluh Aspek (Ten Gods)** — never "Dewa", which
     reads as a Hindu deity to a Muslim-majority audience. Full table: `docs/content/glossary-naming.md`.
+
+    **EN display layer (ruled 2026-08-02):** archetype names and fixed tags carry an English pair
+    (`glossary.json` → `arketipe.name_en`, later `tags_en`). Scope is names + tags + card strings
+    ONLY — the reading body stays Indonesian. The brackets convention above applies to READING PROSE.
+    The sharecard NEVER shows brackets: it renders `name_id` or `name_en` per display variant, one at
+    a time. `name_en` must be the same object as `name_id` (shared watercolour). Which variant ships
+    is a card-visual-system decision and an A/B candidate on share rate — not locked here.
 
     **Chinese characters — the line is data vs words (ruling 2026-08-01):**
     - **KEEP** in the chart display. The eight characters in the pillar cells ARE the chart. They are
@@ -121,8 +146,8 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
       names, button labels. `八字` as a heading is decoration with a comprehension tax — write
       "Bagan Kelahiran" or similar.
     - Rule of thumb: hanzi you can *point at* is fine. Hanzi you must *read* is not.
-21. Exactly **10 archetypes**, one per Day Master stem. Pure BaZi — no Weton, no Javanese pasaran.
-22. Ethics: no fatalism, no dated prophecy, no medical or financial advice, no ranking of gods or
+24. Exactly **10 archetypes**, one per Day Master stem. Pure BaZi — no Weton, no Javanese pasaran.
+25. Ethics: no fatalism, no dated prophecy, no medical or financial advice, no ranking of gods or
     strength states as good/bad. Timing is *cuaca*, never *ramalan*.
 
 ---
@@ -134,12 +159,20 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   If `git status` shows a wall of changes with symmetric insert/delete counts, that is the cause.
 - **PR discipline:** each PR independently reviewable and revertable. Engine work, content work and
   infra work never ride together.
+- **The commit message must describe everything staged.** `git add -A` routinely sweeps in more than
+  the message names — this has happened twice, once carrying a locked-file renumbering under a
+  "docs chore" subject. Either stage selectively, or widen the message. Run `git status` and read it
+  before writing the subject line, not after.
 - **Migrations** are applied manually in the Supabase SQL editor (no CLI migration tracking).
   Always run the migration BEFORE deploying code that depends on it.
 - `contents/*.md` are the DEPRECATED hand-authored cells. They still feed `scripts/build-content.mjs`
   and the currently-live readings — **do not delete them** until the new pipeline ships.
 - Reyner is the **sole authority on Indonesian register**. Propose wording, flag it, never
   auto-decide.
+- **A code-fact written into any doc carries the command that produced it, and its date.** A claim
+  about the code without its grep is a memory, not a fact. Error 13 (COWORK-BRIEF §4) entered this
+  locked file exactly that way and every session inherited it as truth. Re-run the command before
+  propagating the claim into a prompt; a check older than the code it describes proves nothing.
 
 ---
 

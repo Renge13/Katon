@@ -1,0 +1,109 @@
+{
+ "_note": "Oracle 4. supportShare implied by Joey OWN element totals. support = DM element + Resource element; drain = the other three. Joey normalises bars per chart (max=100) but this is a within-chart ratio so the normalisation cancels. ASSUMPTION: Joey bars are element strength in the 旺衰 sense - well supported, still a hypothesis.",
+ "charts": {
+  "1": {
+   "dayMaster": "丙",
+   "dmElement": "Fire",
+   "resourceElement": "Wood",
+   "support": 85,
+   "drain": 338,
+   "joeyImpliedSupportShare": 20.1
+  },
+  "2": {
+   "dayMaster": "戊",
+   "dmElement": "Earth",
+   "resourceElement": "Fire",
+   "support": 277,
+   "drain": 233,
+   "joeyImpliedSupportShare": 54.3
+  },
+  "3": {
+   "dayMaster": "丙",
+   "dmElement": "Fire",
+   "resourceElement": "Wood",
+   "support": 238,
+   "drain": 267,
+   "joeyImpliedSupportShare": 47.1
+  },
+  "4": {
+   "dayMaster": "癸",
+   "dmElement": "Water",
+   "resourceElement": "Metal",
+   "support": 142,
+   "drain": 272,
+   "joeyImpliedSupportShare": 34.3
+  },
+  "5": {
+   "dayMaster": "丙",
+   "dmElement": "Fire",
+   "resourceElement": "Wood",
+   "support": 288,
+   "drain": 253,
+   "joeyImpliedSupportShare": 53.2
+  },
+  "6": {
+   "dayMaster": "壬",
+   "dmElement": "Water",
+   "resourceElement": "Metal",
+   "support": 164,
+   "drain": 311,
+   "joeyImpliedSupportShare": 34.5
+  },
+  "7": {
+   "dayMaster": "甲",
+   "dmElement": "Wood",
+   "resourceElement": "Water",
+   "support": 127,
+   "drain": 294,
+   "joeyImpliedSupportShare": 30.2
+  },
+  "8": {
+   "dayMaster": "庚",
+   "dmElement": "Metal",
+   "resourceElement": "Earth",
+   "support": 210,
+   "drain": 170,
+   "joeyImpliedSupportShare": 55.3
+  },
+  "9": {
+   "dayMaster": "甲",
+   "dmElement": "Wood",
+   "resourceElement": "Water",
+   "support": 147,
+   "drain": 391,
+   "joeyImpliedSupportShare": 27.3
+  },
+  "10": {
+   "dayMaster": "甲",
+   "dmElement": "Wood",
+   "resourceElement": "Water",
+   "support": 200,
+   "drain": 357,
+   "joeyImpliedSupportShare": 35.9
+  },
+  "11": {
+   "dayMaster": "庚",
+   "dmElement": "Metal",
+   "resourceElement": "Earth",
+   "support": 258,
+   "drain": 224,
+   "joeyImpliedSupportShare": 53.5
+  },
+  "12": {
+   "dayMaster": "癸",
+   "dmElement": "Water",
+   "resourceElement": "Metal",
+   "support": 78,
+   "drain": 268,
+   "joeyImpliedSupportShare": 22.5
+  },
+  "13": {
+   "dayMaster": "乙",
+   "dmElement": "Wood",
+   "resourceElement": "Water",
+   "support": 215,
+   "drain": 239,
+   "joeyImpliedSupportShare": 47.4
+  }
+ }
+}

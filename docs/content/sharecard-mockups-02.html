@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katon sharecard v2 - Poster direction, layout locked</title>
+<!--
+STATUS: MOCKUP v2.2 for Reyner. 2026-08-02. Poster direction; layout LOCKED, polish deferred.
+Rulings applied this revision: EN header on BOTH cards, Aspek stays Indonesian, hanzi to PDF only,
+hook restored on Card B, appendix pillar grid labeled, badge palace-qualifier demoted visually,
+footer = gender + birthdate + katon.app, Card B taller as exclusivity signal.
+SIZE PROPOSAL (pending Reyner): Card A 1080x1350 (4:5, feed). Card B 1080x1920 (9:16, full story).
+Mocks are 320px wide at those ratios: A 320x400, B 320x569.
+One typeface: Archivo variable. Only MATAHARI is a real chart; other cards carry placeholder
+dynamic tags/badges (CONTOH) and the Card B pillar row is ILLUSTRATIVE, not computed.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bench:#111113; --bench-ink:#d9d7d2; --bench-dim:#84817a;
+    --sun-f:#FF4F12;   --sun-i:#FFF4EC;   --sun-a:#FFC9A8;
+    --oce-f:#0E3A5C;   --oce-i:#EAF3F9;   --oce-a:#7FB6D9;
+    --gem-f:#EDEAE4;   --gem-i:#1C1A17;   --gem-a:#8A7B5C;
+    --bam-f:#1F7A43;   --bam-i:#EFF8EF;   --bam-a:#A8DBB4;
+    --bes-f:#26282D;   --bes-i:#E8E9EC;   --bes-a:#9BA1AD;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bench);color:var(--bench-ink);font-family:'Archivo',sans-serif;padding:48px 40px 96px}
+  h1{font-variation-settings:'wdth' 72,'wght' 800;font-size:34px;letter-spacing:.01em;margin-bottom:8px;text-transform:uppercase}
+  .sub{color:var(--bench-dim);font-size:13.5px;max-width:74ch;line-height:1.6}
+  section{margin-top:60px}
+  section>h2{font-variation-settings:'wdth' 110,'wght' 600;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--bench-dim);border-bottom:1px solid #26262a;padding-bottom:10px;margin-bottom:30px}
+  .row{display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start}
+  .cap{font-size:12px;line-height:1.55;color:var(--bench-dim);margin-top:14px;max-width:320px}
+  .cap b{color:var(--bench-ink);font-variation-settings:'wght' 650}
+
+  /* CONTAINER RULES (the layout contract, carried to the real component):
+     1. Fixed canvas ratio via aspect-ratio, never a hardcoded px height.
+     2. Safe-area padding 7% all sides; content lives inside it.
+     3. Content never shrinks to fit - engine strings are BOUNDED (hook <= 2 sentences,
+        6 tags, <= 4 badges). If content exceeds the canvas it is a CONTENT bug and must
+        fail loudly in QA, never clip silently: dev builds set overflow visible + outline.
+     4. Name block has exactly two size steps: one-word and two-word. No autofit below them. */
+  .card{width:360px;aspect-ratio:4/5;border-radius:20px;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;padding:7%;
+    background:var(--f);color:var(--i);
+    box-shadow:0 30px 60px -18px rgba(0,0,0,.6)}
+  .debug .card,.debug .cardB{overflow:visible;outline:2px dashed #f0f}
+  .card::before{content:"";position:absolute;inset:0;background:linear-gradient(178deg,rgba(255,255,255,.09),transparent 34%,rgba(0,0,0,.10) 92%);pointer-events:none}
+
+  .mark{height:88px;display:flex;align-items:center}
+  .mark svg{display:block}
+
+  .name{font-variation-settings:'wdth' 64,'wght' 880;font-size:54px;line-height:.94;text-transform:uppercase;letter-spacing:.005em;margin-top:12px}
+  .aspek{font-variation-settings:'wdth' 100,'wght' 480;font-style:italic;font-size:16px;margin-top:7px;color:var(--a)}
+  .tags{margin-top:15px;display:flex;flex-wrap:wrap;gap:5px 16px;
+    font-variation-settings:'wdth' 112,'wght' 650;font-size:10.5px;letter-spacing:.16em}
+  .tags .dyn{opacity:.62}
+  .hook{font-variation-settings:'wdth' 98,'wght' 440;font-size:12.4px;line-height:1.5;margin-top:14px;max-width:30ch;opacity:.95}
+  .badges{margin-top:auto;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+  .badge{font-variation-settings:'wdth' 104,'wght' 640;font-size:10.5px;letter-spacing:.05em;color:var(--a)}
+  .badge::before{content:"\25C6 ";font-size:8px;vertical-align:1px}
+  .badge em{display:block;font-style:normal;font-variation-settings:'wdth' 100,'wght' 450;font-size:9px;letter-spacing:.08em;opacity:.75;margin-top:2px;padding-left:13px}
+  .foot{margin-top:12px;display:flex;justify-content:space-between;
+    font-variation-settings:'wdth' 90,'wght' 520;font-size:9.5px;letter-spacing:.12em;opacity:.78;text-transform:uppercase}
+
+  .thumbwrap{display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap}
+  .t{width:86px;height:108px;overflow:hidden;border-radius:5px}
+  .t .card{transform:scale(0.2389);transform-origin:top left;border-radius:21px}
+  .tb{width:86px;height:153px;overflow:hidden;border-radius:5px}
+  .tb .cardB{transform:scale(0.224);transform-origin:top left}
+  .tlabel{font-variation-settings:'wdth' 100,'wght' 500;font-size:10px;letter-spacing:.14em;color:var(--bench-dim);margin-top:9px;text-transform:uppercase}
+
+  /* CARD B - 9:16, layout locked: ghost mark top, content bottom-anchored, appendix band */
+  .cardB{width:384px;aspect-ratio:9/16;border-radius:20px;position:relative;overflow:hidden;display:flex;flex-direction:column;padding:7% 7% 0;color:var(--i);
+    background:linear-gradient(172deg, var(--fB1) 0%, var(--fB2) 58%, var(--fB3) 100%)}
+  .cardB::before{content:"";position:absolute;inset:0;background:linear-gradient(178deg,rgba(255,255,255,.07),transparent 30%,rgba(0,0,0,.14) 92%);pointer-events:none}
+  .bigmark{position:absolute;top:-30px;right:-70px;width:340px;height:340px;opacity:.13;pointer-events:none}
+  .bigmark svg{width:100%;height:100%}
+  .cardB>*{position:relative}
+  .eyebrow{font-variation-settings:'wdth' 112,'wght' 620;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;opacity:.7}
+  .cardB .tags{margin-top:12px;font-size:10px}
+  .cardB .hook{font-size:11.5px;line-height:1.45;margin-top:12px}
+  .cardB .aspek{font-size:15px;margin-top:5px}
+  .appendix{margin:16px -8% 0;background:rgba(0,0,0,.28);padding:14px 8% 15px;flex:none}
+  .pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:0 10px}
+  .pillars .ph{font-variation-settings:'wdth' 110,'wght' 620;font-size:8px;letter-spacing:.2em;opacity:.6;text-transform:uppercase}
+  .pillars .pv{font-variation-settings:'wdth' 96,'wght' 560;font-size:9.5px;line-height:1.35;letter-spacing:.04em;margin-top:4px;text-transform:uppercase}
+  .elems{display:flex;gap:12px;margin-top:14px;align-items:flex-end}
+  .elems .e{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .elems i{display:block;width:24px;border-radius:2px;background:var(--a);opacity:.9}
+  .elems b{font-variation-settings:'wdth' 100,'wght' 550;font-size:7.5px;letter-spacing:.14em;opacity:.65}
+  .bfoot{margin-top:12px;display:flex;justify-content:space-between;font-variation-settings:'wdth' 90,'wght' 520;font-size:9px;letter-spacing:.1em;opacity:.78;text-transform:uppercase}
+
+  .note{background:#1a1a1e;border:1px solid #2c2c32;border-radius:12px;padding:18px 22px;font-size:13px;line-height:1.65;color:#bab7b0;margin-top:28px;max-width:920px}
+  .note b{color:#e6e4de;font-variation-settings:'wght' 650}
+</style>
+</head>
+<body>
+
+<h1>Katon — Poster, layout locked</h1>
+<p class="sub">v2.2 — EN header on both cards, Aspek Indonesian, full footer (gender + birthdate +
+source), badge palace-qualifier demoted, Card B hook restored and appendix labeled. One typeface:
+Archivo variable. Only MATAHARI is a real chart.</p>
+
+<section>
+<h2>Card A — 4:5 (1080 x 1350 proposed) — five of ten archetypes</h2>
+<div class="row">
+
+  <div><div class="card" style="--f:var(--sun-f);--i:var(--sun-i);--a:var(--sun-a)">
+    <div class="mark"><svg width="66" height="66" viewBox="0 0 72 72"><circle cx="36" cy="36" r="26" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="36" cy="36" r="9" fill="currentColor"/></svg></div>
+    <div class="name">THE<br>SUN</div>
+    <div class="aspek">Sang Pengelola</div>
+    <div class="tags"><span>HANGAT</span><span>BERSEMANGAT</span><span>TERBUKA</span><span class="dyn">MANDIRI</span><span class="dyn">TAJAM</span><span class="dyn">RAPI</span></div>
+    <p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p>
+    <div class="badges">
+      <span class="badge">Bunga Persik</span>
+      <span class="badge">Bintang Penolong<em>lewat Pilar Kerja</em></span>
+    </div>
+    <div class="foot"><span>PEREMPUAN · 13 SEP 1989</span><span>KATON.APP</span></div>
+  </div><p class="cap"><b>The Sun</b> — real chart. Badge fix: "lewat Pilar Kerja" now reads as
+  Penolong's qualifier, not a third badge. Footer carries gender; when gender is null (it is
+  optional in the engine) the footer shows date + source only.</p></div>
+
+  <div><div class="card" style="--f:var(--oce-f);--i:var(--oce-i);--a:var(--oce-a)">
+    <div class="mark"><svg width="70" height="66" viewBox="0 0 76 72"><path d="M8 28 Q19 20 30 28 T52 28 T74 28" fill="none" stroke="currentColor" stroke-width="3.5"/><path d="M8 42 Q19 34 30 42 T52 42 T74 42" fill="none" stroke="currentColor" stroke-width="3.5" opacity=".65"/><path d="M8 56 Q19 48 30 56 T52 56 T74 56" fill="none" stroke="currentColor" stroke-width="3.5" opacity=".35"/></svg></div>
+    <div class="name">THE<br>OCEAN</div>
+    <div class="aspek">Sang Perajin</div>
+    <div class="tags"><span>DINAMIS</span><span>GIGIH</span><span>VISIONER</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu sulit ditebak. Arah tujuanmu sebenarnya selalu sama, hanya jalurnya yang berganti-ganti."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>LAKI-LAKI · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div><p class="cap"><b>The Ocean</b> — Aspek pairing is a placeholder.</p></div>
+
+  <div><div class="card" style="--f:var(--gem-f);--i:var(--gem-i);--a:var(--gem-a)">
+    <div class="mark"><svg width="66" height="66" viewBox="0 0 72 72"><rect x="21" y="21" width="30" height="30" transform="rotate(45 36 36)" fill="none" stroke="currentColor" stroke-width="3.5"/><rect x="30" y="30" width="12" height="12" transform="rotate(45 36 36)" fill="currentColor"/></svg></div>
+    <div class="name">THE<br>JEWEL</div>
+    <div class="aspek">Sang Pemijar</div>
+    <div class="tags"><span>TELITI</span><span>ANGGUN</span><span>PEMILIH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu terlalu pemilih. Kamu hanya tidak bisa memuji sesuatu yang kenyataannya belum sempurna."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>PEREMPUAN · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div><p class="cap"><b>The Jewel</b> — the light card of the lineup.</p></div>
+
+  <div><div class="card" style="--f:var(--bam-f);--i:var(--bam-i);--a:var(--bam-a)">
+    <div class="mark"><svg width="66" height="66" viewBox="0 0 72 72"><line x1="26" y1="10" x2="26" y2="62" stroke="currentColor" stroke-width="3.5"/><line x1="46" y1="10" x2="46" y2="62" stroke="currentColor" stroke-width="3.5" opacity=".6"/><line x1="18" y1="30" x2="34" y2="30" stroke="currentColor" stroke-width="3.5"/><line x1="38" y1="46" x2="54" y2="46" stroke="currentColor" stroke-width="3.5" opacity=".6"/></svg></div>
+    <div class="name">THE<br>BAMBOO</div>
+    <div class="aspek">Sang Pendamping</div>
+    <div class="tags"><span>LUWES</span><span>ULET</span><span>TAKTIS</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu gampang mengikuti arus. Kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>PEREMPUAN · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div><p class="cap"><b>The Bamboo</b></p></div>
+
+  <div><div class="card" style="--f:var(--bes-f);--i:var(--bes-i);--a:var(--bes-a)">
+    <div class="mark"><svg width="66" height="66" viewBox="0 0 72 72"><rect x="16" y="30" width="40" height="14" fill="currentColor"/><rect x="26" y="18" width="20" height="8" fill="currentColor" opacity=".55"/><rect x="26" y="48" width="20" height="8" fill="currentColor" opacity=".55"/></svg></div>
+    <div class="name">THE<br>FORGE</div>
+    <div class="aspek">Sang Peraih</div>
+    <div class="tags"><span>TEGAS</span><span>TANGGUH</span><span>LUGAS</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu kaku dan dingin. Kamu hanya menolak berpura-pura ramah demi kenyamanan orang lain."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>LAKI-LAKI · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div><p class="cap"><b>The Forge</b></p></div>
+
+</div>
+<div class="note"><b>One open register call:</b> with the EN header on Card A, the Indonesian name
+(Matahari, Samudra...) now appears NOWHERE on the free card. Options: (a) EN-only on cards, ID name
+lives in the reading; (b) tiny ID eyebrow above the EN name. Currently mocked as (a). Also note the
+footer gender strings PEREMPUAN / LAKI-LAKI are proposals — and the middle-dot question from v1
+still stands in the footer.</div>
+</section>
+
+<section>
+<h2>Thumbnail shelf — colour is the archetype</h2>
+<div class="thumbwrap">
+  <div><div class="t"><div class="card" style="--f:var(--sun-f);--i:var(--sun-i);--a:var(--sun-a)"><div class="mark"><svg width="66" height="66" viewBox="0 0 72 72"><circle cx="36" cy="36" r="26" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="36" cy="36" r="9" fill="currentColor"/></svg></div><div class="name">THE<br>SUN</div></div></div><div class="tlabel">the sun</div></div>
+  <div><div class="t"><div class="card" style="--f:var(--oce-f);--i:var(--oce-i);--a:var(--oce-a)"><div class="mark"><svg width="70" height="66" viewBox="0 0 76 72"><path d="M8 28 Q19 20 30 28 T52 28 T74 28" fill="none" stroke="currentColor" stroke-width="3.5"/><path d="M8 42 Q19 34 30 42 T52 42 T74 42" fill="none" stroke="currentColor" stroke-width="3.5" opacity=".65"/></svg></div><div class="name">THE<br>OCEAN</div></div></div><div class="tlabel">the ocean</div></div>
+  <div><div class="t"><div class="card" style="--f:var(--gem-f);--i:var(--gem-i);--a:var(--gem-a)"><div class="mark"><svg width="66" height="66" viewBox="0 0 72 72"><rect x="21" y="21" width="30" height="30" transform="rotate(45 36 36)" fill="none" stroke="currentColor" stroke-width="3.5"/></svg></div><div class="name">THE<br>JEWEL</div></div></div><div class="tlabel">the jewel</div></div>
+  <div><div class="t"><div class="card" style="--f:var(--bam-f);--i:var(--bam-i);--a:var(--bam-a)"><div class="mark"><svg width="66" height="66" viewBox="0 0 72 72"><line x1="26" y1="10" x2="26" y2="62" stroke="currentColor" stroke-width="3.5"/><line x1="46" y1="10" x2="46" y2="62" stroke="currentColor" stroke-width="3.5" opacity=".6"/></svg></div><div class="name">THE<br>BAMBOO</div></div></div><div class="tlabel">the bamboo</div></div>
+  <div><div class="t"><div class="card" style="--f:var(--bes-f);--i:var(--bes-i);--a:var(--bes-a)"><div class="mark"><svg width="66" height="66" viewBox="0 0 72 72"><rect x="16" y="30" width="40" height="14" fill="currentColor"/></svg></div><div class="name">THE<br>FORGE</div></div></div><div class="tlabel">the forge</div></div>
+</div>
+</section>
+
+<section>
+<h2>Card B — 9:16 (1080 x 1920 proposed) — Complete Edition</h2>
+<div class="row">
+  <div><div class="cardB" style="--fB1:#B33305;--fB2:#701C02;--fB3:#330C00;--i:var(--sun-i);--a:#FFB98C">
+    <div class="bigmark"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="26" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="36" cy="36" r="9" fill="currentColor"/></svg></div>
+    <div class="eyebrow" style="margin-top:auto">Persona</div>
+    <div class="name" style="font-size:48px;margin-top:6px">THE SUN</div>
+    <div class="aspek">Sang Pengelola</div>
+    <div class="tags"><span>HANGAT</span><span>BERSEMANGAT</span><span>TERBUKA</span><span class="dyn">MANDIRI</span><span class="dyn">TAJAM</span><span class="dyn">RAPI</span></div>
+    <p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p>
+    <div class="badges" style="margin-top:12px;flex:none">
+      <span class="badge">Bunga Persik</span>
+      <span class="badge">Bintang Penolong<em>lewat Pilar Kerja</em></span>
+    </div>
+    <div class="appendix">
+      <div class="pillars">
+        <div><div class="ph">Tahun</div><div class="pv">Kerbau<br>Kayu</div></div>
+        <div><div class="ph">Bulan</div><div class="pv">Anjing<br>Api</div></div>
+        <div><div class="ph">Hari</div><div class="pv">Macan<br>Api</div></div>
+        <div><div class="ph">Jam</div><div class="pv">Tikus<br>Tanah</div></div>
+      </div>
+      <div class="elems">
+        <div class="e"><i style="height:26px"></i><b>KAYU</b></div>
+        <div class="e"><i style="height:32px"></i><b>API</b></div>
+        <div class="e"><i style="height:18px"></i><b>TANAH</b></div>
+        <div class="e"><i style="height:8px"></i><b>LOGAM</b></div>
+        <div class="e"><i style="height:12px"></i><b>AIR</b></div>
+      </div>
+      <div class="bfoot"><span>COMPLETE EDITION</span><span>PEREMPUAN · 13 SEP 1989 · KATON.APP</span></div>
+    </div>
+  </div><p class="cap"><b>Card B — layout locked.</b> Hook restored (spec: everything on A, plus the
+  appendix). Appendix now reads as content: four labeled pillars (Tahun/Bulan/Hari/Jam, animal +
+  element each) and the five element bars labeled. Hanzi lives ONLY in the PDF chart sheet
+  (confirmed 08-02). Pillar values and bar heights here are ILLUSTRATIVE, not computed. 9:16 fills
+  a full story - the height is the exclusivity signal.</p></div>
+</div>
+</section>
+
+</body>
+</html>

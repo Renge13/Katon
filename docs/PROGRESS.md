@@ -7,10 +7,18 @@ UPDATED: 2026-07-30 — CALCULATOR CLOSED + STRATEGY RESET. sxtwl retired in fav
          (measured equivalent). Time convention empirically pinned against Joey. Launch strategy
          changed to CARD-FIRST; strength engine / 78 modules / paid compat all PARKED. New revenue
          model: free mirror + optional paid hi-res card & PDF (no gate). See SUPERSEDED at bottom.
+UPDATED: 2026-08-01 — Badge anchors verified 60/60 against Joey with full table-row coverage. 華蓋
+         descoped. Stale mirror `D:\Work\Katon assets\Katon md` neutralised, its two unique files
+         rescued into the repo. `docs/COWORK-BRIEF.md` added as the Cowork session entry point.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
 -->
 
 # Katon — PROGRESS Ledger
+
+> **New session?** Claude Code starts at `NEXT.md`. Cowork starts at `COWORK-BRIEF.md`.
+> Both after `../CLAUDE.md`. Brief yourself from the repo, never from memory or a summary.
+> **`D:\Work\Katon assets\Katon md` is a STALE MIRROR — do not read it.** It still carries the
+> rejected Aspek names (Setara, Karya, Pijar, Peluang) and a PROGRESS.md with no decisions in it.
 
 ## THE PIVOT IN ONE PARAGRAPH
 Hand-authoring reading cells produced flat, hedged prose that failed a cold-read walkthrough. We
@@ -24,7 +32,7 @@ translation + copywriting layer, never a calculator."
 We were building depth before distribution. The archetype — the shareable face, the whole viral
 surface — comes from the DAY PILLAR, which is pure 60-day arithmetic with **zero ephemeris and zero
 solar-term dependency**. It cannot be wrong and never needed the engine work. The known failure (per
-KATON-coldread-analysis.md, first line: *"The copy is not the problem. Coherence is."*) was never
+research/coldread-analysis.md, first line: *"The copy is not the problem. Coherence is."*) was never
 accuracy — nobody has ever complained the math was wrong.
 
 **REVISION, same session.** The mid-session call to park the strength engine and cut compat from v1
@@ -48,27 +56,47 @@ needs a second birthdate, so the free mirror must ship and acquire first. Theref
 - `prompts/C2-rulings.md` .............. metric fix, pair-distribution, 旺相休囚死 vs 十二長生.
 - `prompts/C3-ruling-B.md` ............. get the full ten bars; Earth deferred.
 - `prompts/C4-data-and-two-corrections.md` . the 子 fix + ruling A refuted.
-- `prompts/C5-earth-adopted-transform-next.md` . CURRENT. 土旺於四季 adopted; the 16% inversion finding.
+- `prompts/C5-earth-adopted-transform-next.md` . 土旺於四季 adopted; the 16% inversion finding.
+- `prompts/C6-sqrt-adopted-oracle4.md` . sqrt adopted; Oracle 4. Its step 2 is STRUCK.
+- `prompts/D1-engine-additions.md` ..... DONE. 刑, 胎元, gender field.
+- `prompts/D1b-remove-life-palace.md` .. DONE. 命宮 removed; its convention is unresolved at n=5.
+- `prompts/D2-stage3.md` .............. DONE 2026-08-02, all three phases. Stage 3 hierarchy scoring +
+                                         semantic JSON. Its end-to-end AI Studio gate is NOT run.
+- `prompts/D2a-stage3-anchors.md` ..... DONE. Its §1 tables are locked in `tests/badge-anchors.spec.mjs`;
+                                         its §4 target-file correction is applied. Two of its own claims
+                                         were wrong — see errors 13 and 14 in `COWORK-BRIEF.md`.
 
 ### Engine
 - `engine/joey-bars-13.json` ........... GROUND TRUTH. 13 charts x 10 bars, presence + element totals.
                                          Collected from Joey's plotter directly. The fixture imports it.
+- `engine/joey-implied-strength.json` .. ORACLE 4 data. supportShare derived from Joey own element totals.
 - `engine/joey-profile-mapping.md` ..... profile name -> Ten God, from Joey's printed legend. Do not re-derive.
 - `engine/calculator-decision.md` ...... calculator + time convention. CLOSED.
-- `engine/engine-session-state.md` ..... method spec. NOTE: strength engine is UN-PARKED and in progress.
+- `engine/engine-session-state.md` ..... method spec. NOTE: strength engine is DONE (Oracle 4 r=0.929).
 - `engine/bazi-blueprint.md` ........... feature map, pull-power, coherence rules CR-1..6.
 - `engine/pipeline-spec.md` ............ the 7-stage build spec. CURRENT.
 
 ### Content
 - `content/renderer-prompt.txt` ........ THE Stage-5 system prompt. Single source of truth. Paste this.
-- `content/renderer-prompt-notes.md` ... what the live runs proved and why each rule exists.
+- `content/renderer-prompt-notes.md` ... what the live runs proved and why each rule exists. Run-by-run rationale.
 - `content/glossary-naming.md` ......... LOCKED naming. Read before authoring any content.
-- `content/glossary.json` .............. the engine content table. Batch 1 of 6 written (Ten Aspek).
-- `content/provecell-01-*` ............. renderer test kit + fixture + rubric.
-- `content/bazi-card-skill-v4.md` ...... sharecard spec. NEEDS A READ before the card is built.
+- `content/glossary.json` .............. the engine content table. COMPLETE, 49 entries, Reyner-reviewed.
+- `content/glossary-REVIEW.md` ......... human-readable review sheet. Regenerated from the JSON, not edited by hand.
+- `content/sharecard-spec.md` .......... CURRENT card information architecture. Two cards: free shareable + paid artifact.
+                                         Supersedes bazi-card-skill-v4.md's information architecture.
+- `content/provecell-01-USER.json` ..... the hand-authored TARGET shape for fixture chart 1. Corrected
+                                         2026-08-02: `lean`/`provisional` deleted, two 七殺 attributions
+                                         fixed to 正官.
+- `content/provecell-01-ENGINE.json` ... GENERATED by Stage 3 for the same chart. Diff against the USER
+                                         file. Regenerate: `node scripts/emit-semantic.mjs 1989-09-13 09:00 --write`.
+- `content/provecell-01-*` (others) .... renderer test kit + fixture + rubric.
+- `content/bazi-card-skill-v4.md` ...... LEGACY visual system. Its info architecture is superseded by sharecard-spec.md.
 - `content/_STATIC-STRINGS.md` ......... system copy. Needs a one-voice + keyboard-chars audit.
 
 ### Product
+- `product/compatibility-reading-spec.md` . the 合婚 workflow + ethical spine. RESCUED 08-01 from the
+                                         stale mirror; NOT reconciled against the Aspek/Bintang naming
+                                         lock. Read as proposal, not decision.
 - `product/paid-product-map.md` ........ the full paid surface, ranked. Annual reading and parent->child
                                          are the two products not previously counted.
 - `product/launch-decisions.md` ........ pricing, the 19k upsell, imajidiri teardown, abuse math.
@@ -107,7 +135,7 @@ needs a second birthdate, so the free mirror must ship and acquire first. Theref
   立春 1989 = 1989-02-04 04:27 (+08) and 白露 1989 = 1989-09-07 23:53 (+08).
 
 ## VALIDATION FIXTURE — 13 CHARTS
-Rows 1–12 in KATON-engine-session-state.md. Added 07-30 from Joey PDF:
+Rows 1–12 in engine/engine-session-state.md. Added 07-30 from Joey PDF:
 ```
 13  1989-02-04 04:00 | 乙 | 丑 | 比肩 | Managers | Friend80/Phil80/Dir78/Pio72
 ```
@@ -122,7 +150,7 @@ fixture imports that file rather than re-typing numbers. Pillars agree with Joey
 - **NEW (07-30): optional paid hi-res card + packaged PDF report, ~19k.** Offered AFTER the free
   reading has landed and the sharecard is in hand. **It is an upsell, never a gate.** Refusal costs
   nothing — they still share. Take rate is the pricing evidence we currently lack. Rationale and the
-  rejected alternatives are in KATON-launch-decisions.md.
+  rejected alternatives are in product/launch-decisions.md.
 - **The 19k mirror GATE is rejected** — and note the earlier stated reason ("to recover lunch-money
   API cost") was void: total cost to cache the *entire* mirror space forever is ~$115. The real
   reason is that a gate at the top of the funnel asks for money before any investment exists.
@@ -135,13 +163,13 @@ fixture imports that file rather than re-typing numbers. Pillars agree with Joey
   **One voice everywhere, including chrome.** No prose slang (ngerasa/bikin/kayak/capek), no chat
   particles (tuh/lho/deh), and not bureaucratic-baku either. Keyboard characters only — no em-dash,
   no curly quotes. Yin/Yang never surfaced as bare words.
-  **The casual "old friend" register is DEAD** — killed explicitly by KATON-coldread-analysis.md §"THE
+  **The casual "old friend" register is DEAD** — killed explicitly by research/coldread-analysis.md §"THE
   VOICE DECISION": *"drop the casual old-friend register entirely… that reaction was caused BY the
   casual front door."* The ultra-casual front door was creating doubt about legitimacy before the user
   saw any value. Any note claiming the two registers coexist is wrong; the cold-read is the later
   decision and it wins.
 - Ten Gods: classical concepts in plain Indonesian. **Never** Joey's trademarked profile names
-  (Director/Diplomat/Warrior are his IP). Locked display names in KATON-engine-session-state.md.
+  (Director/Diplomat/Warrior are his IP). Locked display names in engine/engine-session-state.md.
 - **Loading state says "Menghitung bagan kelahiranmu" — never "dianalisis sama AI."** Advertising the
   AI invites the suspicion that it merely rephrased the user's own input.
 - **Capture email AFTER the free mirror, optional, framed as "save your reading."** Currently we
@@ -178,21 +206,317 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | Oracle 2 Ten God top-3 set match | 2/13 | 07-31 | hard threshold on a noisy tail; see Spearman below before concluding anything |
 | Oracle 2 mean Spearman | 0.783 | 08-01 | full ten bars |
 | Oracle 2 pair concordance | 82.2% | 08-01 | |
-| **Oracle 3 element rank exact** | **3/13** | 08-01 | **PRIMARY GATE** |
-| **Oracle 3 mean Spearman** | **0.782** | 08-01 | was 0.682 before 土旺於四季 |
-| **Oracle 3 pair concordance** | **84.5%** | 08-01 | was 79.8% |
+| **Oracle 3 element rank exact** | **4/13** | 08-01 | **PRIMARY GATE**; 3/13 before sqrt |
+| **Oracle 3 top-1 element** | **9/13** | 08-01 | was 6/13 before sqrt |
+| **Oracle 3 mean Spearman** | **0.874** | 08-01 | 0.682 -> 0.782 (土旺於四季) -> 0.874 (sqrt) |
+| **Oracle 3 pair concordance** | **89.9%** | 08-01 | 79.8% -> 84.5% -> 89.9% |
+| Verdict distribution | 5 weak / 8 balanced / 0 strong | 08-01 | Joey-implied is 7/6/0 — NOT a regression |
+| Joey-implied supportShare range | 20.1% to 55.3% | 08-01 | `engine/joey-implied-strength.json`; no chart reaches 60 |
+| **Oracle 4 Pearson r** | **0.929** | 08-01 | engine supportShare vs Joey-implied, 13 charts. The verdict layer's underlying number is SOUND. |
+| **Oracle 4 Spearman rho** | **0.934** | 08-01 | same ordering as Joey |
+| Oracle 4 mean SIGNED error | +3.6 pts | 08-01 | engine reads systematically HIGH — an offset, not noise. Relevant when thresholds are eventually chosen. |
+| Oracle 4 mean abs error | 5.0 pts | 08-01 | max 10.2 (charts 10 and 6) |
+| Oracle 4 label agreement | 11/13 | 08-01 | informational only — the labels have no ground truth. Both misses (6, 10) straddle the 40 cut. |
 | Zero-presence law | 130/130 | 08-01 | verified against Joey's own presence figures |
 | Projection-independent ceiling | 7/13 | 08-01 | was 6/13 |
 | Engine Earth-first | 5 charts | 08-01 | was 7; Joey's is 4 |
-| Within-element presence inversions | 9/57 (16%) | 08-01 | no monotone transform can fix these; residual factor unidentified |
-| Grid-search best (NOT adopted) | rho 0.863 | 08-01 | {2.4,1.2,0.8,0.6,0.4}; only 旺 deviates, confounded with the untested concave transform |
+| Within-element agreement | 48/57 (9 inversions) | 08-01 | **transform-INVARIANT** under linear/sqrt/log1p. Needs a MECHANISM, not a reweighting. Diagnostic 0 in the harness. |
+| 旺 re-fit after sqrt (NOT adopted) | +0.020 rho | 08-01 | optimum collapsed 2.4 -> flat 1.6-1.8 plateau. Rule 13 demonstrated numerically. Left at 1.4. |
 | Solar-term boundaries, day-level | 0 disagreements / 1212 | 07-30 | three oracles |
 | Joey #1 element distribution | Earth 5, Fire 4, Wood 3, Metal 1, Water 0 | 08-01 | from full ten bars |
+| **Badge anchors vs Joey's printed stars** | **60/60** | 08-01 | 貴人 文昌 桃花 驛馬 孤辰 across 12 charts. **Every table row exercised** — 10/10 day stems, 4/4 trine groups, 4/4 season groups. Tables in `prompts/D2a-stage3-anchors.md`. |
+| Badge anchors, YEAR-pillar alternative | 0/12 桃花, 0/12 驛馬, 1/12 孤辰 | 08-01 | the day-pillar ruling is not marginal |
+| **Badge frequency (avg per chart)** | **2.15, range 1-4** | 08-02 | RE-MEASURED from the verified anchors (was 2.5 with a candidate 華蓋 table). 28 badges over 13 charts. Nobody at 0, nothing universal, so the comparison mechanic survives. Phase 2's extremity term reads this. |
+| **Bintang Penolong frequency** | **77% (10/13)** | 08-02 | re-measured; unchanged from the stale figure by coincidence, 10 of 13 either way. The never-top-3 rule stands on the same footing. |
+| **Badge frequency, per badge** | 貴人 10 · 文昌 5 · 驛馬 4 · 空亡 4 · 桃花 2 · 羊刃 2 · 孤辰 1 | 08-02 | out of 13. `tests/badge-anchors.spec.mjs` asserts all seven. **All three per-badge figures D2 phase 2 cites survive unchanged** — Mata Pisau 15% (2/13), Tanda Kekosongan 31% (4/13), Bintang Penolong 77% (10/13). Only the AVERAGE moved, and only because 華蓋 left the set. |
+| **Badge anchors, YEAR-pillar alternative** | **0/10 桃花, 0/10 驛馬, 1/10 孤辰** | 08-02 | CORRECTS the 08-01 row below it. Denominator is 10, not 12: X2 and X3 both have year branch == day branch (巳), so the two conventions are the same computation there and cannot discriminate. Stated correctly the ruling is STRONGER — every chart that can tell them apart favours the day pillar. |
+| Stage 3 facts per chart | 9 to 16, mean 12.5 | 08-02 | Phase 1 inventory, unranked. Thinnest charts 7 (9) and 12 (10) are the `quiet_chart` candidates. |
+| Stage 3 CR-1 fire rate | 4/13 | 08-02 | charts 1, 7, 9, 12. **9/13 without the balanced-verdict exclusion** — see the 08-02 Stage 3 section. |
+| Stage 3 void_stack fire rate | 1/13 | 08-02 | chart 1 only, at stack size 3. The exemplar the target file describes. |
+| Stage 3 glossary gaps | 1 fact type | 08-02 | `strength_<verdict>` has no glossary entry at all. Every other fact type is fully backed. |
+| **Stage 3 chart-1 rank rho vs hand-written** | **0.81** | 08-02 | Spearman over the 11 facts the target file carries. **Top-3 SET is exact.** Not a gate — a record, so a change that scrambles ordering shows as a drop. |
+| **Bintang Penolong in top-3** | **0/13** | 08-02 | the load-bearing D2 assertion. Engine ranks it 11th of 11 on chart 1 where the hand file put it 7th; the engine applies the never-headline rule more consistently than the hand scoring did. |
+| Stage 3 quiet_chart rate | 2/13 | 08-02 | charts 5 and 13, at `quietFloor` 70. Unfitted default. |
+| **Stage 3 JSON byte-identical on recompute** | **13/13** | 08-02 | the cache guarantee. Cache keys all distinct, no collisions. |
+| Stage 3 facts after collapse, chart 1 | 14 of 16 | 08-02 | `main_profile` absorbed by CR-1, `badge_空亡` by its void stack. |
+| Stage 3 required points, chart 1 | 9 | 08-02 | hand-written file has 8; the extra is `day_master_Fire`, which the target carries as its first point. |
+
+## DECIDED 2026-08-02 — Stage 3 PHASE 1 landed (fact inventory + badge anchors)
+
+`prompts/D2-stage3.md` + `D2a`, phase 1 of 3. **No scoring, no JSON contract, no required_points** —
+those are phases 2 and 3. New: `lib/bazi/badges.js`, `lib/bazi/relations.js`, `lib/semantic/facts.js`,
+`lib/semantic/glossary.js`, `tests/badge-anchors.spec.mjs`, `tests/stage3-facts.spec.mjs`.
+
+**Badge anchors: 60/60 reproduced independently**, on Joey's own day pillars, with every table row
+exercised. Locked as evidence in `tests/badge-anchors.spec.mjs`.
+
+**Seven detectable badges, not eight.** D2a §"WHAT THIS CHANGES IN D2" says 羊刃 and 空亡 "were already
+computed". **Neither existed anywhere in `lib/`** — this is spec error 13, the same shape as error 9 and
+in the document that corrected error 9. Both are implemented here and both are legitimate under rule 4,
+for reasons that are NOT the same as 華蓋's:
+- 羊刃 is written down twice in `docs/` (`engine-session-state.md` line 92, `bazi-blueprint.md` line 223)
+  with the same table, and `DI_WANG_BRANCH` in `strength.ts` corroborates it inside the repo — 羊刃 IS
+  the yang stem's 帝旺 branch.
+- 空亡 is not a table. A 旬 covers ten of the twelve branches; the two it misses are void. The spec
+  asserts it structurally over all 60 pillars, not by sampling.
+- 華蓋 had a table nobody wrote down, no repo corroboration, and no oracle. It stays descoped and is
+  deliberately absent from `badges.js`.
+
+**Four rulings made where D2/D2a were silent or wrong. All four are reversible and all four are tested:**
+
+1. **`provenance` is emitted as STRUCTURED DATA, not prose.** The target file carries it as finished
+   Indonesian sentences that exist nowhere in `glossary.json`, so producing them means Stage 3 authoring
+   user-facing copy — which D2 forbids and which only Reyner can approve on register. **The sentence
+   layer is deferred to Phase 3 as an explicit register-review item.** The data is strictly richer than
+   the sentence, so nothing is lost. NOTE while deciding it: the target file's provenance strings use
+   *"Dihitung dari pilar harimu"*, and `renderer-prompt.txt` §PROVENANCE IS NOT ARITHMETIC bans exactly
+   that phrasing. Whatever ships must not model banned copy.
+2. **CR-1 does not fire on balanced charts.** Without the exclusion it fires 9/13, because 8 of 13 are
+   balanced and for a balanced chart the engine picks the unfavourable side by whichever is merely less
+   scarce — then flags itself `confidence: low` for doing so. Building a reading's emotional core on a
+   split the engine already distrusts is what D2 means by a forced tension. With it: 4/13. Carry-forward:
+   the fixture has zero `strong` charts, so today this reads as weak-charts-only; re-measure if the
+   40/60 thresholds move.
+3. **The day stem is excluded from Aspek convergence counting.** It is the self, not a relation to the
+   self, and counting it inflates 比肩 by one on every chart ever computed. The target file agrees — it
+   reads chart 1's 比肩 as the two hidden 丙, not three.
+4. **A void stack counts at most one convergent Aspek per branch (main qi only).** Counting all hidden
+   stems made a three-stem branch stack almost automatically: chart 13's void 辰 scored 3 on 戊/乙/癸
+   alone, with no badge and no profile source. That is a branch with three hidden stems, not a
+   convergence. After the fix, `void_stack` fires on chart 1 only — exactly the exemplar D2 describes.
+
+**Chart 1 vs the hand-written target: all 11 target facts present, 5 extra.** The extras are
+`main_profile` (the plain fact under the CR-1 tension, now marked `supersedes`/`superseded_by` so Phase 3
+collapses them deterministically), `element_dominant_Water` (the same finding as `officer_convergence`
+seen from the element side), `aspek_convergence_食神` and `_偏財` (戊 x2 at qi 0.1 and 庚 x2 at 0.3, both
+from the duplicated 巳 — they converge by the letter of the rule and barely at all by presence, which is
+why **Phase 2's convergence term must weight by presence, not by position count**), and `badge_空亡`
+under the stack. None is a defect; all are the Phase 2/3 dedupe surface.
+
+**TWO MORE TARGET-FILE CORRECTIONS, same class as D2a §4's `lean`.** `provecell-01-USER.json` attributes
+七殺 to chart 1 twice — the fact id `spouse_palace_7k`, and `officer_convergence`'s label "Aspek Pengatur
+dan Aspek Penantang". **壬 appears nowhere in chart 1**, so 七殺 scores exactly 0 and 正官 scores 100.
+Both should be 正官 alone. This is the zero-presence law catching a hand-written file. Fix them in the
+Phase 3 commit alongside `lean`/`provisional`.
+
+**Good news on the re-measurement D2a §2 ordered:** the three per-badge frequencies D2 phase 2 actually
+reads — Mata Pisau 15%, Tanda Kekosongan 31%, Bintang Penolong 77% — are all **unchanged**. Only the
+average moved, 2.5 to 2.15, and only because 華蓋 left the set. Nothing in the extremity term was
+silently mis-scored, and the Penolong never-top-3 rule stands on the same 77%. (Those three figures are
+cited in `D2-stage3.md` as living in `sharecard-spec.md`; that file carries only the average and the
+77%. Minor, noted so nobody hunts for them.)
+
+**Two doc defects found in passing, not fixed here:** the 08-01 ledger entry below calls 華蓋 "Bintang
+Cendekia" — the glossary says 華蓋 is **Bintang Sunyi** and 文昌 is Bintang Cendekia. And
+`lib/readingView.js` renders Earth as "Bumi" while the glossary says "Tanah"; that surface predates the
+glossary and is out of Stage 3's scope, but it is exactly the drift `lib/semantic/glossary.js` derives
+its element map to prevent.
+
+## DECIDED 2026-08-02 — Stage 3 PHASE 3 landed (JSON contract + cache key)
+
+`lib/semantic/index.js` + `tests/stage3-contract.spec.mjs` + `scripts/emit-semantic.mjs`.
+**Stage 3 is complete.** `engine_version` is `0.4.0-stage3`; bumping it invalidates the whole cache.
+
+**Byte-identity is asserted, not assumed.** Two runs of the same chart produce identical JSON and an
+identical cache key, on all 13 charts. That is not tidiness: a reordered key or a float that rounds
+differently means a cache miss, a second LLM call, and a second DIFFERENT reading of the same birthdate.
+The hash is taken over a key-sorted canonical form so a future refactor cannot silently invalidate the
+table; array order still counts, because `facts` is ranked and the ranking is meaning.
+
+**`required_points` is emitted as a STRUCTURED checklist** (`fact_id` + `must_cover`), not as Indonesian
+sentences, for the same reason as `provenance` — and one more: a fact-id checklist is the only form
+**Stage 6 can validate mechanically.** It can check that a reading covered fact X; it cannot check that
+a reading covered a sentence. D2's rule holds either way: every required point has a backing fact, and a
+test asserts `must_cover` can only ask for content the fact actually carries. Chart 1 yields 9 points
+against the hand file's 8; the extra is `day_master_Fire`, which the target carries as its *first*
+required point, so the two agree on coverage and differ only on what counts as a point. **Not included:**
+"penutup berupa verdict yang percaya diri" — a style instruction with no backing fact, already in
+`renderer-prompt.txt` where it belongs.
+
+**Two collapses, so the renderer never gets the same paragraph twice.** `main_profile` is absorbed by
+the CR-1 tension (same glossary entry, same four strings, only the framing differs) and `badge_空亡` by a
+void stack that covers every position it hits. Both are recorded in a `qa.facts_collapsed` block rather
+than silently dropped. Chart 1: 16 facts in, 14 out. A void badge with no stack over it survives —
+asserted on charts 5, 6 and 13.
+
+**`provecell-01-USER.json` CORRECTED** — the fix D2a §4 ordered, plus two more of the same class the
+Stage 3 inventory caught:
+- `verdict: "lean"` and `provisional: true` deleted. The engine says supportShare 16.5 against a 40
+  threshold, which is decisively weak, and `confidence: low` comes from the 半合 root pull, not from
+  sitting near a threshold. `confidence_reasons` added. `favorable` needed no change.
+- `officer_convergence` was labelled "Aspek Pengatur dan Aspek Penantang" / "Direct Officer & Seven
+  Killings". **七殺 is 壬 and 壬 appears nowhere in chart 1**, so 七殺 scores exactly 0 and 正官 scores 100.
+  All three Water occurrences are 癸 = 正官. Corrected to 正官 alone.
+- `spouse_palace_7k` renamed `spouse_palace` for the same reason: 子 hides 癸, so the seat is 正官.
+  The prose never named either god and needed no change.
+
+**THE END-TO-END GATE WAS NOT RUN.** D2's final step is pasting Stage 3's chart-1 output into AI Studio
+with `renderer-prompt.txt` and comparing the reading against run 5. That needs an LLM call. The JSON is
+generated and paste-ready at **`docs/content/provecell-01-ENGINE.json`** (regenerate with
+`node scripts/emit-semantic.mjs 1989-09-13 09:00 --write`). **Predict before running it:** the reading
+should be thin exactly where `strength_weak` sits, because that fact is top-3 and carries no
+`label_meaning`, `gift` or `cost` for the renderer to cash out. If the thinness is anywhere else, the
+JSON is wrong and diffing against `provecell-01-USER.json` will say where.
+
+## DECIDED 2026-08-02 — Stage 3 PHASE 2 landed (hierarchy scoring)
+
+`lib/semantic/hierarchy.js` + `tests/stage3-hierarchy.spec.mjs`. Both D2 non-negotiables hold:
+**Bintang Penolong is top-3 on 0 of 13 charts**, and 11 of 13 charts are not quiet.
+
+**NOTHING IS FITTED.** Rule 13 — the scoring logic and the constants that tune it cannot land in the
+same commit, or whichever is fitted first absorbs the other's explanatory work. Every constant is in
+`HIERARCHY_PARAMS` at a reasoned default, and a test asserts those defaults so that editing them IS the
+calibration and needs its own measurement.
+
+**D2's four axes do not rank the spine, so there is a fifth term, and it is flagged as an addition.**
+The four always-present facts — Day Master, strength verdict, main profile, spouse palace — are by
+construction not extreme, not convergent and not paradoxical. On the four axes alone they sink to the
+bottom of every chart, and a reading whose lowest-ranked fact is the Day Master is not a reading. So
+`role` is a BASE, not an axis: spine facts start at 55 and the axes move them, findings start at 25 and
+must earn their place. The hand-written target does the same thing implicitly, scoring the Day Master at
+68 with no axis to justify it.
+
+**Tension is GRADED, not binary.** CR-1 100, void stack 90, 刑 70, 冲 60, spouse palace 50, 害 45. A flat
+bonus would let six minor frictions outrank the one real paradox.
+
+**Chart-1 diff against the hand-written file** (D2 asks for this table; exact numbers were judgment
+calls and are not targeted):
+
+| target fact | hand | Stage 3 | in hand top-3 | in S3 top-3 |
+|---|---|---|---|---|
+| strength_lean -> strength_weak | 97 | 78 | YES | YES |
+| profile_drains_self -> profile_vs_favorable | 95 | 85 | YES | YES |
+| void_month_stack -> void_stack_month | 93 | 100 | YES | YES |
+| officer_convergence -> aspek_convergence_正官 | 91 | 70 | - | - |
+| wood_missing -> element_missing_Wood | 89 | 70 | - | - |
+| peach_blossom -> badge_桃花 | 86 | 65 | - | - |
+| nobleman -> badge_天乙貴人 | 80 | 43 | - | - |
+| spouse_palace_7k -> spouse_palace | 78 | 70 | - | - |
+| metal_half_trine -> relation_半合_巳酉 | 74 | 69 | - | - |
+| steward_vs_selfreliant -> aspek_convergence_比肩 | 72 | 44 | - | - |
+| day_master_fire -> day_master_Fire | 68 | 55 | - | - |
+| *(engine only)* badge_空亡 | - | 59 | - | - |
+| *(engine only)* main_profile | - | 55 | - | - |
+| *(engine only)* aspek_convergence_偏財 | - | 34 | - | - |
+| *(engine only)* element_dominant_Water | - | 31 | - | - |
+| *(engine only)* aspek_convergence_食神 | - | 28 | - | - |
+
+**Top-3 set is exact. Spearman 0.81 over the 11 mapped facts.** The one large divergence is Bintang
+Penolong, hand 7th of 11 and engine 11th — intended, and the hand file's own note ("never headline it,
+77% is not extremity") is the reason.
+
+**The obvious first target for a fitting pass, when one is authorised:** the scale is compressed and ties
+at exactly 70 are common (chart 3 has three). Ties break deterministically on emission order, so the
+cache is safe, but the ordering among them is arbitrary rather than editorial. Second target: branch
+relations float to the top of quiet charts because each type is individually rare, which may be right and
+has not been checked against anything.
+
+## DECIDED 2026-08-02 — archetype names, fixed tags, EN display layer
+
+**The 10 archetype names are LOCKED** in `glossary.json` → `arketipe` (was `arketipe_kandidat`):
+Jati, Bambu, Matahari, Api Unggun, Gunung, Taman, Besi Tempa, Permata, Samudra, Embun — each with a
+`name_en` pair (The Teak, The Bamboo, The Sun, The Bonfire, The Mountain, The Garden, The Forge,
+The Jewel, The Ocean, Morning Dew). Beringin was rejected on political association. Jati is Reyner's
+own pick — premium heirloom wood, classical 甲, and the *jati diri* pun self-demonstrates the product.
+
+**The 30 fixed sharecard tags are LOCKED** in `glossary.json` → `tag_arketipe`. 3 per archetype, all
+30 distinct, title-case stored, uppercase rendered. `tags_en` pending an EN register pass.
+
+**EN display layer scoped:** names + tags + card strings only; the reading body stays Indonesian.
+Rule 23 amended: brackets convention is reading-prose only; the sharecard never shows brackets.
+
+**COMPAT FLOW — RECONCILED AND DECIDED** (review trail: `archive/compat-flow-REVIEW.md`; the spec
+body `product/compatibility-reading-spec.md` is corrected in place and is now buildable):
+- Funnel: enter B → **P0 tease FREE** (two faces + ONE named relational fact, zero explanation;
+  comparison card shareable pre-payment — it is compat's own acquisition engine) → paywall → P1-P8.
+- **Account + email created at first compat checkout.** The mirror stays anonymous — no login wall
+  (Joey's front-door login serves his lead-gen model, not ours). The account owns the chart address
+  book that P8's loop accumulates. Per-account rate limits on top of rule 19.
+- **No consent line for person B** (Reyner, deliberate): the reading is anonymous and does not
+  affect B; the P2 reframe copy carries the ethics alone.
+- **P6 Luck Pillar sync DESCOPED from v1** (rule 25 edge + optional gender + no female-set fixture).
+  Timing lives in the annual product later.
+- **P5 affinity/fit quadrants KEPT as a documented Katon ruling** — deterministic rule to be written
+  before implementation; no classical authority claimed for the 2x2 itself.
+- Pricing: **visible "harga peluncuran" cohorts, never silent A/B** (screenshot culture). List/launch
+  numbers to be set in launch-decisions.md; band stays 25-45k tested.
+- Engine additions inventoried for a future Prompt E (cross-chart relations, spouse-palace hits,
+  cross-chart complementarity with strength_confidence, quadrant rule, pair cache). No plotter
+  oracle exists for the pair layer; relation tables are already test-locked, pair-level rules are
+  Katon rulings and must be written in docs before implementation.
+
+**CARD VISUAL SYSTEM — direction and layout DECIDED** (same day, mockup trail in
+`content/sharecard-mockups-01.html` and `-02.html`; detailing/polish deferred, Reyner will tinker):
+- Direction: **typographic poster.** Colour field + one geometric mark per archetype + typography.
+  **No watercolour — the 10 commissions are CANCELLED**, the parked item is dead, and "paintable"
+  drops out of the naming criteria. One typeface: **Archivo variable** (wght x wdth, SIL OFL).
+- Card A: flat colour field, mark top, name/Aspek/6 tags/verbatim hook/badges/footer. Indonesian.
+- Card B: taller ratio, gradient field, ghost mark background, content bottom-anchored,
+  **head in EN (name_en) + Aspek in Indonesian**, appendix band with animal-element row + element
+  bars, "Complete Edition" chrome. The classical EN Aspek terms (Direct Wealth etc.) are
+  bracket-terms only, NEVER display copy.
+- **Hanzi: card images carry NONE; the 4x2 hanzi grid lives in the PDF chart sheet only**
+  (CONFIRMED by Reyner 08-02). Rule 23's legitimacy object survives in the PDF; no amendment needed.
+- **EN header on BOTH cards** (Reyner 08-02), Aspek Indonesian everywhere. The ID/EN A/B is dead.
+  OPEN: the Indonesian archetype name now appears nowhere on Card A — EN-only, or tiny ID eyebrow.
+- **Footer carries gender + birthdate + katon.app.** Gender is optional in the engine; null gender
+  = date + source only. PEREMPUAN/LAKI-LAKI strings are proposals pending register.
+- **Sizes PROPOSED, pending Reyner: Card A 1080x1350 (4:5 feed), Card B 1080x1920 (9:16 full
+  story).** Taller B confirmed as the exclusivity signal; exact ratios not yet locked.
+- Card B carries the hook (spec: everything on A plus appendix); appendix = labeled pillar grid
+  (Tahun/Bulan/Hari/Jam, animal + element) + labeled element bars + Complete Edition chrome.
+- Colour tokens fixed for 5 of 10 archetypes; remaining 5 to derive (Api Unggun must not collide
+  with Matahari). tags_en remains open.
+
+**The 刑 glossary entry is REGISTER-APPROVED and landed** in `glossary.json` → `relasi_cabang.刑`.
+"Simpul" confirmed (Belitan considered, not taken). `label_meaning` rewritten to drop the banned
+negation-contrast construction. name_en stays "Punishment" per the Seven Killings precedent —
+classical EN term in brackets for legitimacy; the Indonesian does the reframing. D2a §3 marked landed.
+
+Decision trail: `docs/content/archetype-tags-REVIEW.md` (now superseded; move to `archive/` after
+commit). Together with the 刑 approval this closes 3 of the 5 Reyner-blocked items in COWORK-BRIEF §6.
+
+## DECIDED 2026-08-01 — mechanic scope, and one thing deferred to a later product
+
+**刑 (Punishment) ADDED: self-punishment, full trine, and the 子卯 pair. Partial TRINES excluded.**
+(Wording corrected 2026-08-02: the earlier "self and full trine only" omitted the 子卯 pair, which is
+a distinct two-branch type, implemented and locked in `tests/punishment.spec.mjs` — not a partial.)
+The only mechanic in the set that
+describes self-inflicted friction; everything else is either external pressure or a carried badge.
+Measured frequency: 自刑 alone 4/13 (31%), full 三刑 0/13, partial trines would push it to 7/13 (54%)
+and destroy the signal. Partials excluded.
+
+**Life Palace and Conception Palace ADDED as DISPLAY ONLY.** On every Joey chart, so absence is
+noticeable. No interpretation: 命宮 requires the birth hour and is blank for a large share of users,
+and both are effectively extra pillars whose interpretation would open a whole new surface.
+
+**華蓋 (Bintang Cendekia) DESCOPED 2026-08-01.** Joey's plotter prints exactly five natal stars — 貴人,
+文昌, 桃花, 驛馬, 孤辰 — and 華蓋 is not among them. It was added by Claude, not by the oracle, so under
+rule 4 there is no way to verify an anchor for it. The glossary entry stays, marked not-detectable.
+This is spec error 10.
+
+**寡宿 (Widow Star) REJECTED.** Not on gender grounds — Reyner ruled the product serves both genders.
+Rejected because "you will be alone" is structurally a prediction about future relationship status,
+which rule 22 bans, and 孤辰 already covers the psychological ground without the claim.
+
+**破 (Break) REJECTED.** Real, rarely load-bearing, and every added mechanic costs surface area.
+
+**Badge scarcity is a product constraint, not an aesthetic one.** Measured with the current 6-star set:
+avg 2.5 badges per person, range 1-4, none universal. That distribution is what makes "which do you
+have?" a real question, which is the comparison mechanic that makes a card spread. Adding stars toward
+the classical maximum would put everyone at 8 badges and kill it.
+
+**GENDER field added (optional, null default).** Affects luck pillar direction only — forward for
+yang-year males and yin-year females, reverse otherwise. Natal chart, Ten Gods, strength, badges,
+palaces and compatibility are all gender-independent.
+**Carry-forward:** every chart in `engine/joey-bars-13.json` was collected with Joey set to MALE. Fine
+for natal bars. But the **annual reading** and **luck-pillar map** both read luck pillars, so those
+products will need female-set fixture charts to validate against.
 
 ## RESOLVED — stop reporting these as open (2026-08-01)
 - **The 6 test rows in the live `reading` table are DELETED.** Removed manually via the Supabase SQL
   editor; `select count(*)` confirmed at 24. Do not flag again.
-- **`docs/engine/solar-term-oracle-diff.mjs` was deleted deliberately.** It was a prototype;
+- **`tests/tools/solar-term-oracle-diff.mjs` was deleted deliberately.** It was a prototype;
   `tests/solar-terms.spec.ts` supersedes it with real scraped HKO data and CI wiring. Two copies of
   the same oracle is the bug `docs/README.md` warns about. Not an accident, not to be restored.
 - **Migration `0003_term_side.sql` is APPLIED in Supabase.** Column verified present. `main` is
@@ -207,17 +531,23 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 1. **STRENGTH ENGINE** — un-parked, ~2 weeks. 得令/得地/得生/得勢, follow-chart (從格) as a strict
    high-threshold gate, `strength_confidence` on edge charts. Validate against **both** oracles:
    the strong/weak verdict AND Joey's bar rank-order, across the 13-chart fixture. Method spec in
-   KATON-engine-session-state.md (project knowledge). **Gates: compat, annual reading, luck-pillar
+   engine/engine-session-state.md (project knowledge). **Gates: compat, annual reading, luck-pillar
    map, career verdicts, all element-based actionables.**
 2. **THE GLOSSARY** — ~64 entries, 2–3 sentences each. Replaces the ~78 prose modules; different
-   shape entirely. Names are LOCKED in KATON-glossary-naming.md. Write each `label_meaning` as a
+   shape entirely. Names are LOCKED in content/glossary-naming.md. Write each `label_meaning` as a
    **felt experience, never a definition** — that rule fixed the two "hard to understand" defects in
    run 3. **Leverage: these badges are also the sharecard tags. One glossary serves card + reading.**
-3. **Calculator swap** — Prompt A in KATON-calculator-decision.md. One session, deletes ~200 lines of
+3. **Calculator swap** — Prompt A in engine/calculator-decision.md. One session, deletes ~200 lines of
    liability. Then commit Phase 1 (message in §6), then Prompt B regression lock (CI only;
-   `solar-term-oracle-diff.mjs` drops straight in).
+   `tests/tools/solar-term-oracle-diff.mjs` drops straight in).
 4. **Stage 3** (hierarchy + semantic JSON in the four-field shape: provenance / label / label_meaning /
    gift / cost / palace / actionable) and **Stage 6** post-validation.
+   **Renderer measurement note (2026-08-02):** when Stage 5/6 quality is first measured, the primary
+   number is Stage-6 pass rate + provecell rubric on `gemini-3.1-flash-lite`. Run a
+   `gemini-2.5-flash-lite` arm as a RIDER in the same batch and have Reyner blind-judge pairs; switch
+   the free tier only if indistinguishable. Cost is NOT the driver (~$2 per 1k readings, capped by the
+   result cache) — do not make this its own project. Proposal riding along: store `model` +
+   `prompt_version` as metadata on cached reading rows so flagged readings are attributable.
    Stage 6 must mechanically catch what the runs exposed: tension-collapse vocabulary
    (*menyatu / selaras / saling melengkapi / identitas utuh*), invented specificity, dropped `cost`
    strings, and schema-order slot-filling.
@@ -235,16 +565,16 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
   reader into beat 3. Euphemism prevents the question and costs you the reader.
   **Condition: the explanation lands in the same breath, never a sentence later.** And never bare on
   the sharecard, where there is no room for beat 3 — a blunt label without resolution is an insult
-  with a citation. Rule is in KATON-renderer-prompt.txt §"NAME IT PLAINLY".
+  with a citation. Rule is in content/renderer-prompt.txt §"NAME IT PLAINLY".
 - **The move: provenance → name → cash-out.** Cash-out has two halves, both required: the general
   meaning of the name, then the specific consequence for this person. Never stop after the general half.
 - **Braided blocks must converge.** After separate cash-outs, one or two sentences on what it means
   that these things sit together. This is what rescues a fact that read as obscure alone.
 - **Naming: Indonesian name, English in brackets once, no Chinese characters.** Aspek = internal
-  disposition, Bintang = external marker. Full table in KATON-glossary-naming.md.
+  disposition, Bintang = external marker. Full table in content/glossary-naming.md.
 - **Penutup is a confident verdict.** No rhetorical questions, no reflection prompts.
 - **`label_meaning` describes a felt experience, never defines a concept.** Abstraction is the failure mode.
-- Renderer prompt: **`KATON-renderer-prompt.txt`** is the single source of truth. KATON-master-prompt.md
+- Renderer prompt: **`content/renderer-prompt.txt`** is the single source of truth. content/renderer-prompt-notes.md
   is documentation only.
 
 ## PARKED (deliberately, until real signal)
@@ -253,7 +583,7 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 - ~~Paid compatibility~~ **UN-PARKED — it is the v1 money engine.** Ships after the mirror acquires.
 - The ~78 prose modules → **superseded by the ~64-entry GLOSSARY.** Different shape, see TODO #2.
 - 3-way / household synthesis. Highest LTV, heaviest ethics, do it last and do it right.
-- Annual reading, luck-pillar map, parent→child — real products, sequenced in KATON-paid-product-map.md.
+- Annual reading, luck-pillar map, parent→child — real products, sequenced in product/paid-product-map.md.
 - 10 bespoke watercolour illustrations — **growth-blocking, not learning-blocking.** Ship to a small
   cohort without them; commission in parallel; add before any real push.
 
@@ -285,7 +615,7 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
   lives only in `gift`/`cost`/`actionable`. Not bespoke prose.
 - **"Park the strength engine / cut compat from v1"** (proposed midday 07-30) → **REVERSED same day.**
   The engine gates compat, annual reading, luck-pillar map and career depth. Compat is the money engine.
-- **"Voice = casual old friend"** → DEAD, killed by KATON-coldread-analysis.md. One composed voice
+- **"Voice = casual old friend"** → DEAD, killed by research/coldread-analysis.md. One composed voice
   everywhere. Any note claiming the registers coexist is wrong.
 - **"10 Dewa" as the name for 十神** → banned. *Dewa* reads as a Hindu deity to a Muslim-majority
   audience. It is **Sepuluh Aspek (Ten Gods)**. Market risk, not a translation nicety.

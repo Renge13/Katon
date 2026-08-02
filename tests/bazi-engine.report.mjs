@@ -18,9 +18,10 @@ import { tenGodsForChart } from '../lib/bazi/tenGods.js';
 import { mainProfile } from '../lib/bazi/mainProfile.js';
 import { tenGodTally, loudAlternatives, LOUD_MARGIN } from '../lib/bazi/tenGodTally.js';
 import { computeStrength, STRENGTH_PARAMS } from '../lib/bazi/strength.ts';
-import { scoreBars, aggregate, formatAggregate, rankAgreement, aggregateRanks, formatRanks } from './oracle-metrics.mjs';
+import { scoreBars, aggregate, formatAggregate, rankAgreement, aggregateRanks, formatRanks, correlate } from './oracle-metrics.mjs';
 import { elementBarsFrom } from './joey-bars.mjs';
 import { VALIDATION_CHARTS, PILLAR_EDGE_CASES } from './bazi-validation.fixture.js';
+import JOEY_IMPLIED from '../docs/engine/joey-implied-strength.json' with { type: 'json' };
 
 const tick = (ok) => (ok ? '✓' : '✗');
 const pillarStr = (p) => (p ? `${p.stem}${p.branch}` : '——');
@@ -278,6 +279,86 @@ for (const r of results) {
 const aggEl = aggregateRanks(results.map((r) => r.elementAgreement));
 console.log('\n  ORACLE 3 —');
 console.log(formatRanks('ELEMENT rank order vs Joey (5 values x 13 charts) — PRIMARY GATE', aggEl));
+
+// ── Task 8d — ORACLE 4, the verdict layer ──
+// The engine's supportShare against the same quantity implied by Joey's own
+// element totals. A CORRELATION, not a label-agreement count: there is no ground
+// truth for the weak/balanced/strong labels, only for the number underneath.
+console.log('\n\n══════════════ TASK 8d — supportShare vs JOEY-IMPLIED (ORACLE 4) ══════════════');
+console.log('  Thresholds are deliberately NOT fitted here. If the correlation is high the');
+console.log('  number is sound and the cut points are a later labelling choice; if it is low');
+console.log('  the thresholds are irrelevant because the number they cut is wrong.');
+console.log('\n  id | engine | Joey-implied |  delta | engine verdict | Joey verdict');
+console.log('  ---+--------+--------------+--------+----------------+-------------');
+
+const label = (share) => (share < STRENGTH_PARAMS.verdict.weakBelow ? 'weak'
+  : share > STRENGTH_PARAMS.verdict.strongAbove ? 'strong' : 'balanced');
+
+const engineShares = [];
+const joeyShares = [];
+const derivationProblems = [];
+for (const r of results) {
+  const implied = JOEY_IMPLIED.charts[String(r.tc.id)];
+  if (!implied) { derivationProblems.push(`chart ${r.tc.id} missing from joey-implied-strength.json`); continue; }
+
+  // Independently re-derive Joey's implied share from his element totals, rather
+  // than trusting the stored figure. Same reasoning as importing the ten bars:
+  // a hand-computed number in a data file is a transcription risk.
+  const el = r.joeyElements;
+  const dmEl = r.tc.expect.dayMasterElement;
+  const resourceEl = ['Wood', 'Fire', 'Earth', 'Metal', 'Water']
+    .find((e) => ({ Wood: 'Fire', Fire: 'Earth', Earth: 'Metal', Metal: 'Water', Water: 'Wood' })[e] === dmEl);
+  const support = el[dmEl] + el[resourceEl];
+  const drain = Object.entries(el).filter(([e]) => e !== dmEl && e !== resourceEl).reduce((s, [, v]) => s + v, 0);
+  const recomputed = Math.round((support / (support + drain)) * 1000) / 10;
+  if (Math.abs(recomputed - implied.joeyImpliedSupportShare) > 0.15) {
+    derivationProblems.push(`chart ${r.tc.id}: file says ${implied.joeyImpliedSupportShare}, recomputed ${recomputed}`);
+  }
+  if (implied.resourceElement !== resourceEl) {
+    derivationProblems.push(`chart ${r.tc.id}: file resourceElement ${implied.resourceElement} != ${resourceEl}`);
+  }
+
+  engineShares.push(r.strength.supportShare);
+  joeyShares.push(implied.joeyImpliedSupportShare);
+  const d = r.strength.supportShare - implied.joeyImpliedSupportShare;
+  console.log(
+    `  ${String(r.tc.id).padStart(2)} | ${String(r.strength.supportShare).padStart(6)} | ` +
+    `${String(implied.joeyImpliedSupportShare).padStart(12)} | ${(d >= 0 ? '+' : '') + d.toFixed(1).padStart(5)} | ` +
+    `${r.strength.verdict.padEnd(14)} | ${label(implied.joeyImpliedSupportShare)}`,
+  );
+}
+
+const o4 = correlate(engineShares, joeyShares);
+const dist = (shares) => {
+  const c = { weak: 0, balanced: 0, strong: 0 };
+  for (const s of shares) c[label(s)]++;
+  return `${c.weak} weak / ${c.balanced} balanced / ${c.strong} strong`;
+};
+const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+const absErr = engineShares.map((v, i) => Math.abs(v - joeyShares[i]));
+
+console.log('\n  ORACLE 4 —');
+console.log(`    Pearson r                ${o4.pearson.toFixed(3)}   (is it the same number)`);
+console.log(`    Spearman rho             ${o4.spearman.toFixed(3)}   (is it the same ordering)`);
+const signedErr = engineShares.map((v, i) => v - joeyShares[i]);
+console.log(`    mean SIGNED error        ${mean(signedErr) >= 0 ? '+' : ''}${mean(signedErr).toFixed(1)} pts   <- a systematic offset, not noise`);
+console.log(`    mean |error|             ${mean(absErr).toFixed(1)} pts`);
+console.log(`    max  |error|             ${Math.max(...absErr).toFixed(1)} pts`);
+const labelAgree = engineShares.filter((v, i) => label(v) === label(joeyShares[i])).length;
+console.log(`    label agreement          ${labelAgree}/${engineShares.length}   (informational — the labels have no ground truth)`);
+console.log(`    engine distribution      ${dist(engineShares)}`);
+console.log(`    Joey-implied distribution ${dist(joeyShares)}`);
+console.log(`    engine range             ${Math.min(...engineShares).toFixed(1)} .. ${Math.max(...engineShares).toFixed(1)}`);
+console.log(`    Joey-implied range       ${Math.min(...joeyShares).toFixed(1)} .. ${Math.max(...joeyShares).toFixed(1)}`);
+if (derivationProblems.length === 0) {
+  console.log('    derivation re-check      OK — every stored figure reproduces from Joey\'s element totals');
+} else {
+  // A real failure, not a note: it would mean the Oracle-4 data file no longer
+  // matches the element totals it claims to be derived from.
+  for (const p of derivationProblems) record('O4', 'joeyImpliedDerivation', p);
+}
+console.log('\n    CAVEAT: this inherits Oracle 3\'s assumption that Joey\'s bars are element');
+console.log('    strength in the 旺衰 sense. It is not an independent oracle.');
 
 // ── Task 7 ──
 console.log('\n\n══════════════ TASK 7 — SUMMARY ══════════════');

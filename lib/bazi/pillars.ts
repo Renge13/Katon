@@ -80,6 +80,21 @@ export interface PillarsInput {
    * hour would render as a real fourth pillar.
    */
   termSide?: 'before' | 'after' | null;
+  /**
+   * Optional, default null. Accepted and persisted; it does NOT affect anything
+   * this function returns.
+   *
+   * Gender affects EXACTLY ONE THING: luck-pillar (大運) direction — forward for
+   * yang-year males and yin-year females, reverse otherwise. It does not touch the
+   * natal chart, Ten Gods, strength, badges, palaces or compatibility, all of
+   * which read the natal chart only. Luck pillars are not built yet, so there is
+   * no consumer; the field exists so it does not have to be re-collected later.
+   *
+   * When luck pillars ARE built, use tyme4ts's gender-aware API
+   * (ChildLimit.fromSolarTime(solarTime, Gender) -> DecadeFortune) rather than
+   * deriving the direction by hand.
+   */
+  gender?: 'male' | 'female' | null;
 }
 
 export interface Pillar {
@@ -144,6 +159,42 @@ export interface Pillars {
   day: Pillar;
   /** null when the birth time is unknown. Never defaulted to midnight. */
   hour: Pillar | null;
+  /**
+   * 命宮 Life Palace is DELIBERATELY ABSENT. Removed 2026-08-01 (D1b) after four
+   * more Joey values were collected: no candidate convention reproduces him.
+   *
+   *   solar-term month branch (tyme4ts getOwnSign)  4/5 — fails chart 2
+   *   lunar month number (the obvious alternative)  3/5 — fails charts 7 and 10
+   *
+   * So a shipped value would be wrong on roughly 1 in 5 charts. The palace block
+   * exists ONLY as the legitimacy object a curious user cross-checks against
+   * Joey, and there a wrong value is strictly worse than an absent one: absent
+   * reads as "they left that field out", wrong reads as "their calculation
+   * disagrees with Joey's" in the one place designed to prove it does not.
+   *
+   * It is fragile by construction, not by accident. 命宮 consumes the YEAR STEM,
+   * the MONTH and the HOUR, so it compounds three independent convention choices
+   * and every boundary ambiguity in the engine lands in this one field at once.
+   * That is why it fails precisely on the charts that are already edge cases —
+   * chart 2 is a CNY/solar-term mismatch, chart 7 is 晚子時, chart 10 is 立春.
+   *
+   * The derivation is still reachable as `lifePalaceCandidate()` below so the
+   * finding stays executable, but nothing computes or displays it. To un-defer:
+   * settle the convention against 10+ Joey values including a CNY/solar mismatch,
+   * a 晚子時 birth and a 立春 birth. Nothing interprets it, so it costs nothing
+   * to leave out.
+   */
+  /**
+   * 胎元 Conception Palace. DISPLAY ONLY, same reasoning.
+   *
+   * Always available: derived from the MONTH pillar alone (stem +1, branch +3),
+   * so it survives an unknown birth hour.
+   *
+   * Triple-verified: Joey's printed 胎元 甲子 for chart 1, tyme4ts
+   * getFetalOrigin(), and the standard formula computed by hand — all three agree
+   * across five charts.
+   */
+  conceptionPalace: Pillar;
   /**
    * The two risks, kept apart. They are not comparable: a 節 boundary can move
    * the month pillar and therefore the reading; a 時辰 edge can only move the
@@ -297,6 +348,29 @@ function checkHourEdge(
   return { boundary: { flagged: false }, reason: null };
 }
 
+/**
+ * 命宮 under the solar-term-month convention — NOT FOR DISPLAY.
+ *
+ * Exported only so the recorded failure stays executable: tests/palaces.spec.mjs
+ * asserts this reproduces Joey on 4 of 5 collected charts and names the one it
+ * misses. Without it the 4/5 finding would be a comment, and a comment does not
+ * fail when someone re-adds the field.
+ *
+ * DO NOT wire this into a chart object or a view. It is wrong on roughly 1 in 5
+ * charts and the palace block's only job is to be cross-checkable against Joey.
+ * See the 命宮 note on the Pillars interface for the full reasoning.
+ *
+ * @returns the candidate palace, or null when the hour is unknown
+ */
+export function lifePalaceCandidate({ date, time }: { date: string; time?: string | null }): Pillar | null {
+  const hasTime = time !== null && time !== undefined && time !== '';
+  if (!hasTime) return null; // reads the hour branch; never fabricate from the probe
+  const { y, m, d } = parseDate(date);
+  const { h, mi } = parseTime(time as string);
+  const sign = SolarTime.fromYmdHms(y, m, d, h, mi, 0).getLunarHour().getEightChar().getOwnSign();
+  return { stem: sign.getHeavenStem().getName(), branch: sign.getEarthBranch().getName() };
+}
+
 // ── Season-turn lookup (for the season gate) ───────────────
 
 export interface SeasonTurn {
@@ -342,8 +416,11 @@ export function seasonTurnOnDate(date: string): SeasonTurn | null {
  * computePillars({ date: '1989-09-13', time: '09:00' });
  * // → year 己巳, month 癸酉, day 丙子, hour 癸巳
  */
-export function computePillars({ date, time = null, tz = null, termSide = null }: PillarsInput): Pillars {
+export function computePillars({ date, time = null, tz = null, termSide = null, gender = null }: PillarsInput): Pillars {
   void tz; // see PillarsInput.tz — persisted upstream, never read here.
+  // see PillarsInput.gender — luck-pillar direction only, and luck pillars do not
+  // exist yet. Reading it anywhere in the natal computation would be a bug.
+  void gender;
 
   const { y, m, d } = parseDate(date);
   const hasTime = time !== null && time !== undefined && time !== '';
@@ -408,6 +485,12 @@ export function computePillars({ date, time = null, tz = null, termSide = null }
     day: pillar(eightChar.getDay()),
     // Still null: termSide resolves the MONTH, it never invents an hour pillar.
     hour: hasTime ? pillar(eightChar.getHour()) : null,
+    // 命宮 reads the hour branch, so with no birth time there is nothing to
+    // compute. Deriving it from the noon probe would fabricate a palace out of an
+    // hour the user never supplied — the same trap as inventing an hour pillar.
+    // 命宮 is deliberately NOT emitted — see the note on Pillars above.
+    // 胎元 needs only the month pillar, so it is always real, and it is 5/5.
+    conceptionPalace: pillar(eightChar.getFetalOrigin()),
     boundary: { solarTerm, hourEdge, timeLikelyRounded },
     boundaryFlag,
     ...(reasons.length > 0 ? { boundaryReason: reasons.join('; ') } : {}),

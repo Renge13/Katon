@@ -41,7 +41,7 @@ neutral, and *Aspek* reads as analysis rather than theatre — which is the posi
 
 ## THE TEN ASPECTS — decided 07-30
 
-Locked English display names already exist in KATON-engine-session-state.md. These are the Indonesian
+Locked English display names already exist in ../engine/engine-session-state.md. These are the Indonesian
 layer.
 
 **TAXONOMY (Reyner, 07-30): ASPEK = internal disposition. BINTANG = external marker.**

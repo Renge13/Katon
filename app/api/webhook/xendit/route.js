@@ -1,6 +1,6 @@
 import { getReading, markReadingPaid, claimWaSend, releaseWaSend } from '@/lib/readingStore';
 import { verifyCallbackToken, getInvoice, PAID_STATUSES } from '@/lib/xendit';
-import { PRICE_IDR } from '@/lib/pricing';
+import { amountMatchesSku } from '@/lib/pricing';
 import { sendReadingLink, decideWaOutcome } from '@/lib/wa';
 import { json, badRequest, unauthorized, notConfigured } from '@/lib/http';
 import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
@@ -11,9 +11,16 @@ export const runtime = 'nodejs';
 // THE ONLY path that may flip paid=true. Two-layer defense:
 //   (1) constant-time x-callback-token verification BEFORE parsing the body, and
 //   (2) re-fetch the invoice from Xendit by id and confirm status + amount
-//       against our SKU price — NEVER trusting the callback body to grant access.
+//       against the price of the SKU WE STORED at payment intent — NEVER
+//       trusting the callback body to grant access.
 // (2) makes a leaked callback token useless on its own: a forged PAID event must
-// still reference a real invoice that Xendit reports as paid for Rp 49.000.
+// still reference a real invoice that Xendit reports as paid, for exactly what
+// that reading's own product currently costs.
+//
+// PER-SKU, not per-constant. With one global price, "the amount is one of our
+// prices" and "the amount is THIS product's price" were the same question. With
+// two SKUs at four price points they are not, and the weaker check would let a
+// 19000 artifact payment unlock a 29000 compat reading.
 export async function POST(request) {
   // 0. Fail-closed: in production the payment path must be fully configured, or refuse.
   //    This makes the DEV body-trust branch below structurally unreachable in prod.
@@ -36,9 +43,12 @@ export async function POST(request) {
     return badRequest('invalid JSON body');
   }
 
-  // Resolve the authoritative reading id + paid state.
+  // Resolve the authoritative reading id + settled state. The AMOUNT check is
+  // deferred until the row is loaded, because verifying it needs the SKU that was
+  // stored at payment intent.
   let readingId;
-  let paidConfirmed;
+  let statusPaid;      // Xendit says the money arrived
+  let settledAmount;   // null in dev, where there is no invoice to re-fetch
 
   if (process.env.XENDIT_SECRET_KEY) {
     // PROD: re-fetch the invoice and trust ONLY Xendit's own record.
@@ -51,12 +61,14 @@ export async function POST(request) {
       return json({ error: 'invoice_lookup_failed' }, 502);
     }
     readingId = invoice.externalId; // authoritative — external_id was set to the reading id
-    paidConfirmed = PAID_STATUSES.includes(invoice.status) && invoice.amount === PRICE_IDR;
+    statusPaid = PAID_STATUSES.includes(invoice.status);
+    settledAmount = invoice.amount;
   } else if (devBypassAllowed()) {
     // DEV (no Xendit key, non-production ONLY): trust the body after token
     // verification. The fence at step 0 makes this unreachable in production.
     readingId = payload?.external_id;
-    paidConfirmed = PAID_STATUSES.includes(String(payload?.status || '').toUpperCase());
+    statusPaid = PAID_STATUSES.includes(String(payload?.status || '').toUpperCase());
+    settledAmount = null; // no invoice exists, so there is no amount to verify
   } else {
     // Belt-and-suspenders: never trust the callback body in production.
     return notConfigured('payment_not_configured:xendit_secret_key_unset');
@@ -64,10 +76,22 @@ export async function POST(request) {
 
   if (!readingId) return badRequest('missing external_id');
 
-  if (paidConfirmed) {
-    const row = await getReading(readingId);
-    if (!row) return json({ received: true }); // unknown id — ack so Xendit stops retrying
+  const row = await getReading(readingId);
+  if (!row) return json({ received: true }); // unknown id — ack so Xendit stops retrying
 
+  // Amount verification, per SKU, FAIL-CLOSED. A null or unknown row.sku does not
+  // unlock: a row whose product we cannot identify must never be treated as paid
+  // for. No real money has moved yet, so there are no legitimate in-flight
+  // invoices this strands (see supabase/migrations/0005_sku.sql).
+  const amountOk = settledAmount === null ? true : amountMatchesSku(settledAmount, row.sku);
+  if (statusPaid && !amountOk) {
+    console.error(
+      `[webhook/xendit] amount rejected for reading ${readingId}: sku=${row.sku ?? 'null'}`,
+    );
+  }
+  const paidConfirmed = statusPaid && amountOk;
+
+  if (paidConfirmed) {
     // 3. Idempotent flip (false→true only). 4. WA-send guarded by a claim that acts
     //    as a mutex: a genuine Xendit double-fire finds the slot already claimed and
     //    sends at most once. But the claim is only KEPT on a CONFIRMED delivery — so

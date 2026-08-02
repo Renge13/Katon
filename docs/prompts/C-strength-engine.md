@@ -1,6 +1,6 @@
 <!--
 STATUS: HANDOVER — Claude Code build prompt. Created 2026-07-30.
-This is PROMPT C. Run Prompt A (calculator swap) from KATON-calculator-decision.md FIRST —
+This is PROMPT C. Run Prompt A (calculator swap) from ../engine/calculator-decision.md FIRST —
 the strength engine's heaviest factor depends on a correct Month Branch.
 Prompt B (regression lock) can run in parallel or after.
 -->

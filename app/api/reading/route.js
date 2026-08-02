@@ -18,7 +18,7 @@ export async function POST(request) {
     return badRequest('invalid JSON body');
   }
 
-  const { birthDate, birthTime = null, domain = null, termSide = null } = body || {};
+  const { birthDate, birthTime = null, domain = null, termSide = null, gender = null } = body || {};
   if (!birthDate || typeof birthDate !== 'string') {
     return badRequest('birthDate (YYYY-MM-DD) is required');
   }
@@ -28,12 +28,15 @@ export async function POST(request) {
   if (termSide !== null && termSide !== 'before' && termSide !== 'after') {
     return badRequest('termSide must be "before", "after", or omitted');
   }
+  if (gender !== null && gender !== 'male' && gender !== 'female') {
+    return badRequest('gender must be "male", "female", or omitted');
+  }
 
   // SERVER-SIDE chart computation. day_master + state are derived here,
   // never supplied by the client. termSide only shifts WHICH SIDE of an in-day
   // 節 is read (season gate); it cannot invent an hour pillar and is ignored on
   // any date without a 節 or when a real birthTime is given.
-  const { dayMaster, state, chart } = computeChartInputs({ birthDate, birthTime, termSide });
+  const { dayMaster, state, chart } = computeChartInputs({ birthDate, birthTime, termSide, gender });
 
   if (!hasArchetype(dayMaster)) {
     return json({ error: 'archetype_content_unavailable', dayMaster }, 501);
@@ -54,6 +57,9 @@ export async function POST(request) {
     // Season-gate answer. Must persist: every read recomputes the chart from
     // this row, so dropping it would change the month pillar on revisit.
     term_side: termSide,
+    // Optional. Nothing consumes it yet — it is stored so it does not have to be
+    // re-collected when luck pillars (annual reading, luck-pillar map) are built.
+    gender,
   });
 
   // Response carries ONLY server-derived content — no birthDate/birthTime echo.

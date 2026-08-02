@@ -11,7 +11,7 @@ Read this before any launch, pricing, or funnel work.
 > The strength engine is **UN-PARKED** and compat is **back in scope** as the v1 money engine — because
 > the engine gates compat, the annual reading, the luck-pillar map and career depth (four revenue
 > lines, one ~2-week build), not just compat. See PROGRESS.md "STRATEGY RESET" + TODO, and
-> KATON-paid-product-map.md.
+> paid-product-map.md.
 > **What still stands in this file:** the pricing analysis (§2), the abuse/cost math (§3), and the
 > competitor teardown (§4). Read those. Ignore the build order in §1 and §5.
 
@@ -28,7 +28,7 @@ off an anchor date. No ephemeris. No solar terms. It cannot be wrong. Everything
 only the **month** pillar and the 立春 year boundary — which feed strength, Ten Gods, profile and bars.
 Those are the *depth* layers. The viral surface has been safely computable the whole time.
 
-**b) The known failure was never accuracy.** `KATON-coldread-analysis.md`, first line: *"The copy is
+**b) The known failure was never accuracy.** `../research/coldread-analysis.md`, first line: *"The copy is
 not the problem. Coherence is."* Nobody has ever complained the math was wrong. Two sessions on
 calculation accuracy was displacement activity — tractable, verifiable, satisfying work substituting
 for the ambiguous, unverifiable work of making prose land.
@@ -88,6 +88,25 @@ Compat is a *considered* purchase about a relationship, different psychology, pl
 But **test 25–45k before committing to 80–99k.** The gap between "impulse" and "considered" is where
 most Indonesian digital products die. Pricing is currently an assumption wearing the clothes of a
 decision.
+
+### Price architecture — CONFIRMED by Reyner 2026-08-02 (numbers and mechanic both decided)
+
+Mechanic (DECIDED 08-02, from the compat-flow review): **visible "harga peluncuran" cohorts, never
+silent A/B.** List price fixed and public; the launch discount is the test variable. A discount is a
+story people accept; a silent price difference, screenshotted between friends, reads as cheating.
+
+Structure follows two asymmetries: raising a list price later is nearly impossible, lowering via
+discount is free — so **anchor the list at the top and discount down.** And legitimacy is carried by
+the FREE reading (price never has to signal quality, because the user prices the product after
+feeling it — the structural advantage of the ungated mirror) plus the visibly-different Complete
+Edition card; neither needs a high price to read as legit.
+
+| SKU | List (anchor) | Launch (harga peluncuran) | Note |
+|---|---|---|---|
+| Complete Edition card + PDF | Rp 25.000 | **Rp 19.000** | the decided ~19k becomes the LAUNCH price, not the list; sits credibly above imajidiri's 15k |
+| Compatibility reading | Rp 45.000 | **Rp 29.000** | top of the tested band as anchor; launch inside the band; ~1:1.8 ladder keeps compat clearly the premium product |
+
+Never raise a list price before take-rate evidence exists; flex only the discount.
 
 ---
 
@@ -201,7 +220,7 @@ will. We are also entering an **occupied format** — differentiation must be ex
 
 ## 5. WHAT TO BUILD NEXT
 
-1. **Fix `KATON-master-prompt.md`** — 3 contradictions with locked rules, listed in PROGRESS.md TODO #1.
+1. **Fix `../content/renderer-prompt-notes.md`** — 3 contradictions with locked rules, listed in PROGRESS.md TODO #1.
    30 minutes, and everything downstream depends on it.
 2. **Card content spec** — the slots, the coherence rule per slot, and which BaZi facts each slot may
    legitimately draw from. ~10 archetypes × ~8 short fields = **80 tiny cells**, not 78 prose modules.

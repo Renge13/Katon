@@ -1,0 +1,26 @@
+-- Katon — 0005: which SKU an invoice was created for.
+-- Run in the Supabase SQL editor (or via the Supabase CLI) AFTER 0004.
+--
+-- RUN THIS BEFORE DEPLOYING THE CODE THAT READS IT (repo convention). Until the
+-- column exists, setInvoice() will fail on the sku patch and no invoice can be
+-- created.
+--
+-- WHY THIS COLUMN EXISTS
+-- The webhook verifies the re-fetched Xendit invoice amount against the price of
+-- the SKU that was actually sold (lib/pricing.js#amountMatchesSku). With one
+-- global price constant there was nothing to verify against once a second
+-- product existed; with two SKUs at four price points, "the amount is one of our
+-- prices" is not the same question as "the amount is THIS product's price".
+--
+-- NULLABLE. Rows created before this column exists keep a null sku, and a null
+-- sku FAILS CLOSED in the webhook — it cannot unlock. That is correct: no real
+-- money has moved yet (Xendit KYC is not started), so there are no legitimate
+-- in-flight invoices to strand, and a row whose product is unknown must never
+-- be treated as paid for.
+--
+-- No CHECK constraint against a SKU list on purpose. The sellable set is a
+-- product decision that changes faster than migrations do, it is enforced in
+-- lib/pricing.js#SELLABLE_SKUS at the only place invoices are created, and an
+-- unknown value fails closed anyway. A constraint here would mean a migration
+-- every time the catalogue moves, for no additional safety.
+alter table public.reading add column if not exists sku text;

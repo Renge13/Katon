@@ -32,8 +32,9 @@ next-env.d.ts
 *.sln
 *.sw?
 
-# Claude Code local config
-.claude/
+# Claude Code local config (settings are local; shared slash commands are versioned)
+.claude/*
+!.claude/commands/
 
 # Claude Design reference bundle (kept locally as reference, not shipped/linted)
 Katon Design System/
