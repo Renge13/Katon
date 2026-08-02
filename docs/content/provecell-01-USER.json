@@ -13,12 +13,12 @@
     "main_profile_bracket": "Direct Wealth"
   },
   "strength": {
-    "verdict": "lean",
+    "verdict": "weak",
     "confidence": "low",
-    "provisional": true,
+    "confidence_reasons": ["root 巳 pulled toward Metal by 半合"],
     "favorable": ["Kayu", "Api"],
     "unfavorable": ["Air", "Logam", "Tanah"],
-    "note_for_reyner": "[REYNER] Derived by hand pending Prompt C. 丙 in 酉 = 死. Wood 0.00 so no Resource at all. Drain 72.5%. Two 巳 (臨官) roots, but 巳酉 半合 pulls them toward Logam. Marginal chart on purpose, so the fixture exercises confidence:low rather than the happy path."
+    "note_for_reyner": "CORRECTED 2026-08-02 per D2a section 4. Was verdict:'lean', provisional:true. Both were wrong and were written by hand before Prompt C existed. There are three verdicts and 'lean' is not one of them. The engine says supportShare 16.5 against a 40 threshold, which is not a lean, it is decisively weak. The confidence:low is real but it comes from the 半合 root pull, not from sitting near a threshold. favorable needed no change: the hand-derived Kayu/Api matches the engine exactly, which is mild evidence the strength engine is sane."
   },
   "chart": {
     "year": "己巳", "month": "癸酉", "day": "丙子", "hour": "癸巳",
@@ -30,7 +30,7 @@
   },
   "facts": [
     {
-      "id": "strength_lean",
+      "id": "strength_weak",
       "importance": 97,
       "type": "core",
       "provenance": "Kamu lahir sebagai Api di bulan Ayam, musim Logam. Di musim itu Api sedang di titik paling redup sepanjang tahun. Unsur terbanyak di baganmu adalah Air, dan Air adalah unsur yang memadamkan Api.",
@@ -54,7 +54,7 @@
       "label_meaning": "Aspek Pengelola adalah orang yang dipercaya memegang dan merawat hal yang bernilai. Rapi, bertanggung jawab, tidak gampang lepas tangan.",
       "gift": "Kemampuanmu mengelola adalah hal yang paling dikenali orang darimu. Itu bukan kebetulan, itu memang inti namamu di peta ini.",
       "cost": "Hal yang paling kamu kuasai juga hal yang paling menguras kamu. Semakin banyak yang kamu pegang, semakin sedikit yang tersisa untuk dirimu sendiri.",
-      "note_for_reyner": "[REYNER] This is the first live CR-1 trigger: profile element (Logam) is unfavorable against a lean verdict. 'Your gift and your cost are the same current.' Confirm the framing."
+      "note_for_reyner": "[REYNER] This is the first live CR-1 trigger: profile element (Logam) is unfavorable against a weak verdict. 'Your gift and your cost are the same current.' Confirm the framing."
     },
     {
       "id": "void_month_stack",
@@ -113,14 +113,16 @@
       "importance": 91,
       "type": "convergence",
       "provenance": "Unsur Air muncul di batang bulan, di batang jam, dan sekali lagi di Fondasi Pasanganmu. Tiga posisi, satu tema.",
-      "label": "Aspek Pengatur dan Aspek Penantang",
-      "label_bracket": "Direct Officer & Seven Killings",
-      "label_meaning": "Dua aspek ini mewakili aturan, standar, dan tanggung jawab yang datang dari luar diri. Orang dengan keduanya menonjol biasanya sudah dipercaya memegang hal penting sejak usia muda.",
+      "label": "Aspek Pengatur",
+      "label_bracket": "Direct Officer",
+      "label_meaning": "Aspek ini mewakili aturan, standar, dan tanggung jawab yang datang dari luar diri. Orang dengan aspek ini menonjol biasanya sudah dipercaya memegang hal penting sejak usia muda.",
+      "note_correction": "CORRECTED 2026-08-02. This read 'Aspek Pengatur dan Aspek Penantang' / 'Direct Officer & Seven Killings'. 七殺 is 壬, and 壬 appears NOWHERE in this chart, so 七殺 scores exactly 0 while 正官 scores 100 — the zero-presence law, 130/130. All three Water occurrences here are 癸 = 正官. Caught by the Stage 3 fact inventory.",
       "gift": "Kamu jadi orang yang dipercaya memegang aturan dan standar. Orang menaruh tanggung jawab padamu tanpa perlu diminta.",
       "cost": "Tuntutan untuk selalu benar tidak pernah berhenti. Lelahmu datang dari tidak pernah memberi dirimu izin untuk longgar."
     },
     {
-      "id": "spouse_palace_7k",
+      "id": "spouse_palace",
+      "note_correction": "CORRECTED 2026-08-02. The id was `spouse_palace_7k`, which named 七殺. The day branch 子 hides 癸, so the seat is 正官, not 七殺 — 壬 is absent from this chart entirely. The prose below never names either god and needed no change; only the id was wrong.",
       "importance": 78,
       "type": "tension",
       "relational": true,

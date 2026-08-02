@@ -21,6 +21,8 @@
     "test:badges": "node --test tests/badge-anchors.spec.mjs",
     "test:stage3": "node --test tests/stage3-facts.spec.mjs",
     "test:stage3-hierarchy": "node --test tests/stage3-hierarchy.spec.mjs",
+    "test:stage3-contract": "node --test tests/stage3-contract.spec.mjs",
+    "emit:semantic": "node scripts/emit-semantic.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:engine": "node tests/bazi-engine.report.mjs",
     "test:forge": "node --conditions=react-server scripts/forge-tests.mjs"

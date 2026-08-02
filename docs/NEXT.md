@@ -10,22 +10,37 @@ go stale is which prompt it names. Do not re-add a task summary here.
 
 ## Read, in order
 1. `../CLAUDE.md` — the locked rules, 1 to 25.
-2. `PROGRESS.md` — the ledger. MEASUREMENTS holds every current number.
-3. **`prompts/D2-stage3.md`** — the task.
-4. **`prompts/D2a-stage3-anchors.md`** — the addendum. **It overrides D2 wherever they conflict.**
-5. **`content/provecell-01-USER.json`** — the TARGET SHAPE. Read it before writing code.
+2. `PROGRESS.md` — the ledger. MEASUREMENTS holds every current number, and its three
+   `DECIDED 2026-08-02 — Stage 3 PHASE n` sections describe what was just built.
+3. **`content/provecell-01-ENGINE.json`** — Stage 3's real output for fixture chart 1.
+4. **`content/renderer-prompt.txt`** — the Stage-5 system prompt. Single source of truth.
 
 ## Current task
 
-**`prompts/D2-stage3.md` plus `prompts/D2a-stage3-anchors.md`** — Stage 3. Hierarchy scoring and
-semantic JSON emit. Three phases, three commits. The biggest unblock in the project.
+**Stage 3 is DONE, all three phases** (`prompts/D2-stage3.md` + `D2a`). What is left is the thing
+Stage 3 cannot do for itself.
 
-D2a answers the three blockers raised 2026-08-01: the badge anchor tables are verified and supplied,
-華蓋 is descoped, the 刑 glossary entry is drafted. It also corrects two things in D2's contract.
-**Read both. D2a wins.**
+**1. Run D2's end-to-end gate. It has NOT been run.** Paste
+`content/provecell-01-ENGINE.json` into AI Studio with `content/renderer-prompt.txt` and compare the
+reading against run 5. This needs a real LLM call, which is why it is still open. **Predict before
+running:** the reading should be thin exactly where `strength_weak` sits, because that fact is top-3
+and has no `label_meaning`, `gift` or `cost`. Thinness anywhere else means the JSON is wrong, and
+diffing against `provecell-01-USER.json` will say where.
 
-Migration `0004_gender.sql` is **applied** (verified 2026-08-01, `gender | text` present). Reading
-creation works. Not blocked.
+**2. Two things need Reyner before anything downstream is real.** Both are content, not code:
+- **The strength verdict has NO glossary entry.** `glossary.json` has no `kekuatan` section, so
+  `weak` / `balanced` / `strong` carry no label, no `label_meaning`, no gift and no cost. It is the
+  top-ranked fact on most charts and the single most delicate string in the product — CR-5 permits
+  "lemah" only when the explanation lands in the same breath.
+- **`provenance` and `required_points` ship as STRUCTURED DATA, not Indonesian sentences.** That was
+  a deliberate deferral, not an omission — the sentences exist in no glossary entry, so writing them
+  is Stage 3 authoring user-facing copy. Decide whether the renderer verbalises from the data (rule
+  14 says it should) or whether an engine-owned template table is wanted. If templates: they are new
+  user-facing copy and need a register pass. Note `renderer-prompt.txt` bans "dihitung dari", which
+  the hand-written provenance strings use.
+
+**3. Then Stage 6** (post-validation) and Stage 4 (the result cache). `cacheKey()` already exists and
+is tested; nothing consumes it yet. Nothing in Stage 3 is wired into a route.
 
 ## Done and not to be revisited
 
@@ -34,10 +49,16 @@ creation works. Not blocked.
   deferred, thresholds stay at 40/60 until the pipeline exists.
 - 刑, 胎元, gender field.
 - **命宮 is deliberately absent.** See `prompts/D1b-remove-life-palace.md` and CLAUDE.md rule 4.
-- Glossary: 49 entries plus `salah_dikira`, all Reyner-reviewed.
+- Glossary: 49 entries plus `salah_dikira`, all Reyner-reviewed. The one hole is the strength verdict.
+- **Badge anchors: 60/60, locked in `tests/badge-anchors.spec.mjs`.** Seven detectable badges. Do not
+  re-derive the tables and do not re-add 華蓋.
+- **Stage 3 hierarchy params are UNFITTED on purpose** (rule 13). A fitting pass is its own commit with
+  its own measurement. The first two targets are named at the end of the PHASE 2 section in
+  `PROGRESS.md`.
 
-If a future version of this file sends you back into engine calibration before Stage 3 exists,
-push back.
+If a future version of this file sends you back into engine calibration, push back.
+
+Migration `0004_gender.sql` is **applied** (verified 2026-08-01). Reading creation works. Not blocked.
 
 ## Standing rules
 

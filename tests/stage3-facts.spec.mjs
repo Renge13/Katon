@@ -57,14 +57,14 @@ test('chart 1 covers every fact the hand-written target file carries', () => {
   // real renderer. Its ids are hand-chosen names for the same findings, so the
   // mapping is explicit rather than inferred.
   const TARGET_TO_ENGINE = {
-    strength_lean: 'strength_weak',              // D2a §4: `lean` is not a verdict
+    strength_weak: 'strength_weak',    // was `strength_lean`; corrected in this commit
     profile_drains_self: 'profile_vs_favorable',
     void_month_stack: 'void_stack_month',
     peach_blossom: 'badge_桃花',
     wood_missing: 'element_missing_Wood',
     nobleman: 'badge_天乙貴人',
     officer_convergence: 'aspek_convergence_正官',
-    spouse_palace_7k: 'spouse_palace',
+    spouse_palace: 'spouse_palace',    // was `spouse_palace_7k`; 七殺 is absent from chart 1
     metal_half_trine: 'relation_半合_巳酉',
     steward_vs_selfreliant: 'aspek_convergence_比肩',
     day_master_fire: 'day_master_Fire',

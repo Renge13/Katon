@@ -49,7 +49,7 @@ test('chart 1 top-3 is the same SET the hand-written target chose', () => {
   // ordering, and the top 3 above all.
   const handTop3 = [...PROVECELL.facts]
     .sort((a, b) => b.importance - a.importance).slice(0, 3).map((f) => f.id).sort();
-  assert.deepEqual(handTop3, ['profile_drains_self', 'strength_lean', 'void_month_stack']);
+  assert.deepEqual(handTop3, ['profile_drains_self', 'strength_weak', 'void_month_stack']);
 
   const engineTop3 = rankedFor(VALIDATION_CHARTS[0]).facts.slice(0, 3).map((f) => f.id).sort();
   assert.deepEqual(engineTop3, ['profile_vs_favorable', 'strength_weak', 'void_stack_month']);
@@ -60,14 +60,14 @@ test('chart 1 rank correlation against the hand-written target', () => {
   // numbers — a record, so a future change that scrambles the ordering shows up
   // as a drop rather than as nothing.
   const MAPPING = {
-    strength_lean: 'strength_weak',
+    strength_weak: 'strength_weak',
     profile_drains_self: 'profile_vs_favorable',
     void_month_stack: 'void_stack_month',
     officer_convergence: 'aspek_convergence_正官',
     wood_missing: 'element_missing_Wood',
     peach_blossom: 'badge_桃花',
     nobleman: 'badge_天乙貴人',
-    spouse_palace_7k: 'spouse_palace',
+    spouse_palace: 'spouse_palace',
     metal_half_trine: 'relation_半合_巳酉',
     steward_vs_selfreliant: 'aspek_convergence_比肩',
     day_master_fire: 'day_master_Fire',

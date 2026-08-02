@@ -1,0 +1,711 @@
+{
+  "_README": {
+    "status": "GENERATED, do not hand-edit. Regenerate with scripts/emit-semantic.mjs --write.",
+    "what": "Stage 3 output for fixture chart 1 (1989-09-13 09:00), the same chart docs/content/provecell-01-USER.json was hand-authored for. Diff the two to see what the engine does and does not reproduce.",
+    "the_gate": "D2 asks for this to be pasted into AI Studio with content/renderer-prompt.txt and the reading compared against run 5. THAT HAS NOT BEEN RUN - it needs an LLM call. The JSON is paste-ready.",
+    "known_gap": "strength_weak carries no label, label_meaning, gift or cost. glossary.json has no kekuatan section. This is the one fact type with no Reyner-reviewed content behind it and the renderer will have nothing to cash out for a top-3 fact. Expect the reading to be visibly thinner there than run 5.",
+    "provenance_is_structured": "Every fact carries provenance as DATA, not as the finished Indonesian sentence the hand-written file uses. A deliberate deferral, not an omission - see the header of lib/semantic/facts.js.",
+    "cache_key": "f1d43c91e51bd0b82e54d66cce5bf550a109d5cf58edfa41cf9b7fb1b129ee73"
+  },
+  "engine_version": "0.4.0-stage3",
+  "target_language": "id",
+  "hour_known": true,
+  "quiet_chart": false,
+  "boundary_flag": false,
+  "core": {
+    "day_master": "丙",
+    "element": "Api",
+    "archetype_key": "matahari",
+    "archetype_name_id": "Matahari",
+    "archetype_name_en": "The Sun",
+    "main_profile": "正財",
+    "main_profile_display": "Aspek Pengelola",
+    "main_profile_bracket": "Direct Wealth"
+  },
+  "strength": {
+    "verdict": "weak",
+    "confidence": "low",
+    "confidence_reasons": [
+      "root 巳 pulled toward Metal by 半合"
+    ],
+    "favorable": [
+      "Kayu",
+      "Api"
+    ],
+    "unfavorable": [
+      "Air",
+      "Logam",
+      "Tanah"
+    ]
+  },
+  "chart": {
+    "year": "己巳",
+    "month": "癸酉",
+    "day": "丙子",
+    "hour": "癸巳",
+    "animals": {
+      "year": "Ular",
+      "month": "Ayam",
+      "day": "Tikus",
+      "hour": "Ular"
+    },
+    "palaces": {
+      "year": "Pilar Akar",
+      "month": "Pilar Kerja",
+      "day": "Pilar Diri",
+      "hour": "Pilar Arah"
+    },
+    "element_presence": {
+      "Kayu": 0,
+      "Api": 27.5,
+      "Tanah": 15,
+      "Logam": 20,
+      "Air": 37.5
+    },
+    "element_presence_note": "display distribution only, never a strength score",
+    "missing_element": "Kayu"
+  },
+  "facts": [
+    {
+      "id": "void_stack_month",
+      "type": "tension",
+      "provenance": {
+        "kind": "void_stack",
+        "position": "month",
+        "branch": "酉",
+        "palace": "Pilar Kerja",
+        "notables": [
+          {
+            "kind": "main_profile_source",
+            "god": "正財"
+          },
+          {
+            "kind": "badge",
+            "badge": "天乙貴人"
+          },
+          {
+            "kind": "badge",
+            "badge": "桃花"
+          }
+        ]
+      },
+      "label": "Tanda Kekosongan",
+      "label_bracket": "Void",
+      "label_meaning": "Orang lain melihat kamu berhasil di bidang ini, tetapi kamu sendiri sering merasa belum pantas menyandangnya. Hasilnya tidak pernah kurang. Rasa memilikinya yang tidak pernah ikut hadir.",
+      "gift": "Kamu tidak pernah bersandar pada keberuntungan di bidang ini. Apa pun yang kamu capai di sana, kamu bangun murni dengan kerja keras.",
+      "cost": "Pengakuan orang lain tidak pernah menempel di dalam dirimu. Orang sudah menganggapmu ahli, tetapi kamu masih terus menunggu bukti berikutnya.",
+      "actionable": "Pengakuan di bidang ini tidak akan menempel dengan sendirinya. Sebut hasil kerjamu dengan lantang, meskipun rasanya canggung.",
+      "palace": "Pilar Kerja",
+      "stack_size": 3,
+      "importance": 100,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 0,
+        "convergence": 100,
+        "tension": 90,
+        "actionability": 100
+      }
+    },
+    {
+      "id": "profile_vs_favorable",
+      "type": "tension",
+      "provenance": {
+        "kind": "coherence_rule",
+        "rule": "CR-1",
+        "god": "正財",
+        "element": "Logam",
+        "verdict": "weak",
+        "relation_to_day_master": "is_controlled"
+      },
+      "label": "Aspek Pengelola",
+      "label_bracket": "Direct Wealth",
+      "label_meaning": "Kamu dipercaya memegang hal penting dan merawatnya dengan rapi. Orang merasa tenang saat kamu yang memegang kendali.",
+      "gift": "Apa yang kamu urus jarang berantakan. Kepercayaan datang sendiri tanpa perlu kamu minta.",
+      "cost": "Semakin banyak yang kamu pegang, semakin sedikit energi yang tersisa untuk dirimu sendiri.",
+      "actionable": null,
+      "palace": "Pilar Kerja",
+      "coherence_rule": "CR-1",
+      "supersedes": "main_profile",
+      "importance": 85,
+      "hierarchy": {
+        "role": "spine",
+        "extremity": 0,
+        "convergence": 0,
+        "tension": 100,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "strength_weak",
+      "type": "core",
+      "provenance": {
+        "kind": "strength",
+        "verdict": "weak",
+        "element": "Api",
+        "month_branch": "酉",
+        "season_ruler_element": "Logam",
+        "relation_to_season": "controls"
+      },
+      "label": null,
+      "label_bracket": null,
+      "label_meaning": null,
+      "gift": null,
+      "cost": null,
+      "actionable": null,
+      "glossary_gap": true,
+      "confidence": "low",
+      "confidence_reasons": [
+        "root 巳 pulled toward Metal by 半合"
+      ],
+      "support_share": 16.5,
+      "internal_only": [
+        "support_share"
+      ],
+      "importance": 78,
+      "hierarchy": {
+        "role": "spine",
+        "extremity": 67,
+        "convergence": 0,
+        "tension": 0,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "element_missing_Wood",
+      "type": "extremity",
+      "provenance": {
+        "kind": "element_absent",
+        "element": "Kayu",
+        "percent": 0,
+        "relation_to_day_master": "feeds"
+      },
+      "label": null,
+      "label_bracket": "Missing Wood",
+      "label_meaning": "Kamu jarang menunggu inspirasi dan tidak pernah gelisah tanpa alasan. Dorongan untuk berpindah arah tidak pernah muncul otomatis dari dalam diri.",
+      "gift": "Kamu tidak butuh alasan besar untuk mulai bergerak. Kamu fokus bekerja dari apa yang ada di depan mata.",
+      "cost": "Tanpa pemicu dari luar, kamu bisa bertahan bertahun-tahun di tempat atau situasi yang sudah tidak cocok, dan tetap menganggapnya wajar.",
+      "actionable": "Pemicu perubahan harus kamu pasang sengaja dari luar, berupa tenggat waktu, komitmen dengan orang lain, atau ruang baru yang memaksa kamu melangkah.",
+      "importance": 70,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 100,
+        "convergence": 0,
+        "tension": 0,
+        "actionability": 100
+      }
+    },
+    {
+      "id": "aspek_convergence_正官",
+      "type": "convergence",
+      "provenance": {
+        "kind": "aspek_convergence",
+        "god": "正官",
+        "element": "Air",
+        "occurrences": [
+          {
+            "position": "month",
+            "source": "stem",
+            "stem": "癸",
+            "weight": 1
+          },
+          {
+            "position": "day",
+            "source": "branch",
+            "stem": "癸",
+            "weight": 1
+          },
+          {
+            "position": "hour",
+            "source": "stem",
+            "stem": "癸",
+            "weight": 1
+          }
+        ],
+        "positions": [
+          "month",
+          "day",
+          "hour"
+        ],
+        "palaces": [
+          "Pilar Kerja",
+          "Pilar Diri",
+          "Pilar Arah"
+        ]
+      },
+      "label": "Aspek Pengatur",
+      "label_bracket": "Direct Officer",
+      "label_meaning": "Kamu tahu apa yang seharusnya dilakukan dan tetap menjalankannya meski tidak ada yang melihat. Melanggar aturan terasa lebih melelahkan daripada mematuhinya.",
+      "gift": "Orang menaruh tanggung jawab padamu sejak muda. Kamu menjadi tempat bersandar tanpa pernah meminta posisi itu.",
+      "cost": "Tuntutan untuk selalu benar tidak pernah berhenti. Kamu jarang memberi izin pada dirimu sendiri untuk bersikap longgar.",
+      "actionable": null,
+      "count": 3,
+      "presence": 3,
+      "internal_only": [
+        "presence"
+      ],
+      "importance": 70,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 0,
+        "convergence": 100,
+        "tension": 0,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "spouse_palace",
+      "type": "tension",
+      "provenance": {
+        "kind": "day_branch_seat",
+        "position": "day",
+        "branch": "子",
+        "seat_stem": "癸",
+        "seat_god": "正官",
+        "element": "Air",
+        "relation_to_day_master": "controls"
+      },
+      "label": "Fondasi Pasangan",
+      "label_bracket": "Spouse Palace",
+      "label_meaning": "Tempat membaca dinamika hubungan paling dekat. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain mungkin menganggapnya berat.",
+      "gift": null,
+      "cost": null,
+      "actionable": null,
+      "palace": "Pilar Diri",
+      "seat_god": "正官",
+      "seat_content": {
+        "label": "Aspek Pengatur",
+        "label_bracket": "Direct Officer",
+        "label_meaning": "Kamu tahu apa yang seharusnya dilakukan dan tetap menjalankannya meski tidak ada yang melihat. Melanggar aturan terasa lebih melelahkan daripada mematuhinya.",
+        "gift": "Orang menaruh tanggung jawab padamu sejak muda. Kamu menjadi tempat bersandar tanpa pernah meminta posisi itu.",
+        "cost": "Tuntutan untuk selalu benar tidak pernah berhenti. Kamu jarang memberi izin pada dirimu sendiri untuk bersikap longgar.",
+        "actionable": null
+      },
+      "importance": 70,
+      "hierarchy": {
+        "role": "spine",
+        "extremity": 0,
+        "convergence": 0,
+        "tension": 50,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "relation_半合_巳酉",
+      "type": "combination",
+      "provenance": {
+        "kind": "branch_relation",
+        "relation": "半合",
+        "branches": [
+          "巳",
+          "酉"
+        ],
+        "positions": [
+          "year",
+          "hour",
+          "month"
+        ],
+        "palaces": [
+          "Pilar Akar",
+          "Pilar Arah",
+          "Pilar Kerja"
+        ],
+        "element": "Logam"
+      },
+      "label": "Setengah Gabungan",
+      "label_bracket": "Half Combination",
+      "label_meaning": "Dua dari tiga bagian sudah saling tarik. Arah geraknya sudah jelas, meski kekuatannya belum sepenuhnya padu.",
+      "gift": "Kecenderungan energi ini sudah bekerja untukmu dan memberi arah yang jelas.",
+      "cost": "Kondisi yang belum utuh ini membuatmu secara tidak sadar terus mencari elemen ketiga untuk melengkapinya.",
+      "actionable": null,
+      "combines_into": "Logam",
+      "relation_to_day_master": "is_controlled",
+      "importance": 69,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 61.53846153846154,
+        "convergence": 50,
+        "tension": 0,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "badge_桃花",
+      "type": "badge",
+      "provenance": {
+        "kind": "badge_anchor",
+        "badge": "桃花",
+        "anchored_on": "day_pillar",
+        "anchor_branches": [
+          "酉"
+        ],
+        "hits": [
+          {
+            "position": "month",
+            "branch": "酉",
+            "palace": "Pilar Kerja"
+          }
+        ]
+      },
+      "label": "Bunga Persik",
+      "label_bracket": "Peach Blossom",
+      "label_meaning": "Orang mengingatmu setelah satu pertemuan tanpa kamu perlu berusaha keras. Perhatian datang tanpa harus kamu kejar.",
+      "gift": "Pintu terbuka lebih cepat untukmu karena orang penasaran ingin mengenalmu lebih jauh. Kesan pertamamu bekerja sebelum kamu mulai bicara.",
+      "cost": "Perhatian datang lebih cepat daripada kedekatan. Orang tertarik dulu pada penampilan atau kebiasaanmu, dan jarak menuju kedekatan sungguhan kadang tidak pernah tertutup.",
+      "actionable": "Kesan pertamamu adalah aset terkuatmu. Pakai di awal, jangan disimpan sampai orang sudah membentuk pendapat sendiri.",
+      "palace": "Pilar Kerja",
+      "importance": 65,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 84.61538461538461,
+        "convergence": 0,
+        "tension": 0,
+        "actionability": 100
+      }
+    },
+    {
+      "id": "day_master_Fire",
+      "type": "core",
+      "provenance": {
+        "kind": "day_stem",
+        "position": "day",
+        "stem": "丙",
+        "element": "Api"
+      },
+      "label": "Api",
+      "label_bracket": "Fire",
+      "label_meaning": "Kehadiranmu langsung terasa sebelum kamu bicara. Kamu menerangi sekitarmu lebih dulu sebelum menghangatkan dirimu sendiri.",
+      "gift": "Orang-orang berkumpul di sekitarmu tanpa perlu kamu undang. Suasana ruangan berubah saat kamu masuk.",
+      "cost": "Api selalu membutuhkan bahan bakar dari luar. Kamu tidak bisa terus menyala hanya dari cadangan energimu sendiri.",
+      "actionable": null,
+      "archetype": {
+        "name_id": "Matahari",
+        "name_en": "The Sun"
+      },
+      "salah_dikira": "Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi.",
+      "importance": 55,
+      "hierarchy": {
+        "role": "spine",
+        "extremity": 0,
+        "convergence": 0,
+        "tension": 0,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "aspek_convergence_比肩",
+      "type": "convergence",
+      "provenance": {
+        "kind": "aspek_convergence",
+        "god": "比肩",
+        "element": "Api",
+        "occurrences": [
+          {
+            "position": "year",
+            "source": "branch",
+            "stem": "丙",
+            "weight": 0.6
+          },
+          {
+            "position": "hour",
+            "source": "branch",
+            "stem": "丙",
+            "weight": 0.6
+          }
+        ],
+        "positions": [
+          "year",
+          "hour"
+        ],
+        "palaces": [
+          "Pilar Akar",
+          "Pilar Arah"
+        ]
+      },
+      "label": "Aspek Pendamping",
+      "label_bracket": "Friend",
+      "label_meaning": "Kamu terbiasa menyelesaikan semuanya sendiri. Meminta tolong terasa lebih berat daripada mengerjakan sesuatu dua kali lipat.",
+      "gift": "Kamu tidak runtuh saat tidak ada yang menopang. Orang tahu kamu bisa dititipi hal penting dan tidak akan hilang di tengah jalan.",
+      "cost": "Bantuan sering datang terlambat karena kamu tidak pernah memintanya. Orang mengira kamu tidak membutuhkannya.",
+      "actionable": null,
+      "count": 2,
+      "presence": 1.2,
+      "internal_only": [
+        "presence"
+      ],
+      "importance": 44,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 0,
+        "convergence": 42,
+        "tension": 0,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "badge_天乙貴人",
+      "type": "badge",
+      "provenance": {
+        "kind": "badge_anchor",
+        "badge": "天乙貴人",
+        "anchored_on": "day_pillar",
+        "anchor_branches": [
+          "亥",
+          "酉"
+        ],
+        "hits": [
+          {
+            "position": "month",
+            "branch": "酉",
+            "palace": "Pilar Kerja"
+          }
+        ]
+      },
+      "label": "Bintang Penolong",
+      "label_bracket": "Nobleman",
+      "label_meaning": "Saat kamu benar-benar jalan buntu, selalu ada orang yang muncul membantu. Sering kali orang yang tidak kamu duga dan datang di saat yang tepat.",
+      "gift": "Kamu jarang benar-benar sendirian di titik tersempit. Ada jalur bantuan yang terbuka untukmu.",
+      "cost": "Bantuan itu perlu kamu jemput. Kamu terbiasa menyelesaikan semuanya sendiri sampai lupa bahwa ada yang bisa dimintai bantuan.",
+      "actionable": "Minta bantuan lebih awal dari yang terasa nyaman. Pertolongan di baganmu ada, bentuknya menunggu diminta.",
+      "palace": "Pilar Kerja",
+      "importance": 43,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 23.076923076923073,
+        "convergence": 0,
+        "tension": 0,
+        "actionability": 100
+      }
+    },
+    {
+      "id": "aspek_convergence_偏財",
+      "type": "convergence",
+      "provenance": {
+        "kind": "aspek_convergence",
+        "god": "偏財",
+        "element": "Logam",
+        "occurrences": [
+          {
+            "position": "year",
+            "source": "branch",
+            "stem": "庚",
+            "weight": 0.3
+          },
+          {
+            "position": "hour",
+            "source": "branch",
+            "stem": "庚",
+            "weight": 0.3
+          }
+        ],
+        "positions": [
+          "year",
+          "hour"
+        ],
+        "palaces": [
+          "Pilar Akar",
+          "Pilar Arah"
+        ]
+      },
+      "label": "Aspek Peraih",
+      "label_bracket": "Indirect Wealth",
+      "label_meaning": "Kamu melihat peluang di tempat yang dilewati orang lain. Kesempatan dan hasil terasa mudah datang, tetapi juga mudah lepas.",
+      "gift": "Kamu tidak takut pada ketidakpastian. Pintu sering terbuka justru karena kamu berani mengetuk lebih dulu.",
+      "cost": "Yang datang besar bisa hilang besar. Kamu jarang menyimpannya cukup lama untuk benar-benar merasa aman.",
+      "actionable": null,
+      "count": 2,
+      "presence": 0.6,
+      "internal_only": [
+        "presence"
+      ],
+      "importance": 34,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 0,
+        "convergence": 21,
+        "tension": 0,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "element_dominant_Water",
+      "type": "extremity",
+      "provenance": {
+        "kind": "element_dominant",
+        "element": "Air",
+        "percent": 37.5,
+        "relation_to_day_master": "controls"
+      },
+      "label": "Air",
+      "label_bracket": "Water",
+      "label_meaning": "Kamu menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Orang lain sering kesulitan menebak langkahmu berikutnya.",
+      "gift": "Kamu mampu menembus situasi yang buntu bagi orang lain. Jalan selalu ada karena kamu tidak kaku pada satu cara.",
+      "cost": "Sesuatu yang mengalir terus sulit untuk diikat. Komitmen jangka panjang pada satu bentuk kaku terasa amat berat bagimu.",
+      "actionable": null,
+      "glossary_source": "elemen",
+      "internal_only": [
+        "provenance.percent"
+      ],
+      "importance": 31,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 16.666666666666664,
+        "convergence": 0,
+        "tension": 0,
+        "actionability": 0
+      }
+    },
+    {
+      "id": "aspek_convergence_食神",
+      "type": "convergence",
+      "provenance": {
+        "kind": "aspek_convergence",
+        "god": "食神",
+        "element": "Tanah",
+        "occurrences": [
+          {
+            "position": "year",
+            "source": "branch",
+            "stem": "戊",
+            "weight": 0.1
+          },
+          {
+            "position": "hour",
+            "source": "branch",
+            "stem": "戊",
+            "weight": 0.1
+          }
+        ],
+        "positions": [
+          "year",
+          "hour"
+        ],
+        "palaces": [
+          "Pilar Akar",
+          "Pilar Arah"
+        ]
+      },
+      "label": "Aspek Perajin",
+      "label_bracket": "Eating God",
+      "label_meaning": "Kamu senang mengerjakan sesuatu sampai selesai tanpa perlu ditonton. Prosesnya sendiri sudah memberi kepuasan.",
+      "gift": "Kamu menikmati pekerjaan tanpa bergantung pada pengakuan orang lain. Ini membuatmu bertahan jauh lebih lama di bidang yang kamu sukai.",
+      "cost": "Kamu jarang menagih hakmu. Karyamu sering dipakai orang lain tanpa namamu ikut disebut.",
+      "actionable": null,
+      "count": 2,
+      "presence": 0.2,
+      "internal_only": [
+        "presence"
+      ],
+      "importance": 28,
+      "hierarchy": {
+        "role": "finding",
+        "extremity": 0,
+        "convergence": 7,
+        "tension": 0,
+        "actionability": 0
+      }
+    }
+  ],
+  "required_points": [
+    {
+      "fact_id": "void_stack_month",
+      "importance": 100,
+      "must_cover": [
+        "label_meaning",
+        "gift",
+        "cost",
+        "actionable",
+        "palace"
+      ]
+    },
+    {
+      "fact_id": "profile_vs_favorable",
+      "importance": 85,
+      "must_cover": [
+        "label_meaning",
+        "gift",
+        "cost",
+        "palace"
+      ]
+    },
+    {
+      "fact_id": "strength_weak",
+      "importance": 78,
+      "must_cover": []
+    },
+    {
+      "fact_id": "element_missing_Wood",
+      "importance": 70,
+      "must_cover": [
+        "label_meaning",
+        "gift",
+        "cost",
+        "actionable"
+      ]
+    },
+    {
+      "fact_id": "aspek_convergence_正官",
+      "importance": 70,
+      "must_cover": [
+        "label_meaning",
+        "gift",
+        "cost"
+      ]
+    },
+    {
+      "fact_id": "spouse_palace",
+      "importance": 70,
+      "must_cover": [
+        "label_meaning",
+        "palace"
+      ]
+    },
+    {
+      "fact_id": "relation_半合_巳酉",
+      "importance": 69,
+      "must_cover": [
+        "label_meaning",
+        "gift",
+        "cost"
+      ]
+    },
+    {
+      "fact_id": "badge_桃花",
+      "importance": 65,
+      "must_cover": [
+        "label_meaning",
+        "gift",
+        "cost",
+        "actionable",
+        "palace"
+      ]
+    },
+    {
+      "fact_id": "day_master_Fire",
+      "importance": 55,
+      "must_cover": [
+        "label_meaning",
+        "gift",
+        "cost"
+      ]
+    }
+  ],
+  "safety_flags": [
+    "no_fatalism",
+    "no_medical",
+    "no_financial",
+    "no_god_ranking"
+  ],
+  "qa": {
+    "facts_emitted": 16,
+    "facts_collapsed": [
+      {
+        "id": "badge_空亡",
+        "absorbed_by": "void_stack"
+      },
+      {
+        "id": "main_profile",
+        "absorbed_by": "profile_vs_favorable"
+      }
+    ]
+  }
+}
