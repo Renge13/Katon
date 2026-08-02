@@ -555,3 +555,27 @@ test('validationRetries 0 measures the FIRST-PASS rate', async () => {
     assert.equal(out.source, 'module_assembly');
   });
 });
+
+test('a transport failure does not count against the FIRST-PASS rate', async () => {
+  // The harness reads first-pass off attempts[]: the first attempt that actually
+  // reached Stage 6. A 503 never reached it, so a 503 followed by a clean render
+  // is a first-pass PASS. Getting this backwards would make the prompt look
+  // worse every time the provider had a bad afternoon, and prompt quality is
+  // exactly what the number is for.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let call = 0;
+    const out = await renderReading(CHART_1, {
+      fetchImpl: async () => {
+        call += 1;
+        if (call === 1) return { ok: false, status: 503, text: async () => 'x', json: async () => ({}) };
+        return geminiSays(GOOD);
+      },
+    });
+
+    const firstStage6 = out.attempts.find((a) => a.stage6 || a.ok === true);
+    assert.equal(firstStage6.ok, true, 'the first attempt that reached the gate passed it');
+    assert.ok(!out.attempts.some((a) => a.regenerated), 'no regeneration was spent');
+    assert.equal(out.source, 'gemini');
+  });
+});

@@ -38,3 +38,7 @@ next-env.d.ts
 
 # Claude Design reference bundle (kept locally as reference, not shipped/linted)
 Katon Design System/
+
+# Stage 6 measurement output. Numbers belong in docs/PROGRESS.md as a dated
+# observation (rule 8); the raw run logs and blind-judge pairs do not belong in git.
+reports/
