@@ -514,6 +514,9 @@ for natal bars. But the **annual reading** and **luck-pillar map** both read luc
 products will need female-set fixture charts to validate against.
 
 ## RESOLVED — stop reporting these as open (2026-08-01)
+- **Migration `0005_sku.sql` is APPLIED in Supabase (2026-08-02).** Run in the SQL editor, column
+  verified present by `information_schema.columns` query returning `sku` (screenshot evidence,
+  Cowork session 08-02). `main` is deploy-safe for the Prompt F payment commits. Do not flag again.
 - **The 6 test rows in the live `reading` table are DELETED.** Removed manually via the Supabase SQL
   editor; `select count(*)` confirmed at 24. Do not flag again.
 - **`tests/tools/solar-term-oracle-diff.mjs` was deleted deliberately.** It was a prototype;
