@@ -247,11 +247,18 @@ Rule 23 amended: brackets convention is reading-prose only; the sharecard never 
   **head in EN (name_en) + Aspek in Indonesian**, appendix band with animal-element row + element
   bars, "Complete Edition" chrome. The classical EN Aspek terms (Direct Wealth etc.) are
   bracket-terms only, NEVER display copy.
-- **Hanzi removed from the Card B image** (Reyner 08-02). OPEN FLAG: the 4x2 hanzi grid should move
-  to the PDF chart sheet so rule 23's legitimacy object survives — awaiting confirmation; if the PDF
-  also drops it, rule 23 needs a conscious amendment.
+- **Hanzi: card images carry NONE; the 4x2 hanzi grid lives in the PDF chart sheet only**
+  (CONFIRMED by Reyner 08-02). Rule 23's legitimacy object survives in the PDF; no amendment needed.
+- **EN header on BOTH cards** (Reyner 08-02), Aspek Indonesian everywhere. The ID/EN A/B is dead.
+  OPEN: the Indonesian archetype name now appears nowhere on Card A — EN-only, or tiny ID eyebrow.
+- **Footer carries gender + birthdate + katon.app.** Gender is optional in the engine; null gender
+  = date + source only. PEREMPUAN/LAKI-LAKI strings are proposals pending register.
+- **Sizes PROPOSED, pending Reyner: Card A 1080x1350 (4:5 feed), Card B 1080x1920 (9:16 full
+  story).** Taller B confirmed as the exclusivity signal; exact ratios not yet locked.
+- Card B carries the hook (spec: everything on A plus appendix); appendix = labeled pillar grid
+  (Tahun/Bulan/Hari/Jam, animal + element) + labeled element bars + Complete Edition chrome.
 - Colour tokens fixed for 5 of 10 archetypes; remaining 5 to derive (Api Unggun must not collide
-  with Matahari). tags_en and the ID/EN A/B remain open; Card B carrying the EN head may settle it.
+  with Matahari). tags_en remains open.
 
 **The 刑 glossary entry is REGISTER-APPROVED and landed** in `glossary.json` → `relasi_cabang.刑`.
 "Simpul" confirmed (Belitan considered, not taken). `label_meaning` rewritten to drop the banned
