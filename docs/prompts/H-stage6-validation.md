@@ -21,7 +21,10 @@ construction TWICE despite an explicit prompt ban. The prompt cannot fix it; onl
 ### 1. FACT GUARD (hard reject)
 The text may not contradict the semantic JSON. Minimum: the strength verdict (JSON "Seimbang" +
 text "lemah" = reject), the Day Master element, badge presence (a badge named in text must exist
-in JSON — invention is the run-1 failure), palace attributions.
+in JSON — invention is the run-1 failure), palace attributions, **and branch-relation positions:
+if the text names which pillars a relation spans, the set must match `provenance.positions` exactly
+(OBSERVED 2026-08-02, gate-check run 2: the 半合 spans year+hour+month in the JSON, the text said
+"tahun dan bulan" — dropped the hour).**
 **The same-breath check (rule 21 + `glossary.kekuatan._note`, wired 2026-08-02):** if the rendered
 text carries the verdict word (lemah/kuat/seimbang used AS the verdict), the block containing it
 must also carry the substance of that verdict's `label_meaning` — the explanation lands in the same
