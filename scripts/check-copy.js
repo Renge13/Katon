@@ -13,21 +13,25 @@
 // Usage: npm run check:copy
 // ============================================================
 
-import { DAY_MASTERS }                            from '../src/lib/bazi/interpretation/dayMasters.js'
-import { DAY_BRANCHES }                           from '../src/lib/bazi/interpretation/dayBranches.js'
-import { DOMINANT_ELEMENT, MISSING_ELEMENT }      from '../src/lib/bazi/interpretation/elementImpact.js'
-import { PAID_HOOK_TEMPLATE }                     from '../src/lib/bazi/interpretation/paidHooks.js'
-import { PILLAR_STEM_MEANINGS }                   from '../src/lib/bazi/interpretation/pillarMeanings.js'
+// Paths are repo-root-relative `lib/`. They read `src/lib/` until 2026-08-02:
+// `src/` was the Vite reference app, deleted in f99deaa, and this script was
+// never repointed, so `npm run check:copy` had been failing ERR_MODULE_NOT_FOUND
+// on a clean tree ever since. The modules themselves all moved to `lib/`.
+import { DAY_MASTERS }                            from '../lib/bazi/interpretation/dayMasters.js'
+import { DAY_BRANCHES }                           from '../lib/bazi/interpretation/dayBranches.js'
+import { DOMINANT_ELEMENT, MISSING_ELEMENT }      from '../lib/bazi/interpretation/elementImpact.js'
+import { PAID_HOOK_TEMPLATE }                     from '../lib/bazi/interpretation/paidHooks.js'
+import { PILLAR_STEM_MEANINGS }                   from '../lib/bazi/interpretation/pillarMeanings.js'
 
 // Report passage banks (Phase 4)
-import REPORT_PEMBUKAAN              from '../src/lib/bazi/report/passages/pembukaan.js'
-import REPORT_CARA_KAMU_HADIR        from '../src/lib/bazi/report/passages/caraKamuHadir.js'
-import REPORT_POLA_DI_PEKERJAAN      from '../src/lib/bazi/report/passages/polaDiPekerjaan.js'
-import REPORT_POLA_DI_HUBUNGAN       from '../src/lib/bazi/report/passages/polaDiHubungan.js'
-import REPORT_POLA_DI_TUBUH          from '../src/lib/bazi/report/passages/polaDiTubuh.js'
-import REPORT_HUBUNGAN_DENGAN_REZEKI from '../src/lib/bazi/report/passages/hubunganDenganRezeki.js'
-import REPORT_PENUTUP                from '../src/lib/bazi/report/passages/penutup.js'
-import { PROMPTS as REPORT_PROMPTS } from '../src/lib/bazi/report/prompts.js'
+import REPORT_PEMBUKAAN              from '../lib/bazi/report/passages/pembukaan.js'
+import REPORT_CARA_KAMU_HADIR        from '../lib/bazi/report/passages/caraKamuHadir.js'
+import REPORT_POLA_DI_PEKERJAAN      from '../lib/bazi/report/passages/polaDiPekerjaan.js'
+import REPORT_POLA_DI_HUBUNGAN       from '../lib/bazi/report/passages/polaDiHubungan.js'
+import REPORT_POLA_DI_TUBUH          from '../lib/bazi/report/passages/polaDiTubuh.js'
+import REPORT_HUBUNGAN_DENGAN_REZEKI from '../lib/bazi/report/passages/hubunganDenganRezeki.js'
+import REPORT_PENUTUP                from '../lib/bazi/report/passages/penutup.js'
+import { PROMPTS as REPORT_PROMPTS } from '../lib/bazi/report/prompts.js'
 
 const EM_DASH = '—'
 const issues = []
