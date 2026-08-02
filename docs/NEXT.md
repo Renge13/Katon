@@ -34,17 +34,10 @@ reported not fixed).
 "Gate-check renders") and the strength_weak thinness prediction is VOID — `glossary.kekuatan`
 landed and the fact is fully backed.
 
-**2. One thing still needs Reyner before anything downstream is real:**
-- ~~The strength verdict has NO glossary entry~~ **RESOLVED 2026-08-02**: `glossary.json` now has a
-  `kekuatan` section (weak/balanced/strong), Reyner-reviewed. Its `_note` carries a Stage-6
-  requirement for Prompt H: the label never renders bare — lemah/kuat must co-occur with its
-  meaning sentence.
-- **`provenance` and `required_points` ship as STRUCTURED DATA, not Indonesian sentences.** That was
-  a deliberate deferral, not an omission — the sentences exist in no glossary entry, so writing them
-  is Stage 3 authoring user-facing copy. Decide whether the renderer verbalises from the data (rule
-  14 says it should) or whether an engine-owned template table is wanted. If templates: they are new
-  user-facing copy and need a register pass. Note `renderer-prompt.txt` bans "dihitung dari", which
-  the hand-written provenance strings use.
+**Both former Reyner blockers are RESOLVED 2026-08-02:** the strength verdict has its
+`glossary.kekuatan` section (Reyner-reviewed; H enforces label-never-bare), and provenance
+verbalization is RULED — the renderer verbalises from the payload joins, and `renderer-prompt.txt`
+now carries the join instruction (`f068352`). No template table.
 
 **4. After the harness numbers land: the mirror ROUTE.** Stage 5's only entry point is a CLI by
 design; the next build prompt (not yet written — Cowork writes it once thresholds are fitted) wires
@@ -60,7 +53,8 @@ Its task 5 was corrected: the real rule-20 fix is curly quotes at `components/Fu
   deferred, thresholds stay at 40/60 until the pipeline exists.
 - 刑, 胎元, gender field.
 - **命宮 is deliberately absent.** See `prompts/D1b-remove-life-palace.md` and CLAUDE.md rule 4.
-- Glossary: 49 entries plus `salah_dikira`, all Reyner-reviewed. The one hole is the strength verdict.
+- Glossary: complete and Reyner-reviewed — including `kekuatan`, `arketipe` + EN pairs,
+  `tag_arketipe`, the 刑 entry, and the 08-02 ban-sweep (zero banned tokens in user-facing strings).
 - **Badge anchors: 60/60, locked in `tests/badge-anchors.spec.mjs`.** Seven detectable badges. Do not
   re-derive the tables and do not re-add 華蓋.
 - **Stage 3 hierarchy params are UNFITTED on purpose** (rule 13). A fitting pass is its own commit with
