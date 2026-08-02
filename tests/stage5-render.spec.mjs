@@ -26,6 +26,7 @@ import { readCache, writeCache, flagCache, __clearMemCache } from '../lib/render
 import { renderReading, persistRendered, withTargetLanguage } from '../lib/render/index.js';
 import { STRICTER_STYLE_BLOCK, renderWithOpenAI } from '../lib/render/providers/openai.js';
 import { STAGE6_VERSION, serveFenceReason, serveAllowed } from '../lib/render/fence.js';
+import { STAGE6_VERSION as GATE_VERSION } from '../lib/validate/index.js';
 import { splitParagraphs, inspectParagraphs } from '../lib/render/paragraphs.js';
 import { RENDER_COPY } from '../lib/render/copy.js';
 
@@ -159,8 +160,10 @@ test('the floor names a badge and never names a null-label condition', () => {
   // "Tidak ada satu pun Unsur yang Hilang (Missing Element) berupa Kayu" is the
   // failure the prompt calls out. A condition is described, never named.
   const out = assembleFallback(CHART_1);
+  // The palace leads, then the name. Added when Stage 6 caught the floor
+  // dropping the palace its own required_point demands.
   const badge = out.blocks.find((b) => b.fact_ids[0] === 'badge_桃花');
-  assert.match(badge.text, /^Bunga Persik \(Peach Blossom\)\./);
+  assert.match(badge.text, /^Pilar Kerja\. Bunga Persik \(Peach Blossom\)\./);
 
   const missing = out.blocks.find((b) => b.fact_ids[0] === 'element_missing_Wood');
   const fact = CHART_1.facts.find((f) => f.id === 'element_missing_Wood');
@@ -270,11 +273,24 @@ const httpError = (status) => ({
   ok: false, status, text: async () => 'boom', json: async () => ({}),
 });
 
-/** A response that cites only ids chart 1 actually carries. */
-const validRender = JSON.stringify({
-  blocks: [{ fact_ids: ['void_stack_month'], heading: 'Ruang kerja', text: 'Isi bacaan.' }],
-  penutup: 'Penutup.',
-});
+/**
+ * A response that passes Stage 6.
+ *
+ * Derived from the module floor rather than hand-written, so the fixture cannot
+ * drift away from what the gate accepts, and so this file authors no Indonesian
+ * (Reyner is the sole authority on register). The penutup is a glossary sentence
+ * for the same reason - the floor leaves penutup empty and the shape contract
+ * requires a non-empty one.
+ *
+ * Before Prompt H this was a two-word stub. It now has to be a real reading,
+ * which is the gate doing its job on the test suite as well as on a provider.
+ */
+const goodRender = (() => {
+  const floor = assembleFallback(CHART_1);
+  const dayMaster = CHART_1.facts.find((f) => f.id === 'day_master_Fire');
+  return JSON.stringify({ blocks: floor.blocks, penutup: dayMaster.label_meaning });
+})();
+const validRender = goodRender;
 
 async function withEnv(env, fn) {
   const saved = {};
@@ -480,23 +496,41 @@ test('measurement mode refuses the floor instead of counting it as a pass', asyn
 
 // ── the Stage 6 fence ──────────────────────────────────────
 
-test('the fence is closed, and persisting a render is refused while it is', async () => {
-  assert.equal(STAGE6_VERSION, null, 'Prompt H sets this, and nothing else may');
-  assert.equal(serveFenceReason(), 'stage6_gate_absent');
-  assert.equal(serveAllowed(), false);
+test('the fence is OPEN now that Prompt H built the gate, and it names the gate', async () => {
+  // Prompt G left this null because no gate existed. H built one. The fence
+  // re-exports lib/validate's version rather than declaring its own, so it can
+  // only be open when the validating code is actually there.
+  assert.equal(STAGE6_VERSION, GATE_VERSION);
+  assert.match(STAGE6_VERSION, /^\d+\.\d+\.\d+$/);
+  assert.equal(serveFenceReason(), null);
+  assert.equal(serveAllowed(), true);
 
   __clearMemCache();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     const out = await renderReading(CHART_1, { fetchImpl: async () => geminiSays(validRender) });
-    await assert.rejects(
-      () => persistRendered(out, CHART_1),
-      (err) => err.name === 'RenderRefused' && err.reason === 'stage6_gate_absent',
-    );
-    assert.equal(
-      await readCache(out.cache_key, { includeUnvalidated: true }), null,
-      'nothing may be written while the gate is absent',
-    );
+    assert.equal(out.stage6_version, STAGE6_VERSION, 'a passing render records its gate');
+    await persistRendered(out, CHART_1);
+
+    // Servable WITHOUT includeUnvalidated: the gate ran, so the row is real.
+    const row = await readCache(out.cache_key);
+    assert.ok(row, 'a validated reading must be servable');
+    assert.equal(row.stage6_version, STAGE6_VERSION);
   });
+});
+
+test('rows written before the gate existed stay unservable after it exists', async () => {
+  // The discriminator was chosen to survive exactly this moment. A status flag
+  // would have been overwritten by H; a null stage6_version cannot be.
+  __clearMemCache();
+  await writeCache('legacy-key', {
+    engineVersion: CHART_1.engine_version,
+    blocks: [{ fact_ids: ['day_master_Fire'], heading: 'h', text: 'ditulis sebelum gerbang ada' }],
+    penutup: 'p',
+    source: 'gemini',
+    stage6Version: null,
+  });
+  assert.equal(await readCache('legacy-key'), null);
+  assert.ok(await readCache('legacy-key', { includeUnvalidated: true }));
 });
 
 // ── the UI contract and the chrome copy ────────────────────

@@ -5,7 +5,7 @@
     "the_gate": "D2 asks for this to be pasted into AI Studio with content/renderer-prompt.txt and the reading compared against run 5. THAT HAS NOT BEEN RUN - it needs an LLM call. The JSON is paste-ready.",
     "closed_gap": "CLOSED 2026-08-02 in 3b5685e. strength_weak previously carried no label, label_meaning, gift or cost because glossary.json had no kekuatan section; it now has one (weak/balanced/strong, Reyner-reviewed) and the fact is fully backed. Every fact type in this artifact now has Reyner-reviewed content behind it. Stage 6 owes the same-breath check: the verdict label never renders without its label_meaning (rule 21, glossary kekuatan._note).",
     "provenance_is_structured": "Every fact carries provenance as DATA, not as the finished Indonesian sentence the hand-written file uses. A deliberate deferral, not an omission - see the header of lib/semantic/facts.js.",
-    "cache_key": "5aa29f41bc8f78a543d6ac23ce18b78996f28e22be528d9daa602ce5723fabe2"
+    "cache_key": "c481243a4d1a4172b7d38fbad580906196dda9aa15bc2e80670c05bc3e584027"
   },
   "engine_version": "0.4.0-stage3",
   "target_language": "id",
@@ -36,6 +36,9 @@
       "Air",
       "Logam",
       "Tanah"
+    ],
+    "internal_only": [
+      "confidence_reasons"
     ]
   },
   "chart": {
@@ -158,7 +161,8 @@
       ],
       "support_share": 16.5,
       "internal_only": [
-        "support_share"
+        "support_share",
+        "confidence_reasons"
       ],
       "importance": 78,
       "hierarchy": {
@@ -265,7 +269,7 @@
       },
       "label": "Fondasi Pasangan",
       "label_bracket": "Spouse Palace",
-      "label_meaning": "Tempat membaca dinamika hubungan paling dekat. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain mungkin menganggapnya berat.",
+      "label_meaning": "Tempat membaca dinamika hubungan paling dekat. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain bisa menganggapnya berat.",
       "gift": null,
       "cost": null,
       "actionable": null,
@@ -313,8 +317,8 @@
       "label": "Setengah Gabungan",
       "label_bracket": "Half Combination",
       "label_meaning": "Dua dari tiga bagian sudah saling tarik. Arah geraknya sudah jelas, meski kekuatannya belum sepenuhnya padu.",
-      "gift": "Kecenderungan energi ini sudah bekerja untukmu dan memberi arah yang jelas.",
-      "cost": "Kondisi yang belum utuh ini membuatmu secara tidak sadar terus mencari elemen ketiga untuk melengkapinya.",
+      "gift": "Tarikan energi ini sudah bekerja untukmu dan memberi arah yang jelas.",
+      "cost": "Kondisi yang belum utuh ini membuatmu terus mencari elemen ketiga untuk melengkapinya, sering tanpa kamu sadari.",
       "actionable": null,
       "combines_into": "Logam",
       "relation_to_day_master": "is_controlled",

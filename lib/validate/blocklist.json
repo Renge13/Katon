@@ -1,0 +1,261 @@
+{
+  "_README": {
+    "purpose": "Stage 6 blocklists. DATA, not code (Prompt H): adding a banned word after this ships is a content change Reyner can approve, with no code deploy.",
+    "how_to_edit": "Every entry is { pattern, note }. `pattern` is a JavaScript regex SOURCE string, matched case-insensitively against rendered text only. Escape backslashes for JSON. tests/stage6-validation.spec.mjs compiles every pattern, so a malformed edit fails CI rather than production.",
+    "scope": "Matched against block text, block headings and penutup. NEVER against fact_ids, which legitimately carry hanzi (badge_桃花), and never against the semantic JSON.",
+    "authority": "Reyner is the sole authority on Indonesian register. Every note here explains why a pattern exists so a later reader can judge whether it still should.",
+    "false_positives": "Prefer a tight pattern that misses over a loose one that rejects real readings. A hard reject costs a regeneration; the measurement harness reports per-check rejection rates so an over-eager pattern is visible as a number."
+  },
+  "forbidden_content": {
+    "_note": "Rule 25 and pipeline-spec Stage 6. HARD REJECT, no regeneration budget spent on nuance: these are ethics failures, not style slips.",
+    "fatalism": [
+      {
+        "pattern": "\\b(19|20)\\d{2}\\b",
+        "note": "A year in a reading is a dated prophecy. Timing is cuaca, never ramalan (rule 25)."
+      },
+      {
+        "pattern": "\\bramalan\\b|\\bdiramalkan\\b|\\bmeramalkan\\b",
+        "note": "Names the thing rule 25 forbids the product from being."
+      },
+      {
+        "pattern": "\\b(takdir|takdirmu|ditakdirkan|nasibmu|suratan)\\b",
+        "note": "Fate language closes the door. Insight opens."
+      },
+      {
+        "pattern": "\\bpasti akan\\b|\\bsudah pasti\\b|\\bdipastikan akan\\b",
+        "note": "A fixed future outcome. The 'akan + fixed outcome' pattern from pipeline-spec."
+      },
+      {
+        "pattern": "\\btidak akan pernah\\b|\\bselamanya akan\\b",
+        "note": "A permanent verdict. Same failure, negative form."
+      }
+    ],
+    "medical": [
+      {
+        "pattern": "\\b(penyakit|diagnosa|diagnosis|gejala)\\b",
+        "note": "Medical claim. Rule 25."
+      },
+      {
+        "pattern": "\\b(obat|resep dokter|ke dokter|terapi|pengobatan)\\b",
+        "note": "Medical advice."
+      },
+      {
+        "pattern": "\\b(depresi|gangguan (mental|kecemasan)|kesehatan mentalmu)\\b",
+        "note": "Clinical framing of a personality reading. The heaviest version of this failure."
+      }
+    ],
+    "financial": [
+      {
+        "pattern": "\\b(investasi|saham|kripto|reksa ?dana|obligasi)\\b",
+        "note": "Financial advice. Rule 25."
+      },
+      {
+        "pattern": "\\b(beli|jual) (properti|rumah|tanah)\\b",
+        "note": "A specific financial instruction."
+      },
+      {
+        "pattern": "\\bakan (kaya|untung|rugi)\\b",
+        "note": "A financial prediction, which is both fatalism and financial advice."
+      }
+    ],
+    "ranking": [
+      {
+        "pattern": "\\baspek (terbaik|terburuk|paling baik|paling buruk|jelek|bagus)\\b",
+        "note": "Rule 25: never rank a Ten God as good or bad."
+      },
+      {
+        "pattern": "\\bbintang (sial|buruk|jelek)\\b",
+        "note": "Same, for the external markers."
+      },
+      {
+        "pattern": "\\b(lemah|kuat|seimbang) (lebih baik|lebih buruk)\\b",
+        "note": "Rule 25: never rank a strength state."
+      },
+      {
+        "pattern": "\\bberuntung karena (aspek|bintang)\\b",
+        "note": "Ranks by luck, which is ranking with a friendlier word."
+      }
+    ],
+    "self_harm": [
+      {
+        "pattern": "\\b(bunuh diri|menyakiti diri|melukai diri)\\b",
+        "note": "Never, under any framing."
+      },
+      {
+        "pattern": "\\bmenyerah saja\\b|\\btidak ada gunanya\\b",
+        "note": "Despair framing adjacent to the above."
+      }
+    ]
+  },
+  "style": {
+    "_note": "Regenerate-with-stricter-directive, not hard reject. Thresholds are per-provider; OpenAI runs harder (pipeline-spec PROVIDER FALLBACK).",
+    "hedge_construction": [
+      {
+        "pattern": "\\bbukan\\b[^.!?]{0,140}?\\b(tapi|melainkan)\\b",
+        "note": "THE load-bearing regex. renderer-prompt-notes: CONFIRMED UNFIXABLE BY PROMPT ALONE - run 5 emitted it twice against an explicit ban, and gate-check run 2 emitted it a third time, in the penutup. This regex is the only reliable fix. The 140-char window keeps it inside one sentence; the lazy quantifier stops it spanning a whole paragraph."
+      }
+    ],
+    "tension_collapse": [
+      {
+        "pattern": "\\bmenyatu\\b",
+        "note": "Run 1 turned the steward/self-reliant tension into 'menyatu secara selaras'. A tension resolved into a compliment is the fact destroyed."
+      },
+      {
+        "pattern": "\\bselaras\\b",
+        "note": "Run 1, in the same sentence as menyatu. Harmony vocabulary applied to a tension is the tension deleted."
+      },
+      {
+        "pattern": "\\bsaling melengkapi\\b",
+        "note": "renderer-prompt HOLD THE TENSION."
+      },
+      {
+        "pattern": "\\bidentitas utuh\\b",
+        "note": "Run 1, verbatim."
+      },
+      {
+        "pattern": "\\bmembentuk (satu )?kesatuan\\b",
+        "note": "The same move with different words."
+      },
+      {
+        "pattern": "\\bberpadu\\b|\\bperpaduan\\b",
+        "note": "renderer-prompt bans 'Perpaduan ...' as an essay connective and it collapses tensions too."
+      }
+    ],
+    "slang": [
+      {
+        "pattern": "\\bngerasa\\b",
+        "note": "Rule 20 names this one."
+      },
+      {
+        "pattern": "\\bbikin\\b",
+        "note": "Rule 20 names this one. The casual register died with coldread-analysis."
+      },
+      {
+        "pattern": "\\bkayak\\b",
+        "note": "Rule 20 names this one. The casual register died with coldread-analysis."
+      },
+      {
+        "pattern": "\\bcapek\\b",
+        "note": "Rule 20 names this one. The casual register died with coldread-analysis."
+      },
+      {
+        "pattern": "\\bgitu aja\\b",
+        "note": "renderer-prompt hard bans."
+      },
+      {
+        "pattern": "\\binget\\b",
+        "note": "renderer-prompt hard bans."
+      },
+      {
+        "pattern": "\\bnggak\\b|\\bgak\\b",
+        "note": "The casual register killed by coldread-analysis. Present throughout the OLD provecell testkit, which predates rule 20."
+      }
+    ],
+    "particles": [
+      {
+        "pattern": "\\btuh\\b",
+        "note": "Chat particle. Rule 20."
+      },
+      {
+        "pattern": "\\blho\\b",
+        "note": "Chat particle, rule 20. Reads as chat, and the composed voice is not chat."
+      },
+      {
+        "pattern": "\\bdeh\\b",
+        "note": "Chat particle, rule 20. Reads as chat, and the composed voice is not chat."
+      },
+      {
+        "pattern": "\\bsih\\b",
+        "note": "renderer-prompt hard bans."
+      },
+      {
+        "pattern": "\\bdong\\b",
+        "note": "renderer-prompt hard bans."
+      },
+      {
+        "pattern": "\\bnih\\b",
+        "note": "renderer-prompt hard bans."
+      }
+    ],
+    "hedging": [
+      {
+        "pattern": "\\bmungkin\\b",
+        "note": "renderer-prompt: no hedging INSIDE a claim. Golden rule 7, one committed image per claim."
+      },
+      {
+        "pattern": "\\bagak\\b",
+        "note": "Hedging inside a claim. Golden rule 7, one committed image per claim."
+      },
+      {
+        "pattern": "\\bcenderung\\b",
+        "note": "Hedging inside a claim. Sat in the glossary itself until the f068352 ban-sweep."
+      },
+      {
+        "pattern": "\\bsepertinya\\b",
+        "note": "Hedging inside a claim. Golden rule 7, say the thing."
+      }
+    ],
+    "adverbial": [
+      {
+        "pattern": "\\bsecara \\w+",
+        "note": "renderer-prompt bans the 'secara ...' adverbial outright. Observed in gate-check run 1."
+      }
+    ],
+    "essay_connectives": [
+      {
+        "pattern": "\\bkondisi ini\\b",
+        "note": "renderer-prompt bans. Essay register, not a letter to a person."
+      },
+      {
+        "pattern": "\\bhal ini\\b",
+        "note": "Essay connective banned by renderer-prompt. Essay register, not a letter to a person."
+      },
+      {
+        "pattern": "\\bpemahaman atas\\b",
+        "note": "Essay connective banned by renderer-prompt. Abstraction is the failure mode."
+      },
+      {
+        "pattern": "\\bmerupakan bagian dari\\b",
+        "note": "Essay connective banned by renderer-prompt. Bureaucratic-baku creeping back in."
+      },
+      {
+        "pattern": "\\bdengan demikian\\b|\\badapun\\b|\\bhal tersebut\\b|\\bsebagaimana\\b",
+        "note": "Bureaucratic-baku, rule 20."
+      }
+    ],
+    "meta": [
+      {
+        "pattern": "sebagai AI\\b|\\bsebagai model\\b|\\bsebagai asisten\\b",
+        "note": "renderer-prompt bans meta."
+      },
+      {
+        "pattern": "berdasarkan (data|informasi) (yang diberikan|di atas)",
+        "note": "Same. Also advertises the machine, which PROGRESS decided against everywhere."
+      },
+      {
+        "pattern": "\\bJSON\\b|\\bprompt\\b",
+        "note": "Leaks the pipeline into the reading."
+      }
+    ],
+    "arithmetic": [
+      {
+        "pattern": "\\d+\\s?%",
+        "note": "renderer-prompt PROVENANCE IS NOT ARITHMETIC: never a percentage. Golden rule 1, hide the arithmetic."
+      },
+      {
+        "pattern": "\\bdihitung dari\\b",
+        "note": "Names the calculation. The seam to hide is the math."
+      },
+      {
+        "pattern": "\\bdi atas ambang\\b|\\bambang batas\\b|\\bskor\\b|\\bbobot\\b",
+        "note": "Threshold and score language, same rule."
+      }
+    ],
+    "bare_polarity": [
+      {
+        "pattern": "\\b(Api|Kayu|Air|Logam|Tanah) (Yang|Yin)\\b",
+        "note": "Golden rule 5, NO BARE YIN/YANG. Reads as broken Indonesian and the polarity means nothing to a layperson."
+      }
+    ]
+  }
+}
