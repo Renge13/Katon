@@ -1,55 +1,50 @@
 <!--
-STATUS: LIVE POINTER. This file always describes the SINGLE next task for Claude Code.
-Maintained by Claude (Cowork) between sessions. Reyner does not edit it.
-Overwritten every time, never appended to — see DOC-STANDARD.md.
-LAST SET: 2026-08-01
+STATUS: LIVE POINTER. Maintained by Claude (Cowork). Reyner does not edit it.
+
+DESIGN NOTE, 2026-08-01: this file went stale twice by duplicating the task list from the prompt it
+points at. It is now a POINTER ONLY. It names the prompt and nothing else, so the only thing that can
+go stale is which prompt it names. Do not re-add a task summary here.
 -->
 
 # NEXT
 
-## Read first
-1. `../CLAUDE.md` — the locked rules. 25 of them, numbered, no collisions.
-2. `PROGRESS.md` — the ledger. Its MEASUREMENTS table holds every current number.
-3. `prompts/C6-sqrt-adopted-oracle4.md` — **the instruction for this task.**
+## Read, in order
+1. `../CLAUDE.md` — the locked rules, 1 to 25.
+2. `PROGRESS.md` — the ledger. MEASUREMENTS holds every current number.
+3. **`prompts/D2-stage3.md`** — the task.
+4. **`prompts/D2a-stage3-anchors.md`** — the addendum. **It overrides D2 wherever they conflict.**
+5. **`content/provecell-01-USER.json`** — the TARGET SHAPE. Read it before writing code.
 
-## The task
+## Current task
 
-**Prompt C, session 5.** Two steps, in this order, one measurement each.
+**`prompts/D2-stage3.md` plus `prompts/D2a-stage3-anchors.md`** — Stage 3. Hierarchy scoring and
+semantic JSON emit. Three phases, three commits. The biggest unblock in the project.
 
-### Step 1 — Oracle 4
-Correlate the engine's `supportShare` against `engine/joey-implied-strength.json`, which holds the
-same quantity derived from Joey's own element totals. Report **Pearson and Spearman** across the 13
-charts.
+D2a answers the three blockers raised 2026-08-01: the badge anchor tables are verified and supplied,
+華蓋 is descoped, the 刑 glossary entry is drafted. It also corrects two things in D2's contract.
+**Read both. D2a wins.**
 
-**Do NOT touch the 40/60 thresholds.** Cutting them to make the distribution look right is fitting to
-a prior on 13 charts with no ground truth for the labels. If the correlation is high, the underlying
-number is sound and the cut points become a deliberate labelling choice made afterward. If it is low,
-the thresholds are irrelevant because the number they cut is wrong.
+Migration `0004_gender.sql` is **applied** (verified 2026-08-01, `gender | text` present). Reading
+creation works. Not blocked.
 
-Context you may not expect: **"0 strong" is not a regression.** Joey's own element totals imply
-7 weak / 6 balanced / 0 strong under the same thresholds, max 55.3%. The engine's 5/8/0 is close to
-his. The `sqrt` transform moved the verdict layer toward Joey, not away.
+## Done and not to be revisited
 
-### Step 2 — 十二長生 for the 16% residual
-Nine of 57 within-element pairs invert against presence, and that number is **transform-invariant**
-under linear, sqrt and log1p. It needs a *mechanism*, not a reweighting.
+- Calculator, solar-term lock, season gate.
+- Strength engine. Oracle 3 rho 0.874, Oracle 4 r 0.929. **No further calibration.** 十二長生 is
+  deferred, thresholds stay at 40/60 until the pipeline exists.
+- 刑, 胎元, gender field.
+- **命宮 is deliberately absent.** See `prompts/D1b-remove-life-palace.md` and CLAUDE.md rule 4.
+- Glossary: 49 entries plus `salah_dikira`, all Reyner-reviewed.
 
-Test 十二長生 (twelve life stages). It is a genuinely different mechanism rather than a reweighting, and
-Joey prints a life-stage label on every luck pillar so he demonstrably computes them.
+If a future version of this file sends you back into engine calibration before Stage 3 exists,
+push back.
 
-**Measure on within-element agreement (currently 48/57) as the primary signal** — that is the number
-no transform can move, so it isolates the mechanism.
+## Standing rules
 
-### Then stop
-Thresholds come last and only if Oracle 4 says the underlying number is sound. Report and wait for a
-ruling. **Rule 13: one change, one measurement.**
-
-## Standing rules for every session
-
-- Engine changes and calibration go in **separate commits**.
-- Never improvise a BaZi rule (rule 4). If it is not written in `docs/`, ask.
+- Engine changes and calibration in **separate commits**.
+- Never improvise a BaZi rule (rule 4). That includes tables handed to you in a prompt.
 - Measurements go in `PROGRESS.md`, never into `CLAUDE.md` as locked constants (rule 8).
-- If you are running low on context mid-sequence, **stop and report** rather than half-landing a
-  change. That has been the right call every time it has come up.
-- Flag anything in the docs that contradicts what you find. Four spec errors have been caught that
-  way so far, all of them mine.
+- The commit message must describe everything staged.
+- Low on context mid-sequence: **stop and report** rather than half-landing a change.
+- Flag anything in the docs that contradicts what you find. Many spec errors have been caught that
+  way, all of them mine.
