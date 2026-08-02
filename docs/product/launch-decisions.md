@@ -89,7 +89,7 @@ But **test 25–45k before committing to 80–99k.** The gap between "impulse" a
 most Indonesian digital products die. Pricing is currently an assumption wearing the clothes of a
 decision.
 
-### PROPOSED price architecture 2026-08-02 — [REYNER to confirm; unconfirmed numbers, locked mechanic]
+### Price architecture — CONFIRMED by Reyner 2026-08-02 (numbers and mechanic both decided)
 
 Mechanic (DECIDED 08-02, from the compat-flow review): **visible "harga peluncuran" cohorts, never
 silent A/B.** List price fixed and public; the launch discount is the test variable. A discount is a
