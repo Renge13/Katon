@@ -42,7 +42,9 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { renderReading } from '../lib/render/index.js';
 import { PROMPT_VERSION } from '../lib/render/prompt.js';
 import { modelFor, DEFAULT_TIER, geminiConfigured } from '../lib/render/config.js';
-import { STAGE6_VERSION } from '../lib/validate/index.js';
+import {
+  STAGE6_VERSION, FACT_PARAMS, COVERAGE_PARAMS, STRUCTURE_PARAMS,
+} from '../lib/validate/index.js';
 import { VALIDATION_CHARTS } from '../tests/bazi-validation.fixture.js';
 
 // ── arguments ──────────────────────────────────────────────
@@ -101,9 +103,25 @@ function armStats(model) {
     stats.set(model, {
       runs: 0, firstPass: 0, shipped: 0, regenerated: 0, fallback: 0, hard: 0,
       errors: 0, checks: new Map(),
+      // Observed values of every UNFITTED threshold, passing runs included.
+      // Rule 13: one change, one measurement - these are what a later fitting
+      // pass measures against, and it needs the passes as much as the failures.
+      dist: { same_breath: [], coverage: [], total_chars: [], block_chars: [] },
     });
   }
   return stats.get(model);
+}
+
+/** Percentiles, nearest-rank. Small samples, so no interpolation games. */
+function summarise(values) {
+  if (values.length === 0) return null;
+  const v = [...values].sort((a, b) => a - b);
+  const at = (p) => v[Math.min(v.length - 1, Math.floor((p / 100) * v.length))];
+  const mean = v.reduce((a, b) => a + b, 0) / v.length;
+  return {
+    n: v.length, min: v[0], p10: at(10), p25: at(25), median: at(50),
+    p75: at(75), p90: at(90), max: v.at(-1), mean,
+  };
 }
 
 for (const testChart of charts) {
@@ -148,6 +166,12 @@ for (const testChart of charts) {
         for (const check of attempt.stage6 || []) {
           s.checks.set(check, (s.checks.get(check) || 0) + 1);
         }
+        const m = attempt.stage6_metrics;
+        if (!m) continue;
+        for (const x of m.same_breath) s.dist.same_breath.push(x.ratio);
+        for (const x of m.coverage) s.dist.coverage.push(x.ratio);
+        for (const x of m.total_chars) s.dist.total_chars.push(x);
+        for (const x of m.block_chars) s.dist.block_chars.push(x);
       }
 
       rows.push({
@@ -211,6 +235,28 @@ for (const [model, s] of stats) {
   }
 }
 
+console.log('\nTHRESHOLD DISTRIBUTIONS (observed values, passes included)');
+console.log('These are the UNFITTED constants. Fit them from here, one at a time (rule 13).');
+const THRESHOLDS = {
+  same_breath: `FACT_PARAMS.sameBreathOverlap = ${FACT_PARAMS.sameBreathOverlap}`,
+  coverage: `COVERAGE_PARAMS.fieldOverlap = ${COVERAGE_PARAMS.fieldOverlap}`,
+  total_chars: `STRUCTURE_PARAMS.maxTotalChars = ${STRUCTURE_PARAMS.maxTotalChars}`,
+  block_chars: `STRUCTURE_PARAMS.minBlockChars = ${STRUCTURE_PARAMS.minBlockChars}`,
+};
+for (const [model, s] of stats) {
+  console.log(`\n  ${model}`);
+  for (const [name, values] of Object.entries(s.dist)) {
+    const d = summarise(values);
+    if (!d) { console.log(`    ${name.padEnd(14)} (no observations)`); continue; }
+    const fmt = (x) => (x < 10 ? x.toFixed(2) : Math.round(x).toString());
+    console.log(`    ${name.padEnd(14)} n=${String(d.n).padStart(4)}  `
+      + `min ${fmt(d.min).padStart(6)}  p10 ${fmt(d.p10).padStart(6)}  `
+      + `p25 ${fmt(d.p25).padStart(6)}  med ${fmt(d.median).padStart(6)}  `
+      + `p75 ${fmt(d.p75).padStart(6)}  max ${fmt(d.max).padStart(6)}`);
+    console.log(`    ${' '.repeat(14)} current: ${THRESHOLDS[name]}`);
+  }
+}
+
 mkdirSync(outDir, { recursive: true });
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const base = `${outDir}/stage6-${stamp}`;
@@ -221,8 +267,11 @@ writeFileSync(`${base}-runs.json`, `${JSON.stringify({
   n,
   arms,
   charts: charts.map((c) => c.id),
+  thresholds: { FACT_PARAMS, COVERAGE_PARAMS, STRUCTURE_PARAMS },
   summary: Object.fromEntries([...stats].map(([m, s]) => [m, {
-    ...s, checks: Object.fromEntries(s.checks),
+    ...s,
+    checks: Object.fromEntries(s.checks),
+    dist: Object.fromEntries(Object.entries(s.dist).map(([k, v]) => [k, summarise(v)])),
   }])),
   rows,
 }, null, 2)}\n`);
