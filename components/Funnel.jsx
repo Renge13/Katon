@@ -728,7 +728,7 @@ function Unlocked({ full, token, onUpdate }) {
 
       <div id="b6" style={BEAT}>{kicker('Bagian enam')}<h3 style={H3}>{H[6]}</h3>
         {c.beat6?.lead && <p style={BODY}>{c.beat6.lead}</p>}
-        {c.beat6?.rule && <div style={{ background: 'rgba(174,132,63,.12)', border: '1px solid rgba(174,132,63,.4)', borderRadius: 14, padding: 18, margin: '12px 0' }}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontStyle: 'italic', color: '#F0D9AE', lineHeight: 1.4 }}>“{c.beat6.rule}”</div></div>}
+        {c.beat6?.rule && <div style={{ background: 'rgba(174,132,63,.12)', border: '1px solid rgba(174,132,63,.4)', borderRadius: 14, padding: 18, margin: '12px 0' }}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontStyle: 'italic', color: '#F0D9AE', lineHeight: 1.4 }}>"{c.beat6.rule}"</div></div>}
         {c.beat6?.body && <p style={BODY}>{c.beat6.body}</p>}
       </div>
 
