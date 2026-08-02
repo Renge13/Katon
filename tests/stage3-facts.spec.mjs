@@ -122,14 +122,31 @@ test('every fact carries the renderer contract shape', () => {
   }
 });
 
-test('the only glossary gap is the strength verdict', () => {
-  // Every other fact type is fully backed by Reyner-reviewed content. If this
-  // grows, new copy is needed and someone has to be told, not the test relaxed.
+test('no fact has a glossary gap', () => {
+  // Every fact type is fully backed by Reyner-reviewed content. The strength
+  // verdict was the last gap and glossary.kekuatan closed it (3b5685e,
+  // 2026-08-02). If this grows, new copy is needed and someone has to be told,
+  // not the test relaxed.
   const gaps = new Set();
   for (const tc of VALIDATION_CHARTS) {
     for (const f of inventoryFor(tc)) if (f.glossary_gap) gaps.add(f.id);
   }
-  assert.deepEqual([...gaps].sort(), ['strength_balanced', 'strength_weak']);
+  assert.deepEqual([...gaps].sort(), []);
+});
+
+test('the strength fact carries its glossary entry', () => {
+  // The positive form of the assertion above, aimed at the one fact that used to
+  // be the gap. A verdict with no label_meaning must fail here rather than ship:
+  // rule 21 lets "lemah"/"kuat" through ONLY when the explanation lands in the
+  // same breath, so the meaning sentence is not optional decoration.
+  for (const tc of VALIDATION_CHARTS) {
+    const f = inventoryFor(tc).find((x) => x.id.startsWith('strength_'));
+    assert.ok(f, `chart ${tc.id}: no strength fact`);
+    assert.equal(f.glossary_gap, undefined, `chart ${tc.id}: ${f.id} still flagged as a gap`);
+    for (const field of ['label', 'label_bracket', 'label_meaning', 'gift', 'cost']) {
+      assert.ok(f[field], `chart ${tc.id}: ${f.id}.${field} is empty`);
+    }
+  }
 });
 
 test('no English element name leaks into provenance', () => {

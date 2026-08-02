@@ -3,9 +3,9 @@
     "status": "GENERATED, do not hand-edit. Regenerate with scripts/emit-semantic.mjs --write.",
     "what": "Stage 3 output for fixture chart 1 (1989-09-13 09:00), the same chart docs/content/provecell-01-USER.json was hand-authored for. Diff the two to see what the engine does and does not reproduce.",
     "the_gate": "D2 asks for this to be pasted into AI Studio with content/renderer-prompt.txt and the reading compared against run 5. THAT HAS NOT BEEN RUN - it needs an LLM call. The JSON is paste-ready.",
-    "known_gap": "strength_weak carries no label, label_meaning, gift or cost. glossary.json has no kekuatan section. This is the one fact type with no Reyner-reviewed content behind it and the renderer will have nothing to cash out for a top-3 fact. Expect the reading to be visibly thinner there than run 5.",
+    "closed_gap": "CLOSED 2026-08-02 in 3b5685e. strength_weak previously carried no label, label_meaning, gift or cost because glossary.json had no kekuatan section; it now has one (weak/balanced/strong, Reyner-reviewed) and the fact is fully backed. Every fact type in this artifact now has Reyner-reviewed content behind it. Stage 6 owes the same-breath check: the verdict label never renders without its label_meaning (rule 21, glossary kekuatan._note).",
     "provenance_is_structured": "Every fact carries provenance as DATA, not as the finished Indonesian sentence the hand-written file uses. A deliberate deferral, not an omission - see the header of lib/semantic/facts.js.",
-    "cache_key": "f1d43c91e51bd0b82e54d66cce5bf550a109d5cf58edfa41cf9b7fb1b129ee73"
+    "cache_key": "5aa29f41bc8f78a543d6ac23ce18b78996f28e22be528d9daa602ce5723fabe2"
   },
   "engine_version": "0.4.0-stage3",
   "target_language": "id",
@@ -146,13 +146,12 @@
         "season_ruler_element": "Logam",
         "relation_to_season": "controls"
       },
-      "label": null,
-      "label_bracket": null,
-      "label_meaning": null,
-      "gift": null,
-      "cost": null,
+      "label": "Lemah",
+      "label_bracket": "Weak",
+      "label_meaning": "Lemah di sini bukan berarti tidak mampu. Sumber tenagamu ada di luar dirimu. Tempat yang tepat membuatmu melesat cepat, dan tempat yang salah mengurasmu sampai habis.",
+      "gift": "Kamu sangat peka membaca situasi dan tahu cara memanfaatkan dukungan di sekitarmu. Saat berada di lingkungan yang pas, pertumbuhanmu bisa jauh melampaui orang lain.",
+      "cost": "Karena sumber tenagamu dari luar, kamu kehabisan energi lebih cepat saat salah menempatkan diri. Tanpa ekosistem yang menopang, kamu menanggung lelah sendirian.",
       "actionable": null,
-      "glossary_gap": true,
       "confidence": "low",
       "confidence_reasons": [
         "root 巳 pulled toward Metal by 半合"
@@ -630,7 +629,11 @@
     {
       "fact_id": "strength_weak",
       "importance": 78,
-      "must_cover": []
+      "must_cover": [
+        "label_meaning",
+        "gift",
+        "cost"
+      ]
     },
     {
       "fact_id": "element_missing_Wood",

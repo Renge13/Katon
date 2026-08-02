@@ -173,15 +173,16 @@ test('required points cover the spine and the top findings, chart 1', () => {
   assert.equal(PROVECELL.required_points.length, 8);
 });
 
-test('no fact reaches the renderer without a label_meaning, except the known gap', () => {
+test('no fact reaches the renderer without a label_meaning', () => {
   // A fact with no meaning is a name the reader cannot cash out. The strength
-  // verdict is the one hole and it is tracked; anything else appearing here is
-  // new content Reyner has to write.
+  // verdict was the one hole; glossary.kekuatan closed it (3b5685e, 2026-08-02)
+  // and there is no exemption left. Anything appearing here is new content
+  // Reyner has to write.
   const gaps = new Set();
   for (const tc of VALIDATION_CHARTS) {
     for (const f of jsonFor(tc).facts) if (!f.label_meaning) gaps.add(f.id);
   }
-  assert.deepEqual([...gaps].sort(), ['strength_balanced', 'strength_weak']);
+  assert.deepEqual([...gaps].sort(), []);
 });
 
 test('no English element name leaks into the contract blocks', () => {
