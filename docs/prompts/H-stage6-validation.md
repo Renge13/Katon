@@ -22,6 +22,11 @@ construction TWICE despite an explicit prompt ban. The prompt cannot fix it; onl
 The text may not contradict the semantic JSON. Minimum: the strength verdict (JSON "Seimbang" +
 text "lemah" = reject), the Day Master element, badge presence (a badge named in text must exist
 in JSON — invention is the run-1 failure), palace attributions.
+**The same-breath check (rule 21 + `glossary.kekuatan._note`, wired 2026-08-02):** if the rendered
+text carries the verdict word (lemah/kuat/seimbang used AS the verdict), the block containing it
+must also carry the substance of that verdict's `label_meaning` — the explanation lands in the same
+block, never a bare label. `label` and `label_meaning` ship as separate JSON fields, so emitting
+the verdict bare is mechanically possible and nothing upstream can prevent it. Hard reject.
 
 ### 2. COVERAGE, not structure (carried principle — validate coverage, NEVER structural conformance)
 - Every `required_point` in the JSON is addressed somewhere in `blocks[]`. Order is the renderer's
