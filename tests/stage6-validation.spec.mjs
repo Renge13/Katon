@@ -579,3 +579,52 @@ test('a transport failure does not count against the FIRST-PASS rate', async () 
     assert.equal(out.source, 'gemini');
   });
 });
+
+// ── false positives the FIRST LIVE BATCH exposed (2026-08-02) ──
+// Both of these rejected correct Indonesian, and between them they accounted for
+// 33 of the 133 rejections in the first run. A gate's own false-positive rate is
+// part of its correctness, not a footnote.
+
+test('bare_polarity does not fire on the relative pronoun "yang"', () => {
+  // "yang" is the ordinary Indonesian relative pronoun. Case-insensitively this
+  // pattern matched "api yang menyala" and rejected the reading. It is now
+  // case-SENSITIVE, and that is the whole fix.
+  const innocent = [
+    'Ada api yang menyala pelan di dalam dirimu sepanjang hari ini.',
+    'Air yang terlalu banyak membuat nyalamu tidak pernah penuh.',
+    'Logam yang keras itu duduk di cabang bulanmu sejak awal.',
+    'Tanah yang menopang langkahmu tidak pernah benar-benar goyah.',
+  ];
+  for (const sentence of innocent) {
+    const reading = withBlockText(goodReading(), 'day_master_Fire',
+      `${sentence} Satu kalimat lagi supaya blok ini punya panjang yang wajar.`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('style.bare_polarity'),
+      `false positive on: ${sentence}`);
+  }
+
+  // The real violation still fires: capitalised polarity as a label.
+  const real = withBlockText(goodReading(), 'day_master_Fire',
+    'Kamu Api Yang, dan itu membuat caramu hadir terasa terbuka sejak awal.');
+  assert.ok(checksIn(validateRendering(real, CHART_1)).includes('style.bare_polarity'));
+});
+
+test('english_leakage ignores words inside a SANCTIONED bracket', () => {
+  // Rule 23's EN display layer gives archetypes English names, and "The Sun"
+  // contains "the". Scanning the raw text flagged a reading for obeying rule 23.
+  const sanctioned = withBlockText(goodReading(), 'day_master_Fire',
+    'Arketipemu adalah Matahari (The Sun), dan itu terlihat dari caramu mengisi ruangan.');
+  const result = validateRendering(sanctioned, CHART_1);
+  assert.ok(!checksIn(result).includes('style.english_leakage'), 'flagged a sanctioned bracket');
+  assert.ok(!checksIn(result).includes('style.unsanctioned_bracket'));
+
+  // English in the PROSE still fires.
+  const leaked = withBlockText(goodReading(), 'day_master_Fire',
+    'This is the pattern that shapes how you move through a room every single day.');
+  assert.ok(checksIn(validateRendering(leaked, CHART_1)).includes('style.english_leakage'));
+});
+
+test('a blocklist entry may override the default regex flags', () => {
+  const entry = BLOCKLIST.style.bare_polarity[0];
+  assert.equal(entry.flags, 'u', 'bare_polarity must stay case-sensitive');
+  assert.ok(entry.note.includes('CASE-SENSITIVE'), 'and must say why in its note');
+});

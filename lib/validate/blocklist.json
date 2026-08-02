@@ -254,7 +254,8 @@
     "bare_polarity": [
       {
         "pattern": "\\b(Api|Kayu|Air|Logam|Tanah) (Yang|Yin)\\b",
-        "note": "Golden rule 5, NO BARE YIN/YANG. Reads as broken Indonesian and the polarity means nothing to a layperson."
+        "note": "Golden rule 5, NO BARE YIN/YANG. CASE-SENSITIVE, and that is load-bearing: \"yang\" is the ordinary Indonesian relative pronoun, so a case-insensitive version of this pattern matches \"api yang menyala\" and \"Air yang terlalu banyak\" and rejects correct prose. Measured 2026-08-02: it fired 20 times in the first live batch, all false positives.",
+        "flags": "u"
       }
     ]
   }
