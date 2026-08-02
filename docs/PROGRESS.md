@@ -515,6 +515,10 @@ for natal bars. But the **annual reading** and **luck-pillar map** both read luc
 products will need female-set fixture charts to validate against.
 
 ## RESOLVED — stop reporting these as open (2026-08-01)
+- **Migration `0006_render_cache.sql` is APPLIED in Supabase (2026-08-02).** Run in the SQL editor,
+  `render_cache` verified present via `information_schema.tables` (screenshot evidence, Cowork
+  session 08-02); RLS enabled with no policies per the migration itself. The result cache is real —
+  no more silent in-memory degrade. Do not flag again.
 - **Migration `0005_sku.sql` is APPLIED in Supabase (2026-08-02).** Run in the SQL editor, column
   verified present by `information_schema.columns` query returning `sku` (screenshot evidence,
   Cowork session 08-02). `main` is deploy-safe for the Prompt F payment commits. Do not flag again.
