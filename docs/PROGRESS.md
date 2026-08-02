@@ -568,12 +568,14 @@ products will need female-set fixture charts to validate against.
    `tests/tools/solar-term-oracle-diff.mjs` drops straight in).
 4. **Stage 3** (hierarchy + semantic JSON in the four-field shape: provenance / label / label_meaning /
    gift / cost / palace / actionable) and **Stage 6** post-validation.
-   **Renderer measurement note (2026-08-02):** when Stage 5/6 quality is first measured, the primary
-   number is Stage-6 pass rate + provecell rubric on `gemini-3.1-flash-lite`. Run a
-   `gemini-2.5-flash-lite` arm as a RIDER in the same batch and have Reyner blind-judge pairs; switch
-   the free tier only if indistinguishable. Cost is NOT the driver (~$2 per 1k readings, capped by the
-   result cache) — do not make this its own project. Proposal riding along: store `model` +
-   `prompt_version` as metadata on cached reading rows so flagged readings are attributable.
+   **Renderer measurement note (2026-08-02, CLOSED same day):** the harness exists (Prompt H) and
+   ran. `gemini-2.5-flash-lite` is RETIRED — HTTP 404 "no longer available to new users" (so is
+   2.0-flash-lite); the down-market rider question is dead by market action, not by measurement.
+   Substituted rider: `gemini-3.5-flash-lite` (the only other live lite arm), pending Reyner's
+   ratification — the question inverted from "move down?" to "move up?". At n=39 the arms are
+   indistinguishable on aggregate (run variance band ~8 points) but fail DIFFERENTLY per-check:
+   3.5 drops palaces 2x more, 3.1 hedges 4x more. Blind judging decides which failure reads worse.
+   The model+prompt_version metadata proposal SHIPPED with G/H.
    Stage 6 must mechanically catch what the runs exposed: tension-collapse vocabulary
    (*menyatu / selaras / saling melengkapi / identitas utuh*), invented specificity, dropped `cost`
    strings, and schema-order slot-filling.
