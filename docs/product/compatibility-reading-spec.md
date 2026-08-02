@@ -1,3 +1,17 @@
+<!--
+STATUS: header added 2026-08-01. The body is unchanged and was already in the repo — an earlier claim in
+this session that it needed rescuing from the stale mirror was WRONG (see COWORK-BRIEF.md error 11).
+What was genuinely fixed: `product/paid-product-map.md` had been pointing at the old mirror filename,
+so this file looked absent when followed by reference.
+
+NOT YET RECONCILED against the post-2026-08-01 engine. Read it for the classical 合婚 workflow and the
+ethical spine, both of which stand. Before building from it, check it against:
+  - CLAUDE.md rules 20-25 (voice, naming, hanzi, ethics) — this predates the Aspek/Bintang naming lock
+  - content/glossary.json — the authoritative names
+  - the strength engine as built (Oracle 3 rho 0.874, Oracle 4 r 0.929)
+Any scoring or naming in here is a PROPOSAL, not a locked decision.
+-->
+
 # Katon — Paid Compatibility Reading (合婚) Spec
 
 > The paid unlock. Grounded in the classical BaZi marriage-compatibility (合婚) workflow, which is a

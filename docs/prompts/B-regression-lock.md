@@ -1,6 +1,6 @@
 <!--
 STATUS: HANDOVER — Claude Code build prompt. PROMPT B. Run after A.
-Full reasoning: KATON-calculator-decision.md. Harness already written: solar-term-oracle-diff.mjs
+Full reasoning: ../engine/calculator-decision.md. Harness already written: solar-term-oracle-diff.mjs
 Sequence: A (swap) -> commit Phase 1 -> B (this) -> C (strength engine)
 -->
 
@@ -12,7 +12,7 @@ Adopting tyme4ts converts "do I trust this dependency?" into "did this dependenc
 question CI can answer on every push. That is the real no-compromise guarantee, and it costs about
 90 KB of JSON.
 
-`solar-term-oracle-diff.mjs` in this folder already does the tyme4ts vs astronomy-engine comparison
+`tests/tools/solar-term-oracle-diff.mjs` in this folder already does the tyme4ts vs astronomy-engine comparison
 and passes. It drops straight into `scripts/`.
 
 ---
@@ -47,7 +47,7 @@ and counts of disagreement at MINUTE / HOUR / DAY granularity.
 
 Expected, already measured: **0 day-level, 0 hour-level, max |Δ| ≈ 52 s, median 9 s.**
 
-`solar-term-oracle-diff.mjs` already implements this comparison including the UTC+8 JD trap guard.
+`tests/tools/solar-term-oracle-diff.mjs` already implements this comparison including the UTC+8 JD trap guard.
 Reuse it rather than rewriting.
 
 **3.** `scripts/oracle-sxtwl.py` — optional, run manually, **never in the Vercel build**

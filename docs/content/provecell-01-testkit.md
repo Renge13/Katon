@@ -10,7 +10,7 @@ PURPOSE: test whether the Gemini renderer can turn engine JSON into prose that l
 ## HOW TO RUN
 
 1. Open Google AI Studio. Model: **Gemini 2.5 Flash-Lite**. Temperature **0.2**. Response type **JSON**.
-2. System instructions = the whole of `KATON-master-prompt.md` (v2) above the `---`.
+2. System instructions = the whole of `renderer-prompt-notes.md` (v2) above the `---`.
 3. User message = the semantic JSON in §2 below, verbatim.
 4. Run it **three times** without changing anything. Judge all three against §3.
 5. Then run it once at temperature 0.0 and once at 0.7 to see the spread.
@@ -160,7 +160,7 @@ Score each run. **Do not soften a fail because you like a sentence.**
 
 - [ ] **RECOGNITION.** Reading `officer_convergence` and `steward_vs_selfreliant`, do you feel *seen*,
       or *described*? You confirm you're "both Director and Friend" — did it land that, or state it?
-- [ ] **NOT FLAT.** Compare against the drafts in KATON-coldread-analysis.md. Is this materially
+- [ ] **NOT FLAT.** Compare against the drafts in ../research/coldread-analysis.md. Is this materially
       better, or the same register with a different pipeline?
 - [ ] **HIERARCHY HELD.** Does the Officer convergence (94) dominate, or did Wood-missing (82) steal
       the lead because zero is fun to write about?

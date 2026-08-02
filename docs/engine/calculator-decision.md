@@ -1,6 +1,6 @@
 <!--
 STATUS: DECISION DOC — resolves the "OPEN BLOCKER — CALCULATOR" section of
-        KATON-engine-session-state.md. Written 2026-07-29 after empirical measurement
+        engine-session-state.md. Written 2026-07-29 after empirical measurement
         (not desk research). Supersedes "swap in sxtwl" as the action item.
 -->
 
@@ -174,7 +174,7 @@ whose value proposition is authoritative self-recognition, "Katon says a differe
 month than Joey" is the worst available failure mode.
 
 Decided by the already-locked methodological principle in
-KATON-engine-session-state.md: *"Adopt classical rigor only where it prevents a
+engine-session-state.md: *"Adopt classical rigor only where it prevents a
 false/self-contradictory statement; ignore it where it's lineage-preference the
 consumer never perceives."*
 
@@ -256,7 +256,7 @@ constraint here; do not take shortcuts and do not preserve the old code as a fal
      Do NOT apply True Solar Time / longitude correction. Joey Yap's plotter has no
      city or timezone input and therefore applies none; matching it is the requirement.
      Pass raw Y/M/D/h/m to SolarTime.fromYmdHms and let tyme4ts's +08-frame solar-term
-     table govern. See §4 of KATON-calculator-decision.md.
+     table govern. See §4 of calculator-decision.md.
    - Accept an optional `tz` field on the input type, persist it, and leave it UNUSED
      by the calculation. It exists so the convention can be revisited without
      re-collecting user data. Add a comment saying exactly that.

@@ -102,10 +102,11 @@ means "never fit two candidate terms in one measurement."**
 
 1. **Oracle 4**: correlate engine `supportShare` against `joey-implied-strength.json`. Report Pearson
    and Spearman. Do not touch thresholds.
-2. **十二長生** for the 16% within-element residual. Agreed it goes first — it is a different mechanism
-   rather than a reweighting, and Joey prints life-stage labels on every luck pillar so he demonstrably
-   computes them. Measure on within-element agreement (48/57) as the primary signal, since that is the
-   number the transform provably cannot move.
+2. ~~**十二長生** for the 16% within-element residual.~~ **STRUCK 2026-08-01. DEFERRED, do not start.**
+   Oracle 4 came back at r=0.929 and settled it: the verdict correlates at 0.93 while those nine
+   inversions sit unfixed, which is positive evidence that they do not touch the support/drain ratio.
+   They move bar display order only. Un-defer when the bars become a user-visible legitimacy surface
+   someone cross-checks against Joey, not before. `docs/NEXT.md` is the live pointer and it wins.
 3. Thresholds last, and only once Oracle 4 says the underlying number is sound.
 
 One at a time. Rule 13.

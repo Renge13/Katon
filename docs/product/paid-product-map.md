@@ -42,7 +42,7 @@ need the favorable element. Build it once, unlock four revenue lines.
 
 ## 1. COMPATIBILITY — confirmed
 
-Already specced in KATON-compatibility-reading-spec.md. Day Master × Day Master, Fondasi Pasangan
+Already specced in compatibility-reading-spec.md. Day Master × Day Master, Fondasi Pasangan
 comparison as centrepiece, Ten Aspects fit, Luck Pillar sync. Paywall after the second birthdate is
 entered and the pairing tease is seen.
 
@@ -97,7 +97,7 @@ different emotional register — often about reconciliation. Lower priority, sam
 
 ## 4. ARTIFACT TIER — ship with v1
 
-Hi-res card + packaged PDF at ~19k. Already decided in KATON-launch-decisions.md. Same content as the
+Hi-res card + packaged PDF at ~19k. Already decided in launch-decisions.md. Same content as the
 free reading, better object, plus the chart sheet appendix. **Keepsake psychology, not information
 psychology.** Do not put better content behind it or the free mirror becomes a trailer.
 

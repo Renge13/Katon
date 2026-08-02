@@ -1,13 +1,13 @@
 <!--
 STATUS: v3 — 2026-07-30. This file is now DOCUMENTATION ONLY.
-THE PROMPT ITSELF LIVES IN: KATON-renderer-prompt.txt  <- single source of truth, paste that
+THE PROMPT ITSELF LIVES IN: renderer-prompt.txt  <- single source of truth, paste that
 This file records what the prompt does, what changed, and why. Do not duplicate prompt text here;
 two copies will drift.
 -->
 
 # Katon — Renderer Prompt (documentation)
 
-**The prompt is `KATON-renderer-prompt.txt`.** Paste that into System Instructions. This file explains
+**The prompt is `renderer-prompt.txt`.** Paste that into System Instructions. This file explains
 it. Tested live against Gemini Flash on 2026-07-30 across three runs; every rule below exists because
 a run failed without it.
 
@@ -52,7 +52,7 @@ Remaining defects → the naming, palace, felt-meaning and penutup rules now in 
 
 **The load-bearing lesson: guardrails were never the bottleneck. Poor JSON was.** Raw Gemini with no
 system prompt beat run 2 because it improvised the mechanism layer from its own knowledge. The
-glossary (`KATON-glossary-naming.md`) is that layer, made deterministic.
+glossary (`glossary-naming.md`) is that layer, made deterministic.
 
 ---
 
@@ -62,7 +62,7 @@ glossary (`KATON-glossary-naming.md`) is that layer, made deterministic.
 
 An earlier draft of this file specified a casual "old friend" register with *ngerasa/bikin/kayak*.
 **That was wrong**, sourced from a stale memory note rather than the docs.
-`KATON-coldread-analysis.md` §"THE VOICE DECISION" explicitly killed it:
+`../research/coldread-analysis.md` §"THE VOICE DECISION" explicitly killed it:
 
 > *"drop the casual old-friend register entirely… one voice across the whole product… that reaction
 > was caused BY the casual front door."*
@@ -80,7 +80,7 @@ no `secara ...` adverbials, no essay connectives.
 
 - **`actionable` field**: only non-element actionables ship in the free mirror. Element-based advice
   ("cari orang ber-Kayu") inverts on the strength verdict and belongs in the compatibility reading —
-  by nature, not by convenience. See KATON-paid-product-map.md.
+  by nature, not by convenience. See ../product/paid-product-map.md.
 - **Stage 6** must mechanically catch what the runs exposed:
   - tension-collapse vocabulary (*menyatu / selaras / saling melengkapi / identitas utuh*)
   - invented specificity, dropped `cost` strings, schema-order slot-filling
@@ -93,7 +93,7 @@ no `secara ...` adverbials, no essay connectives.
   - a `label: null` fact rendered as though it were a badge
   - "unsur" applied to an animal branch
 - The prompt has only been run against Gemini Flash. **The OpenAI adapter needs its own stricter
-  style block** per KATON-pipeline-spec.md.
+  style block** per ../engine/pipeline-spec.md.
 
 - **UI CONTRACT — paragraph breaks. Not yet implemented; nothing consumes renderer output today.**
   `text` may contain `\n\n` as a paragraph separator. In AI Studio you see the raw JSON escape, which
