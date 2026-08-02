@@ -117,9 +117,11 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     No slang (*ngerasa/bikin/kayak/capek*), no chat particles (*tuh/lho/deh*), not bureaucratic-baku.
     **Keyboard characters only — no em-dash, no curly quotes. This applies to USER-FACING STRINGS
     ONLY.** Code comments and JSX comments are not user-facing; leave them alone. The audit surface is
-    rendered text, payment descriptions, headings, buttons, and error copy. Two known violations as of
-    2026-08-01: the Xendit invoice description in `app/api/pay/[id]/route.js`, and an em-dash used as
-    an empty-state placeholder in `components/Sharecard.jsx`.
+    rendered text, payment descriptions, headings, buttons, and error copy.
+    (Correction 2026-08-02: the two "known violations" previously listed here were both FALSE — the
+    Sharecard em-dashes are all in comments and the old invoice description used a colon. The one
+    real violation found by grep is curly quotes around rendered text in `components/Funnel.jsx:731`.
+    COWORK-BRIEF error 13. Audit by grep, never from memory.)
 21. **"lemah"/"kuat" ARE permitted.** The friction ("what do you mean I'm weak?") pulls the reader
     deeper. Condition: the explanation lands in the same breath, and never bare on the sharecard.
 22. **Never use Joey Yap's trademarked profile names** (Director, Diplomat, Warrior — his IP).

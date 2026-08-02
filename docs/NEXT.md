@@ -39,8 +39,15 @@ diffing against `provecell-01-USER.json` will say where.
   user-facing copy and need a register pass. Note `renderer-prompt.txt` bans "dihitung dari", which
   the hand-written provenance strings use.
 
-**3. Then Stage 6** (post-validation) and Stage 4 (the result cache). `cacheKey()` already exists and
-is tested; nothing consumes it yet. Nothing in Stage 3 is wired into a route.
+**3. Then the pipeline, prompts now written (2026-08-02):** `prompts/G-stage5-render.md` (Stage 5
+renderer wiring + Stage 4 cache consumption — `cacheKey()` exists and is tested, nothing consumes it
+yet), then `prompts/H-stage6-validation.md` (the Stage 6 gate + the pass-rate measurement harness).
+Own session/PR each. Nothing user-facing ships from G until H exists. Note G/H were written before
+Stage 3 completed — if the semantic JSON shape they assume contradicts what PHASE 3 actually emits,
+the code and `provecell-01-ENGINE.json` win; report the mismatch.
+
+(`prompts/F-payments-pricing.md` — separate INFRA track — executed 2026-08-02, tasks 1-4 done.
+Its task 5 was corrected: the real rule-20 fix is curly quotes at `components/Funnel.jsx:731`.)
 
 ## Done and not to be revisited
 
