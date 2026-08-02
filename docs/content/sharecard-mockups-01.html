@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katon sharecard - visual direction mockups 01</title>
+<!--
+STATUS: MOCKUP for Reyner's card-visual-system decision. 2026-08-02. Not product code.
+Three directions for Card A, the thumbnail test row, the ID vs EN variant, and three
+Card B differentiation candidates. Content is real engine data for a 丙 (Matahari) chart
+except the three DYNAMIC tags, which are placeholders (marked).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bench:#161412; --bench-ink:#d8d2c8; --bench-dim:#8a8378;
+    --cream:#f6efe3; --cream-ink:#2b2317; --cream-soft:#6b5d48;
+    --night:#101622; --night-ink:#e9e2d2; --night-gold:#d4a94e; --night-dim:#7a8299;
+    --poster:#e85d2a; --poster-deep:#b23c12; --poster-ink:#1a0d06; --poster-pale:#ffe9d6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bench);color:var(--bench-ink);font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100;padding:48px 40px 96px}
+  .grain{position:relative}
+  .grain::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E")}
+  h1{font-family:'Fraunces',serif;font-weight:400;font-size:30px;letter-spacing:.01em;margin-bottom:6px}
+  .sub{color:var(--bench-dim);font-size:13.5px;max-width:70ch;line-height:1.55}
+  section{margin-top:56px}
+  section>h2{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--bench-dim);border-bottom:1px solid #2e2a25;padding-bottom:10px;margin-bottom:28px}
+  .row{display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start}
+  .slot{width:340px}
+  .slot .dname{font-family:'Fraunces',serif;font-size:19px;margin:18px 0 4px}
+  .slot .why{font-size:12.5px;line-height:1.55;color:var(--bench-dim)}
+  .card{width:340px;height:425px;border-radius:14px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 24px 48px -12px rgba(0,0,0,.55)}
+
+  /* ============ DIRECTION 1 - GALERI ============ */
+  .galeri{background:var(--cream);color:var(--cream-ink);padding:26px 26px 20px}
+  .galeri .wash{position:absolute;top:-60px;left:-40px;width:420px;height:300px;filter:blur(2px);opacity:.9;
+    background:
+      radial-gradient(45% 55% at 60% 45%, rgba(240,166,60,.55), transparent 70%),
+      radial-gradient(35% 45% at 40% 30%, rgba(226,106,44,.38), transparent 70%),
+      radial-gradient(50% 60% at 75% 25%, rgba(247,205,120,.5), transparent 72%)}
+  .galeri .sun{position:relative;width:112px;height:112px;margin:8px auto 2px;border-radius:50%;
+    background:radial-gradient(circle at 42% 38%, #f7cf82, #eda242 55%, #d97a2b 85%);
+    box-shadow:0 0 0 10px rgba(237,162,66,.16), 0 0 0 22px rgba(237,162,66,.07)}
+  .galeri .name{font-family:'Fraunces',serif;font-weight:560;font-size:40px;letter-spacing:.045em;text-align:center;margin-top:20px}
+  .galeri .aspek{font-family:'Fraunces',serif;font-style:italic;font-weight:420;font-size:17.5px;text-align:center;color:var(--cream-soft);margin-top:2px}
+  .galeri .rule{width:44px;height:1px;background:#c9b790;margin:14px auto}
+  .galeri .tags{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-family:'Archivo';font-variation-settings:'wdth' 112;font-size:11px;font-weight:600;letter-spacing:.14em}
+  .galeri .hook{font-family:'Fraunces',serif;font-style:italic;font-size:14px;line-height:1.5;text-align:center;color:#4a3d29;margin:16px 10px 0}
+  .galeri .badges{margin-top:auto;display:flex;justify-content:center;gap:18px;font-size:11.5px;font-weight:500;letter-spacing:.04em;color:#7a5c22}
+  .galeri .badges span::before{content:"\2726  ";font-size:10px}
+  .galeri .foot{margin-top:14px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#a08f6f}
+
+  /* ============ DIRECTION 2 - MALAM ============ */
+  .malam{background:radial-gradient(120% 90% at 50% -10%, #1b2436 0%, var(--night) 55%);color:var(--night-ink);padding:26px}
+  .malam .frame{position:absolute;inset:12px;border:1px solid rgba(212,169,78,.55);border-radius:8px;pointer-events:none}
+  .malam .frame::after{content:"";position:absolute;inset:5px;border:1px solid rgba(212,169,78,.22);border-radius:5px}
+  .malam .sun{width:104px;height:104px;margin:26px auto 6px;border-radius:50%;position:relative;
+    background:radial-gradient(circle at 45% 40%, #f4d78a, #d4a94e 60%, #8f6a24 95%);
+    box-shadow:0 0 34px 4px rgba(212,169,78,.4)}
+  .malam .sun::before,.malam .sun::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:1px dashed rgba(212,169,78,.4)}
+  .malam .sun::after{inset:-26px;border-style:solid;border-color:rgba(212,169,78,.15)}
+  .malam .name{font-family:'Archivo';font-variation-settings:'wdth' 78;font-weight:750;font-size:37px;letter-spacing:.14em;text-align:center;margin-top:24px;color:#f0e8d4}
+  .malam .aspek{font-family:'Fraunces',serif;font-style:italic;font-size:16.5px;text-align:center;color:var(--night-gold);margin-top:4px}
+  .malam .tags{margin-top:16px;display:flex;flex-wrap:wrap;justify-content:center;gap:7px 15px;font-size:10.5px;font-weight:600;letter-spacing:.18em;color:#b9c0d2}
+  .malam .hook{font-family:'Fraunces',serif;font-style:italic;font-size:13.5px;line-height:1.55;text-align:center;color:#cfd5e2;margin:16px 12px 0}
+  .malam .badges{margin-top:auto;display:flex;justify-content:center;gap:18px;font-size:11.5px;color:var(--night-gold);letter-spacing:.04em}
+  .malam .badges span::before{content:"\2726  ";font-size:10px}
+  .malam .foot{margin-top:14px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--night-dim)}
+
+  /* ============ DIRECTION 3 - POSTER ============ */
+  .poster{background:linear-gradient(168deg, var(--poster) 0%, var(--poster-deep) 100%);color:var(--poster-pale);padding:24px}
+  .poster .sun{position:absolute;top:-70px;right:-70px;width:230px;height:230px;border-radius:50%;
+    background:radial-gradient(circle at 40% 40%, #ffd98f, #ffb14e 55%, transparent 78%);opacity:.9}
+  .poster .name{font-family:'Archivo';font-variation-settings:'wdth' 64;font-weight:880;font-size:64px;line-height:.92;letter-spacing:.01em;margin-top:96px;text-transform:uppercase;color:#fff3e4;text-shadow:0 2px 0 rgba(120,35,5,.35)}
+  .poster .aspek{font-family:'Fraunces',serif;font-style:italic;font-size:19px;margin-top:8px;color:#ffd9ad}
+  .poster .tags{margin-top:18px;display:flex;flex-wrap:wrap;gap:7px;font-size:10.5px;font-weight:700;letter-spacing:.1em}
+  .poster .tags b{border:1.5px solid rgba(255,233,214,.85);border-radius:99px;padding:5px 11px;font-weight:700}
+  .poster .hook{font-size:13px;line-height:1.5;font-weight:500;margin:18px 2px 0;color:#ffe9d6;max-width:26ch}
+  .poster .badges{margin-top:auto;display:flex;gap:16px;font-size:11.5px;font-weight:700;letter-spacing:.03em;color:#ffd9ad}
+  .poster .badges span::before{content:"\25C6 ";font-size:9px}
+  .poster .foot{margin-top:12px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#f2b990}
+
+  /* ============ THUMBNAILS ============ */
+  .thumbwrap{display:flex;gap:22px;align-items:flex-end;flex-wrap:wrap}
+  .thumb{transform-origin:top left}
+  .thumb .card{box-shadow:0 8px 18px -6px rgba(0,0,0,.6)}
+  .tlabel{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--bench-dim);margin-top:10px;text-transform:uppercase}
+  .scale-90{width:90px;height:113px;overflow:hidden;border-radius:4px}
+  .scale-90 .card{transform:scale(0.2647);transform-origin:top left;border-radius:16px}
+  .scale-90b{width:90px;height:142px;overflow:hidden;border-radius:4px}
+  .scale-90b .cardB{transform:scale(0.2647);transform-origin:top left}
+
+  /* Card B candidates */
+  .cardB{width:340px;height:537px;border-radius:14px;position:relative;overflow:hidden;display:flex;flex-direction:column}
+  .bseal{position:absolute;top:18px;right:18px;width:54px;height:54px;border-radius:50%;border:1.5px solid var(--night-gold);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:9px;letter-spacing:.16em;color:var(--night-gold);text-align:center;line-height:1.3;transform:rotate(8deg)}
+  .appendix{margin-top:auto;background:rgba(246,239,227,.96);color:#2b2317;padding:14px 18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.06em;line-height:1.9;border-top:3px solid var(--night-gold)}
+  .note{background:#201c18;border:1px solid #35302a;border-radius:10px;padding:18px 22px;font-size:13px;line-height:1.6;color:#c7c0b4;margin-top:26px;max-width:900px}
+  .note b{color:#e8e1d3}
+  .k{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#d4a94e}
+</style>
+</head>
+<body class="grain">
+
+<h1>Katon sharecard — three directions</h1>
+<p class="sub">Same engine data on all three (a 丙 Matahari chart). Watercolour is a CSS placeholder — the
+commissioned illustrations replace it in every direction. The three DYNAMIC tags are placeholders;
+fixed tags are the locked ones. React to the feeling, not the pixels.</p>
+
+<section>
+<h2>Card A — the free shareable</h2>
+<div class="row">
+
+  <div class="slot">
+    <div class="card galeri grain">
+      <div class="wash"></div>
+      <div class="sun"></div>
+      <div class="name">MATAHARI</div>
+      <div class="aspek">Sang Pengelola</div>
+      <div class="rule"></div>
+      <div class="tags"><span>HANGAT</span><span>BERSEMANGAT</span><span>TERBUKA</span><span>MANDIRI</span><span>TAJAM</span><span>RAPI</span></div>
+      <p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p>
+      <div class="badges"><span>Bunga Persik</span><span>Bintang Penolong · Pilar Kerja</span></div>
+      <div class="foot"><span>13 SEP 1989</span><span>katon.app</span></div>
+    </div>
+    <div class="dname">1 — GALERI</div>
+    <p class="why">Museum label on cream paper. Serif, airy, calm. Reads premium and feminine; the
+    watercolour carries the colour, the type stays quiet. Risk: politest of the three, may under-pop in a feed.</p>
+  </div>
+
+  <div class="slot">
+    <div class="card malam grain">
+      <div class="frame"></div>
+      <div class="sun"></div>
+      <div class="name">MATAHARI</div>
+      <div class="aspek">Sang Pengelola</div>
+      <div class="tags"><span>HANGAT</span><span>BERSEMANGAT</span><span>TERBUKA</span><span>MANDIRI</span><span>TAJAM</span><span>RAPI</span></div>
+      <p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p>
+      <div class="badges"><span>Bunga Persik</span><span>Bintang Penolong · Pilar Kerja</span></div>
+      <div class="foot"><span>13 SEP 1989</span><span>katon.app</span></div>
+    </div>
+    <div class="dname">2 — MALAM</div>
+    <p class="why">Ink night, gold accent, double hairline frame. A tarot object — a card you were
+    dealt, not a graphic you generated. Strongest fit with the EN variant ("THE SUN"). Badges in gold
+    read as earned. Risk: mystical register may cut against "analysis not theatre".</p>
+  </div>
+
+  <div class="slot">
+    <div class="card poster grain">
+      <div class="sun"></div>
+      <div class="name">MATA<br>HARI</div>
+      <div class="aspek">Sang Pengelola</div>
+      <div class="tags"><b>HANGAT</b><b>BERSEMANGAT</b><b>TERBUKA</b><b>MANDIRI</b><b>TAJAM</b><b>RAPI</b></div>
+      <p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p>
+      <div class="badges"><span>Bunga Persik</span><span>Bintang Penolong · Pilar Kerja</span></div>
+      <div class="foot"><span>13 SEP 1989</span><span>katon.app</span></div>
+    </div>
+    <div class="dname">3 — POSTER</div>
+    <p class="why">Element colour floods the card; the name IS the visual. Ten archetypes = ten
+    unmistakable colour fields — instantly distinct in a feed, closest to the imajidiri energy.
+    Risk: loudest, least "document"; tags-as-pills flirt with generic quiz aesthetics.</p>
+  </div>
+</div>
+</section>
+
+<section>
+<h2>The thumbnail test — what a feed actually shows</h2>
+<div class="thumbwrap">
+  <div><div class="scale-90"><div class="card galeri"><div class="wash"></div><div class="sun"></div><div class="name">MATAHARI</div><div class="aspek">Sang Pengelola</div><div class="rule"></div><div class="tags"><span>HANGAT</span><span>BERSEMANGAT</span><span>TERBUKA</span><span>MANDIRI</span><span>TAJAM</span><span>RAPI</span></div><p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p><div class="badges"><span>Bunga Persik</span><span>Bintang Penolong · Pilar Kerja</span></div><div class="foot"><span>13 SEP 1989</span><span>katon.app</span></div></div></div><div class="tlabel">1 galeri</div></div>
+  <div><div class="scale-90"><div class="card malam"><div class="frame"></div><div class="sun"></div><div class="name">MATAHARI</div><div class="aspek">Sang Pengelola</div><div class="tags"><span>HANGAT</span><span>BERSEMANGAT</span><span>TERBUKA</span><span>MANDIRI</span><span>TAJAM</span><span>RAPI</span></div><p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p><div class="badges"><span>Bunga Persik</span><span>Bintang Penolong · Pilar Kerja</span></div><div class="foot"><span>13 SEP 1989</span><span>katon.app</span></div></div></div><div class="tlabel">2 malam</div></div>
+  <div><div class="scale-90"><div class="card poster"><div class="sun"></div><div class="name">MATA<br>HARI</div><div class="aspek">Sang Pengelola</div><div class="tags"><b>HANGAT</b><b>BERSEMANGAT</b><b>TERBUKA</b><b>MANDIRI</b><b>TAJAM</b><b>RAPI</b></div><p class="hook">"Orang mengira energimu tidak pernah habis."</p><div class="badges"><span>Bunga Persik</span><span>Bintang Penolong</span></div><div class="foot"><span>13 SEP 1989</span><span>katon.app</span></div></div></div><div class="tlabel">3 poster</div></div>
+</div>
+<div class="note"><b>What to look for:</b> which one would stop your thumb, and which one can you still
+IDENTIFY as Katon at this size. Direction 3 wins raw visibility; direction 2 wins object-ness;
+direction 1 depends heavily on the real watercolour being good.</div>
+</section>
+
+<section>
+<h2>ID vs EN variant — same object, two names (rule 23 amendment)</h2>
+<div class="row">
+  <div class="slot">
+    <div class="card malam grain">
+      <div class="frame"></div>
+      <div class="sun"></div>
+      <div class="name">MATAHARI</div>
+      <div class="aspek">Sang Pengelola</div>
+      <div class="tags"><span>HANGAT</span><span>BERSEMANGAT</span><span>TERBUKA</span><span>MANDIRI</span><span>TAJAM</span><span>RAPI</span></div>
+      <p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p>
+      <div class="badges"><span>Bunga Persik</span><span>Bintang Penolong · Pilar Kerja</span></div>
+      <div class="foot"><span>13 SEP 1989</span><span>katon.app</span></div>
+    </div>
+    <div class="dname">Variant ID</div>
+  </div>
+  <div class="slot">
+    <div class="card malam grain">
+      <div class="frame"></div>
+      <div class="sun"></div>
+      <div class="name" style="letter-spacing:.2em">THE SUN</div>
+      <div class="aspek">Sang Pengelola</div>
+      <div class="tags"><span>HANGAT</span><span>BERSEMANGAT</span><span>TERBUKA</span><span>MANDIRI</span><span>TAJAM</span><span>RAPI</span></div>
+      <p class="hook">"Orang mengira energimu tidak pernah habis. Mereka tidak melihat seberapa cepat kamu merasa kosong begitu ruangan sepi."</p>
+      <div class="badges"><span>Bunga Persik</span><span>Bintang Penolong · Pilar Kerja</span></div>
+      <div class="foot"><span>13 SEP 1989</span><span>katon.app</span></div>
+    </div>
+    <div class="dname">Variant EN — name only, body stays Indonesian</div>
+  </div>
+</div>
+<div class="note"><b>Open question for the A/B:</b> does the EN name alone carry the "legit + cool"
+effect, or do the tags need to flip too (<span class="k">tags_en</span>, not yet written)? Note the
+mixed register on this mock: English headline, Indonesian everything else. Decide whether that mix
+is the feature (aspirational code-mixing) or a bug (one voice rule).</div>
+</section>
+
+<section>
+<h2>Card B — three ways to be visibly "the paid one" at thumbnail size</h2>
+<div class="thumbwrap">
+  <div><div class="scale-90"><div class="card malam"><div class="frame"></div><div class="sun"></div><div class="name">MATAHARI</div><div class="aspek">Sang Pengelola</div></div></div><div class="tlabel">Card A (reference)</div></div>
+  <div><div class="scale-90b"><div class="cardB malam"><div class="frame"></div><div class="bseal">KATON<br>EDISI<br>PENUH</div><div class="sun" style="margin-top:40px"></div><div class="name">MATAHARI</div><div class="aspek">Sang Pengelola</div><div class="appendix">乙丑 &nbsp;丙戌 &nbsp;丙寅 &nbsp;戊子<br>KERBAU KAYU · ANJING API · MACAN API · TIKUS TANAH<br>████████ ▓▓▓▓ ▒▒▒ ░░ ░</div></div></div><div class="tlabel">B1 taller + appendix</div></div>
+  <div><div class="scale-90"><div class="card galeri"><div class="wash"></div><div style="position:absolute;inset:10px;border:2px solid #b98a2e;border-radius:10px"></div><div class="sun"></div><div class="name">MATAHARI</div><div class="aspek">Sang Pengelola</div><div class="rule"></div><div class="badges" style="margin-top:120px"><span>Bunga Persik</span></div><div class="foot"><span>13 SEP 1989</span><span style="color:#b98a2e">EDISI PENUH</span></div></div></div><div class="tlabel">B2 gold frame + seal</div></div>
+  <div><div class="scale-90"><div class="card malam" style="background:radial-gradient(120% 90% at 50% -10%, #2e1b36 0%, #170f1e 55%)"><div class="frame"></div><div class="sun" style="background:radial-gradient(circle at 45% 40%, #e8c8ff, #b98ae0 60%, #6a3f8f 95%);box-shadow:0 0 34px 4px rgba(185,138,224,.4)"></div><div class="name">MATAHARI</div><div class="aspek">Sang Pengelola</div></div></div><div class="tlabel">B3 exclusive colourway</div></div>
+</div>
+<div class="note"><b>My read:</b> B1 (different aspect ratio + visible chart appendix) is the only one
+that signals "document, not graphic" while scrolling — the height difference alone reads at any size,
+and the appendix is the legitimacy object made visible. B2 is subtle at thumbnail. B3 is visible but
+spends the element-colour system (a purple sun breaks "the Day Master drives the visual").
+<br><br><b>Register flags on all mocks:</b> the middle dot in "13 SEP 1989 · katon.app" and
+"Bintang Penolong · Pilar Kerja" is NOT a keyboard character — the spec's own ASCII mock uses it, so
+either amend rule 20's letter or swap to a hyphen/space. And the hook line is used verbatim per spec;
+on direction 3 it only fits because the type is smaller — check whether two-sentence hooks survive
+every archetype.</div>
+</section>
+
+</body>
+</html>
