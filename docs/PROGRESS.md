@@ -220,8 +220,85 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | Joey #1 element distribution | Earth 5, Fire 4, Wood 3, Metal 1, Water 0 | 08-01 | from full ten bars |
 | **Badge anchors vs Joey's printed stars** | **60/60** | 08-01 | 貴人 文昌 桃花 驛馬 孤辰 across 12 charts. **Every table row exercised** — 10/10 day stems, 4/4 trine groups, 4/4 season groups. Tables in `prompts/D2a-stage3-anchors.md`. |
 | Badge anchors, YEAR-pillar alternative | 0/12 桃花, 0/12 驛馬, 1/12 孤辰 | 08-01 | the day-pillar ruling is not marginal |
-| Badge frequency (avg per chart) | 2.5, range 1-4 | 08-01 | **STALE — measured with a candidate 華蓋 table that is now descoped.** Re-measure in D2a Phase 1; Phase 2's extremity term reads this. |
-| Bintang Penolong frequency | 77% | 08-01 | **STALE for the same reason.** Re-measure from the verified anchor. |
+| **Badge frequency (avg per chart)** | **2.15, range 1-4** | 08-02 | RE-MEASURED from the verified anchors (was 2.5 with a candidate 華蓋 table). 28 badges over 13 charts. Nobody at 0, nothing universal, so the comparison mechanic survives. Phase 2's extremity term reads this. |
+| **Bintang Penolong frequency** | **77% (10/13)** | 08-02 | re-measured; unchanged from the stale figure by coincidence, 10 of 13 either way. The never-top-3 rule stands on the same footing. |
+| **Badge frequency, per badge** | 貴人 10 · 文昌 5 · 驛馬 4 · 空亡 4 · 桃花 2 · 羊刃 2 · 孤辰 1 | 08-02 | out of 13. `tests/badge-anchors.spec.mjs` asserts all seven. **All three per-badge figures D2 phase 2 cites survive unchanged** — Mata Pisau 15% (2/13), Tanda Kekosongan 31% (4/13), Bintang Penolong 77% (10/13). Only the AVERAGE moved, and only because 華蓋 left the set. |
+| **Badge anchors, YEAR-pillar alternative** | **0/10 桃花, 0/10 驛馬, 1/10 孤辰** | 08-02 | CORRECTS the 08-01 row below it. Denominator is 10, not 12: X2 and X3 both have year branch == day branch (巳), so the two conventions are the same computation there and cannot discriminate. Stated correctly the ruling is STRONGER — every chart that can tell them apart favours the day pillar. |
+| Stage 3 facts per chart | 9 to 16, mean 12.5 | 08-02 | Phase 1 inventory, unranked. Thinnest charts 7 (9) and 12 (10) are the `quiet_chart` candidates. |
+| Stage 3 CR-1 fire rate | 4/13 | 08-02 | charts 1, 7, 9, 12. **9/13 without the balanced-verdict exclusion** — see the 08-02 Stage 3 section. |
+| Stage 3 void_stack fire rate | 1/13 | 08-02 | chart 1 only, at stack size 3. The exemplar the target file describes. |
+| Stage 3 glossary gaps | 1 fact type | 08-02 | `strength_<verdict>` has no glossary entry at all. Every other fact type is fully backed. |
+
+## DECIDED 2026-08-02 — Stage 3 PHASE 1 landed (fact inventory + badge anchors)
+
+`prompts/D2-stage3.md` + `D2a`, phase 1 of 3. **No scoring, no JSON contract, no required_points** —
+those are phases 2 and 3. New: `lib/bazi/badges.js`, `lib/bazi/relations.js`, `lib/semantic/facts.js`,
+`lib/semantic/glossary.js`, `tests/badge-anchors.spec.mjs`, `tests/stage3-facts.spec.mjs`.
+
+**Badge anchors: 60/60 reproduced independently**, on Joey's own day pillars, with every table row
+exercised. Locked as evidence in `tests/badge-anchors.spec.mjs`.
+
+**Seven detectable badges, not eight.** D2a §"WHAT THIS CHANGES IN D2" says 羊刃 and 空亡 "were already
+computed". **Neither existed anywhere in `lib/`** — this is spec error 13, the same shape as error 9 and
+in the document that corrected error 9. Both are implemented here and both are legitimate under rule 4,
+for reasons that are NOT the same as 華蓋's:
+- 羊刃 is written down twice in `docs/` (`engine-session-state.md` line 92, `bazi-blueprint.md` line 223)
+  with the same table, and `DI_WANG_BRANCH` in `strength.ts` corroborates it inside the repo — 羊刃 IS
+  the yang stem's 帝旺 branch.
+- 空亡 is not a table. A 旬 covers ten of the twelve branches; the two it misses are void. The spec
+  asserts it structurally over all 60 pillars, not by sampling.
+- 華蓋 had a table nobody wrote down, no repo corroboration, and no oracle. It stays descoped and is
+  deliberately absent from `badges.js`.
+
+**Four rulings made where D2/D2a were silent or wrong. All four are reversible and all four are tested:**
+
+1. **`provenance` is emitted as STRUCTURED DATA, not prose.** The target file carries it as finished
+   Indonesian sentences that exist nowhere in `glossary.json`, so producing them means Stage 3 authoring
+   user-facing copy — which D2 forbids and which only Reyner can approve on register. **The sentence
+   layer is deferred to Phase 3 as an explicit register-review item.** The data is strictly richer than
+   the sentence, so nothing is lost. NOTE while deciding it: the target file's provenance strings use
+   *"Dihitung dari pilar harimu"*, and `renderer-prompt.txt` §PROVENANCE IS NOT ARITHMETIC bans exactly
+   that phrasing. Whatever ships must not model banned copy.
+2. **CR-1 does not fire on balanced charts.** Without the exclusion it fires 9/13, because 8 of 13 are
+   balanced and for a balanced chart the engine picks the unfavourable side by whichever is merely less
+   scarce — then flags itself `confidence: low` for doing so. Building a reading's emotional core on a
+   split the engine already distrusts is what D2 means by a forced tension. With it: 4/13. Carry-forward:
+   the fixture has zero `strong` charts, so today this reads as weak-charts-only; re-measure if the
+   40/60 thresholds move.
+3. **The day stem is excluded from Aspek convergence counting.** It is the self, not a relation to the
+   self, and counting it inflates 比肩 by one on every chart ever computed. The target file agrees — it
+   reads chart 1's 比肩 as the two hidden 丙, not three.
+4. **A void stack counts at most one convergent Aspek per branch (main qi only).** Counting all hidden
+   stems made a three-stem branch stack almost automatically: chart 13's void 辰 scored 3 on 戊/乙/癸
+   alone, with no badge and no profile source. That is a branch with three hidden stems, not a
+   convergence. After the fix, `void_stack` fires on chart 1 only — exactly the exemplar D2 describes.
+
+**Chart 1 vs the hand-written target: all 11 target facts present, 5 extra.** The extras are
+`main_profile` (the plain fact under the CR-1 tension, now marked `supersedes`/`superseded_by` so Phase 3
+collapses them deterministically), `element_dominant_Water` (the same finding as `officer_convergence`
+seen from the element side), `aspek_convergence_食神` and `_偏財` (戊 x2 at qi 0.1 and 庚 x2 at 0.3, both
+from the duplicated 巳 — they converge by the letter of the rule and barely at all by presence, which is
+why **Phase 2's convergence term must weight by presence, not by position count**), and `badge_空亡`
+under the stack. None is a defect; all are the Phase 2/3 dedupe surface.
+
+**TWO MORE TARGET-FILE CORRECTIONS, same class as D2a §4's `lean`.** `provecell-01-USER.json` attributes
+七殺 to chart 1 twice — the fact id `spouse_palace_7k`, and `officer_convergence`'s label "Aspek Pengatur
+dan Aspek Penantang". **壬 appears nowhere in chart 1**, so 七殺 scores exactly 0 and 正官 scores 100.
+Both should be 正官 alone. This is the zero-presence law catching a hand-written file. Fix them in the
+Phase 3 commit alongside `lean`/`provisional`.
+
+**Good news on the re-measurement D2a §2 ordered:** the three per-badge frequencies D2 phase 2 actually
+reads — Mata Pisau 15%, Tanda Kekosongan 31%, Bintang Penolong 77% — are all **unchanged**. Only the
+average moved, 2.5 to 2.15, and only because 華蓋 left the set. Nothing in the extremity term was
+silently mis-scored, and the Penolong never-top-3 rule stands on the same 77%. (Those three figures are
+cited in `D2-stage3.md` as living in `sharecard-spec.md`; that file carries only the average and the
+77%. Minor, noted so nobody hunts for them.)
+
+**Two doc defects found in passing, not fixed here:** the 08-01 ledger entry below calls 華蓋 "Bintang
+Cendekia" — the glossary says 華蓋 is **Bintang Sunyi** and 文昌 is Bintang Cendekia. And
+`lib/readingView.js` renders Earth as "Bumi" while the glossary says "Tanah"; that surface predates the
+glossary and is out of Stage 3's scope, but it is exactly the drift `lib/semantic/glossary.js` derives
+its element map to prevent.
 
 ## DECIDED 2026-08-02 — archetype names, fixed tags, EN display layer
 

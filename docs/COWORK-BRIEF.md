@@ -108,7 +108,7 @@ right until you have checked.** It has been right every time so far.
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
 
-**Eleven spec errors so far. All eleven were mine.** Not listed to be self-flagellating; listed because
+**Fourteen spec errors so far. All fourteen were mine.** Not listed to be self-flagellating; listed because
 the pattern is predictive and knowing it changes what you do next. **Append here when a new one is
 caught, and never trim the list — the pattern is the value, not the count.**
 
@@ -126,6 +126,8 @@ caught, and never trim the list — the pattern is the value, not the count.**
 | 10 | Added 華蓋 to the badge set; Joey's plotter never prints it | invented a mechanic and then looked for an oracle for it |
 | 11 | Called two mirror files "orphans with no repo counterpart". **Both were already in the repo.** `KATON-master-prompt.md` was `content/renderer-prompt-notes.md`; the compat spec was already at `product/compatibility-reading-spec.md` | matched by FILENAME, then "confirmed" by a hash check I had **already invalidated by writing to the file first** |
 | 12 | "Rescued" `solar-term-oracle-diff.mjs` from the mirror into `tests/tools/` — a file `PROGRESS.md` RESOLVED had already ruled deliberately deleted and not to be restored | verified the file WAS an orphan, never checked whether its absence was a DECISION. Same shape as 2/5/6: the disproving evidence was already in the ledger |
+| 13 | D2a said 羊刃 and 空亡 "were already computed". **Neither existed anywhere in `lib/`.** | error 9 again, in the very document that corrected error 9. Fixed the five anchors I had checked and asserted the other two from memory of what the engine contained |
+| 14 | D2a §1 reports the year-pillar alternative at 0/12, 0/12, 1/12. Two of the twelve charts (X2, X3) have year branch == day branch, so the conventions are the same computation there and cannot discriminate. True figures: **0/10, 0/10, 1/10** | quoted a discriminating-cases count against the full-sample denominator. Harmless here — stated correctly the ruling is stronger — but the same slip on a marginal result would manufacture significance |
 
 **Three of these (2, 5, 6) are the same failure: I had the disproving evidence in hand and wrote the
 claim anyway.** Before asserting anything, check whether something you already measured contradicts it.
