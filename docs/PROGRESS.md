@@ -237,6 +237,22 @@ own pick — premium heirloom wood, classical 甲, and the *jati diri* pun self-
 **EN display layer scoped:** names + tags + card strings only; the reading body stays Indonesian.
 Rule 23 amended: brackets convention is reading-prose only; the sharecard never shows brackets.
 
+**CARD VISUAL SYSTEM — direction and layout DECIDED** (same day, mockup trail in
+`content/sharecard-mockups-01.html` and `-02.html`; detailing/polish deferred, Reyner will tinker):
+- Direction: **typographic poster.** Colour field + one geometric mark per archetype + typography.
+  **No watercolour — the 10 commissions are CANCELLED**, the parked item is dead, and "paintable"
+  drops out of the naming criteria. One typeface: **Archivo variable** (wght x wdth, SIL OFL).
+- Card A: flat colour field, mark top, name/Aspek/6 tags/verbatim hook/badges/footer. Indonesian.
+- Card B: taller ratio, gradient field, ghost mark background, content bottom-anchored,
+  **head in EN (name_en) + Aspek in Indonesian**, appendix band with animal-element row + element
+  bars, "Complete Edition" chrome. The classical EN Aspek terms (Direct Wealth etc.) are
+  bracket-terms only, NEVER display copy.
+- **Hanzi removed from the Card B image** (Reyner 08-02). OPEN FLAG: the 4x2 hanzi grid should move
+  to the PDF chart sheet so rule 23's legitimacy object survives — awaiting confirmation; if the PDF
+  also drops it, rule 23 needs a conscious amendment.
+- Colour tokens fixed for 5 of 10 archetypes; remaining 5 to derive (Api Unggun must not collide
+  with Matahari). tags_en and the ID/EN A/B remain open; Card B carrying the EN head may settle it.
+
 **The 刑 glossary entry is REGISTER-APPROVED and landed** in `glossary.json` → `relasi_cabang.刑`.
 "Simpul" confirmed (Belitan considered, not taken). `label_meaning` rewritten to drop the banned
 negation-contrast construction. name_en stays "Punishment" per the Seven Killings precedent —

@@ -234,6 +234,15 @@ should be decided.
    user without passing Stage 6.
 4. **Sharecard build.** Almost entirely engine-free; only the optional feed/drain line needs strength.
 5. **Compatibility** — the v1 money engine. Price band to be **tested** at 25 to 45k, not assumed.
+   **BACKLOGGED 08-02: the flow reconciliation.** `product/compatibility-reading-spec.md` is still
+   proposal-not-decision; before build, one Cowork session must produce the input→output flow with
+   contradictions vs the naming lock marked and every BaZi assertion oracle-checked. Carries two open
+   product questions: (a) identity/login — Reyner floated email-login before any reading (Joey's
+   model) + paywalling non-own birthdates; Cowork counter-position recorded in session 08-02: keep
+   the mirror anon (locked email-after-reading decision stands), require email at compat CHECKOUT
+   where it is transactionally natural; note any non-own-date gate is unenforceable while the mirror
+   reads any date by design. (b) person-B consent UX belongs to the compat spec, not to a login wall.
+   Also: Luck Pillar sync in compat may force female-set fixture charts earlier than planned.
 6. Rate limiting, and remove the `NEXT_PUBLIC_FREE_FULL_READING` flag.
 
 ---
