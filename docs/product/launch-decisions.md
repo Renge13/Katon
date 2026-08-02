@@ -89,6 +89,25 @@ But **test 25–45k before committing to 80–99k.** The gap between "impulse" a
 most Indonesian digital products die. Pricing is currently an assumption wearing the clothes of a
 decision.
 
+### PROPOSED price architecture 2026-08-02 — [REYNER to confirm; unconfirmed numbers, locked mechanic]
+
+Mechanic (DECIDED 08-02, from the compat-flow review): **visible "harga peluncuran" cohorts, never
+silent A/B.** List price fixed and public; the launch discount is the test variable. A discount is a
+story people accept; a silent price difference, screenshotted between friends, reads as cheating.
+
+Structure follows two asymmetries: raising a list price later is nearly impossible, lowering via
+discount is free — so **anchor the list at the top and discount down.** And legitimacy is carried by
+the FREE reading (price never has to signal quality, because the user prices the product after
+feeling it — the structural advantage of the ungated mirror) plus the visibly-different Complete
+Edition card; neither needs a high price to read as legit.
+
+| SKU | List (anchor) | Launch (harga peluncuran) | Note |
+|---|---|---|---|
+| Complete Edition card + PDF | Rp 25.000 | **Rp 19.000** | the decided ~19k becomes the LAUNCH price, not the list; sits credibly above imajidiri's 15k |
+| Compatibility reading | Rp 45.000 | **Rp 29.000** | top of the tested band as anchor; launch inside the band; ~1:1.8 ladder keeps compat clearly the premium product |
+
+Never raise a list price before take-rate evidence exists; flex only the discount.
+
 ---
 
 ## 3. ABUSE & COST — SETTLED WITH ARITHMETIC
