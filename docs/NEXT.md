@@ -15,17 +15,24 @@ go stale is which prompt it names. Do not re-add a task summary here.
 3. **`content/provecell-01-ENGINE.json`** — Stage 3's real output for fixture chart 1.
 4. **`content/renderer-prompt.txt`** — the Stage-5 system prompt. Single source of truth.
 
-## Current task
+## Current task (updated 2026-08-02 late — Stages 3, 5 and 6 are ALL DONE and on main)
 
-**Stage 3 is DONE, all three phases** (`prompts/D2-stage3.md` + `D2a`). What is left is the thing
-Stage 3 cannot do for itself.
+**1. RUN THE HARNESS. It is the launch-gating number and it has never touched a live model.**
+`npm run measure:stage6 -- --n 3` with `GEMINI_API_KEY` set. Reports first-pass / shipped /
+fallback rates separately, per-check per-model failures, the 2.5-flash-lite rider, and the
+threshold distributions for the stem-overlap proxies. Numbers go to `PROGRESS.md` MEASUREMENTS,
+dated (rule 8). Reyner blind-judges the anonymised rider pairs.
 
-**1. Run D2's end-to-end gate. It has NOT been run.** Paste
-`content/provecell-01-ENGINE.json` into AI Studio with `content/renderer-prompt.txt` and compare the
-reading against run 5. This needs a real LLM call, which is why it is still open. **Predict before
-running:** the reading should be thin exactly where `strength_weak` sits, because that fact is top-3
-and has no `label_meaning`, `gift` or `cost`. Thinness anywhere else means the JSON is wrong, and
-diffing against `provecell-01-USER.json` will say where.
+**2. Fit the same-breath / coverage proxy thresholds FROM the harness distributions.** They ship
+unfitted by design. One change, one measurement (rule 13) — never fit two in one pass.
+
+**3. One sanctioned engine line:** `element_missing_*` lacks `internal_only: ['provenance.percent']`
+while `element_dominant_*` has it, so a zero percent reaches the provider (H session finding,
+reported not fixed).
+
+**Historical note:** the AI Studio end-to-end WAS run (2026-08-02, 0/2 clean, see MEASUREMENTS
+"Gate-check renders") and the strength_weak thinness prediction is VOID — `glossary.kekuatan`
+landed and the fact is fully backed.
 
 **2. One thing still needs Reyner before anything downstream is real:**
 - ~~The strength verdict has NO glossary entry~~ **RESOLVED 2026-08-02**: `glossary.json` now has a
@@ -39,12 +46,9 @@ diffing against `provecell-01-USER.json` will say where.
   user-facing copy and need a register pass. Note `renderer-prompt.txt` bans "dihitung dari", which
   the hand-written provenance strings use.
 
-**3. Then the pipeline, prompts now written (2026-08-02):** `prompts/G-stage5-render.md` (Stage 5
-renderer wiring + Stage 4 cache consumption — `cacheKey()` exists and is tested, nothing consumes it
-yet), then `prompts/H-stage6-validation.md` (the Stage 6 gate + the pass-rate measurement harness).
-Own session/PR each. Nothing user-facing ships from G until H exists. Note G/H were written before
-Stage 3 completed — if the semantic JSON shape they assume contradicts what PHASE 3 actually emits,
-the code and `provecell-01-ENGINE.json` win; report the mismatch.
+**4. After the harness numbers land: the mirror ROUTE.** Stage 5's only entry point is a CLI by
+design; the next build prompt (not yet written — Cowork writes it once thresholds are fitted) wires
+funnel -> engine -> cache -> render -> gate -> serve. G and H are DONE and merged.
 
 (`prompts/F-payments-pricing.md` — separate INFRA track — executed 2026-08-02, tasks 1-4 done.
 Its task 5 was corrected: the real rule-20 fix is curly quotes at `components/Funnel.jsx:731`.)

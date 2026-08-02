@@ -167,7 +167,10 @@ Score each run. **Do not soften a fail because you like a sentence.**
 - [ ] **ARRANGEMENT EARNED.** Did it choose an order that suits this chart, or default to the JSON's
       array order? Array order = it's slot-filling, and slot-filling is the register you're killing.
 - [ ] **CONSISTENCY.** Are all three runs good, or one good and two mush?
-- [ ] **VOICE.** Casual old-friend Indonesian, or baku pretending to be casual? [REYNER decides]
+- [ ] **VOICE.** Plain, precise, composed Indonesian (the ONE voice, rule 20) — not slang, not
+      chat particles, not bureaucratic-baku, and not the dead casual old-friend register. Also:
+      are the seeds WOVEN with connective tissue, or pasted as tiles? [REYNER decides]
+      (Corrected 2026-08-02; the earlier "casual old-friend" line predated the voice ruling.)
 
 ### Reading the result
 
