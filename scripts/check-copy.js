@@ -33,13 +33,29 @@ import REPORT_HUBUNGAN_DENGAN_REZEKI from '../lib/bazi/report/passages/hubunganD
 import REPORT_PENUTUP                from '../lib/bazi/report/passages/penutup.js'
 import { PROMPTS as REPORT_PROMPTS } from '../lib/bazi/report/prompts.js'
 
-const EM_DASH = '—'
+// Stage 5 chrome (rule 20: one voice everywhere, INCLUDING chrome).
+import { RENDER_COPY } from '../lib/render/copy.js'
+
+// Rule 20 bans typographic characters in user-facing strings, keyboard keys only.
+// The em-dash is the #1 AI tell and was the original reason for this script, but
+// it was never the whole rule: the ONE real rule-20 violation ever found in this
+// repo was CURLY QUOTES at components/Funnel.jsx:731 (fixed in 75f1901), which
+// this checker would have missed. Widened 2026-08-02 to the full set.
+const BANNED = [
+  ['em-dash',       '—'],
+  ['en-dash',       '–'],
+  ['curly quote',   '‘'],
+  ['curly quote',   '’'],
+  ['curly quote',   '“'],
+  ['curly quote',   '”'],
+  ['ellipsis char', '…'],
+]
 const issues = []
 
 function walk(node, path) {
   if (typeof node === 'string') {
-    if (node.includes(EM_DASH)) {
-      issues.push({ path, value: node })
+    for (const [name, char] of BANNED) {
+      if (node.includes(char)) issues.push({ path, value: node, name, char })
     }
     return
   }
@@ -71,14 +87,17 @@ walk(REPORT_HUBUNGAN_DENGAN_REZEKI, 'REPORT.hubunganDenganRezeki')
 walk(REPORT_PENUTUP,                'REPORT.penutup')
 walk(REPORT_PROMPTS,                'REPORT.PROMPTS')
 
+// Stage 5 chrome. The loading string is user-facing and rule 20 covers chrome.
+walk(RENDER_COPY,                   'RENDER_COPY')
+
 if (issues.length > 0) {
-  console.error(`✗ Found em-dash in ${issues.length} copy string(s):\n`)
+  console.error(`✗ Found banned typography in ${issues.length} copy string(s):\n`)
   for (const issue of issues) {
-    console.error(`  ${issue.path}`)
+    console.error(`  ${issue.path} — ${issue.name} (${issue.char})`)
     console.error(`    "${issue.value}"\n`)
   }
-  console.error(`Replace with a regular dash (-), comma, or period. Em-dash is the #1 AI-text tell.`)
+  console.error(`Rule 20: keyboard characters only. Use a hyphen, comma, period or straight quote.`)
   process.exit(1)
 }
 
-console.log(`✓ No em-dashes in copy banks. Checked: DAY_MASTERS, DAY_BRANCHES, DOMINANT_ELEMENT, MISSING_ELEMENT, PAID_HOOK_TEMPLATE, PILLAR_STEM_MEANINGS, 7 REPORT passage banks, REPORT.PROMPTS.`)
+console.log(`✓ No banned typography in copy banks. Checked: DAY_MASTERS, DAY_BRANCHES, DOMINANT_ELEMENT, MISSING_ELEMENT, PAID_HOOK_TEMPLATE, PILLAR_STEM_MEANINGS, 7 REPORT passage banks, REPORT.PROMPTS, RENDER_COPY.`)

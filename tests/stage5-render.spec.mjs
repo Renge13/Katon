@@ -26,6 +26,8 @@ import { readCache, writeCache, flagCache, __clearMemCache } from '../lib/render
 import { renderReading, persistRendered, withTargetLanguage } from '../lib/render/index.js';
 import { STRICTER_STYLE_BLOCK, renderWithOpenAI } from '../lib/render/providers/openai.js';
 import { STAGE6_VERSION, serveFenceReason, serveAllowed } from '../lib/render/fence.js';
+import { splitParagraphs, inspectParagraphs } from '../lib/render/paragraphs.js';
+import { RENDER_COPY } from '../lib/render/copy.js';
 
 const jsonFor = (tc) => buildSemanticJson(calculateBaziChart({
   birthDate: tc.date, birthTime: tc.time,
@@ -495,6 +497,40 @@ test('the fence is closed, and persisting a render is refused while it is', asyn
       'nothing may be written while the gate is absent',
     );
   });
+});
+
+// ── the UI contract and the chrome copy ────────────────────
+
+test('a block splits on the double break, and on nothing else', () => {
+  assert.deepEqual(splitParagraphs('Satu.\n\nDua.'), ['Satu.', 'Dua.']);
+  // A lone newline is never a paragraph break. It stays inside the paragraph so
+  // the gate can see it; pre-wrap would have rendered it as a visible artefact.
+  assert.deepEqual(splitParagraphs('Satu.\nDua.'), ['Satu.\nDua.']);
+  // 3+ collapse rather than producing an empty paragraph.
+  assert.deepEqual(splitParagraphs('Satu.\n\n\n\nDua.'), ['Satu.', 'Dua.']);
+  assert.deepEqual(splitParagraphs('   '), []);
+  assert.deepEqual(splitParagraphs(undefined), []);
+});
+
+test('the strict view reports what the tolerant one repairs', () => {
+  // Prompt H reads this one. Reports, never fixes.
+  const got = inspectParagraphs('Satu.\nDua.\n\nTiga.\n\n\nEmpat.');
+  assert.equal(got.paragraphs.length, 3);
+  assert.equal(got.breakCount, 2);
+  assert.equal(got.strayNewlines, 1, 'the lone newline must be visible to the gate');
+  assert.equal(inspectParagraphs('Satu.\n\nDua.').strayNewlines, 0);
+});
+
+test('the loading copy never advertises the AI', () => {
+  // Decided in PROGRESS: naming the model invites "it just rephrased my input".
+  assert.equal(RENDER_COPY.loading, 'Menghitung bagan kelahiranmu');
+  for (const banned of ['AI', 'Gemini', 'GPT', 'model', 'kecerdasan']) {
+    assert.ok(!RENDER_COPY.loading.includes(banned), `loading copy names "${banned}"`);
+  }
+  // Rule 20's audit surface. scripts/check-copy.js walks this object too.
+  for (const value of Object.values(RENDER_COPY)) {
+    assert.ok(!/[—–‘’“”…]/.test(value), `banned typography in "${value}"`);
+  }
 });
 
 test('target_language is set before keying, so two languages are two entries', () => {

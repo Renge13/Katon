@@ -24,6 +24,7 @@
     "test:stage3-contract": "node --test tests/stage3-contract.spec.mjs",
     "test:stage5": "node --conditions=react-server --test tests/stage5-render.spec.mjs",
     "emit:semantic": "node scripts/emit-semantic.mjs",
+    "render:reading": "node --conditions=react-server scripts/render-reading.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:engine": "node tests/bazi-engine.report.mjs",
     "test:forge": "node --conditions=react-server scripts/forge-tests.mjs"
