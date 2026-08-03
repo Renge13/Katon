@@ -10,6 +10,10 @@ UPDATED: 2026-07-30 — CALCULATOR CLOSED + STRATEGY RESET. sxtwl retired in fav
 UPDATED: 2026-08-01 — Badge anchors verified 60/60 against Joey with full table-row coverage. 華蓋
          descoped. Stale mirror `D:\Work\Katon assets\Katon md` neutralised, its two unique files
          rescued into the repo. `docs/COWORK-BRIEF.md` added as the Cowork session entry point.
+UPDATED: 2026-08-03 — XENDIT SITE COMPLIANCE. Site footer + /harga /tentang /privasi /syarat
+         /pengembalian shipped (Prompt I). Serves TODO #8. Two pre-existing defects found and NOT
+         fixed here: the paywall shows a retired Rp 49.000, and the funnel carries 9 banned
+         ellipsis characters.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
 -->
 
@@ -259,6 +263,70 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **Stage 3 JSON byte-identical on recompute** | **13/13** | 08-02 | the cache guarantee. Cache keys all distinct, no collisions. |
 | Stage 3 facts after collapse, chart 1 | 14 of 16 | 08-02 | `main_profile` absorbed by CR-1, `badge_空亡` by its void stack. |
 | Stage 3 required points, chart 1 | 9 | 08-02 | hand-written file has 8; the extra is `day_master_Fire`, which the target carries as its first point. |
+
+## DECIDED 2026-08-03 — Xendit merchant-compliance chrome shipped (footer + 5 static pages)
+
+`prompts/I-xendit-site-compliance.md`, all six tasks. Serves **TODO #8**. Xendit rejected activation
+(ticket 2686100) on KBLI mismatch AND website criteria; MCS Consulting owns the KBLI side, this is
+the website side. New: `lib/site/entity.js`, `lib/site/copy.js`, `lib/site/format.js`,
+`components/SiteFooter.jsx`, `components/StaticPage.jsx`, and `app/{harga,tentang,privasi,syarat,pengembalian}/page.js`.
+
+**All five pages prerender as static.** `npm run build` on 2026-08-03 lists `/harga`, `/tentang`,
+`/privasi`, `/syarat`, `/pengembalian` as `○ (Static)`, and the entity name is present in each
+generated `.next/server/app/<route>.html`. The Xendit reviewer sees real content in view-source
+without executing JS, which was acceptance check 5 and is now a structural property, not a promise.
+
+**The footer is mounted in the LAYOUT.** Verified live on `/`, `/harga`, `/tentang` and
+`/r/[token]` against the dev server. Mounting it per page would have missed the reading route,
+which is the one page a reviewer following a shared link actually lands on.
+
+**No rupiah figure exists in any page or copy string.** `/harga` resolves every number from
+`lib/pricing.js`. The launch/list anchor renders only while `priceFor(sku) < SKUS[sku].list`, so
+flipping `LAUNCH_PRICING` needs no edit here. `compat` is gated on `isSellable()`, not on wording:
+it shows priced + `segera` + no action today and becomes buyable the moment Prompt E adds it to
+`SELLABLE_SKUS`. `formatIdr` is hand-rolled in `lib/site/format.js` rather than `Intl.NumberFormat`,
+which emits U+00A0 on some ICU builds and can differ between the rendering server and the hydrating
+browser.
+
+**Rule 20 is now enforced mechanically on this surface, not by a one-off grep.**
+`scripts/check-copy.js` walks `SITE_COPY` and `ENTITY`. Legal prose is the longest body of
+user-facing copy in the repo and is exactly where a pasted smart quote survives review.
+
+**THE PRIVACY POLICY'S CLAIMS WERE CHECKED AGAINST THE CODE, NOT RECALLED** (2026-08-03; commands
+are in the `lib/site/copy.js` comment block). Two claims changed as a result, and both would have
+been wrong if the prompt's draft had been transcribed:
+- The prompt lists "alamat email jika pembayaran". Checkout captures a **WhatsApp number**
+  (`wa_number`, `app/api/pay/[id]/route.js`) and **no email is captured anywhere today**.
+- `gender` is accepted by `app/api/reading/route.js` but is **not collected by the UI** —
+  `grep -n "gender" components/Funnel.jsx` returns nothing — so it is not listed as collected.
+- No cookies, no storage, no analytics, verified by
+  `grep -rn "localStorage|sessionStorage|cookies()|document.cookie|gtag|analytics" app components lib`
+  returning one code comment and nothing else. Stated on the page because it is true today; it stops
+  being true the moment anyone adds an analytics tag, so re-check before claiming it again.
+- The LLM payload carries no identifier and no raw birth date (`lib/render/payload.js`; the Stage 3
+  semantic JSON has no date field). That is why the page can say what it says about the model
+  provider.
+
+**TWO PRE-EXISTING DEFECTS FOUND, NEITHER FIXED HERE** (content PRs stay independently reviewable):
+1. **`components/Funnel.jsx:613` hardcodes `Rp 49.000` in the LIVE paywall.** That price is retired
+   in CLAUDE.md's SUPERSEDED list and gone from `lib/pricing.js`, and the invoice actually charges
+   `priceFor('artifact')` = **Rp 19.000**. The user is shown one number and charged another. This is
+   payment-adjacent UI, so it belongs with Prompt F, but flag its severity: an advertised price that
+   differs from the charged amount is exactly what a payment-processor reviewer escalates, and
+   activation is currently blocked. Line 611's `Rp 300-500rb` anchor is the same dead 49k copy.
+2. **Nine banned ellipsis characters (U+2026) in user-facing funnel strings.** Rule 20 violation.
+   `rg -n '\x{2026}' components app lib --glob '*.{js,jsx}'` on 2026-08-03: `Funnel.jsx` lines 255,
+   352, 462, 553, 607, 651, 671, 799, 902. The two `lib/` hits are the ban patterns themselves and
+   are correct. The root cause is structural: the funnel inlines its strings, so no checker covers
+   it. Fix needs a copy bank or a source-level scan, not nine edits. Per rule 20, this note closes
+   when a fixing commit exists.
+
+**OPEN, blocking merge:** acceptance check 6, Reyner's approval of every user-facing string. The
+contact email (`hello@katon.app`) and the refund terms (claim 7 days, reply 3x24 jam kerja) are
+already his decisions from 2026-08-03. Everything else is a proposal. Two items want his eye
+specifically: `Pelindungan` in the UU 27/2022 title is the law's own official spelling and is not a
+typo, and `/harga` shows compat's launch price behind a `segera` label, which advertises a price for
+something not yet sellable.
 
 ## DECIDED 2026-08-02 — Stage 3 PHASE 1 landed (fact inventory + badge anchors)
 
@@ -586,6 +654,10 @@ products will need female-set fixture charts to validate against.
 7. **COMPATIBILITY** — the money engine. Price band 25–45k, TESTED, not 80–99k by intuition.
 8. **Start Xendit KYC now** (bank account is in hand) — external latency, background it. Stick with
    Xendit, not Mayar: PT KATON on the checkout is a real trust advantage.
+   **STATUS 2026-08-03:** activation was REJECTED (ticket 2686100) on two grounds. KBLI mismatch is
+   MCS Consulting's. The website criteria are DONE in code — see the 08-03 section above — and now
+   wait on (a) Reyner's string approval, (b) merge and deploy, (c) the dummy-account walkthrough for
+   the reviewer, which is an ops task and was never in scope for the code prompt.
 
 ### Reading format — SETTLED 07-30 (three live runs against Gemini Flash)
 - **CR-5 IS LIFTED.** "Lemah" and "kuat" are permitted as consumer words. Finding from Keynan's
