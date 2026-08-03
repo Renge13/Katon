@@ -62,9 +62,9 @@ export default function SyaratPage() {
         </a>
         {q.lawAfter}
       </P>
-      <P style={{ fontSize: 13, color: 'var(--muted-warm)' }}>
-        {SITE_COPY.footer.operatorLabel} {ENTITY.name}. {ENTITY.address}.
-      </P>
+      {/* No entity block here. The site footer renders directly below with the
+          same name and address; the entity is already named in "Tentang layanan
+          ini" at the top, where a terms page is supposed to name it. */}
     </StaticPage>
   );
 }

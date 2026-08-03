@@ -51,10 +51,8 @@ export default function PengembalianPage() {
       {q.reply.map((text) => (
         <P key={text.slice(0, 24)}>{text}</P>
       ))}
-
-      <P style={{ fontSize: 13, color: 'var(--muted-warm)' }}>
-        {SITE_COPY.footer.operatorLabel} {ENTITY.name}. {ENTITY.address}.
-      </P>
+      {/* No entity block here. The site footer renders directly below with the
+          same name and address. */}
     </StaticPage>
   );
 }

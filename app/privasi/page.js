@@ -58,9 +58,9 @@ export default function PrivasiPage() {
 
       <H2>{q.changesHeading}</H2>
       <P>{q.changes}</P>
-      <P style={{ fontSize: 13, color: 'var(--muted-warm)' }}>
-        {SITE_COPY.footer.operatorLabel} {ENTITY.name}. {ENTITY.address}.
-      </P>
+      {/* No entity block here. The site footer renders directly below with the
+          same name and address, and printing it twice in a row reads as an
+          editing mistake rather than as thoroughness. */}
     </StaticPage>
   );
 }
