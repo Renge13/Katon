@@ -5,7 +5,7 @@ import { ENTITY } from '@/lib/site/entity';
 // /pengembalian — the refund policy.
 //
 // Terms confirmed by Reyner 2026-08-03: claim within 7 days of payment, reply
-// within 3x24 jam kerja.
+// within 3 hari kerja. The window lives in the bank as `claimWindowDays`, once.
 //
 // Scope is delivery and defect, never dissatisfaction with the reading. That
 // boundary is stated on the page rather than left implicit, and it is paired with
@@ -14,11 +14,12 @@ import { ENTITY } from '@/lib/site/entity';
 
 const q = SITE_COPY.pengembalian;
 
-export const metadata = {
-  title: 'Pengembalian Dana · KATON',
-  description:
-    'Kapan dana produk berbayar Katon bisa dikembalikan, apa yang tidak tercakup, dan cara mengajukannya.',
-};
+// The claim window is stated twice on the page and lives once in the bank. Filling
+// the placeholder here is what keeps the deadline to file and the cutoff that makes
+// a working product non-refundable from ever disagreeing.
+const days = (s) => s.replaceAll('{claimDays}', String(q.claimWindowDays));
+
+export const metadata = q.meta;
 
 export default function PengembalianPage() {
   return (
@@ -34,10 +35,10 @@ export default function PengembalianPage() {
       <P>{q.eligibleNote}</P>
 
       <H2>{q.notEligibleHeading}</H2>
-      <Bullets items={q.notEligible} />
+      <Bullets items={q.notEligible.map(days)} />
 
       <H2>{q.howHeading}</H2>
-      <P>{q.howLead}</P>
+      <P>{days(q.howLead)}</P>
       <Bullets items={q.how} />
       <P>
         {q.contactBefore}{' '}

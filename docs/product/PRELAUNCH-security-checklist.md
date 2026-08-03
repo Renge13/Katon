@@ -33,6 +33,19 @@ branch must be unreachable.
 - [ ] Confirm Supabase (not dev in-memory store) is the active reading store in production.
 - [ ] Confirm the CSPRNG token path (`nanoid(21)`) is what ships (no debug/sequential fallback).
 
+### 4. Legal review of `/privasi` (added 2026-08-03, Reyner)
+The privacy policy shipped with the Xendit compliance pages (`lib/site/copy.js` → `SITE_COPY.privasi`).
+Its factual claims were verified against the code; its LEGAL SUFFICIENCY was not reviewed by anyone
+qualified. Two clauses carry the most weight per unit of text and are the priority for that pass:
+- [ ] **Cross-border transfer.** `processorNote` discloses that some processors store data outside
+      Indonesia and asserts they are bound by data-processing terms. UU PDP contemplates more than an
+      acknowledgement for transfers abroad, and the assertion rests on the four providers' standard
+      terms rather than on a signed bilateral DPA. Confirm that is enough, or strengthen it.
+- [ ] **Deletion window.** `rightsHowAfter` promises deletion within **14 hari kerja**. The number was
+      chosen editorially, not from the statute. Confirm it against UU PDP's response expectations.
+- [ ] While there: confirm the age floor on `/syarat` (17+, `limits[2]`) and the liability cap
+      (`liability`) are the right shapes for an Indonesian digital-goods seller.
+
 ## NOTE — not security, but launch-blocking for breadth
 - Content registry (`lib/content/index.js`) currently wires only 丙 Matahari; other 9 archetypes
   return 501. Wiring written readings into content files is a separate workstream from security.

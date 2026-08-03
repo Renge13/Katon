@@ -16,11 +16,7 @@ import { ENTITY } from '@/lib/site/entity';
 
 const q = SITE_COPY.syarat;
 
-export const metadata = {
-  title: 'Syarat Layanan · KATON',
-  description:
-    'Syarat pemakaian Katon: layanan konten digital, batas layanan, produk berbayar, dan hukum yang berlaku.',
-};
+export const metadata = q.meta;
 
 export default function SyaratPage() {
   return (

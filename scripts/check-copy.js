@@ -57,6 +57,14 @@ const BANNED = [
   ['curly quote',   '“'],
   ['curly quote',   '”'],
   ['ellipsis char', '…'],
+  // Added 2026-08-03 (Reyner: rule 20 keeps zero exceptions). U+00B7 was being
+  // used as a title separator. NOTE WHAT THIS BAN DOES NOT REACH: the middle dot
+  // is still used ~10 times in lib/bazi/interpretation/cardCopy.js and ~10 times
+  // as a chart/card separator in components/{Funnel,kit,Sharecard}.jsx, and NONE
+  // of those is walked by this script. Widening the walk to cardCopy.js would
+  // fail the build immediately - that is a decision to take deliberately, not a
+  // side effect of adding a character here.
+  ['middle dot', '·'],
 ]
 const issues = []
 

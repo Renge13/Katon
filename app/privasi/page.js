@@ -14,11 +14,7 @@ import { ENTITY } from '@/lib/site/entity';
 
 const q = SITE_COPY.privasi;
 
-export const metadata = {
-  title: 'Privasi · KATON',
-  description:
-    'Apa yang Katon simpan, untuk apa, siapa yang ikut memproses, dan bagaimana kamu meminta datamu dihapus.',
-};
+export const metadata = q.meta;
 
 export default function PrivasiPage() {
   return (

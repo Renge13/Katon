@@ -15,11 +15,7 @@ import { ENTITY } from '@/lib/site/entity';
 
 const q = SITE_COPY.tentang;
 
-export const metadata = {
-  title: 'Tentang · KATON',
-  description:
-    'Katon membaca pola dari waktu kelahiranmu dengan metode Empat Pilar. Dioperasikan oleh PT Katon Digital Nusantara.',
-};
+export const metadata = q.meta;
 
 export default function TentangPage() {
   return (

@@ -22,7 +22,9 @@ const hanken = Hanken_Grotesk({
 });
 
 export const metadata = {
-  title: 'KATON · Refleksi personal dari waktu kelahiranmu',
+  // Hyphen, not a middle dot. Rule 20 is keyboard characters only with zero
+  // exceptions (Reyner, 2026-08-03); U+00B7 is now on the check-copy ban list.
+  title: 'KATON - Refleksi personal dari waktu kelahiranmu',
   description:
     'Refleksi personal dari waktu kelahiranmu. Sebuah lensa untuk mengenali polamu, bukan ramalan.',
 };

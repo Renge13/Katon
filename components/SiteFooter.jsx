@@ -55,9 +55,12 @@ export default function SiteFooter() {
           <div>
             {q.operatorLabel} <strong style={{ fontWeight: 600, color: 'var(--tinta-soft)' }}>{ENTITY.name}</strong>
           </div>
-          <div style={{ marginTop: 8 }}>
-            {q.addressLabel}: {ENTITY.address}
-          </div>
+          {/* NO REGISTERED ADDRESS. Removed 2026-08-03 on Reyner's ruling, against
+              Xendit's own stated criteria (Kira, ticket 2686100, 3 Aug): they ask for
+              a live site, a catalog with pricing and a checkout flow, and a business
+              description. An entity address is not among them. The prompt this work
+              came from claimed otherwise and was wrong. ENTITY.address is kept in
+              lib/site/entity.js for later use; its absence here is a decision. */}
           <div style={{ marginTop: 8 }}>
             {q.contactLabel}:{' '}
             <a href={`mailto:${ENTITY.email}`} style={{ color: 'var(--tinta-soft)' }}>
