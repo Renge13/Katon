@@ -36,6 +36,14 @@ import { PROMPTS as REPORT_PROMPTS } from '../lib/bazi/report/prompts.js'
 // Stage 5 chrome (rule 20: one voice everywhere, INCLUDING chrome).
 import { RENDER_COPY } from '../lib/render/copy.js'
 
+// Site chrome + static pages (footer, /harga, /tentang, /privasi, /syarat,
+// /pengembalian). Added 2026-08-03 with the Xendit merchant-compliance pages:
+// legal prose is the longest body of user-facing copy in the repo and is exactly
+// where a pasted em-dash or a smart quote survives review. Grepping the diff
+// catches it once; walking the bank catches it forever.
+import { SITE_COPY } from '../lib/site/copy.js'
+import { ENTITY } from '../lib/site/entity.js'
+
 // Rule 20 bans typographic characters in user-facing strings, keyboard keys only.
 // The em-dash is the #1 AI tell and was the original reason for this script, but
 // it was never the whole rule: the ONE real rule-20 violation ever found in this
@@ -49,6 +57,14 @@ const BANNED = [
   ['curly quote',   '“'],
   ['curly quote',   '”'],
   ['ellipsis char', '…'],
+  // Added 2026-08-03 (Reyner: rule 20 keeps zero exceptions). U+00B7 was being
+  // used as a title separator. NOTE WHAT THIS BAN DOES NOT REACH: the middle dot
+  // is still used ~10 times in lib/bazi/interpretation/cardCopy.js and ~10 times
+  // as a chart/card separator in components/{Funnel,kit,Sharecard}.jsx, and NONE
+  // of those is walked by this script. Widening the walk to cardCopy.js would
+  // fail the build immediately - that is a decision to take deliberately, not a
+  // side effect of adding a character here.
+  ['middle dot', '·'],
 ]
 const issues = []
 
@@ -90,6 +106,12 @@ walk(REPORT_PROMPTS,                'REPORT.PROMPTS')
 // Stage 5 chrome. The loading string is user-facing and rule 20 covers chrome.
 walk(RENDER_COPY,                   'RENDER_COPY')
 
+// Site chrome + the five static pages. ENTITY is walked too: the registered name
+// and address are rendered to the user, so a typographic character pasted from
+// the NIB PDF would ship.
+walk(SITE_COPY,                     'SITE_COPY')
+walk(ENTITY,                        'ENTITY')
+
 if (issues.length > 0) {
   console.error(`✗ Found banned typography in ${issues.length} copy string(s):\n`)
   for (const issue of issues) {
@@ -100,4 +122,4 @@ if (issues.length > 0) {
   process.exit(1)
 }
 
-console.log(`✓ No banned typography in copy banks. Checked: DAY_MASTERS, DAY_BRANCHES, DOMINANT_ELEMENT, MISSING_ELEMENT, PAID_HOOK_TEMPLATE, PILLAR_STEM_MEANINGS, 7 REPORT passage banks, REPORT.PROMPTS, RENDER_COPY.`)
+console.log(`✓ No banned typography in copy banks. Checked: DAY_MASTERS, DAY_BRANCHES, DOMINANT_ELEMENT, MISSING_ELEMENT, PAID_HOOK_TEMPLATE, PILLAR_STEM_MEANINGS, 7 REPORT passage banks, REPORT.PROMPTS, RENDER_COPY, SITE_COPY, ENTITY.`)

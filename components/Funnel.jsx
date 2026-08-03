@@ -5,6 +5,8 @@ import Sharecard from './Sharecard.jsx';
 import { exportSharecardPNG } from './exportCard.js';
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { freeFullReadingEnabled } from '../lib/flags.js';
+import { priceFor } from '../lib/pricing.js';
+import { formatIdr } from '../lib/site/format.js';
 
 const DOMAINS = [
   { key: 'hubungan', label: 'Hubungan' },
@@ -252,7 +254,7 @@ function Anticipation({ step }) {
       </div>
       <div style={{ height: 34, marginTop: 30, position: 'relative', width: 280, textAlign: 'center' }}>
         {ANTICIPATION.map((l, i) => (
-          <div key={i} style={{ position: 'absolute', inset: 0, fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--tinta-soft)', opacity: step === i ? 1 : 0, transform: step === i ? 'none' : 'translateY(6px)', transition: 'all .6s var(--ease-quiet)' }}>{l}…</div>
+          <div key={i} style={{ position: 'absolute', inset: 0, fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--tinta-soft)', opacity: step === i ? 1 : 0, transform: step === i ? 'none' : 'translateY(6px)', transition: 'all .6s var(--ease-quiet)' }}>{l}...</div>
         ))}
       </div>
     </div>
@@ -349,7 +351,7 @@ function SeasonGate({ season, onAnswer }) {
           </div>
           <div style={{ marginTop: 16 }}>
             <Button onClick={() => answer({ birthTime: `${pad(hour)}:${pad(minute || 0)}` })} disabled={busy || hour === ''}>
-              {busy ? 'Menyusun ulang…' : 'Lanjut'}
+              {busy ? 'Menyusun ulang...' : 'Lanjut'}
             </Button>
           </div>
           <button type="button" onClick={() => setMode('choose')} disabled={busy}
@@ -459,7 +461,7 @@ function Reading({ reading, onReset, initialFull }) {
         <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>Satu kartu ringkas tentang dirimu, untuk disimpan atau dibagikan.</p></Reveal>
         <Reveal delay={0.06} style={{ display: 'flex', justifyContent: 'center' }}><Sharecard data={fc} birthDate={reading.birthDate} /></Reveal>
         <Reveal delay={0.12} style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-          <Button variant="gold" onClick={save} disabled={saving} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Icon.save size={17} /> {saving ? 'Menyimpan…' : 'Simpan Gambar'}</Button>
+          <Button variant="gold" onClick={save} disabled={saving} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Icon.save size={17} /> {saving ? 'Menyimpan...' : 'Simpan Gambar'}</Button>
         </Reveal>
       </Section>
 
@@ -550,7 +552,7 @@ function Paywall({ reading, initialFull }) {
   }, [freeFull, initialFull, full, reading.token]);
 
   if (stage === 'unlocked' && full) return <Unlocked full={full} token={reading.token} onUpdate={setFull} />;
-  if (stage === 'ungating') return <div style={{ padding: '48px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--muted-warm)' }}>Membuka bacaan lengkap…</div>;
+  if (stage === 'ungating') return <div style={{ padding: '48px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--muted-warm)' }}>Membuka bacaan lengkap...</div>;
   if (stage === 'unlocking') return <Unlocking />;
   if (stage === 'pending') return <Pending invoiceUrl={invoiceUrl} />;
   if (stage === 'wa') return <WaCapture wa={wa} setWa={setWa} onSubmit={submitWa} />;
@@ -604,13 +606,17 @@ function Teaser({ reading, onOpen, selectedDomain, setSelectedDomain }) {
 
         {isLive ? (
           <>
-            {t?.lead && <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '20px 0 0' }}>{t.lead}<span style={{ color: 'rgba(234,241,242,.45)' }}> …</span></p>}
+            {t?.lead && <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '20px 0 0' }}>{t.lead}<span style={{ color: 'rgba(234,241,242,.45)' }}> ...</span></p>}
             <LockedLines />
             <div style={{ height: 24 }} />
             <div style={{ background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g22)', borderRadius: 16, padding: 18 }}>
               <div style={{ fontSize: 12.5, color: 'rgba(234,241,242,.6)' }}>Sekali konsultasi biasanya Rp 300-500rb.</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, margin: '6px 0 0' }}>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff' }}>Rp 49.000</div>
+                {/* Resolved from lib/pricing.js, never hardcoded: the paywall must show
+                    exactly what the invoice charges. The old literal Rp 49.000 was the
+                    retired pre-pivot price and the checkout was already billing
+                    priceFor('artifact'), so the shown and charged amounts disagreed. */}
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff' }}>{formatIdr(priceFor('artifact'))}</div>
                 <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW }}>sekali bayar</div>
               </div>
               <div style={{ marginTop: 16 }}>
@@ -648,7 +654,7 @@ function Pending({ invoiceUrl }) {
   return (
     <div style={{ background: SANCTUARY, borderRadius: 26, padding: '40px 24px', color: LIGHT, boxShadow: 'var(--shadow-deep)', textAlign: 'center' }}>
       <div className="k-spin" style={{ width: 34, height: 34, border: '3px solid var(--el-g25)', borderTopColor: GLOW, borderRadius: '50%', margin: '0 auto 16px' }} />
-      <p style={{ fontFamily: 'var(--font-serif)', fontSize: 18, color: '#F2F6F6', margin: 0 }}>Menunggu konfirmasi pembayaran…</p>
+      <p style={{ fontFamily: 'var(--font-serif)', fontSize: 18, color: '#F2F6F6', margin: 0 }}>Menunggu konfirmasi pembayaran...</p>
       <p style={{ fontSize: 13, color: 'rgba(234,241,242,.6)', marginTop: 8 }}>Begitu masuk, bacaanmu langsung terbuka di sini.</p>
       {invoiceUrl && (
         <p style={{ fontSize: 13, marginTop: 14, color: 'rgba(234,241,242,.7)' }}>
@@ -668,7 +674,7 @@ function Unlocking() {
         <span className="k-seal"><Icon.lock size={26} /></span>
         <span className="k-seal-check" style={{ position: 'absolute' }}><Icon.check size={28} /></span>
       </div>
-      <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 16, color: 'rgba(234,241,242,.8)', marginTop: 26 }}>Refleksimu terbuka…</p>
+      <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 16, color: 'rgba(234,241,242,.8)', marginTop: 26 }}>Refleksimu terbuka...</p>
     </div>
   );
 }
@@ -796,7 +802,7 @@ function PaidPillars({ id, chart, token, onUpdate, explanation, hourNote, kicker
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, marginTop: 10 }}>
             <select value={hour} onChange={(e) => setHour(e.target.value)} aria-label="Jam" style={darkField}><option value="">Jam</option>{RANGE(24).map((h) => <option key={h} value={h}>{pad(h)}</option>)}</select>
             <select value={minute} onChange={(e) => setMinute(e.target.value)} aria-label="Menit" style={darkField}><option value="">Menit</option>{RANGE(60).map((m) => <option key={m} value={m}>{pad(m)}</option>)}</select>
-            <Button type="submit" variant="gold" light disabled={busy || hour === ''} style={{ width: 'auto', padding: '0 18px' }}>{busy ? '…' : 'Tambah'}</Button>
+            <Button type="submit" variant="gold" light disabled={busy || hour === ''} style={{ width: 'auto', padding: '0 18px' }}>{busy ? '...' : 'Tambah'}</Button>
           </div>
         </form>
       )}
@@ -899,7 +905,7 @@ export function ReadingByToken({ token }) {
 function ReadingLoading() {
   return (
     <div style={{ ...wrap, paddingTop: 120, textAlign: 'center' }}>
-      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--muted-warm)', margin: 0 }}>Membuka bacaanmu…</p>
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--muted-warm)', margin: 0 }}>Membuka bacaanmu...</p>
     </div>
   );
 }
