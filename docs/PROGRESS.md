@@ -226,6 +226,7 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | Engine Earth-first | 5 charts | 08-01 | was 7; Joey's is 4 |
 | Within-element agreement | 48/57 (9 inversions) | 08-01 | **transform-INVARIANT** under linear/sqrt/log1p. Needs a MECHANISM, not a reweighting. Diagnostic 0 in the harness. |
 | 旺 re-fit after sqrt (NOT adopted) | +0.020 rho | 08-01 | optimum collapsed 2.4 -> flat 1.6-1.8 plateau. Rule 13 demonstrated numerically. Left at 1.4. |
+| **Blind model judging, 16 pairs, 8 charts (Reyner, labels hidden)** | **3.1-flash-lite 12, 3.5-flash-lite 4** | 08-02 | ~4% probability under coin-flip. 3.5 also costs more ($0.30/$2.50 vs $0.25/$1.50 per M). **MODEL DECISION CLOSED: 3.1-flash-lite stays primary; rule 15 untouched.** Judging notes exposed 4 candidate gate checks: duplicate-sentence detector, code/variable-leak regex, meta-disclaimer patterns, minimum-paragraphing check. |
 | Gate-check renders, chart 1 (3.1-flash-lite, temp 0.2, n=2) | 0/2 clean, both salvageable by one regeneration | 08-02 | Run 1: secara-adverbial + profile palace dropped. Run 2: bukan-melainkan in the PENUTUP (third leak past the prompt ban), 半合 positions misstated, profile palace dropped again. Strength same-breath PASSED both runs, zero invention both runs. Stage 6 confirmed load-bearing; the H checks map 1:1 onto every observed failure. |
 | **STAGE 6 FIRST-PASS RATE (3.1-flash-lite)** | **10.3%** (4/39) | 08-02 | **THE LAUNCH-GATING NUMBER.** `npm run measure:stage6 -- --n 3`, 13 charts x n=3, temp 0.2, prompt `baa5b7c0e3320b13`, gate `1.0.0`. Does the PROMPT work: this is the one that should move when renderer-prompt.txt is edited. It is LOW, and the cause is concentrated, not diffuse — see the per-check row. |
 | Stage 6 SHIPPED rate (3.1-flash-lite) | 38.5% (15/39) | 08-02 | First pass plus the one regeneration. What a user would experience. Regeneration rescues 28.2% of runs, so the gate's retry is doing most of the work the prompt is not. |
@@ -263,6 +264,34 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **Stage 3 JSON byte-identical on recompute** | **13/13** | 08-02 | the cache guarantee. Cache keys all distinct, no collisions. |
 | Stage 3 facts after collapse, chart 1 | 14 of 16 | 08-02 | `main_profile` absorbed by CR-1, `badge_空亡` by its void stack. |
 | Stage 3 required points, chart 1 | 9 | 08-02 | hand-written file has 8; the extra is `day_master_Fire`, which the target carries as its first point. |
+
+## DECIDED 2026-08-03 — card sizes LOCKED, Card A head, footer gender strings (Reyner)
+
+Three rulings by Reyner. They close the last two open items in the 08-02 CARD VISUAL SYSTEM block
+below except the colour tokens and `tags_en`, which are in review as of this date.
+
+**1. SIZES LOCKED.**
+- **Card A: a 63:88 card OBJECT (TCG ratio) rendered on a 3:4, 1080x1440 feed-safe canvas.** The card
+  floats on the colour field with a slim margin. Rationale: 3:4 matches Instagram's 2026 grid, so the
+  image crops in neither feed nor profile grid; the TCG ratio makes the thing on the canvas read as a
+  *card* rather than a graphic. This **supersedes the 08-02 proposal of 1080x1350 (4:5)**.
+- **Card B: 1080x1920 (9:16), unchanged.** Taller is the exclusivity signal.
+
+  Derived geometry (arithmetic, 08-03): a 3:4 canvas and a 63:88 card admit exactly one uniform
+  margin. Solving `(1080-2m)/(1440-2m) = 63/88` gives **m = 86.4**, card **907 x 1267**. So the card
+  can sit optically centred with an equal margin on all four sides at no cost to either ratio; any
+  slimmer margin makes the top-bottom and left-right gaps unequal. **OPEN, one sub-question the ruling
+  does not settle:** what distinguishes the card object from the canvas when both carry the same
+  colour field. Cowork recommends a hairline inset plus a soft shadow, same colour both sides, because
+  the alternative (a different surface value for the card) adds a fourth colour token per archetype.
+  Mocked that way in the 08-03 token proposal; not locked.
+
+**2. CARD A HEAD: EN-only (`name_en`), no Indonesian eyebrow.** The Indonesian archetype name appears
+nowhere on the free card; it lives in the reading. **This closes the OPEN item** in the 08-02 block
+("EN-only, or tiny ID eyebrow"). Aspek stays Indonesian on both cards, per 08-02.
+
+**3. GENDER FOOTER STRINGS: `PEREMPUAN` / `LAKI-LAKI` APPROVED** as proposed. Register review done.
+Footer stays gender + birthdate + katon.app; null gender still renders date + source only.
 
 ## DECIDED 2026-08-03 — Xendit merchant-compliance chrome shipped (footer + 5 static pages)
 
@@ -625,15 +654,20 @@ body `product/compatibility-reading-spec.md` is corrected in place and is now bu
 - **Hanzi: card images carry NONE; the 4x2 hanzi grid lives in the PDF chart sheet only**
   (CONFIRMED by Reyner 08-02). Rule 23's legitimacy object survives in the PDF; no amendment needed.
 - **EN header on BOTH cards** (Reyner 08-02), Aspek Indonesian everywhere. The ID/EN A/B is dead.
-  OPEN: the Indonesian archetype name now appears nowhere on Card A — EN-only, or tiny ID eyebrow.
+  ~~OPEN: EN-only, or tiny ID eyebrow~~ → **CLOSED 08-03: EN-only, no eyebrow.** See the 08-03 section.
 - **Footer carries gender + birthdate + katon.app.** Gender is optional in the engine; null gender
-  = date + source only. PEREMPUAN/LAKI-LAKI strings are proposals pending register.
-- **Sizes PROPOSED, pending Reyner: Card A 1080x1350 (4:5 feed), Card B 1080x1920 (9:16 full
-  story).** Taller B confirmed as the exclusivity signal; exact ratios not yet locked.
+  = date + source only. ~~PEREMPUAN/LAKI-LAKI strings are proposals pending register~~ →
+  **APPROVED 08-03.**
+- ~~**Sizes PROPOSED, pending Reyner: Card A 1080x1350 (4:5 feed), Card B 1080x1920 (9:16 full
+  story).**~~ → **SUPERSEDED 08-03. Card A is a 63:88 card object on a 3:4 1080x1440 canvas;
+  Card B 1080x1920 unchanged.** See the 08-03 section.
 - Card B carries the hook (spec: everything on A plus appendix); appendix = labeled pillar grid
   (Tahun/Bulan/Hari/Jam, animal + element) + labeled element bars + Complete Edition chrome.
 - Colour tokens fixed for 5 of 10 archetypes; remaining 5 to derive (Api Unggun must not collide
-  with Matahari). tags_en remains open.
+  with Matahari). tags_en remains open. **STATUS 08-03: both are WITH REYNER for review** — the
+  5 tokens as a swatch preview (measured against the locked 5, Api Unggun clears Matahari at
+  dE 0.29 where the set's existing floor is 0.09) and `tags_en` as a 30-row register table.
+  Nothing written into `glossary.json` or the mockup until he approves.
 
 **The 刑 glossary entry is REGISTER-APPROVED and landed** in `glossary.json` → `relasi_cabang.刑`.
 "Simpul" confirmed (Belitan considered, not taken). `label_meaning` rewritten to drop the banned
