@@ -10,6 +10,11 @@ UPDATED: 2026-07-30 — CALCULATOR CLOSED + STRATEGY RESET. sxtwl retired in fav
 UPDATED: 2026-08-01 — Badge anchors verified 60/60 against Joey with full table-row coverage. 華蓋
          descoped. Stale mirror `D:\Work\Katon assets\Katon md` neutralised, its two unique files
          rescued into the repo. `docs/COWORK-BRIEF.md` added as the Cowork session entry point.
+UPDATED: 2026-08-04 — MODEL QUESTION CLOSED (12-4, 3.1-flash-lite stays primary, riders dropped).
+         Stage 3 pre-verbalises the relation span (`positions_id`); it WORKED. Four gate checks added
+         from Reyner's blind-judging notes; the pairs file was POST-gate, so two were live escapes.
+         Two defects found and deliberately NOT fixed: `relation_positions` is a gate false positive
+         (8/8 measured) and a third Stage 3 collapse gap hits charts 9 and 12.
 UPDATED: 2026-08-03 — XENDIT SITE COMPLIANCE. Site footer + /harga /tentang /privasi /syarat
          /pengembalian shipped (Prompt I). Serves TODO #8. Two pre-existing defects found and NOT
          fixed here: the paywall shows a retired Rp 49.000, and the funnel carries 9 banned
@@ -264,6 +269,135 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **Stage 3 JSON byte-identical on recompute** | **13/13** | 08-02 | the cache guarantee. Cache keys all distinct, no collisions. |
 | Stage 3 facts after collapse, chart 1 | 14 of 16 | 08-02 | `main_profile` absorbed by CR-1, `badge_空亡` by its void stack. |
 | Stage 3 required points, chart 1 | 9 | 08-02 | hand-written file has 8; the extra is `day_master_Fire`, which the target carries as its first point. |
+| **STAGE 6 FIRST-PASS RATE, prompt `443fcb57`, gate `1.1.0`** | **18.5%** (24/130) | **08-04** | **n=10, primary only, rider OFF.** `npm run measure:stage6 -- --n 10`, 13 charts x n=10, temp 0.2. Two changes land together and they push OPPOSITE ways, so read this against the band, not against the last number: the prompt gained the `positions_id` handover, and the GATE GAINED FOUR CHECKS. Against the 17.9 / 23.1 / 25.6 variance band this is INSIDE it, at the bottom. Holding inside the band while the bar rose is not a regression; it is also not a demonstrated improvement. **Binomial 95% CI at n=130 is +-6.7 points**, so n=10 does NOT deliver the +-2-3 points hoped for - that needs n~50 (644 runs). |
+| Stage 6 SHIPPED rate, prompt `443fcb57`, gate `1.1.0` | 43.8% (57/130) | 08-04 | was 53.8 / 61.5 / 61.5. **BELOW the band, and the cause is known and intended:** `structure.unparagraphed` is new and rejects 25.8% of gate evaluations. Readings that used to ship now fail on a real defect. The gate got stricter; the prompt did not get worse. 95% CI +-8.5 points. |
+| Stage 6 FALLBACK, prompt `443fcb57` | fb-gate 56.2% · **fb-net 0.0%** | 08-04 | was 46.2% / 0.0%. Every one of the 130 runs is a real quality observation. One HTTP 503 across 235 attempts, absorbed by the transport retry. |
+| **Stage 6 per-check, gate `1.1.0`** | palace_dropped 43.6% · hedge_construction 41.7% · hedging 31.3% · **unparagraphed 25.8%** · essay_connectives 25.2% · relation_positions 18.4% · adverbial 7.4% · condition_named 1.2% · unsanctioned_bracket 1.2% · field_dropped 1.2% · tension_collapse 1.2% · cost_dropped 0.6% | 08-04 | Normalised per GATE EVALUATION (163), the ledger's convention - the denominator moves with the regeneration rate and raw counts would overstate everything. 324 rejections. **palace_dropped is back on top at 43.6% (was 29%)** and needs its own look; nothing in this pass touched it. |
+| **`relation_positions`: the phrase handover WORKED, the CHECK is broken** | **8 of 8 failures are gate false positives** | **08-04** | 28% -> 18.4% per evaluation after `positions_id`. The residual is NOT the renderer. Diagnostic over the only three charts that still fail (2, 11, 6): **every finding had `missing == []`** - the span was stated COMPLETELY - and every one failed on an EXTRA position (`expected [month,year] named [year,month,hour]`). Separately, **5 of 5** relation blocks reaching the gate carried `positions_id` VERBATIM. Cause: the check scans for bare `tahun/bulan/hari/jam`, which `renderer-prompt.txt` itself MANDATES in `batang bulan` / `cabang hari` / `batang jam` (~line 76) and in the `Hari lahirmu` idiom. Same class as `bare_polarity`/*yang*. **NOT fixed here on purpose** - it targets the same metric as the handover and fitting both in one measurement is rule 13. Own commit, own measurement. |
+| **The four checks added 08-04, by real-defect yield** | unparagraphed 42 · duplicate_sentence 0 · code_leak 0 · meta 0 | 08-04 | Over 163 gate evaluations. `unparagraphed` is doing all the work and is the whole reason shipped fell. The other three cost nothing and catch nothing at n=130, which is what insurance looks like when it is not needed yet. All four were validated against the 32 gate-passed samples in the 08-02 pairs file before shipping: **zero false positives there.** |
+| **`paragraphFloorChars` = 700 is FITTED ON A BIASED SAMPLE and needs re-deciding** | rejects 25.8% of evaluations | 08-04 | Set from the 32 gate-PASSED pairs samples, where block length was med 415 / p90 570 / max 954. The full n=130 population is LONGER: **med 493, p90 748, max 1390** (n=1310 blocks). So 700 now sits BELOW p90 rather than above it, which is why it fires so much. Passes-only is as biased a sample as rejections-only - the same error the harness header warns about. **This is a real decision for Reyner, not a bug:** a 700-char unbroken paragraph IS a wall, and regeneration rescues most of them, but the threshold moved the launch number and was never ratified. |
+| Stage 6 threshold distributions, gate `1.1.0` | same_breath med 0.93 (min 0.20, p10 0.50) · coverage med 1.00 (min 0.00, p10 0.69) · total_chars med 3313 (max 4797) · block_chars med 493 (p90 748, max 1390) | 08-04 | n=231 / 3792 / 235 / 1310. The three ORIGINAL unfitted constants still reject nothing: sameBreathOverlap 0.25 vs a p10 of 0.50, fieldOverlap 0.20 vs a p10 of 0.69, maxTotalChars 12000 vs a max of 4797. `coverage` min is now 0.00 and `same_breath` min 0.20 - the first observations to fall BELOW their thresholds, so these two are no longer provably inert and are worth a look before they are fitted. |
+
+## DECIDED 2026-08-04 — model question CLOSED; span pre-verbalised; four gate checks; n=10 measured
+
+**MODEL DECISION IS CLOSED (Reyner).** Blind judging went **12-4 for 3.1-flash-lite**, which also
+costs less ($0.25/$1.50 vs $0.30/$2.50 per M). It stays primary; rule 15 untouched. **No more rider
+arms.** `scripts/measure-stage6.mjs` no longer defaults `--rider` to a model — it used to default to
+`gemini-2.5-flash-lite`, which is RETIRED (HTTP 404), so every default run spent half its calls on an
+arm that could not answer and then reported it as fallback. A rider is now opt-in. `--no-rider` still
+works and is redundant.
+
+### 1. Stage 3 pre-verbalises the branch-relation span (`positions_id`)
+
+`relation_positions` was the one check an explicit prompt instruction never moved (24% -> 28% across
+`baa5b7c0` -> `9f5ee276`, flat at n=39). The renderer was handed an ARRAY of positions and told to say
+all of them, and kept saying two of three. It is now handed the finished phrase.
+
+`provenance.positions_id` ships on **all 21 relation facts across the 13 fixture charts** — both
+`branch_relation` and `punishment`, because the prompt line says "a relation's span" and a 刑 is a
+relation the reader sees as one. `palacePhrase()` in `lib/semantic/glossary.js`. Chart 1:
+`"Pilar Akar, Pilar Kerja, dan Pilar Arah"`.
+
+- **It is a DATA JOIN, not copy.** Every name comes from `GLOSSARY.pilar`. Nothing is authored, so no
+  register review is owed. Asserted: `tests/stage3-facts.spec.mjs` checks the phrase names exactly the
+  palaces the fact claims, no more and no fewer, against `GLOSSARY.pilar` itself.
+- **Sorted into READING ORDER, which the raw field is not.** Chart 1's `positions` are
+  `[year, hour, month]` because the relation table lists the pair's branches in table order. Speaking
+  that order aloud is wrong, so the phrase sorts year/month/day/hour and a test asserts it.
+- `positions` and `palaces` both stay: the gate checks against them and QA reads them.
+- One prompt line added at `renderer-prompt.txt` §THE PALACES AND THE PARTS. Verified `positions_id`
+  survives `scrubInternal` into the payload the provider actually sees.
+- **`ENGINE_VERSION` 0.4.0-stage3 -> 0.4.1-stage3.** A new field is a contract change, so the whole
+  cache invalidates. Correct: every cached reading predates the field.
+
+**IT WORKED, AND THE MEASUREMENT SAYS SO — see the `relation_positions` row in MEASUREMENTS.** 5 of 5
+relation blocks reaching the gate carried the phrase verbatim, and 8 of 8 residual failures are the
+CHECK's false positive, not the renderer's. Which is the next item.
+
+### 2. THE 08-02 BLIND-JUDGING PAIRS FILE WAS **POST-GATE**. All four defects were gate MISSES.
+
+This was the question to settle before adding anything, and it is settled twice over:
+- `measure-stage6.mjs` records a sample for judging only when `!fallback` (`perArm[model] = result`).
+- `renderReading` returns a non-fallback result **solely from the `gate.ok` branch**
+  (`lib/render/index.js`), so non-fallback means gate-passed by construction.
+- Empirically: all **46** served rows of that batch passed.
+
+So the defects Reyner found were in text the gate had already approved. Re-running the four new checks
+over those **32 gate-passed samples**:
+
+| defect | in gate-passed text | verdict |
+|---|---|---|
+| unparagraphed wall | **2 / 32** — worst 954 chars, 17 unbroken sentences | live escape |
+| duplicate sentence | **1 / 32** — chart 3, same sentence twice in one block | live escape |
+| code/variable leak | 0 / 32 | insurance |
+| meta-disclaimer | 0 / 32 | insurance |
+
+**Why the wall escaped: the gate had a CEILING on paragraph breaks (`maxBreaksPerBlock`) and no FLOOR.**
+Zero breaks was legal at any length. `minBlockChars` guards emptiness, not density.
+
+Four checks added, all `soft` (one regeneration), **`STAGE6_VERSION` 1.0.0 -> 1.1.0**:
+`structure.unparagraphed`, `structure.duplicate_sentence` (both in `structure.js`, both structural
+properties of rendered text), `style.code_leak` and six new `style.meta` entries (both in
+`blocklist.json`, which is DATA Reyner can extend without a deploy).
+
+**Duplicate detection is scoped to the WHOLE reading, not one block.** The observed case was
+within-block, but braided blocks make cross-block restatement the worse failure, not the milder one.
+Comparison is exact beyond case/whitespace/terminal punctuation: a near-duplicate detector needs a
+similarity threshold, and an unfitted threshold on a brand-new check is how false positives ship.
+
+**TWO FALSE POSITIVES WERE CAUGHT BEFORE SHIPPING, both the `bare_polarity`/*yang* shape:**
+1. **The camelCase code-leak regex compiled case-INSENSITIVELY** (`compile()` defaults to `iu`), which
+   reduces `[a-z]+[A-Z]` to `[a-z]+[a-z]` — it matched every word in the language and flagged all 398
+   glossary strings. Pinned with `"flags": "u"`.
+2. **`NO ENGINE STRING WOULD TRIP THE STYLE GATE` was hardcoding `'iu'`**, ignoring each entry's own
+   `flags`, so it was stricter than the gate it guards and could not validate a case-sensitive pattern
+   at all. Now compiles the way `style.js` does. `bare_polarity` was passing that test by luck.
+3. A third was caught in the audit itself and never shipped: a naive `sebagai (ai|model)` disclaimer
+   pattern matches **"Sebagai Air (Water)"**, correct prose on every Water chart. The shipped `meta`
+   entry keeps `\b` after `AI` and there is now a test named after this.
+
+### 3. TWO DEFECTS FOUND BY THE NEW CHECKS. Neither fixed here, both have their own commit.
+
+**a) A THIRD Stage 3 collapse gap, charts 9 and 12 of 13.** When the CR-1 tension's Aspek is ALSO a
+converging Aspek, Stage 3 emits both `profile_vs_favorable` and `aspek_convergence_<same god>`. Both
+resolve to the SAME glossary entry, so label + label_meaning + gift + cost render **twice, word for
+word** — six duplicated sentences on chart 9 (正財), seven on chart 12 (偏財). Chart 1's CR-1 god is 正財
+and it has no 正財 convergence, which is why 11 of 13 are clean.
+
+This is the same pattern `collapseSuperseded()` already handles twice (`main_profile` absorbed by CR-1,
+`badge_空亡` by its void stack) and the fix belongs there. **Not done here because it moves those charts'
+fact sets, `required_points` and hierarchy ranks, and landing it inside a prompt-change measurement
+would confound both (rule 13).** It also means the renderer is currently handed the same content twice
+on those charts, so it is a plausible CAUSE of the duplicate sentences Reyner saw, not just a floor
+defect. `tests/stage6-validation.spec.mjs` asserts the failure EXACTLY, with the exemption **derived
+from the cause** rather than a chart-id list, so it retires itself when the collapse lands and cannot
+absorb a chart that starts duplicating for some other reason.
+
+**b) `fact.relation_positions` is a GATE BUG, measured 8/8.** See the MEASUREMENTS row. The check
+scans for bare `tahun/bulan/hari/jam`, and `renderer-prompt.txt` itself mandates `batang bulan` /
+`cabang hari` / `batang jam` and the `Hari lahirmu` idiom, so a block that states its span correctly in
+palace names and then correctly names a stem picks up a spurious extra position and fails. **It is all
+four words, not just `hari`** — the measured extras were `hour` and `month`. Minimal repro on chart 1
+(span `[year, hour, month]`, no `day`): adding `"batang hari"` to a correct block flips it to
+`names [day, year, month, hour]`. Fix technique already exists in this codebase — `englishLeakage()`
+cuts the sanctioned bracket out before scanning.
+
+### 4. Two things the measurement changed that were NOT decisions anyone made
+
+- **`paragraphFloorChars` = 700 was fitted on a biased sample.** It was set from the gate-PASSED pairs
+  (p90 570) and the full population is longer (p90 748, max 1390), so it fires on 25.8% of evaluations
+  and is most of why shipped fell to 43.8%. Passes-only is as biased as rejections-only. **Reyner's
+  call**, with the distribution now in MEASUREMENTS.
+- **`palace_dropped` is back on top at 43.6%**, up from 29% after the `d0cfb16` prompt fix that halved
+  it. Nothing in this pass touched the palace instruction. Either the fix decayed against a changed
+  prompt or the earlier figure was a lucky batch. It is now the largest single rejection cause and the
+  highest-value target after the `relation_positions` gate fix.
+
+**Two test fixtures were self-duplicating and are fixed.** `goodReading()` (stage6) and `goodRender`
+(stage5) both set `penutup` to a glossary string their own blocks already render, so both repeated
+themselves and `structure.duplicate_sentence` correctly rejected them. Any glossary string would
+collide — the floor renders every string of every fact — so both now use a fixture sentence asserted
+clean against the whole blocklist. **The checks were not weakened to accommodate a fixture.**
 
 ## DECIDED 2026-08-03 — card sizes LOCKED, Card A head, footer gender strings (Reyner)
 
