@@ -254,8 +254,27 @@ test('supersession is symmetric and only fires with CR-1', () => {
     const plain = facts.find((f) => f.id === 'main_profile');
     assert.ok(plain, `chart ${tc.id}: main_profile is always present`);
     if (cr1) {
-      assert.equal(cr1.supersedes, 'main_profile', `chart ${tc.id}`);
+      // An ARRAY as of 2026-08-05: CR-1 absorbs main_profile always, and the
+      // convergence of the SAME Aspek when the chart has one (charts 9 and 12).
+      assert.ok(Array.isArray(cr1.supersedes), `chart ${tc.id}: supersedes is a list`);
+      assert.ok(cr1.supersedes.includes('main_profile'), `chart ${tc.id}`);
       assert.equal(plain.superseded_by, 'profile_vs_favorable', `chart ${tc.id}`);
+
+      // The twin convergence, if any, is absorbed and carries its positions over.
+      const twin = facts.find((f) => f.provenance.kind === 'aspek_convergence'
+        && f.provenance.god === cr1.provenance.god);
+      if (twin) {
+        assert.ok(cr1.supersedes.includes(twin.id), `chart ${tc.id}: ${twin.id} absorbed`);
+        assert.equal(twin.superseded_by, 'profile_vs_favorable', `chart ${tc.id}`);
+        // The collapse must not lose what only the convergence knew.
+        assert.deepEqual(cr1.provenance.convergence_positions, twin.provenance.positions,
+          `chart ${tc.id}: positions carried`);
+        assert.deepEqual(cr1.provenance.convergence_palaces, twin.provenance.palaces,
+          `chart ${tc.id}: palaces carried`);
+      } else {
+        assert.equal(cr1.supersedes.length, 1, `chart ${tc.id}: nothing else to absorb`);
+        assert.ok(!('convergence_positions' in cr1.provenance), `chart ${tc.id}`);
+      }
     } else {
       assert.ok(!('superseded_by' in plain), `chart ${tc.id}: nothing supersedes it`);
     }

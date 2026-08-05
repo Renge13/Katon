@@ -77,58 +77,37 @@ test('the module-assembled floor passes its own gate, on every fixture chart', (
   // was first run it did NOT - the floor never named a palace, while five of
   // chart 1's nine required points demand one. lib/render/fallback.js now leads
   // each block with the palace. This test is what caught that.
-  // KNOWN EXCEPTION, found 2026-08-04 by structure.duplicate_sentence on the run
-  // that introduced it. NOT a floor bug and NOT a false positive - an upstream
-  // Stage 3 collapse gap, on charts 9 and 12 of 13:
-  //
-  //   when the CR-1 tension's Aspek is ALSO a converging Aspek, Stage 3 emits both
-  //   `profile_vs_favorable` and `aspek_convergence_<same god>`. The two facts
-  //   resolve to the SAME glossary entry, so the floor renders label +
-  //   label_meaning + gift + cost twice, word for word. Chart 9 duplicates six
-  //   sentences on 正財, chart 12 seven on 偏財. Chart 1's CR-1 god is 正財 and it has
-  //   no 正財 convergence, which is why 11 of 13 charts are clean.
-  //
-  // This is the third instance of the pattern collapseSuperseded() already handles
-  // twice (main_profile absorbed by CR-1, badge_空亡 absorbed by its void stack) and
-  // the fix belongs there, in its own commit with its own measurement: it moves
-  // those charts' fact sets, their required_points and their hierarchy ranks, and
-  // landing it inside a prompt-change measurement would confound both (rule 13).
-  //
-  // The exemption is DERIVED FROM THE CAUSE, not a list of chart ids. So it stops
-  // applying by itself the day the collapse lands, and it cannot silently absorb a
-  // different chart that starts duplicating for a different reason. The failure is
-  // asserted EXACTLY, so any other defect on these two charts still fails.
-  const sharesCr1GodWithConvergence = (semantic) => {
-    const cr1 = semantic.facts.find((f) => f.provenance?.rule === 'CR-1');
-    if (!cr1) return false;
-    return semantic.facts.some((f) => f.provenance?.kind === 'aspek_convergence'
-      && f.provenance.god === cr1.provenance.god);
-  };
-
-  let exempted = 0;
+  // THE EXEMPTION IS GONE, and its removal is the confirmation it was written for.
+  // Between 2026-08-04 and 08-05 this test carried a derived exemption for charts 9
+  // and 12, whose CR-1 Aspek was also a converging Aspek: two facts resolved to one
+  // glossary entry and the floor rendered it twice, word for word. Stage 3 now
+  // collapses the pair (the third collapseSuperseded instance), so all 13 charts
+  // pass with no special case - which is what the exemption existed to detect.
   for (const tc of VALIDATION_CHARTS) {
     const semantic = jsonFor(tc);
     const result = validateRendering(goodReading(semantic), semantic, {
       provider: 'module_assembly',
     });
-
-    if (sharesCr1GodWithConvergence(semantic)) {
-      exempted += 1;
-      assert.deepEqual(
-        [...new Set(checksIn(result))], ['structure.duplicate_sentence'],
-        `chart ${tc.id} floor should fail ONLY on the documented Stage 3 collapse gap`,
-      );
-      assert.equal(result.hard, false);
-      continue;
-    }
-
     assert.ok(result.ok, `chart ${tc.id} floor rejected: ${checksIn(result).join(', ')}`);
     assert.equal(result.hard, false);
   }
+});
 
-  // Pins the size of the exception. If it grows, something upstream changed and the
-  // collapse gap got wider rather than narrower.
-  assert.equal(exempted, 2, 'exactly charts 9 and 12 carry the collapse gap');
+test('no chart emits the CR-1 Aspek and its convergence as two facts', () => {
+  // The collapse, asserted where it belongs rather than only through the floor.
+  // Charts 9 (正財) and 12 (偏財) are the two that used to.
+  let collapsed = 0;
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const cr1 = semantic.facts.find((f) => f.provenance?.rule === 'CR-1');
+    if (!cr1) continue;
+    const twin = semantic.facts.find((f) => f.provenance?.kind === 'aspek_convergence'
+      && f.provenance.god === cr1.provenance.god);
+    assert.equal(twin, undefined,
+      `chart ${tc.id}: ${cr1.provenance.god} converges AND is the profile; one must be absorbed`);
+    if (cr1.provenance.convergence_positions) collapsed += 1;
+  }
+  assert.equal(collapsed, 2, 'exactly two fixture charts carry an absorbed convergence');
 });
 
 test('a passing result records the gate version that passed it', () => {
