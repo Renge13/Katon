@@ -31,7 +31,7 @@ import { MASTER_PROMPT } from '../lib/render/prompt.js';
 import { parseRenderResponse } from '../lib/render/schema.js';
 import { scrubInternal, internalFieldNames } from '../lib/render/payload.js';
 import {
-  validateRendering, stricterDirective, STAGE6_VERSION, CATEGORIES,
+  validateRendering, stricterDirective, STAGE6_VERSION, CATEGORIES, STRUCTURE_PARAMS,
 } from '../lib/validate/index.js';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
 import { stemOverlap, distinctiveStems } from '../lib/validate/text.js';
@@ -41,11 +41,23 @@ const jsonFor = (tc) => buildSemanticJson(calculateBaziChart({
 }));
 const CHART_1 = jsonFor(VALIDATION_CHARTS[0]);
 
-/** The floor, plus a glossary sentence for the penutup the floor cannot write. */
+/**
+ * The floor, plus a penutup the floor cannot write (it returns '' on purpose).
+ *
+ * The penutup is a FIXTURE sentence, not glossary content, and that is deliberate.
+ * It used to be `core.label_meaning` - a string the floor already renders inside a
+ * block - so the fixture repeated itself three sentences over, and
+ * `structure.duplicate_sentence` correctly rejected it the moment that check
+ * existed. Any glossary string would collide the same way, because the floor
+ * renders every string of every fact. The sentence below carries no banned pattern
+ * (asserted by the blocklist sweep below) and appears nowhere else.
+ */
 function goodReading(semantic = CHART_1) {
   const floor = assembleFallback(semantic);
-  const core = semantic.facts.find((f) => f.type === 'core' && f.label_meaning);
-  return { blocks: floor.blocks, penutup: core.label_meaning };
+  return {
+    blocks: floor.blocks,
+    penutup: 'Peta ini sudah cukup jelas untuk kamu jalani mulai sekarang.',
+  };
 }
 
 /** Deep copy with one block's text replaced, so fixtures stay one-line diffs. */
@@ -65,14 +77,58 @@ test('the module-assembled floor passes its own gate, on every fixture chart', (
   // was first run it did NOT - the floor never named a palace, while five of
   // chart 1's nine required points demand one. lib/render/fallback.js now leads
   // each block with the palace. This test is what caught that.
+  // KNOWN EXCEPTION, found 2026-08-04 by structure.duplicate_sentence on the run
+  // that introduced it. NOT a floor bug and NOT a false positive - an upstream
+  // Stage 3 collapse gap, on charts 9 and 12 of 13:
+  //
+  //   when the CR-1 tension's Aspek is ALSO a converging Aspek, Stage 3 emits both
+  //   `profile_vs_favorable` and `aspek_convergence_<same god>`. The two facts
+  //   resolve to the SAME glossary entry, so the floor renders label +
+  //   label_meaning + gift + cost twice, word for word. Chart 9 duplicates six
+  //   sentences on 正財, chart 12 seven on 偏財. Chart 1's CR-1 god is 正財 and it has
+  //   no 正財 convergence, which is why 11 of 13 charts are clean.
+  //
+  // This is the third instance of the pattern collapseSuperseded() already handles
+  // twice (main_profile absorbed by CR-1, badge_空亡 absorbed by its void stack) and
+  // the fix belongs there, in its own commit with its own measurement: it moves
+  // those charts' fact sets, their required_points and their hierarchy ranks, and
+  // landing it inside a prompt-change measurement would confound both (rule 13).
+  //
+  // The exemption is DERIVED FROM THE CAUSE, not a list of chart ids. So it stops
+  // applying by itself the day the collapse lands, and it cannot silently absorb a
+  // different chart that starts duplicating for a different reason. The failure is
+  // asserted EXACTLY, so any other defect on these two charts still fails.
+  const sharesCr1GodWithConvergence = (semantic) => {
+    const cr1 = semantic.facts.find((f) => f.provenance?.rule === 'CR-1');
+    if (!cr1) return false;
+    return semantic.facts.some((f) => f.provenance?.kind === 'aspek_convergence'
+      && f.provenance.god === cr1.provenance.god);
+  };
+
+  let exempted = 0;
   for (const tc of VALIDATION_CHARTS) {
     const semantic = jsonFor(tc);
     const result = validateRendering(goodReading(semantic), semantic, {
       provider: 'module_assembly',
     });
+
+    if (sharesCr1GodWithConvergence(semantic)) {
+      exempted += 1;
+      assert.deepEqual(
+        [...new Set(checksIn(result))], ['structure.duplicate_sentence'],
+        `chart ${tc.id} floor should fail ONLY on the documented Stage 3 collapse gap`,
+      );
+      assert.equal(result.hard, false);
+      continue;
+    }
+
     assert.ok(result.ok, `chart ${tc.id} floor rejected: ${checksIn(result).join(', ')}`);
     assert.equal(result.hard, false);
   }
+
+  // Pins the size of the exception. If it grows, something upstream changed and the
+  // collapse gap got wider rather than narrower.
+  assert.equal(exempted, 2, 'exactly charts 9 and 12 carry the collapse gap');
 });
 
 test('a passing result records the gate version that passed it', () => {
@@ -337,6 +393,125 @@ test('more than two paragraph breaks in one block is rejected', () => {
   assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('structure.too_many_breaks'));
 });
 
+// ── 6. THE FOUR CHECKS FROM REYNER'S BLIND-JUDGING NOTES ───
+// All four are POST-GATE MISSES, not speculative hardening. The 2026-08-02 pairs
+// file holds only text the gate PASSED (measure-stage6.mjs records a result for
+// judging only when `!fallback`, and renderReading returns non-fallback solely from
+// the gate.ok branch), and the defects below were found in it. Counts over its 32
+// samples: 1 duplicate sentence, 2 unparagraphed walls, 0 code leaks, 0 disclaimers.
+// The last two were cheap insurance; the first two were live escapes.
+
+test('the wall of text is rejected: a long block with no paragraph break', () => {
+  // OBSERVED post-gate: 954 characters, 17 unbroken sentences, chart 3. The gate had
+  // a CEILING on breaks (maxBreaksPerBlock) and no FLOOR, so zero breaks was legal
+  // at any length.
+  const fact = CHART_1.facts.find((f) => f.id === 'day_master_Fire');
+  const filler = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
+  const long = `Api (Fire). ${filler} ${filler} ${filler} ${filler}`;
+  assert.ok(long.length > STRUCTURE_PARAMS.paragraphFloorChars, 'fixture must clear the floor');
+
+  const wall = withBlockText(goodReading(), 'day_master_Fire', long);
+  assert.ok(checksIn(validateRendering(wall, CHART_1)).includes('structure.unparagraphed'));
+
+  // The SAME text with one break is fine. The rule asks for a paragraph, not for
+  // brevity - a long block is allowed to be long.
+  const broken = withBlockText(goodReading(), 'day_master_Fire',
+    `Api (Fire). ${filler} ${filler}\n\n${filler} ${filler}`);
+  assert.ok(!checksIn(validateRendering(broken, CHART_1)).includes('structure.unparagraphed'));
+});
+
+test('an ordinary-length block is never asked to paragraph', () => {
+  // The threshold sits above the observed p90 (570 over the 32 gate-passed samples)
+  // precisely so this holds. A rule that made every block break would be a style
+  // opinion wearing a structure check's name.
+  const clean = validateRendering(goodReading(), CHART_1);
+  assert.ok(!checksIn(clean).includes('structure.unparagraphed'));
+});
+
+test('the same sentence twice in one reading is rejected', () => {
+  // OBSERVED post-gate: chart 3 said "Baganmu berdiri di titik tengah yang stabil."
+  // twice, two sentences apart, inside one block.
+  const fact = CHART_1.facts.find((f) => f.id === 'day_master_Fire');
+  const repeated = `Api (Fire). ${fact.label_meaning} ${fact.gift} ${fact.label_meaning}`;
+  const bad = withBlockText(goodReading(), 'day_master_Fire', repeated);
+  assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('structure.duplicate_sentence'));
+});
+
+test('duplicate detection spans BLOCKS, and ignores punctuation and case', () => {
+  const reading = goodReading();
+  const sentence = 'Tempat yang tepat membuatmu bergerak jauh lebih cepat dari biasanya';
+  reading.blocks[0].text += ` ${sentence}.`;
+  reading.blocks[1].text += ` ${sentence.toUpperCase()}!`;
+  assert.ok(checksIn(validateRendering(reading, CHART_1))
+    .includes('structure.duplicate_sentence'), 'a restatement across blocks still repeats');
+});
+
+test('a SHORT sentence may recur; only substantial ones count', () => {
+  // Prefer a pattern that misses over one that rejects real readings (blocklist
+  // _README, and the 33-of-133 false-positive episode of 2026-08-02).
+  const reading = goodReading();
+  const short = 'Itu wajar.';
+  assert.ok(short.length < STRUCTURE_PARAMS.minDuplicateSentenceChars);
+  reading.blocks[0].text += ` ${short}`;
+  reading.blocks[1].text += ` ${short}`;
+  assert.ok(!checksIn(validateRendering(reading, CHART_1))
+    .includes('structure.duplicate_sentence'));
+});
+
+test('a raw variable or code string in the prose is rejected', () => {
+  const leaks = [
+    'Pilar Kerjamu membawa label_meaning yang kuat.', // snake_case
+    'Pilar Kerjamu membawa supportShare yang tinggi.', // camelCase
+    'Pilar Kerjamu membawa {fact_ids} di dalamnya.', // braces
+    'Pilar Kerjamu ada di Pilar null dan terasa jelas.', // a leaked missing value
+    'Pilar Kerjamu terbaca dari provenance bagan ini.', // the one bare-word field
+  ];
+  for (const text of leaks) {
+    const bad = withBlockText(goodReading(), 'day_master_Fire', `Api (Fire). ${text}`);
+    assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('style.code_leak'),
+      `not caught: ${text}`);
+  }
+});
+
+test('the code-leak check does not fire on a correct reading', () => {
+  // The camelCase pattern is case-SENSITIVE for this reason; under the default
+  // case-insensitive flags it reduces to [a-z]+[a-z] and matches every word in the
+  // language. It flagged all 398 glossary strings before the flag was pinned.
+  assert.ok(!checksIn(validateRendering(goodReading(), CHART_1)).includes('style.code_leak'));
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    assert.ok(!checksIn(validateRendering(goodReading(semantic), semantic,
+      { provider: 'module_assembly' })).includes('style.code_leak'), `chart ${tc.id}`);
+  }
+});
+
+test('a mid-reading system disclaimer is rejected', () => {
+  const disclaimers = [
+    'Ini bukan nasihat medis untuk kondisimu.',
+    'Catatan: pembacaan berikut bersifat umum.',
+    'Perlu diingat bahwa setiap orang berbeda.',
+    'Bacaan ini hanya menggambarkan kecenderungan umum.',
+    'Sebagai model bahasa, saya membaca pola dari bagan.',
+    'Uraian di atas tidak dimaksudkan sebagai kepastian.',
+  ];
+  for (const text of disclaimers) {
+    const bad = withBlockText(goodReading(), 'day_master_Fire', `Api (Fire). ${text}`);
+    assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('style.meta'),
+      `not caught: ${text}`);
+  }
+});
+
+test('THE DISCLAIMER CHECK DOES NOT FIRE ON "Sebagai Air"', () => {
+  // The `\b` after AI in the meta pattern is load-bearing. Without it, "Sebagai Air
+  // (Water)" matches - correct prose on every Water chart, and the exact shape of
+  // the bare_polarity/`yang` and english_leakage/`the` false positives that cost 33
+  // rejections on 2026-08-02. A scan written for this session's audit reproduced the
+  // bug and flagged a real chart-4 reading; the shipped pattern does not.
+  const bad = withBlockText(goodReading(), 'day_master_Fire',
+    'Sebagai Air (Water) dengan arketipe Embun, kamu menyesuaikan diri tanpa kehilangan arah.');
+  assert.ok(!checksIn(validateRendering(bad, CHART_1)).includes('style.meta'));
+});
+
 // ── the regeneration directive ─────────────────────────────
 
 test('the stricter directive names the failures and omits the flags', () => {
@@ -432,9 +607,17 @@ test('NO ENGINE STRING WOULD TRIP THE STYLE GATE', () => {
     'branch_name_id', 'branch_label_meaning', 'line',
   ]);
   const EXEMPT = /^glossary\.salah_dikira\./;
+  // Compiled with EACH ENTRY'S OWN FLAGS, exactly as lib/validate/style.js#compile
+  // does. Hardcoding 'iu' here made this test stricter than the gate it guards, and
+  // for a case-sensitive pattern that is not caution but a false alarm: the
+  // case-insensitive form of `code_leak`'s camelCase regex is `[a-z]+[a-z]`, which
+  // matches every word in the language, so this test reported all 398 glossary
+  // strings as offenders against a pattern the gate would never have fired.
   for (const [category, entries] of Object.entries(BLOCKLIST.style)) {
     if (category.startsWith('_')) continue;
-    for (const entry of entries) patterns.push([category, new RegExp(entry.pattern, 'iu')]);
+    for (const entry of entries) {
+      patterns.push([category, new RegExp(entry.pattern, entry.flags || 'iu')]);
+    }
   }
 
   (function walk(node, path) {

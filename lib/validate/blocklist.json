@@ -226,7 +226,7 @@
     "meta": [
       {
         "pattern": "sebagai AI\\b|\\bsebagai model\\b|\\bsebagai asisten\\b",
-        "note": "renderer-prompt bans meta."
+        "note": "renderer-prompt bans meta. The \\b after AI is load-bearing: without it this pattern matches \"Sebagai Air (Water)\", which is correct prose on every Water chart. Same class of error as bare_polarity matching the pronoun `yang`."
       },
       {
         "pattern": "berdasarkan (data|informasi) (yang diberikan|di atas)",
@@ -235,6 +235,57 @@
       {
         "pattern": "\\bJSON\\b|\\bprompt\\b",
         "note": "Leaks the pipeline into the reading."
+      },
+      {
+        "pattern": "\\b(kecerdasan buatan|model bahasa)\\b",
+        "note": "The same self-identification as `sebagai AI` with the noun spelled out. Reyner's 2026-08-02 blind-judging notes list mid-reading system disclaimers as a defect class; this is its plainest form."
+      },
+      {
+        "pattern": "\\bbukan (nasihat|saran|pengganti) (medis|keuangan|profesional|dokter)\\b",
+        "note": "The safety disclaimer. Rule 25 is enforced by NOT giving medical or financial advice, which forbidden_content already hard-rejects; appending a disclaimer instead is the model covering itself inside a reading that should never have needed one."
+      },
+      {
+        "pattern": "\\b(catatan|disclaimer|penafian):",
+        "note": "A labelled aside. The reading has no apparatus - no notes, no footnotes, no caveats block. The colon is required so the ordinary noun `catatan` in prose does not match."
+      },
+      {
+        "pattern": "\\bperlu (diingat|dicatat|dipahami) bahwa\\b|\\bharap (dicatat|diingat)\\b",
+        "note": "Hedging the whole reading rather than a claim. Golden rule 7 bans hedging inside a claim; this is the same failure one level up, and it is also bureaucratic-baku (rule 20)."
+      },
+      {
+        "pattern": "\\bbacaan ini (hanya|bukan|tidak)\\b|\\bini (hanya|bukanlah) (sebuah )?(gambaran|panduan|alat|hiburan|prediksi)\\b",
+        "note": "The reading disowning itself. PROGRESS: 'one committed image, no hedging' - a reading that tells the reader not to take it seriously has spent the trust the whole funnel exists to build. Scoped to those followers so \"Bacaan ini menutup ...\" is untouched."
+      },
+      {
+        "pattern": "\\btidak dimaksudkan (untuk|sebagai)\\b|\\bsaya tidak (bisa|dapat)\\b",
+        "note": "Terms-of-service register, and the model speaking as itself in the first person. The reading addresses the reader as `kamu` and never refers to its own author."
+      }
+    ],
+    "code_leak": [
+      {
+        "pattern": "\\b[a-z][a-z0-9]*_[a-z0-9_]+\\b",
+        "note": "A snake_case identifier: `label_meaning`, `fact_id`, `positions_id`, `support_share`. Reyner's 2026-08-02 blind-judging notes list raw variable/code-string leaks as a defect class. Indonesian prose contains no underscores, so this cannot fire on real copy. fact_ids are out of scope by construction (blocklist scope note) - they are excluded from the checked text."
+      },
+      {
+        "pattern": "\\b[a-z]+[A-Z][a-zA-Z]*\\b",
+        "note": "camelCase: `supportShare`, `positionsId`, `factIds`. CASE-SENSITIVE, and that is load-bearing for the same reason bare_polarity is: under the default case-insensitive flags this pattern is `[a-z]+[a-z]` and matches EVERY word of two letters or more. Caught by the engine-string test on first run - it flagged all 398 glossary strings. Verified against the whole glossary and all 32 gate-passed samples from the 2026-08-02 pairs file: zero matches with the `u` flag.",
+        "flags": "u"
+      },
+      {
+        "pattern": "[{}\\[\\]`]|\\$\\{",
+        "note": "Braces, square brackets, backticks and template-literal syntax. Parentheses are DELIBERATELY absent: rule 23 sanctions the English bracket, so banning ( ) would reject every correct reading."
+      },
+      {
+        "pattern": "\"[a-z_]+\"\\s*:",
+        "note": "A JSON key. The model echoing its own input structure into the prose."
+      },
+      {
+        "pattern": "\\b(null|undefined|NaN)\\b",
+        "note": "A missing value rendered as its literal. The hour pillar is absent for a large share of users and `palaceName` returns null for it, so `Pilar null` is a reachable output and not a hypothetical."
+      },
+      {
+        "pattern": "\\bprovenance\\b",
+        "note": "The one payload field name that is a bare English word rather than snake_case, so nothing above catches it. Observed as a category in the notes; named explicitly for that reason."
       }
     ],
     "arithmetic": [
