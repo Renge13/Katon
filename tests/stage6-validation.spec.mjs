@@ -223,6 +223,52 @@ test('a misstated branch-relation span is caught (observed in gate-check run 2)'
   assert.ok(checksIn(result).includes('fact.relation_positions'));
 });
 
+test('A CORRECT SPAN SURVIVES THE MANDATED PILLAR-PART CONSTRUCTIONS', () => {
+  // The 8/8 false positive, fixed. Chart 1's 半合 spans year + hour + month and NOT
+  // day, so before the scan was scoped, a block that stated the span perfectly and
+  // then wrote "batang hari" - which renderer-prompt REQUIRES for a stem - failed
+  // with "names [day, year, month, hour]". Measured extras were hour and month too,
+  // so every one of the four words is exercised here.
+  const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
+  const phrase = fact.provenance.positions_id;
+  const tail = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
+
+  const mandated = [
+    'Ini terbaca dari batang hari kamu.', // §THE PALACES AND THE PARTS
+    'Ini terbaca dari cabang bulanmu.', // the prompt's own possessive example
+    'Ini terbaca dari batang jam kamu.',
+    'Ini datang dari pilar harimu.', // §PROVENANCE IS NOT ARITHMETIC
+    'Hari lahirmu membawa unsur Api.', // the Day Master idiom, encouraged
+  ];
+  for (const clause of mandated) {
+    const reading = withBlockText(goodReading(), fact.id,
+      `Tarikan ini menempati ${phrase}. ${clause} ${tail}`);
+    const checks = checksIn(validateRendering(reading, CHART_1));
+    assert.ok(!checks.includes('fact.relation_positions'),
+      `a complete span must survive: ${clause}`);
+  }
+});
+
+test('an INCOMPLETE span still fails, even wrapped in those constructions', () => {
+  // The other direction. Scoping the scan must not blind the check to the failure
+  // it exists for - dropping a position the JSON lists.
+  const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
+  const tail = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
+
+  // Two of the three palaces, plus a mandated construction as camouflage.
+  const short = withBlockText(goodReading(), fact.id,
+    `Tarikan ini menempati Pilar Akar dan Pilar Kerja. Ini terbaca dari batang hari kamu. ${tail}`);
+  const findings = validateRendering(short, CHART_1).findings
+    .filter((f) => f.check === 'fact.relation_positions');
+  assert.equal(findings.length, 1, 'a dropped position is still a hard reject');
+  assert.match(findings[0].message, /but the text names/);
+
+  // And the original observed failure, stated in bare words, still fails.
+  const bare = withBlockText(goodReading(), fact.id,
+    `Ini datang dari tahun dan bulan kelahiranmu. ${tail}`);
+  assert.ok(checksIn(validateRendering(bare, CHART_1)).includes('fact.relation_positions'));
+});
+
 test('naming NO positions is allowed; naming the RIGHT set is allowed', () => {
   // The check must not force the renderer to list pillars it had no reason to.
   const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
