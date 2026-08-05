@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import Sharecard from './Sharecard.jsx';
 import { exportSharecardPNG } from './exportCard.js';
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
-import { freeFullReadingEnabled } from '../lib/flags.js';
 import { priceFor } from '../lib/pricing.js';
 import { formatIdr } from '../lib/site/format.js';
 
@@ -486,10 +485,7 @@ function Reading({ reading, onReset, initialFull }) {
 function Paywall({ reading, initialFull }) {
   // initialFull (optional): when provided (re-access to an already-paid reading), the
   // paywall opens straight to the unlocked view. Omitted in the funnel → default flow.
-  // TEST-UNGATE: with the flag on and no initialFull, open in 'ungating' — fetch /full
-  // (served under the same flag) and show the deep-read instead of the teaser+paywall.
-  const freeFull = freeFullReadingEnabled();
-  const [stage, setStage] = useState(initialFull ? 'unlocked' : (freeFull ? 'ungating' : 'teaser')); // teaser | wa | pending | unlocking | unlocked | ungating
+  const [stage, setStage] = useState(initialFull ? 'unlocked' : 'teaser'); // teaser | wa | pending | unlocking | unlocked
   const [wa, setWa] = useState('');
   const [full, setFull] = useState(initialFull || null);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
@@ -535,24 +531,7 @@ function Paywall({ reading, initialFull }) {
     return () => clearTimeout(t);
   }, [stage]);
 
-  // TEST-UNGATE: fetch the full reading up-front (no payment) and show the deep-read.
-  // The /full route serves paidContent under the same flag. VIEW-ONLY — this never
-  // calls the pay/webhook flow and never marks the reading paid. If content doesn't
-  // arrive (flag off server-side, etc.), fall back to the normal teaser+paywall.
-  useEffect(() => {
-    if (!freeFull || initialFull || full) return;
-    let cancelled = false;
-    (async () => {
-      const r = await fetch(`/api/reading/${reading.token}/full`).then((x) => x.json()).catch(() => null);
-      if (cancelled) return;
-      if (r && r.paid && r.paidContent) { setFull(r); setStage('unlocked'); }
-      else setStage('teaser');
-    })();
-    return () => { cancelled = true; };
-  }, [freeFull, initialFull, full, reading.token]);
-
   if (stage === 'unlocked' && full) return <Unlocked full={full} token={reading.token} onUpdate={setFull} />;
-  if (stage === 'ungating') return <div style={{ padding: '48px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--muted-warm)' }}>Membuka bacaan lengkap...</div>;
   if (stage === 'unlocking') return <Unlocking />;
   if (stage === 'pending') return <Pending invoiceUrl={invoiceUrl} />;
   if (stage === 'wa') return <WaCapture wa={wa} setWa={setWa} onSubmit={submitWa} />;
@@ -868,10 +847,7 @@ export function ReadingByToken({ token }) {
         const fv = await res.json();
         if (!fv || fv.error || !fv.token) { if (!cancelled) setStatus('notfound'); return; }
         let paidFull = null;
-        // TEST-UNGATE: with the flag on, revisiting an unpaid link shows the full reading
-        // too (same render as a paid one — portrait + deep-read). VIEW-ONLY; the /full
-        // route gates content, and the DB row stays paid=false.
-        if (fv.paid || freeFullReadingEnabled()) {
+        if (fv.paid) {
           const fr = await fetch(`/api/reading/${token}/full`).then((r) => r.json()).catch(() => null);
           if (fr && fr.paid && fr.paidContent) paidFull = fr;
         }

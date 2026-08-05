@@ -34,6 +34,43 @@ export default function TentangPage() {
         </a>
         .
       </P>
+
+      {/* Contact block. Serves the "address, and contact number" line in Xendit's
+          second rejection (2026-08-05), which their first set of criteria did not
+          ask for. Deliberately NOT in the footer - see lib/site/entity.js. The id
+          is the anchor the footer's Kontak link points at. Plain <dl>, so all three
+          values are in the HTML document without JS, same as every other page here. */}
+      <H2 id="kontak">{q.kontakHeading}</H2>
+      <P>{q.kontakLead}</P>
+      <dl
+        style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 15,
+          lineHeight: 1.75,
+          color: 'var(--tinta-soft)',
+          margin: 0,
+        }}
+      >
+        <dt style={{ fontWeight: 600, color: 'var(--tinta)' }}>{q.kontakWhatsappLabel}</dt>
+        <dd style={{ margin: '0 0 12px' }}>
+          <a
+            href={`https://wa.me/${ENTITY.whatsappE164}`}
+            style={{ color: 'var(--clay)' }}
+          >
+            {ENTITY.whatsapp}
+          </a>
+        </dd>
+
+        <dt style={{ fontWeight: 600, color: 'var(--tinta)' }}>{q.kontakEmailLabel}</dt>
+        <dd style={{ margin: '0 0 12px' }}>
+          <a href={`mailto:${ENTITY.email}`} style={{ color: 'var(--clay)' }}>
+            {ENTITY.email}
+          </a>
+        </dd>
+
+        <dt style={{ fontWeight: 600, color: 'var(--tinta)' }}>{q.kontakAddressLabel}</dt>
+        <dd style={{ margin: 0 }}>{ENTITY.address}</dd>
+      </dl>
     </StaticPage>
   );
 }

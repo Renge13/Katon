@@ -19,6 +19,10 @@ UPDATED: 2026-08-03 — XENDIT SITE COMPLIANCE. Site footer + /harga /tentang /p
          /pengembalian shipped (Prompt I). Serves TODO #8. Two pre-existing defects found and NOT
          fixed here: the paywall shows a retired Rp 49.000, and the funnel carries 9 banned
          ellipsis characters.
+UPDATED: 2026-08-05 — XENDIT REJECTION 2. `NEXT_PUBLIC_FREE_FULL_READING` removed from the codebase;
+         the paywall renders again. INTERIM STATE FLAGGED: this re-enables the legacy 19k deep-read
+         gate and an invoice description that does not match delivery. Fulfillment swap is the next
+         build priority after submission. Read that section before touching the paid path.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
 -->
 
@@ -277,6 +281,56 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **The four checks added 08-04, by real-defect yield** | unparagraphed 42 · duplicate_sentence 0 · code_leak 0 · meta 0 | 08-04 | Over 163 gate evaluations. `unparagraphed` is doing all the work and is the whole reason shipped fell. The other three cost nothing and catch nothing at n=130, which is what insurance looks like when it is not needed yet. All four were validated against the 32 gate-passed samples in the 08-02 pairs file before shipping: **zero false positives there.** |
 | **`paragraphFloorChars` = 700 is FITTED ON A BIASED SAMPLE and needs re-deciding** | rejects 25.8% of evaluations | 08-04 | Set from the 32 gate-PASSED pairs samples, where block length was med 415 / p90 570 / max 954. The full n=130 population is LONGER: **med 493, p90 748, max 1390** (n=1310 blocks). So 700 now sits BELOW p90 rather than above it, which is why it fires so much. Passes-only is as biased a sample as rejections-only - the same error the harness header warns about. **This is a real decision for Reyner, not a bug:** a 700-char unbroken paragraph IS a wall, and regeneration rescues most of them, but the threshold moved the launch number and was never ratified. |
 | Stage 6 threshold distributions, gate `1.1.0` | same_breath med 0.93 (min 0.20, p10 0.50) · coverage med 1.00 (min 0.00, p10 0.69) · total_chars med 3313 (max 4797) · block_chars med 493 (p90 748, max 1390) | 08-04 | n=231 / 3792 / 235 / 1310. The three ORIGINAL unfitted constants still reject nothing: sameBreathOverlap 0.25 vs a p10 of 0.50, fieldOverlap 0.20 vs a p10 of 0.69, maxTotalChars 12000 vs a max of 4797. `coverage` min is now 0.00 and `same_breath` min 0.20 - the first observations to fall BELOW their thresholds, so these two are no longer provably inert and are worth a look before they are fitted. |
+
+## DECIDED 2026-08-05 — test-ungate flag REMOVED; the paywall is live again as an INTERIM state
+
+**Why now.** Xendit rejected the site a second time: *"This contents of this website are incomplete.
+Make sure it contains your product / services, prices, checkout page, address, and contact number."*
+The rejection is CORRECT and Prompt I did not cause it. `/harga`, `/tentang`, the legal pages and the
+footer entity all shipped 08-03 and are fine. What was missing is a reachable **checkout**, because
+`NEXT_PUBLIC_FREE_FULL_READING` was still set in Vercel and it had quietly become the architecture.
+
+Evidence, both run 2026-08-05 against a freshly generated reading on each host:
+```
+prod  https://www.katon.app/r/ZVm4Aghlo9q1zVDjGFQXi
+  buttons: ["← Ganti tanggal","Simpan Gambar","Kabari aku","Kabari aku",<footer links>]
+  hasRp:   false
+local (flag unset) http://localhost:3000/r/g8JgXk2w8TkNPRrDUrUXy
+  buttons: ["← Ganti tanggal","Simpan Gambar","Hubungan","Karier","Uang","Buka Refleksiku"]
+  rp:      ["Rp 300-500rb.","Rp 19.000"]
+```
+The flag routed the paywall through `ungating` -> `unlocked`, so `Teaser` — the only component that
+renders a price or a buy button — never mounted in production. Not a copy problem; the checkout did
+not exist on the live site.
+
+**What shipped.** Removed from every code path, not switched off: `lib/flags.js` deleted,
+`freeFullReadingEnabled()` gone from `components/Funnel.jsx` (import, `ungating` stage, the
+up-front `/full` fetch, and the `ReadingByToken` re-visit branch) and from
+`app/api/reading/[id]/full/route.js`, whose gate is now `row.paid === true` and nothing else.
+`.env.example` carries a do-not-reintroduce note in place of the old stanza. Verified on the dev
+server: an UNPAID reading returns `paid:false`, no `paidContent`, teaser only. Reyner deletes the
+Vercel env var on a coordinated deploy.
+
+### THE INTERIM STATE — do not let this ship quietly past submission
+
+Re-enabling the paywall re-enables the **legacy 19k unlock**, which is NOT the product CLAUDE.md
+describes. Two specific mismatches, both accepted by Reyner for the Xendit submission window and
+both live the moment the deploy lands:
+
+1. **The free mirror is no longer complete.** Rule: FREE is the full mirror, ungated, and paid is
+   "an upsell offered AFTER the free reading lands, never a gate." What actually happens now is the
+   7-beat Bacaan Mendalam sits BEHIND the Rp 19.000 wall (`Unlocked` in `components/Funnel.jsx`
+   renders `paidContent.beat1..beat7`). The gate is back.
+2. **The charge description does not match what is delivered.** The invoice reads
+   `Katon - CE card + PDF reading` (`INVOICE_DESCRIPTION.artifact`, `app/api/pay/[id]/route.js`)
+   while the buyer receives a deep-read unlock. There is no PDF and no hi-res card in the paid path.
+   This one is a merchant-compliance risk in its own right, which is a poor thing to carry into a
+   merchant review.
+
+**Accepted because traffic is zero** — nobody is being charged in this window. **The fulfillment
+swap is the next build priority after submission**: paid delivers card + PDF, the deep-read returns
+to the free mirror. Until that lands, this section is the reason the numbers look right and the
+product does not.
 
 ## DECIDED 2026-08-04 — model question CLOSED; span pre-verbalised; four gate checks; n=10 measured
 
@@ -971,5 +1025,7 @@ products will need female-set fixture charts to validate against.
   (Seven Killings)**.
 - "The café/stranger test is the one gate" → the cold-read walkthrough already surfaced the failure.
 - "Portrait-first vs domain-first" → RESOLVED: no domain gate; pillars ARE the domains positionally.
-- "The test-ungate flag is the mechanism for a free mirror" → the mirror is ungated BY DESIGN now.
-  Remove `NEXT_PUBLIC_FREE_FULL_READING` from Vercel; do not let a test flag become the architecture.
+- "The test-ungate flag is the mechanism for a free mirror" → **DONE 08-05.** `NEXT_PUBLIC_FREE_FULL_READING`
+  is deleted from the codebase, not merely unset, and `lib/flags.js` is gone with it. It HAD become the
+  architecture: it was left on in Vercel and the paywall never rendered in production. Do not
+  reintroduce it. The mirror being ungated is a FULFILLMENT decision to build, never an env var.
