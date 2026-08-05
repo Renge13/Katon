@@ -24,6 +24,9 @@ UPDATED: 2026-08-05 — XENDIT REJECTION 2. `NEXT_PUBLIC_FREE_FULL_READING` remo
          gate, and the Xendit account is in TEST MODE so Vercel holds a test key - LIVE keys must be
          generated and swapped before any real transaction. Fulfillment swap is the next build
          priority after submission. Read that section before touching the paid path.
+         COPY SET ALIGNED same day: invoice, /harga and /tentang all say `Bacaan Mendalam`, the name
+         the funnel already used. The card + PDF copy returns wholesale at the fulfillment swap. One
+         surface still carries the dead claim - `harga.meta.description` - and needs a register call.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
 -->
 
@@ -322,21 +325,47 @@ both live the moment the deploy lands, plus one live-key swap that must not be f
    "an upsell offered AFTER the free reading lands, never a gate." What actually happens now is the
    7-beat Bacaan Mendalam sits BEHIND the Rp 19.000 wall (`Unlocked` in `components/Funnel.jsx`
    renders `paidContent.beat1..beat7`). The gate is back.
-2. **The charge description did not match what is delivered — FIXED 08-05.**
-   `INVOICE_DESCRIPTION.artifact` (`app/api/pay/[id]/route.js`) read `Katon - CE card + PDF reading`
-   while the buyer received a deep-read unlock, with no PDF and no hi-res card anywhere in the paid
-   path. Charging for one thing and delivering another is a merchant-compliance risk in its own
-   right, so the string now reads **`Katon - Bacaan lengkap`** and describes what is actually
-   delivered (Reyner-approved 08-05). It goes back to naming the card and the PDF when the
-   fulfillment swap makes that true.
+2. **The charge description did not match what is delivered — FIXED 08-05, then the whole copy set
+   followed it.** `INVOICE_DESCRIPTION.artifact` (`app/api/pay/[id]/route.js`) read
+   `Katon - CE card + PDF reading` while the buyer received a deep-read unlock, with no PDF and no
+   hi-res card anywhere in the paid path. Charging for one thing and delivering another is a
+   merchant-compliance risk in its own right, so the string was changed to describe what is actually
+   delivered.
 
-   **The invoice is fixed; the CATALOG COPY IS NOT.** Two user-facing surfaces still promise the
-   card and the PDF, and both are visible to a reviewer before checkout:
-   `SITE_COPY.harga.artifact.body` ("Kartu resolusi tinggi dan PDF dari bacaanmu") and
-   `SITE_COPY.tentang.paragraphs[2]` ("kartu resolusi tinggi dengan PDF"), both in
-   `lib/site/copy.js`. Left alone on purpose - Reyner is sole authority on register (CLAUDE.md)
-   and this copy was approved 08-03, so it is not something to quietly rewrite. It is listed here
-   because "the invoice description was fixed" must not be mistaken for "the mismatch is gone".
+   **First fix superseded the same day.** `Katon - Bacaan lengkap` cleared the delivery mismatch and
+   created a copy one: `lengkap` was the FREE row's own claim on /harga, so the paid line borrowed the
+   word that distinguishes the free product. **Reyner-approved copy set, 2026-08-05: every surface now
+   says `Bacaan Mendalam`** — the name the funnel has always used
+   (`components/Funnel.jsx:587`, `:712`).
+
+   | Surface | Now reads |
+   |---|---|
+   | `INVOICE_DESCRIPTION.artifact` | `Katon - Bacaan Mendalam` |
+   | `SITE_COPY.harga.lead` | "Bacaan pertamamu gratis. Bacaan Mendalam dibuka sekali bayar, tanpa langganan." |
+   | `SITE_COPY.harga.free.body` | "Bacaan personal dari tanggal lahirmu. Tidak perlu akun dan tidak perlu bayar." (drops `lengkap` + "semua bagiannya terbuka") |
+   | `SITE_COPY.harga.artifact.name` | `Bacaan Mendalam` (was `Complete Edition`) |
+   | `SITE_COPY.harga.artifact.body` | "Menelusuri polamu lebih dalam di hubungan, karier, atau uang. Sekali baca, milikmu selamanya." |
+   | `SITE_COPY.tentang.paragraphs[2]` | last three sentences replaced; the card and the card+PDF promises are gone |
+
+   **The card + PDF copy set returns WHOLESALE at the fulfillment swap.** Every string above is
+   interim and every one of them has its revert condition in a comment beside it. `harga.launchLabel`
+   ("harga peluncuran") is untouched and the badge still renders — it is driven by `isSellable()` and
+   `launch < list`, never by copy. **The SKU key stays `artifact`**: display name and SKU key diverge
+   on purpose, because the webhook validates the re-fetched invoice amount against that key.
+
+   Verified 2026-08-05 on this branch: `npm run check:copy` passes over SITE_COPY and ENTITY;
+   `npm run build` keeps `/harga` and `/tentang` at `○ (Static)`, and
+   `grep -o "Bacaan Mendalam" .next/server/app/{harga,tentang}.html` finds the string in both
+   prerendered files, so it is in view-source without executing JS.
+
+   **ONE SURFACE IS STILL WRONG, and it is not in the approved set.**
+   `SITE_COPY.harga.meta.description` reads *"Bacaan Katon gratis dan lengkap. Complete Edition dan
+   Compatibility Reading adalah tambahan opsional."* — it carries BOTH dead claims, and it is the
+   browser-tab description and the search-result snippet, so it is user-facing and a reviewer can see
+   it. Confirmed present in the built HTML after this change:
+   `grep -o '<meta name="description" content="[^"]*"' .next/server/app/harga.html` (2026-08-05).
+   Left alone because Reyner is sole authority on register and no replacement was approved. Proposed
+   wording is with him.
 3. **THE WHOLE XENDIT ACCOUNT IS IN TEST MODE until verification passes, so the key in Vercel is a
    TEST key too.** Nothing in production can take real money today. After verification succeeds,
    generate LIVE keys and swap them in Vercel **before any real transaction** - both

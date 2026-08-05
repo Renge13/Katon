@@ -80,12 +80,19 @@ artifact and future invoices and is rendered nowhere. Its absence is a decision,
 `artifact.{name,body,noteBefore,noteLink,noteAfter}` / `compat.{name,body,note}` / `payment` / `cta`.
 **No rupiah figure is stored in the bank or in the JSX.** Numbers come from `lib/pricing.js`, and
 which label a row shows is decided by `isSellable()` and by whether launch < list.
-The Complete Edition note is split in three because the funnel is linked inside the sentence: this
+The paid row's note is split in three because the funnel is linked inside the sentence: this
 page has no buy button, since the real offer lives at the end of the free reading, so the purchase
 path has to be readable here instead (Xendit criterion 2).
-**Product names are an EN tier layer** (Reyner, 2026-08-03): `Complete Edition` and
-`Compatibility Reading`. Body copy stays Indonesian. The Indonesian name `Bacaan Kompatibilitas` is
-retired - `grep -rni "kompatibilitas" app components lib` returns only code comments.
+**The EN product-name tier is PARTLY SUSPENDED, INTERIM** (Reyner, 2026-08-05). It was `Complete
+Edition` + `Compatibility Reading` (Reyner, 2026-08-03). The paid row is now **`Bacaan Mendalam`**,
+matching the funnel and the Xendit invoice description, because the paid path delivers the deep
+reading and not the card + PDF that `Complete Edition` named. `Compatibility Reading` stays English:
+it is unsellable, so renaming it buys nothing. **The SKU key is still `artifact`** - display name and
+SKU key diverge on purpose (`lib/pricing.js` carries the note; the webhook validates on the key).
+Both revert at the fulfillment swap. Body copy stays Indonesian throughout. The Indonesian name
+`Bacaan Kompatibilitas` is still retired - `grep -rni "kompatibilitas" app components lib` returns
+**zero hits** (re-run 2026-08-05). The earlier "returns only code comments" was already stale when
+written: there are no comment hits either.
 
 ## SITE_COPY.tentang - `app/tentang/page.js`
 `title` / `lead` / `paragraphs[3]` / `operatorHeading` / `operatorBefore` + `operatorAfter`
