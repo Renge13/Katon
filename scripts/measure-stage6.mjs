@@ -6,10 +6,10 @@
 // model, regeneration rate, fallback rate. This is the number that decides
 // launch readiness - it does not exist yet anywhere."
 //
-//   npm run measure:stage6 -- --n 3
+//   npm run measure:stage6 -- --n 10
 //   npm run measure:stage6 -- --n 3 --charts 1,9,13
-//   npm run measure:stage6 -- --n 3 --rider gemini-2.5-flash-lite
-//   npm run measure:stage6 -- --n 1 --dry           # plan only, zero API calls
+//   npm run measure:stage6 -- --n 3 --rider <model>  # opt-in second arm
+//   npm run measure:stage6 -- --n 1 --dry            # plan only, zero API calls
 //
 // ── THE THREE NUMBERS, AND WHY THEY ARE DIFFERENT ──────────
 // FIRST-PASS RATE tells you whether the PROMPT works. It is the honest quality
@@ -61,13 +61,19 @@ const dry = has('dry');
 const outDir = flag('out', 'reports');
 const chartFilter = flag('charts');
 const primary = flag('model', modelFor(DEFAULT_TIER, 'gemini'));
-const rider = flag('rider', 'gemini-2.5-flash-lite');
+// OPT-IN as of 2026-08-04. It used to default to `gemini-2.5-flash-lite`, which is
+// RETIRED (HTTP 404, "no longer available to new users"), so every default run
+// spent half its calls on an arm that could not answer and reported it as fallback.
+// The model question is CLOSED - blind judging went 12-4 for 3.1-flash-lite, which
+// also costs less - so a rider is now a deliberate act, not the default posture.
+// `--no-rider` still works and is now redundant.
+const rider = flag('rider', null);
 const noRider = has('no-rider');
 
 const charts = VALIDATION_CHARTS.filter(
   (c) => !chartFilter || chartFilter.split(',').map(Number).includes(c.id),
 );
-const arms = noRider ? [primary] : [primary, rider];
+const arms = (rider && !noRider) ? [primary, rider] : [primary];
 
 if (!Number.isFinite(n) || n < 1) {
   console.error('--n must be a positive integer');
