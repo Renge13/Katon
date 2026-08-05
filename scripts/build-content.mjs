@@ -59,12 +59,10 @@ const ARCH = {
   samudra:  { stem: '壬', name: 'SAMUDRA',  el: 'Water' },
   hujan:    { stem: '癸', name: 'HUJAN',    el: 'Water' },
 };
-const ARCH_NAMES = new Set(Object.values(ARCH).map((a) => a.name));
-// display (title-case) archetype names used in feed/drain arrays on the card
-const DISPLAY = {
-  JATI: 'Jati', AKAR: 'Akar', MATAHARI: 'Matahari', PELITA: 'Pelita', GUNUNG: 'Gunung',
-  LADANG: 'Ladang', PEDANG: 'Pedang', PERMATA: 'Permata', SAMUDRA: 'Samudra', HUJAN: 'Hujan',
-};
+// NOTE: an ARCH_NAMES set and an UPPERCASE->Title-case DISPLAY map once sat here,
+// both unused. The markdown already writes feed/drain names in title case ("Samudra",
+// "Hujan"), so DISPLAY had nothing to map, and name validation is done instead by the
+// 'fd-agree' flag in validateCell(), which checks the card names against beat4 prose.
 
 const PRICE_LINES = [
   'Buka bacaan Hubungan · Rp 49.000',
@@ -231,7 +229,7 @@ function parseCell(archKey, state) {
 
   // modifier fallbacks: comment "Modifier:" line, then existing-JS exception (matahari-balanced)
   if (!modifier) {
-    const cm = comment.match(/Modifier:\s*([^\[\(\|\n]+)/);
+    const cm = comment.match(/Modifier:\s*([^[(|\n]+)/);
     if (cm) {
       modifier = cm[1].trim();
       flag(cell, 'modifier-source', `modifier "${modifier}" taken from comment (no sharecard header); confirm`);
@@ -286,7 +284,7 @@ function parseCell(archKey, state) {
   if (!bridge.length) flag(cell, 'free-quote-missing', `no inner-voice quote at end of "Ke Mana Ini Bawa Kamu"`);
 
   // ---- Paywall lead + accordion ----
-  let lead = '';
+  let lead; // assigned in both branches below
   const leadSec = findSection(secs, (t) => /^PAYWALL$/i.test(t));
   const accordion = [];
   // accordion bullets can live under PAYWALL (full) or as bare bullets after keMana (bare)
@@ -728,8 +726,8 @@ if (!all20) throw new Error('not all 20 (stem,state) cells present');
 
 // aggregate pass/fail
 let failed = 0;
-for (const [cell, ck] of Object.entries(table)) {
-  for (const [k, v] of Object.entries(ck)) if (!v) { failed++; }
+for (const ck of Object.values(table)) {
+  for (const v of Object.values(ck)) if (!v) { failed++; }
 }
 
 if (report) {
