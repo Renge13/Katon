@@ -6,14 +6,23 @@ import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
 
 export const runtime = 'nodejs';
 
-// REYNER-APPROVED 2026-08-02. This string is on the Xendit checkout page and on
+// REYNER-APPROVED 2026-08-05. This string is on the Xendit checkout page and on
 // the bank/e-wallet statement line, so it is user-facing chrome and rule 20
 // applies: keyboard characters only, one composed voice.
 //
-// It replaces `Katon: Bacaan Mendalam (${row.domain})`, which sold the pre-pivot
-// domain reading — a product that no longer exists.
+// INTERIM, and it describes what the buyer ACTUALLY RECEIVES. The previous string
+// was `Katon - CE card + PDF reading`, which described the intended Complete
+// Edition; the paid path delivers the 7-beat Bacaan Mendalam unlock and there is
+// no PDF and no hi-res card in it yet. Charging for one thing and delivering
+// another is a merchant-compliance problem in its own right, and a poor thing to
+// carry into a merchant review, so the description follows delivery until the
+// fulfillment swap lands. See the 2026-08-05 interim section in docs/PROGRESS.md;
+// when paid really is card + PDF, this string goes back to naming them.
+//
+// The pre-pivot `Katon: Bacaan Mendalam (${row.domain})` is still dead: it sold a
+// per-domain reading, and the domain is not a product.
 const INVOICE_DESCRIPTION = {
-  artifact: 'Katon - CE card + PDF reading',
+  artifact: 'Katon - Bacaan lengkap',
 };
 
 // POST /api/pay/[id]   body: { wa_number, sku? }
