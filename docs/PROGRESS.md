@@ -21,8 +21,9 @@ UPDATED: 2026-08-03 — XENDIT SITE COMPLIANCE. Site footer + /harga /tentang /p
          ellipsis characters.
 UPDATED: 2026-08-05 — XENDIT REJECTION 2. `NEXT_PUBLIC_FREE_FULL_READING` removed from the codebase;
          the paywall renders again. INTERIM STATE FLAGGED: this re-enables the legacy 19k deep-read
-         gate and an invoice description that does not match delivery. Fulfillment swap is the next
-         build priority after submission. Read that section before touching the paid path.
+         gate, and the Xendit account is in TEST MODE so Vercel holds a test key - LIVE keys must be
+         generated and swapped before any real transaction. Fulfillment swap is the next build
+         priority after submission. Read that section before touching the paid path.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
 -->
 
@@ -315,17 +316,34 @@ Vercel env var on a coordinated deploy.
 
 Re-enabling the paywall re-enables the **legacy 19k unlock**, which is NOT the product CLAUDE.md
 describes. Two specific mismatches, both accepted by Reyner for the Xendit submission window and
-both live the moment the deploy lands:
+both live the moment the deploy lands, plus one live-key swap that must not be forgotten:
 
 1. **The free mirror is no longer complete.** Rule: FREE is the full mirror, ungated, and paid is
    "an upsell offered AFTER the free reading lands, never a gate." What actually happens now is the
    7-beat Bacaan Mendalam sits BEHIND the Rp 19.000 wall (`Unlocked` in `components/Funnel.jsx`
    renders `paidContent.beat1..beat7`). The gate is back.
-2. **The charge description does not match what is delivered.** The invoice reads
-   `Katon - CE card + PDF reading` (`INVOICE_DESCRIPTION.artifact`, `app/api/pay/[id]/route.js`)
-   while the buyer receives a deep-read unlock. There is no PDF and no hi-res card in the paid path.
-   This one is a merchant-compliance risk in its own right, which is a poor thing to carry into a
-   merchant review.
+2. **The charge description did not match what is delivered — FIXED 08-05.**
+   `INVOICE_DESCRIPTION.artifact` (`app/api/pay/[id]/route.js`) read `Katon - CE card + PDF reading`
+   while the buyer received a deep-read unlock, with no PDF and no hi-res card anywhere in the paid
+   path. Charging for one thing and delivering another is a merchant-compliance risk in its own
+   right, so the string now reads **`Katon - Bacaan lengkap`** and describes what is actually
+   delivered (Reyner-approved 08-05). It goes back to naming the card and the PDF when the
+   fulfillment swap makes that true.
+
+   **The invoice is fixed; the CATALOG COPY IS NOT.** Two user-facing surfaces still promise the
+   card and the PDF, and both are visible to a reviewer before checkout:
+   `SITE_COPY.harga.artifact.body` ("Kartu resolusi tinggi dan PDF dari bacaanmu") and
+   `SITE_COPY.tentang.paragraphs[2]` ("kartu resolusi tinggi dengan PDF"), both in
+   `lib/site/copy.js`. Left alone on purpose - Reyner is sole authority on register (CLAUDE.md)
+   and this copy was approved 08-03, so it is not something to quietly rewrite. It is listed here
+   because "the invoice description was fixed" must not be mistaken for "the mismatch is gone".
+3. **THE WHOLE XENDIT ACCOUNT IS IN TEST MODE until verification passes, so the key in Vercel is a
+   TEST key too.** Nothing in production can take real money today. After verification succeeds,
+   generate LIVE keys and swap them in Vercel **before any real transaction** - both
+   `XENDIT_SECRET_KEY` and `XENDIT_WEBHOOK_TOKEN`, since the callback token is per-mode as well.
+   A test key in production fails silently in the worst direction: invoices are created, the webhook
+   never settles real money, and the paid unlock never fires for a customer who thinks they paid.
+   **This swap is the single easiest thing on this page to forget.**
 
 **Accepted because traffic is zero** — nobody is being charged in this window. **The fulfillment
 swap is the next build priority after submission**: paid delivers card + PDF, the deep-read returns
