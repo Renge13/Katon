@@ -201,7 +201,11 @@ test('no English element name leaks into the contract blocks', () => {
 });
 
 test('the version and the unfitted contract constants are stated', () => {
-  assert.equal(ENGINE_VERSION, '0.4.0-stage3');
+  // 0.4.1 as of 2026-08-04: branch_relation and punishment provenance gained
+  // `positions_id`, the pre-verbalised span. A new field in the contract, so the
+  // version moves and the whole cache invalidates - which is correct, every cached
+  // reading predates the field.
+  assert.equal(ENGINE_VERSION, '0.4.1-stage3');
   assert.deepEqual(SAFETY_FLAGS, ['no_fatalism', 'no_medical', 'no_financial', 'no_god_ranking']);
   assert.deepEqual(CONTRACT_PARAMS, { coverageFloor: 65 });
 });

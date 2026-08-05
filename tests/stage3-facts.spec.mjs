@@ -261,3 +261,61 @@ test('supersession is symmetric and only fires with CR-1', () => {
     }
   }
 });
+
+test('every relation fact carries its span as a ready Indonesian phrase', () => {
+  // `relation_positions` was the ONE gate check a prompt edit did not move
+  // (PROGRESS 2026-08-02: 24% -> 28% across baa5b7c0 -> 9f5ee276, flat at n=39,
+  // after an instruction that named it explicitly). The renderer was handed an
+  // array of positions and asked to say all of them, and kept saying two of
+  // three. `positions_id` hands it the finished phrase instead.
+  //
+  // This asserts the JOIN, not the wording: every name must come from
+  // GLOSSARY.pilar, so nothing here can become unreviewed user-facing copy.
+  let seen = 0;
+  for (const tc of VALIDATION_CHARTS) {
+    for (const fact of inventoryFor(tc)) {
+      const kind = fact.provenance?.kind;
+      if (kind !== 'branch_relation' && kind !== 'punishment') continue;
+      seen += 1;
+
+      const phrase = fact.provenance.positions_id;
+      assert.equal(typeof phrase, 'string', `chart ${tc.id} ${fact.id}`);
+
+      // Exactly the palaces the fact claims, no more and no fewer. This is the
+      // property the renderer was failing to preserve by hand.
+      const expected = [...new Set(fact.provenance.palaces)];
+      for (const palace of expected) {
+        assert.ok(phrase.includes(palace), `chart ${tc.id} ${fact.id}: missing ${palace}`);
+      }
+      const named = Object.values(GLOSSARY.pilar)
+        .map((p) => p.name_id)
+        .filter((name) => phrase.includes(name));
+      assert.deepEqual(named.sort(), [...expected].sort(),
+        `chart ${tc.id} ${fact.id}: phrase names a palace the fact does not claim`);
+
+      // Reading order, never the order the relation table happened to list. Chart
+      // 1's 半合 positions are [year, hour, month]; the phrase must not say them
+      // that way round.
+      const order = ['Pilar Akar', 'Pilar Kerja', 'Pilar Diri', 'Pilar Arah']
+        .filter((name) => phrase.includes(name))
+        .map((name) => phrase.indexOf(name));
+      assert.deepEqual(order, [...order].sort((a, b) => a - b),
+        `chart ${tc.id} ${fact.id}: not in reading order`);
+
+      // Indonesian list punctuation: "A dan B", "A, B, dan C".
+      if (expected.length === 1) assert.equal(phrase, expected[0]);
+      else assert.ok(phrase.includes(' dan '), `chart ${tc.id} ${fact.id}: no conjunction`);
+      if (expected.length > 2) assert.ok(phrase.includes(', '), `chart ${tc.id} ${fact.id}`);
+    }
+  }
+  assert.equal(seen, 21, '13 fixture charts carry 21 relation facts between them');
+});
+
+test('the chart-1 relation span is the phrase the renderer is told to copy', () => {
+  // The worked example, pinned. Positions are [year, hour, month] in the relation
+  // table and the phrase is in reading order.
+  const fact = inventoryFor(VALIDATION_CHARTS[0])
+    .find((f) => f.id === 'relation_半合_巳酉');
+  assert.deepEqual([...fact.provenance.positions].sort(), ['hour', 'month', 'year']);
+  assert.equal(fact.provenance.positions_id, 'Pilar Akar, Pilar Kerja, dan Pilar Arah');
+});

@@ -72,9 +72,11 @@ export default function StaticPage({ title, lead, children }) {
   );
 }
 
-export function H2({ children }) {
+// `id` is optional and exists so a section can be linked directly (/tentang#kontak).
+export function H2({ children, id }) {
   return (
     <h2
+      id={id}
       style={{
         fontFamily: 'var(--font-sans)',
         fontSize: 12,

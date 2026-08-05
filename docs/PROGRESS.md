@@ -10,10 +10,19 @@ UPDATED: 2026-07-30 — CALCULATOR CLOSED + STRATEGY RESET. sxtwl retired in fav
 UPDATED: 2026-08-01 — Badge anchors verified 60/60 against Joey with full table-row coverage. 華蓋
          descoped. Stale mirror `D:\Work\Katon assets\Katon md` neutralised, its two unique files
          rescued into the repo. `docs/COWORK-BRIEF.md` added as the Cowork session entry point.
+UPDATED: 2026-08-04 — MODEL QUESTION CLOSED (12-4, 3.1-flash-lite stays primary, riders dropped).
+         Stage 3 pre-verbalises the relation span (`positions_id`); it WORKED. Four gate checks added
+         from Reyner's blind-judging notes; the pairs file was POST-gate, so two were live escapes.
+         Two defects found and deliberately NOT fixed: `relation_positions` is a gate false positive
+         (8/8 measured) and a third Stage 3 collapse gap hits charts 9 and 12.
 UPDATED: 2026-08-03 — XENDIT SITE COMPLIANCE. Site footer + /harga /tentang /privasi /syarat
          /pengembalian shipped (Prompt I). Serves TODO #8. Two pre-existing defects found and NOT
          fixed here: the paywall shows a retired Rp 49.000, and the funnel carries 9 banned
          ellipsis characters.
+UPDATED: 2026-08-05 — XENDIT REJECTION 2. `NEXT_PUBLIC_FREE_FULL_READING` removed from the codebase;
+         the paywall renders again. INTERIM STATE FLAGGED: this re-enables the legacy 19k deep-read
+         gate and an invoice description that does not match delivery. Fulfillment swap is the next
+         build priority after submission. Read that section before touching the paid path.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
 -->
 
@@ -226,6 +235,7 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | Engine Earth-first | 5 charts | 08-01 | was 7; Joey's is 4 |
 | Within-element agreement | 48/57 (9 inversions) | 08-01 | **transform-INVARIANT** under linear/sqrt/log1p. Needs a MECHANISM, not a reweighting. Diagnostic 0 in the harness. |
 | 旺 re-fit after sqrt (NOT adopted) | +0.020 rho | 08-01 | optimum collapsed 2.4 -> flat 1.6-1.8 plateau. Rule 13 demonstrated numerically. Left at 1.4. |
+| **Blind model judging, 16 pairs, 8 charts (Reyner, labels hidden)** | **3.1-flash-lite 12, 3.5-flash-lite 4** | 08-02 | ~4% probability under coin-flip. 3.5 also costs more ($0.30/$2.50 vs $0.25/$1.50 per M). **MODEL DECISION CLOSED: 3.1-flash-lite stays primary; rule 15 untouched.** Judging notes exposed 4 candidate gate checks: duplicate-sentence detector, code/variable-leak regex, meta-disclaimer patterns, minimum-paragraphing check. |
 | Gate-check renders, chart 1 (3.1-flash-lite, temp 0.2, n=2) | 0/2 clean, both salvageable by one regeneration | 08-02 | Run 1: secara-adverbial + profile palace dropped. Run 2: bukan-melainkan in the PENUTUP (third leak past the prompt ban), 半合 positions misstated, profile palace dropped again. Strength same-breath PASSED both runs, zero invention both runs. Stage 6 confirmed load-bearing; the H checks map 1:1 onto every observed failure. |
 | **STAGE 6 FIRST-PASS RATE (3.1-flash-lite)** | **10.3%** (4/39) | 08-02 | **THE LAUNCH-GATING NUMBER.** `npm run measure:stage6 -- --n 3`, 13 charts x n=3, temp 0.2, prompt `baa5b7c0e3320b13`, gate `1.0.0`. Does the PROMPT work: this is the one that should move when renderer-prompt.txt is edited. It is LOW, and the cause is concentrated, not diffuse — see the per-check row. |
 | Stage 6 SHIPPED rate (3.1-flash-lite) | 38.5% (15/39) | 08-02 | First pass plus the one regeneration. What a user would experience. Regeneration rescues 28.2% of runs, so the gate's retry is doing most of the work the prompt is not. |
@@ -263,6 +273,213 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **Stage 3 JSON byte-identical on recompute** | **13/13** | 08-02 | the cache guarantee. Cache keys all distinct, no collisions. |
 | Stage 3 facts after collapse, chart 1 | 14 of 16 | 08-02 | `main_profile` absorbed by CR-1, `badge_空亡` by its void stack. |
 | Stage 3 required points, chart 1 | 9 | 08-02 | hand-written file has 8; the extra is `day_master_Fire`, which the target carries as its first point. |
+| **STAGE 6 FIRST-PASS RATE, prompt `443fcb57`, gate `1.1.0`** | **18.5%** (24/130) | **08-04** | **n=10, primary only, rider OFF.** `npm run measure:stage6 -- --n 10`, 13 charts x n=10, temp 0.2. Two changes land together and they push OPPOSITE ways, so read this against the band, not against the last number: the prompt gained the `positions_id` handover, and the GATE GAINED FOUR CHECKS. Against the 17.9 / 23.1 / 25.6 variance band this is INSIDE it, at the bottom. Holding inside the band while the bar rose is not a regression; it is also not a demonstrated improvement. **Binomial 95% CI at n=130 is +-6.7 points**, so n=10 does NOT deliver the +-2-3 points hoped for - that needs n~50 (644 runs). |
+| Stage 6 SHIPPED rate, prompt `443fcb57`, gate `1.1.0` | 43.8% (57/130) | 08-04 | was 53.8 / 61.5 / 61.5. **BELOW the band, and the cause is known and intended:** `structure.unparagraphed` is new and rejects 25.8% of gate evaluations. Readings that used to ship now fail on a real defect. The gate got stricter; the prompt did not get worse. 95% CI +-8.5 points. |
+| Stage 6 FALLBACK, prompt `443fcb57` | fb-gate 56.2% · **fb-net 0.0%** | 08-04 | was 46.2% / 0.0%. Every one of the 130 runs is a real quality observation. One HTTP 503 across 235 attempts, absorbed by the transport retry. |
+| **Stage 6 per-check, gate `1.1.0`** | palace_dropped 43.6% · hedge_construction 41.7% · hedging 31.3% · **unparagraphed 25.8%** · essay_connectives 25.2% · relation_positions 18.4% · adverbial 7.4% · condition_named 1.2% · unsanctioned_bracket 1.2% · field_dropped 1.2% · tension_collapse 1.2% · cost_dropped 0.6% | 08-04 | Normalised per GATE EVALUATION (163), the ledger's convention - the denominator moves with the regeneration rate and raw counts would overstate everything. 324 rejections. **palace_dropped is back on top at 43.6% (was 29%)** and needs its own look; nothing in this pass touched it. |
+| **`relation_positions`: the phrase handover WORKED, the CHECK is broken** | **8 of 8 failures are gate false positives** | **08-04** | 28% -> 18.4% per evaluation after `positions_id`. The residual is NOT the renderer. Diagnostic over the only three charts that still fail (2, 11, 6): **every finding had `missing == []`** - the span was stated COMPLETELY - and every one failed on an EXTRA position (`expected [month,year] named [year,month,hour]`). Separately, **5 of 5** relation blocks reaching the gate carried `positions_id` VERBATIM. Cause: the check scans for bare `tahun/bulan/hari/jam`, which `renderer-prompt.txt` itself MANDATES in `batang bulan` / `cabang hari` / `batang jam` (~line 76) and in the `Hari lahirmu` idiom. Same class as `bare_polarity`/*yang*. **NOT fixed here on purpose** - it targets the same metric as the handover and fitting both in one measurement is rule 13. Own commit, own measurement. |
+| **The four checks added 08-04, by real-defect yield** | unparagraphed 42 · duplicate_sentence 0 · code_leak 0 · meta 0 | 08-04 | Over 163 gate evaluations. `unparagraphed` is doing all the work and is the whole reason shipped fell. The other three cost nothing and catch nothing at n=130, which is what insurance looks like when it is not needed yet. All four were validated against the 32 gate-passed samples in the 08-02 pairs file before shipping: **zero false positives there.** |
+| **`paragraphFloorChars` = 700 is FITTED ON A BIASED SAMPLE and needs re-deciding** | rejects 25.8% of evaluations | 08-04 | Set from the 32 gate-PASSED pairs samples, where block length was med 415 / p90 570 / max 954. The full n=130 population is LONGER: **med 493, p90 748, max 1390** (n=1310 blocks). So 700 now sits BELOW p90 rather than above it, which is why it fires so much. Passes-only is as biased a sample as rejections-only - the same error the harness header warns about. **This is a real decision for Reyner, not a bug:** a 700-char unbroken paragraph IS a wall, and regeneration rescues most of them, but the threshold moved the launch number and was never ratified. |
+| Stage 6 threshold distributions, gate `1.1.0` | same_breath med 0.93 (min 0.20, p10 0.50) · coverage med 1.00 (min 0.00, p10 0.69) · total_chars med 3313 (max 4797) · block_chars med 493 (p90 748, max 1390) | 08-04 | n=231 / 3792 / 235 / 1310. The three ORIGINAL unfitted constants still reject nothing: sameBreathOverlap 0.25 vs a p10 of 0.50, fieldOverlap 0.20 vs a p10 of 0.69, maxTotalChars 12000 vs a max of 4797. `coverage` min is now 0.00 and `same_breath` min 0.20 - the first observations to fall BELOW their thresholds, so these two are no longer provably inert and are worth a look before they are fitted. |
+
+## DECIDED 2026-08-05 — test-ungate flag REMOVED; the paywall is live again as an INTERIM state
+
+**Why now.** Xendit rejected the site a second time: *"This contents of this website are incomplete.
+Make sure it contains your product / services, prices, checkout page, address, and contact number."*
+The rejection is CORRECT and Prompt I did not cause it. `/harga`, `/tentang`, the legal pages and the
+footer entity all shipped 08-03 and are fine. What was missing is a reachable **checkout**, because
+`NEXT_PUBLIC_FREE_FULL_READING` was still set in Vercel and it had quietly become the architecture.
+
+Evidence, both run 2026-08-05 against a freshly generated reading on each host:
+```
+prod  https://www.katon.app/r/ZVm4Aghlo9q1zVDjGFQXi
+  buttons: ["← Ganti tanggal","Simpan Gambar","Kabari aku","Kabari aku",<footer links>]
+  hasRp:   false
+local (flag unset) http://localhost:3000/r/g8JgXk2w8TkNPRrDUrUXy
+  buttons: ["← Ganti tanggal","Simpan Gambar","Hubungan","Karier","Uang","Buka Refleksiku"]
+  rp:      ["Rp 300-500rb.","Rp 19.000"]
+```
+The flag routed the paywall through `ungating` -> `unlocked`, so `Teaser` — the only component that
+renders a price or a buy button — never mounted in production. Not a copy problem; the checkout did
+not exist on the live site.
+
+**What shipped.** Removed from every code path, not switched off: `lib/flags.js` deleted,
+`freeFullReadingEnabled()` gone from `components/Funnel.jsx` (import, `ungating` stage, the
+up-front `/full` fetch, and the `ReadingByToken` re-visit branch) and from
+`app/api/reading/[id]/full/route.js`, whose gate is now `row.paid === true` and nothing else.
+`.env.example` carries a do-not-reintroduce note in place of the old stanza. Verified on the dev
+server: an UNPAID reading returns `paid:false`, no `paidContent`, teaser only. Reyner deletes the
+Vercel env var on a coordinated deploy.
+
+### THE INTERIM STATE — do not let this ship quietly past submission
+
+Re-enabling the paywall re-enables the **legacy 19k unlock**, which is NOT the product CLAUDE.md
+describes. Two specific mismatches, both accepted by Reyner for the Xendit submission window and
+both live the moment the deploy lands:
+
+1. **The free mirror is no longer complete.** Rule: FREE is the full mirror, ungated, and paid is
+   "an upsell offered AFTER the free reading lands, never a gate." What actually happens now is the
+   7-beat Bacaan Mendalam sits BEHIND the Rp 19.000 wall (`Unlocked` in `components/Funnel.jsx`
+   renders `paidContent.beat1..beat7`). The gate is back.
+2. **The charge description does not match what is delivered.** The invoice reads
+   `Katon - CE card + PDF reading` (`INVOICE_DESCRIPTION.artifact`, `app/api/pay/[id]/route.js`)
+   while the buyer receives a deep-read unlock. There is no PDF and no hi-res card in the paid path.
+   This one is a merchant-compliance risk in its own right, which is a poor thing to carry into a
+   merchant review.
+
+**Accepted because traffic is zero** — nobody is being charged in this window. **The fulfillment
+swap is the next build priority after submission**: paid delivers card + PDF, the deep-read returns
+to the free mirror. Until that lands, this section is the reason the numbers look right and the
+product does not.
+
+## DECIDED 2026-08-04 — model question CLOSED; span pre-verbalised; four gate checks; n=10 measured
+
+**MODEL DECISION IS CLOSED (Reyner).** Blind judging went **12-4 for 3.1-flash-lite**, which also
+costs less ($0.25/$1.50 vs $0.30/$2.50 per M). It stays primary; rule 15 untouched. **No more rider
+arms.** `scripts/measure-stage6.mjs` no longer defaults `--rider` to a model — it used to default to
+`gemini-2.5-flash-lite`, which is RETIRED (HTTP 404), so every default run spent half its calls on an
+arm that could not answer and then reported it as fallback. A rider is now opt-in. `--no-rider` still
+works and is redundant.
+
+### 1. Stage 3 pre-verbalises the branch-relation span (`positions_id`)
+
+`relation_positions` was the one check an explicit prompt instruction never moved (24% -> 28% across
+`baa5b7c0` -> `9f5ee276`, flat at n=39). The renderer was handed an ARRAY of positions and told to say
+all of them, and kept saying two of three. It is now handed the finished phrase.
+
+`provenance.positions_id` ships on **all 21 relation facts across the 13 fixture charts** — both
+`branch_relation` and `punishment`, because the prompt line says "a relation's span" and a 刑 is a
+relation the reader sees as one. `palacePhrase()` in `lib/semantic/glossary.js`. Chart 1:
+`"Pilar Akar, Pilar Kerja, dan Pilar Arah"`.
+
+- **It is a DATA JOIN, not copy.** Every name comes from `GLOSSARY.pilar`. Nothing is authored, so no
+  register review is owed. Asserted: `tests/stage3-facts.spec.mjs` checks the phrase names exactly the
+  palaces the fact claims, no more and no fewer, against `GLOSSARY.pilar` itself.
+- **Sorted into READING ORDER, which the raw field is not.** Chart 1's `positions` are
+  `[year, hour, month]` because the relation table lists the pair's branches in table order. Speaking
+  that order aloud is wrong, so the phrase sorts year/month/day/hour and a test asserts it.
+- `positions` and `palaces` both stay: the gate checks against them and QA reads them.
+- One prompt line added at `renderer-prompt.txt` §THE PALACES AND THE PARTS. Verified `positions_id`
+  survives `scrubInternal` into the payload the provider actually sees.
+- **`ENGINE_VERSION` 0.4.0-stage3 -> 0.4.1-stage3.** A new field is a contract change, so the whole
+  cache invalidates. Correct: every cached reading predates the field.
+
+**IT WORKED, AND THE MEASUREMENT SAYS SO — see the `relation_positions` row in MEASUREMENTS.** 5 of 5
+relation blocks reaching the gate carried the phrase verbatim, and 8 of 8 residual failures are the
+CHECK's false positive, not the renderer's. Which is the next item.
+
+### 2. THE 08-02 BLIND-JUDGING PAIRS FILE WAS **POST-GATE**. All four defects were gate MISSES.
+
+This was the question to settle before adding anything, and it is settled twice over:
+- `measure-stage6.mjs` records a sample for judging only when `!fallback` (`perArm[model] = result`).
+- `renderReading` returns a non-fallback result **solely from the `gate.ok` branch**
+  (`lib/render/index.js`), so non-fallback means gate-passed by construction.
+- Empirically: all **46** served rows of that batch passed.
+
+So the defects Reyner found were in text the gate had already approved. Re-running the four new checks
+over those **32 gate-passed samples**:
+
+| defect | in gate-passed text | verdict |
+|---|---|---|
+| unparagraphed wall | **2 / 32** — worst 954 chars, 17 unbroken sentences | live escape |
+| duplicate sentence | **1 / 32** — chart 3, same sentence twice in one block | live escape |
+| code/variable leak | 0 / 32 | insurance |
+| meta-disclaimer | 0 / 32 | insurance |
+
+**Why the wall escaped: the gate had a CEILING on paragraph breaks (`maxBreaksPerBlock`) and no FLOOR.**
+Zero breaks was legal at any length. `minBlockChars` guards emptiness, not density.
+
+Four checks added, all `soft` (one regeneration), **`STAGE6_VERSION` 1.0.0 -> 1.1.0**:
+`structure.unparagraphed`, `structure.duplicate_sentence` (both in `structure.js`, both structural
+properties of rendered text), `style.code_leak` and six new `style.meta` entries (both in
+`blocklist.json`, which is DATA Reyner can extend without a deploy).
+
+**Duplicate detection is scoped to the WHOLE reading, not one block.** The observed case was
+within-block, but braided blocks make cross-block restatement the worse failure, not the milder one.
+Comparison is exact beyond case/whitespace/terminal punctuation: a near-duplicate detector needs a
+similarity threshold, and an unfitted threshold on a brand-new check is how false positives ship.
+
+**TWO FALSE POSITIVES WERE CAUGHT BEFORE SHIPPING, both the `bare_polarity`/*yang* shape:**
+1. **The camelCase code-leak regex compiled case-INSENSITIVELY** (`compile()` defaults to `iu`), which
+   reduces `[a-z]+[A-Z]` to `[a-z]+[a-z]` — it matched every word in the language and flagged all 398
+   glossary strings. Pinned with `"flags": "u"`.
+2. **`NO ENGINE STRING WOULD TRIP THE STYLE GATE` was hardcoding `'iu'`**, ignoring each entry's own
+   `flags`, so it was stricter than the gate it guards and could not validate a case-sensitive pattern
+   at all. Now compiles the way `style.js` does. `bare_polarity` was passing that test by luck.
+3. A third was caught in the audit itself and never shipped: a naive `sebagai (ai|model)` disclaimer
+   pattern matches **"Sebagai Air (Water)"**, correct prose on every Water chart. The shipped `meta`
+   entry keeps `\b` after `AI` and there is now a test named after this.
+
+### 3. TWO DEFECTS FOUND BY THE NEW CHECKS. Neither fixed here, both have their own commit.
+
+**a) A THIRD Stage 3 collapse gap, charts 9 and 12 of 13.** When the CR-1 tension's Aspek is ALSO a
+converging Aspek, Stage 3 emits both `profile_vs_favorable` and `aspek_convergence_<same god>`. Both
+resolve to the SAME glossary entry, so label + label_meaning + gift + cost render **twice, word for
+word** — six duplicated sentences on chart 9 (正財), seven on chart 12 (偏財). Chart 1's CR-1 god is 正財
+and it has no 正財 convergence, which is why 11 of 13 are clean.
+
+This is the same pattern `collapseSuperseded()` already handles twice (`main_profile` absorbed by CR-1,
+`badge_空亡` by its void stack) and the fix belongs there. **Not done here because it moves those charts'
+fact sets, `required_points` and hierarchy ranks, and landing it inside a prompt-change measurement
+would confound both (rule 13).** It also means the renderer is currently handed the same content twice
+on those charts, so it is a plausible CAUSE of the duplicate sentences Reyner saw, not just a floor
+defect. `tests/stage6-validation.spec.mjs` asserts the failure EXACTLY, with the exemption **derived
+from the cause** rather than a chart-id list, so it retires itself when the collapse lands and cannot
+absorb a chart that starts duplicating for some other reason.
+
+**b) `fact.relation_positions` is a GATE BUG, measured 8/8.** See the MEASUREMENTS row. The check
+scans for bare `tahun/bulan/hari/jam`, and `renderer-prompt.txt` itself mandates `batang bulan` /
+`cabang hari` / `batang jam` and the `Hari lahirmu` idiom, so a block that states its span correctly in
+palace names and then correctly names a stem picks up a spurious extra position and fails. **It is all
+four words, not just `hari`** — the measured extras were `hour` and `month`. Minimal repro on chart 1
+(span `[year, hour, month]`, no `day`): adding `"batang hari"` to a correct block flips it to
+`names [day, year, month, hour]`. Fix technique already exists in this codebase — `englishLeakage()`
+cuts the sanctioned bracket out before scanning.
+
+### 4. Two things the measurement changed that were NOT decisions anyone made
+
+- **`paragraphFloorChars` = 700 was fitted on a biased sample.** It was set from the gate-PASSED pairs
+  (p90 570) and the full population is longer (p90 748, max 1390), so it fires on 25.8% of evaluations
+  and is most of why shipped fell to 43.8%. Passes-only is as biased as rejections-only. **Reyner's
+  call**, with the distribution now in MEASUREMENTS.
+- **`palace_dropped` is back on top at 43.6%**, up from 29% after the `d0cfb16` prompt fix that halved
+  it. Nothing in this pass touched the palace instruction. Either the fix decayed against a changed
+  prompt or the earlier figure was a lucky batch. It is now the largest single rejection cause and the
+  highest-value target after the `relation_positions` gate fix.
+
+**Two test fixtures were self-duplicating and are fixed.** `goodReading()` (stage6) and `goodRender`
+(stage5) both set `penutup` to a glossary string their own blocks already render, so both repeated
+themselves and `structure.duplicate_sentence` correctly rejected them. Any glossary string would
+collide — the floor renders every string of every fact — so both now use a fixture sentence asserted
+clean against the whole blocklist. **The checks were not weakened to accommodate a fixture.**
+
+## DECIDED 2026-08-03 — card sizes LOCKED, Card A head, footer gender strings (Reyner)
+
+Three rulings by Reyner. They close the last two open items in the 08-02 CARD VISUAL SYSTEM block
+below except the colour tokens and `tags_en`, which are in review as of this date.
+
+**1. SIZES LOCKED.**
+- **Card A: a 63:88 card OBJECT (TCG ratio) rendered on a 3:4, 1080x1440 feed-safe canvas.** The card
+  floats on the colour field with a slim margin. Rationale: 3:4 matches Instagram's 2026 grid, so the
+  image crops in neither feed nor profile grid; the TCG ratio makes the thing on the canvas read as a
+  *card* rather than a graphic. This **supersedes the 08-02 proposal of 1080x1350 (4:5)**.
+- **Card B: 1080x1920 (9:16), unchanged.** Taller is the exclusivity signal.
+
+  Derived geometry (arithmetic, 08-03): a 3:4 canvas and a 63:88 card admit exactly one uniform
+  margin. Solving `(1080-2m)/(1440-2m) = 63/88` gives **m = 86.4**, card **907 x 1267**. So the card
+  can sit optically centred with an equal margin on all four sides at no cost to either ratio; any
+  slimmer margin makes the top-bottom and left-right gaps unequal. **OPEN, one sub-question the ruling
+  does not settle:** what distinguishes the card object from the canvas when both carry the same
+  colour field. Cowork recommends a hairline inset plus a soft shadow, same colour both sides, because
+  the alternative (a different surface value for the card) adds a fourth colour token per archetype.
+  Mocked that way in the 08-03 token proposal; not locked.
+
+**2. CARD A HEAD: EN-only (`name_en`), no Indonesian eyebrow.** The Indonesian archetype name appears
+nowhere on the free card; it lives in the reading. **This closes the OPEN item** in the 08-02 block
+("EN-only, or tiny ID eyebrow"). Aspek stays Indonesian on both cards, per 08-02.
+
+**3. GENDER FOOTER STRINGS: `PEREMPUAN` / `LAKI-LAKI` APPROVED** as proposed. Register review done.
+Footer stays gender + birthdate + katon.app; null gender still renders date + source only.
 
 ## DECIDED 2026-08-03 — Xendit merchant-compliance chrome shipped (footer + 5 static pages)
 
@@ -625,15 +842,20 @@ body `product/compatibility-reading-spec.md` is corrected in place and is now bu
 - **Hanzi: card images carry NONE; the 4x2 hanzi grid lives in the PDF chart sheet only**
   (CONFIRMED by Reyner 08-02). Rule 23's legitimacy object survives in the PDF; no amendment needed.
 - **EN header on BOTH cards** (Reyner 08-02), Aspek Indonesian everywhere. The ID/EN A/B is dead.
-  OPEN: the Indonesian archetype name now appears nowhere on Card A — EN-only, or tiny ID eyebrow.
+  ~~OPEN: EN-only, or tiny ID eyebrow~~ → **CLOSED 08-03: EN-only, no eyebrow.** See the 08-03 section.
 - **Footer carries gender + birthdate + katon.app.** Gender is optional in the engine; null gender
-  = date + source only. PEREMPUAN/LAKI-LAKI strings are proposals pending register.
-- **Sizes PROPOSED, pending Reyner: Card A 1080x1350 (4:5 feed), Card B 1080x1920 (9:16 full
-  story).** Taller B confirmed as the exclusivity signal; exact ratios not yet locked.
+  = date + source only. ~~PEREMPUAN/LAKI-LAKI strings are proposals pending register~~ →
+  **APPROVED 08-03.**
+- ~~**Sizes PROPOSED, pending Reyner: Card A 1080x1350 (4:5 feed), Card B 1080x1920 (9:16 full
+  story).**~~ → **SUPERSEDED 08-03. Card A is a 63:88 card object on a 3:4 1080x1440 canvas;
+  Card B 1080x1920 unchanged.** See the 08-03 section.
 - Card B carries the hook (spec: everything on A plus appendix); appendix = labeled pillar grid
   (Tahun/Bulan/Hari/Jam, animal + element) + labeled element bars + Complete Edition chrome.
 - Colour tokens fixed for 5 of 10 archetypes; remaining 5 to derive (Api Unggun must not collide
-  with Matahari). tags_en remains open.
+  with Matahari). tags_en remains open. **STATUS 08-03: both are WITH REYNER for review** — the
+  5 tokens as a swatch preview (measured against the locked 5, Api Unggun clears Matahari at
+  dE 0.29 where the set's existing floor is 0.09) and `tags_en` as a 30-row register table.
+  Nothing written into `glossary.json` or the mockup until he approves.
 
 **The 刑 glossary entry is REGISTER-APPROVED and landed** in `glossary.json` → `relasi_cabang.刑`.
 "Simpul" confirmed (Belitan considered, not taken). `label_meaning` rewritten to drop the banned
@@ -803,5 +1025,7 @@ products will need female-set fixture charts to validate against.
   (Seven Killings)**.
 - "The café/stranger test is the one gate" → the cold-read walkthrough already surfaced the failure.
 - "Portrait-first vs domain-first" → RESOLVED: no domain gate; pillars ARE the domains positionally.
-- "The test-ungate flag is the mechanism for a free mirror" → the mirror is ungated BY DESIGN now.
-  Remove `NEXT_PUBLIC_FREE_FULL_READING` from Vercel; do not let a test flag become the architecture.
+- "The test-ungate flag is the mechanism for a free mirror" → **DONE 08-05.** `NEXT_PUBLIC_FREE_FULL_READING`
+  is deleted from the codebase, not merely unset, and `lib/flags.js` is gone with it. It HAD become the
+  architecture: it was left on in Vercel and the paywall never rendered in production. Do not
+  reintroduce it. The mirror being ungated is a FULFILLMENT decision to build, never an env var.

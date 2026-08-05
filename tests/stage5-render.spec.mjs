@@ -285,10 +285,18 @@ const httpError = (status) => ({
  * Before Prompt H this was a two-word stub. It now has to be a real reading,
  * which is the gate doing its job on the test suite as well as on a provider.
  */
+// The penutup is a FIXTURE sentence, not glossary content. It used to be
+// `day_master_Fire.label_meaning`, which the floor already renders inside a block,
+// so this "valid" render repeated itself and `structure.duplicate_sentence` sent it
+// to the floor the moment that check landed (2026-08-04). Any glossary string would
+// collide the same way - the floor renders every string of every fact. Same fix as
+// goodReading() in tests/stage6-validation.spec.mjs, which carries the long version.
 const goodRender = (() => {
   const floor = assembleFallback(CHART_1);
-  const dayMaster = CHART_1.facts.find((f) => f.id === 'day_master_Fire');
-  return JSON.stringify({ blocks: floor.blocks, penutup: dayMaster.label_meaning });
+  return JSON.stringify({
+    blocks: floor.blocks,
+    penutup: 'Peta ini sudah cukup jelas untuk kamu jalani mulai sekarang.',
+  });
 })();
 const validRender = goodRender;
 

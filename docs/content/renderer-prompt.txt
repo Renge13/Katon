@@ -90,6 +90,10 @@ of them.** If provenance.positions has three entries, the sentence names three p
 of three is a factual error, not a simplification; a reader cross-checking her chart will see the
 third and stop trusting you.
 
+**The span is already written for you: use `provenance.positions_id` VERBATIM.** It is the complete
+list in the right order, punctuated and ready to drop into a sentence. Copy it exactly and do not
+shorten it, reorder it, or rebuild it from `provenance.positions`.
+
 Write "Fondasi Pasanganmu ditempati ...", never "Rumah tempat hubungan paling dekatmu dibaca, yaitu
 pilar hari, ditempati ...".
 
