@@ -191,6 +191,59 @@ test('a dropped palace is caught (observed in gate-check runs 1 and 2)', () => {
   assert.ok(checksIn(result).includes('fact.palace_dropped'));
 });
 
+test('THE SPOUSE PALACE IS SATISFIED BY ITS BRANCH NAME, NOT ONLY ITS PILLAR', () => {
+  // DIAGNOSED 2026-08-06 off captured provider output: 5 of 5 palace failures on
+  // charts 5 and 10 were `spouse_palace` required to name the literal "Pilar Diri",
+  // and BOTH forms the renderer produced are the prompt's own. This is the first,
+  // verbatim from chart 10 - the model sentence renderer-prompt.txt prescribes.
+  const fact = CHART_1.facts.find((f) => f.id === 'spouse_palace');
+  assert.equal(fact.palace, 'Pilar Diri', 'fixture assumption');
+  assert.equal(fact.label, 'Fondasi Pasangan', 'the label IS the day branch name');
+
+  const asPrescribed = withBlockText(goodReading(), 'spouse_palace',
+    'Fondasi Pasanganmu ditempati oleh Aspek Pengatur (Direct Officer). '
+    + `${fact.label_meaning} ${fact.gift} ${fact.cost}`);
+  assert.ok(!checksIn(validateRendering(asPrescribed, CHART_1)).includes('fact.palace_dropped'),
+    'the sentence the prompt prescribes must satisfy the check it was written for');
+
+  // Naming the pillar outright still passes - this widens the check, never narrows it.
+  const asPillar = withBlockText(goodReading(), 'spouse_palace',
+    `Di Pilar Diri, ${fact.label_meaning} ${fact.gift} ${fact.cost}`);
+  assert.ok(!checksIn(validateRendering(asPillar, CHART_1)).includes('fact.palace_dropped'));
+});
+
+test('naming NEITHER the palace nor its branch still fails', () => {
+  // The other direction. The check must still catch a fact cashed out with no
+  // location at all - that is the failure it exists for, observed twice in the
+  // 2026-08-02 gate-check runs.
+  const fact = CHART_1.facts.find((f) => f.id === 'spouse_palace');
+  const bad = withBlockText(goodReading(), 'spouse_palace',
+    `${fact.label_meaning} ${fact.gift} ${fact.cost}`);
+  // The HEADING has to be cleared too. The floor sets `heading: fact.label`, which
+  // for this fact IS "Fondasi Pasangan", and checkPalaces reads heading + text - so
+  // leaving it would have the fixture satisfy the check it is meant to fail.
+  bad.blocks.find((b) => b.fact_ids.includes('spouse_palace')).heading = 'Hubungan Terdekat';
+  const findings = validateRendering(bad, CHART_1).findings
+    .filter((f) => f.check === 'fact.palace_dropped');
+  assert.equal(findings.length, 1, 'a locationless fact is still a hard reject');
+  assert.match(findings[0].message, /Fondasi Pasangan/, 'the message names the accepted alias');
+});
+
+test('the alias is scoped to the fact whose LABEL is that branch name', () => {
+  // A fact that merely SITS in Pilar Diri must not pass by mentioning a spouse
+  // palace it has nothing to do with. Only spouse_palace carries the alias, because
+  // only its label is the branch name; every other palace demand is Pilar Kerja or
+  // Pilar Akar, which have no branch name in GLOSSARY.pilar at all.
+  const other = CHART_1.facts.find((f) => f.palace && f.label !== 'Fondasi Pasangan'
+    && CHART_1.required_points.some((p) => p.fact_id === f.id && p.must_cover.includes('palace')));
+  assert.ok(other, 'the fixture must carry a second palace-demanding fact');
+
+  const bad = withBlockText(goodReading(), other.id,
+    `Fondasi Pasanganmu juga bicara di sini. ${other.label_meaning} ${other.gift} ${other.cost}`);
+  assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('fact.palace_dropped'),
+    `${other.id} needs ${other.palace}; a spouse-palace mention must not satisfy it`);
+});
+
 test('a misstated branch-relation span is caught (observed in gate-check run 2)', () => {
   // The 半合 spans year + hour + month; run 2 wrote "tahun dan bulan".
   const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
