@@ -34,7 +34,7 @@ import {
   validateRendering, stricterDirective, STAGE6_VERSION, CATEGORIES, STRUCTURE_PARAMS,
 } from '../lib/validate/index.js';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
-import { stemOverlap, distinctiveStems } from '../lib/validate/text.js';
+import { stemOverlap, distinctiveStems, sentences } from '../lib/validate/text.js';
 
 const jsonFor = (tc) => buildSemanticJson(calculateBaziChart({
   birthDate: tc.date, birthTime: tc.time,
@@ -77,58 +77,37 @@ test('the module-assembled floor passes its own gate, on every fixture chart', (
   // was first run it did NOT - the floor never named a palace, while five of
   // chart 1's nine required points demand one. lib/render/fallback.js now leads
   // each block with the palace. This test is what caught that.
-  // KNOWN EXCEPTION, found 2026-08-04 by structure.duplicate_sentence on the run
-  // that introduced it. NOT a floor bug and NOT a false positive - an upstream
-  // Stage 3 collapse gap, on charts 9 and 12 of 13:
-  //
-  //   when the CR-1 tension's Aspek is ALSO a converging Aspek, Stage 3 emits both
-  //   `profile_vs_favorable` and `aspek_convergence_<same god>`. The two facts
-  //   resolve to the SAME glossary entry, so the floor renders label +
-  //   label_meaning + gift + cost twice, word for word. Chart 9 duplicates six
-  //   sentences on 正財, chart 12 seven on 偏財. Chart 1's CR-1 god is 正財 and it has
-  //   no 正財 convergence, which is why 11 of 13 charts are clean.
-  //
-  // This is the third instance of the pattern collapseSuperseded() already handles
-  // twice (main_profile absorbed by CR-1, badge_空亡 absorbed by its void stack) and
-  // the fix belongs there, in its own commit with its own measurement: it moves
-  // those charts' fact sets, their required_points and their hierarchy ranks, and
-  // landing it inside a prompt-change measurement would confound both (rule 13).
-  //
-  // The exemption is DERIVED FROM THE CAUSE, not a list of chart ids. So it stops
-  // applying by itself the day the collapse lands, and it cannot silently absorb a
-  // different chart that starts duplicating for a different reason. The failure is
-  // asserted EXACTLY, so any other defect on these two charts still fails.
-  const sharesCr1GodWithConvergence = (semantic) => {
-    const cr1 = semantic.facts.find((f) => f.provenance?.rule === 'CR-1');
-    if (!cr1) return false;
-    return semantic.facts.some((f) => f.provenance?.kind === 'aspek_convergence'
-      && f.provenance.god === cr1.provenance.god);
-  };
-
-  let exempted = 0;
+  // THE EXEMPTION IS GONE, and its removal is the confirmation it was written for.
+  // Between 2026-08-04 and 08-05 this test carried a derived exemption for charts 9
+  // and 12, whose CR-1 Aspek was also a converging Aspek: two facts resolved to one
+  // glossary entry and the floor rendered it twice, word for word. Stage 3 now
+  // collapses the pair (the third collapseSuperseded instance), so all 13 charts
+  // pass with no special case - which is what the exemption existed to detect.
   for (const tc of VALIDATION_CHARTS) {
     const semantic = jsonFor(tc);
     const result = validateRendering(goodReading(semantic), semantic, {
       provider: 'module_assembly',
     });
-
-    if (sharesCr1GodWithConvergence(semantic)) {
-      exempted += 1;
-      assert.deepEqual(
-        [...new Set(checksIn(result))], ['structure.duplicate_sentence'],
-        `chart ${tc.id} floor should fail ONLY on the documented Stage 3 collapse gap`,
-      );
-      assert.equal(result.hard, false);
-      continue;
-    }
-
     assert.ok(result.ok, `chart ${tc.id} floor rejected: ${checksIn(result).join(', ')}`);
     assert.equal(result.hard, false);
   }
+});
 
-  // Pins the size of the exception. If it grows, something upstream changed and the
-  // collapse gap got wider rather than narrower.
-  assert.equal(exempted, 2, 'exactly charts 9 and 12 carry the collapse gap');
+test('no chart emits the CR-1 Aspek and its convergence as two facts', () => {
+  // The collapse, asserted where it belongs rather than only through the floor.
+  // Charts 9 (正財) and 12 (偏財) are the two that used to.
+  let collapsed = 0;
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const cr1 = semantic.facts.find((f) => f.provenance?.rule === 'CR-1');
+    if (!cr1) continue;
+    const twin = semantic.facts.find((f) => f.provenance?.kind === 'aspek_convergence'
+      && f.provenance.god === cr1.provenance.god);
+    assert.equal(twin, undefined,
+      `chart ${tc.id}: ${cr1.provenance.god} converges AND is the profile; one must be absorbed`);
+    if (cr1.provenance.convergence_positions) collapsed += 1;
+  }
+  assert.equal(collapsed, 2, 'exactly two fixture charts carry an absorbed convergence');
 });
 
 test('a passing result records the gate version that passed it', () => {
@@ -447,29 +426,69 @@ test('more than two paragraph breaks in one block is rejected', () => {
 // samples: 1 duplicate sentence, 2 unparagraphed walls, 0 code leaks, 0 disclaimers.
 // The last two were cheap insurance; the first two were live escapes.
 
-test('the wall of text is rejected: a long block with no paragraph break', () => {
-  // OBSERVED post-gate: 954 characters, 17 unbroken sentences, chart 3. The gate had
-  // a CEILING on breaks (maxBreaksPerBlock) and no FLOOR, so zero breaks was legal
-  // at any length.
-  const fact = CHART_1.facts.find((f) => f.id === 'day_master_Fire');
-  const filler = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
-  const long = `Api (Fire). ${filler} ${filler} ${filler} ${filler}`;
-  assert.ok(long.length > STRUCTURE_PARAMS.paragraphFloorChars, 'fixture must clear the floor');
+test('THE 17-SENTENCE WALL FROM THE JUDGING SET IS REJECTED', () => {
+  // The actual escape, reconstructed to its measured shape: chart 3 of the
+  // 2026-08-02 pairs file shipped 954 characters of 17 unbroken sentences THROUGH
+  // the gate, which had a ceiling on breaks (maxBreaksPerBlock) and no floor.
+  //
+  // Reyner's rule, 2026-08-05: break once past 8 sentences; 1100-character backstop.
+  const wallText = `${'Kamu bergerak lebih dulu dan menimbang belakangan. '.repeat(17)}`.trim();
+  assert.equal(sentences(wallText).length, 17, 'fixture must be the observed 17 sentences');
+  // 866 characters, so it is UNDER the 1100 backstop. That is the point: the
+  // SENTENCE rule has to be what catches this, exactly as Reyner specified. The
+  // retired 700-character floor caught it too, but only by accident of width.
+  assert.ok(wallText.length < STRUCTURE_PARAMS.maxCharsUnbroken,
+    `the backstop must NOT be what catches it (${wallText.length} chars)`);
 
-  const wall = withBlockText(goodReading(), 'day_master_Fire', long);
-  assert.ok(checksIn(validateRendering(wall, CHART_1)).includes('structure.unparagraphed'));
+  const wall = withBlockText(goodReading(), 'day_master_Fire', wallText);
+  const finding = validateRendering(wall, CHART_1).findings
+    .find((f) => f.check === 'structure.unparagraphed');
+  assert.ok(finding, 'the wall must fail');
+  assert.match(finding.message, /17 sentences/);
 
-  // The SAME text with one break is fine. The rule asks for a paragraph, not for
+  // The SAME text with one break passes. The rule asks for a paragraph, not for
   // brevity - a long block is allowed to be long.
+  const half = Math.floor(wallText.length / 2);
+  const cut = wallText.indexOf(' ', half);
   const broken = withBlockText(goodReading(), 'day_master_Fire',
-    `Api (Fire). ${filler} ${filler}\n\n${filler} ${filler}`);
+    `${wallText.slice(0, cut)}\n\n${wallText.slice(cut + 1)}`);
   assert.ok(!checksIn(validateRendering(broken, CHART_1)).includes('structure.unparagraphed'));
 });
 
-test('an ordinary-length block is never asked to paragraph', () => {
-  // The threshold sits above the observed p90 (570 over the 32 gate-passed samples)
-  // precisely so this holds. A rule that made every block break would be a style
-  // opinion wearing a structure check's name.
+test('A DENSE 5-SENTENCE BLOCK OF ~750 CHARACTERS PASSES', () => {
+  // The other direction, and the whole reason the unit changed from characters to
+  // sentences. The retired 700-character floor rejected this; it is not a wall.
+  // A character count cannot tell a wall from a dense paragraph - what made the
+  // judging-set block unreadable was 17 consecutive sentences, not its width.
+  const dense = `${'Kamu membaca situasi lebih cepat daripada kamu menjelaskannya, sehingga orang lain menyangka keputusanmu datang tanpa pertimbangan sama sekali. '.repeat(5)}`.trim();
+  assert.equal(sentences(dense).length, 5, 'five sentences');
+  assert.ok(dense.length > 600 && dense.length < 800, `~750 chars, got ${dense.length}`);
+  assert.ok(dense.length > 700,
+    `and would have FAILED the retired 700-character floor (${dense.length} chars)`);
+
+  const reading = withBlockText(goodReading(), 'day_master_Fire', dense);
+  assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('structure.unparagraphed'));
+});
+
+test('the 1100-character backstop catches few-but-enormous sentences', () => {
+  // Eight sentences satisfy the sentence rule, so without the backstop a block of
+  // eight 200-character sentences would pass as a paragraph. Reyner's ruling names
+  // this case: over 1100 characters breaks regardless of sentence count.
+  const long = `${'Kamu terbiasa menyelesaikan banyak hal sendiri sampai orang lain berhenti menawarkan bantuan, dan pada titik itu kemandirian berubah menjadi beban yang tidak pernah kamu sebut. '.repeat(8)}`.trim();
+  assert.ok(sentences(long).length <= STRUCTURE_PARAMS.maxSentencesUnbroken,
+    'must satisfy the sentence rule, so only the backstop can catch it');
+  assert.ok(long.length > STRUCTURE_PARAMS.maxCharsUnbroken, `over 1100, got ${long.length}`);
+
+  const reading = withBlockText(goodReading(), 'day_master_Fire', long);
+  const finding = validateRendering(reading, CHART_1).findings
+    .find((f) => f.check === 'structure.unparagraphed');
+  assert.ok(finding, 'the backstop must fire');
+  assert.match(finding.message, new RegExp(`${long.length} characters`));
+});
+
+test('an ordinary block is never asked to paragraph', () => {
+  // A rule that made every block break would be a style opinion wearing a structure
+  // check's name. The module floor is the reference for ordinary.
   const clean = validateRendering(goodReading(), CHART_1);
   assert.ok(!checksIn(clean).includes('structure.unparagraphed'));
 });

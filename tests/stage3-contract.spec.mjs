@@ -205,7 +205,7 @@ test('the version and the unfitted contract constants are stated', () => {
   // `positions_id`, the pre-verbalised span. A new field in the contract, so the
   // version moves and the whole cache invalidates - which is correct, every cached
   // reading predates the field.
-  assert.equal(ENGINE_VERSION, '0.4.1-stage3');
+  assert.equal(ENGINE_VERSION, '0.4.2-stage3');
   assert.deepEqual(SAFETY_FLAGS, ['no_fatalism', 'no_medical', 'no_financial', 'no_god_ranking']);
   assert.deepEqual(CONTRACT_PARAMS, { coverageFloor: 65 });
 });
