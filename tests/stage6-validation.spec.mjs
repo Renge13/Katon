@@ -454,33 +454,74 @@ test('more than two paragraph breaks in one block is rejected', () => {
 // samples: 1 duplicate sentence, 2 unparagraphed walls, 0 code leaks, 0 disclaimers.
 // The last two were cheap insurance; the first two were live escapes.
 
-test('THE 17-SENTENCE WALL FROM THE JUDGING SET IS REJECTED', () => {
+test('THE 17-SENTENCE WALL IS FIXED, NOT REJECTED, AND THE WORDS SURVIVE', () => {
   // The actual escape, reconstructed to its measured shape: chart 3 of the
   // 2026-08-02 pairs file shipped 954 characters of 17 unbroken sentences THROUGH
-  // the gate, which had a ceiling on breaks (maxBreaksPerBlock) and no floor.
-  //
-  // Reyner's rule, 2026-08-05: break once past 8 sentences; 1100-character backstop.
+  // the gate. Reyner's rule (08-05) made it a rejection; his 08-06 ruling makes it
+  // a deterministic FIX, because the renderer never emits a break and so could
+  // never satisfy the rule by being asked (0 of 31 blocks, measured).
   const wallText = `${'Kamu bergerak lebih dulu dan menimbang belakangan. '.repeat(17)}`.trim();
   assert.equal(sentences(wallText).length, 17, 'fixture must be the observed 17 sentences');
-  // 866 characters, so it is UNDER the 1100 backstop. That is the point: the
-  // SENTENCE rule has to be what catches this, exactly as Reyner specified. The
-  // retired 700-character floor caught it too, but only by accident of width.
+  // Under 1100 chars, so the SENTENCE limb is what triggers the insert.
   assert.ok(wallText.length < STRUCTURE_PARAMS.maxCharsUnbroken,
-    `the backstop must NOT be what catches it (${wallText.length} chars)`);
+    `the backstop must NOT be what triggers it (${wallText.length} chars)`);
 
-  const wall = withBlockText(goodReading(), 'day_master_Fire', wallText);
-  const finding = validateRendering(wall, CHART_1).findings
-    .find((f) => f.check === 'structure.unparagraphed');
-  assert.ok(finding, 'the wall must fail');
-  assert.match(finding.message, /17 sentences/);
+  const result = validateRendering(
+    withBlockText(goodReading(), 'day_master_Fire', wallText), CHART_1,
+  );
+  const block = result.normalized.blocks.find((b) => b.fact_ids.includes('day_master_Fire'));
 
-  // The SAME text with one break passes. The rule asks for a paragraph, not for
-  // brevity - a long block is allowed to be long.
-  const half = Math.floor(wallText.length / 2);
-  const cut = wallText.indexOf(' ', half);
-  const broken = withBlockText(goodReading(), 'day_master_Fire',
-    `${wallText.slice(0, cut)}\n\n${wallText.slice(cut + 1)}`);
-  assert.ok(!checksIn(validateRendering(broken, CHART_1)).includes('structure.unparagraphed'));
+  // 1. It PASSES.
+  assert.ok(!checksIn(result).includes('structure.unparagraphed'),
+    'the wall must be fixed, not rejected');
+  // 2. It came out with exactly one break.
+  assert.equal((block.text.match(/\n\n/g) || []).length, 1, 'exactly one break inserted');
+  // 3. THE BREAK IS AT A SENTENCE BOUNDARY - the character before it terminates.
+  assert.match(block.text, /[.!?]\n\n/, 'the break must land on a sentence boundary');
+  // 4. THE WORDS ARE BYTE-IDENTICAL. Only a whitespace run changed, which is the
+  //    whole rule-20 boundary: the gate inserts paragraph breaks, never words.
+  assert.equal(block.text.replace(/\s+/g, ' '), wallText.replace(/\s+/g, ' '),
+    'not one non-whitespace character may change');
+  // 5. It is counted as a fix, not a failure.
+  assert.equal(result.metrics.paragraph_inserts, 1);
+
+  // Near the midpoint, so neither half is a wall in its own right.
+  const [first, second] = block.text.split('\n\n');
+  assert.ok(Math.abs(first.length - second.length) < wallText.length / 3,
+    'the break should land near the middle, not at the first boundary it finds');
+});
+
+test('AN 8-SENTENCE BLOCK IS LEFT ALONE, BYTE FOR BYTE', () => {
+  // The other direction. A rule that reformatted ordinary blocks would be a style
+  // opinion wearing a formatter's name, and it would rewrite cached readings for
+  // no reason.
+  const fine = `${'Kamu membaca situasi lebih cepat daripada kamu menjelaskannya. '.repeat(8)}`.trim();
+  assert.equal(sentences(fine).length, 8, 'exactly at the limit, not over it');
+  assert.ok(fine.length < STRUCTURE_PARAMS.maxCharsUnbroken);
+
+  const result = validateRendering(
+    withBlockText(goodReading(), 'day_master_Fire', fine), CHART_1,
+  );
+  const block = result.normalized.blocks.find((b) => b.fact_ids.includes('day_master_Fire'));
+  assert.equal(block.text, fine, 'an 8-sentence block must come back untouched');
+  assert.equal(result.metrics.paragraph_inserts, 0);
+  assert.ok(!checksIn(result).includes('structure.unparagraphed'));
+});
+
+test('a block with NO sentence boundary still fails - nothing can format it', () => {
+  // The one case the reformatter cannot rescue: a single enormous sentence. There
+  // is nowhere to put a break, so it stays a genuine wall and stays a rejection.
+  const oneSentence = `Kamu ${'terus bergerak dan menimbang serta menata ulang '.repeat(30)}sekali lagi`;
+  assert.equal(sentences(oneSentence).length, 1);
+  assert.ok(oneSentence.length > STRUCTURE_PARAMS.maxCharsUnbroken);
+
+  const result = validateRendering(
+    withBlockText(goodReading(), 'day_master_Fire', oneSentence), CHART_1,
+  );
+  assert.ok(checksIn(result).includes('structure.unparagraphed'));
+  assert.equal(result.metrics.paragraph_inserts, 0, 'nothing was inserted');
+  const f = result.findings.find((x) => x.check === 'structure.unparagraphed');
+  assert.match(f.message, /no sentence boundary/);
 });
 
 test('A DENSE 5-SENTENCE BLOCK OF ~750 CHARACTERS PASSES', () => {
@@ -507,11 +548,16 @@ test('the 1100-character backstop catches few-but-enormous sentences', () => {
     'must satisfy the sentence rule, so only the backstop can catch it');
   assert.ok(long.length > STRUCTURE_PARAMS.maxCharsUnbroken, `over 1100, got ${long.length}`);
 
-  const reading = withBlockText(goodReading(), 'day_master_Fire', long);
-  const finding = validateRendering(reading, CHART_1).findings
-    .find((f) => f.check === 'structure.unparagraphed');
-  assert.ok(finding, 'the backstop must fire');
-  assert.match(finding.message, new RegExp(`${long.length} characters`));
+  // As of gate 1.5.0 the backstop TRIGGERS THE INSERT rather than a rejection, on
+  // the same terms as the sentence limb.
+  const result = validateRendering(
+    withBlockText(goodReading(), 'day_master_Fire', long), CHART_1,
+  );
+  const block = result.normalized.blocks.find((b) => b.fact_ids.includes('day_master_Fire'));
+  assert.equal(result.metrics.paragraph_inserts, 1, 'the backstop must trigger the insert');
+  assert.match(block.text, /[.!?]\n\n/, 'at a sentence boundary');
+  assert.equal(block.text.replace(/\s+/g, ' '), long.replace(/\s+/g, ' '), 'words unchanged');
+  assert.ok(!checksIn(result).includes('structure.unparagraphed'));
 });
 
 test('an ordinary block is never asked to paragraph', () => {
