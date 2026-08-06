@@ -25,8 +25,9 @@ UPDATED: 2026-08-05 — XENDIT REJECTION 2. `NEXT_PUBLIC_FREE_FULL_READING` remo
          generated and swapped before any real transaction. Fulfillment swap is the next build
          priority after submission. Read that section before touching the paid path.
          COPY SET ALIGNED same day: invoice, /harga and /tentang all say `Bacaan Mendalam`, the name
-         the funnel already used. The card + PDF copy returns wholesale at the fulfillment swap. One
-         surface still carries the dead claim - `harga.meta.description` - and needs a register call.
+         the funnel already used. The card + PDF copy returns wholesale at the fulfillment swap.
+UPDATED: 2026-08-06 — `harga.meta.description` closed, the last surface carrying the dead claim.
+         Every copy surface now names Bacaan Mendalam.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
 -->
 
@@ -358,14 +359,14 @@ both live the moment the deploy lands, plus one live-key swap that must not be f
    `grep -o "Bacaan Mendalam" .next/server/app/{harga,tentang}.html` finds the string in both
    prerendered files, so it is in view-source without executing JS.
 
-   **ONE SURFACE IS STILL WRONG, and it is not in the approved set.**
-   `SITE_COPY.harga.meta.description` reads *"Bacaan Katon gratis dan lengkap. Complete Edition dan
-   Compatibility Reading adalah tambahan opsional."* — it carries BOTH dead claims, and it is the
-   browser-tab description and the search-result snippet, so it is user-facing and a reviewer can see
-   it. Confirmed present in the built HTML after this change:
-   `grep -o '<meta name="description" content="[^"]*"' .next/server/app/harga.html` (2026-08-05).
-   Left alone because Reyner is sole authority on register and no replacement was approved. Proposed
-   wording is with him.
+   **THE LAST SURFACE — CLOSED 2026-08-06.** `SITE_COPY.harga.meta.description` read *"Bacaan Katon
+   gratis dan lengkap. Complete Edition dan Compatibility Reading adalah tambahan opsional."* — both
+   dead claims at once, on the browser-tab description and the search-result snippet, which is the
+   one user-facing string a reviewer can reach without loading the page. It was outside the 08-05
+   approved set and was recorded rather than rewritten. **Reyner approved the replacement 08-06:**
+   *"Bacaan personal dari tanggal lahirmu, gratis. Bacaan Mendalam berbayar bisa kamu ambil atau
+   lewati."* He rejected the alternative of reusing `lead` verbatim: a snippet that clones the first
+   line the reader then sees wastes the slot. **With this, every copy surface names Bacaan Mendalam.**
 3. **THE WHOLE XENDIT ACCOUNT IS IN TEST MODE until verification passes, so the key in Vercel is a
    TEST key too.** Nothing in production can take real money today. After verification succeeds,
    generate LIVE keys and swap them in Vercel **before any real transaction** - both
