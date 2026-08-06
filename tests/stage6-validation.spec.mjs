@@ -248,6 +248,34 @@ test('an INCOMPLETE span still fails, even wrapped in those constructions', () =
   assert.ok(checksIn(validateRendering(bare, CHART_1)).includes('fact.relation_positions'));
 });
 
+test('A BRAIDED BLOCK MAY NAME ANOTHER FACT\'S PALACE WITHOUT FAILING', () => {
+  // `extra` was dropped 2026-08-06. blocksCiting() returns one block per citing
+  // fact and this check reads the WHOLE block, so a braided block charged each
+  // relation with the other facts' palaces - and renderer-prompt.txt REQUIRES
+  // braiding. Measured: chart 2 states both its spans correctly in one block and
+  // failed on each other 10 runs out of 10; 8 of 8 sampled findings had
+  // `missing == []`, i.e. every one was a correct span.
+  const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
+  const phrase = fact.provenance.positions_id;
+  const tail = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
+
+  // The span is COMPLETE, and the block also names Pilar Diri - a palace this
+  // relation does not span (chart 1's 半合 is year + month + hour, never day).
+  // That is what a braid looks like, and it must pass.
+  const braided = withBlockText(goodReading(), fact.id,
+    `Tarikan ini menempati ${phrase}. Fondasi Pasanganmu di Pilar Diri membawa hal lain. ${tail}`);
+  const checks = checksIn(validateRendering(braided, CHART_1));
+  assert.ok(!checks.includes('fact.relation_positions'),
+    'a complete span must survive a braided neighbour naming its own palace');
+
+  // The guarantee that dropping `extra` costs nothing: a WRONG set is still a
+  // MISSING set. Naming day+month for a year+month+hour span omits year and hour.
+  const wrong = withBlockText(goodReading(), fact.id,
+    `Tarikan ini menempati Pilar Diri dan Pilar Kerja. ${tail}`);
+  assert.ok(checksIn(validateRendering(wrong, CHART_1)).includes('fact.relation_positions'),
+    'there is no failure mode that is extra-only and genuine');
+});
+
 test('naming NO positions is allowed; naming the RIGHT set is allowed', () => {
   // The check must not force the renderer to list pillars it had no reason to.
   const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
