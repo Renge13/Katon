@@ -334,6 +334,11 @@ Vercel env var on a coordinated deploy.
 
 ### THE INTERIM STATE — do not let this ship quietly past submission
 
+**XENDIT VERIFICATION RESUBMITTED 2026-08-06** — payment-flow PDF, invoice records and Sertifikat
+sent. **Awaiting review.** The compliance work is DONE; what is still queued is the **live-key +
+webhook-token swap on approval day** (item 3 below), which is the one step that must not be
+forgotten between an approval email and a real transaction.
+
 Re-enabling the paywall re-enables the **legacy 19k unlock**, which is NOT the product CLAUDE.md
 describes. Two specific mismatches, both accepted by Reyner for the Xendit submission window and
 both live the moment the deploy lands, plus one live-key swap that must not be forgotten:
