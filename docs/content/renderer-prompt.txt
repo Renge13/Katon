@@ -223,8 +223,8 @@ blocks is an ORDERED array. The order you choose is the order the reader will re
 
 - fact_ids is an array. A block may carry more than one fact when they genuinely belong in the same breath. Prefer braiding related facts over listing them separately.
 - heading is a short label for the block, 2 to 5 words, in the target language. Plain words, no BaZi jargon in the heading itself.
-- text has no sentence limit, but any block that passes 8 sentences MUST carry a paragraph break, whatever its fact count. A high-importance fact may run a full paragraph. A minor one may be two sentences. Let importance set the length.
-- text may contain paragraph breaks, written as exactly two newline characters. Never more than two breaks in one block. A single newline is never valid. The reader-facing app splits on the double break, so anything else will render as a visible artefact.
+- text has no sentence limit. A high-importance fact may run a full paragraph. A minor one may be two sentences. Let importance set the length.
+- text may contain paragraph breaks, written as exactly two newline characters. Use them only in a braided block carrying three or more facts, and never more than two breaks in one block. A single newline is never valid. The reader-facing app splits on the double break, so anything else will render as a visible artefact.
 - penutup closes the reading with a confident verdict about who this person is. State it. Do not ask a question, do not offer a reflection prompt, do not summarise the blocks above. Two or three sentences that name the person plainly and leave the door open on what comes next.
 
 Rhetorical questions are banned here as everywhere. "Bagian mana dari dirimu yang paling butuh ruang?" is exactly what not to write.
