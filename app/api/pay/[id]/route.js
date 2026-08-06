@@ -10,19 +10,26 @@ export const runtime = 'nodejs';
 // the bank/e-wallet statement line, so it is user-facing chrome and rule 20
 // applies: keyboard characters only, one composed voice.
 //
-// INTERIM, and it describes what the buyer ACTUALLY RECEIVES. The previous string
-// was `Katon - CE card + PDF reading`, which described the intended Complete
-// Edition; the paid path delivers the 7-beat Bacaan Mendalam unlock and there is
-// no PDF and no hi-res card in it yet. Charging for one thing and delivering
-// another is a merchant-compliance problem in its own right, and a poor thing to
-// carry into a merchant review, so the description follows delivery until the
-// fulfillment swap lands. See the 2026-08-05 interim section in docs/PROGRESS.md;
-// when paid really is card + PDF, this string goes back to naming them.
+// INTERIM, and it describes what the buyer ACTUALLY RECEIVES. It names the same
+// product the funnel names — `Bacaan Mendalam`, the string already on the paywall
+// at components/Funnel.jsx:587 and :712 — so the checkout page, the statement line
+// and the offer the buyer accepted all read alike.
+//
+// TWO SUPERSESSIONS, both this interim. `Katon - CE card + PDF reading` described
+// the intended Complete Edition, while the paid path delivers the 7-beat unlock
+// with no PDF and no hi-res card in it: charging for one thing and delivering
+// another is a merchant-compliance problem in its own right. Its replacement
+// `Katon - Bacaan lengkap` fixed the delivery mismatch and introduced a copy one —
+// `lengkap` is the free reading's own claim on /harga, so the paid line borrowed
+// the word that is supposed to distinguish the free product. Superseded by Reyner
+// 2026-08-05 for that collision. See the 2026-08-05 interim section in
+// docs/PROGRESS.md; when paid really is card + PDF, this string names them again.
 //
 // The pre-pivot `Katon: Bacaan Mendalam (${row.domain})` is still dead: it sold a
-// per-domain reading, and the domain is not a product.
+// per-domain reading, and the domain is not a product. The product name returning
+// here is not that string returning — there is no domain in it.
 const INVOICE_DESCRIPTION = {
-  artifact: 'Katon - Bacaan lengkap',
+  artifact: 'Katon - Bacaan Mendalam',
 };
 
 // POST /api/pay/[id]   body: { wa_number, sku? }

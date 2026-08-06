@@ -97,9 +97,10 @@ function Row({ name, price, badge, badgeTone, anchor, body, note }) {
 }
 
 // A row's note is either a plain sentence or a sentence with the funnel linked
-// inside it. Complete Edition takes the linked form because it is the only product
-// with a live purchase path and that path is not a button on this page - the offer
-// lives at the end of the free reading, so the steps have to be readable here.
+// inside it. The paid row (Bacaan Mendalam since 2026-08-05, Complete Edition
+// before it) takes the linked form because it is the only product with a live
+// purchase path and that path is not a button on this page - the offer lives at
+// the end of the free reading, so the steps have to be readable here.
 function noteNode(copy) {
   if (!copy.noteLink) return copy.note ?? null;
   return (
