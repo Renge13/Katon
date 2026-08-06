@@ -29,7 +29,8 @@
     "render:reading": "node --conditions=react-server scripts/render-reading.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:engine": "node tests/bazi-engine.report.mjs",
-    "test:forge": "node --conditions=react-server scripts/forge-tests.mjs"
+    "test:forge": "node --conditions=react-server scripts/forge-tests.mjs",
+    "gallery:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/rejection-gallery.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
