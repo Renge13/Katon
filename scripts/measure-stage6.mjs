@@ -122,6 +122,11 @@ function armStats(model) {
       // Rule 13: one change, one measurement - these are what a later fitting
       // pass measures against, and it needs the passes as much as the failures.
       dist: { same_breath: [], coverage: [], total_chars: [], block_chars: [] },
+      // Deterministic paragraph inserts (gate 1.5.0). A silent FIX, never a
+      // rejection, so it is counted apart from the checks table - but it IS
+      // counted, because a gate quietly reformatting every reading with nothing on
+      // the report would be worse than one that rejected them.
+      paragraphInserts: 0,
     });
   }
   return stats.get(model);
@@ -201,6 +206,7 @@ for (const testChart of charts) {
         for (const x of m.coverage) s.dist.coverage.push(x.ratio);
         for (const x of m.total_chars) s.dist.total_chars.push(x);
         for (const x of m.block_chars) s.dist.block_chars.push(x);
+        s.paragraphInserts += m.paragraph_inserts || 0;
       }
 
       rows.push({
@@ -272,6 +278,14 @@ if (anyTransport) {
       console.log(`    ${cls.padEnd(34)} ${String(count).padStart(4)}`);
     }
   }
+}
+
+console.log('\nDETERMINISTIC FIXES (silent, never rejections)');
+for (const [model, s] of stats) {
+  const evaluations = s.runs + s.regenerated;
+  const per = evaluations === 0 ? 'n/a' : (s.paragraphInserts / evaluations).toFixed(2);
+  console.log(`  ${model.padEnd(26)} paragraph inserts ${String(s.paragraphInserts).padStart(5)}`
+    + `   (${per} per gate evaluation)`);
 }
 
 console.log('\nFAILURES BY CHECK (count of attempts each check rejected)');
