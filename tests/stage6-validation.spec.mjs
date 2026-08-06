@@ -677,6 +677,39 @@ test('the code-leak check does not fire on a correct reading', () => {
   }
 });
 
+test('THE RAW PILLAR IS REJECTED; THE PALACE NAME IS NOT', () => {
+  // Added 2026-08-06 with the prompt fix it enforces. renderer-prompt used to BAN
+  // "pilar hari" in one section and ENCOURAGE "ini datang dari pilar harimu" in
+  // another; the renderer followed the encouragement and wrote "Fondasi Pasanganmu
+  // berada di pilar hari" on chart 5. The contradiction is resolved in the same
+  // commit, so this ban enforces a rule the prompt now states only once.
+  const fact = CHART_1.facts.find((f) => f.id === 'spouse_palace');
+  const tail = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
+
+  for (const raw of ['pilar hari', 'pilar harimu', 'pilar bulan', 'pilar tahun', 'pilar jam']) {
+    const bad = withBlockText(goodReading(), 'spouse_palace',
+      `Fondasi Pasanganmu berada di ${raw}. ${tail}`);
+    assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('style.raw_pillar'),
+      `not caught: ${raw}`);
+  }
+
+  // The four palace names must survive. They are capital-P and never followed by a
+  // pillar word, which is what keeps the pattern from eating correct prose.
+  for (const good of ['Pilar Diri', 'Pilar Kerja', 'Pilar Akar', 'Pilar Arah']) {
+    const ok = withBlockText(goodReading(), 'spouse_palace',
+      `Fondasi Pasanganmu berada di ${good}. ${tail}`);
+    assert.ok(!checksIn(validateRendering(ok, CHART_1)).includes('style.raw_pillar'),
+      `false positive on ${good}`);
+  }
+
+  // And the module floor, which names palaces on every block, stays clean.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    assert.ok(!checksIn(validateRendering(goodReading(semantic), semantic,
+      { provider: 'module_assembly' })).includes('style.raw_pillar'), `chart ${tc.id}`);
+  }
+});
+
 test('a mid-reading system disclaimer is rejected', () => {
   const disclaimers = [
     'Ini bukan nasihat medis untuk kondisimu.',

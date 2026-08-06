@@ -302,6 +302,12 @@
         "note": "Threshold and score language, same rule."
       }
     ],
+    "raw_pillar": [
+      {
+        "pattern": "\\bpilar\\s+(tahun|bulan|hari|jam)\\w*",
+        "note": "The raw pillar where a palace name belongs. renderer-prompt §THE PALACES AND THE PARTS bans it in as many words ('Do not downgrade it to \"pilar hari\"') and every one of the four pillars HAS a palace name, so the raw form is never needed. Added 2026-08-06 together with the fix to the prompt line that used to contradict the ban: §PROVENANCE IS NOT ARITHMETIC listed 'ini datang dari pilar harimu' as ENCOURAGED, which is what the renderer was following when it wrote 'Fondasi Pasanganmu berada di pilar hari' on chart 5. The contradiction is resolved first and this enforces the surviving rule, the same pairing as the 8-sentence paragraph rule. Pre-checked: zero matches against every rendered glossary field, and clean on all four 'Pilar X' palace names, which are capital-P and never followed by a pillar word. The \\w* tail catches the possessive ('pilar harimu')."
+      }
+    ],
     "bare_polarity": [
       {
         "pattern": "\\b(Api|Kayu|Air|Logam|Tanah) (Yang|Yin)\\b",
