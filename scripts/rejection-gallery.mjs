@@ -9,7 +9,14 @@
 // check matched. Reyner reads them AS A READER and rules on the bans.
 //
 //   npm run gallery:rejections
-//   npm run gallery:rejections -- --n 3 --out reports/rejection-gallery.md
+//   npm run gallery:rejections -- --n 3 --out docs/research/my-gallery.md
+//
+// ── ONE GALLERY PER PROMPT VERSION, DATED, NEVER OVERWRITTEN ──
+// Reyner's ruling 2026-08-06. The default output is dated, so a new run beside a
+// prompt change produces a NEW file rather than destroying the one his rulings were
+// made against. A gallery is evidence for a decision; overwriting it deletes the
+// reason the decision was made. They live in docs/research/ with the rest of the
+// evidence, not in reports/, which is gitignored raw run logs.
 //
 // ── THE READING COMES FIRST, THE FLAGS COME AFTER ──────────
 // Deliberate. If the flags are at the top he reads hunting for them, which is
@@ -42,7 +49,8 @@ const flag = (name, fallback) => {
 
 const perChart = Number(flag('n', 2));
 const wanted = Number(flag('count', 5));
-const outPath = flag('out', 'reports/rejection-gallery.md');
+const stamp = new Date().toISOString().slice(0, 10);
+const outPath = flag('out', `docs/research/rejection-gallery-${stamp}.md`);
 /** Guaranteed a slot: it is the largest rejection cause and the least understood. */
 const PRIORITY = 'style.hedge_construction';
 
@@ -153,7 +161,7 @@ while (picked.length < wanted) {
 const lines = [
   '# Rejection gallery',
   '',
-  `Generated ${new Date().toISOString().slice(0, 10)} · prompt \`${PROMPT_VERSION}\` · `
+  `Generated ${stamp} · prompt \`${PROMPT_VERSION}\` · `
   + `gate \`${STAGE6_VERSION}\` · model \`${modelFor(DEFAULT_TIER, 'gemini')}\``,
   '',
   `${picked.length} complete readings the gate REJECTED, drawn from ${rejected.length} `

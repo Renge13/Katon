@@ -91,8 +91,8 @@
     "_note": "Regenerate-with-stricter-directive, not hard reject. Thresholds are per-provider; OpenAI runs harder (pipeline-spec PROVIDER FALLBACK).",
     "hedge_construction": [
       {
-        "pattern": "\\bbukan\\b[^.!?]{0,140}?\\b(tapi|melainkan)\\b",
-        "note": "THE load-bearing regex. renderer-prompt-notes: CONFIRMED UNFIXABLE BY PROMPT ALONE - run 5 emitted it twice against an explicit ban, and gate-check run 2 emitted it a third time, in the penutup. This regex is the only reliable fix. The 140-char window keeps it inside one sentence; the lazy quantifier stops it spanning a whole paragraph."
+        "pattern": "\\bbukan\\b(?!\\s+berarti\\b)[^.!?]{0,140}?\\b(tapi|melainkan)\\b",
+        "note": "THE load-bearing regex. renderer-prompt-notes: CONFIRMED UNFIXABLE BY PROMPT ALONE - run 5 emitted it twice against an explicit ban, and gate-check run 2 emitted it a third time, in the penutup. This regex is the only reliable fix. The 140-char window keeps it inside one sentence; the lazy quantifier stops it spanning a whole paragraph. THE `bukan berarti` CARVE-OUT (Reyner, 2026-08-06, ruling A on the rejection gallery): the gallery showed this check's most common trigger was 'Lemah di sini bukan berarti tidak mampu, melainkan sumber tenagamu ada di luar dirimu' - which is the resolve-in-the-same-breath move rule 21 REQUIRES, not the hedge the ban was written for. 'bukan berarti X' NEGATES A MISREADING, which is the job; 'bukan X tapi Y' substitutes one claim for another, which is the hedge. The lookahead separates them, so the ban keeps catching what it was built for."
       }
     ],
     "tension_collapse": [
