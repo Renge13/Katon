@@ -372,10 +372,24 @@ Vercel env var on a coordinated deploy.
 
 ### THE INTERIM STATE — do not let this ship quietly past submission
 
-**XENDIT VERIFICATION RESUBMITTED 2026-08-06** — payment-flow PDF, invoice records and Sertifikat
-sent. **Awaiting review.** The compliance work is DONE; what is still queued is the **live-key +
-webhook-token swap on approval day** (item 3 below), which is the one step that must not be
-forgotten between an approval email and a real transaction.
+**XENDIT VERIFICATION APPROVED — go-live ritual executed 2026-08-07 (Cowork session), status:**
+- Business verified, bank account (BCA, PT KATON DIGITAL NUSANTARA) **active**.
+- Live `xnd_production_...` key + live webhook verification token generated and **swapped into
+  Vercel Production; redeployed.** The live-key-swap item below is DONE.
+- Webhook URL saved for Invoices-paid + paid-after-expiry. Xendit's test callback returned 502
+  `invoice_lookup_failed` — that is the fail-closed design PASSING (fictional invoice, re-fetch
+  refused; the token check passed en route). Not a defect.
+- **QRIS channel: "In Progress"** (Bank Indonesia NMID registration, typically days). Checkout is
+  QRIS-only, so NO REAL PURCHASE IS POSSIBLE until it flips to Activated. Decision (Reyner,
+  patient path): WAIT — no temporary channel-lifting. Nudge Xendit support if >1 week.
+- **Remaining ritual step: the first real self-purchase** (Rp 19.000, own birthdate, own bank app)
+  the day QRIS activates. Screenshot the paid invoice into the ledger.
+- **Channels ruling (Reyner 2026-08-07): launch is QRIS-ONLY.** Coverage is universal via bank/
+  e-wallet apps, MDR ~0.7% vs ~Rp 4.000 flat for VAs (a fifth of the ticket). Additional channels
+  are a conversion lever to revisit ONLY on measured payment-step abandonment.
+
+~~RESUBMITTED 2026-08-06, awaiting review~~ — superseded by the approval above. The original
+warning stands for the FUNNEL mismatches below, which remain live until the fulfillment swap.
 
 Re-enabling the paywall re-enables the **legacy 19k unlock**, which is NOT the product CLAUDE.md
 describes. Two specific mismatches, both accepted by Reyner for the Xendit submission window and

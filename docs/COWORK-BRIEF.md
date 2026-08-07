@@ -218,6 +218,27 @@ headlines, so you can recognise a re-litigation attempt:
 Two lists. Keep them short; if either grows past a handful of items, something is being deferred that
 should be decided.
 
+**Session state as of 2026-08-07 (end of the long Cowork session):**
+
+- Pipeline COMPLETE and measured honestly: gate 1.8.0, first-pass ~53%, shipped ~75%. Every
+  gate false positive found and killed (the ledger rows tell the story). The house method, proven
+  four times: READ THE FAILING OUTPUT before touching any lever; finding messages are evidence
+  about the check, never about the text.
+- `hedge_construction` pooled truth is 28.8% (25.9% was a low draw) and is the next quality
+  target. The "bukan berarti" carve-out (Reyner ruling A) already landed in gate 1.8.0.
+- **Prompt J (mirror route) is WRITTEN and UNSTARTED** — `docs/prompts/J-mirror-route.md`. It is
+  the next build: fenced preview route, rate limiting, promotion conditions baked in. Starts in a
+  FRESH Code session. After J: card component, then the fulfillment swap (retires the interim
+  funnel), then promotion.
+- Xendit: APPROVED, live keys swapped, QRIS activation in progress — see PROGRESS INTERIM STATE
+  for the full go-live status. Self-purchase test pending QRIS.
+- **Compat reading CONTENT session is QUEUED and is Cowork+Reyner work** (no code): author the
+  ~5 element-relationship dynamics, the 4 affinity/fit quadrant blocks, the ~6 branch outcome
+  blocks, and the P0 tease copy — the "low tens of cells" from the compat spec, every string
+  register-reviewed. Can run any time; does not block on the mirror. This answers Reyner's
+  standing question "when do we discuss what to write in the compatibility reading."
+- ONE SESSION PER REPO at a time (two branch collisions taught this). Worktrees for true parallel.
+
 **Blocked on Reyner. Nobody else can decide these.**
 
 | Item | Where | Note |
