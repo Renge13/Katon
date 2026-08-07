@@ -216,6 +216,10 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 
 | Metric | Value | As of | Note |
 |---|---|---|---|
+| Mirror route tests | 36 route + 11 limiter, 0 fail | 08-07 | Prompt J. No network, no key: the provider is a `globalThis.fetch` stub that throws on a cache hit, so "zero provider calls" is asserted against a stub and not against the absence of a key |
+| Repo suites green | 15 of 15 | 08-07 | was 13 before J |
+| `npm run build` | passes, 3 new dynamic routes | 08-07 | it did NOT before `888e5bc` — `new URL(..., import.meta.url)` in the prompt loader is a webpack asset reference. `/harga` and `/tentang` still `○ (Static)` |
+| **Cache keys moved by the `element_missing` `internal_only` fix** | **2 of 13** | **08-07** | charts 1 and 5, the only two with a missing-element fact; the other 11 bit-identical. This is why `ENGINE_VERSION` was NOT bumped — the hash invalidates exactly the affected charts, and a bump would discard 11/13 to fix 2 |
 | Pillars vs fixture | 13/13 | 08-01 | |
 | **Pillars vs Joey's own printed pillars** | **13/13** | 08-01 | first full cross-check; came free with the ten-bar collection |
 | Ten Gods | 13/13 | 08-01 | |
@@ -471,12 +475,16 @@ SEPARATE, LATER, DELIBERATE commit. Its three named preconditions, also written 
 | 3 | Reyner has QA'd real readings through the preview | NOT MET |
 
 **1 of 3.** Condition 3 is the one J unblocks: QA is
-`curl -H "x-mirror-preview-token: $MIRROR_PREVIEW_TOKEN" https://katon.app/api/mirror/<token>` after a
-POST to `/api/mirror` with a birthdate. It returns JSON, not a page — J built no UI, by design.
+`curl -H "x-mirror-preview-token: $MIRROR_PREVIEW_TOKEN" https://www.katon.app/api/mirror/<token>`
+after a POST to `/api/mirror` with a birthdate. It returns JSON, not a page — J built no UI, by
+design. **Use `www.`** — the apex 308-redirects to it, and a redirect is the one place a header can
+quietly go missing depending on the client (found the hard way during the 08-07 QA run).
 
 **Two migrations must be run BEFORE the deploy** (repo convention): `0007_reading_cache_key.sql` and
 `0008_rate_limit.sql`. 0008 is the louder one — the limiter FAILS CLOSED, so code deployed ahead of
-that migration refuses every request with a 429 rather than waving them through.
+that migration refuses every request with a 429 rather than waving them through. **Both applied and
+confirmed live 2026-08-07**, not by inspection but by behaviour: the production POST returned 201
+(so `cache_key` exists, 0007) and did not 429 (so `rate_limit_hit` answered, 0008).
 
 **RULED 2026-08-07 (Reyner, via Cowork) — the floor serves but is never persisted.** This shipped as
 a gap in the first pass: a floor result was stored like any other render, so a one-hour Gemini blip
