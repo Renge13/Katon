@@ -17,9 +17,12 @@
 import assert from 'node:assert/strict';
 import { test, beforeEach, afterEach } from 'node:test';
 
-import { createMirrorReading, serveMirrorReading } from '../lib/mirror/handlers.js';
+import {
+  createMirrorReading, serveMirrorReading, recordMirrorFeedback,
+} from '../lib/mirror/handlers.js';
 import { PREVIEW_HEADER, previewFenceReason } from '../lib/mirror/fence.js';
-import { __clearMemCache } from '../lib/render/cache.js';
+import { readCache, writeCache, __clearMemCache } from '../lib/render/cache.js';
+import { STAGE6_VERSION } from '../lib/render/fence.js';
 import { RATE_LIMITS, __clearMemRateLimit } from '../lib/ratelimit.js';
 import { SESSION_COOKIE } from '../lib/mirror/session.js';
 
@@ -53,6 +56,9 @@ function request({ method = 'GET', token = PREVIEW, body, url = ORIGIN, session,
 
 const create = (body, opts = {}) => createMirrorReading(request({ method: 'POST', body, ...opts }));
 const serve = (readingToken, opts = {}) => serveMirrorReading(request(opts), readingToken);
+const feedback = (readingToken, body, opts = {}) => recordMirrorFeedback(
+  request({ method: 'POST', body, ...opts }), readingToken,
+);
 
 async function createOk(body = CHART_A) {
   const res = await create(body);
@@ -418,4 +424,110 @@ test('two readings of the same chart share one cached text; a different chart do
   stubFailingProvider();
   await serve(b);
   assert.ok(fetchCalls > 0, 'a different chart was served from another chart\'s row');
+});
+
+// ── Stage 7 feedback ───────────────────────────────────────
+
+test('a thumbs-down flags the cached row, and the reading keeps serving', async () => {
+  const token = await createOk();
+  const before = await (await serve(token)).json();
+
+  const res = await feedback(token, { vote: 'down' });
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { ok: true, vote: 'down', flagged: true });
+
+  const key = readingMem().get(token).cache_key;
+  assert.equal((await readCache(key)).status, 'flagged');
+
+  // Pulling it would leave a hole for everyone who shares that semantic
+  // profile. A reading somebody disliked is not a reading that is wrong.
+  const after = await (await serve(token)).json();
+  assert.deepEqual(after.blocks, before.blocks);
+});
+
+test('a thumbs-up is accepted and changes no status', async () => {
+  const token = await createOk();
+  await serve(token);
+
+  const res = await feedback(token, { vote: 'up' });
+  assert.deepEqual(await res.json(), { ok: true, vote: 'up', flagged: false });
+  assert.equal((await readCache(readingMem().get(token).cache_key)).status, 'unreviewed');
+});
+
+test('the feedback endpoint is behind the same fence and rejects a bad vote', async () => {
+  const token = await createOk();
+  await serve(token);
+
+  assert.equal((await feedback(token, { vote: 'down' }, { token: null })).status, 404);
+  assert.equal((await feedback(token, { vote: 'down' }, { token: 'wrong' })).status, 404);
+  assert.equal((await feedback('no-such-token', { vote: 'down' })).status, 404);
+  assert.equal((await feedback(token, { vote: 'maybe' })).status, 400);
+  assert.equal((await feedback(token, {})).status, 400);
+});
+
+// ── the hard-check exception (pipeline-spec Stage 7) ───────
+
+/** Plant a cached row that would pass shape checks but fails a HARD gate check. */
+async function plantHardFailingRow(key) {
+  await writeCache(key, {
+    engineVersion: 'planted',
+    // "ramalan" names the thing rule 25 forbids the product from being, and it
+    // is a HARD reject in lib/validate/blocklist.json. Everything else about
+    // this row is well-formed, so only the hard check can be what fires.
+    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Ini ramalan untuk kamu.' }],
+    penutup: 'Penutup.',
+    source: 'gemini',
+    model: 'planted-model',
+    promptVersion: 'planted',
+    stage6Version: STAGE6_VERSION,
+  });
+}
+
+test('a cached reading that fails a HARD check falls back immediately', async () => {
+  const token = await createOk();
+  await plantHardFailingRow(readingMem().get(token).cache_key);
+
+  fetchCalls = 0;
+  stubForbiddenProvider();
+  const body = await (await serve(token)).json();
+
+  // Not the stored text, and not a provider call either. The floor is engine
+  // content, always available, and always accurate.
+  assert.equal(fetchCalls, 0);
+  assert.equal(body.meta.source, 'module_assembly');
+  assert.equal(body.meta.hard_fail_fallback, true);
+  assert.equal(body.meta.cached, false, 'the served text is not the cached row');
+  assert.ok(!JSON.stringify(body.blocks).includes('ramalan'));
+});
+
+test('the fallback does NOT overwrite the row it refused to serve', async () => {
+  const token = await createOk();
+  const key = readingMem().get(token).cache_key;
+  await plantHardFailingRow(key);
+
+  await serve(token);
+
+  // Overwriting with the floor would answer the QA question by deleting it.
+  const row = await readCache(key);
+  assert.equal(row.source, 'gemini');
+  assert.equal(row.blocks[0].text, 'Ini ramalan untuk kamu.');
+});
+
+test('a SOFT failure keeps serving; only hard checks pull a reading', async () => {
+  const token = await createOk();
+  const key = readingMem().get(token).cache_key;
+  await writeCache(key, {
+    engineVersion: 'planted',
+    // Coverage and style will both complain about this. None of it is hard.
+    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Satu kalimat pendek saja.' }],
+    penutup: 'Penutup.',
+    source: 'gemini',
+    model: 'planted-model',
+    promptVersion: 'planted',
+    stage6Version: STAGE6_VERSION,
+  });
+
+  const body = await (await serve(token)).json();
+  assert.equal(body.meta.source, 'gemini');
+  assert.deepEqual(body.blocks[0].paragraphs, ['Satu kalimat pendek saja.']);
 });
