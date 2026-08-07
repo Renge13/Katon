@@ -453,6 +453,38 @@ swap is the next build priority after submission**: paid delivers card + PDF, th
 to the free mirror. Until that lands, this section is the reason the numbers look right and the
 product does not.
 
+### THE MIRROR ROUTE IS BUILT AND FENCED — do not promote it early (2026-08-07, Prompt J)
+
+`/api/mirror` exists and serves real Stage 3-6 readings. **Nothing links to it and nothing user-facing
+changed.** It is reachable only with the `MIRROR_PREVIEW_TOKEN` header; with the env var unset the
+route 404s entirely, which is a missing capability rather than a switch (the STAGE6_VERSION pattern,
+and the `NEXT_PUBLIC_FREE_FULL_READING` lesson three sections up).
+
+**PROMOTION** — wiring the funnel to this route and removing the preview-token requirement — is a
+SEPARATE, LATER, DELIBERATE commit. Its three named preconditions, also written into the header of
+`app/api/mirror/[token]/route.js` so no session can promote without reading them:
+
+| # | Precondition | Status |
+|---|---|---|
+| 1 | Xendit verification approved + live keys swapped | **MET 2026-08-07.** QRIS activation and the first self-purchase are tracked above and are NOT part of this condition |
+| 2 | The fulfillment swap shipped — Complete Edition card + PDF exist, so the 19k upsell is a real thing to buy | NOT MET |
+| 3 | Reyner has QA'd real readings through the preview | NOT MET |
+
+**1 of 3.** Condition 3 is the one J unblocks: QA is
+`curl -H "x-mirror-preview-token: $MIRROR_PREVIEW_TOKEN" https://katon.app/api/mirror/<token>` after a
+POST to `/api/mirror` with a birthdate. It returns JSON, not a page — J built no UI, by design.
+
+**Two migrations must be run BEFORE the deploy** (repo convention): `0007_reading_cache_key.sql` and
+`0008_rate_limit.sql`. 0008 is the louder one — the limiter FAILS CLOSED, so code deployed ahead of
+that migration refuses every request with a 429 rather than waving them through.
+
+**Known gaps, recorded not fixed.** A floor result (provider outage) is persisted like any other
+render and therefore freezes for that cache key until `ENGINE_VERSION` moves — a one-hour Gemini blip
+permanently costs those charts their LLM reading. 👍 is accepted and stored nowhere. 胎元 is absent
+from the mirror's chart display because its only Indonesian label is hand-authored in
+`lib/readingView.js` and exists in no glossary entry; that is a register call and register is
+Reyner's.
+
 ## DECIDED 2026-08-04 — model question CLOSED; span pre-verbalised; four gate checks; n=10 measured
 
 **MODEL DECISION IS CLOSED (Reyner).** Blind judging went **12-4 for 3.1-flash-lite**, which also
