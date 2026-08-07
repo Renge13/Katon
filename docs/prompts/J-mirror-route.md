@@ -1,10 +1,13 @@
 <!--
 STATUS: HANDOVER — Claude Code build prompt. Created 2026-08-06 by Cowork.
 This is PROMPT J — the mirror route: the first consumer of the Stage 3-6 pipeline. Own session/PR.
-PRECONDITION: the clean n=10 row (gate 1.5.0) has landed and Reyner has green-lit J on its numbers.
-CRITICAL CONTEXT: Xendit verification is IN REVIEW on the live funnel as-is. Nothing user-visible
-may change until that clears. Everything J builds ships FENCED (see task 5); promotion to the public
-funnel is a separate, later, deliberate commit gated on three named conditions.
+PRECONDITION: MET — gate 1.8.0 measured 08-07 (first-pass 70.0%, shipped 88.5%, both real vs the
+pooled baseline) and Reyner queued J as the next build (COWORK-BRIEF §6, 2026-08-07).
+CRITICAL CONTEXT (updated 2026-08-07): Xendit verification is APPROVED and live keys are swapped —
+promotion precondition 1 of task 5 is MET. QRIS activation is still pending, so no real purchase is
+possible yet. The legacy funnel stays untouched in J regardless: the fulfillment swap is its own
+later build. Everything J builds ships FENCED (see task 5); promotion to the public funnel is a
+separate, later, deliberate commit gated on three named conditions (1 of 3 now met).
 -->
 
 # Prompt J — the mirror route: birthdate in, gated pipeline reading out
@@ -12,8 +15,8 @@ funnel is a separate, later, deliberate commit gated on three named conditions.
 ## Read first, in order
 1. `../../CLAUDE.md` — rules 14-19 (architecture), rule 19 especially: rate limiting is a
    PRECONDITION of any public exposure, not an enhancement.
-2. `../PROGRESS.md` — THE INTERIM STATE section (why the live funnel is frozen) and the latest
-   gate 1.5.0 measurement row.
+2. `../PROGRESS.md` — THE INTERIM STATE section (Xendit go-live status, QRIS pending) and the
+   gate 1.8.0 measurement rows (08-07, the current pipeline state).
 3. `lib/render/index.js` — `renderReading`, `persistRendered`, `RenderRefused`. The chain already
    does cache-check, provider failover, gate, floor. J consumes it; J does not reimplement any of it.
 4. `lib/semantic/index.js` — `buildSemanticJson`, `cacheKey`.
@@ -60,14 +63,16 @@ The new route mounts under a path that is linked from NOWHERE, and the GET requi
 `MIRROR_PREVIEW_TOKEN` set in env = QA access for Reyner; absent = the route 404s entirely. No
 `NEXT_PUBLIC_*` flag, nothing client-readable. PROMOTION (wiring the funnel to this route, removing
 the preview token requirement) is a SEPARATE future commit whose named preconditions are:
-  1. Xendit verification approved + live keys swapped,
+  1. Xendit verification approved + live keys swapped — MET 2026-08-07 (QRIS activation still
+     pending; the first real self-purchase is a separate ritual step, see INTERIM STATE),
   2. the fulfillment swap shipped (Complete Edition card + PDF exist, so the 19k upsell is real),
   3. Reyner has QA'd real readings through the preview.
 Write these three into the route file header AND the PROGRESS interim section, so no session
 promotes early.
 
 ## What J must NOT touch
-- The legacy funnel, paywall, and `/full` unlock — under Xendit review, frozen.
+- The legacy funnel, paywall, and `/full` unlock — the fulfillment swap is its own later build;
+  J does not go near the paid path.
 - Payments. Engine (`lib/bazi/*`, `lib/semantic/*` except consuming exports). The gate.
 - The renderer prompt.
 

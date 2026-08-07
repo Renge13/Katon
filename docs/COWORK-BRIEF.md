@@ -108,9 +108,12 @@ right until you have checked.** It has been right every time so far.
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
 
-**Fourteen spec errors so far. All fourteen were mine.** Not listed to be self-flagellating; listed because
+**Sixteen spec errors so far. All sixteen were mine.** Not listed to be self-flagellating; listed because
 the pattern is predictive and knowing it changes what you do next. **Append here when a new one is
 caught, and never trim the list — the pattern is the value, not the count.**
+(Numbering corrected 2026-08-07: two appended rows reused 13 and 14, so the "fourteen" headline
+undercounted a sixteen-row table — a counting error in the error ledger itself. The D2a pair is now
+15 and 16; `CLAUDE.md` rule 20's cross-reference to "error 13" means the curly-quotes row, unchanged.)
 
 | # | Error | The pattern underneath |
 |---|---|---|
@@ -128,8 +131,8 @@ caught, and never trim the list — the pattern is the value, not the count.**
 | 12 | "Rescued" `solar-term-oracle-diff.mjs` from the mirror into `tests/tools/` — a file `PROGRESS.md` RESOLVED had already ruled deliberately deleted and not to be restored | verified the file WAS an orphan, never checked whether its absence was a DECISION. Same shape as 2/5/6: the disproving evidence was already in the ledger |
 | 13 | CLAUDE.md rule 20 listed two "known violations" that were both FALSE (Sharecard em-dashes are all comments; the invoice description used a colon), and missed the one real violation (curly quotes, `Funnel.jsx:731`). Propagated into Prompt F unverified; caught by Claude Code | asserted a code fact from a doc without grepping the code — error 9's shape. A "known violation" note in a locked file must carry the grep that found it |
 | 14 | Prompt H specced a slot-filling check ("block order matches JSON order AND importance non-monotonic") that is inert by construction — Stage 3 emits facts importance-sorted, so the two conditions are mutually exclusive. Caught by Claude Code, which implemented it as specced and pinned the sortedness in a test | specced a detector without checking what the upstream stage actually emits — asserting engine behavior from the spec instead of the code, error 9's shape again |
-| 13 | D2a said 羊刃 and 空亡 "were already computed". **Neither existed anywhere in `lib/`.** | error 9 again, in the very document that corrected error 9. Fixed the five anchors I had checked and asserted the other two from memory of what the engine contained |
-| 14 | D2a §1 reports the year-pillar alternative at 0/12, 0/12, 1/12. Two of the twelve charts (X2, X3) have year branch == day branch, so the conventions are the same computation there and cannot discriminate. True figures: **0/10, 0/10, 1/10** | quoted a discriminating-cases count against the full-sample denominator. Harmless here — stated correctly the ruling is stronger — but the same slip on a marginal result would manufacture significance |
+| 15 | D2a said 羊刃 and 空亡 "were already computed". **Neither existed anywhere in `lib/`.** | error 9 again, in the very document that corrected error 9. Fixed the five anchors I had checked and asserted the other two from memory of what the engine contained |
+| 16 | D2a §1 reports the year-pillar alternative at 0/12, 0/12, 1/12. Two of the twelve charts (X2, X3) have year branch == day branch, so the conventions are the same computation there and cannot discriminate. True figures: **0/10, 0/10, 1/10** | quoted a discriminating-cases count against the full-sample denominator. Harmless here — stated correctly the ruling is stronger — but the same slip on a marginal result would manufacture significance |
 
 **Three of these (2, 5, 6) are the same failure: I had the disproving evidence in hand and wrote the
 claim anyway.** Before asserting anything, check whether something you already measured contradicts it.
@@ -247,7 +250,7 @@ should be decided.
 | ~~Write 30 fixed tags~~ | DONE 08-02 | `glossary.json` → `tag_arketipe`; `tags_en` pending, waits for card work |
 | ~~Register-review the 刑 entry~~ | DONE 08-02 | Simpul confirmed, entry landed in `glossary.json` |
 | Card visual system | `content/sharecard-spec.md` | Card B must differ **at thumbnail size**. Now also decides the ID vs EN name display variant (rule 23 amendment) |
-| Xendit verification | external | was in progress 2026-08-01 |
+| ~~Xendit verification~~ | DONE 08-07 | approved, live keys swapped; QRIS activation + self-purchase test still pending, see PROGRESS INTERIM STATE |
 
 **Engine and pipeline, in order.**
 
@@ -294,8 +297,8 @@ quality of the output, not to what is easier to build. I am the sole authority o
 register: propose wording, flag it, never auto-decide.
 
 Never improvise a BaZi rule, including tables I hand you. Verify against docs/, the repo's locked
-tests, or Joey's plotter, and stop if sources disagree. Eleven spec errors have been caught this
-way and all eleven were yours, so check before asserting.
+tests, or Joey's plotter, and stop if sources disagree. Sixteen spec errors are in the ledger and
+all sixteen were yours, so check before asserting.
 
 Then tell me where we actually are and what you think the next move is. Do not write engine code.
 ```
