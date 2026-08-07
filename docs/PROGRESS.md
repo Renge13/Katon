@@ -478,12 +478,19 @@ POST to `/api/mirror` with a birthdate. It returns JSON, not a page — J built 
 `0008_rate_limit.sql`. 0008 is the louder one — the limiter FAILS CLOSED, so code deployed ahead of
 that migration refuses every request with a 429 rather than waving them through.
 
-**Known gaps, recorded not fixed.** A floor result (provider outage) is persisted like any other
-render and therefore freezes for that cache key until `ENGINE_VERSION` moves — a one-hour Gemini blip
-permanently costs those charts their LLM reading. 👍 is accepted and stored nowhere. 胎元 is absent
-from the mirror's chart display because its only Indonesian label is hand-authored in
-`lib/readingView.js` and exists in no glossary entry; that is a register call and register is
-Reyner's.
+**RULED 2026-08-07 (Reyner, via Cowork) — the floor serves but is never persisted.** This shipped as
+a gap in the first pass: a floor result was stored like any other render, so a one-hour Gemini blip
+permanently cost those charts their LLM reading — the next request is a cache hit and the chain never
+runs again until `ENGINE_VERSION` moves. Now `persistRendered` refuses a `module_assembly` result and
+the next request retries. `CLAUDE.md` rule 16 is amended to match: determinism attaches to the first
+generation **that passes Stage 6**. Enforced at the single door, not in the route, so a later route
+cannot reintroduce it by not knowing. Costs nothing in churn — `assembleFallback` is pure engine
+content, so a refresh during an outage is byte-identical.
+
+**Known gaps still open, recorded not fixed.** 👍 is accepted and stored nowhere: `render_cache` has
+no column for it and a counter is a schema change. 胎元 is absent from the mirror's chart display
+because its only Indonesian label is hand-authored in `lib/readingView.js` and exists in no glossary
+entry; that is a register call and register is Reyner's.
 
 ## DECIDED 2026-08-04 — model question CLOSED; span pre-verbalised; four gate checks; n=10 measured
 

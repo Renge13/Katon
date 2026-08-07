@@ -100,8 +100,13 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     is ever in a position to decide something true, the design is wrong.
 15. **Runtime LLM rendering is ON** (reversal of the old rule) — for the RENDERING layer only.
     Gemini primary, OpenAI secondary, both behind one provider interface.
-16. Every reading is **result-cached** on `hash(semantic_JSON + engine_version)`. Deterministic
-    after first generation.
+16. Every reading is **result-cached** on `hash(semantic_JSON + engine_version)` - deterministic
+    after the first generation THAT PASSES STAGE 6. **Module-assembly floor results serve but are
+    never persisted; the next request retries the render.** (Amended 2026-08-07, ratified by Reyner.
+    Storing the floor let a single provider outage cost those charts their real reading permanently:
+    the next request is a cache hit and the chain never runs again, and the key only moves when
+    ENGINE_VERSION does. Enforced in `persistRendered`, which is the single door, so a later route
+    cannot reintroduce it by not knowing.)
 17. **Nothing reaches a user without passing Stage-6 post-validation.** LLM output is guilty until
     validated. Module assembly is the always-available floor.
 18. **Paywall is server-gated.** `paid` flips only in the verified Xendit webhook, never from any

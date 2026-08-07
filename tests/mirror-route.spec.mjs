@@ -23,6 +23,8 @@ import {
 import { PREVIEW_HEADER, previewFenceReason } from '../lib/mirror/fence.js';
 import { readCache, writeCache, __clearMemCache } from '../lib/render/cache.js';
 import { STAGE6_VERSION } from '../lib/render/fence.js';
+import { assembleFallback } from '../lib/render/fallback.js';
+import { semanticFromRow } from '../lib/mirror/reading.js';
 import { RATE_LIMITS, __clearMemRateLimit } from '../lib/ratelimit.js';
 import { SESSION_COOKIE } from '../lib/mirror/session.js';
 
@@ -87,6 +89,42 @@ function stubForbiddenProvider() {
     fetchCalls += 1;
     throw new Error('provider was called on a cache hit');
   };
+}
+
+/**
+ * A provider response that PASSES Stage 6.
+ *
+ * Built from the module floor plus a penutup, which is the construction
+ * tests/stage6-validation.spec.mjs uses and which that file proves clears the
+ * gate on all 13 fixture charts. Hand-faking prose that satisfies the coverage,
+ * fact and style guards is not something a test should be attempting.
+ */
+function stubRecoveredProvider(semanticJson) {
+  const reading = {
+    blocks: assembleFallback(semanticJson).blocks,
+    penutup: 'Peta ini sudah cukup jelas untuk kamu jalani mulai sekarang.',
+  };
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    return Response.json({
+      candidates: [{ content: { parts: [{ text: JSON.stringify(reading) }] }, finishReason: 'STOP' }],
+    });
+  };
+}
+
+/**
+ * Put a REAL gated row in the cache for this token, and return what was served.
+ *
+ * Needed by every test that used to rely on the floor being cached. Since rule
+ * 16's amendment the floor stores nothing, so a cache row now only exists once a
+ * render has actually passed Stage 6 - which is the point.
+ */
+async function warmCache(token) {
+  const { semanticJson } = semanticFromRow(readingMem().get(token));
+  stubRecoveredProvider(semanticJson);
+  const body = await (await serve(token)).json();
+  assert.equal(body.meta.source, 'gemini', 'the warm-up render did not pass the gate');
+  return body;
 }
 
 beforeEach(() => {
@@ -393,7 +431,7 @@ test('a provider outage lands on the floor rather than failing the request', asy
 
 test('a cache hit makes ZERO provider calls and returns the identical text', async () => {
   const token = await createOk();
-  const first = await (await serve(token)).json();
+  const first = await warmCache(token);
 
   fetchCalls = 0;
   stubForbiddenProvider();
@@ -409,7 +447,7 @@ test('a cache hit makes ZERO provider calls and returns the identical text', asy
 
 test('two readings of the same chart share one cached text; a different chart does not', async () => {
   const a1 = await createOk(CHART_A);
-  const firstBody = await (await serve(a1)).json();
+  const firstBody = await warmCache(a1);
 
   const a2 = await createOk(CHART_A);
   fetchCalls = 0;
@@ -430,7 +468,7 @@ test('two readings of the same chart share one cached text; a different chart do
 
 test('a thumbs-down flags the cached row, and the reading keeps serving', async () => {
   const token = await createOk();
-  const before = await (await serve(token)).json();
+  const before = await warmCache(token);
 
   const res = await feedback(token, { vote: 'down' });
   assert.equal(res.status, 200);
@@ -447,7 +485,7 @@ test('a thumbs-down flags the cached row, and the reading keeps serving', async 
 
 test('a thumbs-up is accepted and changes no status', async () => {
   const token = await createOk();
-  await serve(token);
+  await warmCache(token);
 
   const res = await feedback(token, { vote: 'up' });
   assert.deepEqual(await res.json(), { ok: true, vote: 'up', flagged: false });
@@ -530,4 +568,83 @@ test('a SOFT failure keeps serving; only hard checks pull a reading', async () =
   const body = await (await serve(token)).json();
   assert.equal(body.meta.source, 'gemini');
   assert.deepEqual(body.blocks[0].paragraphs, ['Satu kalimat pendek saja.']);
+});
+
+// ── the floor serves but never persists (rule 16, amended 08-07) ──
+
+test('an outage serves the floor and stores NOTHING', async () => {
+  const token = await createOk();
+  const body = await (await serve(token)).json();
+
+  assert.equal(body.meta.source, 'module_assembly');
+  assert.ok(body.blocks.length > 0, 'the product never hard-fails on the free mirror');
+  // The whole point: a one-hour Gemini blip must not cost this chart its real
+  // reading forever. A stored floor would be a cache hit for every later request
+  // and the chain would never run again until ENGINE_VERSION moved.
+  assert.equal(await readCache(readingMem().get(token).cache_key), null);
+  assert.equal(
+    await readCache(readingMem().get(token).cache_key, { includeUnvalidated: true }), null,
+    'not even as an unservable row',
+  );
+});
+
+test('a second request during the outage retries, and does not flap', async () => {
+  const token = await createOk();
+  const first = await (await serve(token)).json();
+
+  fetchCalls = 0;
+  const second = await (await serve(token)).json();
+
+  assert.ok(fetchCalls > 0, 'the second request must retry the provider, not serve a frozen floor');
+  // assembleFallback is pure engine content, so re-deriving it is byte-identical.
+  // A reader refreshing during an outage sees no churn.
+  assert.deepEqual(second.blocks, first.blocks);
+  assert.equal(second.penutup, first.penutup);
+});
+
+test('one request spends the regeneration budget once, outage or not', async () => {
+  const token = await createOk();
+  fetchCalls = 0;
+  await serve(token);
+
+  // attemptsPerProvider 2, one provider armed (OPENAI_API_KEY unset), and the
+  // Stage 6 budget is separate from the transport retry. Not persisting the
+  // floor must not turn one request into an unbounded retry loop.
+  assert.equal(fetchCalls, 2, `expected 2 provider attempts, got ${fetchCalls}`);
+});
+
+test('when the provider recovers the render is gated, stored, and frozen', async () => {
+  const token = await createOk();
+
+  // 1. Outage: floor, nothing stored.
+  assert.equal((await (await serve(token)).json()).meta.source, 'module_assembly');
+  const key = readingMem().get(token).cache_key;
+  assert.equal(await readCache(key), null);
+
+  // 2. Recovery.
+  const { semanticJson } = semanticFromRow(readingMem().get(token));
+  stubRecoveredProvider(semanticJson);
+  fetchCalls = 0;
+  const recovered = await (await serve(token)).json();
+
+  assert.equal(fetchCalls, 1, 'a passing render takes one call');
+  assert.equal(recovered.meta.source, 'gemini');
+  assert.equal(recovered.meta.cached, false);
+  assert.equal(recovered.meta.stage6_version, STAGE6_VERSION, 'it passed the real gate');
+
+  const row = await readCache(key);
+  assert.ok(row, 'a validated render IS stored');
+  assert.equal(row.source, 'gemini');
+  assert.equal(row.stage6_version, STAGE6_VERSION);
+
+  // 3. Byte-identical forever, with the provider forbidden.
+  fetchCalls = 0;
+  stubForbiddenProvider();
+  for (let i = 0; i < 3; i += 1) {
+    const again = await (await serve(token)).json();
+    assert.equal(fetchCalls, 0);
+    assert.equal(again.meta.cached, true);
+    assert.deepEqual(again.blocks, recovered.blocks);
+    assert.equal(again.penutup, recovered.penutup);
+  }
 });
