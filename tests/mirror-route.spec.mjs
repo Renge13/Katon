@@ -255,6 +255,53 @@ test('no heading, palace or archetype name is a Chinese character (rule 23, REMO
   assert.ok(!hanzi.test(chart.archetype.name_id));
 });
 
+// ── boundary softness ──────────────────────────────────────
+
+test('the known solar-term edge chart surfaces boundary, and says which risk', async () => {
+  // 立春 1989 falls at 1989-02-04 04:27 (+08). A birth 0.1 minutes before it is
+  // inside the two-minute window where no method is authoritative.
+  const token = await createOk({ birthDate: '1989-02-04', birthTime: '04:27' });
+  const body = await (await serve(token)).json();
+
+  assert.equal(body.boundary, true);
+  assert.equal(body.boundary_sources.chart_edge, true);
+});
+
+test('an hour-less birth on a 節 day is a chart edge too', async () => {
+  const token = await createOk({ birthDate: '1989-02-04' });
+  const body = await (await serve(token)).json();
+  assert.equal(body.boundary_sources.chart_edge, true);
+});
+
+test('a marginal strength verdict is a SEPARATE risk from a chart edge', async () => {
+  // Same date, 04:00: the chart is certain, the verdict read off it is not.
+  // Collapsing the two would fire the flag for the wrong reason.
+  const token = await createOk(CHART_A);
+  const body = await (await serve(token)).json();
+
+  assert.equal(body.boundary_sources.chart_edge, false);
+  assert.equal(body.boundary_sources.strength_confidence, true);
+  assert.equal(body.boundary, true, 'the single flag is the union of the two');
+});
+
+test('a chart with neither risk is not flagged', async () => {
+  const token = await createOk(CHART_B);
+  const body = await (await serve(token)).json();
+  assert.deepEqual(body.boundary_sources, { chart_edge: false, strength_confidence: false });
+  assert.equal(body.boundary, false);
+});
+
+test('confidence_reasons never leaves the server', async () => {
+  const token = await createOk(CHART_A);
+  const raw = await (await serve(token)).text();
+  // Engine diagnostics in English with hanzi, marked internal_only in the
+  // semantic JSON. The renderer is banned from writing either, and so is this
+  // route: softening is learned from the LEVEL, never from these strings.
+  assert.ok(!raw.includes('confidence_reasons'));
+  assert.ok(!raw.includes('supportShare'));
+  assert.ok(!raw.includes('半合'));
+});
+
 // ── the cache ──────────────────────────────────────────────
 
 test('a provider outage lands on the floor rather than failing the request', async () => {
