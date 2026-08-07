@@ -20,6 +20,8 @@ import { test, beforeEach, afterEach } from 'node:test';
 import { createMirrorReading, serveMirrorReading } from '../lib/mirror/handlers.js';
 import { PREVIEW_HEADER, previewFenceReason } from '../lib/mirror/fence.js';
 import { __clearMemCache } from '../lib/render/cache.js';
+import { RATE_LIMITS, __clearMemRateLimit } from '../lib/ratelimit.js';
+import { SESSION_COOKIE } from '../lib/mirror/session.js';
 
 const PREVIEW = 'preview-token-for-tests';
 const ORIGIN = 'http://localhost/api/mirror';
@@ -33,9 +35,15 @@ const CHART_B = { birthDate: '1994-11-21', birthTime: '13:45' };
 /** The dev in-memory reading store, pinned on globalThis by lib/readingStore.js. */
 const readingMem = () => globalThis.__katonReadingMem;
 
-function request({ method = 'GET', token = PREVIEW, body, url = ORIGIN } = {}) {
+function request({ method = 'GET', token = PREVIEW, body, url = ORIGIN, session, ip } = {}) {
   const headers = { 'content-type': 'application/json' };
   if (token !== null) headers[PREVIEW_HEADER] = token;
+  // Omitted by default so the rate limiter charges nothing: every request mints
+  // a throwaway session and has no resolvable IP, which is what lets the other
+  // tests here create as many readings as they need. The limiter's own tests
+  // pin an identity deliberately.
+  if (session) headers.cookie = `${SESSION_COOKIE}=${session}`;
+  if (ip) headers['x-forwarded-for'] = ip;
   return new Request(url, {
     method,
     headers,
@@ -85,6 +93,7 @@ beforeEach(() => {
   stubFailingProvider();
   readingMem().clear();
   __clearMemCache();
+  __clearMemRateLimit();
 });
 
 afterEach(() => {
@@ -253,6 +262,66 @@ test('no heading, palace or archetype name is a Chinese character (rule 23, REMO
     assert.ok(!hanzi.test(pillar.element));
   }
   assert.ok(!hanzi.test(chart.archetype.name_id));
+});
+
+// ── rate limiting (rule 19) ────────────────────────────────
+
+const SESSION = '11111111-2222-3333-4444-555555555555';
+
+test('the create path trips at its session limit and says how long to wait', async () => {
+  const { limit } = RATE_LIMITS.mirror_create.session;
+
+  for (let i = 1; i <= limit; i += 1) {
+    const res = await create(CHART_A, { session: SESSION });
+    assert.equal(res.status, 201, `refused on create ${i} of ${limit}`);
+  }
+
+  const over = await create(CHART_A, { session: SESSION });
+  assert.equal(over.status, 429);
+  assert.equal((await over.json()).error, 'rate_limited_session');
+  assert.ok(Number(over.headers.get('retry-after')) > 0);
+});
+
+test('the serve path is limited too, because the cache IS the thing worth harvesting', async () => {
+  const token = await createOk();
+  const { limit } = RATE_LIMITS.mirror_serve.ip;
+
+  // Every request after the first is a cache hit: free to answer, and exactly
+  // what a scraper sends. Distinct sessions, one IP - the scraper's shape.
+  for (let i = 1; i <= limit; i += 1) {
+    const res = await serve(token, { ip: '203.0.113.7' });
+    assert.equal(res.status, 200, `refused on read ${i} of ${limit}`);
+  }
+  const over = await serve(token, { ip: '203.0.113.7' });
+  assert.equal(over.status, 429);
+  assert.equal((await over.json()).error, 'rate_limited_ip');
+});
+
+test('a refused request never reaches the limiter, so a stranger cannot burn a quota', async () => {
+  const { limit } = RATE_LIMITS.mirror_create.session;
+  for (let i = 0; i < limit * 3; i += 1) {
+    assert.equal((await create(CHART_A, { session: SESSION, token: 'wrong' })).status, 404);
+  }
+  // The fence ran first, so the session's own quota is untouched.
+  assert.equal((await create(CHART_A, { session: SESSION })).status, 201);
+});
+
+test('a session cookie is minted on first contact and not re-minted after', async () => {
+  const first = await create(CHART_A);
+  const setCookie = first.headers.get('set-cookie');
+  assert.match(setCookie, new RegExp(`^${SESSION_COOKIE}=[0-9a-f-]{36};`));
+  assert.match(setCookie, /HttpOnly/);
+
+  const second = await create(CHART_A, { session: SESSION });
+  assert.equal(second.headers.get('set-cookie'), null);
+});
+
+test('a rejected body still carries the session cookie', async () => {
+  // Otherwise a client retrying a bad payload gets a FRESH session each time and
+  // the session dimension counts to one forever.
+  const res = await create({ birthDate: 'nope' });
+  assert.equal(res.status, 400);
+  assert.match(res.headers.get('set-cookie') || '', new RegExp(`^${SESSION_COOKIE}=`));
 });
 
 // ── boundary softness ──────────────────────────────────────
