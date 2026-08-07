@@ -25,6 +25,7 @@ import { readCache, writeCache, __clearMemCache } from '../lib/render/cache.js';
 import { STAGE6_VERSION } from '../lib/render/fence.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { semanticFromRow } from '../lib/mirror/reading.js';
+import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { RATE_LIMITS, __clearMemRateLimit } from '../lib/ratelimit.js';
 import { SESSION_COOKIE } from '../lib/mirror/session.js';
 
@@ -647,4 +648,34 @@ test('when the provider recovers the render is gated, stored, and frozen', async
     assert.deepEqual(again.blocks, recovered.blocks);
     assert.equal(again.penutup, recovered.penutup);
   }
+});
+
+// ── 胎元 (ruled 2026-08-07) ────────────────────────────────
+
+test('the conception pillar is served, labelled from the glossary, outside pillars[]', async () => {
+  const token = await createOk();
+  const { chart } = await (await serve(token)).json();
+
+  const cp = chart.conception_pillar;
+  assert.ok(cp, 'no conception pillar');
+  assert.equal(cp.label, 'Pilar Konsepsi');
+  assert.equal(cp.hanzi, `${cp.stem}${cp.branch}`);
+  // Never bare: the same pairing every other hanzi cell carries (rule 23).
+  assert.ok(cp.animal);
+  assert.ok(cp.element);
+  assert.ok(!/[一-鿿]/.test(cp.label + cp.animal + cp.element));
+
+  // It is NOT one of the four chart positions and must not be counted as one.
+  assert.deepEqual(chart.pillars.map((p) => p.position), ['year', 'month', 'day', 'hour']);
+  assert.ok(!chart.pillars.some((p) => p.hanzi === cp.hanzi && p.palace === cp.label));
+});
+
+test('命宮 is still absent, and stays that way', () => {
+  // Rule 4 and prompts/D1b: two candidate conventions score 4/5 and 3/5 against
+  // Joey's own printed values. In a block whose only job is to be cross-checked,
+  // a wrong value is worse than an absent one. This test exists so re-adding it
+  // has to be a deliberate act.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  assert.equal(chart.lifePalace, undefined);
+  assert.equal(chart.mingGong, undefined);
 });

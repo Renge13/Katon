@@ -473,6 +473,11 @@
    "name_id": "Pilar Arah",
    "name_en": "Hour Pillar",
    "label_meaning": "Pandangan ke depan, dorongan jangka panjang, dan apa yang kamu bangun setelah fondasi hidupmu terbentuk."
+  },
+  "conception": {
+   "name_id": "Pilar Konsepsi",
+   "name_en": "Conception Pillar",
+   "_note": "胎元. NOT one of the four chart positions - it is derived from the month pillar and is DISPLAY ONLY, printed in Joey's Personal Chart Details block so a cross-checking reader does not find it missing. It has NO label_meaning on purpose: nothing downstream interprets it, and inventing one would be unreviewed interpretive copy. Ruled by Reyner 2026-08-07, replacing the hand-authored 'Istana Konsepsi' that lived in lib/readingView.js and in no glossary entry. Anything iterating pilar for the four positions must key on year/month/day/hour, never on Object.keys."
   }
  },
  "salah_dikira": {
