@@ -35,5 +35,5 @@ changes the semantic JSON and therefore every cache key; that consequence has no
 - Low on context mid-sequence: **stop and report** rather than half-landing a change.
 - If this file sends you back into engine calibration, push back — that work is closed
   (`PROGRESS.md` RESOLVED).
-- Flag anything in the docs that contradicts what you find. Sixteen spec errors have been caught
+- Flag anything in the docs that contradicts what you find. Seventeen spec errors have been caught
   that way, all of them Cowork's.

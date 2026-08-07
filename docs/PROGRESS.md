@@ -453,6 +453,45 @@ swap is the next build priority after submission**: paid delivers card + PDF, th
 to the free mirror. Until that lands, this section is the reason the numbers look right and the
 product does not.
 
+### THE MIRROR ROUTE IS BUILT AND FENCED — do not promote it early (2026-08-07, Prompt J)
+
+`/api/mirror` exists and serves real Stage 3-6 readings. **Nothing links to it and nothing user-facing
+changed.** It is reachable only with the `MIRROR_PREVIEW_TOKEN` header; with the env var unset the
+route 404s entirely, which is a missing capability rather than a switch (the STAGE6_VERSION pattern,
+and the `NEXT_PUBLIC_FREE_FULL_READING` lesson three sections up).
+
+**PROMOTION** — wiring the funnel to this route and removing the preview-token requirement — is a
+SEPARATE, LATER, DELIBERATE commit. Its three named preconditions, also written into the header of
+`app/api/mirror/[token]/route.js` so no session can promote without reading them:
+
+| # | Precondition | Status |
+|---|---|---|
+| 1 | Xendit verification approved + live keys swapped | **MET 2026-08-07.** QRIS activation and the first self-purchase are tracked above and are NOT part of this condition |
+| 2 | The fulfillment swap shipped — Complete Edition card + PDF exist, so the 19k upsell is a real thing to buy | NOT MET |
+| 3 | Reyner has QA'd real readings through the preview | NOT MET |
+
+**1 of 3.** Condition 3 is the one J unblocks: QA is
+`curl -H "x-mirror-preview-token: $MIRROR_PREVIEW_TOKEN" https://katon.app/api/mirror/<token>` after a
+POST to `/api/mirror` with a birthdate. It returns JSON, not a page — J built no UI, by design.
+
+**Two migrations must be run BEFORE the deploy** (repo convention): `0007_reading_cache_key.sql` and
+`0008_rate_limit.sql`. 0008 is the louder one — the limiter FAILS CLOSED, so code deployed ahead of
+that migration refuses every request with a 429 rather than waving them through.
+
+**RULED 2026-08-07 (Reyner, via Cowork) — the floor serves but is never persisted.** This shipped as
+a gap in the first pass: a floor result was stored like any other render, so a one-hour Gemini blip
+permanently cost those charts their LLM reading — the next request is a cache hit and the chain never
+runs again until `ENGINE_VERSION` moves. Now `persistRendered` refuses a `module_assembly` result and
+the next request retries. `CLAUDE.md` rule 16 is amended to match: determinism attaches to the first
+generation **that passes Stage 6**. Enforced at the single door, not in the route, so a later route
+cannot reintroduce it by not knowing. Costs nothing in churn — `assembleFallback` is pure engine
+content, so a refresh during an outage is byte-identical.
+
+**Known gaps still open, recorded not fixed.** 👍 is accepted and stored nowhere: `render_cache` has
+no column for it and a counter is a schema change. 胎元 is absent from the mirror's chart display
+because its only Indonesian label is hand-authored in `lib/readingView.js` and exists in no glossary
+entry; that is a register call and register is Reyner's.
+
 ## DECIDED 2026-08-04 — model question CLOSED; span pre-verbalised; four gate checks; n=10 measured
 
 **MODEL DECISION IS CLOSED (Reyner).** Blind judging went **12-4 for 3.1-flash-lite**, which also

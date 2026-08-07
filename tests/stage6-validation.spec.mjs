@@ -1026,15 +1026,27 @@ test('failing TWICE serves the floor and flags the chart for QA', async () => {
   });
 });
 
-test('a floor result is stored under its own gate marker, never the gate version', async () => {
+test('a floor result is NOT stored, and says so in its return value', async () => {
+  // SUPERSEDED 2026-08-07. This test used to assert the opposite - that the
+  // floor was stored under a `-floor` gate marker so a QA row could tell it from
+  // a validated render at a glance. The marker still exists and is still on the
+  // in-memory result; what changed is that the row is never written.
+  //
+  // Rule 16, as amended and ratified by Reyner: storing the floor let one
+  // provider outage cost those charts their real reading PERMANENTLY, because
+  // the next request is a cache hit and the chain never runs again. Determinism
+  // now attaches to the first generation that PASSES STAGE 6.
   __clearMemCache();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     const out = await renderReading(CHART_1, { fetchImpl: async () => geminiSays(BAD) });
-    await persistRendered(out, CHART_1);
-    const row = await readCache(out.cache_key);
-    assert.equal(row.stage6_version, `${STAGE6_VERSION}-floor`,
-      'a QA row must be able to tell a validated render from the floor at a glance');
-    assert.equal(row.source, 'module_assembly');
+    assert.equal(out.source, 'module_assembly');
+    assert.equal(out.stage6_version, `${STAGE6_VERSION}-floor`);
+
+    assert.equal(await persistRendered(out, CHART_1), false, 'the floor must not be stored');
+    assert.equal(await readCache(out.cache_key), null);
+    // Not even as an unservable row: a stored floor would be a cache hit for
+    // every later request, and includeUnvalidated is the QA door, not a loophole.
+    assert.equal(await readCache(out.cache_key, { includeUnvalidated: true }), null);
   });
 });
 
