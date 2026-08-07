@@ -22,7 +22,7 @@ import { test } from 'node:test';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { GLOSSARY } from '../lib/semantic/glossary.js';
-import { VALIDATION_CHARTS } from './bazi-validation.fixture.js';
+import { VALIDATION_CHARTS, HOUR_UNKNOWN_CHARTS } from './bazi-validation.fixture.js';
 
 import { assembleFallback } from '../lib/render/fallback.js';
 import { renderReading, persistRendered } from '../lib/render/index.js';
@@ -157,6 +157,70 @@ test('the same-breath check accepts a REWRITE, not just a copy', () => {
   // And the proxy is doing real work: the paraphrase is NOT the original.
   assert.ok(!paraphrase.includes(fact.label_meaning), 'fixture must not be a copy');
   assert.ok(stemOverlap(fact.label_meaning, paraphrase).ratio > 0.25);
+});
+
+test('CLAIMING THE HOUR IS UNKNOWN WHEN IT IS KNOWN IS A HARD REJECT', () => {
+  // FOUND 2026-08-06 by the rejection gallery, on chart 1, twice. The penutup said
+  // the fourth pillar could not be mapped, on a chart whose hour is 09:00, in a
+  // reading that named Pilar Arah one paragraph above. Nothing in the fact guard
+  // looked for it - the raw_pillar STYLE ban caught it by coincidence.
+  assert.equal(CHART_1.hour_known, true, 'fixture assumption');
+
+  const observed = 'Pilar jam lahirmu tidak dapat dipetakan karena waktu kelahiran '
+    + 'tidak diketahui.';
+  const variants = [
+    observed,                                        // verbatim, as it shipped
+    'Jam lahirmu tidak diketahui, jadi bagian ini dibaca lebih longgar.',
+    'Tanpa jam lahir, arah ke depan hanya bisa dibaca sebagian.',
+  ];
+  for (const claim of variants) {
+    const bad = goodReading();
+    bad.penutup = claim;
+    const result = validateRendering(bad, CHART_1);
+    assert.ok(checksIn(result).includes('fact.hour_known_contradiction'), `not caught: ${claim}`);
+    assert.ok(result.hard, 'a falsehood about the reader\'s own chart is not a style slip');
+  }
+});
+
+test('the same sentence is ALLOWED when the hour really is unknown', () => {
+  // The other direction, and the reason the hour-less fixture variants exist. With
+  // hour_known false the prompt REQUIRES this statement, so the check must be
+  // silent - otherwise it would reject every reading of a chart with no birth time,
+  // which is a large share of real users.
+  for (const tc of HOUR_UNKNOWN_CHARTS) {
+    const semantic = buildSemanticJson(calculateBaziChart({
+      birthDate: tc.date, birthTime: tc.time,
+    }));
+    assert.equal(semantic.hour_known, false, `chart ${tc.id} must have no hour`);
+
+    const reading = goodReading(semantic);
+    reading.penutup = 'Pilar jam lahirmu tidak dapat dipetakan karena waktu kelahiran '
+      + 'tidak diketahui.';
+    assert.ok(!checksIn(validateRendering(reading, semantic))
+      .includes('fact.hour_known_contradiction'), `chart ${tc.id}`);
+  }
+});
+
+test('the hour-less variants are real charts and still match their sources', () => {
+  // They are DERIVED rows, not evidence. This is what stops them drifting into
+  // pointing at a chart that has been edited or renumbered underneath them.
+  assert.equal(HOUR_UNKNOWN_CHARTS.length, 3);
+  for (const tc of HOUR_UNKNOWN_CHARTS) {
+    const source = VALIDATION_CHARTS.find((c) => c.id === tc.from);
+    assert.ok(source, `chart ${tc.id} claims to derive from ${tc.from}, which is gone`);
+    assert.equal(tc.date, source.date, `chart ${tc.id} date drifted from chart ${tc.from}`);
+    assert.equal(tc.time, null, 'the whole point is that it has no time');
+    assert.ok(tc.id > 100, 'ids are offset so they cannot collide with a fixture id');
+
+    // And the floor still passes its own gate for them - rule 17 holds for a chart
+    // with no hour exactly as it holds for one with.
+    const semantic = buildSemanticJson(calculateBaziChart({
+      birthDate: tc.date, birthTime: tc.time,
+    }));
+    const result = validateRendering(goodReading(semantic), semantic,
+      { provider: 'module_assembly' });
+    assert.ok(result.ok, `chart ${tc.id} floor rejected: ${checksIn(result).join(', ')}`);
+  }
 });
 
 test('an invented badge is a HARD reject', () => {
@@ -419,6 +483,30 @@ test('the bukan-X-tapi-Y construction is caught, in prose and in the penutup', (
   const inPenutup = goodReading();
   inPenutup.penutup = 'Kamu bukan orang yang lambat, tapi orang yang menunggu pemicunya.';
   assert.ok(checksIn(validateRendering(inPenutup, CHART_1)).includes('style.hedge_construction'));
+});
+
+test('"BUKAN BERARTI" IS CARVED OUT - it negates a misreading, it does not hedge', () => {
+  // Reyner's ruling A on the 2026-08-06 rejection gallery. hedge_construction was
+  // the largest rejection cause in the pipeline, and the gallery showed its most
+  // common trigger was this exact sentence - which is the resolve-in-the-same-breath
+  // move rule 21 REQUIRES, not the hedge the ban was written for.
+  //
+  //   "bukan berarti X"  negates a MISREADING the label invites   -> allowed
+  //   "bukan X tapi Y"   substitutes one claim for another        -> banned
+  const carved = withBlockText(goodReading(), 'strength_weak',
+    'Kamu Api Lemah. Lemah di sini bukan berarti tidak mampu, melainkan sumber '
+    + 'tenagamu ada di luar dirimu. Tempat yang tepat membuatmu melesat, dan tempat '
+    + 'yang salah menguras habis cadanganmu.');
+  assert.ok(!checksIn(validateRendering(carved, CHART_1)).includes('style.hedge_construction'),
+    'the sentence rule 21 asks for must not be rejected');
+
+  // The ban still catches what it was built for, INCLUDING when a carved-out
+  // phrase appears earlier in the same breath - the lookahead skips that one
+  // occurrence, it does not disarm the check.
+  const stillBanned = goodReading();
+  stillBanned.penutup = 'Bukan berarti mudah. Kamu bukan penunggu, tapi penggerak.';
+  assert.ok(checksIn(validateRendering(stillBanned, CHART_1))
+    .includes('style.hedge_construction'), 'a real hedge after a carve-out still fails');
 });
 
 test('tension-collapse vocabulary is caught', () => {

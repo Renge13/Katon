@@ -263,4 +263,42 @@ export const PILLAR_EDGE_CASES = {
   13: { year: '戊辰', month: '乙丑', day: '乙未', hour: '戊寅' }, // 27 min BEFORE 立春
 };
 
+/**
+ * HOUR-LESS VARIANTS. Three charts with the birth time removed.
+ *
+ * A SEPARATE EXPORT, never rows in VALIDATION_CHARTS, and the distinction is not
+ * tidiness. That table is EVIDENCE transcribed from Joey's calculator (see the
+ * header); these are derived inputs with no oracle behind them, and dropping them
+ * in would both corrupt an evidence table and silently change the chart set every
+ * locked test and every measurement row is stated against.
+ *
+ * ── WHY THEY EXIST (Reyner, 2026-08-06) ────────────────────
+ * All 13 fixture charts have a birth time, so `hour_known: false` was exercised by
+ * NOTHING - not one test, not one measurement, not one live render. The prompt has
+ * a whole branch for it ("state once, plainly, that the fourth pillar cannot be
+ * mapped") that had never been run. A large share of real users will not know their
+ * birth hour, so this was a coverage hole in the most common real-world input, and
+ * it stayed invisible until the rejection gallery caught the renderer INVENTING an
+ * unknown hour on a chart that had one.
+ *
+ * Ids are offset by 100 so they are unmistakable in any per-chart output and can
+ * never collide with a real fixture id.
+ *
+ * The hour pillar is a STRENGTH input, so dropping it is not a cosmetic edit: it
+ * removes up to two of the eight characters and can move the verdict. These three
+ * cover both verdicts the fixture contains (it has no `strong` chart - a recorded
+ * cost of the sqrt transform), and 110 is included precisely BECAUSE its verdict
+ * changes, balanced with the hour and weak without it. That is the case where a
+ * reading built on a missing hour says something different about the person, and it
+ * is the one worth having under test.
+ *
+ * `from` is the chart each was derived from; a test asserts the dates still match,
+ * so a future edit to a source row cannot leave these silently pointing at nothing.
+ */
+export const HOUR_UNKNOWN_CHARTS = [
+  { id: 101, date: '1989-09-13', time: null, gender: 'F', from: 1 },  // weak, unchanged
+  { id: 105, date: '1988-07-10', time: null, gender: 'F', from: 5 },  // balanced, unchanged
+  { id: 110, date: '1985-02-04', time: null, gender: 'M', from: 10 }, // balanced -> weak
+];
+
 export default VALIDATION_CHARTS;

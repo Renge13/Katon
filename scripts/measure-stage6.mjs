@@ -45,7 +45,7 @@ import { modelFor, DEFAULT_TIER, geminiConfigured } from '../lib/render/config.j
 import {
   STAGE6_VERSION, FACT_PARAMS, COVERAGE_PARAMS, STRUCTURE_PARAMS,
 } from '../lib/validate/index.js';
-import { VALIDATION_CHARTS } from '../tests/bazi-validation.fixture.js';
+import { VALIDATION_CHARTS, HOUR_UNKNOWN_CHARTS } from '../tests/bazi-validation.fixture.js';
 
 // ── arguments ──────────────────────────────────────────────
 
@@ -70,7 +70,22 @@ const primary = flag('model', modelFor(DEFAULT_TIER, 'gemini'));
 const rider = flag('rider', null);
 const noRider = has('no-rider');
 
-const charts = VALIDATION_CHARTS.filter(
+// ── THE CHART SET CHANGED ON 2026-08-06, AND ROWS BEFORE IT ARE NOT COMPARABLE ──
+// The three HOUR_UNKNOWN_CHARTS are included by DEFAULT (Reyner), because the
+// prompt's `hour_known: false` branch was exercised by nothing - no test, no
+// measurement, no live render - and a large share of real users will not know their
+// birth hour. The rejection gallery then caught the renderer INVENTING an unknown
+// hour on a chart that had one, which is the failure that branch was supposed to
+// prevent.
+//
+// The cost is stated rather than hidden: the denominator moved from 13 charts to
+// 16, so an absolute rate measured after this date is NOT directly comparable to
+// one measured before it. Pass --no-hourless to reproduce an old row exactly.
+const chartPool = has('no-hourless')
+  ? VALIDATION_CHARTS
+  : [...VALIDATION_CHARTS, ...HOUR_UNKNOWN_CHARTS];
+
+const charts = chartPool.filter(
   (c) => !chartFilter || chartFilter.split(',').map(Number).includes(c.id),
 );
 const arms = (rider && !noRider) ? [primary, rider] : [primary];
