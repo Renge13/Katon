@@ -14,18 +14,15 @@ Cowork: updating this pointer is PART of writing or queueing a build prompt, not
 
 ## Read, in order
 1. `../CLAUDE.md` — the locked rules, 1 to 25.
-2. `PROGRESS.md` — MEASUREMENTS (the gate `1.8.0` rows, 08-07, are the current pipeline state) and
-   THE INTERIM STATE (Xendit go-live status — read it before touching anything near the paid path).
-3. **`prompts/J-mirror-route.md` — THE CURRENT BUILD.** Fresh session, own PR. The prompt file is
-   self-contained; brief yourself from it, not from this one.
+2. `PROGRESS.md` — the "MIRROR QA VERDICT 2026-08-10" section (the current requirement and why),
+   MEASUREMENTS (gate `1.8.0` rows are the current pipeline state), and THE INTERIM STATE
+   (Xendit go-live status — read it before touching anything near the paid path).
+3. **`prompts/K-identity-first.md` — THE CURRENT BUILD.** Fresh session, own PR. The prompt file
+   is self-contained; brief yourself from it, not from this one.
 
-## Carried item — separate commit, NOT part of J
-One sanctioned engine line: `element_missing_*` lacks `internal_only: ['provenance.percent']` while
-`element_dominant_*` has it, so a zero percent reaches the provider (H session finding). Verified
-still open 2026-08-07: `grep -n "internal_only" lib/semantic/facts.js` shows the dominant fact
-carrying it (~line 259) and the missing-element block (~225–237) without it. J's own rules forbid
-touching `lib/semantic/*`, so this is its own one-line commit — and check first whether adding it
-changes the semantic JSON and therefore every cache key; that consequence has not been verified.
+(Prompt J is DONE — merged as PR #18-#20 on 2026-08-07, live and fenced on production. The carried
+`element_missing` item landed with it as PR #20. Promotion is 1 of 3: condition 2 is the
+fulfillment swap, condition 3 failed QA — the verdict section explains what K is for.)
 
 ## Standing rules
 - Engine changes and calibration in **separate commits**.

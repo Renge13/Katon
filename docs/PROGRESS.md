@@ -345,6 +345,77 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **`hour_known_contradiction` fires at 9.7% — the falsehood was COMMON, not rare** | **15 rejections**, 2nd largest cause | **08-07** | The check added today, on 13 charts that ALL have a known hour. **Roughly one generation in ten told the reader her birth hour was unknown when it was not** - a plain falsehood about her own chart. It is every one of the 15 hard findings in this batch. Before today NOTHING looked for it: it surfaced only because the `raw_pillar` style ban happened to match the same sentence a day earlier, so for the whole life of this pipeline these readings shipped. **The single most valuable thing the rejection gallery produced, and the strongest argument for reading output rather than counting it.** |
 | Stage 6 threshold distributions, gate `1.1.0` | same_breath med 0.93 (min 0.20, p10 0.50) · coverage med 1.00 (min 0.00, p10 0.69) · total_chars med 3313 (max 4797) · block_chars med 493 (p90 748, max 1390) | 08-04 | n=231 / 3792 / 235 / 1310. The three ORIGINAL unfitted constants still reject nothing: sameBreathOverlap 0.25 vs a p10 of 0.50, fieldOverlap 0.20 vs a p10 of 0.69, maxTotalChars 12000 vs a max of 4797. `coverage` min is now 0.00 and `same_breath` min 0.20 - the first observations to fall BELOW their thresholds, so these two are no longer provably inert and are worth a look before they are fitted. |
 
+## DECIDED 2026-08-10 — MIRROR QA VERDICT (Reyner, buyer-hat): promotion condition 3 NOT MET
+
+The four production QA readings (Prompt J run, gate `1.8.0`, all four passed the gate) were judged
+by Reyner reading as the buyer. **Verdict: not ship-quality.** The pipeline is sound — the floor
+retry proved itself live, chart 13 served the rule-3 pillars exactly — and the prose still fails
+the reader. All four findings are EXPERIENCE-level, invisible to the gate by construction:
+
+1. **Identity buried.** The reading opens on the most dramatic finding and reveals who-you-are just
+   before the penutup (Samudra ranked ~9th of 12 on `fresh-1996`). The importance descent is doing
+   exactly what it was designed to do, and the design is wrong for the opening. **RULING: the
+   reader meets herself first** — day master + strength + main profile as the opening spine, then
+   the descent. This amends the descending-hook order for the OPENING ONLY. Build: Prompt K.
+2. **Modular stacking.** Blocks read as engine output stacked, no thematic handoffs. NOTE: the fix
+   cannot be connective words — `essay_connectives` is a live ban that came from Reyner's own blind
+   judging. Deferred to a LATER prompt (engine-assigned narrative-role tags + a handoff
+   instruction), only if the stacking survives K + the content pass. One change at a time (rule 13).
+3. **Jargon without a Monday morning.** Most cells carry no actionable, and label_meanings assume
+   the reader will accept a BaZi label as an explanation.
+4. **Gift/cost reads as contradiction** (missing-Wood: "starts easily" vs "stays stuck for years";
+   桃花: attention vs closeness-gap). The pair is true in the mechanism and unreconciled in the text.
+
+**The sharpest sub-finding (checked against the served file, not memory): the 桃花 actionable WAS
+present in the reading Reyner reviewed, one sentence after the cost he quoted — and he did not
+experience it as a fix, because it answers the GIFT (use first impressions early) and leaves the
+COST (the closeness gap) unanswered. CONTENT RULE, ratified: every `actionable` must answer its
+fact's COST, not restate or amplify the gift. Cells whose actionable fails that test count as
+having none.**
+
+**The fix plan, in order (one change, one measurement):**
+1. **Prompt K** (`prompts/K-identity-first.md`) — identity-first order. Engine-owned, no register.
+   Primary metric is Reyner's re-read; harness n=10 is the regression guard only.
+2. **Content revision pass** (Cowork + Reyner, no code) — every glossary cell against three tests:
+   cost-answering actionable; a reconciling hinge between gift and cost; jargon demoted to a
+   secondary clause behind the behavior it names (rule 23 unchanged: Indonesian name first, EN
+   bracket once). This pass REPLACES the queued compat content session in the schedule — compat
+   cells will be authored to whatever pattern survives this pass.
+3. **Transitions / narrative roles** — only if needed after 1+2, and then via engine-assigned role
+   tags in the payload (the `positions_id` lesson: structured handover beats instruction), never
+   via connective vocabulary.
+4. **VOICE A/B (added 2026-08-10, Reyner's call after the Gemini-feedback discussion).** Two
+   renderer prompts identical except the voice paragraph: the current composed-voice wording vs a
+   revision worded by Reyner+Cowork (informed by, not copied from, the "grounded mentor" instinct —
+   sharper, consequence-driven, coffee-table direct). Anonymised pairs over the same charts, Reyner
+   judges blind — the exact method that closed the model question 12-4. Runs AFTER steps 1+2, or
+   both arms measure stiff content instead of voice. Rule 20 is amended only if the challenger
+   wins; the gate's fact checks (hour contradiction, palace joins) are what make a looser style
+   leash affordable to even test. His stated principle, recorded: he cannot always articulate the
+   model, but he can feel whether output is right — the blind pair is how that feeling becomes a
+   measurement.
+
+**External feedback adjudicated (Gemini, via Reyner, 2026-08-10)** — recorded so it is not
+re-imported wholesale later: ADOPTED — pre-reconciled gift→hinge→cost→action inside the existing
+field contract (the gate's `must_cover` reads fields; no schema change); behavior-first jargon
+packaging, corrected to rule 23's Indonesian-first bracket. DEFERRED — narrative_role tags, to
+step 3, engine-assigned only. **REJECTED** — the "grounded mentor / executive coaching" voice swap
+(re-litigates rule 20's one composed voice; register authority is Reyner, per cell, not a model)
+and the blanket ban list of "abstract fillers" (several proposed bans are Reyner-reviewed glossary
+lines tied to archetype imagery; the `hedge_construction` lesson stands — a ban can spend most of
+its budget on prose the product requires, and only the gallery method may justify new bans).
+
+Cache note: step 1 and step 2 each move every cache key (JSON order, glossary strings). Expected
+and free at zero traffic; both must land before promotion re-QA.
+
+Date-stamp note, CORRECTED 2026-08-11 before this section was committed: the draft of this entry
+claimed the 08-07 stamps on the rule-16 amendment note, the J header and the COWORK-BRIEF renumber
+note were wrong and told later sessions to change them to 08-10. **They were right and they stay.**
+`git log -6 --format="%h a:%ad c:%cd %s" --date=iso` puts `6ca09b6` and PRs #18-#20 at 2026-08-07
+22:19-23:10 +0700, author and committer both; `reports/mirror-qa-fresh-1996.md:5` says the QA
+readings were served on production 2026-08-07. What happened on 08-10 is the buyer-hat READING of
+those files, which is what this section is dated for. COWORK-BRIEF error 18.
+
 ## DECIDED 2026-08-05 — test-ungate flag REMOVED; the paywall is live again as an INTERIM state
 
 **Why now.** Xendit rejected the site a second time: *"This contents of this website are incomplete.
