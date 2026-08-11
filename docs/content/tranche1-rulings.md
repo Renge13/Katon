@@ -59,7 +59,23 @@ intended difference, and #24 is it.
 - actionable_seed (NEW field): "Beban kerja yang kamu pegang akan terus bertambah kalau tidak pernah ada yang kamu bagikan. Pilih satu tugas untuk diserahkan ke orang lain bulan ini. Berikan petunjuk yang jelas, dan biarkan hasilnya berjalan meskipun tidak serapi caramu."
 
 ## aspek.比肩
-- actionable_seed (NEW field): "Orang jarang menawarkan bantuan bukan karena tidak peduli, tapi karena kamu selalu terlihat sanggup melakukannya sendiri. Minta tolong lebih awal dengan kalimat yang sederhana sebelum situasinya makin mendesak."
+- actionable_seed (NEW field): "Orang mengira kamu selalu sanggup sendiri, jadi bantuan jarang ditawarkan. Mintalah bantuan lebih awal sebelum situasinya makin mendesak."
+
+  RULED 2026-08-11, Reyner's final wording, replacing the first ruling. That read
+  "Orang jarang menawarkan bantuan **bukan** karena tidak peduli, **tapi** karena kamu selalu
+  terlihat sanggup melakukannya sendiri...", which is the banned `bukan X tapi Y` construction -
+  renderer-prompt.txt calls it the most frequently broken rule in the prompt and names
+  "bukan karena X, melainkan karena Y" as one of its hiding places. It tripped
+  `style.hedge_construction`, and it was caught by the repo's own invariant test
+  NO ENGINE STRING WOULD TRIP THE STYLE GATE, which named the cell exactly.
+
+  **THE SENTENCE BENDS, NOT THE CHECK.** The construction is banned for the renderer, so a glossary
+  seed may not carry it either - an engine string that trips the style gate would punish the
+  renderer for faithfully carrying engine content, which is the failure `f068352` cleaned out of
+  twelve cells and this invariant exists to prevent recurring.
+
+  Verified before landing: the replacement raises no forbidden or style finding under the real
+  guards, and it carries no question mark.
 
 ## bintang.天乙貴人
 - NO CHANGE. Anchor cell; passes all three tests as-is.
