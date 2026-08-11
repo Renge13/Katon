@@ -66,3 +66,5 @@ not two levers fitted separately.
 ## Stop and report
 On any contradiction between this prompt and the repo: docs win over this prompt, CLAUDE.md wins
 over docs. Seventeen spec errors are in the ledger, all of them Cowork's. Check before asserting.
+(Nineteen as of 2026-08-11: errors 18 and 19 were both caught in this prompt's own build session,
+and 19 is in this prompt. The count above is left as written, dated, rather than back-edited.)

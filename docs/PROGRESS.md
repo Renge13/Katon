@@ -420,6 +420,35 @@ note were wrong and told later sessions to change them to 08-10. **They were rig
 readings were served on production 2026-08-07. What happened on 08-10 is the buyer-hat READING of
 those files, which is what this section is dated for. COWORK-BRIEF error 18.
 
+### RE-READ VERDICT 2026-08-11 (Reyner, buyer-hat, on the K re-renders)
+
+**Finding 1 is FIXED.** Reyner, on `reports/mirror-qa-chart-01-K.md` and
+`reports/mirror-qa-fresh-1996-K.md`: *"meeting yourself first completely fixes the upside-down
+feeling."* **K's primary metric passed, so step 1 of the fix plan is DONE** and merged as PR #21.
+Note what carried the decision: the harness could not settle it (see the 08-11 baseline row in
+MEASUREMENTS - the stored gate row did not reproduce), and the re-read did. That is the order of
+authority this prompt was written with, and it held.
+
+**Findings 2 and 3 are CONFIRMED as still present** - stacked blocks, and cold system labels - and
+stay assigned to steps 2 and 3 exactly as planned. Neither is re-opened by this verdict.
+
+**NEW FINDING 5 - palace names carry no life-domain context in prose.** "Pilar Kerja" reads as an
+internal variable that leaked to the user. The reader cannot tell whether it means her job, her
+career arc, or how she is seen. The name is doing the work of a label while telling her nothing.
+
+**RULING (Reyner): fix by WEAVING the domain gloss into the FIRST MENTION in prose.**
+`GLOSSARY.pilar.*.label_meaning` already carries the reviewed definitions - verified 2026-08-11,
+`node -e "const g=require('./docs/content/glossary.json'); console.log(g.pilar.month)"` returns
+*"Karier, lingkungan profesional, dan relasi kerja. Ini adalah panggung utama tempat orang lain
+menilai kemampuanmu."*, and all four positions carry one - **so this is a JOIN, not new authoring.**
+A legend variant may live in the CHART DISPLAY block later; **never before the prose.** A legend
+first would teach the reader to decode a table instead of reading a sentence, which is the same
+comprehension tax rule 23 removed from headings.
+
+**Assigned to step 2 (the content revision pass), with a likely small payload join to follow it.**
+The content pass decides the wording; a payload change, if one is needed to put `label_meaning`
+where the renderer can reach it per fact, is a separate engine commit measured on its own (rule 13).
+
 ## DECIDED 2026-08-05 — test-ungate flag REMOVED; the paywall is live again as an INTERIM state
 
 **Why now.** Xendit rejected the site a second time: *"This contents of this website are incomplete.
