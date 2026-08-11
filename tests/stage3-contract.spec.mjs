@@ -220,9 +220,19 @@ test('required points cover the spine and the top findings, chart 1', () => {
   const json = jsonFor(VALIDATION_CHARTS[0]);
   // Identity spine first, then the importance descent. `day_master_Fire` used to
   // sit LAST here at importance 55, which is the buried opening Reyner rejected.
+  //
+  // RE-MEASURED 2026-08-11: `relation_半合_巳酉` moved up four places, from after
+  // `spouse_palace` to directly after the spine. Updated deliberately as a dated
+  // observation, not regenerated to pass; PROGRESS carries the reason.
+  //
+  // WHY IT MOVED: actionability became an engine declaration rather than an
+  // inference from `actionable_seed` (facts.js#ACTIONABLE_KINDS). `branch_relation`
+  // is declared actionable, so the 半合 gained the +10 it could never earn while
+  // the axis read prose that nobody had written - 69 -> 79, which clears the
+  // three facts sitting at 70. Nothing about chart 1 changed.
   assert.deepEqual(json.required_points.map((p) => p.fact_id), [
     'day_master_Fire', 'strength_weak', 'profile_vs_favorable', 'void_stack_month',
-    'element_missing_Wood', 'aspek_convergence_正官', 'spouse_palace', 'relation_半合_巳酉',
+    'relation_半合_巳酉', 'element_missing_Wood', 'aspek_convergence_正官', 'spouse_palace',
     'badge_桃花',
   ]);
   // The hand-written file lists 8. The ninth here is day_master_Fire, which the

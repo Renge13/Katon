@@ -38,9 +38,28 @@ test('Bintang Penolong never ranks top-3 — on any chart', () => {
   }
 });
 
-test('quiet_chart fires on 2 of 13, and most charts are not quiet', () => {
+test('quiet_chart fires on NO fixture chart, and that is flagged for a ruling', () => {
+  // RE-MEASURED 2026-08-11: was [5, 13], now []. Updated deliberately as a dated
+  // observation; PROGRESS carries it and flags it.
+  //
+  // WHY IT MOVED: actionability became an engine declaration (facts.js#
+  // ACTIONABLE_KINDS), so facts of a declared-actionable kind gained +10 whether
+  // or not their prose had been written. Charts 5 and 13 had no fact at or above
+  // `quietFloor` (70); the bonus pushed their top fact over it.
+  //
+  // THIS IS A BEHAVIOUR DISAPPEARING, NOT JUST A NUMBER, and it is why this test
+  // is renamed rather than quietly edited. `quiet_chart` tells the renderer to
+  // say less and not manufacture drama - "a quiet chart honestly read beats a
+  // loud chart faked". At 0 of 13 that instruction now reaches nobody.
+  //
+  // It may be correct: those charts DO carry actionable conditions, and the old
+  // score under-rated them only because nobody had written the seed yet. Or
+  // `quietFloor` may need re-fitting against the new distribution, which is its
+  // own change under rule 13 and must not ride with this one.
   const quiet = VALIDATION_CHARTS.filter((tc) => rankedFor(tc).quiet_chart).map((tc) => tc.id);
-  assert.deepEqual(quiet, [5, 13]);
+  assert.deepEqual(quiet, []);
+
+  // The original assertion, kept: a pass that calls every chart quiet is broken.
   assert.ok(quiet.length < VALIDATION_CHARTS.length, 'not every chart may be quiet');
 });
 
@@ -89,7 +108,19 @@ test('chart 1 rank correlation against the hand-written target', () => {
   const rho = 1 - (6 * sumD2) / (n * (n * n - 1));
 
   assert.equal(n, 11);
-  assert.equal(Math.round(rho * 100) / 100, 0.81);
+  // 0.81 -> 0.73, RE-MEASURED 2026-08-11 when actionability became an engine
+  // declaration rather than an inference from `actionable_seed` (facts.js#
+  // ACTIONABLE_KINDS). Updated deliberately as a dated observation, not
+  // regenerated to pass; PROGRESS carries the same figure and the reason.
+  //
+  // WHY IT MOVED: three chart-1 facts gained the +10 they had never been able to
+  // earn, because their kind is actionable but nobody had written their prose
+  // yet - strength_weak 78 -> 88, relation_半合_巳酉 69 -> 79,
+  // element_dominant_Water 31 -> 41. The hand-written target was scored on
+  // 2026-08-02 against a glossary where those cells were empty, so it ranks them
+  // where the OLD inference put them. The divergence is the target being stale
+  // about authoring state, which is precisely the coupling this change removed.
+  assert.equal(Math.round(rho * 100) / 100, 0.73);
 
   // The one large divergence, recorded because it is INTENDED, not a defect:
   // the target file ranks Bintang Penolong 7th of 11 while the engine puts it
