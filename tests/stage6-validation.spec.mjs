@@ -33,6 +33,7 @@ import { scrubInternal, internalFieldNames } from '../lib/render/payload.js';
 import {
   validateRendering, stricterDirective, STAGE6_VERSION, CATEGORIES, STRUCTURE_PARAMS,
 } from '../lib/validate/index.js';
+import { hasUnsanctionedQuestion } from '../lib/validate/style.js';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
 import { stemOverlap, distinctiveStems, sentences } from '../lib/validate/text.js';
 
@@ -627,6 +628,45 @@ test('typography, hanzi, questions and arithmetic are all caught', () => {
       `${sentence} Satu kalimat lagi supaya blok ini punya panjang yang wajar.`);
     assert.ok(checksIn(validateRendering(bad, CHART_1)).includes(check), `${check} not caught`);
   }
+});
+
+test('THE QUESTION BAN POLICES THE MODEL, NOT THE DICTIONARY', () => {
+  // Ruled by Reyner 2026-08-11, on the hedge_construction precedent: the gate
+  // polices what the model improvises, never engine-authored prose.
+  //
+  // The ban fired on every "?" including the ones inside ruled glossary seeds,
+  // which the module-assembly floor copies VERBATIM - so it was rejecting
+  // Reyner's own sentences and, across every run measured, never once the
+  // failure it was written for (0 of 130 on the current prompt, 0 of 520 on
+  // three neighbours). The failure itself is real and stays banned:
+  // renderer-prompt.txt names and quotes it.
+  //
+  // hasUnsanctionedQuestion is tested directly with an injected list, because
+  // whether any glossary cell currently carries a "?" is a content question that
+  // changes tranche by tranche, and this behaviour must not.
+  const seed = 'Sebelum mengambil peran baru, tanya ke diri sendiri: siapa yang akan '
+    + 'mengisi ulang energiku di sini?';
+  const invented = 'Bagian mana dari dirimu yang paling butuh ruang sekarang?';
+
+  assert.equal(hasUnsanctionedQuestion(seed, [seed]), false,
+    'an engine-authored question is sanctioned');
+  assert.equal(hasUnsanctionedQuestion(`Pembuka. ${seed} Penutup.`, [seed]), false,
+    'and stays sanctioned when the reading wraps prose around it');
+  assert.equal(hasUnsanctionedQuestion(invented, [seed]), true,
+    'a question the engine did not author still fails');
+  assert.equal(hasUnsanctionedQuestion(`${seed} ${invented}`, [seed]), true,
+    'one sanctioned question does not launder a second, invented one');
+
+  // A REWRITE is not the sanctioned sentence. The prompt orders the renderer to
+  // rewrite rather than copy, so this is what keeps the model policed: only the
+  // floor, which copies verbatim, is exempt.
+  const rewritten = 'Sebelum ambil peran baru, tanyakan siapa yang akan mengisi energimu?';
+  assert.equal(hasUnsanctionedQuestion(rewritten, [seed]), true,
+    'a paraphrased question is the model improvising and must still fail');
+
+  // With no engine questions at all - main's glossary today - nothing changes.
+  assert.equal(hasUnsanctionedQuestion(invented, []), true);
+  assert.equal(hasUnsanctionedQuestion('Tidak ada pertanyaan di sini.', []), false);
 });
 
 test('an unsanctioned English bracket is caught, a glossary one is not', () => {
