@@ -406,6 +406,63 @@ test('naming NO positions is allowed; naming the RIGHT set is allowed', () => {
   assert.ok(!checksIn(validateRendering(complete, CHART_1)).includes('fact.relation_positions'));
 });
 
+test('A PILLAR WORD INSIDE AN ORDINARY WORD IS NOT A PILLAR', () => {
+  // FOUND 2026-08-11 by the tranche-1 content pass. The scan was `\b` + word with
+  // NO trailing boundary, so anything merely STARTING with a pillar word claimed
+  // that pillar. "kehidupan sehari-hari" reported chart 1's 半合 as naming [day]
+  // and dropping [year, hour, month] - a HARD finding, on a reader's own chart,
+  // from a phrase that means "everyday life".
+  //
+  // A trailing \b is NOT the fix: a hyphen is a word boundary, so `\bhari\b`
+  // still enters `sehari-hari` halfway. Whole-token matching is.
+  const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
+  const tail = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
+  const span = fact.provenance.positions_id;
+
+  const innocent = [
+    'Dalam kehidupan sehari-hari, rasanya hampir pas.', // the observed case
+    'Sehari saja sudah cukup untuk melihatnya.', // the se- prefix
+    'Kamu bisa menunggu berhari-hari tanpa gelisah.', // ber- + reduplication: a duration
+    'Penghasilan bulanan kamu tidak menentukan arah ini.', // bulan + -an
+    'Kamu membuat rencana tahunan tanpa diminta.', // tahun + -an
+    'Kamu jarang meminta jaminan sebelum melangkah.', // jam inside jaminan
+    'Rasa itu menjamin kamu terus bergerak.', // jam inside menjamin
+  ];
+  for (const clause of innocent) {
+    const reading = withBlockText(goodReading(), fact.id,
+      `Tarikan ini menempati ${span}. ${clause} ${tail}`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('fact.relation_positions'),
+      `ordinary Indonesian was read as a pillar: ${clause}`);
+  }
+
+  // And the words that DO name a pillar still do, or the fix would have bought
+  // silence instead of precision. Three classes: bare, cliticised, and
+  // REDUPLICATED - Indonesian pluralises by repeating the noun, so "hari-hari"
+  // names the day pillar exactly as "hari" does (ruled 2026-08-11). The last two
+  // carry a clitic on top of the reduplication.
+  const naming = [
+    'tahun', 'tahunmu', 'bulan', 'bulannya', 'hari', 'hariku', 'jam', 'jammu',
+    'hari-hari', 'bulan-bulan', 'tahun-tahun', 'jam-jam',
+    'hari-harinya', 'tahun-tahunku',
+  ];
+  for (const clause of naming) {
+    const reading = withBlockText(goodReading(), fact.id,
+      `Tarikan ini terbaca di ${clause}. ${tail}`);
+    const hit = checksIn(validateRendering(reading, CHART_1)).includes('fact.relation_positions');
+    assert.ok(hit, `"${clause}" must be read as naming a pillar`);
+  }
+
+  // The repetition must be of the SAME word. "hari-bulan" is not a plural of
+  // either, and the backreference is what makes that true rather than a
+  // hand-listed exclusion.
+  for (const clause of ['hari-bulan', 'tahun-jam']) {
+    const reading = withBlockText(goodReading(), fact.id,
+      `Tarikan ini menempati ${span}. Catatan ${clause} tidak relevan. ${tail}`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('fact.relation_positions'),
+      `"${clause}" is not a reduplicated plural`);
+  }
+});
+
 // ── 2. COVERAGE ────────────────────────────────────────────
 
 test('a required point in no block is caught', () => {
