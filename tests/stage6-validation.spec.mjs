@@ -89,8 +89,27 @@ test('the module-assembled floor passes its own gate, on every fixture chart', (
     const result = validateRendering(goodReading(semantic), semantic, {
       provider: 'module_assembly',
     });
-    assert.ok(result.ok, `chart ${tc.id} floor rejected: ${checksIn(result).join(', ')}`);
-    assert.equal(result.hard, false);
+    // RESCOPED TO HARD FINDINGS 2026-08-11 (issue #23, option d), and this is
+    // the release contract: a hard finding on any fixture chart's floor blocks
+    // the release, because the serve path now REFUSES such a floor with a 503
+    // (lib/mirror/handlers.js#floorRefusalReason) and a chart nobody can read is
+    // worse than a bland one.
+    //
+    // It used to assert `result.ok`, which means NO finding of any severity.
+    // That was stricter than the ruled behaviour and, once the ruling landed,
+    // defended nothing: soft findings on the floor KEEP SERVING, deliberately,
+    // because pulling a reading over a style count leaves a hole for everyone
+    // who shares that semantic profile and the floor is blander rather than
+    // untrue. An assertion demanding zero soft findings would have forced a
+    // glossary edit for a reading the product intends to serve.
+    //
+    // The soft count is still surfaced in the failure message, so a tranche that
+    // makes the floor noticeably worse is visible here even when it does not
+    // block.
+    const soft = checksIn(result).filter((c) => !c.startsWith('forbidden.'));
+    assert.equal(result.hard, false,
+      `chart ${tc.id} floor HARD-rejected: ${checksIn(result).join(', ')}`
+      + `${soft.length ? ` (soft, not blocking: ${soft.join(', ')})` : ''}`);
   }
 });
 
