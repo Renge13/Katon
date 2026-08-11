@@ -28,6 +28,8 @@
     "test:ratelimit": "node --conditions=react-server --test tests/ratelimit.spec.mjs",
     "measure:stage6": "node --env-file-if-exists=.env.local --conditions=react-server scripts/measure-stage6.mjs",
     "emit:semantic": "node scripts/emit-semantic.mjs",
+    "apply:rulings": "node scripts/apply-rulings.mjs",
+    "test:rulings": "node --test tests/apply-rulings.spec.mjs",
     "render:reading": "node --conditions=react-server scripts/render-reading.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:engine": "node tests/bazi-engine.report.mjs",
