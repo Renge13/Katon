@@ -109,3 +109,29 @@ no `secara ...` adverbials, no essay connectives.
   Stage 6 normalises first: collapse 3+ newlines to 2, reject a lone `\n`, reject more than two
   breaks in one block. Do not use `white-space: pre-wrap` as the fix — it would also preserve
   stray single newlines the validator is meant to reject.
+
+---
+
+## AMENDMENT 2026-08-11 — the opening is no longer the renderer's choice
+
+"ARRANGEMENT IS FREE" became "THE OPENING IS FIXED. THE REST OF THE ARRANGEMENT IS FREE." The
+identity spine (Day Master, strength verdict, main profile) is written first, in the order facts[]
+gives it; everything after keeps the importance descent and keeps the free order.
+
+**Why, and why it is not a return to Run 1.** Reyner read the four Prompt J production readings as
+the buyer and ruled them not ship-quality (PROGRESS, "MIRROR QA VERDICT 2026-08-10", finding 1). The
+reading opened on its most dramatic finding and revealed who the reader is one block before the
+penutup - `day_master_Water` ranks 9th of 14 by importance on 1996-10-02 19:20, and the served
+reading put "Sifat Samudra" 6th of 7 blocks. The importance descent was doing exactly what it was
+designed to do; the design was wrong for the opening.
+
+Run 1's failure was the OPPOSITE of this and the row in the table above still stands. Run 1 walked
+the schema order and ignored `importance` entirely (94 vs 82). Here importance still governs
+everything past the third fact, and the three that are pinned are pinned by the ENGINE, which
+reordered facts[] so that following the array IS following the ruling. The renderer is not asked to
+identify the spine and is not asked to rank anything. Rule 14: the engine owns the order, the model
+owns the words.
+
+The engine-side derivation is in `lib/semantic/index.js` (`IDENTITY_MATCHERS`, `identityFirst`), and
+it reads the identity set off the JSON's own `core` and `strength` blocks. `spouse_palace` is
+role-spine and is deliberately NOT in the opening: it is a place in the chart, not the reader.

@@ -134,6 +134,61 @@ test('a void badge with no stack over it survives', () => {
   }
 });
 
+test('facts[] opens with the identity spine, on every chart', () => {
+  // THE ORDER IS THE CONTRACT (Prompt K). Three facts, always the same three,
+  // always in this order, derived from the JSON's own core and strength blocks
+  // rather than from a list of ids - so a renamed fact id fails here instead of
+  // silently dropping a limb of the opening.
+  for (const tc of VALIDATION_CHARTS) {
+    const json = jsonFor(tc);
+    const [dayMaster, verdict, profile] = json.facts;
+
+    assert.equal(dayMaster.provenance.kind, 'day_stem', `chart ${tc.id}: fact 1`);
+    assert.equal(dayMaster.provenance.stem, json.core.day_master, `chart ${tc.id}: fact 1 stem`);
+
+    assert.equal(verdict.provenance.kind, 'strength', `chart ${tc.id}: fact 2`);
+    assert.equal(verdict.provenance.verdict, json.strength.verdict, `chart ${tc.id}: fact 2 verdict`);
+
+    // main_profile, or the CR-1 fact that supersedes it. Both carry the Aspek
+    // that core.main_profile names, one on the fact and one on its provenance.
+    assert.equal(profile.god ?? profile.provenance.god, json.core.main_profile,
+      `chart ${tc.id}: fact 3 is not the main profile`);
+    assert.ok(['main_profile', 'profile_vs_favorable'].includes(profile.id), `chart ${tc.id}`);
+
+    for (const fact of json.facts.slice(0, 3)) {
+      assert.equal(fact.hierarchy.role, 'spine', `chart ${tc.id}: ${fact.id} is not spine`);
+    }
+  }
+});
+
+test('spouse_palace is role-spine and is NEVER in the opening', () => {
+  // The reason "sort spine first" is wrong. The Fondasi Pasangan is a PLACE in
+  // the chart, not the reader, and hoisting it would put the closest-
+  // relationship finding in the opening breath.
+  for (const tc of VALIDATION_CHARTS) {
+    const json = jsonFor(tc);
+    const index = json.facts.findIndex((f) => f.id === 'spouse_palace');
+    if (index === -1) continue;
+    assert.equal(json.facts[index].hierarchy.role, 'spine', `chart ${tc.id}: role changed`);
+    assert.ok(index >= 3, `chart ${tc.id}: spouse_palace reached the opening at ${index}`);
+  }
+});
+
+test('past the opening three, importance still descends', () => {
+  // The other half of the contract. K amends the OPENING only; the findings
+  // descent is untouched, and a change that flattened it would be a different
+  // product change measured on its own (rule 13).
+  for (const tc of VALIDATION_CHARTS) {
+    const rest = jsonFor(tc).facts.slice(3);
+    let previous = Infinity;
+    for (const fact of rest) {
+      assert.ok(fact.importance <= previous,
+        `chart ${tc.id}: ${fact.id} breaks the descent at ${fact.importance} after ${previous}`);
+      previous = fact.importance;
+    }
+  }
+});
+
 test('main_profile survives on every chart CR-1 did not fire on', () => {
   for (const tc of VALIDATION_CHARTS) {
     const ids = jsonFor(tc).facts.map((f) => f.id);
@@ -163,9 +218,12 @@ test('every required point has a backing fact that is actually emitted', () => {
 
 test('required points cover the spine and the top findings, chart 1', () => {
   const json = jsonFor(VALIDATION_CHARTS[0]);
+  // Identity spine first, then the importance descent. `day_master_Fire` used to
+  // sit LAST here at importance 55, which is the buried opening Reyner rejected.
   assert.deepEqual(json.required_points.map((p) => p.fact_id), [
-    'void_stack_month', 'profile_vs_favorable', 'strength_weak', 'element_missing_Wood',
-    'aspek_convergence_正官', 'spouse_palace', 'relation_半合_巳酉', 'badge_桃花', 'day_master_Fire',
+    'day_master_Fire', 'strength_weak', 'profile_vs_favorable', 'void_stack_month',
+    'element_missing_Wood', 'aspek_convergence_正官', 'spouse_palace', 'relation_半合_巳酉',
+    'badge_桃花',
   ]);
   // The hand-written file lists 8. The ninth here is day_master_Fire, which the
   // target carries as its FIRST required point ("Inti diri: Api...") — so the
@@ -205,7 +263,13 @@ test('the version and the unfitted contract constants are stated', () => {
   // `positions_id`, the pre-verbalised span. A new field in the contract, so the
   // version moves and the whole cache invalidates - which is correct, every cached
   // reading predates the field.
-  assert.equal(ENGINE_VERSION, '0.4.2-stage3');
+  //
+  // 0.4.3 as of 2026-08-11: facts[] is no longer ordered by importance alone -
+  // the identity spine is lifted to the front (Prompt K). The emitted order IS
+  // the contract, so the version moves and every key in the table orphans. Free
+  // at zero traffic, and the old rows can never be served again because the key
+  // only moves with the version.
+  assert.equal(ENGINE_VERSION, '0.4.3-stage3');
   assert.deepEqual(SAFETY_FLAGS, ['no_fatalism', 'no_medical', 'no_financial', 'no_god_ranking']);
   assert.deepEqual(CONTRACT_PARAMS, { coverageFloor: 65 });
 });
