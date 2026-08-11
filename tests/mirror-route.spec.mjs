@@ -18,7 +18,7 @@ import assert from 'node:assert/strict';
 import { test, beforeEach, afterEach } from 'node:test';
 
 import {
-  createMirrorReading, serveMirrorReading, recordMirrorFeedback,
+  createMirrorReading, serveMirrorReading, recordMirrorFeedback, floorRefusalReason,
 } from '../lib/mirror/handlers.js';
 import { PREVIEW_HEADER, previewFenceReason } from '../lib/mirror/fence.js';
 import { readCache, writeCache, __clearMemCache } from '../lib/render/cache.js';
@@ -26,6 +26,7 @@ import { STAGE6_VERSION } from '../lib/render/fence.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { semanticFromRow } from '../lib/mirror/reading.js';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
+import { buildSemanticJson } from '../lib/semantic/index.js';
 import { RATE_LIMITS, __clearMemRateLimit } from '../lib/ratelimit.js';
 import { SESSION_COOKIE } from '../lib/mirror/session.js';
 
@@ -428,6 +429,57 @@ test('a provider outage lands on the floor rather than failing the request', asy
   // Rule 17: the floor is servable BECAUSE it is engine content, and the row
   // records which gate cleared it rather than the version installed today.
   assert.match(body.meta.stage6_version, /-floor$/);
+});
+
+test('A FLOOR THAT FAILS THE GATE IS REFUSED, NOT SERVED', () => {
+  // Issue #23, option (b), ruled 2026-08-11. The floor used to reach a reader
+  // with no gate over it at all, so FAILING the gate routed AROUND the gate -
+  // the worse the pipeline was doing, the less validation the reader got.
+  //
+  // Not hypothetical. The tranche-1 content pass put forbidden.fatalism into
+  // three fixture charts' floors via a ruled glossary seed, and the only reason
+  // it did not ship is that the gate was run by hand during review.
+  //
+  // The decision function is tested directly rather than through the route,
+  // because the glossary on main is clean: there is no chart whose floor fails
+  // today, and this must hold whatever the glossary says tomorrow.
+  const semantic = buildSemanticJson(calculateBaziChart({
+    birthDate: '1989-09-13', birthTime: '09:00',
+  }));
+  const floor = { ...assembleFallback(semantic), source: 'module_assembly' };
+
+  assert.equal(floorRefusalReason(floor, semantic), null,
+    'a clean floor serves - this is the state on main today');
+
+  const poisoned = {
+    ...floor,
+    penutup: 'Pada tahun 2027 kamu akan menemukan arah yang kamu cari.',
+  };
+  const reason = floorRefusalReason(poisoned, semantic);
+  assert.match(reason, /^floor_failed_gate:/);
+  assert.match(reason, /forbidden\.fatalism/,
+    'the reason names the check, so a 503 in the logs is diagnosable');
+
+  // Provider output is NOT re-checked here - it already passed the gate inside
+  // renderReading, and re-running it would double-charge every served reading.
+  assert.equal(floorRefusalReason({ ...poisoned, source: 'gemini' }, semantic), null);
+});
+
+test('a SOFT finding on the floor keeps serving', () => {
+  // The other half of the ruling, matching floorIfHardFailing's policy for
+  // cached rows: pulling a reading over a style count would leave a hole for
+  // everyone sharing that semantic profile, and the floor is blander rather
+  // than untrue. Only hard findings - rule 14 and rule 25 - refuse.
+  const semantic = buildSemanticJson(calculateBaziChart({
+    birthDate: '1989-09-13', birthTime: '09:00',
+  }));
+  const floor = { ...assembleFallback(semantic), source: 'module_assembly' };
+  const soft = {
+    ...floor,
+    penutup: `${floor.penutup} Kondisi ini terasa jelas untukmu.`,
+  };
+  assert.equal(floorRefusalReason(soft, semantic), null,
+    'a soft finding must not refuse');
 });
 
 test('a cache hit makes ZERO provider calls and returns the identical text', async () => {
