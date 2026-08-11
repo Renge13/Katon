@@ -20,20 +20,39 @@ Cowork: updating this pointer is PART of writing or queueing a build prompt, not
    anything near the paid path).
 3. **THERE IS NO ACTIVE BUILD PROMPT.** Do not go looking for one.
 
-**The current work is the CONTENT REVISION PASS — step 2 of the fix plan. Cowork and Reyner, no
-code.** Every glossary cell against the three tests in the verdict section (a cost-answering
-actionable; a reconciling hinge between gift and cost; jargon demoted behind the behavior it names),
-plus new finding 5, the palace domain gloss woven into first mention. **The next build prompt gets
-written after that pass, not before** — a build prompt written now would be guessing at what the
-pass decides.
+**The current work is the CONTENT REVISION PASS, TRANCHE 2 — step 2 of the fix plan. Cowork and
+Reyner, no code.** Tranche 1 PASSED (see the verdict in `PROGRESS.md`) and tranche 2 is green-lit;
+Cowork is drafting the proposals. **Nothing is actionable for Claude Code until Reyner's rulings
+arrive as a rulings file**, same flow as tranche 1:
+
+  1. the rulings file lands on MAIN first, on its own — decision state never lives on the branch it
+     rules on (the #28 ruling);
+  2. `node scripts/apply-rulings.mjs docs/content/tranche2-rulings.md --expect <N>` applies it —
+     `--expect` is mandatory and is the guard that would have caught the tranche-1 corruption;
+  3. sweep the new strings, run the suite, measure cache keys AND fact order, open the PR.
+
+Fact order should now move on ZERO charts (measured: tranche 1 on top of the actionability
+declaration moved 13 of 13 cache keys and 0 of 13 orderings). **If a content tranche ever re-ranks a
+chart again, something has re-coupled prose to ranking and that is the bug.**
+
+**QUEUED BEHIND TRANCHE 2, NOT BEFORE IT: one small renderer-prompt pass**, two items together,
+measured as a same-day pair — the pillar-domain gloss on first palace mention (`domain_id` is
+already in the glossary as data), and a breath phrase when two facts stack in one pillar. Details in
+the tranche-1 verdict section. Also queued: re-render chart 5 to settle whether `quietFloor` needs
+re-fitting, which is a decision waiting on tranche 2's content rather than on a threshold argument.
 
 (Prompt J is DONE — merged as PR #18-#20 on 2026-08-07, live and fenced on production. The carried
 `element_missing` item landed with it as PR #20.
 
 Prompt K is DONE — merged as PR #21 on 2026-08-11. Reyner's re-read passed it: *"meeting yourself
-first completely fixes the upside-down feeling."* Findings 2 and 3 remain, assigned to steps 2 and
-3. Promotion is still 1 of 3: condition 2 is the fulfillment swap, condition 3 needs the content
-pass and a re-QA.)
+first completely fixes the upside-down feeling."*
+
+**Fix-plan step 3, transitions / narrative roles, is CANCELLED — not deferred, and never built.**
+Thematic headers plus grounded action endings closed the seams; the reader does not miss
+connectives. Do not revive it without new evidence from a real read.
+
+Promotion is still 1 of 3: condition 2 is the fulfillment swap, condition 3 needs tranche 2 and a
+re-QA.)
 
 ## Before the next measured change — READ THIS
 The 08-11 control run showed the exact gate-`1.8.0` configuration scoring 88.5% and 94.6% shipped
