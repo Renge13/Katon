@@ -406,6 +406,45 @@ test('naming NO positions is allowed; naming the RIGHT set is allowed', () => {
   assert.ok(!checksIn(validateRendering(complete, CHART_1)).includes('fact.relation_positions'));
 });
 
+test('A PILLAR WORD INSIDE AN ORDINARY WORD IS NOT A PILLAR', () => {
+  // FOUND 2026-08-11 by the tranche-1 content pass. The scan was `\b` + word with
+  // NO trailing boundary, so anything merely STARTING with a pillar word claimed
+  // that pillar. "kehidupan sehari-hari" reported chart 1's 半合 as naming [day]
+  // and dropping [year, hour, month] - a HARD finding, on a reader's own chart,
+  // from a phrase that means "everyday life".
+  //
+  // A trailing \b is NOT the fix: a hyphen is a word boundary, so `\bhari\b`
+  // still enters `sehari-hari` halfway. Whole-token matching is.
+  const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
+  const tail = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
+  const span = fact.provenance.positions_id;
+
+  const innocent = [
+    'Dalam kehidupan sehari-hari, rasanya hampir pas.', // the observed case
+    'Hari-hari seperti ini terasa panjang.', // reduplication
+    'Sehari saja sudah cukup untuk melihatnya.', // the se- prefix
+    'Penghasilan bulanan kamu tidak menentukan arah ini.', // bulan + -an
+    'Kamu membuat rencana tahunan tanpa diminta.', // tahun + -an
+    'Kamu jarang meminta jaminan sebelum melangkah.', // jam inside jaminan
+    'Rasa itu menjamin kamu terus bergerak.', // jam inside menjamin
+  ];
+  for (const clause of innocent) {
+    const reading = withBlockText(goodReading(), fact.id,
+      `Tarikan ini menempati ${span}. ${clause} ${tail}`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('fact.relation_positions'),
+      `ordinary Indonesian was read as a pillar: ${clause}`);
+  }
+
+  // And the words that DO name a pillar still do, bare and with each clitic, or
+  // the fix would have bought silence instead of precision.
+  for (const clause of ['tahun', 'tahunmu', 'bulan', 'bulannya', 'hari', 'hariku', 'jam']) {
+    const reading = withBlockText(goodReading(), fact.id,
+      `Tarikan ini terbaca di ${clause}. ${tail}`);
+    const hit = checksIn(validateRendering(reading, CHART_1)).includes('fact.relation_positions');
+    assert.ok(hit, `"${clause}" must still be read as naming a pillar`);
+  }
+});
+
 // ── 2. COVERAGE ────────────────────────────────────────────
 
 test('a required point in no block is caught', () => {
