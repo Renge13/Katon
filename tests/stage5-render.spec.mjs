@@ -130,6 +130,33 @@ test('the floor stands on every fixture chart and authors no typography', () => 
   }
 });
 
+test('THE FLOOR SAYS WHERE A RELATION SITS, on every chart that has one', () => {
+  // Until 2026-08-12 it did not. A branch relation has no `fact.palace` - its span
+  // lives in `provenance.positions_id` because it sits in two or more places - so
+  // blockFor skipped it and every floor relation block said WHAT the relation is
+  // and never WHERE. Measured before the fix: 0 of 18 relation blocks across the
+  // fixture named their span; chart 6's block opened "Gesekan (Harm)." and located
+  // nothing.
+  //
+  // The gate could not catch this: fact.relation_positions SKIPS a block that names
+  // no position at all, which is why four rounds of that check's own bugs never
+  // surfaced here. So this test is the guard the gate cannot be.
+  let relations = 0;
+  for (const tc of [...VALIDATION_CHARTS, { id: 'hourless', date: '1989-02-04', time: null }]) {
+    const json = jsonFor(tc);
+    const out = assembleFallback(json);
+    for (const fact of json.facts.filter((f) => f.provenance?.kind === 'branch_relation')) {
+      relations += 1;
+      const block = out.blocks.find((b) => b.fact_ids.includes(fact.id));
+      if (!block) continue; // below the coverage floor, legitimately not rendered
+      assert.ok(block.text.includes(fact.provenance.positions_id),
+        `chart ${tc.id}: ${fact.id} block does not state its span `
+        + `(${fact.provenance.positions_id})`);
+    }
+  }
+  assert.ok(relations >= 17, `expected the fixture to exercise relations, saw ${relations}`);
+});
+
 test('the floor never leaves a strength label bare (rule 21, same breath)', () => {
   // glossary kekuatan._note: lemah/kuat must co-occur with its meaning sentence.
   // Structural here - the label and its meaning share ONE text field, so no
