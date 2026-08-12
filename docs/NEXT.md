@@ -70,5 +70,5 @@ that looked like a K regression turned out to be the 08-06 penutup failure, unch
 - Low on context mid-sequence: **stop and report** rather than half-landing a change.
 - If this file sends you back into engine calibration, push back — that work is closed
   (`PROGRESS.md` RESOLVED).
-- Flag anything in the docs that contradicts what you find. Nineteen spec errors have been caught
+- Flag anything in the docs that contradicts what you find. Twenty spec errors have been caught
   that way, all of them Cowork's.
