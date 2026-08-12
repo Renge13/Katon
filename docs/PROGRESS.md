@@ -349,7 +349,58 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **THE STORED GATE ROW IS NOT A USABLE BASELINE. Identical config, four days apart: shipped 88.5% vs 94.6%.** | first-pass 70.0 -> **60.0** · shipped 88.5 -> **94.6** · hard **15 -> 1** · rejections **85 -> 34** | **08-11** | A same-session CONTROL run of the exact gate-`1.8.0` configuration (engine `0.4.2`, prompt `9b5b67d7`, same 13 charts, `--no-hourless`, n=10). Nothing in the repo differs from the 08-07 row; only the day does. **The two moved in OPPOSITE directions - first-pass down 10, shipped up 6 - and `hour_known_contradiction` fired 15 times then and ONCE now.** The 08-07 hedge replicate already warned that a single batch carries about +-6; this says the same for the headline rates and much worse for a single check. **Consequence, and it is a method rule, not a K finding: a stored gate row cannot serve as the comparator for a later change. Any prompt or engine change measured against one is measuring the day.** Arms must be run back to back in one session, and ideally replicated, before a difference means anything. |
 | **PROMPT K SHIPPED — the reader meets herself first** | `day_master` rank 9/14 -> **1/14** on `fresh-1996`; served reading block 6-of-7 -> **block 1** | **08-11** | `identityFirst` in `lib/semantic/index.js` lifts the identity spine (Day Master, strength verdict, main profile or the CR-1 that supersedes it) to the front of `facts[]`; everything after keeps the importance descent. Derived from the JSON's own `core`/`strength` blocks, not a hand-list of ids. `spouse_palace` is role-spine and deliberately stays in the descent - it is a PLACE, not the reader. ENGINE_VERSION `0.4.2` -> `0.4.3-stage3`, so every cache key moves; free at zero traffic. Re-read files: `reports/mirror-qa-chart-01-K.md`, `reports/mirror-qa-fresh-1996-K.md`. |
 | **BLOCKS PER READING is the one metric that replicates - and it is what the renderer-prompt wording moves** | identical config **5.1 / 5.1** · K wordings **7.3 / 5.4 / 7.1** | **08-11** | Measured over 616-1396 blocks per run, which is why it is stable where the rates are not: the two gate-`1.8.0` runs four days apart agree to the decimal. Three wordings of the same K instruction were measured. "Write them first, in the order the array gives them" (`69a9afe2`) and the minimal one-sentence insert (`9c167561`) both inflate block count ~40% - chart 1 went from 4 blocks carrying 10 facts to **9 blocks carrying 9 facts**, one fact per block, which is the "tour of the chart" the prompt bans and a direct worsening of QA finding 2. Adding "First does not mean three blocks" (`8877da29`) holds it at **5.4**. **The engine reorder is common to all three, so the wording is the whole effect; the reorder alone fragments nothing.** `8877da29` is what shipped. Its cost is coverage p10 0.55 against the control's 0.67 - a soft-check trade, taken on the metric that replicates over three rates that do not. |
+| **THE MODULE-ASSEMBLY FLOOR IS 13/13 CLEAN — and the cause of the last two findings was nobody's prediction** | floor readings raising a gate finding **2 of 13 -> 0 of 13** | **08-12** | `ac24441`, the tranche-2a wiring commit, measured alone. **The two were `structure.duplicate_sentence` on charts 2 and 8, and those are exactly the two `same`-relation charts** - `elementRelation(dmElement, element)` returns `same` there because the dominant element IS the day master's element, so `element_dominant` and `day_stem` resolved to the identical `GLOSSARY.elemen[hanzi]` entry and the floor, which renders every string of every fact, printed it word for word twice. Keying `element_dominant` to its own `elemen_dominan` group **per relation** removed the collision at its source rather than by collapsing a fact. **Record this mechanism, do not rediscover it:** the finding looked like a floor-renderer defect and was actually two facts sharing one glossary node, which is the same shape as the third Stage 3 collapse gap (charts 9 and 12, 08-04) arriving through a different door. A shared glossary entry between two facts that can co-occur is a duplicate waiting to happen. |
+| **A content tranche and its wiring BOTH re-ranked nothing — the second and third confirmations that prose is decoupled from ranking** | fact order moved **0 of 13** on `6947af0` and **0 of 13** on `ac24441` · cache keys moved 10 of 13 then 8 of 13 | **08-12** | The tripwire from the actionability declaration (08-11 row above), and it is clean twice. Importances on the wiring commit are byte-identical before and after: 41, 70, 64, 70, 41, 70, 61, 67. Keys moving while order does not is the correct signature - the strings changed, the axes did not, because `actionabilityOf` reads `ACTIONABLE_KINDS[fact.provenance?.kind]` and nothing in `hierarchy.js` reads fact content. **The tranche-2a prompt predicted 8 of 13 orders would move and was wrong; that is COWORK-BRIEF error 21**, and the aggravating half is that it also told the reader the move was "expected, NOT the re-coupling tripwire firing", which would have authorised dismissing a real alarm. |
 | The `hour_known_contradiction` spike under K was the KNOWN penutup failure, not a K regression | 1 (control) · 15 / 25 / 38 (K arms) · 15 (08-07) | 08-11 | Read in `docs/research/rejections-K-v1-2026-08-11.md` rather than counted. The failing sentence is verbatim the 08-06 gallery finding - *"Keempat pilar harimu tidak dapat dipetakan karena jam lahir tidak diketahui"*, in the **penutup**, in a reading that names Pilar Akar, Pilar Kerja and Pilar Arah three paragraphs above. It lives in the closing sentence, which K does not touch, and it fired 15 times in the 08-07 baseline before K existed. **Its rate swings 1 to 38 across runs of code that differs in ways it cannot see, which makes it the loudest single argument for the baseline rule two rows up.** Left open: nothing here explains why the rate moves, and it remains a plain falsehood when it fires. |
+
+## 2026-08-12 — TRANCHE 2A built and measured (28 ruled strings + the `elemen_dominan` wiring)
+
+Fix-plan step 2 continues. Two commits, deliberately separate (rule 13), both measured on their own.
+Numbers are in MEASUREMENTS; this section is the mechanism.
+
+**STATE: PR #38 is OPEN at the time of writing, awaiting Reyner's review.** The measurements below are
+off the branch commits and stand on their own; the merge does not change them. Whoever merges #38
+should strike this paragraph and stamp the section DONE with the merge date from `git log`.
+
+- **`6947af0` content** — `elemen_dominan` scaffolded as a new glossary group (five keys, `name_id`
+  null on all five, following the `elemen_hilang` precedent) and 28 assignments applied verbatim from
+  `content/tranche2a-rulings.md` via `apply:rulings --expect 28`. 24 are the tranche, **4 are a
+  register sweep** of Reyner's already-ruled `gampang` -> `mudah` in cells tranche 1 never touched.
+  The highest-frequency gap it closes is `kekuatan.balanced.actionable_seed`: it fires on 8 of 13
+  fixture charts, and Prompt K put strength in the OPENING SPINE of every reading, so the block where
+  8 of 13 readers meet themselves carried no action line at all.
+- **`ac24441` engine** — `element_dominant` now reads `elemen_dominan` keyed by
+  `relation_to_day_master`, not `GLOSSARY.elemen[hanzi]` keyed by element.
+
+**WHY THE WIRING WAS A CORRECTNESS FIX, not a content nicety.** The old binding served the element's
+CHARACTER entry, which describes what it is like to BE that element. So a reader merely SATURATED with
+an element was handed the paragraph written for somebody else's day master. **Fixture chart 5 is the
+case Reyner caught in the quiet-chart read** (08-11 row, `reports/mirror-qa-chart-05-quiet.md`): a Fire
+day master whose dominant-Earth block was the Earth person's description, which is exactly why her
+Pemijar block and her dominant-element block read as one mechanism said twice. That read attributed the
+padding to unwritten content and ruled `quietFloor` untouched; this is the second, independent cause
+underneath the same complaint.
+
+**THE FLOOR IS NOW 13/13 CLEAN, and the cause was nobody's prediction.** See the MEASUREMENTS row.
+Short version: the last two findings were `structure.duplicate_sentence` on charts 2 and 8, the two
+`same`-relation charts, where `element_dominant` and `day_stem` resolved to the SAME glossary entry and
+the floor printed it twice. Relation-keying removed the collision at its source. **The generalisable
+rule: two facts that can co-occur must not share a glossary node.** It reached the gate looking like a
+floor-renderer defect and it was a data-binding collision, the same shape as the 08-04 Stage 3 collapse
+gap arriving through a different door.
+
+**Both of the rulings file's flagged notes are CLOSED** (Reyner, 08-12): `dengan jernih` confirmed at
+`aspek.傷官` — it is already the applied text, so nothing needs re-applying — and `output`/`input` stay
+as ruled in `elemen_dominan.drains`. `content/tranche2a-rulings.md` carries nothing pending; a later
+session must not read either note as an open question.
+
+**One prediction in the tranche-2a prompt was wrong and it is COWORK-BRIEF error 21.** It said the
+wiring would move fact order on 8 of 13 charts because the fact "finally carries an actionable". But
+since PR #34 actionability has been declared rather than inferred, so writing prose cannot buy rank at
+all, and the measured answer is 0 of 13 with identical importances. The row exists for the second half: the prompt
+also said the move would be *"expected, NOT
+the re-coupling tripwire firing"*, which would have authorised dismissing a genuine alarm. **A
+prediction that tells a reader what to disregard must carry its grep.**
 
 ## DECIDED 2026-08-10 — MIRROR QA VERDICT (Reyner, buyer-hat): promotion condition 3 NOT MET
 
@@ -391,6 +442,9 @@ having none.**
    bracket once). This pass REPLACES the queued compat content session in the schedule — compat
    cells will be authored to whatever pattern survives this pass.
    **TRANCHE 1 DONE 2026-08-11, PR #22 + #24. PASSED — see the verdict below. Tranche 2 GREEN-LIT.**
+   **TRANCHE 2A built and measured 2026-08-12, PR #38 OPEN — see the 08-12 section above.** It also
+   carried the `elemen_dominan` wiring, which closed the last floor finding and the second cause under
+   chart 5's padding.
 3. ~~**Transitions / narrative roles**~~ — **CANCELLED 2026-08-11, not deferred.** See below.
 4. **VOICE A/B (added 2026-08-10, Reyner's call after the Gemini-feedback discussion).** Two
    renderer prompts identical except the voice paragraph: the current composed-voice wording vs a

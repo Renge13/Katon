@@ -104,11 +104,51 @@ What that means concretely:
 Claude Code is a good reviewer and has caught real spec errors. When it pushes back, **assume it is
 right until you have checked.** It has been right every time so far.
 
+### Working-style rules. Reyner-ratified 2026-08-11, folded in here 2026-08-12.
+
+**These are rules, not history.** They were ratified in a Cowork session and then lived only in that
+session's handover file, which no Claude Code session can read — and the git rule below was then broken
+by a session that had no way to know it existed. That is error 20's real cause and it is written up
+under the ledger. **A rule not in the repo is not a rule.**
+
+1. **EXEC SUMMARY FIRST, and it must be readable cold.** Open every substantial reply with the
+   summary, not the reasoning that produced it. Gloss every piece of jargon on first use — engine
+   field names, gate check names, hanzi, statistics. And **split the actions explicitly: what REYNER
+   must decide or do, versus what CLAUDE CODE will build.** He is reading to find his own next move;
+   a summary that mixes the two makes him extract it himself.
+2. **Do everything you can do yourself. Ask only for PERMISSION, never for legwork.** Read the files,
+   run the checks, plot the oracle charts, write the prompt. The only things worth interrupting him
+   for are a register call (his, exclusively), a product decision, and permission to proceed with
+   something irreversible. "Can you check X for me" is a question this brief exists to make
+   unnecessary.
+3. **DATES COME FROM `git log`, NEVER FROM THE WALL CLOCK.** Any date claim about work — when a
+   commit landed, when a decision was made, when a measurement was taken — is verified with
+   `git log --format="%h a:%ad c:%cd %s" --date=iso` before it is written down. A session's own clock
+   describes the session, not the work. This is error 18, which nearly propagated a wrong date into
+   three files, each of which would then have been "evidence" for the next session.
+4. **NEVER WRITE TO THE REPO WHILE A CODE SESSION IS MID-BUILD. File READS are fine; GIT COMMANDS ARE
+   NOT.** Device git leaves an `index.lock` that the bridge cannot delete, and it blocks the builder's
+   working tree until someone clears it by hand. This is the topology table above enforced from the
+   other side: Cowork gains nothing from running git that a prompt to Claude Code would not also
+   achieve, and the downside is that the builder stops. Error 20.
+5. **THE REGISTER FLOW, in order, and no step may be skipped or reordered:**
+
+   | # | Who | Does what |
+   |---|---|---|
+   | 1 | Cowork | **proposes** wording. Never decides it. |
+   | 2 | Reyner | **rewrites** it. His text is the text; this is CLAUDE.md rule 20. |
+   | 3 | Cowork | **sweeps his rewrite against the ban list ONLY** — `lib/validate/blocklist.json`, banned typography, the slang list. Mechanical checks, nothing else. A gate hit is reported with the pattern that fired and the minimum bend that clears it, and the bend is his to accept. **Register is not re-opened at this step.** |
+   | 4 | Cowork | writes the strings into a **rulings file** in `docs/content/`, on `main`, alone, before the PR that applies them. Decision state never lives on the branch it rules on (the #28 precedent). |
+   | 5 | Claude Code | applies them **VERBATIM**, via `scripts/apply-rulings.mjs` with an `--expect` count. |
+
+   The reason step 3 is fenced so narrowly: a sweep that also "improves" a phrase is Cowork deciding
+   register with extra steps, and it is unreviewable because his text and the edit arrive together.
+
 ---
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
 
-**Twenty spec errors so far. All twenty were mine.** Not listed to be self-flagellating; listed because
+**Twenty-one spec errors so far. All twenty-one were mine.** Not listed to be self-flagellating; listed because
 the pattern is predictive and knowing it changes what you do next. **Append here when a new one is
 caught, and never trim the list — the pattern is the value, not the count.**
 (Numbering corrected 2026-08-07: two appended rows reused 13 and 14, so the "fourteen" headline
@@ -136,9 +176,32 @@ undercounted a sixteen-row table — a counting error in the error ledger itself
 | 17 | Prompt J task 2 said "Stage 3 carries `confidence` / `confidence_reasons` for solar-term-edge and 子-hour charts". It does not. `confidence` is `strength.ts` and measures a MARGINAL VERDICT (supportShare within 5 of a threshold, unrooted DM, a root pulled by 半合); the solar-term and 時辰 edge is `boundary_flag` in `pillars.ts`. Caught by Claude Code, which exposed both with the sources kept apart. Verified 08-07: `1989-02-04 04:00` is confidence-low with `boundary_flag` false, so a route built to the prompt would have softened the wrong charts | named the right RISK and the wrong FIELD. Error 9's shape once more: asserted where a value lives from memory of the architecture instead of grepping for it. `pillars.ts` even warns in a comment that its own either-or "cannot tell the two risks apart" |
 | 18 | The 2026-08-10 QA-verdict session wrote that the 08-07 stamps on the rule-16 amendment note, the J-mirror-route header and the ledger-renumber note were wrong, and instructed every later session to "correct" them to 08-10. **The stamps were right.** `git log -6 --format="%h a:%ad c:%cd %s" --date=iso` puts `6ca09b6` and PRs #18-#20 at 2026-08-07 22:19-23:10 +0700, author and committer both, and `reports/mirror-qa-fresh-1996.md:5` independently says the reading was served on production 2026-08-07. Caught by Claude Code before the docs commit landed | applied the CURRENT session's wall clock to work done in an EARLIER one. The instruction was worse than the claim: it would have propagated the error into three more files, each of them then "evidence" for the next session. A date claim carries `git log`, never the clock — the same discipline CLAUDE.md already demands for a code fact |
 | 19 | Prompt K's mechanism section asserted "Stage 3 emits facts importance-sorted and the renderer follows JSON order", and built the change's whole theory of action on the second clause. `docs/content/renderer-prompt.txt:22-26` is a section headed **ARRANGEMENT IS FREE** and says the opposite: "The order of facts[] in the input is NOT the order you must write. It is a ranking, not a sequence." The first clause is true, which is what made the second sound checked. Caught by Claude Code, which read the prompt file before editing | error 9's shape again: asserted a component's behavior from the architecture rather than from the file, and the file is a plain-text document that takes one minute to read. Half-true is the dangerous form — the true half carried the false half through |
-| 20 | Ran a git command against the DEVICE REPO and left a `.git/index.lock` the bridge cannot delete, blocking the working tree until it was cleared by hand. Not a BaZi error and not a spec error - a ROLE error, which is why it belongs here anyway | the topology table in section 3 is the rule: **Cowork writes prompts and does not write engine code; Claude Code is the builder.** Operating the repo directly is the same boundary crossed from the other side. Worth being precise, though: no working rule NAMED git or lockfiles before this row, so the failure was foreseeable from the role split rather than prohibited outright. It is prohibited now. The practical cost is asymmetric and that is the argument - Cowork gains nothing from running git that a prompt to Claude Code would not also achieve, and a lock it cannot release stops the builder entirely |
+| 20 | Ran a git command against the DEVICE REPO and left a `.git/index.lock` the bridge cannot delete, blocking the working tree until it was cleared by hand. Not a BaZi error and not a spec error - a ROLE error, which is why it belongs here anyway | the topology table in section 3 is the rule: **Cowork writes prompts and does not write engine code; Claude Code is the builder.** Operating the repo directly is the same boundary crossed from the other side. **CORRECTED 2026-08-12: this row said the failure was "foreseeable from the role split rather than prohibited outright". IT WAS PROHIBITED.** A Reyner-ratified rule already said so verbatim - see the correction note under the table - and it was invisible to every session that could only read the repo. The practical cost is asymmetric and that is still the argument: Cowork gains nothing from running git that a prompt to Claude Code would not also achieve, and a lock it cannot release stops the builder entirely |
+| 21 | The tranche-2a prompt predicted commit 3 (element_dominant reading its own group) would move fact order on **8 of 13** charts, "because the fact finally carries an actionable and `hierarchy.actionability` stops being a promise it cannot pay". Since #34 actionability is **DECLARED, not inferred**: `actionabilityOf` reads `ACTIONABLE_KINDS[fact.provenance?.kind]` and nothing else (`lib/semantic/hierarchy.js:219-221`), `element_dominant: true` (`lib/semantic/facts.js:105`), and it pays 100 whether or not the prose exists. Measured on the commit itself (`ac24441`): **0 of 13** fact orders moved, importances byte-identical (41, 70, 64, 70, 41, 70, 61, 67 before and after); only the 8 cache keys moved, which is just the strings changing | errors 2/5/6 again - **the disproving evidence was in hand.** The prompt had read that exact block: the comment above `ACTIONABLE_KINDS` names the five tranche-1 `aspek` cells whose prose "still ships, it just no longer buys them rank", which is the same claim in the same file, and the prompt wrote the opposite anyway. **THE AGGRAVATING FACTOR, and why this is its own row rather than a footnote on 19:** the prediction also said *"Expected. NOT the re-coupling tripwire firing"* - it pre-authorised dismissing the very tripwire that would have caught it. A prediction that tells a reader what to DISREGARD must carry its grep. Being wrong costs a re-measurement; telling the builder to ignore a live alarm costs the alarm |
 
-**Three of these (2, 5, 6) are the same failure: I had the disproving evidence in hand and wrote the
+### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
+
+The row originally said the git prohibition was "foreseeable rather than prohibited". It was
+prohibited. Cowork's own session-state handover — a file in the Claude project,
+`claude/KATON-session-state-2026-08-11.md`, under a header reading **"Working-style rules (fold into
+COWORK-BRIEF section 3 at next quiet moment - Reyner ratified)"** — said verbatim:
+
+> "Never write to the repo while a Code session is mid-build (file READS are fine; git commands are
+> not - device git leaves index.lock the bridge cannot delete)."
+
+**The grep that "found" the rule absent was correct and proves the real finding.** It searched `docs/`
+and `CLAUDE.md`, and the rule is in neither, because it never got folded in. So a **Reyner-ratified
+rule lived only where Claude Code cannot read it**, and the fold-in that its own header scheduled
+never happened. The failure was not a missing rule; it was a rule parked outside the repo, and the
+parking was the whole cause.
+
+**That is the durable lesson, and it is bigger than git.** A rule ratified in a chat and stored in a
+handover file does not exist. Only `CLAUDE.md`, `docs/` and the locked tests can constrain a session,
+because they are the only things a session reads. "Fold in at the next quiet moment" is how a rule
+dies: fold it into the repo in the SAME turn it is ratified, or accept that it is a preference nobody
+will ever be bound by. **The five rules from that block are now in section 3, where they are readable.**
+
+**Four of these (2, 5, 6, 21) are the same failure: I had the disproving evidence in hand and wrote the
 claim anyway.** Before asserting anything, check whether something you already measured contradicts it.
 
 **Error 11 is the cheapest to prevent and the most embarrassing, so learn it once.** Two distinct
@@ -301,8 +364,9 @@ quality of the output, not to what is easier to build. I am the sole authority o
 register: propose wording, flag it, never auto-decide.
 
 Never improvise a BaZi rule, including tables I hand you. Verify against docs/, the repo's locked
-tests, or Joey's plotter, and stop if sources disagree. Twenty spec errors are in the ledger and
-all twenty were yours, so check before asserting.
+tests, or Joey's plotter, and stop if sources disagree. Twenty-one spec errors are in the ledger and
+all twenty-one were yours, so check before asserting. Section 3 carries the working-style rules,
+including the one you must not break: no git commands against my repo, reads only.
 
 Then tell me where we actually are and what you think the next move is. Do not write engine code.
 ```
