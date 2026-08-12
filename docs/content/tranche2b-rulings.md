@@ -131,7 +131,7 @@ slang list, and the `hukuman` ban. 3-gram-diffed against all 22 live action line
   cell is ever revisited.
 
 ## relasi_cabang.害
-- actionable_seed: "Bereskan kejanggalan atau masalah kecil begitu terlihat. Membiarkan gesekan kecil menumpuk hanya akan memicu ledakan yang tak perlu di kemudian hari."
+- actionable_seed: "Bereskan kejanggalan atau masalah kecil begitu terlihat. Membiarkan gesekan kecil menumpuk hanya akan memicu ledakan yang tak perlu."
 
   Fires on fixture charts 6, 8, 10, 11.
 
@@ -139,6 +139,33 @@ slang list, and the `hukuman` ban. 3-gram-diffed against all 22 live action line
   rule 7, no hedging inside a claim - and the pattern is a bare `\bmungkin\b`, so it fires even
   where the word is doing the opposite of hedging. Replaced with `begitu terlihat`, which keeps the
   immediacy. `saat itu juga` was also verified clean and is the alternative.
+
+  BENT A SECOND TIME AT APPLY TIME, 2026-08-12, AND THIS ONE IS FOR REYNER TO ACCEPT OR REVERSE.
+  Three words DELETED from the end of the second sentence: `... yang tak perlu di kemudian hari.`
+  -> `... yang tak perlu.` Nothing was added; no word here is mine.
+
+  WHY, and it is not a style ban. `di kemudian hari` contains the bare token `hari`, and
+  `fact.relation_positions` (`lib/validate/fact.js:423`) reads a bare pillar word as a claim about
+  that PILLAR. The check skips a block that names no position at all (`fact.js:439`), so before this
+  tranche the floor's 害 block was never scanned; the added sentence supplied `hari`, the scan
+  concluded the text named [day], and the fact spans [month, year] - so it reported both as DROPPED.
+  Severity is HARD, and `lib/mirror/handlers.js#floorRefusalReason` refuses a hard-rejected floor
+  with a 503. MEASURED, all 13 fixture charts plus the hour-less chart, before the bend:
+  HARD on charts 6, 8, 10, 11 and hour-less 1989-02-04 - which is every chart 害 fires on. After the
+  bend: 0 hard, 13 of 13 floors clean.
+
+  THIS IS A GATE LIMITATION, NOT A DEFECT IN REYNER'S SENTENCE. `fact.js:85-91` already records the
+  same family: `kehidupan sehari-hari` produced a HARD finding on ordinary Indonesian that says
+  nothing about any pillar, fixed 2026-08-11 by making the scan a whole-token test. `di kemudian
+  hari` is a standalone `hari` token, so that fix cannot reach it. THE SENTENCE BENDS, NOT THE CHECK
+  (the aspek.比肩 ruling) is why the wording moved here rather than the gate - and per Reyner's
+  instruction this tranche touches no engine path. **The durable fix is a NOT_A_SPAN entry for the
+  temporal idioms (`kemudian hari`, `suatu hari`, `hari ini`), which is a gate change with its own
+  measurement (rule 13). Recorded in PROGRESS as the recommendation.**
+
+  TWO ALTERNATIVES, both verified to leave 0 hard findings on all 13 charts, either of which can
+  replace the deletion if Reyner prefers to keep the temporal beat: `pada akhirnya`, or `nanti`.
+  Both introduce a word, which is why neither was chosen unilaterally.
 
 ## relasi_cabang.刑
 - actionable_seed: "Urutkan pola rumit di area ini hingga ke keputusan awal yang kamu buat sendiri. Karena kamu yang mengikat simpulnya, hanya kamu yang bisa mengubah arahnya."

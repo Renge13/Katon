@@ -33,14 +33,16 @@
    "name_en": "Rob Wealth",
    "label_meaning": "Kamu bergerak lebih cepat saat ada persaingan. Situasi tanpa tantangan terasa datar.",
    "gift_seed": "Kamu berani mengambil langkah yang ditunda orang lain. Keberanian itu sering membukakan pintu lebih dulu.",
-   "cost_seed": "Hasil yang datang cepat juga bisa pergi cepat. Kamu sulit menahan sesuatu cukup lama sampai ia benar-benar mengendap."
+   "cost_seed": "Hasil yang datang cepat juga bisa pergi cepat. Kamu sulit menahan sesuatu cukup lama sampai ia benar-benar mengendap.",
+   "actionable_seed": "Tetapkan satu pencapaian utama dan kunci targetnya minimal untuk setahun. Jangan ganti fokus sebelum tenggatnya tiba, semenarik apa pun peluang baru yang muncul."
   },
   "食神": {
    "name_id": "Aspek Perajin",
    "name_en": "Eating God",
    "label_meaning": "Kamu senang mengerjakan sesuatu sampai selesai tanpa perlu ditonton. Prosesnya sendiri sudah memberi kepuasan.",
    "gift_seed": "Kamu menikmati pekerjaan tanpa bergantung pada pengakuan orang lain. Ini membuatmu bertahan jauh lebih lama di bidang yang kamu sukai.",
-   "cost_seed": "Kamu jarang menagih hakmu. Karyamu sering dipakai orang lain tanpa namamu ikut disebut."
+   "cost_seed": "Kamu jarang menagih hakmu. Karyamu sering dipakai orang lain tanpa namamu ikut disebut.",
+   "actionable_seed": "Dokumentasikan dan kirimkan langsung hasil kerjamu ke pemangku kepentingan. Klaim kontribusimu dengan lugas tanpa menunggu orang lain menyatakannya."
   },
   "傷官": {
    "name_id": "Aspek Pemijar",
@@ -63,7 +65,8 @@
    "name_en": "Indirect Wealth",
    "label_meaning": "Kamu melihat peluang di tempat yang dilewati orang lain. Kesempatan dan hasil terasa mudah datang, tetapi juga mudah lepas.",
    "gift_seed": "Kamu tidak takut pada ketidakpastian. Pintu sering terbuka justru karena kamu berani mengetuk lebih dulu.",
-   "cost_seed": "Yang datang besar bisa hilang besar. Kamu jarang menyimpannya cukup lama untuk benar-benar merasa aman."
+   "cost_seed": "Yang datang besar bisa hilang besar. Kamu jarang menyimpannya cukup lama untuk benar-benar merasa aman.",
+   "actionable_seed": "Kunci dan eksekusi tuntas satu peluang di tangan sebelum mengejar yang baru. Peluang yang setengah jalan hanya membuang energi."
   },
   "正官": {
    "name_id": "Aspek Pengatur",
@@ -78,7 +81,8 @@
    "name_en": "Seven Killings",
    "label_meaning": "Kamu tumbuh paling cepat saat berada di bawah tekanan. Keadaan yang terlalu aman justru membuatmu gelisah.",
    "gift_seed": "Kamu tidak lumpuh saat situasi memburuk. Justru di titik itu pikiranmu paling jernih.",
-   "cost_seed": "Kamu sering mencari tekanan yang sebenarnya tidak perlu. Istirahat terasa seperti kehilangan arah."
+   "cost_seed": "Kamu sering mencari tekanan yang sebenarnya tidak perlu. Istirahat terasa seperti kehilangan arah.",
+   "actionable_seed": "Sebelum mengambil tantangan baru, pastikan tekanannya bukan hasil ciptaanmu sendiri. Masukkan waktu rehat ke dalam jadwal sebelum tubuhmu memaksamu berhenti."
   },
   "正印": {
    "name_id": "Aspek Pelindung",
@@ -119,7 +123,8 @@
    "name_en": "Sky Horse",
    "label_meaning": "Diam terlalu lama di satu tempat membuatmu gelisah tanpa sebab. Pindah lokasi, bepergian, atau berganti suasana sering menyelesaikan masalah yang tidak selesai lewat berpikir.",
    "gift_seed": "Kamu tidak takut memulai kembali di tempat baru. Perpindahan yang terasa berat bagi orang lain adalah hal wajar bagimu.",
-   "cost_seed": "Hubungan atau usaha butuh waktu untuk mengakar, dan kamu sering berpindah sebelum itu terjadi. Hal yang butuh waktu bertahun-tahun kadang terlewat begitu saja."
+   "cost_seed": "Hubungan atau usaha butuh waktu untuk mengakar, dan kamu sering berpindah sebelum itu terjadi. Hal yang butuh waktu bertahun-tahun kadang terlewat begitu saja.",
+   "actionable_seed": "Pertahankan setidaknya satu jangkar stabil, baik pekerjaan maupun relasi, di tengah perubahan. Saat hasrat berpindah muncul, ubah rutinitas kecil dulu sebelum membongkar hal besar."
   },
   "空亡": {
    "name_id": "Tanda Kekosongan",
@@ -136,6 +141,7 @@
    "label_meaning": "Ada titik di mana kamu berhenti menimbang dan langsung mengambil keputusan tegas. Orang di sekitarmu sering kaget dengan seberapa cepat perubahan itu terjadi.",
    "gift_seed": "Kamu sanggup mengambil keputusan sulit yang ditunda orang lain. Ketegasan itu sering menyelamatkan situasi kritis.",
    "cost_seed": "Ketajaman yang sama bisa melukai hubungan atau situasi yang tidak perlu dirusak. Apa yang terputus di titik ini sulit untuk disambung kembali.",
+   "actionable_seed": "Endapkan keputusan memutus hubungan atau komitmen selama semalam sebelum mengeksekusinya. Ketegasan tidak akan luntur hanya karena kamu menundanya sehari.",
    "note_for_reyner": "[REYNER] Yang stems only (甲 -> 卯, 丙/戊 -> 午, 庚 -> 酉, 壬 -> 子). Yin stems never carry this."
   },
   "文昌": {
@@ -143,14 +149,16 @@
    "name_en": "Academic Star",
    "label_meaning": "Kamu menyerap hal baru lebih cepat daripada orang di sekitarmu, terutama lewat membaca dan mengamati sendiri.",
    "gift_seed": "Proses belajar tidak terasa sebagai beban. Bidang baru terbuka untukmu jauh lebih cepat daripada orang lain.",
-   "cost_seed": "Memahami suatu teori membuatmu merasa seolah-olah sudah menyelesaikannya. Jarak antara paham dan benar-benar mengeksekusinya sering kali terulur panjang."
+   "cost_seed": "Memahami suatu teori membuatmu merasa seolah-olah sudah menyelesaikannya. Jarak antara paham dan benar-benar mengeksekusinya sering kali terulur panjang.",
+   "actionable_seed": "Eksekusi satu penerapan kecil dalam tujuh hari setiap kali selesai mempelajari hal baru. Memahami teori tidak berharga sampai ada wujud nyatanya."
   },
   "孤辰": {
    "name_id": "Penyendiri",
    "name_en": "Solitary",
    "label_meaning": "Kamu bisa berada di tengah keramaian dan tetap merasa sedang mengamati dari luar. Waktu sendirian tidak pernah terasa sebagai hukuman.",
    "gift_seed": "Kamu tidak membutuhkan persetujuan orang lain untuk merasa utuh. Keputusan besar bisa kamu ambil tanpa perlu ditopang siapa pun.",
-   "cost_seed": "Orang mengira kamu sengaja menutup diri. Jarak yang kamu buat untuk kenyamanan pribadi sering dianggap sebagai penolakan oleh orang lain."
+   "cost_seed": "Orang mengira kamu sengaja menutup diri. Jarak yang kamu buat untuk kenyamanan pribadi sering dianggap sebagai penolakan oleh orang lain.",
+   "actionable_seed": "Beri kabar singkat saat kamu butuh menyendiri untuk mengisi ulang energi. Satu kalimat pemberitahuan mencegah prasangka tak perlu dari lingkunganmu."
   },
   "華蓋": {
    "name_id": "Bintang Sunyi",
@@ -261,28 +269,32 @@
    "name_en": "Missing Fire",
    "label_meaning": "Kehadiranmu tidak otomatis terlihat oleh orang banyak. Butuh waktu bagi orang lain untuk menyadari peranmu di dalam ruangan.",
    "gift_seed": "Kamu bekerja murni fokus pada hasil tanpa butuh panggung. Pekerjaanmu bebas dari kebutuhan untuk tampil.",
-   "cost_seed": "Apa yang sudah kamu kerjakan sering luput dari perhatian orang yang perlu tahu. Kehangatan relasi juga tidak datang sendiri, harus kamu usahakan dengan sengaja."
+   "cost_seed": "Apa yang sudah kamu kerjakan sering luput dari perhatian orang yang perlu tahu. Kehangatan relasi juga tidak datang sendiri, harus kamu usahakan dengan sengaja.",
+   "actionable_seed": "Kirim pembaruan kerja berkala tanpa diminta dan sesekali bangun obrolan informal. Kehadiran dan ikatan tidak akan terbangun jika kamu terus bersembunyi di balik layar."
   },
   "土": {
    "name_id": null,
    "name_en": "Missing Earth",
    "label_meaning": "Kamu bergerak ringan dan sulit merasa benar-benar mengakar. Rutinitas harian cepat membuatmu merasa jenuh.",
    "gift_seed": "Kamu tidak terikat pada satu pola hidup kaku. Perubahan besar tidak membuatmu cemas.",
-   "cost_seed": "Kamu tidak memiliki jangkar alami. Proses yang membutuhkan waktu bertahun-tahun untuk berbuah sering kamu tinggalkan sebelum waktunya."
+   "cost_seed": "Kamu tidak memiliki jangkar alami. Proses yang membutuhkan waktu bertahun-tahun untuk berbuah sering kamu tinggalkan sebelum waktunya.",
+   "actionable_seed": "Tetapkan satu rutinitas wajib di jam yang sama setiap minggu, sekecil apa pun itu. Konsistensi fisik membangun stabilitas yang tidak dimiliki pikiranmu."
   },
   "金": {
    "name_id": null,
    "name_en": "Missing Metal",
    "label_meaning": "Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulainya. Kamu bertahan di situasi yang sudah jelas selesai.",
    "gift_seed": "Kamu memberi kesempatan lebih banyak kepada orang lain. Hubungan atau pekerjaan jarang kamu putus tergesa-gesa.",
-   "cost_seed": "Hal-hal yang seharusnya sudah selesai terus menempel dan menguras energi. Batas tegas harus kamu buat dengan sengaja karena tidak akan muncul sendiri."
+   "cost_seed": "Hal-hal yang seharusnya sudah selesai terus menempel dan menguras energi. Batas tegas harus kamu buat dengan sengaja karena tidak akan muncul sendiri.",
+   "actionable_seed": "Beranikan diri mengakhiri urusan yang menggantung lewat satu percakapan tegas. Menggantung masalah jauh lebih menguras energi dibanding ketegangan singkat saat menyelesaikannya."
   },
   "水": {
    "name_id": null,
    "name_en": "Missing Water",
    "label_meaning": "Kamu sangat lurus dan konsisten, tetapi kurang lentur saat situasi berubah mendadak.",
    "gift_seed": "Orang tahu persis kualitas dirimu. Tidak ada versi lain dari dirimu yang berubah-ubah di ruangan berbeda.",
-   "cost_seed": "Menyesuaikan diri dengan keadaan sering terasa seperti mengkhianati prinsip diri. Situasi yang mengharuskanmu mengalah terasa sangat menguras emosi."
+   "cost_seed": "Menyesuaikan diri dengan keadaan sering terasa seperti mengkhianati prinsip diri. Situasi yang mengharuskanmu mengalah terasa sangat menguras emosi.",
+   "actionable_seed": "Tentukan tiga prinsip non-negosiasi, lalu beri dirimu fleksibilitas penuh di luar ketiganya. Mempertahankan metode lama bukanlah bagian dari integritas."
   }
  },
  "elemen_dominan": {
@@ -434,6 +446,7 @@
    "label_meaning": "Dua bagian baganmu saling berhadapan langsung. Perubahan di area ini biasanya datang mendadak dan membawa guncangan, bukan lewat proses perlahan.",
    "gift_seed": "Kamu terbiasa beradaptasi dengan guncangan cepat. Situasi sulit yang membuat orang lain panik sudah pernah kamu lewati.",
    "cost_seed": "Ketenangan di area ini tidak datang otomatis. Kestabilannya butuh dijaga dengan usaha yang sadar dan terus-menerus.",
+   "actionable_seed": "Perlakukan dinamika di area ini sebagai dorongan untuk naik kelas. Siapkan rencana cadangan sebelum dibutuhkan agar kamu merespons dengan strategi, bukan panik.",
    "pairs": [
     "子午",
     "丑未",
@@ -450,6 +463,7 @@
    "label_meaning": "Gesekan kecil yang terjadi terus-menerus, bukan benturan besar. Masalah-masalah sepele yang menumpuk perlahan hingga terasa memberatkan.",
    "gift_seed": "Kamu sangat peka pada detail kecil yang diabaikan orang lain. Masalah jarang membesar tanpa terdeteksi olehmu lebih dulu.",
    "cost_seed": "Gesekan kecil ini jarang selesai total dalam sekali tindakan. Ia sering muncul kembali dalam bentuk lain yang sedikit berbeda.",
+   "actionable_seed": "Bereskan kejanggalan atau masalah kecil begitu terlihat. Membiarkan gesekan kecil menumpuk hanya akan memicu ledakan yang tak perlu.",
    "pairs": [
     "子未",
     "丑午",
@@ -465,6 +479,7 @@
    "label_meaning": "Dua atau lebih bagian baganmu saling mengikat dengan cara yang menyulitkan. Pola ini kamu bawa sendiri, dan tanpa kamu sadari terus kamu ulang.",
    "gift_seed": "Kamu memahami situasi rumit yang tidak punya jawaban sederhana. Orang lain menyerah lebih awal di kondisi seperti ini.",
    "cost_seed": "Kesulitan di area ini sering berawal dari keputusanmu sendiri. Menyalahkan keadaan tidak akan menyelesaikannya.",
+   "actionable_seed": "Urutkan pola rumit di area ini hingga ke keputusan awal yang kamu buat sendiri. Karena kamu yang mengikat simpulnya, hanya kamu yang bisa mengubah arahnya.",
    "types": {
     "self": {
      "label_meaning": "Bagian yang sama muncul dua kali dan bergesekan dengan dirinya sendiri. Kamu justru berlebihan di wilayah yang paling kamu kuasai.",
