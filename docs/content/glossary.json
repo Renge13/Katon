@@ -47,7 +47,8 @@
    "name_en": "Hurting Officer",
    "label_meaning": "Kamu cepat melihat cara yang lebih baik dan sulit diam saat melihat hal yang tidak efisien. Mengikuti aturan yang tidak masuk akal terasa menyiksa.",
    "gift_seed": "Kamu paling cepat menemukan celah dan paling berani menyuarakan kebenaran. Ide yang tajam biasanya datang darimu.",
-   "cost_seed": "Kejujuranmu mahal harganya. Orang yang kamu koreksi sering mengingat rasa sakitnya, bukan kebenarannya."
+   "cost_seed": "Kejujuranmu mahal harganya. Orang yang kamu koreksi sering mengingat rasa sakitnya, bukan kebenarannya.",
+   "actionable_seed": "Tunda penyampaian kritik saat kamu emosi. Besoknya, sampaikan hanya satu poin perbaikan beserta dampaknya dengan jernih. Satu masukan yang diterima jauh lebih bernilai dibanding lima yang ditolak."
   },
   "正財": {
    "name_id": "Aspek Pengelola",
@@ -187,7 +188,7 @@
   "土": {
    "name_id": "Tanah",
    "name_en": "Earth",
-   "label_meaning": "Orang menaruh hal-hal penting padamu karena kamu tidak gampang goyah. Kamu menampung lebih banyak beban dari yang terlihat di permukaan.",
+   "label_meaning": "Orang menaruh hal-hal penting padamu karena kamu tidak mudah goyah. Kamu menampung lebih banyak beban dari yang terlihat di permukaan.",
    "gift_seed": "Kamu adalah tempat orang lain berpijak. Apa yang dititipkan padamu tidak akan dibiarkan jatuh.",
    "cost_seed": "Kamu menyerap beban tanpa pernah mengeluh. Apa yang tertahan terlalu lama di dalam akhirnya mengeras dan menjadi beban dingin.",
    "fed_by": "火",
@@ -234,14 +235,16 @@
    "name_en": "Balanced",
    "label_meaning": "Baganmu berdiri di titik tengah yang stabil. Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar. Situasi berubah, tetapi kamu jarang ikut goyah.",
    "gift_seed": "Kamu memiliki kelenturan yang tinggi. Perubahan mendadak yang membuat orang lain kehilangan arah biasanya hanya menggeser langkahmu sedikit saja.",
-   "cost_seed": "Titik tengah tidak memberi dorongan ekstrem yang memaksa. Arah hidupmu harus kamu tentukan sendiri, karena baganmu tidak akan memaksamu ke satu sudut."
+   "cost_seed": "Titik tengah tidak memberi dorongan ekstrem yang memaksa. Arah hidupmu harus kamu tentukan sendiri, karena baganmu tidak akan memaksamu ke satu sudut.",
+   "actionable_seed": "Tentukan satu komitmen untuk enam bulan ke depan dan tuliskan alasannya. Begitu ragu menghampiri, baca ulang catatan itu alih-alih menunggu dorongan luar."
   },
   "strong": {
    "name_id": "Kuat",
    "name_en": "Strong",
    "label_meaning": "Sumber tenagamu lahir langsung dari dalam dirimu sendiri. Kamu sanggup berjalan mandiri lebih jauh dari kebanyakan orang.",
    "gift_seed": "Daya tahanmu nyata dan solid. Tekanan keras yang membuat orang lain menyerah justru bisa kamu balikkan menjadi bahan bakar untuk maju.",
-   "cost_seed": "Energi sebesar ini membutuhkan saluran yang jelas. Tanpa arah dan kesibukan yang tepat, tenaga berlebih itu berbalik menjadi gesekan konstan dengan orang-orang terdekatmu."
+   "cost_seed": "Energi sebesar ini membutuhkan saluran yang jelas. Tanpa arah dan kesibukan yang tepat, tenaga berlebih itu berbalik menjadi gesekan konstan dengan orang-orang terdekatmu.",
+   "actionable_seed": "Alirkan energi lebihmu ke satu kegiatan fisik atau proyek intensif setiap minggu, agar tak tumpah menjadi konflik dengan orang terdekat."
   }
  },
  "elemen_hilang": {
@@ -280,6 +283,49 @@
    "label_meaning": "Kamu sangat lurus dan konsisten, tetapi kurang lentur saat situasi berubah mendadak.",
    "gift_seed": "Orang tahu persis kualitas dirimu. Tidak ada versi lain dari dirimu yang berubah-ubah di ruangan berbeda.",
    "cost_seed": "Menyesuaikan diri dengan keadaan sering terasa seperti mengkhianati prinsip diri. Situasi yang mengharuskanmu mengalah terasa sangat menguras emosi."
+  }
+ },
+ "elemen_dominan": {
+  "_note": "Keyed by facts.js elementRelation() -> relation_to_day_master. Not by element.",
+  "same": {
+   "name_id": null,
+   "name_en": "Dominant Self Element",
+   "label_meaning": "Baganmu didominasi elemen diri. Kamu melangkah tanpa perlu izin orang lain, dan tak suka ruang pribadimu diatur-atur.",
+   "gift_seed": "Pendirianmu kokoh. Saat orang lain ragu, arahmu tetap jelas.",
+   "cost_seed": "Kepala keras membuat masukan sukar masuk. Kamu baru sadar salah jalan setelah dampaknya telanjur besar.",
+   "actionable_seed": "Pilih satu orang yang berani menyanggahmu, lalu minta pendapatnya sebelum mengambil keputusan besar. Dengarkan sampai habis tanpa memotong."
+  },
+  "feeds": {
+   "name_id": null,
+   "name_en": "Dominant Resource",
+   "label_meaning": "Baganmu sarat elemen penopang. Bantuan, ilmu, dan perlindungan mengalir lebih mudah kepadamu dibanding orang lain.",
+   "gift_seed": "Kamu jarang krisis bekal. Selalu ada yang membimbing atau membukakan jalan.",
+   "cost_seed": "Terlalu nyaman ditopang membuatmu terus menunda eksekusi. Kamu terjebak dalam masa persiapan yang tak kunjung usai.",
+   "actionable_seed": "Pakai satu ilmu atau persiapan yang sudah lama kamu tumpuk minggu ini, meski rasanya belum sempurna. Ilmu baru hanya berguna setelah yang lama dipakai."
+  },
+  "drains": {
+   "name_id": null,
+   "name_en": "Dominant Output",
+   "label_meaning": "Baganmu terisi oleh karya dan output. Energi mengucur lewat ide, kreasi, dan kejelian melihat ruang perbaikan.",
+   "gift_seed": "Ide dan karya mengalir tanpa henti. Kamu tak pernah kehabisan gagasan.",
+   "cost_seed": "Output-mu menguras habis input-mu. Kamu terus memberi sampai lupa mengisi ulang daya diri sendiri.",
+   "actionable_seed": "Selesaikan satu tugas sepenuhnya sebelum menyentuh yang baru, dan sisihkan satu hari seminggu bebas dari target output apa pun."
+  },
+  "is_controlled": {
+   "name_id": null,
+   "name_en": "Dominant Wealth",
+   "label_meaning": "Baganmu dipenuhi hal-hal yang menuntut pengelolaan: peluang, tanggung jawab, dan urusan orang lain.",
+   "gift_seed": "Kesempatan tak pernah habis di tanganmu. Kamu selalu punya objek untuk dikelola.",
+   "cost_seed": "Urusan melebihi kapasitas fisikmu. Perhatianmu terpecah dan banyak hal terbengkalai setengah jalan.",
+   "actionable_seed": "Pilih hanya tiga prioritas utama untuk kuartal ini dan parkir sisanya. Fokus selesaikan tiga hal itu sebelum menyentuh daftar tunggu."
+  },
+  "controls": {
+   "name_id": null,
+   "name_en": "Dominant Officer",
+   "label_meaning": "Baganmu didominasi tuntutan luar: aturan, beban tanggung jawab, dan ekspektasi publik.",
+   "gift_seed": "Kamu tangguh di bawah tekanan. Situasi yang menakutkan bagi orang lain adalah arena harianmu.",
+   "cost_seed": "Tekanan bertubi-tubi membuatmu tak pernah merasa cukup. Selalu ada standar baru yang menghantuimu.",
+   "actionable_seed": "Lepaskan satu beban yang sebenarnya bukan kewajibanmu bulan ini. Sampaikan batas ini dengan tegas kepada pihak terkait."
   }
  },
  "shio": {
@@ -321,7 +367,7 @@
   "未": {
    "name_id": "Kambing",
    "element": "土",
-   "trait": "Peka pada detail yang dilewati orang lain. Lembut di luar, tetapi tidak gampang digoyahkan."
+   "trait": "Peka pada detail yang dilewati orang lain. Lembut di luar, tetapi tidak mudah digoyahkan."
   },
   "申": {
    "name_id": "Monyet",
@@ -351,6 +397,7 @@
    "label_meaning": "Dua bagian dari baganmu saling mengunci. Area hidup yang diwakili keduanya berjalan berdampingan; saat satu bergerak, yang lain otomatis ikut terpengaruh.",
    "gift_seed": "Ada dua bidang hidupmu yang saling menguatkan dengan sendirinya tanpa perlu kamu atur.",
    "cost_seed": "Saat ada masalah, keduanya ikut terdampak bersamaan. Masalah di satu area jarang berhenti di sana saja.",
+   "actionable_seed": "Saat satu pilar kehidupanmu terguncang, jaga pilar pasangannya tetap berjalan rutin. Menjaga satu pilar tetap stabil mencegah efek domino ke area lainnya.",
    "pairs": [
     "子丑",
     "寅亥",
@@ -501,7 +548,7 @@
   },
   "乙": {
    "name_id": "Kayu Yin",
-   "line": "Orang mengira kamu gampang mengikuti arus. Kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah."
+   "line": "Orang mengira kamu mudah mengikuti arus. Kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah."
   },
   "丙": {
    "name_id": "Api Yang",
@@ -509,7 +556,7 @@
   },
   "丁": {
    "name_id": "Api Yin",
-   "line": "Orang mengira kamu gampang mengalah. Kamu hanya memilih dengan sangat hati-hati siapa yang layak kamu terangi."
+   "line": "Orang mengira kamu mudah mengalah. Kamu hanya memilih dengan sangat hati-hati siapa yang layak kamu terangi."
   },
   "戊": {
    "name_id": "Tanah Yang",
