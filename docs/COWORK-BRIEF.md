@@ -108,7 +108,7 @@ right until you have checked.** It has been right every time so far.
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
 
-**Nineteen spec errors so far. All nineteen were mine.** Not listed to be self-flagellating; listed because
+**Twenty spec errors so far. All twenty were mine.** Not listed to be self-flagellating; listed because
 the pattern is predictive and knowing it changes what you do next. **Append here when a new one is
 caught, and never trim the list — the pattern is the value, not the count.**
 (Numbering corrected 2026-08-07: two appended rows reused 13 and 14, so the "fourteen" headline
@@ -136,6 +136,7 @@ undercounted a sixteen-row table — a counting error in the error ledger itself
 | 17 | Prompt J task 2 said "Stage 3 carries `confidence` / `confidence_reasons` for solar-term-edge and 子-hour charts". It does not. `confidence` is `strength.ts` and measures a MARGINAL VERDICT (supportShare within 5 of a threshold, unrooted DM, a root pulled by 半合); the solar-term and 時辰 edge is `boundary_flag` in `pillars.ts`. Caught by Claude Code, which exposed both with the sources kept apart. Verified 08-07: `1989-02-04 04:00` is confidence-low with `boundary_flag` false, so a route built to the prompt would have softened the wrong charts | named the right RISK and the wrong FIELD. Error 9's shape once more: asserted where a value lives from memory of the architecture instead of grepping for it. `pillars.ts` even warns in a comment that its own either-or "cannot tell the two risks apart" |
 | 18 | The 2026-08-10 QA-verdict session wrote that the 08-07 stamps on the rule-16 amendment note, the J-mirror-route header and the ledger-renumber note were wrong, and instructed every later session to "correct" them to 08-10. **The stamps were right.** `git log -6 --format="%h a:%ad c:%cd %s" --date=iso` puts `6ca09b6` and PRs #18-#20 at 2026-08-07 22:19-23:10 +0700, author and committer both, and `reports/mirror-qa-fresh-1996.md:5` independently says the reading was served on production 2026-08-07. Caught by Claude Code before the docs commit landed | applied the CURRENT session's wall clock to work done in an EARLIER one. The instruction was worse than the claim: it would have propagated the error into three more files, each of them then "evidence" for the next session. A date claim carries `git log`, never the clock — the same discipline CLAUDE.md already demands for a code fact |
 | 19 | Prompt K's mechanism section asserted "Stage 3 emits facts importance-sorted and the renderer follows JSON order", and built the change's whole theory of action on the second clause. `docs/content/renderer-prompt.txt:22-26` is a section headed **ARRANGEMENT IS FREE** and says the opposite: "The order of facts[] in the input is NOT the order you must write. It is a ranking, not a sequence." The first clause is true, which is what made the second sound checked. Caught by Claude Code, which read the prompt file before editing | error 9's shape again: asserted a component's behavior from the architecture rather than from the file, and the file is a plain-text document that takes one minute to read. Half-true is the dangerous form — the true half carried the false half through |
+| 20 | Ran a git command against the DEVICE REPO and left a `.git/index.lock` the bridge cannot delete, blocking the working tree until it was cleared by hand. Not a BaZi error and not a spec error - a ROLE error, which is why it belongs here anyway | the topology table in section 3 is the rule: **Cowork writes prompts and does not write engine code; Claude Code is the builder.** Operating the repo directly is the same boundary crossed from the other side. Worth being precise, though: no working rule NAMED git or lockfiles before this row, so the failure was foreseeable from the role split rather than prohibited outright. It is prohibited now. The practical cost is asymmetric and that is the argument - Cowork gains nothing from running git that a prompt to Claude Code would not also achieve, and a lock it cannot release stops the builder entirely |
 
 **Three of these (2, 5, 6) are the same failure: I had the disproving evidence in hand and wrote the
 claim anyway.** Before asserting anything, check whether something you already measured contradicts it.
@@ -300,8 +301,8 @@ quality of the output, not to what is easier to build. I am the sole authority o
 register: propose wording, flag it, never auto-decide.
 
 Never improvise a BaZi rule, including tables I hand you. Verify against docs/, the repo's locked
-tests, or Joey's plotter, and stop if sources disagree. Nineteen spec errors are in the ledger and
-all nineteen were yours, so check before asserting.
+tests, or Joey's plotter, and stop if sources disagree. Twenty spec errors are in the ledger and
+all twenty were yours, so check before asserting.
 
 Then tell me where we actually are and what you think the next move is. Do not write engine code.
 ```
