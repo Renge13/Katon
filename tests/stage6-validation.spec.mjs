@@ -483,6 +483,89 @@ test('A PILLAR WORD INSIDE AN ORDINARY WORD IS NOT A PILLAR', () => {
   }
 });
 
+test('A CALENDAR UNIT IS NOT A PILLAR - round 4, and the classes are from evidence', () => {
+  // 2026-08-12. Tranche 2b's ruled `relasi_cabang.害` line ended `di kemudian hari`
+  // and raised a HARD finding on every chart 害 fires on (6, 8, 10, 11 plus the
+  // hour-less chart), because a bare `hari` was read as the day pillar. Round 3
+  // made the scan whole-token, which cannot reach a STANDALONE token, so this is
+  // the same root cause through a fourth surface form.
+  //
+  // The clauses below are not invented: the whole glossary and renderer-prompt.txt
+  // were swept through the real stripping and tokeniser, and these are the forms
+  // that actually survived. See NOT_A_SPAN in lib/validate/fact.js.
+  const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
+  const tail = `${fact.label_meaning} ${fact.gift} ${fact.cost}`;
+  const span = fact.provenance.positions_id;
+
+  const calendar = [
+    'Jangan tunggu di kemudian hari.', // the round-4 case, tranche 2b
+    'Suatu hari kamu akan melihatnya.', // pre-modifier
+    'Kirim pembaruan bulan ini.', // deictic - aspek.正財, elemen_dominan.controls
+    'Eksekusi satu penerapan dalam tujuh hari.', // counted - bintang.文昌
+    'Tetapkan komitmen untuk enam bulan ke depan.', // counted - kekuatan.balanced
+    'Sisihkan satu hari seminggu.', // counted - elemen_dominan.drains
+    'Tetapkan rutinitas di jam yang sama.', // clock - elemen_hilang.土
+    'Kunci targetnya minimal untuk dua belas bulan.', // `belas` stands alone
+    'Kamu bisa menunggu sepanjang hari.', // pre-modifier
+  ];
+  for (const clause of calendar) {
+    const reading = withBlockText(goodReading(), fact.id,
+      `Tarikan ini menempati ${span}. ${clause} ${tail}`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('fact.relation_positions'),
+      `a calendar unit was read as a pillar: ${clause}`);
+  }
+
+  // THE ZODIAC FORM IS DELIBERATELY NOT STRIPPED, and this is the test that says
+  // so. `bulan Ayam` names the month pillar by its animal and renderer-prompt.txt
+  // encourages it. Stripping only ever REMOVES a position from `named`, and
+  // `missing` is derived from what is named, so stripping a form that genuinely
+  // names a pillar would move it into `missing` and fire where the text is right.
+  const zodiacFact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
+  const positions = zodiacFact.provenance.positions;
+  const reading = withBlockText(goodReading(), zodiacFact.id,
+    `Tarikan ini menempati ${span}. Hari lahirmu jatuh di bulan Ayam. ${tail}`);
+  const hit = checksIn(validateRendering(reading, CHART_1)).includes('fact.relation_positions');
+  assert.ok(!hit || !positions.includes('month'),
+    'the zodiac month form must keep counting as naming the month pillar');
+});
+
+test('NO ENGINE STRING NAMES A PILLAR BY BARE WORD', () => {
+  // The sibling of NO ENGINE STRING WOULD TRIP THE STYLE GATE, and it exists for
+  // the same reason: a glossary cell that trips a gate check punishes the renderer
+  // for carrying engine content faithfully. Four of the last four
+  // `fact.relation_positions` rounds were found by content authoring rather than by
+  // this suite, twice on a Reyner-ruled string. This is the check that makes the
+  // next one a fast unit failure instead of a 503.
+  //
+  // A span is always pre-verbalised by the engine as PALACE names
+  // (provenance.positions_id, e.g. "Pilar Akar dan Pilar Kerja"), so no cell needs
+  // a bare pillar word to state one, and any cell that produces one is an accident.
+  // Strings containing a palace name are skipped: they name a position legitimately,
+  // and in a two-palace span naming one of them is correctly a finding.
+  const PALACE_NAMES = Object.values(GLOSSARY.pilar)
+    .flatMap((p) => [p.name_id, p.branch_name_id]).filter(Boolean);
+  const fact = CHART_1.facts.find((f) => f.provenance?.kind === 'branch_relation');
+
+  const offenders = [];
+  const walk = (node, path) => {
+    if (typeof node === 'string') {
+      if (PALACE_NAMES.some((name) => node.includes(name))) return;
+      const reading = { blocks: [{ heading: '', text: node, fact_ids: [fact.id] }] };
+      const findings = validateRendering(reading, CHART_1).findings
+        .filter((f) => f.check === 'fact.relation_positions');
+      if (findings.length) offenders.push(`${path}: ${findings[0].message}`);
+      return;
+    }
+    if (node && typeof node === 'object') {
+      for (const [key, value] of Object.entries(node)) walk(value, path ? `${path}.${key}` : key);
+    }
+  };
+  walk(GLOSSARY, '');
+
+  assert.deepEqual(offenders, [],
+    `glossary strings read as naming a pillar:\n  ${offenders.join('\n  ')}`);
+});
+
 // ── 2. COVERAGE ────────────────────────────────────────────
 
 test('a required point in no block is caught', () => {
