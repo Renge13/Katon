@@ -353,14 +353,12 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **A content tranche and its wiring BOTH re-ranked nothing — the second and third confirmations that prose is decoupled from ranking** | fact order moved **0 of 13** on `6947af0` and **0 of 13** on `ac24441` · cache keys moved 10 of 13 then 8 of 13 | **08-12** | The tripwire from the actionability declaration (08-11 row above), and it is clean twice. Importances on the wiring commit are byte-identical before and after: 41, 70, 64, 70, 41, 70, 61, 67. Keys moving while order does not is the correct signature - the strings changed, the axes did not, because `actionabilityOf` reads `ACTIONABLE_KINDS[fact.provenance?.kind]` and nothing in `hierarchy.js` reads fact content. **The tranche-2a prompt predicted 8 of 13 orders would move and was wrong; that is COWORK-BRIEF error 21**, and the aggravating half is that it also told the reader the move was "expected, NOT the re-coupling tripwire firing", which would have authorised dismissing a real alarm. |
 | The `hour_known_contradiction` spike under K was the KNOWN penutup failure, not a K regression | 1 (control) · 15 / 25 / 38 (K arms) · 15 (08-07) | 08-11 | Read in `docs/research/rejections-K-v1-2026-08-11.md` rather than counted. The failing sentence is verbatim the 08-06 gallery finding - *"Keempat pilar harimu tidak dapat dipetakan karena jam lahir tidak diketahui"*, in the **penutup**, in a reading that names Pilar Akar, Pilar Kerja and Pilar Arah three paragraphs above. It lives in the closing sentence, which K does not touch, and it fired 15 times in the 08-07 baseline before K existed. **Its rate swings 1 to 38 across runs of code that differs in ways it cannot see, which makes it the loudest single argument for the baseline rule two rows up.** Left open: nothing here explains why the rate moves, and it remains a plain falsehood when it fires. |
 
-## 2026-08-12 — TRANCHE 2A built and measured (28 ruled strings + the `elemen_dominan` wiring)
+## DONE 2026-08-12 — TRANCHE 2A merged (28 ruled strings + the `elemen_dominan` wiring)
 
-Fix-plan step 2 continues. Two commits, deliberately separate (rule 13), both measured on their own.
-Numbers are in MEASUREMENTS; this section is the mechanism.
-
-**STATE: PR #38 is OPEN at the time of writing, awaiting Reyner's review.** The measurements below are
-off the branch commits and stand on their own; the merge does not change them. Whoever merges #38
-should strike this paragraph and stamp the section DONE with the merge date from `git log`.
+Fix-plan step 2 continues. **PR #38, merged 2026-08-12 17:14 +0700 as `ceb77db`** — dates from
+`git log origin/main --format="%h a:%ad c:%cd %s" --date=iso`, never a session clock (error 18). Two
+commits, deliberately separate (rule 13), both measured on their own: `6947af0` 16:41 and `ac24441`
+16:43, both +0700. Numbers are in MEASUREMENTS; this section is the mechanism.
 
 - **`6947af0` content** — `elemen_dominan` scaffolded as a new glossary group (five keys, `name_id`
   null on all five, following the `elemen_hilang` precedent) and 28 assignments applied verbatim from
@@ -442,9 +440,9 @@ having none.**
    bracket once). This pass REPLACES the queued compat content session in the schedule — compat
    cells will be authored to whatever pattern survives this pass.
    **TRANCHE 1 DONE 2026-08-11, PR #22 + #24. PASSED — see the verdict below. Tranche 2 GREEN-LIT.**
-   **TRANCHE 2A built and measured 2026-08-12, PR #38 OPEN — see the 08-12 section above.** It also
-   carried the `elemen_dominan` wiring, which closed the last floor finding and the second cause under
-   chart 5's padding.
+   **TRANCHE 2A DONE 2026-08-12, PR #38 — see the 08-12 section above.** It also carried the
+   `elemen_dominan` wiring, which closed the last floor finding and the second cause under chart 5's
+   padding.
 3. ~~**Transitions / narrative roles**~~ — **CANCELLED 2026-08-11, not deferred.** See below.
 4. **VOICE A/B (added 2026-08-10, Reyner's call after the Gemini-feedback discussion).** Two
    renderer prompts identical except the voice paragraph: the current composed-voice wording vs a
