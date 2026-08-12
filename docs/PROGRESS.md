@@ -352,6 +352,8 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **THE MODULE-ASSEMBLY FLOOR IS 13/13 CLEAN — and the cause of the last two findings was nobody's prediction** | floor readings raising a gate finding **2 of 13 -> 0 of 13** | **08-12** | `ac24441`, the tranche-2a wiring commit, measured alone. **The two were `structure.duplicate_sentence` on charts 2 and 8, and those are exactly the two `same`-relation charts** - `elementRelation(dmElement, element)` returns `same` there because the dominant element IS the day master's element, so `element_dominant` and `day_stem` resolved to the identical `GLOSSARY.elemen[hanzi]` entry and the floor, which renders every string of every fact, printed it word for word twice. Keying `element_dominant` to its own `elemen_dominan` group **per relation** removed the collision at its source rather than by collapsing a fact. **Record this mechanism, do not rediscover it:** the finding looked like a floor-renderer defect and was actually two facts sharing one glossary node, which is the same shape as the third Stage 3 collapse gap (charts 9 and 12, 08-04) arriving through a different door. A shared glossary entry between two facts that can co-occur is a duplicate waiting to happen. |
 | **A content tranche and its wiring BOTH re-ranked nothing — the second and third confirmations that prose is decoupled from ranking** | fact order moved **0 of 13** on `6947af0` and **0 of 13** on `ac24441` · cache keys moved 10 of 13 then 8 of 13 | **08-12** | The tripwire from the actionability declaration (08-11 row above), and it is clean twice. Importances on the wiring commit are byte-identical before and after: 41, 70, 64, 70, 41, 70, 61, 67. Keys moving while order does not is the correct signature - the strings changed, the axes did not, because `actionabilityOf` reads `ACTIONABLE_KINDS[fact.provenance?.kind]` and nothing in `hierarchy.js` reads fact content. **The tranche-2a prompt predicted 8 of 13 orders would move and was wrong; that is COWORK-BRIEF error 21**, and the aggravating half is that it also told the reader the move was "expected, NOT the re-coupling tripwire firing", which would have authorised dismissing a real alarm. |
 | **TRANCHE 2B: the ranking tripwire holds a FOURTH time, and every reader's key moved** | cache keys **13 of 13** · fact order **0 of 13** · importance vectors **0 of 13** · fact count and required_points unchanged 13 of 13 | **08-12** | `273292a`, 15 `actionable_seed` assignments, no engine path. 13 of 13 keys is the strongest form of "this content reached every reader" and it agrees with the per-cell fire lists (the union of the 15 cells' fixture charts is all 13). Order at zero is what makes it a content change: since #34 actionability is DECLARED, so prose cannot buy rank. **Four checks, never once fired.** A first firing would mean prose had re-coupled to ranking — the bug #34 removed — and is a bug report, not a curiosity. |
+| **GATE `1.9.0` — `fact.relation_positions` round 4 FIXED: a calendar unit is not a pillar** | **108 of 108 HARD → 0 of 108** · control 0 → 0 · floors 0 of 14 both sides | **08-12** | The exposure population is every relation fact on 13 fixture charts plus the hour-less chart, against each of the **six live glossary cells that carry a calendar unit**, in the shape that actually fires: span NOT stated + a bare unit. `NOT_A_SPAN` gained three CLASSES (counted duration, calendar deictic, temporal pre-modifier) derived by sweeping the whole glossary and `renderer-prompt.txt` through the real scan — **eight** tokens survived and none was a span statement, so the three idioms in the ruling were a subset. `bulan Ayam` / `tahun Ular` are deliberately NOT stripped: stripping only removes positions from `named`, so stripping a form that genuinely names a pillar would fire where the text is right. Reyner's `di kemudian hari` restored in the next commit, which IS the regression test (keys 4 of 13, **order 0 of 13**). **A claim of this session's own was disproved in the measuring: a correctly-stated span plus a calendar unit fires 0 of 108, because gate `1.4.0` had already dropped the `extra` condition.** Two tests added, stage6 64 → 66, including `NO ENGINE STRING NAMES A PILLAR BY BARE WORD` over every glossary string. |
+| **The floor never states a relation's span — pre-existing, unmasked by the above, NOT fixed** | every relation block, every chart | **08-12** | A `branch_relation` fact carries no `fact.palace` (the span is `provenance.positions_id`) and `assembleFallback` prints only `fact.palace`, so a floor relation block says what the relation is and never where it sits. The check skipped it because nothing was named, which is why four rounds of this bug never surfaced here. **So the 503s were a false positive about a REAL omission.** The cheap fix is one line leading the block with `positions_id` — authors nothing, the string is already engine-owned and Reyner-reviewed. Own change, own measurement. |
 | **`fact.relation_positions` fired for the first time since it was silenced, and it is the CHECK that is wrong** | HARD on **5 charts** (6, 8, 10, 11, hour-less 1989-02-04) → **0** after a 3-word deletion | **08-12** | The 08-06 note said this check "is now silent and should stay that way - if it ever fires again it is a genuine dropped position and worth reading". **Read: it was not genuine.** `di kemudian hari` carries a bare `hari`; the check reads a bare pillar word as a claim about that pillar and **skips any block naming no position** (`fact.js:439`), so the floor's 害 block had never been scanned before this tranche. The new sentence supplied `hari` → named `[day]` → span `[month, year]` reported DROPPED → HARD → `floorRefusalReason` 503s the reader. **Same family as `kehidupan sehari-hari`** (`fact.js:85-91`, fixed 08-11 by a whole-token scan, which cannot reach a standalone token). **RECOMMENDATION, not done: `NOT_A_SPAN` entries for `kemudian hari` / `suatu hari` / `hari ini`** — gate change, own measurement (rule 13). Indonesian uses `hari` temporally more than positionally, so this recurs on production prose, not just glossary strings. Also a method note: the stage6 floor test stops at the first failing chart, so the blast radius was 5 charts while the message showed 1 — probe all 13 before believing a per-chart count. |
 | The `hour_known_contradiction` spike under K was the KNOWN penutup failure, not a K regression | 1 (control) · 15 / 25 / 38 (K arms) · 15 (08-07) | 08-11 | Read in `docs/research/rejections-K-v1-2026-08-11.md` rather than counted. The failing sentence is verbatim the 08-06 gallery finding - *"Keempat pilar harimu tidak dapat dipetakan karena jam lahir tidak diketahui"*, in the **penutup**, in a reading that names Pilar Akar, Pilar Kerja and Pilar Arah three paragraphs above. It lives in the closing sentence, which K does not touch, and it fired 15 times in the 08-07 baseline before K existed. **Its rate swings 1 to 38 across runs of code that differs in ways it cannot see, which makes it the loudest single argument for the baseline rule two rows up.** Left open: nothing here explains why the rate moves, and it remains a plain falsehood when it fires. |
 
@@ -428,14 +430,77 @@ strengthens the case for the fix rather than weakening it:**
    built. Reyner ratified the deletion 2026-08-12 (three of his words removed, none added, and every
    alternative introduces new vocabulary), so 2b's bend stands — but it stands as the exception.
 
-**Why it is safe to defer and unsafe to defer past promotion, which is why it is now a precondition
+### ROUND 4 IS CLOSED, 2026-08-12: the check was fixed and Reyner's words restored
+
+**Gate `1.8.0` -> `1.9.0`.** Two commits, in this order, because the second is the first one's
+regression test: `NOT_A_SPAN` gained three classes, measured with the bent string still in place
+(rule 13); then `di kemudian hari` went back into `relasi_cabang.害` and the fixed check passes it.
+**The ruled wording ships complete.** The `sesegera mungkin` -> `begitu terlihat` bend STAYS —
+`style.hedging` is a legitimate ban, and that distinction is the whole content of COWORK-BRIEF error
+22.
+
+**THE FIX WENT WIDER THAN THE THREE NAMED IDIOMS, and the extra scope came from evidence.** The whole
+glossary and `renderer-prompt.txt` were swept through the real stripping and tokeniser, and **eight**
+bare pillar tokens survived, none of them a span statement: `bulan ini` (`aspek.正財`,
+`elemen_dominan.controls`), `tujuh hari` (`bintang.文昌`), `enam bulan ke depan` (`kekuatan.balanced`),
+`satu hari seminggu` (`elemen_dominan.drains`), `di jam yang sama` (`elemen_hilang.土`), and
+`bulan Ayam` / `tahun Ular` from the prompt's own examples. So the patterns are three CLASSES —
+counted duration, calendar deictic, temporal pre-modifier — and the named idioms fall inside them. A
+list of three would have been round 5 waiting to happen.
+
+**`bulan Ayam` and `tahun Ular` are deliberately NOT stripped**, and the reason is a trap worth
+keeping: stripping only ever REMOVES a position from `named`, and `missing` is derived from what is
+named, so stripping a form that genuinely names a pillar moves it into `missing` and makes the check
+fire where the text is right. Strip only what cannot be a chart reference.
+
+| measured, 13 fixture charts + the hour-less chart | gate 1.8.0 | gate 1.9.0 |
+|---|---|---|
+| span NOT stated + a calendar unit (the floor's shape), every relation fact x each of the 6 live cells | **108 of 108 HARD** | **0 of 108** |
+| span stated correctly + a calendar unit (control) | 0 of 108 | 0 of 108 |
+| floor hard-rejected | 0 of 14 | 0 of 14 |
+| cache keys / fact order moved by the restore | — | 4 of 13 keys (charts 6, 8, 10, 11) · **order 0 of 13** |
+
+**ONE CLAIM OF THIS SESSION'S OWN WAS DISPROVED BY THAT MEASUREMENT and is corrected rather than
+quietly dropped.** The first draft of the fix asserted that any braid of one of those cells with a
+relation fact was a hard finding waiting to happen. **It is not:** with the span stated correctly a
+calendar unit changes nothing, because gate `1.4.0` dropped the `extra` condition. It fires only when
+the block does NOT state the span, which is what stops `named.size === 0` from skipping.
+
+### NEWLY VISIBLE, PRE-EXISTING, AND NOT FIXED: the floor never states a relation's span
+
+Found while measuring the above, and it is the reason the check had been silent on the floor for so
+long. **A `branch_relation` fact carries no `fact.palace`** — its span lives in
+`provenance.positions_id`, pre-verbalised as palace names ("Pilar Akar dan Pilar Kerja") — **and
+`assembleFallback` prints only `fact.palace`.** So every floor relation block says what the relation
+IS and never where it sits, and the check skipped it because nothing was named. Tranche 2b's idiom
+made `named` non-empty, which unmasked the gap and then mis-described it as *"the text names [day]"*.
+
+So the 503s were a false positive about a REAL omission. **Not fixed here** (own change, own
+measurement, and it is a content-quality question: the floor is meant to be bland, but a relation with
+no location is thinner than the data allows). The cheap version is one line in `assembleFallback` —
+lead a relation block with `provenance.positions_id`, which authors nothing, since the string is
+already engine-owned and Reyner-reviewed.
+
+### The forward argument, recorded because it is why this could not wait
+
+**Compat content is relationship prose, and temporal idiom is native register there.** The v1 money
+engine is about two people over time — how they meet, where friction recurs, what is coming — so
+`suatu hari`, `bulan ini`, `di kemudian hari`, `beberapa tahun ke depan` are the natural way to write
+it, not edge cases to be avoided. **Every future content tranche pays this tax until the check is
+right, and each one presents as a content problem when it is a gate problem**: the author sees a HARD
+finding on their own sentence and the cheapest response is always to change the sentence. That is
+exactly what happened in tranche 2b, and it is how a broken check quietly edits the product's voice.
+The fix above is what stops the compat pass from spending its budget on the same argument.
+
+**Why it was safe to defer and unsafe to defer past promotion, which is why it was a precondition
 rather than a backlog item:** a hard finding sends the reading to the module-assembly floor, and
 `floorRefusalReason` answers a hard-rejected floor with a **503**. Behind the preview fence at zero
 traffic, that is a curiosity nobody hits. On a public mirror it is a 503 generator, and the trigger is
 not exotic: **Indonesian uses `hari` temporally far more often than positionally** (`kemudian hari`,
 `suatu hari`, `hari ini`, `sehari-hari`), the renderer writes free prose by design, and rule 15 puts
 an LLM in that path. Every round so far was found by content authoring, where the string is fixed and
-inspectable. Round 5 will be found by a reader.
+inspectable. **Round 5 would have been found by a reader — which is why round 4 ends in a fix and not
+in a bent sentence.**
 
 ### External feedback adjudicated (Gemini, via Reyner, 2026-08-12)
 
@@ -788,19 +853,18 @@ how a session promotes without reading it):
 | 1 | Xendit verification approved + live keys swapped | **MET 2026-08-07.** QRIS **activated 2026-08-11**; the first self-purchase is tracked above and is NOT part of this condition |
 | 2 | The fulfillment swap shipped — Complete Edition card + PDF exist, so the 19k upsell is a real thing to buy | NOT MET |
 | 3 | Reyner has QA'd real readings through the preview | NOT MET |
-| 4 | **`fact.relation_positions` no longer reads a temporal `hari` as a pillar** — the `NOT_A_SPAN` fix (`kemudian hari`, `suatu hari`, `hari ini`), own commit, own measurement (rule 13) | **NOT MET — added 2026-08-12** |
+| 4 | **`fact.relation_positions` no longer reads a temporal `hari` as a pillar** — the `NOT_A_SPAN` fix, own commit, own measurement (rule 13) | **MET 2026-08-12**, gate `1.9.0`. Added and met the same day; the fix went wider than the three named idioms (see below) |
 
-**Precondition 4 was PROMOTED from backlog 2026-08-12, and the reason is a difference of kind, not of
-degree.** A hard finding drops the reading to the floor, and `floorRefusalReason` answers a
-hard-rejected floor with a **503**. Fenced at zero traffic, this check misfiring is a curiosity found
-by whoever is authoring content. On a public mirror it is a **503 generator**: Indonesian uses `hari`
-temporally far more often than positionally, and the renderer writes free prose by design, so the
-trigger is ordinary language rather than an edge case. It has cost work four times without being
-fixed (see the 08-12 history block); the fourth time it hard-rejected a Reyner-ruled string on every
-chart one relation fires on. **Not built here by instruction — but promotion cannot be the commit that
-discovers it.**
+**Precondition 4 was promoted from backlog and MET the same day, 2026-08-12.** It was promoted because
+the exposure is a difference of kind, not degree: a hard finding drops the reading to the floor, and
+`floorRefusalReason` answers a hard-rejected floor with a **503**. Fenced at zero traffic that is a
+curiosity found by whoever authors content; on a public mirror it is a **503 generator**, because
+Indonesian uses `hari` temporally far more often than positionally and the renderer writes free prose
+by design. **Kept in the table now that it is met** rather than deleted, because the row is the record
+of why a gate fix was a release gate at all, and a future promotion should be able to see that
+reasoning applied once and then satisfied.
 
-**1 of 4.** Condition 3 is the one J unblocks: QA is
+**2 of 4.** Condition 3 is the one J unblocks: QA is
 `curl -H "x-mirror-preview-token: $MIRROR_PREVIEW_TOKEN" https://www.katon.app/api/mirror/<token>`
 after a POST to `/api/mirror` with a birthdate. It returns JSON, not a page — J built no UI, by
 design. **Use `www.`** — the apex 308-redirects to it, and a redirect is the one place a header can
