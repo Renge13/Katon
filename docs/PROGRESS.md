@@ -351,7 +351,84 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **BLOCKS PER READING is the one metric that replicates - and it is what the renderer-prompt wording moves** | identical config **5.1 / 5.1** · K wordings **7.3 / 5.4 / 7.1** | **08-11** | Measured over 616-1396 blocks per run, which is why it is stable where the rates are not: the two gate-`1.8.0` runs four days apart agree to the decimal. Three wordings of the same K instruction were measured. "Write them first, in the order the array gives them" (`69a9afe2`) and the minimal one-sentence insert (`9c167561`) both inflate block count ~40% - chart 1 went from 4 blocks carrying 10 facts to **9 blocks carrying 9 facts**, one fact per block, which is the "tour of the chart" the prompt bans and a direct worsening of QA finding 2. Adding "First does not mean three blocks" (`8877da29`) holds it at **5.4**. **The engine reorder is common to all three, so the wording is the whole effect; the reorder alone fragments nothing.** `8877da29` is what shipped. Its cost is coverage p10 0.55 against the control's 0.67 - a soft-check trade, taken on the metric that replicates over three rates that do not. |
 | **THE MODULE-ASSEMBLY FLOOR IS 13/13 CLEAN — and the cause of the last two findings was nobody's prediction** | floor readings raising a gate finding **2 of 13 -> 0 of 13** | **08-12** | `ac24441`, the tranche-2a wiring commit, measured alone. **The two were `structure.duplicate_sentence` on charts 2 and 8, and those are exactly the two `same`-relation charts** - `elementRelation(dmElement, element)` returns `same` there because the dominant element IS the day master's element, so `element_dominant` and `day_stem` resolved to the identical `GLOSSARY.elemen[hanzi]` entry and the floor, which renders every string of every fact, printed it word for word twice. Keying `element_dominant` to its own `elemen_dominan` group **per relation** removed the collision at its source rather than by collapsing a fact. **Record this mechanism, do not rediscover it:** the finding looked like a floor-renderer defect and was actually two facts sharing one glossary node, which is the same shape as the third Stage 3 collapse gap (charts 9 and 12, 08-04) arriving through a different door. A shared glossary entry between two facts that can co-occur is a duplicate waiting to happen. |
 | **A content tranche and its wiring BOTH re-ranked nothing — the second and third confirmations that prose is decoupled from ranking** | fact order moved **0 of 13** on `6947af0` and **0 of 13** on `ac24441` · cache keys moved 10 of 13 then 8 of 13 | **08-12** | The tripwire from the actionability declaration (08-11 row above), and it is clean twice. Importances on the wiring commit are byte-identical before and after: 41, 70, 64, 70, 41, 70, 61, 67. Keys moving while order does not is the correct signature - the strings changed, the axes did not, because `actionabilityOf` reads `ACTIONABLE_KINDS[fact.provenance?.kind]` and nothing in `hierarchy.js` reads fact content. **The tranche-2a prompt predicted 8 of 13 orders would move and was wrong; that is COWORK-BRIEF error 21**, and the aggravating half is that it also told the reader the move was "expected, NOT the re-coupling tripwire firing", which would have authorised dismissing a real alarm. |
+| **TRANCHE 2B: the ranking tripwire holds a FOURTH time, and every reader's key moved** | cache keys **13 of 13** · fact order **0 of 13** · importance vectors **0 of 13** · fact count and required_points unchanged 13 of 13 | **08-12** | `273292a`, 15 `actionable_seed` assignments, no engine path. 13 of 13 keys is the strongest form of "this content reached every reader" and it agrees with the per-cell fire lists (the union of the 15 cells' fixture charts is all 13). Order at zero is what makes it a content change: since #34 actionability is DECLARED, so prose cannot buy rank. **Four checks, never once fired.** A first firing would mean prose had re-coupled to ranking — the bug #34 removed — and is a bug report, not a curiosity. |
+| **`fact.relation_positions` fired for the first time since it was silenced, and it is the CHECK that is wrong** | HARD on **5 charts** (6, 8, 10, 11, hour-less 1989-02-04) → **0** after a 3-word deletion | **08-12** | The 08-06 note said this check "is now silent and should stay that way - if it ever fires again it is a genuine dropped position and worth reading". **Read: it was not genuine.** `di kemudian hari` carries a bare `hari`; the check reads a bare pillar word as a claim about that pillar and **skips any block naming no position** (`fact.js:439`), so the floor's 害 block had never been scanned before this tranche. The new sentence supplied `hari` → named `[day]` → span `[month, year]` reported DROPPED → HARD → `floorRefusalReason` 503s the reader. **Same family as `kehidupan sehari-hari`** (`fact.js:85-91`, fixed 08-11 by a whole-token scan, which cannot reach a standalone token). **RECOMMENDATION, not done: `NOT_A_SPAN` entries for `kemudian hari` / `suatu hari` / `hari ini`** — gate change, own measurement (rule 13). Indonesian uses `hari` temporally more than positionally, so this recurs on production prose, not just glossary strings. Also a method note: the stage6 floor test stops at the first failing chart, so the blast radius was 5 charts while the message showed 1 — probe all 13 before believing a per-chart count. |
 | The `hour_known_contradiction` spike under K was the KNOWN penutup failure, not a K regression | 1 (control) · 15 / 25 / 38 (K arms) · 15 (08-07) | 08-11 | Read in `docs/research/rejections-K-v1-2026-08-11.md` rather than counted. The failing sentence is verbatim the 08-06 gallery finding - *"Keempat pilar harimu tidak dapat dipetakan karena jam lahir tidak diketahui"*, in the **penutup**, in a reading that names Pilar Akar, Pilar Kerja and Pilar Arah three paragraphs above. It lives in the closing sentence, which K does not touch, and it fired 15 times in the 08-07 baseline before K existed. **Its rate swings 1 to 38 across runs of code that differs in ways it cannot see, which makes it the loudest single argument for the baseline rule two rows up.** Left open: nothing here explains why the rate moves, and it remains a plain falsehood when it fires. |
+
+## 2026-08-12 — TRANCHE 2B: fix-plan step 2 is CLOSED (15 action lines)
+
+The content revision pass from the 2026-08-10 mirror QA verdict is complete. Two commits, the #28
+shape: `1a42a69` put `content/tranche2b-rulings.md` on `main` alone (PR #40, merged `fa85302`
+2026-08-12 17:29 +0700, from `git log`), then `273292a` applied it. Fifteen `actionable_seed`
+assignments, no scaffold, no wiring, no engine path.
+
+**Every glossary cell a fact can carry now has an action line**, except the three deliberately
+without one: `elemen.*` (consumed only by `day_stem`, declared non-actionable in `ACTIONABLE_KINDS`),
+`bintang.天乙貴人` (ruled NO CHANGE in tranche 1) and `bintang.華蓋` (descoped). QA finding 3,
+"jargon without a Monday morning", is answered for the whole glossary rather than for one tranche's
+cells.
+
+**THE TRIPWIRE, FOURTH CHECK, STILL CLEAN: cache keys 13 of 13, fact order 0 of 13, importance
+vectors 0 of 13.** 13 of 13 keys is the strongest available form of "this reached every reader" and
+it agrees with the per-cell fire lists — the union of the 15 cells' fixture charts is all 13. See
+MEASUREMENTS.
+
+### The bend the gate forced, and why the check is the thing that is wrong
+
+Recorded because the finding message alone points at the text, and the text is fine.
+
+`relasi_cabang.害`'s ruled line ended `... ledakan yang tak perlu di kemudian hari.` That idiom
+carries the bare token `hari`, and `fact.relation_positions` (`lib/validate/fact.js:423`) reads a
+bare pillar word as a claim about that pillar. It **skips a block that names no position at all**
+(`fact.js:439`), so the floor's 害 block had never been scanned; the new sentence supplied `hari`,
+the scan concluded the text named `[day]`, the fact spans `[month, year]`, and both were reported
+DROPPED. Severity is HARD, and `lib/mirror/handlers.js#floorRefusalReason` turns a hard-rejected
+floor into a **503**.
+
+Measured before the bend, 13 fixture charts plus the hour-less chart: **HARD on charts 6, 8, 10, 11
+and hour-less 1989-02-04 — every chart `害` fires on.** The stage6 test asserts per chart and stops
+at the first, which is why the failure initially presented as one chart; probing all 13 is what
+showed the real blast radius. Three words were deleted (nothing added, no word in that cell authored
+by Code), and it is **flagged in the rulings file for Reyner to accept or reverse**, with two
+verified alternatives (`pada akhirnya`, `nanti`).
+
+**THE RECOMMENDATION, NOT DONE HERE: add the temporal idioms to `NOT_A_SPAN`** —
+`kemudian hari`, `suatu hari`, `hari ini`. `fact.js:85-91` already records this exact family:
+`kehidupan sehari-hari` produced a HARD finding on ordinary Indonesian saying nothing about any
+pillar, fixed 2026-08-11 by making the scan a whole-token test — which cannot reach a *standalone*
+`hari`. Indonesian uses `hari` temporally far more often than positionally, so this will recur on
+production prose, not just on glossary strings. It is a gate change and needs its own measurement
+(rule 13), and this tranche touches no engine path by instruction. **The sentence bent, not the
+check, which is the `aspek.比肩` ruling — but the check is where the defect lives.**
+
+### External feedback adjudicated (Gemini, via Reyner, 2026-08-12)
+
+Same treatment as the 2026-08-10 Gemini round, and for the same reason: recorded so it is not
+re-imported wholesale later.
+
+**REJECTED — "sort facts by real actionability seeds instead of the false `actionable: true` flag".**
+This recommends undoing PR #34. `actionabilityOf` (`lib/semantic/hierarchy.js:219`) reads
+`ACTIONABLE_KINDS` only, and its own comment states the reason: `fact.actionable` **is** the
+`actionable_seed` string, so scoring on it made a fact more important because somebody had written
+more words about it. **Prose buying rank is the bug that was removed, not a feature to restore.**
+Measured three times since, now four: a content tranche moves cache keys and never fact order. There
+is no version of "sort by the real seeds" that does not re-couple authoring to ranking, and rule 14
+gives order to the engine, as a function of the chart.
+
+**ADOPTED / ALREADY TRUE — prose is decoupled from ranking, and the copy constraints are
+architectural boundaries** rather than style preferences (rule 25; golden rule 3 on 冲 and 刑 — a
+clash is a forced upgrade, 刑 is self-authored entanglement, never punishment). Both are already how
+the system works; the feedback is right and is not new work. Tranche 2b's `冲` line states the
+upgrade outright (`dorongan untuk naik kelas`) instead of merely avoiding the word damage, which is
+the most direct satisfaction of golden rule 3 in any wording so far and is worth preserving if that
+cell is revisited.
+
+**NOTED — the renderer-side context join (`pilar.*.domain_id`) is the real remaining bottleneck.**
+Correct, and already queued: it is item (a) of the post-tranche renderer pass recorded in the
+tranche-1 verdict below (QA finding 5, `domain_id` is in the glossary for all four pillars as data
+and nothing reads it yet). **Not new work, and not a new finding.** It rides with item (b), the
+breath phrase for two facts in one pillar, because both are first-mention prose rules in the same
+section and one paired measurement is cheaper than two.
 
 ## DONE 2026-08-12 — TRANCHE 2A merged (28 ruled strings + the `elemen_dominan` wiring)
 
@@ -443,6 +520,10 @@ having none.**
    **TRANCHE 2A DONE 2026-08-12, PR #38 — see the 08-12 section above.** It also carried the
    `elemen_dominan` wiring, which closed the last floor finding and the second cause under chart 5's
    padding.
+   **STEP 2 IS CLOSED BY TRANCHE 2B, 2026-08-12** — PR #40 put the rulings on `main`, the applying
+   commit landed the last 15 action lines. Every cell a fact can carry now has one, except `elemen.*`,
+   `bintang.天乙貴人` and `bintang.華蓋`, all three deliberate. **What remains of this fix plan is
+   step 4, the voice A/B, which was always gated behind steps 1+2.**
 3. ~~**Transitions / narrative roles**~~ — **CANCELLED 2026-08-11, not deferred.** See below.
 4. **VOICE A/B (added 2026-08-10, Reyner's call after the Gemini-feedback discussion).** Two
    renderer prompts identical except the voice paragraph: the current composed-voice wording vs a
