@@ -393,13 +393,49 @@ by Code), and it is **flagged in the rulings file for Reyner to accept or revers
 verified alternatives (`pada akhirnya`, `nanti`).
 
 **THE RECOMMENDATION, NOT DONE HERE: add the temporal idioms to `NOT_A_SPAN`** —
-`kemudian hari`, `suatu hari`, `hari ini`. `fact.js:85-91` already records this exact family:
-`kehidupan sehari-hari` produced a HARD finding on ordinary Indonesian saying nothing about any
-pillar, fixed 2026-08-11 by making the scan a whole-token test — which cannot reach a *standalone*
-`hari`. Indonesian uses `hari` temporally far more often than positionally, so this will recur on
-production prose, not just on glossary strings. It is a gate change and needs its own measurement
+`kemudian hari`, `suatu hari`, `hari ini`. It is a gate change and needs its own measurement
 (rule 13), and this tranche touches no engine path by instruction. **The sentence bent, not the
-check, which is the `aspek.比肩` ruling — but the check is where the defect lives.**
+check, which is the `aspek.比肩` ruling — but the check is where the defect lives.** Promoted to the
+promotion checklist as precondition 4; the full history is the next block.
+
+### `fact.relation_positions` — the whole history, because it has now cost work four times
+
+Recorded 2026-08-12 so the next session inherits the pattern instead of the latest symptom. **The
+check has been known broken since 2026-08-04 and every round has fixed a DIFFERENT surface form of
+one root cause: it reads a bare pillar word as a claim about that pillar.**
+
+| # | When | What it cost | What was fixed |
+|---|---|---|---|
+| 1 | 08-04 → 08-05 | Diagnosed at **8 of 8 failures are gate false positives** (MEASUREMENTS, 08-04 row: *"the check scans for bare `tahun/bulan/hari/jam`"*). Then a second diagnosis, because the first was right about WHAT and wrong about WHY | Gate `1.2.0` (`8c64d37`) scoped the scan past the prompt's own mandated forms (`batang bulan`, `cabang hari`, `Hari lahirmu`) |
+| 2 | 08-06 | Survived a prompt instruction, a payload handover and the scan scoping; still 14-18% | Gate `1.4.0` dropped the `extra` condition and kept `missing`. Went to **zero across 130 runs** |
+| 3 | 08-11 | **Found by the tranche-1 CONTENT pass on a ruled glossary string** — `kehidupan sehari-hari` in `relasi_cabang.半合.cost_seed` raised a HARD finding on **5 of 13** fixture charts, a false accusation of a false statement about the reader's own chart | PR #25, two commits: a whole-token scan (`\bhari` was claiming `sehari-hari`, `jam` claiming `jaminan`, `bulan` claiming `bulanan`) plus reduplicated plurals |
+| 4 | 08-12 | **Tranche 2b.** HARD on 4 fixture charts + the hour-less chart, i.e. every chart `害` fires on; three words deleted from a ruled string | **Nothing.** The sentence bent, because this tranche was instructed to touch no engine path |
+
+**TWO CORRECTIONS TO HOW THIS WAS BRIEFED, both found by checking the repo, and the second one
+strengthens the case for the fix rather than weakening it:**
+
+1. **Tranche 2b is the FOURTH time this check has cost work, not the third.** Round 3 (08-11) was a
+   separate fix round with its own PR and two commits; `git log --all --grep="relation_positions" -i`
+   shows it. Three fixes have shipped for one root cause.
+2. **It is NOT the first time it hard-rejected a Reyner-ruled engine string. Round 3 was too** —
+   also a ruled glossary cell, also found by a content pass, also HARD, on more charts (5 of 13).
+   **What differs is the RESOLUTION, and the two rounds went opposite ways.** `7f289f0`'s own commit
+   message says, in capitals: *"THE PROSE IS NOT THE BUG AND IS NOT CHANGED. `kehidupan sehari-hari`
+   is ordinary Indonesian."* That session fixed the check and refused to touch the prose. Tranche 2b
+   bent the prose, because of the no-engine-path instruction. **So the repo now contains one ruled
+   string bent to satisfy a check that an earlier session explicitly refused to bend prose for.**
+   That inconsistency is the argument: the precedent is "fix the check", and the fix is still not
+   built. Reyner ratified the deletion 2026-08-12 (three of his words removed, none added, and every
+   alternative introduces new vocabulary), so 2b's bend stands — but it stands as the exception.
+
+**Why it is safe to defer and unsafe to defer past promotion, which is why it is now a precondition
+rather than a backlog item:** a hard finding sends the reading to the module-assembly floor, and
+`floorRefusalReason` answers a hard-rejected floor with a **503**. Behind the preview fence at zero
+traffic, that is a curiosity nobody hits. On a public mirror it is a 503 generator, and the trigger is
+not exotic: **Indonesian uses `hari` temporally far more often than positionally** (`kemudian hari`,
+`suatu hari`, `hari ini`, `sehari-hari`), the renderer writes free prose by design, and rule 15 puts
+an LLM in that path. Every round so far was found by content authoring, where the string is fixed and
+inspectable. Round 5 will be found by a reader.
 
 ### External feedback adjudicated (Gemini, via Reyner, 2026-08-12)
 
@@ -653,11 +689,18 @@ Vercel env var on a coordinated deploy.
 - Webhook URL saved for Invoices-paid + paid-after-expiry. Xendit's test callback returned 502
   `invoice_lookup_failed` — that is the fail-closed design PASSING (fictional invoice, re-fetch
   refused; the token check passed en route). Not a defect.
-- **QRIS channel: "In Progress"** (Bank Indonesia NMID registration, typically days). Checkout is
-  QRIS-only, so NO REAL PURCHASE IS POSSIBLE until it flips to Activated. Decision (Reyner,
-  patient path): WAIT — no temporary channel-lifting. Nudge Xendit support if >1 week.
-- **Remaining ritual step: the first real self-purchase** (Rp 19.000, own birthdate, own bank app)
-  the day QRIS activates. Screenshot the paid invoice into the ledger.
+- **QRIS channel: ACTIVATED 2026-08-11** (Reyner's report, recorded here 2026-08-12 — before this it
+  existed only in the Cowork chat and nowhere in the repo, which is why a session reading the ledger
+  would still have believed a real purchase was impossible). The NMID registration cleared on the
+  patient path, so the WAIT decision below was correct and no channel was lifted temporarily.
+  ~~"In Progress" — no real purchase is possible until it flips to Activated~~ — closed.
+- **THE GO-LIVE RITUAL HAS EXACTLY ONE STEP LEFT: the first real self-purchase.** Rp 19.000, own
+  birthdate, own bank app, then **screenshot the paid invoice into the ledger.** Nothing else in the
+  ritual is outstanding: business verified, bank account active, live key and webhook token swapped
+  into Vercel Production, webhook URL saved, QRIS activated. **This step is Reyner's alone** — it
+  requires his bank app and his money, and Cowork/Code cannot perform it or verify it for him.
+  It is what proves the money path end to end: invoice created, QR scanned, webhook verified, `paid`
+  flipped server-side (rule 18: `paid` flips only in the verified Xendit webhook).
 - **Channels ruling (Reyner 2026-08-07): launch is QRIS-ONLY.** Coverage is universal via bank/
   e-wallet apps, MDR ~0.7% vs ~Rp 4.000 flat for VAs (a fifth of the ticket). Additional channels
   are a conversion lever to revisit ONLY on measured payment-step abandonment.
@@ -735,16 +778,29 @@ route 404s entirely, which is a missing capability rather than a switch (the STA
 and the `NEXT_PUBLIC_FREE_FULL_READING` lesson three sections up).
 
 **PROMOTION** — wiring the funnel to this route and removing the preview-token requirement — is a
-SEPARATE, LATER, DELIBERATE commit. Its three named preconditions, also written into the header of
-`app/api/mirror/[token]/route.js` so no session can promote without reading them:
+SEPARATE, LATER, DELIBERATE commit. Its **four** named preconditions, also written into the header of
+`app/api/mirror/[token]/route.js` so no session can promote without reading them (that header was
+updated in the same commit as this row, comment only — a checklist that lives in one of two places is
+how a session promotes without reading it):
 
 | # | Precondition | Status |
 |---|---|---|
-| 1 | Xendit verification approved + live keys swapped | **MET 2026-08-07.** QRIS activation and the first self-purchase are tracked above and are NOT part of this condition |
+| 1 | Xendit verification approved + live keys swapped | **MET 2026-08-07.** QRIS **activated 2026-08-11**; the first self-purchase is tracked above and is NOT part of this condition |
 | 2 | The fulfillment swap shipped — Complete Edition card + PDF exist, so the 19k upsell is a real thing to buy | NOT MET |
 | 3 | Reyner has QA'd real readings through the preview | NOT MET |
+| 4 | **`fact.relation_positions` no longer reads a temporal `hari` as a pillar** — the `NOT_A_SPAN` fix (`kemudian hari`, `suatu hari`, `hari ini`), own commit, own measurement (rule 13) | **NOT MET — added 2026-08-12** |
 
-**1 of 3.** Condition 3 is the one J unblocks: QA is
+**Precondition 4 was PROMOTED from backlog 2026-08-12, and the reason is a difference of kind, not of
+degree.** A hard finding drops the reading to the floor, and `floorRefusalReason` answers a
+hard-rejected floor with a **503**. Fenced at zero traffic, this check misfiring is a curiosity found
+by whoever is authoring content. On a public mirror it is a **503 generator**: Indonesian uses `hari`
+temporally far more often than positionally, and the renderer writes free prose by design, so the
+trigger is ordinary language rather than an edge case. It has cost work four times without being
+fixed (see the 08-12 history block); the fourth time it hard-rejected a Reyner-ruled string on every
+chart one relation fires on. **Not built here by instruction — but promotion cannot be the commit that
+discovers it.**
+
+**1 of 4.** Condition 3 is the one J unblocks: QA is
 `curl -H "x-mirror-preview-token: $MIRROR_PREVIEW_TOKEN" https://www.katon.app/api/mirror/<token>`
 after a POST to `/api/mirror` with a birthdate. It returns JSON, not a page — J built no UI, by
 design. **Use `www.`** — the apex 308-redirects to it, and a redirect is the one place a header can
