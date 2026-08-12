@@ -351,11 +351,86 @@ is expected. Never copy these numbers into CLAUDE.md as locked values.
 | **BLOCKS PER READING is the one metric that replicates - and it is what the renderer-prompt wording moves** | identical config **5.1 / 5.1** · K wordings **7.3 / 5.4 / 7.1** | **08-11** | Measured over 616-1396 blocks per run, which is why it is stable where the rates are not: the two gate-`1.8.0` runs four days apart agree to the decimal. Three wordings of the same K instruction were measured. "Write them first, in the order the array gives them" (`69a9afe2`) and the minimal one-sentence insert (`9c167561`) both inflate block count ~40% - chart 1 went from 4 blocks carrying 10 facts to **9 blocks carrying 9 facts**, one fact per block, which is the "tour of the chart" the prompt bans and a direct worsening of QA finding 2. Adding "First does not mean three blocks" (`8877da29`) holds it at **5.4**. **The engine reorder is common to all three, so the wording is the whole effect; the reorder alone fragments nothing.** `8877da29` is what shipped. Its cost is coverage p10 0.55 against the control's 0.67 - a soft-check trade, taken on the metric that replicates over three rates that do not. |
 | **THE MODULE-ASSEMBLY FLOOR IS 13/13 CLEAN — and the cause of the last two findings was nobody's prediction** | floor readings raising a gate finding **2 of 13 -> 0 of 13** | **08-12** | `ac24441`, the tranche-2a wiring commit, measured alone. **The two were `structure.duplicate_sentence` on charts 2 and 8, and those are exactly the two `same`-relation charts** - `elementRelation(dmElement, element)` returns `same` there because the dominant element IS the day master's element, so `element_dominant` and `day_stem` resolved to the identical `GLOSSARY.elemen[hanzi]` entry and the floor, which renders every string of every fact, printed it word for word twice. Keying `element_dominant` to its own `elemen_dominan` group **per relation** removed the collision at its source rather than by collapsing a fact. **Record this mechanism, do not rediscover it:** the finding looked like a floor-renderer defect and was actually two facts sharing one glossary node, which is the same shape as the third Stage 3 collapse gap (charts 9 and 12, 08-04) arriving through a different door. A shared glossary entry between two facts that can co-occur is a duplicate waiting to happen. |
 | **A content tranche and its wiring BOTH re-ranked nothing — the second and third confirmations that prose is decoupled from ranking** | fact order moved **0 of 13** on `6947af0` and **0 of 13** on `ac24441` · cache keys moved 10 of 13 then 8 of 13 | **08-12** | The tripwire from the actionability declaration (08-11 row above), and it is clean twice. Importances on the wiring commit are byte-identical before and after: 41, 70, 64, 70, 41, 70, 61, 67. Keys moving while order does not is the correct signature - the strings changed, the axes did not, because `actionabilityOf` reads `ACTIONABLE_KINDS[fact.provenance?.kind]` and nothing in `hierarchy.js` reads fact content. **The tranche-2a prompt predicted 8 of 13 orders would move and was wrong; that is COWORK-BRIEF error 21**, and the aggravating half is that it also told the reader the move was "expected, NOT the re-coupling tripwire firing", which would have authorised dismissing a real alarm. |
+| **THE PALACE-DOMAIN WEAVE: +25.6 first-pass, and the join ALONE is a regression** | arm A 28.8% / 54.4% -> arm B **54.4% / 78.1%** · pre-join arm: `raw_pillar` 4.0% -> 33.8% on the join alone | **08-12** | Same session, back to back, gate `1.9.0`, n=10, 16 charts, 160 runs each, fb-net 0.0% both, prompt hash the only difference. Per evaluation: `raw_pillar` 33.8 -> 5.6, `field_dropped` 22.9 -> 6.6, `essay_connectives` 15.4 -> 4.0, `unsanctioned_bracket` 9.0 -> 1.0. **Shown a gloss field with no instruction the model bracketed it and wrote raw pillar words, so the join must never ship without the prompt commit.** The pre-join arm is CONTAMINATED (third consecutive batch, 167 HTTP 429s, fb-net 50.6%, ~100 evaluations) and is directional only. Two checks worsened, neither levered: `adverbial` 6.5 -> 11.1 (unexplained; the hour-less `secara lengkap` sentence exists in both arms) and `forbidden.fatalism` 0 -> 2 runs, both chart 101, both to fallback, not reproduced in 14 targeted renders. |
+| **The floor states a relation's span** | **0 of 18 -> 18 of 18** relation blocks · floors 0 of 14 hard both sides | **08-12** | `b30b7cd`. Deterministic, no provider. Chart 6 opened `"Gesekan (Harm)."` and now opens `"Pilar Akar dan Pilar Kerja."` Authors nothing: `positions_id` is pre-verbalised from the same Reyner-reviewed palace names. Secondary effect: a floor relation block now states its span completely, so `named` is a superset of `expected` and the round-4 failure class cannot reach the floor even if a seed carries a calendar unit. |
+| **API CREDITS DEPLETED — precondition 3 cannot be met until billing is topped up** | `RESOURCE_EXHAUSTED` from the live error body | **08-12** | Read off the actual 429 payload, not inferred: *"Your prepayment credits are depleted."* The QA re-render of charts 5, 13, 1 and fresh-1996 returned `source: module_assembly` on all four - the floor. **The weave is metric-verified and PROSE-UNVERIFIED**: arm B's 160 runs are real LLM output, but the harness stores no prose without `--rider`, so no captured sentence shows the gloss landing as a clause. Chart 5's deferred `quietFloor` re-ask also stays deferred, because it needs a real read of full cells. **Reyner's action, and nobody else's.** |
 | **TRANCHE 2B: the ranking tripwire holds a FOURTH time, and every reader's key moved** | cache keys **13 of 13** · fact order **0 of 13** · importance vectors **0 of 13** · fact count and required_points unchanged 13 of 13 | **08-12** | `273292a`, 15 `actionable_seed` assignments, no engine path. 13 of 13 keys is the strongest form of "this content reached every reader" and it agrees with the per-cell fire lists (the union of the 15 cells' fixture charts is all 13). Order at zero is what makes it a content change: since #34 actionability is DECLARED, so prose cannot buy rank. **Four checks, never once fired.** A first firing would mean prose had re-coupled to ranking — the bug #34 removed — and is a bug report, not a curiosity. |
 | **GATE `1.9.0` — `fact.relation_positions` round 4 FIXED: a calendar unit is not a pillar** | **108 of 108 HARD → 0 of 108** · control 0 → 0 · floors 0 of 14 both sides | **08-12** | The exposure population is every relation fact on 13 fixture charts plus the hour-less chart, against each of the **six live glossary cells that carry a calendar unit**, in the shape that actually fires: span NOT stated + a bare unit. `NOT_A_SPAN` gained three CLASSES (counted duration, calendar deictic, temporal pre-modifier) derived by sweeping the whole glossary and `renderer-prompt.txt` through the real scan — **eight** tokens survived and none was a span statement, so the three idioms in the ruling were a subset. `bulan Ayam` / `tahun Ular` are deliberately NOT stripped: stripping only removes positions from `named`, so stripping a form that genuinely names a pillar would fire where the text is right. Reyner's `di kemudian hari` restored in the next commit, which IS the regression test (keys 4 of 13, **order 0 of 13**). **A claim of this session's own was disproved in the measuring: a correctly-stated span plus a calendar unit fires 0 of 108, because gate `1.4.0` had already dropped the `extra` condition.** Two tests added, stage6 64 → 66, including `NO ENGINE STRING NAMES A PILLAR BY BARE WORD` over every glossary string. |
 | **The floor never states a relation's span — pre-existing, unmasked by the above, NOT fixed** | every relation block, every chart | **08-12** | A `branch_relation` fact carries no `fact.palace` (the span is `provenance.positions_id`) and `assembleFallback` prints only `fact.palace`, so a floor relation block says what the relation is and never where it sits. The check skipped it because nothing was named, which is why four rounds of this bug never surfaced here. **So the 503s were a false positive about a REAL omission.** The cheap fix is one line leading the block with `positions_id` — authors nothing, the string is already engine-owned and Reyner-reviewed. Own change, own measurement. |
 | **`fact.relation_positions` fired for the first time since it was silenced, and it is the CHECK that is wrong** | HARD on **5 charts** (6, 8, 10, 11, hour-less 1989-02-04) → **0** after a 3-word deletion | **08-12** | The 08-06 note said this check "is now silent and should stay that way - if it ever fires again it is a genuine dropped position and worth reading". **Read: it was not genuine.** `di kemudian hari` carries a bare `hari`; the check reads a bare pillar word as a claim about that pillar and **skips any block naming no position** (`fact.js:439`), so the floor's 害 block had never been scanned before this tranche. The new sentence supplied `hari` → named `[day]` → span `[month, year]` reported DROPPED → HARD → `floorRefusalReason` 503s the reader. **Same family as `kehidupan sehari-hari`** (`fact.js:85-91`, fixed 08-11 by a whole-token scan, which cannot reach a standalone token). **RECOMMENDATION, not done: `NOT_A_SPAN` entries for `kemudian hari` / `suatu hari` / `hari ini`** — gate change, own measurement (rule 13). Indonesian uses `hari` temporally more than positionally, so this recurs on production prose, not just glossary strings. Also a method note: the stage6 floor test stops at the first failing chart, so the blast radius was 5 charts while the message showed 1 — probe all 13 before believing a per-chart count. |
 | The `hour_known_contradiction` spike under K was the KNOWN penutup failure, not a K regression | 1 (control) · 15 / 25 / 38 (K arms) · 15 (08-07) | 08-11 | Read in `docs/research/rejections-K-v1-2026-08-11.md` rather than counted. The failing sentence is verbatim the 08-06 gallery finding - *"Keempat pilar harimu tidak dapat dipetakan karena jam lahir tidak diketahui"*, in the **penutup**, in a reading that names Pilar Akar, Pilar Kerja and Pilar Arah three paragraphs above. It lives in the closing sentence, which K does not touch, and it fired 15 times in the 08-07 baseline before K existed. **Its rate swings 1 to 38 across runs of code that differs in ways it cannot see, which makes it the loudest single argument for the baseline rule two rows up.** Left open: nothing here explains why the rate moves, and it remains a plain falsehood when it fires. |
+
+## 2026-08-12 — THE QUEUED RENDERER PASS: measured, and its QA read is BLOCKED ON BILLING
+
+Precondition 3's build, three commits (rule 13 throughout), then a fourth that could not run.
+
+- **`9b2b6b2` engine** — the payload join. `pilar.*.domain_id` had been DATA READ BY NOTHING since
+  tranche 1; every palace now carries its life domain. `ENGINE_VERSION` 0.4.3 -> 0.4.4-stage3.
+  Keys 13 of 13, **fact order 0 of 13** (tripwire, sixth check), importances 0 of 13.
+- **`d55f128` prompt** — the weave plus the breath phrase, as a same-day pair. `PROMPT_VERSION`
+  `8877da29` -> `2ff1a546`.
+- **`b30b7cd` render** — the floor now states a relation's span: 0 of 18 relation blocks named their
+  span, now 18 of 18. Chart 6 opened `"Gesekan (Harm)."` and now opens
+  `"Pilar Akar dan Pilar Kerja."`
+
+### THE JOIN ALONE IS A REGRESSION. These two commits must never ship apart.
+
+The paired arms, back to back in one session, gate `1.9.0`, n=10 over all 16 charts, 160 runs each,
+transport clean both sides (fb-net 0.0%), prompt hash the only difference:
+
+| | arm A: join, no instruction | arm B: join + prompt |
+|---|---|---|
+| first-pass | 28.8% (46/160) | **54.4%** (87/160) |
+| shipped | 54.4% (87/160) | **78.1%** (125/160) |
+| fb-gate | 45.6% | 21.9% |
+| hard | 33 | 16 |
+
+Per gate evaluation the mechanism is specific, not diffuse: `style.raw_pillar` 33.8% -> 5.6%,
+`coverage.field_dropped` 22.9% -> 6.6%, `style.essay_connectives` 15.4% -> 4.0%,
+`style.unsanctioned_bracket` 9.0% -> 1.0%, `fact.condition_named` 12.4% -> 4.0%.
+
+**A third arm at the pre-join baseline says the join by itself made things worse** — `raw_pillar`
+4.0% -> 33.8%, `unsanctioned_bracket` 2.0% -> 9.0%. Shown a gloss field with no instruction, the model
+bracketed it and reached for raw pillar words. So arm B is partly repair and partly gain, and the
+shipping rule follows: **merging the join without the prompt commit ships a measured regression that
+every deterministic check passes.**
+
+**THAT THIRD ARM IS CONTAMINATED AND IS NOT A BASELINE ROW.** It was the third consecutive 160-run
+batch and it exhausted the API account: 167 HTTP 429s, 81 of 160 runs fell to `fallback_transport`,
+fb-net 50.6%, ~100 gate evaluations instead of ~200. Directional only.
+
+**Two checks moved the wrong way and neither was levered.** `style.adverbial` 6.5% -> 11.1%: read as
+prose, the hour-less disclosure sentence uses `secara lengkap`, but that sentence exists in both arms,
+so the rise is unexplained (the pre-join arm sat between them at 8.0%). `forbidden.fatalism` 0 -> 2
+runs, both on chart 101, both to fallback, so neither reached a reader — HARD and rule 25, so it is
+flagged rather than filed, and NOT reproduced in 14 targeted renders.
+
+### BLOCKED: the QA re-render, and therefore promotion precondition 3
+
+**The Gemini account's prepayment credits are depleted** (`RESOURCE_EXHAUSTED`, verified 2026-08-12
+from the live error body, not inferred). Consequences, stated plainly because they are the reason this
+section stops here:
+
+1. **The QA re-render did not happen.** Chart 5, chart 13, chart 1 and fresh-1996 all returned
+   `source: module_assembly` — the floor. Four report files were written and then DELETED rather than
+   kept, because they labelled floor text as a served reading, and a mislabelled artifact is worse
+   than a missing one. **Precondition 3 cannot be met until billing is topped up. That is Reyner's,
+   and nobody else can do it.**
+2. **The weave is METRIC-VERIFIED AND PROSE-UNVERIFIED.** arm B's 160 runs are real LLM output and
+   the rates moved hard in the right direction, but the harness stores no prose without `--rider`, so
+   **no captured sentence shows the gloss landing as a clause.** The first thing to do when credits
+   return is the re-render, and the question is unchanged: does it read as a clause or as a
+   definition, and does the breath phrase fire when two facts share a pillar?
+3. **Chart 5's deferred `quietFloor` re-ask stays deferred.** It needs a real read of full cells, and
+   there was no real render to read. The standing note stands: a threshold that looks mis-set may be
+   reading a content gap.
+
+**A CLAIM OF THIS SESSION'S OWN, RETRACTED.** The prompt commit's message says no captured prose
+contained a four-digit year, offered against the `forbidden.fatalism` hits. **That evidence is void:**
+the probe read `res.rendered.blocks`, and `renderReading` spreads `gate.normalized`, so blocks live at
+`res.blocks` — the scan ran over an empty string and could not have found anything. What survives is
+the part that came from `res.findings`: fatalism did not reproduce in 14 renders. The year hypothesis
+is neither supported nor excluded.
 
 ## 2026-08-12 — TRANCHE 2B: fix-plan step 2 is CLOSED (15 action lines)
 
@@ -852,7 +927,7 @@ how a session promotes without reading it):
 |---|---|---|
 | 1 | Xendit verification approved + live keys swapped | **MET 2026-08-07.** QRIS **activated 2026-08-11**; the first self-purchase is tracked above and is NOT part of this condition |
 | 2 | The fulfillment swap shipped — Complete Edition card + PDF exist, so the 19k upsell is a real thing to buy | NOT MET |
-| 3 | Reyner has QA'd real readings through the preview | NOT MET |
+| 3 | Reyner has QA'd real readings through the preview | **NOT MET, and BLOCKED 2026-08-12: the Gemini account's prepayment credits are depleted, so every render returns the floor.** The queued renderer pass it was waiting on is built and measured (see the 08-12 section); the read itself needs billing topped up first |
 | 4 | **`fact.relation_positions` no longer reads a temporal `hari` as a pillar** — the `NOT_A_SPAN` fix, own commit, own measurement (rule 13) | **MET 2026-08-12**, gate `1.9.0`. Added and met the same day; the fix went wider than the three named idioms (see below) |
 
 **Precondition 4 was promoted from backlog and MET the same day, 2026-08-12.** It was promoted because

@@ -319,6 +319,7 @@ should be decided.
 | ~~Write 30 fixed tags~~ | DONE 08-02 | `glossary.json` → `tag_arketipe`; `tags_en` pending, waits for card work |
 | ~~Register-review the 刑 entry~~ | DONE 08-02 | Simpul confirmed, entry landed in `glossary.json` |
 | Card visual system | `content/sharecard-spec.md` | Card B must differ **at thumbnail size**. Now also decides the ID vs EN name display variant (rule 23 amendment) |
+| **Top up the Gemini billing** | PROGRESS, 2026-08-12 renderer pass | `RESOURCE_EXHAUSTED` - *"Your prepayment credits are depleted."* Every render now returns the module-assembly floor, so **promotion precondition 3 (Reyner's QA read) is blocked**, the palace-domain weave is measured but prose-unverified, and chart 5's `quietFloor` re-ask cannot be answered. The renderer pass itself is built and measured; only the read is blocked |
 | **The first real self-purchase** | PROGRESS, THE INTERIM STATE | Rp 19.000, own birthdate, own bank app, screenshot the paid invoice into the ledger. **The last step of the go-live ritual, and nobody else can do it** - it needs his bank app and his money. Xendit verification DONE 08-07, live keys swapped, **QRIS ACTIVATED 08-11**, so the money path is live and untested |
 
 **Engine and pipeline, in order.**
