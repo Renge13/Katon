@@ -300,8 +300,9 @@ should be decided.
   the next build: fenced preview route, rate limiting, promotion conditions baked in. Starts in a
   FRESH Code session. After J: card component, then the fulfillment swap (retires the interim
   funnel), then promotion.
-- Xendit: APPROVED, live keys swapped, QRIS activation in progress — see PROGRESS INTERIM STATE
-  for the full go-live status. Self-purchase test pending QRIS.
+- Xendit: APPROVED, live keys swapped, **QRIS ACTIVATED 2026-08-11** — see PROGRESS INTERIM STATE
+  for the full go-live status. One step left in the ritual: the first real self-purchase, which is
+  Reyner's alone.
 - **Compat reading CONTENT session is QUEUED and is Cowork+Reyner work** (no code): author the
   ~5 element-relationship dynamics, the 4 affinity/fit quadrant blocks, the ~6 branch outcome
   blocks, and the P0 tease copy — the "low tens of cells" from the compat spec, every string
@@ -317,7 +318,7 @@ should be decided.
 | ~~Write 30 fixed tags~~ | DONE 08-02 | `glossary.json` → `tag_arketipe`; `tags_en` pending, waits for card work |
 | ~~Register-review the 刑 entry~~ | DONE 08-02 | Simpul confirmed, entry landed in `glossary.json` |
 | Card visual system | `content/sharecard-spec.md` | Card B must differ **at thumbnail size**. Now also decides the ID vs EN name display variant (rule 23 amendment) |
-| ~~Xendit verification~~ | DONE 08-07 | approved, live keys swapped; QRIS activation + self-purchase test still pending, see PROGRESS INTERIM STATE |
+| **The first real self-purchase** | PROGRESS, THE INTERIM STATE | Rp 19.000, own birthdate, own bank app, screenshot the paid invoice into the ledger. **The last step of the go-live ritual, and nobody else can do it** - it needs his bank app and his money. Xendit verification DONE 08-07, live keys swapped, **QRIS ACTIVATED 08-11**, so the money path is live and untested |
 
 **Engine and pipeline, in order.**
 
@@ -329,15 +330,42 @@ should be decided.
    user without passing Stage 6.
 4. **Sharecard build.** Almost entirely engine-free; only the optional feed/drain line needs strength.
 5. **Compatibility** — the v1 money engine. Price band to be **tested** at 25 to 45k, not assumed.
-   **BACKLOGGED 08-02: the flow reconciliation.** `product/compatibility-reading-spec.md` is still
-   proposal-not-decision; before build, one Cowork session must produce the input→output flow with
-   contradictions vs the naming lock marked and every BaZi assertion oracle-checked. Carries two open
-   product questions: (a) identity/login — Reyner floated email-login before any reading (Joey's
-   model) + paywalling non-own birthdates; Cowork counter-position recorded in session 08-02: keep
-   the mirror anon (locked email-after-reading decision stands), require email at compat CHECKOUT
-   where it is transactionally natural; note any non-own-date gate is unenforceable while the mirror
-   reads any date by design. (b) person-B consent UX belongs to the compat spec, not to a login wall.
-   Also: Luck Pillar sync in compat may force female-set fixture charts earlier than planned.
+
+   **THE FLOW IS DECIDED. THIS ENTRY WAS STALE FOR TEN DAYS AND WAS BLOCKING A REAL DECISION.**
+   Corrected 2026-08-12. It said `product/compatibility-reading-spec.md` was "still
+   proposal-not-decision" and carried two open product questions. **That file's own header reads
+   `RECONCILED 2026-08-02`** and lands every one of them:
+   - **Funnel: tease-first, paywall between P0 and P1.** P0 free = both faces plus exactly ONE named
+     relational fact with no explanation; the comparison card is shareable PRE-payment.
+   - **(a) identity/login: DECIDED, and it went the way Cowork argued.** Account + email are created
+     at the first compat CHECKOUT; **the mirror stays anonymous.** The brief recorded that as an
+     unresolved "counter-position" for ten days after the spec had adopted it.
+   - **(b) person-B consent: DECIDED — NO consent line.** P2's reframe copy carries the ethics.
+   - **P6 Luck Pillar sync is DESCOPED from v1**, which also **retires this entry's own warning**
+     that compat "may force female-set fixture charts earlier than planned". Luck-pillar direction is
+     what depends on gender; with P6 out of v1, nothing in compat pulls the female-set charts
+     forward.
+
+   **WHAT IS ACTUALLY OPEN, and it is narrower and harder than a flow question:**
+   - **THE CROSS-CHART ORACLE QUESTION.** Every relational fact needs a verification source, and the
+     project's oracle is Joey's plotter, which is **single-chart**: it prints one person's pillars,
+     five natal stars, 命宮 and 胎元. Nothing in the current oracle set can confirm a claim ABOUT A
+     PAIR. Section 4's rule bites directly here — *anything outside what the oracle prints has no
+     oracle and cannot be implemented* (that is how error 10 happened). So before compat can be
+     specced as buildable, someone must answer: what verifies a cross-chart assertion? Note the spec
+     mentions no oracle at all (`grep -n -i "oracle\|joey" docs/product/compatibility-reading-spec.md`
+     → no match, 2026-08-12), so this is a gap in the spec, not a debate inside it.
+   - **天干五合, the five stem combinations, are NOT IMPLEMENTED and are load-bearing for compat.**
+     Two Day Masters combining is step 2 of the classical workflow the spec follows. Re-grepped
+     2026-08-12 across `lib/ tests/ docs/`:
+     `grep -rn "甲己\|乙庚\|丙辛\|丁壬\|戊癸" lib/ tests/ docs/` → **exactly one hit**,
+     `docs/archive/calcdump-CxD.md:45`, and it is Indonesian prose in an archived dump
+     (*"pasangan kombinasi batang klasik (戊癸合)"*), **not a table and not code.**
+     **CAUTION ON THE SEARCH TERM:** `grep -rn "天干五合" lib/ tests/ docs/` returns **ZERO** — the
+     phrase appears nowhere in the repo, so a session searching for it will wrongly conclude nothing
+     exists to find. Search the five pairs, not the name. `lib/bazi/strength.ts` implements BRANCH
+     combinations (三合 / 半合) and nothing implements stem combination.
+     Rule 4 applies with full force: do not recall this table, and do not accept it from a prompt.
 6. Rate limiting, and remove the `NEXT_PUBLIC_FREE_FULL_READING` flag.
 
 ---
