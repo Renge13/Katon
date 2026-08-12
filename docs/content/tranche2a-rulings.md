@@ -27,6 +27,10 @@ scaffolded in glossary.json BEFORE the script runs, in the SAME content commit:
 from provenance.element, not from this cell. The WIRING (facts.js reading this group instead of
 GLOSSARY.elemen) is a SEPARATE commit, measured on its own. Rule 13.
 
+BOTH FLAGGED NOTES ARE CLOSED, 2026-08-12, by Reyner. `dengan jernih` confirmed at aspek.傷官 (it is
+already the applied text); `output`/`input` stay as ruled in elemen_dominan.drains. NOTHING IN THIS
+FILE IS PENDING. A later session must not read either note as an open question.
+
 TWO NOTES ON THE COMMIT MESSAGE. This file carries the tranche AND a register sweep (section 6).
 The message must name both - `git add -A` sweeping in more than the subject line describes has
 already happened twice in this repo.
@@ -68,12 +72,15 @@ clean as ruled.
   "Beban yang Menetap" complaint: she is a Fire day master who was being served the Earth
   person's paragraph, and her Pemijar block and her dominant-Earth block are the same mechanism.
 
-  REGISTER NOTE, FLAGGED NOT DECIDED. Three of these four strings carry bare English (`output`,
-  `input`). Mechanically they are safe: `style.english_leakage` checks a fixed function-word list
-  (the, your, you are, this is, which, because of, however, therefore) and none of these match, and
-  no blocklist pattern fires. So this is a register call, not a gate risk, and it belongs to Reyner
-  alone. The only test worth applying is rule 23's shape - a term the reader can point at is fine,
-  a term she must decode is not. Left exactly as ruled.
+  REGISTER NOTE, RAISED AND CLOSED 2026-08-12. Three of these four strings carry bare English
+  (`output`, `input`). Mechanically they are safe: `style.english_leakage` checks a fixed
+  function-word list (the, your, you are, this is, which, because of, however, therefore) and none of
+  these match, and no blocklist pattern fires. So this was a register call, not a gate risk, and it
+  belonged to Reyner alone. The only test worth applying is rule 23's shape - a term the reader can
+  point at is fine, a term she must decode is not.
+
+  **REYNER, 2026-08-12: `output` and `input` STAY exactly as ruled.** The flag is closed, not
+  outstanding. Do not re-raise it in a later tranche without new evidence from a real read.
 
 ## elemen_dominan.is_controlled
 - label_meaning: "Baganmu dipenuhi hal-hal yang menuntut pengelolaan: peluang, tanggung jawab, dan urusan orang lain."
@@ -107,7 +114,7 @@ clean as ruled.
 ## aspek.傷官
 - actionable_seed: "Tunda penyampaian kritik saat kamu emosi. Besoknya, sampaikan hanya satu poin perbaikan beserta dampaknya dengan jernih. Satu masukan yang diterima jauh lebih bernilai dibanding lima yang ditolak."
 
-  ONE WORD BENT, 2026-08-12, PENDING REYNER'S CONFIRMATION. As ruled, the middle sentence ended
+  ONE WORD BENT, 2026-08-12, CONFIRMED BY REYNER SAME DAY. As ruled, the middle sentence ended
   `...beserta dampaknya secara jernih`. That trips `style.adverbial`, whose pattern is
   `\bsecara \w+` - the renderer-prompt bans the `secara ...` adverbial outright, and the repo's own
   invariant test NO ENGINE STRING WOULD TRIP THE STYLE GATE asserts no glossary string carries one.
@@ -117,8 +124,12 @@ clean as ruled.
 
   Only the preposition moved: `secara jernih` -> `dengan jernih`. Both were checked; `dengan jernih`
   raises no finding. A second candidate, `sejelas mungkin`, was rejected because it trips
-  `style.hedging` on `mungkin`. Simply deleting the two words is also clean and is the alternative
-  if Reyner prefers it.
+  `style.hedging` on `mungkin`.
+
+  **REYNER, 2026-08-12: `dengan jernih` CONFIRMED.** It is already the text at the `actionable_seed`
+  line above, so the ruled string and the applied string are the same thing and nothing needs
+  re-applying. The rejected alternative - deleting the two words - is recorded for the reasoning only
+  and is NOT a live option. This note is closed.
 
 ## relasi_cabang.六合
 - actionable_seed: "Saat satu pilar kehidupanmu terguncang, jaga pilar pasangannya tetap berjalan rutin. Menjaga satu pilar tetap stabil mencegah efek domino ke area lainnya."
