@@ -21,10 +21,14 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData, buildFooter, formatCardDate, dynamicTags } from '../lib/card/cardData.js';
 import { CARD_TOKENS, tokenFor, APPROVED_STEMS } from '../lib/card/tokens.js';
-import { auditContrast, contrast, composite } from '../lib/card/contrast.js';
+import { auditContrast, contrast, composite, surfaces } from '../lib/card/contrast.js';
+import { GLOSSARY } from '../lib/semantic/glossary.js';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import { CARD_A, CARD_B, CardA, CardB, TEXT_ROLES, BAND_TINT, MIN_CONTRAST } from '../components/cards/Card.js';
+import {
+  CARD_A, CARD_B, CardA, CardB, TEXT_ROLES, BAND_TINT, MIN_CONTRAST,
+  AA_EXEMPT, GRADIENT_STOPS, stepAway, CARD_B_BADGE_LIMIT, MAX_LABEL_MEANING,
+} from '../components/cards/Card.js';
 import { VALIDATION_CHARTS } from './bazi-validation.fixture.js';
 
 const { renderToStaticMarkup } = ReactDOMServer;
@@ -125,42 +129,80 @@ test('the APPROVED triples match docs/content/sharecard-mockups-02.html verbatim
 // and five of ten fields are pale, so a plausible-looking new hex can halve a
 // ratio silently. A bad token must fail a test, not ship.
 
-test('NO text role on ANY token falls below the locked set\'s own floor', () => {
+test('EVERY text role on EVERY token meets WCAG AA, except the two known tokens', () => {
+  assert.equal(MIN_CONTRAST, 4.5, 'the target is WCAG AA and it is not negotiable downward');
   const rows = auditContrast(TEXT_ROLES, CARD_TOKENS, BAND_TINT);
-  // 15 roles x 10 tokens. If either count moves, the grid moved and this test is
-  // no longer covering what its name claims.
   assert.equal(rows.length, Object.keys(TEXT_ROLES).length * Object.keys(CARD_TOKENS).length);
+
   const under = rows.filter((r) => r.ratio < MIN_CONTRAST);
+  const unexpected = under.filter((r) => !AA_EXEMPT.includes(r.stem));
   assert.deepEqual(
-    under.map((r) => `${r.stem}.${r.role}=${r.ratio.toFixed(2)}`), [],
-    `below the ${MIN_CONTRAST} floor. Run: npm run audit:card-contrast`,
+    unexpected.map((r) => `${r.stem}.${r.role}=${r.ratio.toFixed(2)}`), [],
+    `under AA and not on the known list. Run: npm run audit:card-contrast`,
   );
 });
 
-test('the floor is the LOCKED set\'s worst case, so it can never demand more than a ruled token gives', () => {
-  // Matahari is the binding token: a vivid orange field caps accent at 2.22.
-  // A WCAG-style 3.0 or 4.5 floor would fail a colour Reyner ruled, which is why
-  // the rule is "no worse than what already shipped" instead.
-  const matahari = CARD_TOKENS['丙'];
-  const accentCeiling = contrast(matahari.accent, matahari.field);
-  assert.ok(accentCeiling < 3.0, `Matahari accent is ${accentCeiling.toFixed(2)}`);
-  assert.ok(MIN_CONTRAST <= accentCeiling, 'the floor must be reachable by every locked token');
+test('the AA exemption list is pinned, so it can only shrink', () => {
+  // A REPORT, NOT A PERMISSION. Both entries cannot reach 4.5 at any opacity
+  // because their INK ceiling is already under it, so the fix is a token change
+  // and the token is Reyner's. Pinning the list exactly means nothing new can
+  // join it by accident: a third token going under AA fails the test above.
+  assert.deepEqual(AA_EXEMPT, ['丙', '戊']);
+  for (const stem of AA_EXEMPT) {
+    const t = CARD_TOKENS[stem];
+    assert.ok(contrast(t.ink, t.field) < MIN_CONTRAST,
+      `${stem} now reaches AA - take it off AA_EXEMPT`);
+  }
+  // And everything NOT on the list must clear AA at full-opacity ink, which is
+  // what makes the list complete rather than a sample.
+  for (const [stem, t] of Object.entries(CARD_TOKENS)) {
+    if (AA_EXEMPT.includes(stem)) continue;
+    assert.ok(contrast(t.ink, t.field) >= MIN_CONTRAST, `${stem} is under AA and unlisted`);
+  }
 });
 
-test('opacity is part of the measurement, not decoration', () => {
-  // The trap this catches: a role measured from the raw hex passes, and the text
-  // the card actually draws does not. Half-opacity ink on its own field is a
-  // genuinely different colour, and several roles are drawn that way.
+test('ACCENT CARRIES NO TEXT — it is a mid-lightness value and cannot reach AA', () => {
+  // The structural finding, 2026-08-13: accent's ceiling against the field runs
+  // 3.05 to 5.69 and SIX of ten tokens are under 4.5 at full opacity. No opacity,
+  // size or weight change fixes that. So accent is a non-text colour: watermark,
+  // bars, the INTI DIRI pill, cell borders.
+  for (const role of Object.values(TEXT_ROLES)) assert.equal(role.on, 'ink');
+  const failing = Object.entries(CARD_TOKENS)
+    .filter(([, t]) => contrast(t.accent, t.field) < MIN_CONTRAST);
+  assert.ok(failing.length >= 5, 'if accent now clears AA broadly, this rule can be revisited');
+});
+
+test('opacity is part of the measurement, and is no longer a hierarchy tool', () => {
+  // Bambu is the binding LOCKED token at ink 4.93, so its lowest usable opacity
+  // is 0.94. Anything dimmer fails a colour Reyner ruled, which is why every role
+  // sits at 1 and size/weight/italic carry the hierarchy instead.
   const t = CARD_TOKENS['丙'];
   const raw = contrast(t.ink, t.field);
   const dimmed = contrast(composite(t.ink, t.field, 0.5), t.field);
   assert.ok(dimmed < raw - 0.5, `dimming must lower the ratio: ${raw.toFixed(2)} -> ${dimmed.toFixed(2)}`);
-  // And every declared role carries an opacity, so none can skip the composite.
+
+  const bambu = CARD_TOKENS['乙'];
+  assert.ok(contrast(composite(bambu.ink, bambu.field, 0.9), bambu.field) < MIN_CONTRAST,
+    'Bambu at 0.9 opacity should be under AA - that is why roles sit at 1');
+
   for (const [name, role] of Object.entries(TEXT_ROLES)) {
-    assert.equal(typeof role.opacity, 'number', `${name} has no opacity`);
-    assert.ok(role.opacity > 0 && role.opacity <= 1, `${name} opacity ${role.opacity}`);
-    assert.ok(['ink', 'accent'].includes(role.on), `${name} draws in ${role.on}`);
+    assert.equal(role.opacity, 1, `${name} is dimmed; see the note on TEXT_ROLES`);
     assert.ok(['field', 'band'].includes(role.over), `${name} sits over ${role.over}`);
+  }
+});
+
+test('the appendix band and the gradient step AWAY from the ink, so the FIELD is the worst surface', () => {
+  // This is what lets one audit cover both cards. The first version tinted the
+  // band toward the ink and quietly cost contrast on the tokens with none spare.
+  for (const [stem, t] of Object.entries(CARD_TOKENS)) {
+    const { field, band } = surfaces(t, BAND_TINT);
+    assert.ok(contrast(t.ink, band) >= contrast(t.ink, field) - 0.001,
+      `${stem}: the band has LESS contrast than the field`);
+    for (const step of GRADIENT_STOPS) {
+      const stop = stepAway(t.field, t.ink, step);
+      assert.ok(contrast(t.ink, stop) >= contrast(t.ink, t.field) - 0.001,
+        `${stem}: gradient stop ${step} has LESS contrast than the flat field`);
+    }
   }
 });
 
@@ -216,6 +258,79 @@ test('dynamic tags come from the chart and are capped at three', () => {
     .filter((f) => (f.type === 'badge' || f.type === 'convergence') && f.label && !taken.has(f.label))
     .slice(0, 3).map((f) => f.label);
   assert.deepEqual(d.tags.dynamic, expected);
+});
+
+// ── CONTENT BUDGET (Reyner's review, 2026-08-13) ───────────
+// The badge block is the only content-driven size on a fixed rectangle: count
+// 1-4, meaning 109-186 chars, about a sevenfold range. Either the widest content
+// fits or the design is only true for the charts that happen to be short.
+
+test('CARD A shows no Aspek tags, CARD B does', () => {
+  // "Aspek Pengatur" is system vocabulary. Card A meets someone in a feed and has
+  // no comprehension budget to teach it; Card B is a document its owner paid for.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  assert.ok(data.tags.dynamic.length > 0, 'this chart must have dynamic tags for the test to mean anything');
+
+  const a = renderToStaticMarkup(React.createElement(CardA, { data }));
+  const b = renderToStaticMarkup(React.createElement(CardB, { data }));
+  for (const tag of data.tags.dynamic) {
+    assert.ok(!a.includes(tag), `Card A must not print the Aspek tag "${tag}"`);
+    assert.ok(b.includes(tag), `Card B must print the Aspek tag "${tag}"`);
+  }
+  // The three fixed trait words stay on BOTH.
+  for (const t of data.tags.fixed) {
+    assert.ok(a.includes(t) && b.includes(t), `fixed tag "${t}" missing`);
+  }
+});
+
+test('badge bullets carry no palace', () => {
+  // "◆ Penyendiri", not "◆ Penyendiri Pilar Akar". The reading carries
+  // provenance; the card does not need it and the line space is scarce. The 08-01
+  // Bintang Penolong rule is about PROSE, not bullets — see the note on <Badges>.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  const withPalace = data.badges.filter((b) => b.palace);
+  assert.ok(withPalace.length > 0, 'the data still carries palaces; only the render drops them');
+  for (const Card of [CardA, CardB]) {
+    const html = renderToStaticMarkup(React.createElement(Card, { data }));
+    for (const b of withPalace) {
+      assert.ok(!html.includes(`${b.label}   ${b.palace}`), `${b.label} still prints its palace`);
+    }
+  }
+});
+
+test('Card B renders at most three badges', () => {
+  assert.equal(CARD_B_BADGE_LIMIT, 3);
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const base = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  const data = { ...base, badges: [1, 2, 3, 4].map((i) => ({ label: `Bintang ${i}`, meaning: `M${i}`, palace: null })) };
+  const b = renderToStaticMarkup(React.createElement(CardB, { data }));
+  assert.ok(b.includes('Bintang 3'), 'the third badge must render');
+  assert.ok(!b.includes('Bintang 4'), 'the fourth must be cut - Stage 3 ranked it least important');
+  // Card A is NOT capped: without meanings each badge is one short line.
+  const a = renderToStaticMarkup(React.createElement(CardA, { data }));
+  assert.ok(a.includes('Bintang 4'));
+});
+
+test('every bintang label_meaning fits the measured ceiling', () => {
+  // 200 chars, measured with `audit:card-budget --probe` against REAL Indonesian:
+  // the block gains a line between 200 and 210 at three bullets. Currently 8 of 8
+  // pass with 14 characters of headroom on the longest, so this is a tripwire for
+  // the next entry someone writes rather than a backlog of edits.
+  const over = Object.entries(GLOSSARY.bintang)
+    .map(([k, v]) => ({ k, len: (v.label_meaning || '').length }))
+    .filter((e) => e.len > MAX_LABEL_MEANING);
+  assert.deepEqual(over.map((e) => `${e.k}=${e.len}`), [],
+    `over the ${MAX_LABEL_MEANING}-char ceiling. Run: npm run audit:card-budget`);
+});
+
+test('the ceiling is not vacuous — it sits above the longest entry, but not far above', () => {
+  // A ceiling of 9999 would pass the test above and constrain nothing. This pins
+  // it to the measurement: real headroom, but less than one more badge's worth.
+  const longest = Math.max(...Object.values(GLOSSARY.bintang).map((v) => (v.label_meaning || '').length));
+  assert.ok(MAX_LABEL_MEANING >= longest, 'the ceiling must not fail existing ruled copy');
+  assert.ok(MAX_LABEL_MEANING < longest * 1.5, 'the ceiling has drifted away from what was measured');
 });
 
 test('NOTHING appears both as a dynamic tag and in the badge row', () => {

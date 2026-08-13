@@ -139,6 +139,13 @@ Two rules:
 - **Always render it with its palace, and say so when it is void.** Never "bantuan akan datang". Always
   "bantuan datang lewat pekerjaan".
 
+  **SCOPED 2026-08-13 (Reyner): the palace rule is about PROSE, and the card bullets drop it.** Read
+  the rule's own examples and they are sentences — "bantuan datang lewat pekerjaan" is a clause in a
+  reading, where a bare "help arrives" is the platitude the rule exists to prevent. A card bullet is
+  not making that claim. It now reads `◆ Penyendiri`, not `◆ Penyendiri Pilar Akar`: the reading
+  carries provenance, the card does not need it, and the line space is scarce. **The prose rule is
+  unchanged.**
+
 ### 2. Tags — HYBRID. 3 fixed per archetype + 3 dynamic from the chart.
 
 Fixed-only gives the card **10 possible states**, which is a zodiac sign — with birthdate-only input a
@@ -147,6 +154,21 @@ archetype and is combinatorially hard to QA.
 
 Three fixed tags anchor the archetype so every Matahari card has family resemblance. Three drawn from
 the actual Aspek and badges so no two are identical. **30 fixed strings total.**
+
+**AMENDED 2026-08-13 (Reyner): the hybrid is CARD B ONLY. Card A carries the three fixed trait words
+and no dynamic tags at all.** "Aspek Pengatur" is system vocabulary — it means nothing to someone
+meeting Katon in a feed, and **Card A has no comprehension budget to teach it.** Card B is a document
+its owner has paid for and read a reading beside, so the vocabulary has somewhere to land.
+
+The differentiation argument above still holds and is still measured: `npm run measure:card-tags`
+gives 13 of 13 distinct dynamic triples across the fixture. It now applies to Card B. Card A's
+differentiation comes from the archetype, the Aspek headline, the hook line and the badges, which is
+already more than the ten states the fixed-only option was rejected for.
+
+Two problems dissolved for free. The tag row no longer mixes one-word traits with two-word system
+labels in one style, so the restyle that needed never has to happen. And a Bintang could previously
+appear twice on Card A, dimmed in the tag row and again as a badge bullet; on Card A there is now no
+tag row to collide with. The dedupe in `lib/card/cardData.js#dynamicTags` still matters for Card B.
 
 ### 3. Headline — TWO AXES. Day Master stays, the weather-modifier is replaced by the Aspek.
 

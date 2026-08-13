@@ -69,66 +69,144 @@ export const CARD_B = { canvas: { w: 1080, h: 1920 }, margin: 86.4, card: { w: 9
 // deferred register for the same reason.
 const FONT = 'var(--font-archivo), Archivo, system-ui, -apple-system, sans-serif';
 
-// ── TEXT ROLES ─────────────────────────────────────────────
-// Every place text meets the field, with the colour and the opacity it is drawn
+// ── TEXT ROLES ───────────────────────────────────────
+// Every place text meets a surface, with the colour and the opacity it is drawn
 // at. EXPORTED because tests/card.spec.mjs asserts the CONTRAST of each role
 // against every token, and a test that re-declared these numbers would be
 // asserting a copy: the roles would drift and the test would keep passing.
 //
-// `on` names the token key the text is drawn in; `over` names what it sits on.
-// Opacity is part of the role, not decoration — a 0.62 dynamic tag is a real
-// contrast reduction and is exactly where a pale field gets away with something.
-// THE OPACITIES BELOW WERE SET BY MEASUREMENT, 2026-08-13, not by eye. The first
-// pass used the 08-03 mock's values (dynamic tags 0.62, a dimmed 0.75 accent for
-// the badge palace, 0.6/0.7 in the appendix) and `npm run audit:card-contrast`
-// put six roles UNDER the locked set's own floor, worst at 1.79. Matahari is the
-// binding token — a vivid orange field caps accent at 2.22 and ink at 3.04 — so
-// dimming compounds on exactly the token with no headroom.
+// ── EVERY TEXT ROLE IS INK, AT FULL OPACITY. Measured 2026-08-13. ──
 //
-// Two of those fixes changed a role rather than a number, and both are better for
-// it. The badge palace was a DIMMED ACCENT and is now INK: it separates from the
-// accent-coloured badge label by hue instead of by fading, which is legible where
-// fading was not. The pillar meta line was an accent and is now ink, which also
-// happens to match the live reference this block is modelled on — `PillarCell`
-// draws its element/polarity line in `--tinta-soft`, not in the element colour.
+// The target is WCAG AA, 4.5:1. Auditing the previous map against it failed
+// 51 of 150 pairs, and the failures had two causes with completely different
+// fixes:
+//
+//   1. ACCENT CAN NEVER CARRY TEXT. It is BY DEFINITION the mid-lightness value
+//      between field and ink, so its ceiling against the field runs 3.05 to 5.69
+//      and SIX of ten tokens sit under 4.5 AT FULL OPACITY. No opacity, size or
+//      weight change reaches AA, because opacity 1 is already the maximum. So
+//      every text role moves to `ink`, and accent survives as a NON-TEXT colour:
+//      the watermark, the element bars, the INTI DIRI pill, the cell borders.
+//
+//   2. DIMMING COMPOUNDS ON THE TOKENS WITH NO HEADROOM. Ink at full opacity
+//      clears 4.5 on eight tokens, but Bambu sits at 4.93, so its lowest usable
+//      opacity is 0.94 — measured, not guessed. Anything below that fails a
+//      LOCKED token. **Opacity is no longer available as a hierarchy tool here.**
+//      Size, weight and italic carry it instead, which is better typography than
+//      fading text anyway.
+//
+// The map stays role-by-role even though every row is now identical, because the
+// assertion is "every role x every token" and the day someone dims one of these
+// back down, the audit has to catch it.
 export const TEXT_ROLES = {
-  headline:     { on: 'ink',    over: 'field', opacity: 1 },
-  aspek:        { on: 'accent', over: 'field', opacity: 1 },
-  tagFixed:     { on: 'ink',    over: 'field', opacity: 1 },
-  tagDynamic:   { on: 'ink',    over: 'field', opacity: 0.75 },
-  hook:         { on: 'ink',    over: 'field', opacity: 0.95 },
-  badgeLabel:   { on: 'accent', over: 'field', opacity: 1 },
-  badgePalace:  { on: 'ink',    over: 'field', opacity: 0.8 },
-  badgeMeaning: { on: 'ink',    over: 'field', opacity: 0.8 },
-  footer:       { on: 'ink',    over: 'field', opacity: 0.78 },
-  nameId:       { on: 'accent', over: 'field', opacity: 1 },
-  // Card B's appendix band tints the ground with ink at 0.07, so text there sits
-  // on a slightly different colour and is measured against that, not the field.
-  pillarLabel:  { on: 'ink',    over: 'band',  opacity: 0.8 },
-  pillarGanzhi: { on: 'ink',    over: 'band',  opacity: 1 },
-  pillarMeta:   { on: 'ink',    over: 'band',  opacity: 0.9 },
-  pillarAnimal: { on: 'ink',    over: 'band',  opacity: 0.8 },
-  barLabel:     { on: 'ink',    over: 'band',  opacity: 0.8 },
+  headline:     { on: 'ink', over: 'field', opacity: 1 },
+  aspek:        { on: 'ink', over: 'field', opacity: 1 },
+  tagFixed:     { on: 'ink', over: 'field', opacity: 1 },
+  tagDynamic:   { on: 'ink', over: 'field', opacity: 1 },
+  hook:         { on: 'ink', over: 'field', opacity: 1 },
+  badgeLabel:   { on: 'ink', over: 'field', opacity: 1 },
+  badgeMeaning: { on: 'ink', over: 'field', opacity: 1 },
+  footer:       { on: 'ink', over: 'field', opacity: 1 },
+  nameId:       { on: 'ink', over: 'field', opacity: 1 },
+  pillarLabel:  { on: 'ink', over: 'band',  opacity: 1 },
+  pillarGanzhi: { on: 'ink', over: 'band',  opacity: 1 },
+  pillarMeta:   { on: 'ink', over: 'band',  opacity: 1 },
+  pillarAnimal: { on: 'ink', over: 'band',  opacity: 1 },
+  barLabel:     { on: 'ink', over: 'band',  opacity: 1 },
 };
 
 /**
- * THE FLOOR EVERY ROLE ON EVERY TOKEN MUST CLEAR, asserted in tests/card.spec.mjs.
+ * WCAG AA. Asserted per role per token in tests/card.spec.mjs.
  *
- * 2.2, and it is not a WCAG number — it is the LOCKED SET'S OWN worst case.
- * Matahari's accent measures 2.22 against its field, so no accent role on any
- * token can ever beat that, and a test demanding 3.0 or 4.5 would fail a colour
- * Reyner ruled. The defensible rule is instead: **nothing may be worse than what
- * already shipped.** It is the same floor `sharecard-tokens-proposal.html`
- * measured its five proposals against.
- *
- * A NEW TOKEN THAT BREAKS THIS FAILS A TEST RATHER THAN SHIPPING, which is the
- * point: `accent` is by definition the mid-lightness value and five of the ten
- * fields are pale, so a plausible-looking hex can quietly halve a ratio.
+ * The previous pass set this to 2.2 on the argument that Matahari's accent caps
+ * at 2.22, so a higher floor would fail a colour Reyner ruled. That resolved the
+ * tension by lowering the bar, and it was the wrong way round: the bar is a
+ * legibility standard and the locked tokens that cannot meet it are a DECISION,
+ * not a reason to move the standard. AA stays; the two tokens that cannot reach
+ * it are listed in `AA_EXEMPT` below and are Reyner's to rule.
  */
-export const MIN_CONTRAST = 2.2;
+export const MIN_CONTRAST = 4.5;
 
-/** The ink tint Card B's appendix band lays over the field. Read by the test too. */
-export const BAND_TINT = 0.07;
+/**
+ * Tokens that cannot reach AA at any opacity, with the ink they already have.
+ * THIS LIST IS A REPORT, NOT A PERMISSION — the test pins it exactly, so it can
+ * only shrink, and nothing new may join it without someone editing this line.
+ *
+ *   丙 Matahari  LOCKED    ink 3.04 on #FF4F12. Reyner's call. Two minimum
+ *                            changes measured: darken the field to #CC3F0E and
+ *                            keep the near-white ink (4.53), or keep the vivid
+ *                            field and flip to a dark ink #4A1705 (4.51), which
+ *                            makes Matahari a light-field token like Permata.
+ *   戊 Gunung    proposed  ink 4.21 on #8F7040. Not locked, so it moves with the
+ *                            token ruling: #896B3D clears it at 4.53, a 4.5%
+ *                            darkening that is barely visible.
+ */
+export const AA_EXEMPT = ['丙', '戊'];
+
+/**
+ * THE FLAT FIELD IS THE WORST SURFACE ON EITHER CARD, and that is enforced rather
+ * than hoped for. Card B's gradient and its appendix band both step AWAY from the
+ * ink — darker under a light ink, lighter under a dark one — so every other
+ * surface has MORE contrast than the flat field, never less. The audit therefore
+ * measures the field and covers both cards.
+ *
+ * The first version tinted the band TOWARD the ink at 0.07 and quietly cost
+ * contrast on exactly the tokens with none to spare. Direction was the bug.
+ */
+export const BAND_TINT = 0.10;
+
+/** Card B's gradient depth. Three stops, from the 08-03 token proposal. */
+export const GRADIENT_STOPS = [0, 0.08, 0.16];
+
+/**
+ * CARD B SHOWS AT MOST THREE BADGES. A CONTENT BUDGET, NOT A LAYOUT GUARD.
+ *
+ * The block varies about sevenfold: badge count runs 1 to 4 and each carries a
+ * `label_meaning` of 109 to 186 characters (`npm run audit:card-budget`). A card
+ * is a fixed rectangle, so the widest content has to fit or the design is only
+ * true for the charts that happen to be short.
+ *
+ * Three, because Stage 3 already ranks the badges by importance, so the cut takes
+ * the least important one, and the measured average is 2.5 — most charts are
+ * unaffected. Card A is NOT capped: without meanings a badge is one short line.
+ *
+ * NOT auto-scaling type to fit. Cards must stay dimensionally identical across
+ * the set, and type that shrinks to accommodate is a card that tells the reader
+ * how much text it has.
+ */
+export const CARD_B_BADGE_LIMIT = 3;
+
+/**
+ * Longest `label_meaning` that fits at CARD_B_BADGE_LIMIT bullets, MEASURED.
+ *
+ * `npm run audit:card-budget -- --probe`, read in a browser 2026-08-13: with
+ * three bullets the block gains a line somewhere between 200 and 210 characters,
+ * so 200 is the last width that fits. Probed with REAL Indonesian sliced from the
+ * longest existing entry, not lorem - synthetic "MaMaMa" filler is far wider and
+ * put the break at 126, which would have been a false constraint on Reyner's copy.
+ *
+ * THE WHOLE GLOSSARY FITS: 8 of 8 bintang entries are 109 to 186 characters, so
+ * the longest has 14 characters of headroom. No content has to be shortened.
+ * The ceiling is a TRIPWIRE for the next entry someone writes, not a backlog.
+ *
+ * It is enforced as a TEST over glossary.json, never as a runtime truncation:
+ * those strings are Reyner-ruled and cutting one mid-sentence at render time
+ * would be the card editing his copy.
+ */
+export const MAX_LABEL_MEANING = 200;
+
+/**
+ * `hex` moved AWAY from the ink by `amount` (0..1): toward white when the ink is
+ * dark, toward black when the ink is light.
+ */
+export function stepAway(hex, ink, amount) {
+  const dark = inkIsDark({ ink });
+  const ch = [1, 3, 5].map((i) => {
+    const v = parseInt(hex.slice(i, i + 2), 16);
+    return Math.round(dark ? v + (255 - v) * amount : v * (1 - amount));
+  });
+  return `#${ch.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
 
 /** rgba() from a #rrggbb and an alpha. Kept local — kit.jsx is a client module. */
 function alpha(hex, a) {
@@ -163,8 +241,8 @@ const SCALE = {
   aspek: 46,       // 57 x 0.815, was 36
   tag: 25,         // 30 x 0.815, was 23
   hook: 35,        // 43.5 x 0.815, was 27
-  badgeLabel: 34,  // 42 x 0.815, was 23
-  badgeMeaning: 30,
+  badgeLabel: 30,  // 42 x 0.815 = 34 on Card A; Card B trims to 30, see CARD_B_BADGE_LIMIT
+  badgeMeaning: 25,
   footer: 24,      // 30 x 0.815, was 20
   pillarLabel: 20,
   pillarStem: 62,
@@ -217,10 +295,26 @@ function Watermark({ stem, token, spec, px }) {
  * the whole export reads as the archetype's colour at thumbnail size; the object
  * is separated by a hairline and a shadow only. See open question 2 above.
  */
-function Canvas({ spec, token, scale, stem, children }) {
+function Canvas({ spec, token, scale, stem, gradient, children }) {
   const { canvas, card } = spec;
   const px = (n) => n * scale;
   const dark = inkIsDark(token);
+  // CARD B'S GRADIENT — the "this is the paid one" treatment, and it is DERIVED,
+  // never a second set of hexes to keep in sync. Three stops from the flat field,
+  // stepping AWAY from the ink by GRADIENT_STOPS.
+  //
+  // It is deliberately SHALLOW, and the reason is in `sharecard-tokens-proposal`
+  // section 5: the original Card B rule ran the field down to near-black, which
+  // swept Matahari's paid gradient through Api Unggun's flat field and left a
+  // paid Matahari card and a FREE Api Unggun card reading as the same colour. A
+  // gradient held in the field's own upper band never crosses another archetype.
+  //
+  // Stepping away from the ink also means the deep end is the HIGH-contrast end,
+  // so the flat field stays the worst surface and the audit still covers it.
+  const ground = gradient
+    ? `linear-gradient(168deg, ${GRADIENT_STOPS.map((s, i) =>
+        `${stepAway(token.field, token.ink, s)} ${[0, 55, 100][i]}%`).join(', ')})`
+    : token.field;
   return E('div', {
     style: {
       // BORDER-BOX EXPLICITLY, on both boxes. The app sets `* { box-sizing:
@@ -235,7 +329,7 @@ function Canvas({ spec, token, scale, stem, children }) {
       // markup, because a computed-style read reports the CONTENT box and
       // happily "confirms" 907 while 1051 is drawn.
       boxSizing: 'border-box',
-      width: px(canvas.w), height: px(canvas.h), background: token.field,
+      width: px(canvas.w), height: px(canvas.h), background: ground,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       overflow: 'hidden', position: 'relative',
     },
@@ -243,7 +337,7 @@ function Canvas({ spec, token, scale, stem, children }) {
     E('div', {
       style: {
         boxSizing: 'border-box',
-        width: px(card.w), height: px(card.h), background: token.field, color: token.ink,
+        width: px(card.w), height: px(card.h), background: ground, color: token.ink,
         borderRadius: px(40), position: 'relative', overflow: 'hidden',
         display: 'flex', flexDirection: 'column', padding: px(72),
         // A light field needs a dark hairline and a dark field a light one, or the
@@ -270,13 +364,13 @@ function Canvas({ spec, token, scale, stem, children }) {
 }
 
 /** Two-axis headline: the Day Master archetype, then the Aspek beneath it. */
-function Headline({ data, token, px, showNameId }) {
+function Headline({ data, px, showNameId }) {
   return E('div', { style: { position: 'relative' } },
     // Card A prints name_en ALONE — no Indonesian name, no ID eyebrow (08-03).
     // Card B may carry the Indonesian name; it is a document, not a share.
     showNameId && E('div', {
       key: 'id',
-      style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.nameId), letterSpacing: px(4), textTransform: 'uppercase', color: token.accent, marginBottom: px(16) },
+      style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.nameId), letterSpacing: px(4), textTransform: 'uppercase', marginBottom: px(16) },
     }, data.nameId),
     E('div', {
       key: 'en',
@@ -285,19 +379,35 @@ function Headline({ data, token, px, showNameId }) {
     // Axis two. Indonesian on BOTH cards.
     E('div', {
       key: 'aspek',
-      style: { fontFamily: FONT, fontStyle: 'italic', fontWeight: 480, fontSize: px(SCALE.aspek), marginTop: px(18), color: token.accent },
+      // Italic and a lighter weight carry the step down from the headline. It was
+      // the accent colour until 2026-08-13; accent cannot reach AA on six of ten
+      // tokens, so the distinction is typographic now. See TEXT_ROLES.
+      style: { fontFamily: FONT, fontStyle: 'italic', fontWeight: 480, fontSize: px(SCALE.aspek), marginTop: px(18) },
     }, data.aspek),
   );
 }
 
-/** 3 fixed + 3 dynamic. The dynamic three are dimmed, as the 08-03 mock has them. */
-function Tags({ data, px }) {
+/**
+ * Tags. THREE FIXED TRAIT WORDS ALWAYS; the three dynamic Aspek only on Card B.
+ *
+ * RULED 2026-08-13: Card A drops them entirely. "Aspek Pengatur" is SYSTEM
+ * VOCABULARY — it means nothing to someone meeting Katon in a feed, and Card A
+ * has no comprehension budget to teach it. Card B is a document its owner has
+ * paid for and read a reading alongside, so the vocabulary lands there.
+ *
+ * It also settles two things that were awkward for free. The row no longer mixes
+ * one-word traits with two-word system labels in a single style, so the restyle
+ * that would have needed is moot. And the Bintang-appearing-twice problem
+ * (dimmed tag plus badge bullet) disappears from Card A outright — the dedupe in
+ * `cardData.js#dynamicTags` still matters, but now only for Card B.
+ */
+function Tags({ data, px, showDynamic }) {
   const base = { fontFamily: FONT, fontWeight: 650, fontSize: px(SCALE.tag), letterSpacing: px(3.4), textTransform: 'uppercase' };
   return E('div', {
     style: { display: 'flex', flexWrap: 'wrap', gap: `${px(14)}px ${px(32)}px`, marginTop: px(34), ...base },
   },
     data.tags.fixed.map((t) => E('span', { key: `f-${t}` }, t)),
-    data.tags.dynamic.map((t) => E('span', { key: `d-${t}`, style: { opacity: TEXT_ROLES.tagDynamic.opacity } }, t)),
+    showDynamic ? data.tags.dynamic.map((t) => E('span', { key: `d-${t}` }, t)) : null,
   );
 }
 
@@ -311,32 +421,38 @@ function Hook({ data, px }) {
   return E('p', {
     style: {
       fontFamily: FONT, fontWeight: 440, fontSize: px(SCALE.hook), lineHeight: 1.45,
-      marginTop: px(34), maxWidth: px(700), opacity: TEXT_ROLES.hook.opacity, flex: 1,
+      marginTop: px(34), maxWidth: px(700), flex: 1,
     },
   }, data.hook);
 }
 
-/** Badges, Indonesian name only. No English bracket — a card has no room for beat 3. */
-function Badges({ data, token, px, withMeaning }) {
-  if (!data.badges.length) return null;
-  return E('div', { style: { display: 'flex', flexDirection: 'column', gap: px(14) } },
-    data.badges.map((b) => E('div', { key: b.label },
+/**
+ * Badges. Indonesian name only, no English bracket, and NO PALACE.
+ *
+ * THE PALACE CAME OFF 2026-08-13. It read "◆ Penyendiri Pilar Akar" and it now
+ * reads "◆ Penyendiri". The reading carries provenance; a card bullet does not
+ * need it and the line space is scarce.
+ *
+ * That does NOT reverse the 08-01 Bintang Penolong rule — read it again and it is
+ * about PROSE: *"Never 'bantuan akan datang'. Always 'bantuan datang lewat
+ * pekerjaan'."* Those are sentences in a reading, where a bare "help arrives" is a
+ * platitude. A bullet on a card is not making that claim, and the palace is one
+ * line away in the reading it came from. Recorded in sharecard-spec.md so the
+ * next reader does not have to re-derive it.
+ *
+ * `max` is the content budget, not a layout guard — see CARD_B_BADGE_LIMIT.
+ */
+function Badges({ data, px, withMeaning, max }) {
+  const list = max ? data.badges.slice(0, max) : data.badges;
+  if (!list.length) return null;
+  return E('div', { style: { display: 'flex', flexDirection: 'column', gap: px(10) } },
+    list.map((b) => E('div', { key: b.label },
       E('div', {
-        style: { fontFamily: FONT, fontWeight: 640, fontSize: px(SCALE.badgeLabel), letterSpacing: px(1.2), color: token.accent },
-      },
-        // Bintang Penolong is in 77% of charts, so it is never a headline and is
-        // always rendered WITH its palace — never a bare "help arrives".
-        `◆ ${b.label}`,
-        // Ink, not a dimmed accent: it separates from the label by HUE, which
-        // survives a pale field where fading does not. See TEXT_ROLES.
-        b.palace ? E('span', {
-          key: 'p',
-          style: { color: token.ink, opacity: TEXT_ROLES.badgePalace.opacity },
-        }, `   ${b.palace}`) : null,
-      ),
+        style: { fontFamily: FONT, fontWeight: 640, fontSize: px(SCALE.badgeLabel), letterSpacing: px(1.2) },
+      }, `◆ ${b.label}`),
       withMeaning && b.meaning && E('div', {
         key: 'm',
-        style: { fontFamily: FONT, fontWeight: 400, fontSize: px(SCALE.badgeMeaning), lineHeight: 1.4, marginTop: px(6), opacity: TEXT_ROLES.badgeMeaning.opacity },
+        style: { fontFamily: FONT, fontWeight: 400, fontSize: px(SCALE.badgeMeaning), lineHeight: 1.4, marginTop: px(6) },
       }, b.meaning),
     )),
   );
@@ -348,7 +464,7 @@ function Footer({ data, px }) {
     style: {
       display: 'flex', justifyContent: 'space-between', marginTop: px(30),
       fontFamily: FONT, fontWeight: 520, fontSize: px(SCALE.footer), letterSpacing: px(2.6),
-      textTransform: 'uppercase', opacity: TEXT_ROLES.footer.opacity,
+      textTransform: 'uppercase',
     },
   },
     E('span', { key: 'l' }, data.footer.left),
@@ -393,7 +509,7 @@ function PillarCells({ data, token, px }) {
       }, 'Inti diri'),
       E('div', {
         key: 'label',
-        style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.pillarLabel), letterSpacing: px(1.6), textTransform: 'uppercase', opacity: TEXT_ROLES.pillarLabel.opacity },
+        style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.pillarLabel), letterSpacing: px(1.6), textTransform: 'uppercase' },
       }, p.palace),
       E('div', {
         key: 'stem',
@@ -405,11 +521,11 @@ function PillarCells({ data, token, px }) {
       }, p.branch),
       E('div', {
         key: 'meta',
-        style: { fontFamily: FONT, fontWeight: 500, fontSize: px(SCALE.pillarMeta), marginTop: px(14), opacity: TEXT_ROLES.pillarMeta.opacity },
+        style: { fontFamily: FONT, fontWeight: 500, fontSize: px(SCALE.pillarMeta), marginTop: px(14) },
       }, `${p.element}${p.polarity ? ` ${p.polarity}` : ''}`),
       E('div', {
         key: 'animal',
-        style: { fontFamily: FONT, fontWeight: 400, fontSize: px(SCALE.pillarMeta), marginTop: px(4), opacity: TEXT_ROLES.pillarAnimal.opacity },
+        style: { fontFamily: FONT, fontWeight: 400, fontSize: px(SCALE.pillarMeta), marginTop: px(4) },
       }, p.animal),
     )),
   );
@@ -429,10 +545,13 @@ export function CardA({ data, scale = 1 }) {
   // slack lands inside the reading zone rather than as one dead block above the
   // footer — the fix for Card A running about half its height empty.
   return E(Canvas, { spec: CARD_A, token, scale, stem: data.stem },
-    E(Headline, { key: 'h', data, token, px }),
-    E(Tags, { key: 't', data, px }),
+    E(Headline, { key: 'h', data, px }),
+    // Three fixed trait words only. No dynamic Aspek — see <Tags>.
+    E(Tags, { key: 't', data, px, showDynamic: false }),
     E(Hook, { key: 'k', data, px }),
-    E('div', { key: 'b', style: { marginTop: px(24) } }, E(Badges, { data, token, px })),
+    // Badges are NOT capped here: without their meanings they are one short line
+    // each, so four of them cost four lines. The budget problem is Card B's.
+    E('div', { key: 'b', style: { marginTop: px(24) } }, E(Badges, { data, px })),
     E(Footer, { key: 'f', data, px }),
   );
 }
@@ -453,20 +572,24 @@ export function CardB({ data, scale = 1 }) {
   const bars = data.appendix.elements || {};
   const max = Math.max(1, ...Object.values(bars));
 
-  return E(Canvas, { spec: CARD_B, token, scale, stem: data.stem },
-    E(Headline, { key: 'h', data, token, px, showNameId: true }),
-    E(Tags, { key: 't', data, px }),
+  return E(Canvas, { spec: CARD_B, token, scale, stem: data.stem, gradient: true },
+    E(Headline, { key: 'h', data, px, showNameId: true }),
+    // The Aspek tags live here and only here — Card B is a document its owner has
+    // read a reading beside, so the system vocabulary has somewhere to land.
+    E(Tags, { key: 't', data, px, showDynamic: true }),
     E(Hook, { key: 'k', data, px }),
-    E('div', { key: 'bd', style: { marginTop: px(34) } }, E(Badges, { data, token, px, withMeaning: true })),
+    E('div', { key: 'bd', style: { marginTop: px(22) } },
+      E(Badges, { data, px, withMeaning: true, max: CARD_B_BADGE_LIMIT })),
 
-    // THE APPENDIX BAND. Separated by a full-bleed rule and a tinted ground so the
-    // lower third reads as a different surface while scrolling.
+    // THE APPENDIX BAND. A full-bleed rule and a ground stepped AWAY from the ink,
+    // so the lower third reads as a different surface while scrolling and gains
+    // contrast rather than losing it.
     E('div', {
       key: 'app',
       style: {
-        marginTop: px(44), marginLeft: px(-72), marginRight: px(-72), marginBottom: px(-72),
-        padding: `${px(48)}px ${px(72)}px ${px(60)}px`,
-        background: alpha(token.ink, BAND_TINT),
+        marginTop: px(30), marginLeft: px(-72), marginRight: px(-72), marginBottom: px(-72),
+        padding: `${px(36)}px ${px(72)}px ${px(48)}px`,
+        background: stepAway(token.field, token.ink, BAND_TINT),
         borderTop: `${Math.max(1, px(2))}px solid ${alpha(token.ink, 0.22)}`,
       },
     },
@@ -475,12 +598,12 @@ export function CardB({ data, scale = 1 }) {
 
       // Element bars: visual, NO numbers. Numbers invite comparison of the wrong
       // thing, and these are a display distribution, never a strength score.
-      E('div', { key: 'bars', style: { display: 'flex', gap: px(10), marginTop: px(38) } },
+      E('div', { key: 'bars', style: { display: 'flex', gap: px(10), marginTop: px(30) } },
         Object.entries(bars).map(([name, v]) => E('div', { key: name, style: { flex: 1 } },
           E('div', { key: 'track', style: { height: px(9), background: alpha(token.ink, 0.16), borderRadius: px(5), overflow: 'hidden' } },
             E('div', { style: { width: `${(v / max) * 100}%`, height: '100%', background: token.accent } }),
           ),
-          E('div', { key: 'l', style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.barLabel), letterSpacing: px(1.4), textTransform: 'uppercase', marginTop: px(9), opacity: TEXT_ROLES.barLabel.opacity } }, name),
+          E('div', { key: 'l', style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.barLabel), letterSpacing: px(1.4), textTransform: 'uppercase', marginTop: px(9) } }, name),
         )),
       ),
 

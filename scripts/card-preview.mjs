@@ -39,7 +39,7 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData } from '../lib/card/cardData.js';
 import { CARD_TOKENS } from '../lib/card/tokens.js';
 import { auditContrast } from '../lib/card/contrast.js';
-import { CardA, CardB, TEXT_ROLES, BAND_TINT, MIN_CONTRAST } from '../components/cards/Card.js';
+import { CardA, CardB, TEXT_ROLES, BAND_TINT, MIN_CONTRAST, AA_EXEMPT } from '../components/cards/Card.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'reports', 'card-preview.html');
@@ -164,7 +164,7 @@ ${rows.map((r) => `
 Aspek <b>${esc(r.data.aspek)}</b>. Fixed tags ${esc(r.data.tags.fixed.join(', '))}.
 Dynamic ${esc(r.data.tags.dynamic.join(', ')) || '(none)'}${r.data.tags.dynamic.length < 3 ? ` <span class="no">(only ${r.data.tags.dynamic.length} - the chart has no more)</span>` : ''}.
 Badges ${esc(r.data.badges.map((b) => b.label).join(', ')) || '(none)'}.
-Worst contrast <b>${worst[r.stem].ratio.toFixed(2)}</b> on <code>${esc(worst[r.stem].role)}</code>, floor ${MIN_CONTRAST}.
+Worst contrast <b>${worst[r.stem].ratio.toFixed(2)}</b> on <code>${esc(worst[r.stem].role)}</code>, floor ${MIN_CONTRAST} (WCAG AA)${AA_EXEMPT.includes(r.stem) ? " <span class=\"no\">- cannot reach AA, Reyner to rule</span>" : ""}.
 Footer <b>${esc(r.data.footer.left)}</b>${r.data.footer.gender ? '' : ' (null gender: date and source only)'}.</p>
 `).join('\n')}
 `;
