@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katon - the 5 missing archetype colour tokens (PROPOSAL)</title>
+<!--
+STATUS: PROPOSAL for Reyner, 2026-08-03. STILL OPEN as of 2026-08-13 - the five proposed triples
+are NOT approved, and colour tokens remain on the do-not-decide-alone list.
+The 5 LOCKED triples are copied verbatim from sharecard-mockups-02.html :root.
+Geometry follows the 2026-08-03 size ruling: 3:4 canvas 1080x1440, 63:88 card object floating on it.
+All numbers in this file were produced by sharecard-tokens-measure.mjs (OKLCh + WCAG), 2026-08-03.
+Marks for the 5 new archetypes are PLACEHOLDERS - mark design was not that session's task.
+
+MOVED INTO THE REPO 2026-08-13, from a Claude scratchpad under
+AppData\Local\Temp\claude\...\127914c7-...\scratchpad\. PROGRESS.md's 08-03 card ruling cites this
+file as its evidence ("Mocked that way in the 08-03 token proposal"), and evidence a session cannot
+read is not evidence: the 08-13 card session redrew a settled spec from scratch because of it. Its
+measurement script moved with it as sharecard-tokens-measure.mjs, in the same directory - the two are
+useless apart, since every number below came out of that script.
+
+Its five locked triples are the source `lib/card/tokens.js` copies. If a value here changes, change
+it there; the test in tests/card.spec.mjs pins them against this file's own :root values.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bench:#111113; --bench-ink:#d9d7d2; --bench-dim:#84817a;
+    /* ---- LOCKED, 5 of 10 (verbatim from sharecard-mockups-02.html) ---- */
+    --sun-f:#FF4F12;   --sun-i:#FFF4EC;   --sun-a:#FFC9A8;
+    --oce-f:#0E3A5C;   --oce-i:#EAF3F9;   --oce-a:#7FB6D9;
+    --gem-f:#EDEAE4;   --gem-i:#1C1A17;   --gem-a:#8A7B5C;
+    --bam-f:#1F7A43;   --bam-i:#EFF8EF;   --bam-a:#A8DBB4;
+    --bes-f:#26282D;   --bes-i:#E8E9EC;   --bes-a:#9BA1AD;
+    /* ---- PROPOSED, the missing 5 ---- */
+    --jat-f:#1B4A2C;   --jat-i:#ECF5EE;   --jat-a:#8FBF9F;
+    --api-f:#7C2012;   --api-i:#FDEEE8;   --api-a:#EFA98C;
+    --gun-f:#8F7040;   --gun-i:#FAF4E9;   --gun-a:#E3CFA8;
+    --tam-f:#D0B87E;   --tam-i:#241E12;   --tam-a:#755C2C;
+    --emb-f:#A9CFE0;   --emb-i:#16242C;   --emb-a:#46748F;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bench);color:var(--bench-ink);font-family:'Archivo',sans-serif;padding:48px 40px 120px}
+  h1{font-variation-settings:'wdth' 72,'wght' 800;font-size:32px;letter-spacing:.01em;margin-bottom:8px;text-transform:uppercase}
+  .sub{color:var(--bench-dim);font-size:13.5px;max-width:80ch;line-height:1.65}
+  section{margin-top:56px}
+  section>h2{font-variation-settings:'wdth' 110,'wght' 600;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--bench-dim);border-bottom:1px solid #26262a;padding-bottom:10px;margin-bottom:26px}
+  h3{font-variation-settings:'wdth' 100,'wght' 650;font-size:14px;margin:26px 0 10px}
+  p.body{font-size:13.5px;line-height:1.7;max-width:88ch;color:#bab7b0;margin-bottom:10px}
+  p.body b{color:var(--bench-ink)}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#e0b978}
+  .row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+
+  /* ---------- CANVAS + CARD OBJECT, today's geometry ----------
+     canvas 3:4 (1080x1440) carries the colour field.
+     card object 63:88 floats on it at a uniform 86px margin (mock: 404x539 / 340x475 / 32px). */
+  .canvas{width:404px;height:539px;background:var(--f);padding:32px;position:relative;border-radius:6px;
+    box-shadow:0 30px 60px -18px rgba(0,0,0,.6)}
+  .cardobj{width:340px;height:475px;background:var(--f);color:var(--i);border-radius:16px;
+    display:flex;flex-direction:column;padding:26px;position:relative;overflow:hidden;
+    box-shadow:0 10px 26px -8px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.16)}
+  .cardobj::before{content:"";position:absolute;inset:0;border-radius:16px;
+    background:linear-gradient(178deg,rgba(255,255,255,.09),transparent 34%,rgba(0,0,0,.10) 92%);pointer-events:none}
+  .light .cardobj{box-shadow:0 10px 26px -8px rgba(0,0,0,.28), inset 0 0 0 1px rgba(0,0,0,.13)}
+  .mark{height:74px;display:flex;align-items:center}
+  .name{font-variation-settings:'wdth' 64,'wght' 880;font-size:48px;line-height:.94;text-transform:uppercase;letter-spacing:.005em;margin-top:10px}
+  .aspek{font-variation-settings:'wdth' 100,'wght' 480;font-style:italic;font-size:15px;margin-top:6px;color:var(--a)}
+  .tags{margin-top:13px;display:flex;flex-wrap:wrap;gap:5px 14px;
+    font-variation-settings:'wdth' 112,'wght' 650;font-size:10px;letter-spacing:.16em}
+  .tags .dyn{opacity:.62}
+  .hook{font-variation-settings:'wdth' 98,'wght' 440;font-size:11.6px;line-height:1.5;margin-top:13px;max-width:30ch;opacity:.95}
+  .badges{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+  .badge{font-variation-settings:'wdth' 104,'wght' 640;font-size:10px;letter-spacing:.05em;color:var(--a)}
+  .badge::before{content:"\25C6 ";font-size:8px;vertical-align:1px}
+  .foot{margin-top:11px;display:flex;justify-content:space-between;
+    font-variation-settings:'wdth' 90,'wght' 520;font-size:9px;letter-spacing:.12em;opacity:.78;text-transform:uppercase}
+  .cap{font-size:12px;line-height:1.6;color:var(--bench-dim);margin-top:12px;max-width:404px}
+  .cap b{color:var(--bench-ink);font-variation-settings:'wght' 650}
+  .tag-new{display:inline-block;font-size:9px;letter-spacing:.18em;padding:3px 7px;border-radius:3px;
+    background:#3b2f14;color:#e9c777;margin-left:8px;vertical-align:2px}
+  .tag-lock{display:inline-block;font-size:9px;letter-spacing:.18em;padding:3px 7px;border-radius:3px;
+    background:#1d2a20;color:#8fc0a0;margin-left:8px;vertical-align:2px}
+
+  /* ---------- thumbnail shelf ---------- */
+  .shelf{display:flex;gap:14px;flex-wrap:wrap}
+  .t{width:100px;height:133px;overflow:hidden;border-radius:5px}
+  .t .canvas{transform:scale(.2475);transform-origin:top left;border-radius:24px}
+  .tlabel{font-variation-settings:'wdth' 100,'wght' 500;font-size:9.5px;letter-spacing:.1em;color:var(--bench-dim);margin-top:8px;text-transform:uppercase}
+  .tlabel i{display:block;font-style:normal;color:#5f5d58;font-size:9px;letter-spacing:.06em}
+
+  /* ---------- swatch strips ---------- */
+  table{border-collapse:collapse;font-size:12px;margin-top:8px}
+  th,td{text-align:left;padding:7px 12px;border-bottom:1px solid #232327;white-space:nowrap}
+  th{font-variation-settings:'wdth' 110,'wght' 620;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--bench-dim)}
+  td.n{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:#b6b3ac}
+  .chip{display:inline-block;width:52px;height:22px;border-radius:3px;vertical-align:-6px;margin-right:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+  .warn{color:#e08a5f}
+  .ok{color:#8fc0a0}
+  .note{background:#1a1a1e;border:1px solid #2c2c32;border-radius:12px;padding:18px 22px;font-size:13px;line-height:1.7;color:#bab7b0;margin-top:24px;max-width:96ch}
+  .note b{color:#e6e4de;font-variation-settings:'wght' 650}
+  .note.flag{border-color:#5a3a20;background:#1d1712}
+  ul{margin:8px 0 0 20px;font-size:13.5px;line-height:1.75;color:#bab7b0;max-width:88ch}
+  li b{color:var(--bench-ink)}
+</style>
+</head>
+<body>
+
+<h1>The five missing colour tokens</h1>
+<p class="sub">PROPOSAL, 2026-08-03. Nothing here is written into <code>glossary.json</code> or
+<code>sharecard-mockups-02.html</code> yet. The five LOCKED triples are copied verbatim from the mockup's
+<code>:root</code>; the five new ones follow the derivation rule measured off them, printed below.
+Geometry is the 08-03 ruling: a 3:4 canvas with a 63:88 card object floating on it. Marks for the new five
+are placeholders. Every number on this page came from <code>sharecard-tokens-measure.mjs</code>, in this
+same directory (OKLCh + WCAG). <b>Still open as of 2026-08-13:</b> the five proposals below are not
+approved, and <code>lib/card/tokens.js</code> renders them flagged <code>approved: false</code> so the
+card can be looked at without the proposal being mistaken for a decision.</p>
+
+<section>
+<h2>1 - The rule the locked five actually follow</h2>
+<p class="body">Measured, not assumed. Three findings, and I followed all three.</p>
+<ul>
+  <li><b>Field = the object's colour, and the hue is the element family.</b> Fire H36 (Matahari), Wood
+  H152 (Bambu), Water H246 (Samudra), Metal achromatic C&nbsp;0.01 (Besi Tempa + Permata). The one
+  complete pair - Metal - shares one hue family and splits on <b>lightness</b>: yang L&nbsp;0.28,
+  yin L&nbsp;0.94. So a reader learns "grey = Logam" from two cards, and the missing five must not break that.</li>
+  <li><b>Ink = the field's own hue, chroma collapsed, lightness pushed to the far end.</b> Hue within
+  10 degrees of the field (Matahari 22 is the outlier), C 0.00-0.02, L 0.93-0.97 on a dark or mid field
+  and L 0.22 on the one light field (Permata). Never pure white, never pure black.</li>
+  <li><b>Accent = the field's hue, chroma equal or lower, lightness landing between field and ink.</b>
+  Hue within 9 degrees (Matahari 17), C 0.02-0.08 and always at or below the field's chroma,
+  L 0.71-0.88 above a dark field, L 0.59 below the light one.</li>
+</ul>
+<p class="body">Two measured floors that constrain anything new: the weakest ink contrast in the locked
+set is <b>Matahari at 3.04</b> and the weakest accent contrast is <b>Matahari at 2.22</b>; the closest
+two colour fields are <b>Samudra vs Besi Tempa at dE 0.09</b> (OKLab). I held all five proposals above
+every one of those: ink 4.21 or better, accent 3.02 or better, and no new pair closer than dE 0.11.</p>
+</section>
+
+<section>
+<h2>2 - The ten fields as a shelf, which is how a feed shows them</h2>
+<div class="shelf">
+  <div><div class="t"><div class="canvas" style="--f:var(--sun-f);--i:var(--sun-i);--a:var(--sun-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><circle cx="36" cy="36" r="26" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="36" cy="36" r="9" fill="currentColor"/></svg></div><div class="name">THE<br>SUN</div></div></div></div><div class="tlabel">Matahari<i>locked</i></div></div>
+  <div><div class="t"><div class="canvas" style="--f:var(--api-f);--i:var(--api-i);--a:var(--api-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><path d="M36 12 C48 30 52 38 52 46 a16 16 0 0 1-32 0 C20 38 24 30 36 12Z" fill="none" stroke="currentColor" stroke-width="3.5"/></svg></div><div class="name">THE<br>BONFIRE</div></div></div></div><div class="tlabel">Api Unggun<i>proposed</i></div></div>
+  <div><div class="t"><div class="canvas" style="--f:var(--jat-f);--i:var(--jat-i);--a:var(--jat-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><line x1="36" y1="8" x2="36" y2="64" stroke="currentColor" stroke-width="4"/><path d="M36 30 L20 18 M36 42 L52 30" stroke="currentColor" stroke-width="3.5" fill="none"/></svg></div><div class="name">THE<br>TEAK</div></div></div></div><div class="tlabel">Jati<i>proposed</i></div></div>
+  <div><div class="t"><div class="canvas" style="--f:var(--bam-f);--i:var(--bam-i);--a:var(--bam-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><line x1="26" y1="10" x2="26" y2="62" stroke="currentColor" stroke-width="3.5"/><line x1="46" y1="10" x2="46" y2="62" stroke="currentColor" stroke-width="3.5" opacity=".6"/><line x1="18" y1="30" x2="34" y2="30" stroke="currentColor" stroke-width="3.5"/></svg></div><div class="name">THE<br>BAMBOO</div></div></div></div><div class="tlabel">Bambu<i>locked</i></div></div>
+  <div><div class="t"><div class="canvas" style="--f:var(--gun-f);--i:var(--gun-i);--a:var(--gun-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><path d="M8 58 L30 20 L44 42 L52 30 L66 58Z" fill="none" stroke="currentColor" stroke-width="3.5"/></svg></div><div class="name">THE<br>MOUNTAIN</div></div></div></div><div class="tlabel">Gunung<i>proposed</i></div></div>
+  <div><div class="t light"><div class="canvas" style="--f:var(--tam-f);--i:var(--tam-i);--a:var(--tam-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><circle cx="36" cy="26" r="12" fill="none" stroke="currentColor" stroke-width="3.5"/><line x1="36" y1="38" x2="36" y2="62" stroke="currentColor" stroke-width="3.5"/><line x1="16" y1="62" x2="56" y2="62" stroke="currentColor" stroke-width="3.5" opacity=".6"/></svg></div><div class="name">THE<br>GARDEN</div></div></div></div><div class="tlabel">Taman<i>proposed</i></div></div>
+  <div><div class="t"><div class="canvas" style="--f:var(--bes-f);--i:var(--bes-i);--a:var(--bes-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><rect x="16" y="30" width="40" height="14" fill="currentColor"/><rect x="26" y="18" width="20" height="8" fill="currentColor" opacity=".55"/></svg></div><div class="name">THE<br>FORGE</div></div></div></div><div class="tlabel">Besi Tempa<i>locked</i></div></div>
+  <div><div class="t light"><div class="canvas" style="--f:var(--gem-f);--i:var(--gem-i);--a:var(--gem-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><rect x="21" y="21" width="30" height="30" transform="rotate(45 36 36)" fill="none" stroke="currentColor" stroke-width="3.5"/></svg></div><div class="name">THE<br>JEWEL</div></div></div></div><div class="tlabel">Permata<i>locked</i></div></div>
+  <div><div class="t"><div class="canvas" style="--f:var(--oce-f);--i:var(--oce-i);--a:var(--oce-a)"><div class="cardobj"><div class="mark"><svg width="62" height="60" viewBox="0 0 76 72"><path d="M8 28 Q19 20 30 28 T52 28 T74 28" fill="none" stroke="currentColor" stroke-width="3.5"/><path d="M8 42 Q19 34 30 42 T52 42 T74 42" fill="none" stroke="currentColor" stroke-width="3.5" opacity=".65"/></svg></div><div class="name">THE<br>OCEAN</div></div></div></div><div class="tlabel">Samudra<i>locked</i></div></div>
+  <div><div class="t light"><div class="canvas" style="--f:var(--emb-f);--i:var(--emb-i);--a:var(--emb-a)"><div class="cardobj"><div class="mark"><svg width="60" height="60" viewBox="0 0 72 72"><path d="M36 14 C46 30 50 36 50 44 a14 14 0 0 1-28 0 C22 36 26 30 36 14Z" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="36" cy="44" r="5" fill="currentColor" opacity=".7"/></svg></div><div class="name">MORNING<br>DEW</div></div></div></div><div class="tlabel">Embun<i>proposed</i></div></div>
+</div>
+<p class="cap" style="max-width:96ch"><b>Read it as a set.</b> Five element families, ten cards: Fire
+bright/deep, Wood bright/deep, Earth mid/pale, Metal dark/pale, Water deep/pale. Every element pair
+shares a hue and splits on value, which is the Metal rule the locked set already established.</p>
+</section>
+
+<section>
+<h2>3 - The five triples, with their numbers</h2>
+<table>
+<tr><th>Archetype</th><th>Field</th><th>L / C / H</th><th>Ink</th><th>ink vs field</th><th>Accent</th><th>acc vs field</th></tr>
+<tr><td>Jati <span class="tag-new">NEW</span></td><td class="n"><span class="chip" style="background:#1B4A2C"></span>#1B4A2C</td><td class="n">0.37 / 0.07 / 153</td><td class="n"><span class="chip" style="background:#ECF5EE"></span>#ECF5EE</td><td class="n ok">9.15</td><td class="n"><span class="chip" style="background:#8FBF9F"></span>#8FBF9F</td><td class="n ok">4.91</td></tr>
+<tr><td>Api Unggun <span class="tag-new">NEW</span></td><td class="n"><span class="chip" style="background:#7C2012"></span>#7C2012</td><td class="n">0.39 / 0.13 / 32</td><td class="n"><span class="chip" style="background:#FDEEE8"></span>#FDEEE8</td><td class="n ok">8.96</td><td class="n"><span class="chip" style="background:#EFA98C"></span>#EFA98C</td><td class="n ok">5.17</td></tr>
+<tr><td>Gunung <span class="tag-new">NEW</span></td><td class="n"><span class="chip" style="background:#8F7040"></span>#8F7040</td><td class="n">0.56 / 0.08 / 77</td><td class="n"><span class="chip" style="background:#FAF4E9"></span>#FAF4E9</td><td class="n">4.21</td><td class="n"><span class="chip" style="background:#E3CFA8"></span>#E3CFA8</td><td class="n">3.02</td></tr>
+<tr><td>Taman <span class="tag-new">NEW</span></td><td class="n"><span class="chip" style="background:#D0B87E"></span>#D0B87E</td><td class="n">0.79 / 0.08 / 88</td><td class="n"><span class="chip" style="background:#241E12"></span>#241E12</td><td class="n ok">8.54</td><td class="n"><span class="chip" style="background:#755C2C"></span>#755C2C</td><td class="n">3.26</td></tr>
+<tr><td>Embun <span class="tag-new">NEW</span></td><td class="n"><span class="chip" style="background:#A9CFE0"></span>#A9CFE0</td><td class="n">0.83 / 0.05 / 227</td><td class="n"><span class="chip" style="background:#16242C"></span>#16242C</td><td class="n ok">9.59</td><td class="n"><span class="chip" style="background:#46748F"></span>#46748F</td><td class="n">3.05</td></tr>
+<tr><td style="padding-top:16px">Matahari <span class="tag-lock">LOCKED</span></td><td class="n" style="padding-top:16px"><span class="chip" style="background:#FF4F12"></span>#FF4F12</td><td class="n" style="padding-top:16px">0.67 / 0.22 / 36</td><td class="n" style="padding-top:16px"><span class="chip" style="background:#FFF4EC"></span>#FFF4EC</td><td class="n warn" style="padding-top:16px">3.04</td><td class="n" style="padding-top:16px"><span class="chip" style="background:#FFC9A8"></span>#FFC9A8</td><td class="n warn" style="padding-top:16px">2.22</td></tr>
+<tr><td>Bambu <span class="tag-lock">LOCKED</span></td><td class="n"><span class="chip" style="background:#1F7A43"></span>#1F7A43</td><td class="n">0.51 / 0.12 / 152</td><td class="n"><span class="chip" style="background:#EFF8EF"></span>#EFF8EF</td><td class="n">4.93</td><td class="n"><span class="chip" style="background:#A8DBB4"></span>#A8DBB4</td><td class="n">3.43</td></tr>
+<tr><td>Samudra <span class="tag-lock">LOCKED</span></td><td class="n"><span class="chip" style="background:#0E3A5C"></span>#0E3A5C</td><td class="n">0.34 / 0.08 / 246</td><td class="n"><span class="chip" style="background:#EAF3F9"></span>#EAF3F9</td><td class="n ok">10.51</td><td class="n"><span class="chip" style="background:#7FB6D9"></span>#7FB6D9</td><td class="n ok">5.40</td></tr>
+<tr><td>Besi Tempa <span class="tag-lock">LOCKED</span></td><td class="n"><span class="chip" style="background:#26282D"></span>#26282D</td><td class="n">0.28 / 0.01 / 268</td><td class="n"><span class="chip" style="background:#E8E9EC"></span>#E8E9EC</td><td class="n ok">12.15</td><td class="n"><span class="chip" style="background:#9BA1AD"></span>#9BA1AD</td><td class="n ok">5.69</td></tr>
+<tr><td>Permata <span class="tag-lock">LOCKED</span></td><td class="n"><span class="chip" style="background:#EDEAE4"></span>#EDEAE4</td><td class="n">0.94 / 0.01 / 85</td><td class="n"><span class="chip" style="background:#1C1A17"></span>#1C1A17</td><td class="n ok">14.46</td><td class="n"><span class="chip" style="background:#8A7B5C"></span>#8A7B5C</td><td class="n ok">3.45</td></tr>
+</table>
+<p class="cap" style="max-width:96ch">Orange numbers are the locked set's own floor, not a proposal
+defect - Matahari's near-white on vivid orange is 3.04, which is large-type-only contrast. Worth a look
+when you tinker, but it is not mine to change and every proposal sits above it.</p>
+</section>
+
+<section>
+<h2>4 - Separation: the tightest pairs in the full set of ten</h2>
+<table>
+<tr><th>Pair</th><th>dE (OKLab)</th><th>dL</th><th>dHue</th><th>Status</th></tr>
+<tr><td>Samudra vs Besi Tempa</td><td class="n">0.09</td><td class="n">0.06</td><td class="n">22</td><td>locked already - this is the floor</td></tr>
+<tr><td>Samudra vs Jati</td><td class="n">0.11</td><td class="n">0.03</td><td class="n">94</td><td>navy vs forest, opposite hue side</td></tr>
+<tr><td>Permata vs Embun</td><td class="n">0.12</td><td class="n">0.11</td><td class="n">142</td><td>warm pearl vs cool mist</td></tr>
+<tr><td>Besi Tempa vs Jati</td><td class="n">0.12</td><td class="n">0.09</td><td class="n">115</td><td>ok</td></tr>
+<tr><td>Bambu vs Gunung</td><td class="n">0.13</td><td class="n">0.05</td><td class="n">75</td><td>ok</td></tr>
+<tr><td>Taman vs Embun</td><td class="n">0.13</td><td class="n">0.04</td><td class="n">139</td><td>the two pales, hue-opposed</td></tr>
+<tr><td>Bambu vs Jati</td><td class="n">0.15</td><td class="n">0.15</td><td class="n">1</td><td>same hue by design, split on value</td></tr>
+<tr><td>Permata vs Taman</td><td class="n">0.16</td><td class="n">0.15</td><td class="n">3</td><td>same hue by design, split on value</td></tr>
+<tr><td><b>Matahari vs Api Unggun</b></td><td class="n ok"><b>0.29</b></td><td class="n">0.28</td><td class="n">5</td><td class="ok">your constraint - clear, 20th of 45 pairs</td></tr>
+</table>
+<p class="cap" style="max-width:96ch">Api Unggun clears Matahari on <b>value</b>, not hue: same fire
+family (5 degrees apart), L 0.39 against 0.67. That is the intended relationship - a contained ember
+against an open blaze - and it is three times the set's existing floor.</p>
+</section>
+
+<section>
+<h2>5 - One thing I found while checking that constraint</h2>
+<div class="note flag"><b>Card B's gradient rule collides with Api Unggun's flat field.</b>
+Matahari's Card B gradient in the locked mock is <code>#B33305 -&gt; #701C02 -&gt; #330C00</code>, which
+measures as one hue (36) walked down in lightness: 0.51, 0.36, 0.22. Api Unggun's proposed field sits at
+L 0.39 in the same family, so it lands <b>dE 0.03 from Matahari's middle stop</b> - a paid Matahari card
+and a free Api Unggun card would read as the same colour.
+<br><br>
+This is not fixable in the token. I tried rotating Api Unggun to the wine side (H 19 instead of 32) and it
+bought 0.01. The cause is the gradient rule itself: "same hue, deepened to near-black" sweeps through the
+whole lightness range, so any dark field in that family gets crossed. Fire is the only pair where the yang
+card is the bright one, so Fire is the only place it bites.
+<br><br>
+<b>My recommendation, your call:</b> keep Card B's gradient in the field's upper band - field minus 0.08 /
+0.16 / 0.24 rather than minus 0.16 / 0.31 / 0.45. Matahari B becomes roughly
+<code>#E04310 -&gt; #B33305 -&gt; #8A2A04</code>: still visibly richer than the flat card, and it never
+descends into Api Unggun's band. The 9:16 height, the ghost mark and the appendix band are already doing
+the "this is the paid one" work; the gradient does not need to run to black to carry it. Not actioned.</div>
+</section>
+
+<section>
+<h2>6 - The five new cards at full size, so ink and accent are judgeable</h2>
+<p class="body">Real fixed tags from <code>glossary.json -&gt; tag_arketipe</code> and real hook lines from
+<code>salah_dikira</code>. Dynamic tags and badges are CONTOH. Aspek pairings are placeholders - the Aspek
+is chart-dependent, not archetype-dependent. Marks are placeholders.</p>
+<div class="row">
+
+  <div><div class="canvas" style="--f:var(--jat-f);--i:var(--jat-i);--a:var(--jat-a)"><div class="cardobj">
+    <div class="mark"><svg width="64" height="64" viewBox="0 0 72 72"><line x1="36" y1="8" x2="36" y2="64" stroke="currentColor" stroke-width="4"/><path d="M36 30 L20 18 M36 42 L52 30" stroke="currentColor" stroke-width="3.5" fill="none"/></svg></div>
+    <div class="name">THE<br>TEAK</div>
+    <div class="aspek">Sang Pengatur</div>
+    <div class="tags"><span>TEGUH</span><span>MENAUNGI</span><span>KONSISTEN</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu keras kepala. Kamu hanya menolak bergeser dari hal yang kamu tahu benar."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>PEREMPUAN · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div></div><p class="cap"><b>Jati / The Teak</b> - deep forest green. Same hue as Bambu (153 vs 152),
+  fifteen points of lightness below it. Wood reads as one family, yang as the heavier card, exactly the
+  way the two Metals already work.</p></div>
+
+  <div><div class="canvas" style="--f:var(--api-f);--i:var(--api-i);--a:var(--api-a)"><div class="cardobj">
+    <div class="mark"><svg width="64" height="64" viewBox="0 0 72 72"><path d="M36 12 C48 30 52 38 52 46 a16 16 0 0 1-32 0 C20 38 24 30 36 12Z" fill="none" stroke="currentColor" stroke-width="3.5"/></svg></div>
+    <div class="name">THE<br>BONFIRE</div>
+    <div class="aspek">Sang Pelindung</div>
+    <div class="tags"><span>PEKA</span><span>SETIA</span><span>PENYAYANG</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu gampang mengalah. Kamu hanya memilih dengan sangat hati-hati siapa yang layak kamu terangi."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>LAKI-LAKI · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div></div><p class="cap"><b>Api Unggun / The Bonfire</b> - deep ember. Held at the fire hue rather
+  than pushed to wine, because the hue rotation bought nothing measurable and ember is the truer object.
+  The separation from Matahari is value, and it is large.</p></div>
+
+  <div><div class="canvas" style="--f:var(--gun-f);--i:var(--gun-i);--a:var(--gun-a)"><div class="cardobj">
+    <div class="mark"><svg width="64" height="64" viewBox="0 0 72 72"><path d="M8 58 L30 20 L44 42 L52 30 L66 58Z" fill="none" stroke="currentColor" stroke-width="3.5"/></svg></div>
+    <div class="name">THE<br>MOUNTAIN</div>
+    <div class="aspek">Sang Pendamping</div>
+    <div class="tags"><span>KOKOH</span><span>ANDAL</span><span>TENANG</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu tidak pernah terguncang. Kamu hanya menampung semuanya sendiri tanpa pernah mengeluh."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>LAKI-LAKI · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div></div><p class="cap"><b>Gunung / The Mountain</b> - mid stone-ochre. This is the card I moved
+  most: at my first attempt it was a dark umber and it sat dE 0.09 from Jati and 0.10 from Api Unggun,
+  three dark warm cards in a row. Lifting it to L 0.56 opens both gaps to 0.19 and gives Earth a hue
+  family of its own.</p></div>
+
+  <div class="light"><div class="canvas" style="--f:var(--tam-f);--i:var(--tam-i);--a:var(--tam-a)"><div class="cardobj">
+    <div class="mark"><svg width="64" height="64" viewBox="0 0 72 72"><circle cx="36" cy="26" r="12" fill="none" stroke="currentColor" stroke-width="3.5"/><line x1="36" y1="38" x2="36" y2="62" stroke="currentColor" stroke-width="3.5"/><line x1="16" y1="62" x2="56" y2="62" stroke="currentColor" stroke-width="3.5" opacity=".6"/></svg></div>
+    <div class="name">THE<br>GARDEN</div>
+    <div class="aspek">Sang Perajin</div>
+    <div class="tags"><span>SABAR</span><span>TELATEN</span><span>MENGAYOMI</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu mudah diatur. Kamu sebenarnya sedang menimbang mana yang memang layak kamu jaga."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>PEREMPUAN · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div></div><p class="cap"><b>Taman / The Garden</b> - warm sand, the light half of Earth, dark ink like
+  Permata. <b>Flagged: this is the one where I chose the system over the instinct.</b> A garden wants to be
+  green, but green is the Wood family's signal and Taman is Tanah Yin - a green Earth card would teach the
+  reader the wrong element. A sage-green version measured dE 0.12 from Embun and blurred the family
+  coding. Say the word and I will show you the sage variant.</p></div>
+
+  <div class="light"><div class="canvas" style="--f:var(--emb-f);--i:var(--emb-i);--a:var(--emb-a)"><div class="cardobj">
+    <div class="mark"><svg width="64" height="64" viewBox="0 0 72 72"><path d="M36 14 C46 30 50 36 50 44 a14 14 0 0 1-28 0 C22 36 26 30 36 14Z" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="36" cy="44" r="5" fill="currentColor" opacity=".7"/></svg></div>
+    <div class="name">MORNING<br>DEW</div>
+    <div class="aspek">Sang Pemikir</div>
+    <div class="tags"><span>JELI</span><span>HALUS</span><span>PENGERTIAN</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span><span class="dyn">CONTOH</span></div>
+    <p class="hook">"Orang mengira kamu acuh tak acuh. Padahal kamu menyerap hampir semua detail, lalu menyimpannya diam-diam."</p>
+    <div class="badges"><span class="badge">BADGE CONTOH</span></div>
+    <div class="foot"><span>PEREMPUAN · 1 JAN 1990</span><span>KATON.APP</span></div>
+  </div></div><p class="cap"><b>Embun / Morning Dew</b> - pale mist, dark ink. Light is intrinsic to the
+  object, and it makes Water work the way Metal does: Samudra deep at L 0.34, Embun pale at 0.83. Note
+  this is the third pale card after Permata and Taman, which is why I kept it at L 0.83 with real chroma
+  rather than a whisper - it needs to hold its own next to the pearl.</p></div>
+
+</div>
+</section>
+
+<section>
+<h2>7 - Two questions the geometry ruling leaves open</h2>
+<div class="note"><b>1. What separates the card object from the canvas?</b> "The card floats on the colour
+field" gives the canvas the archetype colour, but then the card needs an edge or it is invisible. Mocked
+here as: <b>same field colour on both, card distinguished by a hairline inset and a soft shadow</b>. That
+keeps the whole 1080x1440 image reading as the archetype colour at thumbnail size, and needs no sixth
+token. The alternative - a different surface value for the card - would add a fourth colour per archetype
+and thirty more strings. Recommending the hairline; not locked.
+<br><br>
+<b>2. The margin arithmetic works out exactly.</b> A 3:4 canvas and a 63:88 card admit one uniform margin:
+solve <code>(1080-2m)/(1440-2m) = 63/88</code> and m = 86.4, giving a card of 907 x 1267 inside 1080 x 1440.
+So the card can be optically centred with an equal margin on all four sides and no ratio compromise, which
+is a small piece of luck. At 86px the margin is 8 percent of the canvas width. If you want it slimmer than
+that the margins stop being uniform and the card gets a different top-bottom to left-right gap - worth
+knowing before you tinker.
+<br><br>
+<b>Still open from v1 and not mine to close:</b> the middle dot in the footer is not a keyboard character
+(rule 20). It is reproduced here unchanged so the mock matches the locked one.</div>
+</section>
+
+</body>
+</html>

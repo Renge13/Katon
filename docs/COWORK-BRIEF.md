@@ -97,20 +97,33 @@ What that means concretely:
 
 | Who | Role |
 |---|---|
-| **Cowork (you)** | thinking partner, spec author, oracle-driver, verifier. **Writes prompts. Does not write engine code.** |
-| **Claude Code** | the builder. Reads `NEXT.md` via `/next`, implements, pushes back. |
+| **Cowork (you)** | thinking partner, spec author, oracle-driver, verifier. **Writes prompts and docs. Does not write engine code, and does not commit.** |
+| **Reyner** | decides, and is the courier: he pastes prompts from you to Code. Nothing reaches Code except through him. |
+| **Claude Code** | the builder. **Holds the repo and push access** — every commit is Code's. Reads `NEXT.md` via `/next`, implements, pushes back. |
 | **Gemini (AI Studio)** | the runtime renderer. Prompt is `content/renderer-prompt.txt`. |
+
+Two consequences worth stating because they are easy to forget mid-flow. **A prompt is a deliverable,
+not a description** — Reyner pastes it verbatim, so anything you leave implicit is lost in transit.
+And **you cannot see the result of your own instruction** unless Reyner brings it back, which is why
+a prompt names the check Code should run rather than trusting Code to pick one.
 
 Claude Code is a good reviewer and has caught real spec errors. When it pushes back, **assume it is
 right until you have checked.** It has been right every time so far.
 
-### Working-style rules. 1-5 Reyner-ratified 2026-08-11, folded in 2026-08-12. 6-8 added 2026-08-13.
+### Working-style rules. 1-5 Reyner-ratified 2026-08-11. 6-8 added 2026-08-13. THE FOLD IS COMPLETE.
 
 **These are rules, not history.** 1 to 5 were ratified in a Cowork session and then lived only in that
 session's handover file, which no Claude Code session can read — and the git rule below was then broken
 by a session that had no way to know it existed. That is error 20's real cause and it is written up
 under the ledger. **A rule not in the repo is not a rule** — which is now rule 8, generalised, so the
 same parking cannot happen twice.
+
+**CLOSED 2026-08-13.** The first fold (08-12) moved five rules across but flattened three of them:
+rule 3 carried only the DATE check and dropped the mechanism-read and same-day-paired-runs checks,
+and rule 4 carried the git prohibition without the write/review/commit division that explains it.
+Reyner pasted the handover's remaining text this session — Claude Code cannot read the Claude project
+— and rules 3 and 4 below are now the full versions. **Nothing from that handover is outstanding, and
+error 20's gap is closed at the source rather than at the symptom.**
 
 1. **EXEC SUMMARY FIRST, and it must be readable cold.** Open every substantial reply with the
    summary, not the reasoning that produced it. Gloss every piece of jargon on first use — engine
@@ -122,16 +135,29 @@ same parking cannot happen twice.
    for are a register call (his, exclusively), a product decision, and permission to proceed with
    something irreversible. "Can you check X for me" is a question this brief exists to make
    unnecessary.
-3. **DATES COME FROM `git log`, NEVER FROM THE WALL CLOCK.** Any date claim about work — when a
-   commit landed, when a decision was made, when a measurement was taken — is verified with
-   `git log --format="%h a:%ad c:%cd %s" --date=iso` before it is written down. A session's own clock
-   describes the session, not the work. This is error 18, which nearly propagated a wrong date into
-   three files, each of which would then have been "evidence" for the next session.
-4. **NEVER WRITE TO THE REPO WHILE A CODE SESSION IS MID-BUILD. File READS are fine; GIT COMMANDS ARE
+3. **EVERY CLAIM CARRIES ITS CHECK. Three kinds, three checks, and each one has an error behind it.**
+
+   | Claim about | Verified with | Error it comes from |
+   |---|---|---|
+   | A DATE — when a commit landed, when a decision was made, when a measurement was taken | `git log --format="%h a:%ad c:%cd %s" --date=iso`. **Never the wall clock**, which describes the session and not the work. This chat spans days | **18**, which nearly propagated a wrong date into three files, each then "evidence" for the next |
+   | A MECHANISM — what a component does, where a value lives, what a prompt says | **A READ OF THE ACTUAL FILE**, in this session, before writing the claim down. Not the architecture, not the spec, not a summary | **19**, where "the renderer follows JSON order" was written against a prompt section headed ARRANGEMENT IS FREE that says the opposite. Also 9, 15, 17 |
+   | A HARNESS COMPARISON — arm A against arm B | **SAME-DAY PAIRED RUNS ONLY.** Both arms in one session, back to back, one variable between them. A batch compared against a number from another day is not a comparison | The extra-binomial variance recorded in PROGRESS: two identical batches once differed by 10.8 points on shipped, wider than the single-batch CI |
+
+   The half-true form is the dangerous one. Error 19's first clause was correct, which is what carried
+   the false second clause through.
+4. **COWORK WRITES DOCS TO DISK UNCOMMITTED. CODE REVIEWS THEM AGAINST THE REPO AND COMMITS.**
+   That is the whole division, and it is why the git rule is not merely a caution:
+
+   **NEVER WRITE TO THE REPO WHILE A CODE SESSION IS MID-BUILD. File READS are fine; GIT COMMANDS ARE
    NOT.** Device git leaves an `index.lock` that the bridge cannot delete, and it blocks the builder's
    working tree until someone clears it by hand. This is the topology table above enforced from the
    other side: Cowork gains nothing from running git that a prompt to Claude Code would not also
    achieve, and the downside is that the builder stops. Error 20.
+
+   The division is not bureaucracy — it is the review step. A doc Cowork writes has had no second
+   reader; Code reads it against the code it describes, and has caught real errors that way (the
+   ledger is mostly those). Writing the file and committing it in one motion removes the only check
+   Cowork's own output ever gets.
 5. **THE REGISTER FLOW, in order, and no step may be skipped or reordered:**
 
    | # | Who | Does what |
@@ -238,6 +264,14 @@ handover file does not exist. Only `CLAUDE.md`, `docs/` and the locked tests can
 because they are the only things a session reads. "Fold in at the next quiet moment" is how a rule
 dies: fold it into the repo in the SAME turn it is ratified, or accept that it is a preference nobody
 will ever be bound by. **The five rules from that block are now in section 3, where they are readable.**
+
+**AND THE FOLD ITSELF WAS PARTIAL FOR A DAY, which is the same failure one layer down.** The 08-12
+pass moved five rule HEADINGS across and dropped detail from two of them: the mechanism-read check and
+the same-day-paired-runs check fell out of rule 3, and rule 4 lost the write/review/commit division
+that is the reason the git prohibition exists at all. Both were still only in the handover. Reyner
+pasted the remainder on 2026-08-13 and section 3 now carries the full text. **A fold is done when the
+repo says everything the handover said, not when the headings match** — and only the person holding
+the handover can confirm that, because Claude Code cannot open it.
 
 **Six of these (2, 5, 6, 21, 22, 23) are the same failure: I had the disproving evidence in hand and wrote the
 claim anyway.** Before asserting anything, check whether something you already measured contradicts it.

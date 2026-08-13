@@ -33,6 +33,9 @@
     "render:reading": "node --conditions=react-server scripts/render-reading.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:birth-time-input": "node --test tests/birth-time-input.spec.mjs",
+    "test:card": "node --test tests/card.spec.mjs",
+    "preview:cards": "node scripts/card-preview.mjs",
+    "measure:card-tags": "node scripts/measure-card-tags.mjs",
     "test:engine": "node tests/bazi-engine.report.mjs",
     "test:forge": "node --conditions=react-server scripts/forge-tests.mjs",
     "gallery:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/rejection-gallery.mjs"

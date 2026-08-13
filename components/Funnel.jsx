@@ -267,6 +267,24 @@ function Home({ form, setForm, error, onSubmit }) {
               {/* Domain selector removed from the front door — moved to the paywall (the
                   live-decision prompt). Reading still defaults domain to "hubungan"
                   (Funnel form state), so free-reading generation is unaffected. */}
+
+              {/* GENDER IS MISSING HERE ON PURPOSE, AND IT HAS A RE-ADD CONDITION.
+                  Left out because it changes nothing the READING renders: the API
+                  accepts it, the row stores it, and `computePillars` `void`s it
+                  (lib/bazi/pillars.ts) since it touches luck-pillar direction only
+                  and no luck pillars exist.
+
+                  THAT REASONING DOES NOT COVER THE CARD, which is the correction
+                  recorded 2026-08-13. The 2026-08-03 ruling puts PEREMPUAN /
+                  LAKI-LAKI in the footer of BOTH cards, so gender is a card input.
+                  It is harmless today only because no card is wired to anything
+                  (PROGRESS, LIVE STATE), and `buildFooter` renders the null case
+                  as date + source with no placeholder and no gap.
+
+                  SO: re-add the field in the same commit that ships a card, or the
+                  card ships with a footer that can never fill. Nothing will prompt
+                  you — a missing input is silent by construction, which is why the
+                  dependency is written here rather than only in the ledger. */}
             </div>
           </Reveal>
 

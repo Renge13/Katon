@@ -63,6 +63,8 @@ diverge, and every other section of this file is about how we get from one to th
 | Karier / Uang | Nothing. A "Segera" row that captures a WhatsApp number (`interest_wa`) | no content exists — every file in `contents/` is `*-hubungan-FINAL.md` | n/a |
 | Compatibility | Nothing. Not purchasable | not built | `compat` is priced (45.000/29.000) and **absent from `SELLABLE_SKUS`**, so checkout 400s |
 | **The new pipeline** (`/api/mirror`) | **Nothing. It serves no user.** Engine semantic JSON -> Gemini -> Stage 6 -> `render_cache` | Stage 3-6, `docs/content/glossary.json` + `renderer-prompt.txt` | **FENCED.** 404 unless `MIRROR_PREVIEW_TOKEN` is set AND presented. Linked from nowhere |
+| Sharecard (the one that exists) | A 9:16 poster: legacy archetype name, modifier, element tag, one literary line, feed/drain columns, `katon.app` | `components/Sharecard.jsx` from `lib/content` — the SAME legacy cells | none, ungated |
+| **Card A / Card B** (built 2026-08-13) | **Nothing. Wired to no route and no component.** Renders only into `reports/card-preview.html` via `npm run preview:cards` | `lib/card/` + `components/cards/Card.js`, from `glossary.json` + Stage 3 facts | **NOT SHIPPABLE YET,** and for two reasons, not one: five of ten colour tokens are unapproved, and its archetype names disagree with the reading's (see below) |
 | Static pages | `/harga` `/tentang` `/privasi` `/syarat` `/pengembalian` + footer | `lib/site/copy.js` | none |
 
 **The one-line summary: every word a real user reads today comes from `contents/*hubungan*.md`.**
@@ -85,6 +87,15 @@ MEASUREMENTS table below — has never served a single reader.
    `VALIDATED` (`gunung-balanced:18`, `samudra-amplified:18`) use it about one inline fix and both
    also carry `pending founder validation` in their own STATUS line. **Zero founder-validated cells,
    free or paid.**
+3. **TWO ARCHETYPE NAME SETS ARE LIVE IN THE REPO, and they disagree on five of ten.** Found
+   2026-08-13 while building the card. The legacy path a user reads today
+   (`grep -n archetypeName lib/content/*.js`) says **AKAR, PELITA, LADANG, PEDANG, HUJAN** for
+   乙丁己庚癸. `docs/content/glossary.json` -> `arketipe`, which the new pipeline and the card both
+   read, says **Bambu, Api Unggun, Taman, Besi Tempa, Embun**. 甲丙戊辛壬 agree (Jati, Matahari,
+   Gunung, Permata, Samudra). **This is why the card cannot simply be wired to the funnel**: the card
+   would name her Bambu and the reading beside it would name her Akar. It resolves itself when the
+   swap package retires the `contents/*.md` path — the glossary set is the one that survives — so it
+   is a sequencing constraint, not a third open decision.
 
 **THE RULE FOR THIS BLOCK: it is updated in the SAME COMMIT as any funnel change.** A commit that
 changes what a user gets and does not touch this block is incomplete, and a reviewer should say so.
@@ -137,7 +148,7 @@ a later session can tell "deferred with a reason" from "forgotten". Every row ve
 | **`renderer-prompt.txt` hygiene** | Em-dashes at **:59** and **:92**, and **`ramalan` at :207** — a token `forbidden_content.fatalism` bans HARD (`\bramalan\b`), sitting in the instructions the model reads. The line is *"Timing is cuaca, never ramalan"*, so the prompt teaches the banned word while banning the concept | A rewrite that states the rule without naming the token, plus its own measurement (rule 13). The em-dashes are prompt text, not user-facing strings, so rule 20 does not reach them — but the model is being shown the character we ban |
 | **`forbidden_content.fatalism` bans any four-digit year** | `\b(19\|20)\d{2}\b` (`lib/validate/blocklist.json:13`). A reader's own birth year is **provenance she supplied**, not a dated prophecy | A ruling on whether the year the reader typed may be echoed back. The two 08-12 fatalism hits are unattributed — the probe that "cleared" the year hypothesis read the wrong field and was retracted, so the hypothesis is neither supported nor excluded |
 | **The domain selector offers three choices, one is live** | `DOMAINS` in `components/Funnel.jsx` renders Hubungan / Karier / Uang; only `hubungan` has content | Content for the other two, or a decision to stop offering them. Today the two dead choices convert into demand capture, which is honest but is not what a three-way selector looks like |
-| **Gender** | Accepted by `/api/reading`, stored on the row, absent from the UI, and `computePillars` `void`s it. It changes nothing rendered | Luck pillars (annual reading, luck-pillar map). It is stored so it need not be re-collected then. **Until then it is a column that collects nothing and means nothing** |
+| **Gender — CORRECTED 2026-08-13, it is NOT inert** | Accepted by `/api/reading`, stored on the row, absent from the UI, and `computePillars` `void`s it. It changes nothing **rendered in the reading** | **THE CARD FOOTER.** The 08-03 ruling puts `PEREMPUAN` / `LAKI-LAKI` on both cards, so gender is a card input, not a luck-pillar-only field. The 08-13 funnel work kept it out of the form on the reasoning that it changes nothing rendered — TRUE of the reading, FALSE of the card, and harmless only while no card ships. **Re-add the input when the card ships**; `buildFooter` renders the null case as date + source with no placeholder, so nothing breaks meanwhile and nothing prompts either. Luck pillars (annual reading, luck-pillar map) remain the second consumer |
 
 **A CORRECTION TO THE COUNTER ROW, because the wording matters more than the intent.** /privasi does
 NOT currently promise "no analytics". `SITE_COPY.privasi.collectNote` says *"tidak memasang cookie
