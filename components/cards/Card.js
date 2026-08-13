@@ -28,11 +28,10 @@
 //
 // ── WHAT IS STILL OPEN, and is therefore marked in the code ─
 //   1. COLOUR TOKENS. Five of ten are unapproved (lib/card/tokens.js).
-//   2. CARD OBJECT vs CANVAS. Both carry the same colour field, so the object
-//      needs an edge or it is invisible. Rendered here as a hairline inset plus
-//      a soft shadow, which is what the 08-03 proposal mocks and what Cowork
-//      recommends, because the alternative — a different surface value for the
-//      card — adds a FOURTH colour token per archetype. NOT LOCKED.
+//   2. ~~CARD OBJECT vs CANVAS~~ CLOSED 2026-08-13. Reyner rejected the inset
+//      hairline and the drop shadow. The canvas stays a FLAT field and the object
+//      carries the GRADIENT, so they separate by surface rather than by a drawn
+//      border, and no fourth colour token is needed.
 //   3. tags_en. Not needed by anything here: Card A's head is `name_en` alone and
 //      the Aspek and tags stay Indonesian on both cards, per the 08-03 ruling.
 // ============================================================
@@ -71,9 +70,11 @@ const FONT = 'var(--font-archivo), Archivo, system-ui, -apple-system, sans-serif
 
 // ── TEXT ROLES ───────────────────────────────────────
 // Every place text meets a surface, with the colour and the opacity it is drawn
-// at. EXPORTED because tests/card.spec.mjs asserts the CONTRAST of each role
-// against every token, and a test that re-declared these numbers would be
-// asserting a copy: the roles would drift and the test would keep passing.
+// at. CONSUMED by roleStyle() below, which is the only source of text colour on
+// either card, and MEASURED by lib/card/domContrast.js off the rendered markup
+// rather than off this table. The table alone proved nothing: it was exported and
+// used by nothing until 2026-08-13 while the card set one inherited colour on its
+// root, so the audit was reading the intent beside the component.
 //
 // ── EVERY TEXT ROLE IS INK, AT FULL OPACITY. Measured 2026-08-13. ──
 //
@@ -86,7 +87,9 @@ const FONT = 'var(--font-archivo), Archivo, system-ui, -apple-system, sans-serif
 //      and SIX of ten tokens sit under 4.5 AT FULL OPACITY. No opacity, size or
 //      weight change reaches AA, because opacity 1 is already the maximum. So
 //      every text role moves to `ink`, and accent survives as a NON-TEXT colour:
-//      the watermark, the element bars, the INTI DIRI pill, the cell borders.
+//      the watermark, the element bars and the cell borders. The INTI DIRI pill
+//      was on that list and came off it - it carries TEXT, and field-on-accent is
+//      the same unreachable ratio. It is now field-on-ink; see `intiDiri` below.
 //
 //   2. DIMMING COMPOUNDS ON THE TOKENS WITH NO HEADROOM. Ink at full opacity
 //      clears 4.5 on eight tokens, but Bambu sits at 4.93, so its lowest usable
@@ -108,52 +111,78 @@ export const TEXT_ROLES = {
   badgeMeaning: { on: 'ink', over: 'field', opacity: 1 },
   footer:       { on: 'ink', over: 'field', opacity: 1 },
   nameId:       { on: 'ink', over: 'field', opacity: 1 },
-  pillarLabel:  { on: 'ink', over: 'band',  opacity: 1 },
-  pillarGanzhi: { on: 'ink', over: 'band',  opacity: 1 },
-  pillarMeta:   { on: 'ink', over: 'band',  opacity: 1 },
-  pillarAnimal: { on: 'ink', over: 'band',  opacity: 1 },
-  barLabel:     { on: 'ink', over: 'band',  opacity: 1 },
+  pillarLabel:  { on: 'ink', over: 'field',  opacity: 1 },
+  pillarGanzhi: { on: 'ink', over: 'field',  opacity: 1 },
+  pillarMeta:   { on: 'ink', over: 'field',  opacity: 1 },
+  pillarAnimal: { on: 'ink', over: 'field',  opacity: 1 },
+  barLabel:     { on: 'ink', over: 'field',  opacity: 1 },
+  // The one INVERTED role: the INTI DIRI pill is field-coloured text on an ink
+  // pill, which is the same pair as the body copy with the two swapped, so it
+  // scores identically. `over` is a token key like `on`, not a surface name.
+  intiDiri:     { on: 'field', over: 'ink', opacity: 1 },
 };
 
 /**
- * WCAG AA. Asserted per role per token in tests/card.spec.mjs.
+ * WCAG AA. Asserted over the RENDERED MARKUP in tests/card.spec.mjs.
  *
- * The previous pass set this to 2.2 on the argument that Matahari's accent caps
+ * An earlier pass set this to 2.2 on the argument that Matahari's accent capped
  * at 2.22, so a higher floor would fail a colour Reyner ruled. That resolved the
  * tension by lowering the bar, and it was the wrong way round: the bar is a
- * legibility standard and the locked tokens that cannot meet it are a DECISION,
- * not a reason to move the standard. AA stays; the two tokens that cannot reach
- * it are listed in `AA_EXEMPT` below and are Reyner's to rule.
+ * legibility standard, and a ruled token that cannot meet it is a DECISION to put
+ * in front of him rather than a reason to move the standard.
+ *
+ * That is exactly how it resolved. Matahari was the one LOCKED token under AA;
+ * Reyner darkened its field to #CC3F0E on 2026-08-13 and it now measures 4.53.
+ * `AA_EXEMPT` is down to Gunung, which is only PROPOSED.
  */
 export const MIN_CONTRAST = 4.5;
+
+/**
+ * The colour and opacity a role is DRAWN with. Every text element in this file
+ * spreads this; none sets `color` by hand.
+ *
+ * ── WHY THIS FUNCTION EXISTS (fixed 2026-08-13) ────────────
+ * `TEXT_ROLES` was exported, audited, and CONSUMED BY NOTHING. The card set
+ * `color: token.ink` once on its root and every element inherited it, so the
+ * table described an intention and the audit measured that intention rather than
+ * the card. The gap was not theoretical: the pillar branch was drawn at
+ * `opacity: 0.85`, a real dimming that appeared in no role and that the audit
+ * therefore could not see.
+ *
+ * An assertion that reads the intent it is checking is not an assertion. So the
+ * roles are now the only source of text colour, the root sets none, and
+ * `lib/card/domContrast.js` measures the RENDERED MARKUP instead of this table.
+ */
+export function roleStyle(role, token) {
+  const r = TEXT_ROLES[role];
+  if (!r) throw new Error(`No text role "${role}"`);
+  return { color: token[r.on], opacity: r.opacity };
+}
 
 /**
  * Tokens that cannot reach AA at any opacity, with the ink they already have.
  * THIS LIST IS A REPORT, NOT A PERMISSION — the test pins it exactly, so it can
  * only shrink, and nothing new may join it without someone editing this line.
  *
- *   丙 Matahari  LOCKED    ink 3.04 on #FF4F12. Reyner's call. Two minimum
- *                            changes measured: darken the field to #CC3F0E and
- *                            keep the near-white ink (4.53), or keep the vivid
- *                            field and flip to a dark ink #4A1705 (4.51), which
- *                            makes Matahari a light-field token like Permata.
  *   戊 Gunung    proposed  ink 4.21 on #8F7040. Not locked, so it moves with the
  *                            token ruling: #896B3D clears it at 4.53, a 4.5%
  *                            darkening that is barely visible.
  */
-export const AA_EXEMPT = ['丙', '戊'];
+export const AA_EXEMPT = ['戊'];
 
 /**
  * THE FLAT FIELD IS THE WORST SURFACE ON EITHER CARD, and that is enforced rather
- * than hoped for. Card B's gradient and its appendix band both step AWAY from the
- * ink — darker under a light ink, lighter under a dark one — so every other
- * surface has MORE contrast than the flat field, never less. The audit therefore
- * measures the field and covers both cards.
+ * than hoped for. Both cards carry the same gradient, and it steps AWAY from the
+ * ink - darker under a light ink, lighter under a dark one - so every stop has
+ * MORE contrast than the flat field it starts from. Measure the field and you
+ * have covered every pixel of text on both cards.
  *
- * The first version tinted the band TOWARD the ink at 0.07 and quietly cost
- * contrast on exactly the tokens with none to spare. Direction was the bug.
+ * There used to be a second surface here: the appendix band had its own tinted
+ * plate, and the FIRST version of that plate tinted TOWARD the ink and quietly
+ * cost contrast on the tokens with none to spare. Reyner removed the plate
+ * entirely on 2026-08-13 for a different reason - it read as a tray under the
+ * card - which leaves exactly one ground and no BAND_TINT to get wrong.
  */
-export const BAND_TINT = 0.10;
 
 /** Card B's gradient depth. Three stops, from the 08-03 token proposal. */
 export const GRADIENT_STOPS = [0, 0.08, 0.16];
@@ -265,11 +294,16 @@ const SCALE = {
  * character as texture. Rule 23's own test says the same thing: hanzi you can
  * point at is fine, hanzi you must read is not. Nobody reads a watermark.
  *
- * Placement follows the live product exactly (`components/Sharecard.jsx`), which
- * splits it by POLARITY: yang sits top-right and upright, yin sits lower-left and
- * rotated, and yang is drawn slightly stronger. That split is doing real work —
- * it is one of the four things keeping the two same-element archetypes from
- * collapsing into one frame.
+ * TOP-RIGHT ON BOTH CARDS AND BOTH POLARITIES (ruled 2026-08-13). The live
+ * product moves it to the lower left for yin, and that was carried over here and
+ * is now reversed: the headline is top-left, so top-right is the one large empty
+ * region on either card, and Card B's bottom third is the densest area on
+ * anything in this system. A watermark behind the pillar cells and the element
+ * bars is not texture, it is interference.
+ *
+ * Polarity still does real work, but through WEIGHT rather than position — yang
+ * is drawn slightly stronger — so the two same-element archetypes keep a visible
+ * difference without the watermark landing in the busy corner.
  */
 const YANG = new Set(['甲', '丙', '戊', '庚', '壬']);
 
@@ -277,44 +311,55 @@ function Watermark({ stem, token, spec, px }) {
   if (!stem) return null;
   const isYang = YANG.has(stem);
   return E('div', {
+    // DECORATIVE, and marked so rather than assumed so. It is a texture, not a
+    // character anyone reads (see the note above), which is exactly WCAG's
+    // decorative-element exemption — so it is the one thing on the card that does
+    // not owe a 4.5 contrast ratio, and `lib/card/domContrast.js` skips
+    // aria-hidden subtrees for that reason. Marking it in the markup keeps the
+    // exemption a property of the card rather than a special case in the audit.
+    'aria-hidden': 'true',
     style: {
       position: 'absolute', pointerEvents: 'none', userSelect: 'none',
       fontFamily: 'Georgia, "Times New Roman", serif',
       // 0.83 of the card's width, the same proportion the live card uses.
       fontSize: px(spec.card.w * 0.83), lineHeight: 0.8,
       color: alpha(token.accent, isYang ? 0.18 : 0.14),
-      ...(isYang
-        ? { top: px(90), right: px(-70) }
-        : { bottom: px(150), left: px(-80), transform: 'rotate(-8deg)' }),
+      top: px(90), right: px(-70),
     },
   }, stem);
 }
 
 /**
- * The canvas plus the floating card object. Both carry the SAME field colour, so
- * the whole export reads as the archetype's colour at thumbnail size; the object
- * is separated by a hairline and a shadow only. See open question 2 above.
+ * The canvas, and the card object floating on it.
+ *
+ * ── THE EDGE IS THE GRADIENT. No outline, no shadow. (RULED 2026-08-13) ──
+ * The canvas stays a FLAT field and the object carries the GRADIENT, so the two
+ * separate by surface rather than by a drawn border. The previous inset hairline
+ * plus drop shadow are REMOVED — Reyner rejected them, and this closes the open
+ * question that has sat on the preview page since 08-03. It also needs no fourth
+ * colour token per archetype, which was the whole reason the alternative (a
+ * different surface value for the card) was unattractive.
+ *
+ * BOTH CARDS GET THE GRADIENT. It was Card B only until 2026-08-13, which left
+ * Card A with nothing separating object from canvas once the outline came off.
+ * Card B's exclusivity signal is its 9:16 silhouette, the Indonesian name and the
+ * appendix — never the gradient, which is now structural on both.
+ *
+ * The gradient is DERIVED, never a second set of hexes: three stops stepping AWAY
+ * from the ink by GRADIENT_STOPS. It is deliberately SHALLOW, and the reason is
+ * `sharecard-tokens-proposal.html` section 5 — the original rule ran the field
+ * down to near-black, which swept Matahari's gradient through Api Unggun's flat
+ * field so that two different archetypes read as one colour. A gradient held in
+ * the field's own upper band never crosses another archetype.
+ *
+ * Stepping away from the ink also means the deep end is the HIGH-contrast end, so
+ * the flat field stays the worst surface and one audit covers everything.
  */
-function Canvas({ spec, token, scale, stem, gradient, children }) {
+function Canvas({ spec, token, scale, stem, children }) {
   const { canvas, card } = spec;
   const px = (n) => n * scale;
-  const dark = inkIsDark(token);
-  // CARD B'S GRADIENT — the "this is the paid one" treatment, and it is DERIVED,
-  // never a second set of hexes to keep in sync. Three stops from the flat field,
-  // stepping AWAY from the ink by GRADIENT_STOPS.
-  //
-  // It is deliberately SHALLOW, and the reason is in `sharecard-tokens-proposal`
-  // section 5: the original Card B rule ran the field down to near-black, which
-  // swept Matahari's paid gradient through Api Unggun's flat field and left a
-  // paid Matahari card and a FREE Api Unggun card reading as the same colour. A
-  // gradient held in the field's own upper band never crosses another archetype.
-  //
-  // Stepping away from the ink also means the deep end is the HIGH-contrast end,
-  // so the flat field stays the worst surface and the audit still covers it.
-  const ground = gradient
-    ? `linear-gradient(168deg, ${GRADIENT_STOPS.map((s, i) =>
-        `${stepAway(token.field, token.ink, s)} ${[0, 55, 100][i]}%`).join(', ')})`
-    : token.field;
+  const ground = `linear-gradient(168deg, ${GRADIENT_STOPS.map((s, i) =>
+    `${stepAway(token.field, token.ink, s)} ${[0, 55, 100][i]}%`).join(', ')})`;
   return E('div', {
     style: {
       // BORDER-BOX EXPLICITLY, on both boxes. The app sets `* { box-sizing:
@@ -329,7 +374,8 @@ function Canvas({ spec, token, scale, stem, gradient, children }) {
       // markup, because a computed-style read reports the CONTENT box and
       // happily "confirms" 907 while 1051 is drawn.
       boxSizing: 'border-box',
-      width: px(canvas.w), height: px(canvas.h), background: ground,
+      // FLAT field. The object's gradient is what makes it an object.
+      width: px(canvas.w), height: px(canvas.h), background: token.field,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       overflow: 'hidden', position: 'relative',
     },
@@ -337,44 +383,30 @@ function Canvas({ spec, token, scale, stem, gradient, children }) {
     E('div', {
       style: {
         boxSizing: 'border-box',
-        width: px(card.w), height: px(card.h), background: ground, color: token.ink,
+        width: px(card.w), height: px(card.h), background: ground,
         borderRadius: px(40), position: 'relative', overflow: 'hidden',
         display: 'flex', flexDirection: 'column', padding: px(72),
-        // A light field needs a dark hairline and a dark field a light one, or the
-        // inset vanishes into whichever side it was tuned for. Read off the token
-        // rather than hardcoded: the ink IS the far end of the field's lightness.
-        boxShadow: `0 ${px(24)}px ${px(64)}px ${alpha('#000000', dark ? 0.18 : 0.42)}, `
-          + `inset 0 0 0 ${Math.max(1, px(2))}px ${alpha(dark ? '#000000' : '#ffffff', 0.16)}`,
       },
     },
       // The watermark sits UNDER everything, clipped by the card's own overflow.
       E(Watermark, { key: 'wm', stem, token, spec, px }),
-      // the same top-light / bottom-shade the 08-03 mock carries, so the card
-      // object reads as a physical thing rather than a rectangle of paint
-      E('div', {
-        key: 'sheen',
-        style: {
-          position: 'absolute', inset: 0, borderRadius: px(40), pointerEvents: 'none',
-          background: `linear-gradient(178deg, ${alpha('#ffffff', 0.09)}, transparent 34%, ${alpha('#000000', 0.10)} 92%)`,
-        },
-      }),
       children,
     ),
   );
 }
 
 /** Two-axis headline: the Day Master archetype, then the Aspek beneath it. */
-function Headline({ data, px, showNameId }) {
+function Headline({ data, token, px, showNameId }) {
   return E('div', { style: { position: 'relative' } },
     // Card A prints name_en ALONE — no Indonesian name, no ID eyebrow (08-03).
     // Card B may carry the Indonesian name; it is a document, not a share.
     showNameId && E('div', {
       key: 'id',
-      style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.nameId), letterSpacing: px(4), textTransform: 'uppercase', marginBottom: px(16) },
+      style: { ...roleStyle('nameId', token), fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.nameId), letterSpacing: px(4), textTransform: 'uppercase', marginBottom: px(16) },
     }, data.nameId),
     E('div', {
       key: 'en',
-      style: { fontFamily: FONT, fontWeight: 800, fontSize: px(SCALE.headline), lineHeight: 0.94, letterSpacing: px(1), textTransform: 'uppercase' },
+      style: { ...roleStyle('headline', token), fontFamily: FONT, fontWeight: 800, fontSize: px(SCALE.headline), lineHeight: 0.94, letterSpacing: px(1), textTransform: 'uppercase' },
     }, String(data.nameEn || '').split(' ').map((w, i) => E('div', { key: i }, w))),
     // Axis two. Indonesian on BOTH cards.
     E('div', {
@@ -382,7 +414,7 @@ function Headline({ data, px, showNameId }) {
       // Italic and a lighter weight carry the step down from the headline. It was
       // the accent colour until 2026-08-13; accent cannot reach AA on six of ten
       // tokens, so the distinction is typographic now. See TEXT_ROLES.
-      style: { fontFamily: FONT, fontStyle: 'italic', fontWeight: 480, fontSize: px(SCALE.aspek), marginTop: px(18) },
+      style: { ...roleStyle('aspek', token), fontFamily: FONT, fontStyle: 'italic', fontWeight: 480, fontSize: px(SCALE.aspek), marginTop: px(18) },
     }, data.aspek),
   );
 }
@@ -401,13 +433,13 @@ function Headline({ data, px, showNameId }) {
  * (dimmed tag plus badge bullet) disappears from Card A outright — the dedupe in
  * `cardData.js#dynamicTags` still matters, but now only for Card B.
  */
-function Tags({ data, px, showDynamic }) {
+function Tags({ data, token, px, showDynamic }) {
   const base = { fontFamily: FONT, fontWeight: 650, fontSize: px(SCALE.tag), letterSpacing: px(3.4), textTransform: 'uppercase' };
   return E('div', {
     style: { display: 'flex', flexWrap: 'wrap', gap: `${px(14)}px ${px(32)}px`, marginTop: px(34), ...base },
   },
-    data.tags.fixed.map((t) => E('span', { key: `f-${t}` }, t)),
-    showDynamic ? data.tags.dynamic.map((t) => E('span', { key: `d-${t}` }, t)) : null,
+    data.tags.fixed.map((t) => E('span', { key: `f-${t}`, style: roleStyle('tagFixed', token) }, t)),
+    showDynamic ? data.tags.dynamic.map((t) => E('span', { key: `d-${t}`, style: roleStyle('tagDynamic', token) }, t)) : null,
   );
 }
 
@@ -416,10 +448,11 @@ function Tags({ data, px, showDynamic }) {
  * between the hook and the badges, instead of pooling as one dead block above the
  * footer — which is what the live card does with its own body paragraph.
  */
-function Hook({ data, px }) {
+function Hook({ data, token, px }) {
   if (!data.hook) return null;
   return E('p', {
     style: {
+      ...roleStyle('hook', token),
       fontFamily: FONT, fontWeight: 440, fontSize: px(SCALE.hook), lineHeight: 1.45,
       marginTop: px(34), maxWidth: px(700), flex: 1,
     },
@@ -442,26 +475,27 @@ function Hook({ data, px }) {
  *
  * `max` is the content budget, not a layout guard — see CARD_B_BADGE_LIMIT.
  */
-function Badges({ data, px, withMeaning, max }) {
+function Badges({ data, token, px, withMeaning, max }) {
   const list = max ? data.badges.slice(0, max) : data.badges;
   if (!list.length) return null;
   return E('div', { style: { display: 'flex', flexDirection: 'column', gap: px(10) } },
     list.map((b) => E('div', { key: b.label },
       E('div', {
-        style: { fontFamily: FONT, fontWeight: 640, fontSize: px(SCALE.badgeLabel), letterSpacing: px(1.2) },
+        style: { ...roleStyle('badgeLabel', token), fontFamily: FONT, fontWeight: 640, fontSize: px(SCALE.badgeLabel), letterSpacing: px(1.2) },
       }, `◆ ${b.label}`),
       withMeaning && b.meaning && E('div', {
         key: 'm',
-        style: { fontFamily: FONT, fontWeight: 400, fontSize: px(SCALE.badgeMeaning), lineHeight: 1.4, marginTop: px(6) },
+        style: { ...roleStyle('badgeMeaning', token), fontFamily: FONT, fontWeight: 400, fontSize: px(SCALE.badgeMeaning), lineHeight: 1.4, marginTop: px(6) },
       }, b.meaning),
     )),
   );
 }
 
 /** gender + birthdate on the left, source on the right. Null gender: date + source. */
-function Footer({ data, px }) {
+function Footer({ data, token, px }) {
   return E('div', {
     style: {
+      ...roleStyle('footer', token),
       display: 'flex', justifyContent: 'space-between', marginTop: px(30),
       fontFamily: FONT, fontWeight: 520, fontSize: px(SCALE.footer), letterSpacing: px(2.6),
       textTransform: 'uppercase',
@@ -503,29 +537,38 @@ function PillarCells({ data, token, px }) {
           position: 'absolute', top: px(-13), left: '50%', transform: 'translateX(-50%)',
           whiteSpace: 'nowrap', fontFamily: FONT, fontWeight: 650, fontSize: px(16),
           letterSpacing: px(1.6), textTransform: 'uppercase',
-          color: token.field, background: token.accent, borderRadius: px(999),
+          // INK pill, FIELD text — an inversion of the card's own text pair, so
+          // its ratio is identical to the body copy's and it passes wherever the
+          // token passes. It was FIELD on ACCENT until 2026-08-13, which is the
+          // accent-vs-field ratio that structurally cannot reach AA: the DOM
+          // audit found it at 3.02 to 3.45 on six of ten tokens, and Matahari's
+          // was 1.00 against the card ground because pill and field were the same
+          // colour. The table-based audit could never have seen this — a pill is
+          // not a role, and its ground is not the field.
+          ...roleStyle('intiDiri', token),
+          background: token.ink, borderRadius: px(999),
           padding: `${px(5)}px ${px(14)}px`,
         },
       }, 'Inti diri'),
       E('div', {
         key: 'label',
-        style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.pillarLabel), letterSpacing: px(1.6), textTransform: 'uppercase' },
+        style: { ...roleStyle('pillarLabel', token), fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.pillarLabel), letterSpacing: px(1.6), textTransform: 'uppercase' },
       }, p.palace),
       E('div', {
         key: 'stem',
-        style: { fontFamily: 'Georgia, "Times New Roman", serif', fontSize: px(SCALE.pillarStem), lineHeight: 1, marginTop: px(12) },
+        style: { ...roleStyle('pillarGanzhi', token), fontFamily: 'Georgia, "Times New Roman", serif', fontSize: px(SCALE.pillarStem), lineHeight: 1, marginTop: px(12) },
       }, p.stem),
       E('div', {
         key: 'branch',
-        style: { fontFamily: 'Georgia, "Times New Roman", serif', fontSize: px(SCALE.pillarBranch), lineHeight: 1, marginTop: px(6), opacity: 0.85 },
+        style: { ...roleStyle('pillarGanzhi', token), fontFamily: 'Georgia, "Times New Roman", serif', fontSize: px(SCALE.pillarBranch), lineHeight: 1, marginTop: px(6) },
       }, p.branch),
       E('div', {
         key: 'meta',
-        style: { fontFamily: FONT, fontWeight: 500, fontSize: px(SCALE.pillarMeta), marginTop: px(14) },
+        style: { ...roleStyle('pillarMeta', token), fontFamily: FONT, fontWeight: 500, fontSize: px(SCALE.pillarMeta), marginTop: px(14) },
       }, `${p.element}${p.polarity ? ` ${p.polarity}` : ''}`),
       E('div', {
         key: 'animal',
-        style: { fontFamily: FONT, fontWeight: 400, fontSize: px(SCALE.pillarMeta), marginTop: px(4) },
+        style: { ...roleStyle('pillarAnimal', token), fontFamily: FONT, fontWeight: 400, fontSize: px(SCALE.pillarMeta), marginTop: px(4) },
       }, p.animal),
     )),
   );
@@ -545,14 +588,14 @@ export function CardA({ data, scale = 1 }) {
   // slack lands inside the reading zone rather than as one dead block above the
   // footer — the fix for Card A running about half its height empty.
   return E(Canvas, { spec: CARD_A, token, scale, stem: data.stem },
-    E(Headline, { key: 'h', data, px }),
+    E(Headline, { key: 'h', data, token, px }),
     // Three fixed trait words only. No dynamic Aspek — see <Tags>.
-    E(Tags, { key: 't', data, px, showDynamic: false }),
-    E(Hook, { key: 'k', data, px }),
+    E(Tags, { key: 't', data, token, px, showDynamic: false }),
+    E(Hook, { key: 'k', data, token, px }),
     // Badges are NOT capped here: without their meanings they are one short line
     // each, so four of them cost four lines. The budget problem is Card B's.
-    E('div', { key: 'b', style: { marginTop: px(24) } }, E(Badges, { data, px })),
-    E(Footer, { key: 'f', data, px }),
+    E('div', { key: 'b', style: { marginTop: px(24) } }, E(Badges, { data, token, px })),
+    E(Footer, { key: 'f', data, token, px }),
   );
 }
 
@@ -573,25 +616,25 @@ export function CardB({ data, scale = 1 }) {
   const max = Math.max(1, ...Object.values(bars));
 
   return E(Canvas, { spec: CARD_B, token, scale, stem: data.stem, gradient: true },
-    E(Headline, { key: 'h', data, px, showNameId: true }),
+    E(Headline, { key: 'h', data, token, px, showNameId: true }),
     // The Aspek tags live here and only here — Card B is a document its owner has
     // read a reading beside, so the system vocabulary has somewhere to land.
-    E(Tags, { key: 't', data, px, showDynamic: true }),
-    E(Hook, { key: 'k', data, px }),
+    E(Tags, { key: 't', data, token, px, showDynamic: true }),
+    E(Hook, { key: 'k', data, token, px }),
     E('div', { key: 'bd', style: { marginTop: px(22) } },
-      E(Badges, { data, px, withMeaning: true, max: CARD_B_BADGE_LIMIT })),
+      E(Badges, { data, token, px, withMeaning: true, max: CARD_B_BADGE_LIMIT })),
 
-    // THE APPENDIX BAND. A full-bleed rule and a ground stepped AWAY from the ink,
-    // so the lower third reads as a different surface while scrolling and gains
-    // contrast rather than losing it.
+    // THE APPENDIX. Not a band any more (RULED 2026-08-13): it had its own tinted
+    // plate and a full-bleed rule above it, and together those made the bottom
+    // third read as a SEPARATE OBJECT sitting under the card — a tray, not a part.
+    // Both are gone. It is part of the card, separated by nothing but space, and
+    // the pillar cells already give the region its own visual structure.
+    //
+    // This also removes the last surface that was not the card's own gradient, so
+    // every piece of text on either card now sits on one ground.
     E('div', {
       key: 'app',
-      style: {
-        marginTop: px(30), marginLeft: px(-72), marginRight: px(-72), marginBottom: px(-72),
-        padding: `${px(36)}px ${px(72)}px ${px(48)}px`,
-        background: stepAway(token.field, token.ink, BAND_TINT),
-        borderTop: `${Math.max(1, px(2))}px solid ${alpha(token.ink, 0.22)}`,
-      },
+      style: { marginTop: px(46) },
     },
       // THE FOUR PILLAR CHARACTERS, in the live product's cell treatment.
       E(PillarCells, { key: 'pillars', data, token, px }),
@@ -603,7 +646,7 @@ export function CardB({ data, scale = 1 }) {
           E('div', { key: 'track', style: { height: px(9), background: alpha(token.ink, 0.16), borderRadius: px(5), overflow: 'hidden' } },
             E('div', { style: { width: `${(v / max) * 100}%`, height: '100%', background: token.accent } }),
           ),
-          E('div', { key: 'l', style: { fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.barLabel), letterSpacing: px(1.4), textTransform: 'uppercase', marginTop: px(9) } }, name),
+          E('div', { key: 'l', style: { ...roleStyle('barLabel', token), fontFamily: FONT, fontWeight: 600, fontSize: px(SCALE.barLabel), letterSpacing: px(1.4), textTransform: 'uppercase', marginTop: px(9) } }, name),
         )),
       ),
 
@@ -611,7 +654,7 @@ export function CardB({ data, scale = 1 }) {
       // the reading's own chart block still shows it; the card drops it. It is a
       // chart-sheet fact, and this object's job is to travel.
 
-      E(Footer, { key: 'f', data, px }),
+      E(Footer, { key: 'f', data, token, px }),
     ),
   );
 }

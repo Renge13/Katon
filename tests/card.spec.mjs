@@ -21,12 +21,13 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData, buildFooter, formatCardDate, dynamicTags } from '../lib/card/cardData.js';
 import { CARD_TOKENS, tokenFor, APPROVED_STEMS } from '../lib/card/tokens.js';
-import { auditContrast, contrast, composite, surfaces } from '../lib/card/contrast.js';
+import { contrast, composite, luminance, inkPoles, inkVerdict } from '../lib/card/contrast.js';
+import { auditRendered } from '../lib/card/domContrast.js';
 import { GLOSSARY } from '../lib/semantic/glossary.js';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import {
-  CARD_A, CARD_B, CardA, CardB, TEXT_ROLES, BAND_TINT, MIN_CONTRAST,
+  CARD_A, CARD_B, CardA, CardB, TEXT_ROLES, MIN_CONTRAST, roleStyle,
   AA_EXEMPT, GRADIENT_STOPS, stepAway, CARD_B_BADGE_LIMIT, MAX_LABEL_MEANING,
 } from '../components/cards/Card.js';
 import { VALIDATION_CHARTS } from './bazi-validation.fixture.js';
@@ -123,85 +124,192 @@ test('the APPROVED triples match docs/content/sharecard-mockups-02.html verbatim
   }
 });
 
-// ── CONTRAST: every text role x every token ────────────────
-// Added 2026-08-13 on Reyner's review. The iteration READS correctly now, so this
-// exists to keep it that way: `accent` is by definition the mid-lightness value
-// and five of ten fields are pale, so a plausible-looking new hex can halve a
-// ratio silently. A bad token must fail a test, not ship.
+// ── CONTRAST, MEASURED ON THE RENDERED MARKUP ─────────
+// These read the HTML the cards actually produce, not the roles table beside
+// them. The table version passed while the pillar branch carried an undeclared
+// `opacity: 0.85` and the INTI DIRI pill was drawn field-on-accent at 1.00
+// against the card ground. An assertion that reads the intent it is checking is
+// not an assertion.
 
-test('EVERY text role on EVERY token meets WCAG AA, except the two known tokens', () => {
+/** Every text run on both cards, for one token. */
+function runsFor(stem) {
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = { ...buildCardData({ chart, semanticJson: buildSemanticJson(chart), birthDate: '1989-09-13', gender: 'female' }), stem };
+  const out = [];
+  for (const [card, C] of [['A', CardA], ['B', CardB]]) {
+    const html = renderToStaticMarkup(React.createElement(C, { data }));
+    for (const r of auditRendered(html, CARD_TOKENS[stem].field)) out.push({ ...r, card });
+  }
+  return out.sort((a, b) => a.ratio - b.ratio);
+}
+
+test('EVERY RENDERED text run meets WCAG AA, on every token but the known one', () => {
   assert.equal(MIN_CONTRAST, 4.5, 'the target is WCAG AA and it is not negotiable downward');
-  const rows = auditContrast(TEXT_ROLES, CARD_TOKENS, BAND_TINT);
-  assert.equal(rows.length, Object.keys(TEXT_ROLES).length * Object.keys(CARD_TOKENS).length);
+  for (const stem of STEMS) {
+    if (AA_EXEMPT.includes(stem)) continue;
+    const under = runsFor(stem).filter((r) => r.ratio < MIN_CONTRAST);
+    assert.deepEqual(
+      under.map((r) => `${r.card}:${JSON.stringify(r.text.slice(0, 24))}=${r.ratio.toFixed(2)}`), [],
+      `${stem} has rendered text under AA. Run: npm run audit:card-contrast`,
+    );
+  }
+});
 
-  const under = rows.filter((r) => r.ratio < MIN_CONTRAST);
-  const unexpected = under.filter((r) => !AA_EXEMPT.includes(r.stem));
-  assert.deepEqual(
-    unexpected.map((r) => `${r.stem}.${r.role}=${r.ratio.toFixed(2)}`), [],
-    `under AA and not on the known list. Run: npm run audit:card-contrast`,
-  );
+test('the audit sees text the roles table cannot describe', () => {
+  // Guards the guard. If this stops finding more runs than there are roles, the
+  // audit has quietly gone back to measuring the table.
+  const runs = runsFor('壬');
+  assert.ok(runs.length > Object.keys(TEXT_ROLES).length,
+    `only ${runs.length} runs found; the DOM walk is not reaching the card`);
+  // Every run resolves to a real hex, so none is falling back to a browser
+  // default and none is being scored as 0 for an unparseable colour.
+  for (const r of runs) assert.match(r.color || '', /^#[0-9a-f]{6}$/i, JSON.stringify(r.text.slice(0, 20)));
+  // And the INTI DIRI pill is measured against the PILL, not the card ground.
+  const pill = runs.find((r) => r.text.toLowerCase().includes('inti diri'));
+  assert.ok(pill, 'the INTI DIRI pill must appear in the audit');
+  assert.equal(pill.ground, CARD_TOKENS['壬'].ink, 'the pill must be measured on its own background');
+});
+
+test('the watermark is exempt BY DECLARATION, not by the audit knowing about it', () => {
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  const html = renderToStaticMarkup(React.createElement(CardA, { data }));
+  assert.ok(html.includes('aria-hidden="true"'), 'the watermark must mark itself decorative');
+  // It is in the markup and NOT in the audit, which is what the exemption means.
+  assert.ok(html.includes(data.stem), 'the stem must actually render');
+  const runs = auditRendered(html, CARD_TOKENS[data.stem].field);
+  assert.ok(!runs.some((r) => r.text === data.stem), 'a decorative watermark must not be audited as text');
 });
 
 test('the AA exemption list is pinned, so it can only shrink', () => {
-  // A REPORT, NOT A PERMISSION. Both entries cannot reach 4.5 at any opacity
-  // because their INK ceiling is already under it, so the fix is a token change
-  // and the token is Reyner's. Pinning the list exactly means nothing new can
-  // join it by accident: a third token going under AA fails the test above.
-  assert.deepEqual(AA_EXEMPT, ['丙', '戊']);
+  // A REPORT, NOT A PERMISSION. Matahari LEFT this list on 2026-08-13 when Reyner
+  // darkened its field to #CC3F0E; only Gunung remains and Gunung is PROPOSED.
+  assert.deepEqual(AA_EXEMPT, ['戊']);
   for (const stem of AA_EXEMPT) {
     const t = CARD_TOKENS[stem];
-    assert.ok(contrast(t.ink, t.field) < MIN_CONTRAST,
-      `${stem} now reaches AA - take it off AA_EXEMPT`);
+    assert.ok(contrast(t.ink, t.field) < MIN_CONTRAST, `${stem} now reaches AA - take it off AA_EXEMPT`);
   }
-  // And everything NOT on the list must clear AA at full-opacity ink, which is
-  // what makes the list complete rather than a sample.
   for (const [stem, t] of Object.entries(CARD_TOKENS)) {
     if (AA_EXEMPT.includes(stem)) continue;
     assert.ok(contrast(t.ink, t.field) >= MIN_CONTRAST, `${stem} is under AA and unlisted`);
   }
 });
 
+test("MATAHARI'S FIELD IS #CC3F0E and its ink is unchanged (Reyner, 2026-08-13)", () => {
+  // The ruling was specific about WHICH of the two measured options: darken the
+  // field, keep the near-white ink. The rejected option was a dark ink on the
+  // original vivid field, which would have split the Fire pair on polarity while
+  // every other element pair splits on value alone.
+  const m = CARD_TOKENS['丙'];
+  assert.equal(m.field, '#CC3F0E');
+  assert.equal(m.ink, '#FFF4EC', 'the ink was explicitly kept');
+  assert.ok(contrast(m.ink, m.field) >= MIN_CONTRAST);
+  assert.ok(luminance(m.ink) > luminance(m.field), 'Matahari must stay a light-ink token');
+});
+
+test('THE INK POLE IS A GUARD, NOT A CHOOSER', () => {
+  // Nothing may auto-apply the winning pole: a token edit could then silently
+  // repaint every word on the card and still pass. The declared ink is authority;
+  // the report only refuses to stay quiet.
+  const gunung = CARD_TOKENS['戊'];
+  const v = inkVerdict('戊', gunung, MIN_CONTRAST);
+  assert.equal(v.ok, false);
+  assert.match(v.message, /LIGHTER|DARKER/, 'the failure must name the pole that works');
+  assert.match(v.message, /NOT APPLIED/, 'and must say it did not apply it');
+  // The declared ink is untouched by asking.
+  assert.equal(CARD_TOKENS['戊'].ink, gunung.ink);
+
+  // A passing token produces no verdict at all.
+  assert.equal(inkVerdict('壬', CARD_TOKENS['壬'], MIN_CONTRAST).ok, true);
+
+  // And the poles are reported for BOTH directions, so the report is a fact about
+  // the field rather than a recommendation dressed as one.
+  const poles = inkPoles(gunung.field, MIN_CONTRAST);
+  assert.ok(poles.light.ceiling > 1 && poles.dark.ceiling > 1);
+  assert.ok(['light', 'dark'].includes(poles.better));
+});
+
 test('ACCENT CARRIES NO TEXT — it is a mid-lightness value and cannot reach AA', () => {
-  // The structural finding, 2026-08-13: accent's ceiling against the field runs
-  // 3.05 to 5.69 and SIX of ten tokens are under 4.5 at full opacity. No opacity,
-  // size or weight change fixes that. So accent is a non-text colour: watermark,
-  // bars, the INTI DIRI pill, cell borders.
-  for (const role of Object.values(TEXT_ROLES)) assert.equal(role.on, 'ink');
+  // Accent's ceiling against the field runs 3.05 to 5.69 and most tokens are
+  // under 4.5 at full opacity, so no opacity, size or weight change fixes it.
+  // It survives as a NON-TEXT colour: watermark, bars, cell borders.
+  for (const [name, role] of Object.entries(TEXT_ROLES)) {
+    assert.notEqual(role.on, 'accent', `${name} draws text in accent`);
+  }
   const failing = Object.entries(CARD_TOKENS)
     .filter(([, t]) => contrast(t.accent, t.field) < MIN_CONTRAST);
   assert.ok(failing.length >= 5, 'if accent now clears AA broadly, this rule can be revisited');
 });
 
-test('opacity is part of the measurement, and is no longer a hierarchy tool', () => {
+test('opacity is no longer a hierarchy tool, and the roles say so', () => {
   // Bambu is the binding LOCKED token at ink 4.93, so its lowest usable opacity
-  // is 0.94. Anything dimmer fails a colour Reyner ruled, which is why every role
-  // sits at 1 and size/weight/italic carry the hierarchy instead.
-  const t = CARD_TOKENS['丙'];
-  const raw = contrast(t.ink, t.field);
-  const dimmed = contrast(composite(t.ink, t.field, 0.5), t.field);
-  assert.ok(dimmed < raw - 0.5, `dimming must lower the ratio: ${raw.toFixed(2)} -> ${dimmed.toFixed(2)}`);
-
+  // is 0.94. Anything dimmer fails a colour Reyner ruled.
   const bambu = CARD_TOKENS['乙'];
   assert.ok(contrast(composite(bambu.ink, bambu.field, 0.9), bambu.field) < MIN_CONTRAST,
     'Bambu at 0.9 opacity should be under AA - that is why roles sit at 1');
-
   for (const [name, role] of Object.entries(TEXT_ROLES)) {
     assert.equal(role.opacity, 1, `${name} is dimmed; see the note on TEXT_ROLES`);
-    assert.ok(['field', 'band'].includes(role.over), `${name} sits over ${role.over}`);
   }
 });
 
-test('the appendix band and the gradient step AWAY from the ink, so the FIELD is the worst surface', () => {
-  // This is what lets one audit cover both cards. The first version tinted the
-  // band toward the ink and quietly cost contrast on the tokens with none spare.
+test('THE ROLES TABLE IS ACTUALLY CONSUMED', () => {
+  // The defect this exists for: TEXT_ROLES was exported, audited and used by
+  // nothing, because the card set `color` once on its root and everything
+  // inherited. `roleStyle` is now the only source of text colour.
+  const t = CARD_TOKENS['壬'];
+  assert.deepEqual(roleStyle('headline', t), { color: t.ink, opacity: 1 });
+  assert.deepEqual(roleStyle('intiDiri', t), { color: t.field, opacity: 1 });
+  assert.throws(() => roleStyle('nope', t), /No text role/);
+
+  // And the root must NOT set a colour, or inheritance hides an unwired role.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  const html = renderToStaticMarkup(React.createElement(CardA, { data }));
+  const rootStyle = html.slice(0, html.indexOf('>'));
+  assert.ok(!/color:/.test(rootStyle), 'the canvas must not set an inheritable colour');
+});
+
+test('BOTH cards carry the gradient, and the canvas stays flat', () => {
+  // Card A had none until 2026-08-13, which left it with nothing separating
+  // object from canvas once the outline came off.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  for (const [name, C] of [['CardA', CardA], ['CardB', CardB]]) {
+    const html = renderToStaticMarkup(React.createElement(C, { data }));
+    const gradients = html.match(/linear-gradient/g) || [];
+    assert.equal(gradients.length, 1, `${name} must have exactly one gradient, the object's`);
+    // THE EDGE IS THE GRADIENT: no outline, no shadow (ruled 2026-08-13).
+    assert.ok(!/box-shadow/.test(html), `${name} still draws a shadow`);
+    assert.ok(!/border-top/.test(html), `${name} still draws the appendix band rule`);
+  }
+});
+
+test('the gradient steps AWAY from the ink, so the flat field is the worst surface', () => {
+  // This is what lets the audit measure one ground and cover every pixel.
   for (const [stem, t] of Object.entries(CARD_TOKENS)) {
-    const { field, band } = surfaces(t, BAND_TINT);
-    assert.ok(contrast(t.ink, band) >= contrast(t.ink, field) - 0.001,
-      `${stem}: the band has LESS contrast than the field`);
     for (const step of GRADIENT_STOPS) {
       const stop = stepAway(t.field, t.ink, step);
       assert.ok(contrast(t.ink, stop) >= contrast(t.ink, t.field) - 0.001,
         `${stem}: gradient stop ${step} has LESS contrast than the flat field`);
+    }
+  }
+});
+
+test('the watermark sits TOP-RIGHT on both cards and both polarities', () => {
+  // Ruled 2026-08-13. The headline is top-left, so top-right is the one large
+  // empty region; Card B's bottom third is the densest area in the system, and a
+  // watermark behind the pillar cells is interference rather than texture.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const yang = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  assert.ok(['甲', '丙', '戊', '庚', '壬'].includes(yang.stem), 'this fixture chart must be yang');
+  for (const stem of [yang.stem, '乙']) {
+    for (const C of [CardA, CardB]) {
+      const html = renderToStaticMarkup(React.createElement(C, { data: { ...yang, stem } }));
+      const wm = html.slice(html.indexOf('aria-hidden="true"'));
+      const style = wm.slice(0, wm.indexOf('>'));
+      assert.match(style, /top:/, `${stem} watermark must be pinned to the top`);
+      assert.match(style, /right:/, `${stem} watermark must be pinned to the right`);
+      assert.ok(!/bottom:|left:/.test(style), `${stem} watermark still uses the old lower-left placement`);
     }
   }
 });

@@ -19,7 +19,11 @@ dynamic tags/badges (CONTOH) and the Card B pillar row is ILLUSTRATIVE, not comp
 <style>
   :root{
     --bench:#111113; --bench-ink:#d9d7d2; --bench-dim:#84817a;
-    --sun-f:#FF4F12;   --sun-i:#FFF4EC;   --sun-a:#FFC9A8;
+    /* Matahari's field darkened 2026-08-13 by Reyner: #FF4F12 -> #CC3F0E, same
+       hue, ink kept. #FF4F12 could not reach WCAG AA against this ink (3.04);
+       #CC3F0E measures 4.53. This :root is the ruled source `lib/card/tokens.js`
+       copies and `tests/card.spec.mjs` pins against, so the two move together. */
+    --sun-f:#CC3F0E;   --sun-i:#FFF4EC;   --sun-a:#FFC9A8;
     --oce-f:#0E3A5C;   --oce-i:#EAF3F9;   --oce-a:#7FB6D9;
     --gem-f:#EDEAE4;   --gem-i:#1C1A17;   --gem-a:#8A7B5C;
     --bam-f:#1F7A43;   --bam-i:#EFF8EF;   --bam-a:#A8DBB4;

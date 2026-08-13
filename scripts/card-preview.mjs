@@ -38,8 +38,8 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData } from '../lib/card/cardData.js';
 import { CARD_TOKENS } from '../lib/card/tokens.js';
-import { auditContrast } from '../lib/card/contrast.js';
-import { CardA, CardB, TEXT_ROLES, BAND_TINT, MIN_CONTRAST, AA_EXEMPT } from '../components/cards/Card.js';
+import { auditRendered } from '../lib/card/domContrast.js';
+import { CardA, CardB, TEXT_ROLES, MIN_CONTRAST, AA_EXEMPT } from '../components/cards/Card.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'reports', 'card-preview.html');
@@ -80,10 +80,13 @@ function main() {
 
   const unapproved = rows.filter((r) => !r.approved).map((r) => r.data.nameId);
 
-  // Worst role per token, for the review table. Same module the test asserts with.
+  // Worst RENDERED text run per token, measured on the same markup this page
+  // shows. Not the roles table - see lib/card/domContrast.js for why.
   const worst = {};
-  for (const r of auditContrast(TEXT_ROLES, CARD_TOKENS, BAND_TINT)) {
-    if (!worst[r.stem]) worst[r.stem] = r; // audit is already sorted worst-first
+  for (const r of rows) {
+    const all = [auditRendered(r.a, CARD_TOKENS[r.stem].field), auditRendered(r.b, CARD_TOKENS[r.stem].field)]
+      .flat().sort((x, y) => x.ratio - y.ratio);
+    worst[r.stem] = all[0];
   }
 
   const html = `<!doctype html>
@@ -164,7 +167,7 @@ ${rows.map((r) => `
 Aspek <b>${esc(r.data.aspek)}</b>. Fixed tags ${esc(r.data.tags.fixed.join(', '))}.
 Dynamic ${esc(r.data.tags.dynamic.join(', ')) || '(none)'}${r.data.tags.dynamic.length < 3 ? ` <span class="no">(only ${r.data.tags.dynamic.length} - the chart has no more)</span>` : ''}.
 Badges ${esc(r.data.badges.map((b) => b.label).join(', ')) || '(none)'}.
-Worst contrast <b>${worst[r.stem].ratio.toFixed(2)}</b> on <code>${esc(worst[r.stem].role)}</code>, floor ${MIN_CONTRAST} (WCAG AA)${AA_EXEMPT.includes(r.stem) ? " <span class=\"no\">- cannot reach AA, Reyner to rule</span>" : ""}.
+Worst contrast <b>${worst[r.stem].ratio.toFixed(2)}</b> on ${esc(JSON.stringify(worst[r.stem].text.slice(0,22)))}, floor ${MIN_CONTRAST} (WCAG AA)${AA_EXEMPT.includes(r.stem) ? " <span class=\"no\">- cannot reach AA, Reyner to rule</span>" : ""}.
 Footer <b>${esc(r.data.footer.left)}</b>${r.data.footer.gender ? '' : ' (null gender: date and source only)'}.</p>
 `).join('\n')}
 `;
