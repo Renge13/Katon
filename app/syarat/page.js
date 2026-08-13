@@ -9,10 +9,11 @@ import { ENTITY } from '@/lib/site/entity';
 // exactly that paragraph, so it is stated plainly and early rather than buried at
 // the bottom in small print.
 //
-// Delivery is described the way the code actually works: the paid product is
-// available at the reading link and the link goes to the WhatsApp number captured
-// at checkout (`wa_number`, app/api/pay/[id]/route.js), because that is the only
-// address Katon holds - there is no account and no email capture.
+// Delivery is described the way the code actually works: the paid product unlocks
+// in place, at the reading link, and the link is the only address Katon holds -
+// there is no account and, as of 2026-08-13, no WhatsApp capture at checkout
+// either. The clause used to promise a WhatsApp send; nothing behind
+// app/api/pay/[id]/route.js could keep it, so both the field and the promise went.
 
 const q = SITE_COPY.syarat;
 

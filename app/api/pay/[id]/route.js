@@ -32,9 +32,9 @@ const INVOICE_DESCRIPTION = {
   artifact: 'Katon - Bacaan Mendalam',
 };
 
-// POST /api/pay/[id]   body: { wa_number, sku? }
-// Captures the WhatsApp number and creates the Xendit QRIS invoice
-// (external_id = reading id). NEVER sets paid=true — only the verified webhook can.
+// POST /api/pay/[id]   body: { sku?, wa_number? }
+// Creates the Xendit QRIS invoice (external_id = reading id).
+// NEVER sets paid=true — only the verified webhook can.
 //
 // THE CLIENT MAY NAME A SKU. IT MAY NEVER NAME A PRICE. The name is checked
 // against SELLABLE_SKUS and resolved to a number by priceFor(), both server-side,
@@ -58,10 +58,14 @@ export async function POST(request, { params }) {
   } catch {
     return badRequest('invalid JSON body');
   }
-  const waNumber = body?.wa_number;
-  if (!waNumber || typeof waNumber !== 'string') {
-    return badRequest('wa_number is required');
-  }
+  // `wa_number` IS OPTIONAL. It used to be required and this was a hard 400, which
+  // made a WhatsApp number mandatory to buy — for a delivery promise nothing behind
+  // this route could keep (no sender was ever built; `wa_sent` guards a send that
+  // does not exist). The checkout no longer asks for one, so the normal case is
+  // absent. The parameter stays accepted, and the column stays, so a WA channel can
+  // be wired later without another migration; anything else is ignored rather than
+  // stored under a name that claims to be a phone number.
+  const waNumber = typeof body?.wa_number === 'string' && body.wa_number ? body.wa_number : undefined;
 
   const sku = body?.sku ?? DEFAULT_SKU;
   if (!isSellable(sku)) {

@@ -485,27 +485,32 @@ function Reading({ reading, onReset, initialFull }) {
 function Paywall({ reading, initialFull }) {
   // initialFull (optional): when provided (re-access to an already-paid reading), the
   // paywall opens straight to the unlocked view. Omitted in the funnel → default flow.
-  const [stage, setStage] = useState(initialFull ? 'unlocked' : 'teaser'); // teaser | wa | pending | unlocking | unlocked
-  const [wa, setWa] = useState('');
+  const [stage, setStage] = useState(initialFull ? 'unlocked' : 'teaser'); // teaser | pending | unlocking | unlocked
   const [full, setFull] = useState(initialFull || null);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
+  const [busy, setBusy] = useState(false);
   // Domain choice now lives at the paywall (moved from the front door). Defaults to the
   // reading's domain (itself "hubungan" by default). Only "hubungan" is live; Karier/Uang
   // are "Segera" demand-capture. The live pay flow uses the reading as created (hubungan).
   const [selectedDomain, setSelectedDomain] = useState(reading.domain || 'hubungan');
   const pollRef = useRef(null);
 
-  async function submitWa(e) {
-    e.preventDefault();
-    if (!/^[0-9+]{8,}$/.test(wa.replace(/\s/g, ''))) return;
+  // "Buka Refleksiku" goes STRAIGHT to invoice creation. There is no field between
+  // intent and checkout any more: the WhatsApp step used to sit here and was removed
+  // because the promise attached to it ("Ke mana bacaanmu dikirim?") had no sender
+  // behind it. See the note on the pay route for the delivery channel decision.
+  async function startCheckout() {
+    if (busy) return;
+    setBusy(true);
     const res = await fetch(`/api/pay/${reading.token}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wa_number: wa }),
+      body: JSON.stringify({}),
     }).then((r) => r.json()).catch(() => null);
     // Open the Xendit checkout (QRIS) in a new tab; this tab keeps polling /full and
-    // unlocks when the verified webhook flips paid. (Triggered from the submit gesture
+    // unlocks when the verified webhook flips paid. (Triggered from the click gesture
     // so it isn't popup-blocked; a fallback link shows in the pending state too.)
     if (res?.invoiceUrl) { setInvoiceUrl(res.invoiceUrl); window.open(res.invoiceUrl, '_blank', 'noopener'); }
+    setBusy(false);
     setStage('pending');
   }
 
@@ -534,8 +539,7 @@ function Paywall({ reading, initialFull }) {
   if (stage === 'unlocked' && full) return <Unlocked full={full} token={reading.token} onUpdate={setFull} />;
   if (stage === 'unlocking') return <Unlocking />;
   if (stage === 'pending') return <Pending invoiceUrl={invoiceUrl} />;
-  if (stage === 'wa') return <WaCapture wa={wa} setWa={setWa} onSubmit={submitWa} />;
-  return <Teaser reading={reading} onOpen={() => setStage('wa')} selectedDomain={selectedDomain} setSelectedDomain={setSelectedDomain} />;
+  return <Teaser reading={reading} onOpen={startCheckout} busy={busy} selectedDomain={selectedDomain} setSelectedDomain={setSelectedDomain} />;
 }
 
 // Frosted placeholder — generic blurred bars, NEVER the real locked copy.
@@ -552,9 +556,10 @@ function LockedLines() {
   );
 }
 
-// Teaser + price in ONE sanctuary card (price shown with the teaser; WA asked only
-// after "Buka"). See PROGRESS.md — deliberate collapse of the old teaser→offer tap.
-function Teaser({ reading, onOpen, selectedDomain, setSelectedDomain }) {
+// Teaser + price in ONE sanctuary card. "Buka Refleksiku" is now the LAST tap before
+// the Xendit checkout — the old teaser→offer tap collapsed into this card (PROGRESS.md),
+// and the WhatsApp step that followed it was removed outright.
+function Teaser({ reading, onOpen, busy, selectedDomain, setSelectedDomain }) {
   const t = reading.teaser;
   const domain = selectedDomain || reading.domain || 'hubungan';
   const domainLabel = DOMAIN_LABEL[domain] || '';
@@ -599,7 +604,9 @@ function Teaser({ reading, onOpen, selectedDomain, setSelectedDomain }) {
                 <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW }}>sekali bayar</div>
               </div>
               <div style={{ marginTop: 16 }}>
-                <Button onClick={onOpen} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>Buka Refleksiku <Icon.arrow size={17} /></Button>
+                <Button onClick={onOpen} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  {busy ? 'Menyiapkan pembayaran...' : <>Buka Refleksiku <Icon.arrow size={17} /></>}
+                </Button>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 11.5, color: GLOW, opacity: 0.85, marginTop: 14 }}><Icon.lock size={13} /> Sekali baca. Milikmu selamanya.</div>
             </div>
@@ -615,19 +622,16 @@ function Teaser({ reading, onOpen, selectedDomain, setSelectedDomain }) {
   );
 }
 
-function WaCapture({ wa, setWa, onSubmit }) {
-  return (
-    <Reveal>
-      <form onSubmit={onSubmit} style={{ background: SANCTUARY, borderRadius: 26, padding: '30px 24px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
-        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.22em', textTransform: 'uppercase', color: GLOW }}>Satu langkah lagi</div>
-        <p style={{ fontFamily: 'var(--font-serif)', fontSize: 19, lineHeight: 1.5, color: '#F2F6F6', margin: '14px 0 16px' }}>Ke mana bacaanmu dikirim? Masukkan nomor WhatsApp-mu.</p>
-        <input type="tel" placeholder="08xxxxxxxxxx" value={wa} onChange={(e) => setWa(e.target.value)} style={darkField} />
-        <div style={{ marginTop: 16 }}><Button type="submit">Lanjut Bayar</Button></div>
-        <div style={{ fontSize: 11.5, color: 'rgba(234,241,242,.6)', marginTop: 14, textAlign: 'center' }}>Nomormu hanya untuk mengirim bacaan dan link-mu. Bukan untuk spam.</div>
-      </form>
-    </Reveal>
-  );
-}
+/* The `wa` stage lived here: a WhatsApp field between "Buka Refleksiku" and the
+   Xendit invoice, headed "Ke mana bacaanmu dikirim?". It was REMOVED, not made
+   optional. The number was mandatory (the pay route 400'd without it) and the
+   promise attached to it was never kept: migration 0002 added `wa_sent` as a
+   send-once guard and no sender was ever built behind it. Sending on the WhatsApp
+   Business Platform bills per message and needs a verified business plus template
+   approval, which is disproportionate for MVP, so email becomes the delivery and
+   recovery channel instead (already required by the compatibility spec).
+   The coming-soon demand capture in <SegeraRow> is untouched: "kalau mau dikabari"
+   is a promise we can keep. */
 
 function Pending({ invoiceUrl }) {
   return (
