@@ -28,7 +28,16 @@ UPDATED: 2026-08-05 — XENDIT REJECTION 2. `NEXT_PUBLIC_FREE_FULL_READING` remo
          the funnel already used. The card + PDF copy returns wholesale at the fulfillment swap.
 UPDATED: 2026-08-06 — `harga.meta.description` closed, the last surface carrying the dead claim.
          Every copy surface now names Bacaan Mendalam.
+UPDATED: 2026-08-13 — THREE REGISTERS ADDED AT THE TOP, and the 08-05 interim CLOSED. LIVE STATE
+         answers "what does a real user get today" in one table; THE INTERIM REGISTER gives every
+         temporary divergence an end condition and an owner; THE DEFERRED REGISTER lists what was
+         ruled OUT of the swap package. Cause: a Cowork session argued the business model for two
+         rounds against a model that was already live. Reyner ruled the 7-beat deep read RETIRED and
+         the locked free-full-mirror model restored; mirror promotion precondition 2 re-ruled to
+         match, in both places it lives.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
+         For "what SHIPS", read LIVE STATE at the top — it is the only section that answers that, and
+         it is the one a product argument needs first.
 -->
 
 # Katon — PROGRESS Ledger
@@ -37,6 +46,109 @@ PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section
 > Both after `../CLAUDE.md`. Brief yourself from the repo, never from memory or a summary.
 > **`D:\Work\Katon assets\Katon md` is a STALE MIRROR — do not read it.** It still carries the
 > rejected Aspek names (Setara, Karya, Pijar, Peluang) and a PROGRESS.md with no decisions in it.
+
+---
+
+## LIVE STATE — what a real user gets TODAY (verified 2026-08-13)
+
+**Read this before advising on the product, and before arguing about the business model.**
+`CLAUDE.md` describes the TARGET. This block describes what the deployed code actually does. They
+diverge, and every other section of this file is about how we get from one to the other.
+
+| Surface | What a real user gets today | Served by | Gate |
+|---|---|---|---|
+| Free reading | Archetype + modifier, day master (element/polarity/hanzi), four pillars, 胎元, five element bars, three prose sections (`siapaKamu`, `kenapaBegini`, `keMana`), one teaser lead | `contents/*hubungan*.md` -> `scripts/build-content.mjs` -> `lib/content/<archetype>.js`. **No LLM, zero provider calls** | none, ungated |
+| Sharecard | Downloadable PNG of the same free content | same | none |
+| **Bacaan Mendalam, Rp 19.000** | The **7-beat deep read** (`paidContent.beat1..beat7`) + the paid pillar recap and post-pay hour door | **the same `contents/*hubungan*.md` cells**, `getPaidDomain(stem, state, domain)` | **PAYWALL.** `row.paid === true`, flipped only in the verified Xendit webhook |
+| Karier / Uang | Nothing. A "Segera" row that captures a WhatsApp number (`interest_wa`) | no content exists — every file in `contents/` is `*-hubungan-FINAL.md` | n/a |
+| Compatibility | Nothing. Not purchasable | not built | `compat` is priced (45.000/29.000) and **absent from `SELLABLE_SKUS`**, so checkout 400s |
+| **The new pipeline** (`/api/mirror`) | **Nothing. It serves no user.** Engine semantic JSON -> Gemini -> Stage 6 -> `render_cache` | Stage 3-6, `docs/content/glossary.json` + `renderer-prompt.txt` | **FENCED.** 404 unless `MIRROR_PREVIEW_TOKEN` is set AND presented. Linked from nowhere |
+| Static pages | `/harga` `/tentang` `/privasi` `/syarat` `/pengembalian` + footer | `lib/site/copy.js` | none |
+
+**The one-line summary: every word a real user reads today comes from `contents/*hubungan*.md`.**
+The new pipeline — the engine, the glossary, the renderer, the Stage-6 gate, every measurement in the
+MEASUREMENTS table below — has never served a single reader.
+
+**Two divergences from the locked model, both live:**
+
+1. **FREE IS NOT THE FULL MIRROR.** `CLAUDE.md` says free is the full mirror and paid is "an upsell
+   offered AFTER the free reading lands, never a gate." What actually happens is that the 7-beat
+   deep read sits behind the Rp 19.000 wall. The gate is back. It has been back since 2026-08-05 and
+   the reason is in THE INTERIM REGISTER below. **Reyner ruled the revert to the locked model on
+   2026-08-13**; nothing has shipped yet.
+2. **NOT ONE CELL IS FOUNDER-VALIDATED, AND A PAYING CUSTOMER RECEIVES THEM.** Counted 2026-08-13,
+   `contents/` holds 20 files, all `*-hubungan-FINAL.md`. `grep -l "pending founder" contents/*.md`
+   returns **16** — e.g. `akar-amplified-hubungan-FINAL.md:3`, *"STATUS: LIVE (helper-PRIMARY, Claude
+   structure+register-fix; pending founder validation)"*. Of the remaining four, three are stamped
+   **SCAFFOLD, pre-validation** (`akar-balanced:2`, `jati-balanced:2`, `pedang-balanced:2`) and
+   `matahari-balanced` carries **no STATUS header at all**. The only two files containing the word
+   `VALIDATED` (`gunung-balanced:18`, `samudra-amplified:18`) use it about one inline fix and both
+   also carry `pending founder validation` in their own STATUS line. **Zero founder-validated cells,
+   free or paid.**
+
+**THE RULE FOR THIS BLOCK: it is updated in the SAME COMMIT as any funnel change.** A commit that
+changes what a user gets and does not touch this block is incomplete, and a reviewer should say so.
+
+**Why it exists.** On 2026-08-13 a Cowork session argued a business-model question for two rounds
+without noticing that the model it was arguing against **was already live** — the fact was sitting in
+this file at the "the gate is back" line (the 2026-08-05 INTERIM section), inside a wall of history
+nobody reads to the bottom. `CLAUDE.md` described the target, the code ran something else, and
+nothing anywhere recorded the difference. A ledger that only records decisions cannot answer
+"what ships?", and that is the question every product argument actually rests on.
+
+---
+
+## THE INTERIM REGISTER
+
+**An interim with no end condition and no owner is not an interim, it is a decision nobody made.**
+Every temporary divergence from a locked rule goes here with all four fields filled. Three of them
+are cheap; the two that get skipped are the two that matter.
+
+| Interim | What it is | Why it was accepted | WHAT ENDS IT | WHO CHECKS | Status |
+|---|---|---|---|---|---|
+| **The Xendit submission-window paywall** | `NEXT_PUBLIC_FREE_FULL_READING` removed 2026-08-05, which re-enabled the legacy 19k unlock: the 7-beat deep read went back behind the wall, so FREE stopped being the full mirror | Xendit's second rejection was for having **no reachable checkout**. The flag had quietly become the architecture — the paywall never rendered in production, so there was nothing for a reviewer to see. Accepted at zero traffic: nobody was being charged in that window | Xendit verification approved, then the fulfillment swap: paid becomes card + PDF and the deep read returns to the free mirror | Reyner | **CLOSED 2026-08-13.** Verification approved **08-07**, QRIS activated **08-11**, first self-purchase completed (Reyner's report, 08-13). Reyner ruled the revert to the locked model **2026-08-13**. The swap itself is now the build, tracked as the swap package under THE DEFERRED REGISTER |
+
+**What that interim cost, recorded because it is the argument for the two columns on the right.** It
+had `what it is` and `why` from the day it was written and neither `what ends it` nor `who checks`.
+Its window was the Xendit submission — days. It ran for **eight days past approval** (08-05 to 08-13)
+and was found by accident, in a business-model argument that had already gone two rounds against a
+model that was live. Nothing was watching it because nothing had been made responsible for it.
+
+---
+
+## THE DEFERRED REGISTER — ruled OUT of the swap package
+
+**THE SWAP PACKAGE, ruled 2026-08-13.** Free full mirror served from the new pipeline; Rp 19.000
+becomes card + PDF; the deep read and the `contents/*.md` path are retired; `/harga`, `/syarat` and
+the invoice description describe what actually ships; Reyner's QA passed and the outside reads are
+in. **NOTHING ELSE HOLDS THE DATE.**
+
+Everything below was considered and ruled OUT of that package. Each row carries what unblocks it, so
+a later session can tell "deferred with a reason" from "forgotten". Every row verified still open on
+2026-08-13 with the command or file named.
+
+| Deferred | What it is | What unblocks it |
+|---|---|---|
+| **Compatibility** | The v1 money engine per CLAUDE.md. Not built | **Sourcing 天干五合**, the five stem combinations, which are step 2 of the classical workflow the compat spec follows. `grep -rn "甲己\|乙庚\|丙辛\|丁壬\|戊癸" lib/ tests/` -> **0** on 2026-08-13. The only substantive hit anywhere is Indonesian prose in `docs/archive/calcdump-CxD.md:45` — not a table, not code. (Scope the grep to `lib/ tests/`: across `docs/` it now also matches this row and COWORK-BRIEF's, so a docs-wide count measures the registers, not the engine. Searching the NAME `天干五合` returns zero everywhere and will mislead you — search the five pairs.) **And an oracle that can verify a CROSS-CHART claim** — Joey's plotter is single-chart (probed 2026-08-12), so COWORK-BRIEF section 4's rule bites: what has no oracle cannot be implemented |
+| **Email capture at checkout** | Recovery and delivery channel. Today the reading URL is the only address Katon holds, and checkout asks for nothing (`d81434a` removed the WhatsApp field) | A register call on the wording plus a column. Also **required by the compat spec**, which creates account + email at the first compat CHECKOUT while the mirror stays anonymous |
+| **Server-side conversion counters** | Nothing records funnel steps. `d81434a` removed a required field between intent and checkout with no instrumentation to see the effect | A build. **This BLOCKS the 25-45k price test CLAUDE.md requires** — a price test with no conversion measurement is a coin toss with extra steps. Note the /privasi correction under this table |
+| **The Pending poll dead end** | `components/Funnel.jsx` polls `/full` every 3s and gives up after 60 tries onto a permanent spinner. Reachable in-session and now also via the Xendit success redirect (`c5e649c`) | A decision on what a 3-minute-old unconfirmed payment should say. It cannot fall back to the offer — she paid — so it needs copy, which is a register call |
+| **`secara lengkap` in the hour-less disclosure** | `style.adverbial` is `\bsecara \w+` (`lib/validate/blocklist.json:200`) and the hour-less sentence uses `secara lengkap` (`docs/research/rejections-K-v1-2026-08-11.md:103`). **The gate rejects a sentence the product must be able to say** | A ruling on which side bends. This is the `aspek.比肩` shape — a legitimate ban punishing required prose — not the `relation_positions` shape, and error 22 is the record of confusing the two |
+| **`renderer-prompt.txt` hygiene** | Em-dashes at **:59** and **:92**, and **`ramalan` at :207** — a token `forbidden_content.fatalism` bans HARD (`\bramalan\b`), sitting in the instructions the model reads. The line is *"Timing is cuaca, never ramalan"*, so the prompt teaches the banned word while banning the concept | A rewrite that states the rule without naming the token, plus its own measurement (rule 13). The em-dashes are prompt text, not user-facing strings, so rule 20 does not reach them — but the model is being shown the character we ban |
+| **`forbidden_content.fatalism` bans any four-digit year** | `\b(19\|20)\d{2}\b` (`lib/validate/blocklist.json:13`). A reader's own birth year is **provenance she supplied**, not a dated prophecy | A ruling on whether the year the reader typed may be echoed back. The two 08-12 fatalism hits are unattributed — the probe that "cleared" the year hypothesis read the wrong field and was retracted, so the hypothesis is neither supported nor excluded |
+| **The domain selector offers three choices, one is live** | `DOMAINS` in `components/Funnel.jsx` renders Hubungan / Karier / Uang; only `hubungan` has content | Content for the other two, or a decision to stop offering them. Today the two dead choices convert into demand capture, which is honest but is not what a three-way selector looks like |
+| **Gender** | Accepted by `/api/reading`, stored on the row, absent from the UI, and `computePillars` `void`s it. It changes nothing rendered | Luck pillars (annual reading, luck-pillar map). It is stored so it need not be re-collected then. **Until then it is a column that collects nothing and means nothing** |
+
+**A CORRECTION TO THE COUNTER ROW, because the wording matters more than the intent.** /privasi does
+NOT currently promise "no analytics". `SITE_COPY.privasi.collectNote` says *"tidak memasang cookie
+pelacak atau alat analitik pihak ketiga"* — **pihak ketiga**, third party. A first-party server-side
+counter is neither a tracking cookie nor a third-party tool, so that public sentence survives
+unchanged. What DOES have to move is the doc comment above `privasi` in `lib/site/copy.js`, which
+asserts "no cookies, no storage, no analytics" as a verified code fact, and the `collect` / `purpose`
+lists, which would need to say what is counted. Smaller than "rewrite the privacy promise", and
+precise about which string is actually load-bearing.
+
+---
 
 ## THE PIVOT IN ONE PARAGRAPH
 Hand-authoring reading cells produced flat, hedged prose that failed a cold-read walkthrough. We
@@ -822,6 +934,12 @@ Vercel env var on a coordinated deploy.
 
 ### THE INTERIM STATE — do not let this ship quietly past submission
 
+> **CLOSED 2026-08-13.** This is the interim's own write-up and it stays as the record. Its status,
+> its end condition and its owner now live in **THE INTERIM REGISTER** at the top of this file, and
+> what a user gets while it is still deployed is in **LIVE STATE**. This section had no end condition
+> and no owner, which is why it outlived its window by eight days and was found by accident. Read the
+> registers first; read this for the reasoning.
+
 **XENDIT VERIFICATION APPROVED — go-live ritual executed 2026-08-07 (Cowork session), status:**
 - Business verified, bank account (BCA, PT KATON DIGITAL NUSANTARA) **active**.
 - Live `xnd_production_...` key + live webhook verification token generated and **swapped into
@@ -855,7 +973,14 @@ both live the moment the deploy lands, plus one live-key swap that must not be f
 1. **The free mirror is no longer complete.** Rule: FREE is the full mirror, ungated, and paid is
    "an upsell offered AFTER the free reading lands, never a gate." What actually happens now is the
    7-beat Bacaan Mendalam sits BEHIND the Rp 19.000 wall (`Unlocked` in `components/Funnel.jsx`
-   renders `paidContent.beat1..beat7`). The gate is back.
+   renders `paidContent.beat1..beat7`). **The gate is back.**
+
+   **This one sentence is the whole reason the LIVE STATE block exists.** It was accurate the day it
+   was written and it stayed accurate for eight days after the interim's window closed, buried at
+   line ~967 of a 1,600-line ledger. On 2026-08-13 a Cowork session argued the business model for two
+   rounds against a model that was already deployed, because the only place reality was recorded was
+   here. **RULED 2026-08-13 (Reyner): the 7-beat deep read is RETIRED and the locked model is
+   restored.** Not yet shipped — see precondition 2 below and the swap package at the top.
 2. **The charge description did not match what is delivered — FIXED 08-05, then the whole copy set
    followed it.** `INVOICE_DESCRIPTION.artifact` (`app/api/pay/[id]/route.js`) read
    `Katon - CE card + PDF reading` while the buyer received a deep-read unlock, with no PDF and no
@@ -926,9 +1051,38 @@ how a session promotes without reading it):
 | # | Precondition | Status |
 |---|---|---|
 | 1 | Xendit verification approved + live keys swapped | **MET 2026-08-07.** QRIS **activated 2026-08-11**; the first self-purchase is tracked above and is NOT part of this condition |
-| 2 | The fulfillment swap shipped — Complete Edition card + PDF exist, so the 19k upsell is a real thing to buy | NOT MET |
+| 2 | **RE-RULED 2026-08-13 (Reyner).** The Rp 19.000 has a deliverable that is NOT the free mirror — card + PDF exist and ship — and `/harga`, `/syarat` and `INVOICE_DESCRIPTION` describe that rather than the deep read. See the re-ruling note below the table | NOT MET |
 | 3 | Reyner has QA'd real readings through the preview | **NOT MET, and BLOCKED 2026-08-12: the Gemini account's prepayment credits are depleted, so every render returns the floor.** The queued renderer pass it was waiting on is built and measured (see the 08-12 section); the read itself needs billing topped up first |
 | 4 | **`fact.relation_positions` no longer reads a temporal `hari` as a pillar** — the `NOT_A_SPAN` fix, own commit, own measurement (rule 13) | **MET 2026-08-12**, gate `1.9.0`. Added and met the same day; the fix went wider than the three named idioms (see below) |
+
+### Precondition 2, RE-RULED 2026-08-13 (Reyner)
+
+The old row read *"the fulfillment swap shipped — Complete Edition card + PDF exist, so the Rp 19.000
+upsell is a real thing to buy."* That framed the swap as something that could land BESIDE promotion.
+It cannot, and the ruling that makes it plain is that **the 7-beat Bacaan Mendalam is RETIRED and the
+locked free-full-mirror model is restored.**
+
+**RETIRING THE GATE AND REPLACING THE UNVALIDATED PROSE ARE THE SAME ACT.** The paid beats and the
+free prose have ONE source. `scripts/build-content.mjs` slices each `contents/<archetype>-<state>-
+hubungan-FINAL.md` into 3 FREE and 7 PAID sections of one `lib/content/<archetype>.js`, and the
+generator hard-fails if that structure breaks — so the two halves are not merely adjacent, they are
+the same artifact. Promoting this route replaces the FREE half with Stage 3-6 output; the same commit
+orphans the PAID half, which is the only thing Rp 19.000 buys today. **There is no ordering in which
+one of those lands without the other.**
+
+The second half of the act is what those cells are: **not one is founder-validated.** 16 of 20 say
+`pending founder validation`, three say SCAFFOLD/pre-validation, one has no STATUS line (counted
+2026-08-13; the commands are in the LIVE STATE block at the top of this file). A paying customer
+receives that prose today. Retiring the deep read is what stops that, and it is the same commit again.
+
+**So the precondition is now: the Rp 19.000 has a deliverable that is NOT the free mirror.** Card +
+PDF exist and ship, and `/harga`, `/syarat` and `INVOICE_DESCRIPTION` describe that rather than the
+deep read. Without it, promotion leaves a live SKU selling something the same commit just gave away
+for free — which is a merchant-compliance problem of exactly the shape the 08-05 invoice-description
+fix already had to solve once.
+
+The full package this belongs to is THE DEFERRED REGISTER at the top of this file, which also lists
+what was ruled OUT of it.
 
 **Precondition 4 was promoted from backlog and MET the same day, 2026-08-12.** It was promoted because
 the exposure is a difference of kind, not degree: a hard finding drops the reading to the floor, and
@@ -939,7 +1093,13 @@ by design. **Kept in the table now that it is met** rather than deleted, because
 of why a gate fix was a release gate at all, and a future promotion should be able to see that
 reasoning applied once and then satisfied.
 
-**2 of 4.** Condition 3 is the one J unblocks: QA is
+**2 of 4** — conditions 1 and 4. The header of `app/api/mirror/[token]/route.js` read **1 of 4** with
+condition 4 marked NOT MET until 2026-08-13, because 4 was met here and not there. That is the drift
+this checklist was deliberately duplicated to prevent, arriving anyway. **Change a row in one place
+and change it in the other in the same commit**, or the copy that is wrong becomes the one a
+promoting session happens to read.
+
+Condition 3 is the one J unblocks: QA is
 `curl -H "x-mirror-preview-token: $MIRROR_PREVIEW_TOKEN" https://www.katon.app/api/mirror/<token>`
 after a POST to `/api/mirror` with a birthdate. It returns JSON, not a page — J built no UI, by
 design. **Use `www.`** — the apex 308-redirects to it, and a redirect is the one place a header can

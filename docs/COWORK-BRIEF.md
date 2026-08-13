@@ -104,12 +104,13 @@ What that means concretely:
 Claude Code is a good reviewer and has caught real spec errors. When it pushes back, **assume it is
 right until you have checked.** It has been right every time so far.
 
-### Working-style rules. Reyner-ratified 2026-08-11, folded in here 2026-08-12.
+### Working-style rules. 1-5 Reyner-ratified 2026-08-11, folded in 2026-08-12. 6-8 added 2026-08-13.
 
-**These are rules, not history.** They were ratified in a Cowork session and then lived only in that
+**These are rules, not history.** 1 to 5 were ratified in a Cowork session and then lived only in that
 session's handover file, which no Claude Code session can read — and the git rule below was then broken
 by a session that had no way to know it existed. That is error 20's real cause and it is written up
-under the ledger. **A rule not in the repo is not a rule.**
+under the ledger. **A rule not in the repo is not a rule** — which is now rule 8, generalised, so the
+same parking cannot happen twice.
 
 1. **EXEC SUMMARY FIRST, and it must be readable cold.** Open every substantial reply with the
    summary, not the reasoning that produced it. Gloss every piece of jargon on first use — engine
@@ -144,11 +145,46 @@ under the ledger. **A rule not in the repo is not a rule.**
    The reason step 3 is fenced so narrowly: a sweep that also "improves" a phrase is Cowork deciding
    register with extra steps, and it is unreviewable because his text and the edit arrive together.
 
+6. **VERIFY WHAT SHIPS BEFORE ADVISING ON THE PRODUCT. `CLAUDE.md` describes the TARGET; the code
+   describes REALITY; they diverge.** Added 2026-08-13 after a session argued a business-model
+   question for two rounds against a model that was already deployed. The answer is now one table:
+   **`PROGRESS.md`, the LIVE STATE block at the very top.** Read it before any product argument, and
+   if a claim in it disagrees with the code, the code wins and the block is the thing to fix.
+   Corollary: a locked rule is not evidence about what a user experiences. Rule 20's one-voice
+   requirement and rule 16's cache guarantee are both true and both describe surfaces that,
+   as of 2026-08-13, no user has ever reached.
+
+7. **A NUMBER ENTERING A DECISION TABLE CARRIES WHO GENERATED IT.** Revenue, signups, usage — if the
+   answer is "us", it is a test result and it goes in the test column or nowhere. Error 23, where a
+   self-purchase smoke test was scored as demand and pointed a model comparison at the wrong answer.
+   A wrong fact in prose gets argued with; a wrong cell in a scoring table gets summed.
+
+8. **RATIFY AND FOLD IN THE SAME TURN. THE HANDOVER FILE MAY CARRY SESSION STATE AND NOTHING ELSE.**
+   This is error 20's durable lesson promoted to a rule, because the lesson is bigger than git.
+   A rule agreed in a Cowork session and parked in `claude/KATON-session-state-*.md` — a file in the
+   Claude project — **does not exist**, because `CLAUDE.md`, `docs/` and the locked tests are the only
+   things a session reads. "Fold in at the next quiet moment" is how a rule dies; the five rules above
+   sat under a header saying exactly that, and rule 4 was then broken by a session with no way to know
+   it was a rule.
+
+   The split, so it is operable rather than a sentiment:
+
+   | Goes in the repo, same turn it is agreed | Stays in the Claude project |
+   |---|---|
+   | Anything phrased as always / never / must / the flow is | What I was mid-way through and where I stopped |
+   | A decision, a ruling, a price, a name, a threshold | Which files I had open, what I was about to check next |
+   | A working rule about how Cowork, Code and Reyner divide work | Draft text not yet proposed to Reyner |
+   | A correction to something the repo currently asserts | Scratch reasoning, rejected options, chat context |
+
+   **The test: could a Claude Code session break this by not knowing it?** If yes, it is a rule and it
+   belongs in `docs/` or `CLAUDE.md` before the turn ends. If it only describes where one conversation
+   got to, it is session state and it belongs in the handover, where going stale costs nothing.
+
 ---
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
 
-**Twenty-two spec errors so far. All twenty-two were mine.** Not listed to be self-flagellating; listed because
+**Twenty-three spec errors so far. All twenty-three were mine.** Not listed to be self-flagellating; listed because
 the pattern is predictive and knowing it changes what you do next. **Append here when a new one is
 caught, and never trim the list — the pattern is the value, not the count.**
 (Numbering corrected 2026-08-07: two appended rows reused 13 and 14, so the "fourteen" headline
@@ -179,6 +215,7 @@ undercounted a sixteen-row table — a counting error in the error ledger itself
 | 20 | Ran a git command against the DEVICE REPO and left a `.git/index.lock` the bridge cannot delete, blocking the working tree until it was cleared by hand. Not a BaZi error and not a spec error - a ROLE error, which is why it belongs here anyway | the topology table in section 3 is the rule: **Cowork writes prompts and does not write engine code; Claude Code is the builder.** Operating the repo directly is the same boundary crossed from the other side. **CORRECTED 2026-08-12: this row said the failure was "foreseeable from the role split rather than prohibited outright". IT WAS PROHIBITED.** A Reyner-ratified rule already said so verbatim - see the correction note under the table - and it was invisible to every session that could only read the repo. The practical cost is asymmetric and that is still the argument: Cowork gains nothing from running git that a prompt to Claude Code would not also achieve, and a lock it cannot release stops the builder entirely |
 | 21 | The tranche-2a prompt predicted commit 3 (element_dominant reading its own group) would move fact order on **8 of 13** charts, "because the fact finally carries an actionable and `hierarchy.actionability` stops being a promise it cannot pay". Since #34 actionability is **DECLARED, not inferred**: `actionabilityOf` reads `ACTIONABLE_KINDS[fact.provenance?.kind]` and nothing else (`lib/semantic/hierarchy.js:219-221`), `element_dominant: true` (`lib/semantic/facts.js:105`), and it pays 100 whether or not the prose exists. Measured on the commit itself (`ac24441`): **0 of 13** fact orders moved, importances byte-identical (41, 70, 64, 70, 41, 70, 61, 67 before and after); only the 8 cache keys moved, which is just the strings changing | errors 2/5/6 again - **the disproving evidence was in hand.** The prompt had read that exact block: the comment above `ACTIONABLE_KINDS` names the five tranche-1 `aspek` cells whose prose "still ships, it just no longer buys them rank", which is the same claim in the same file, and the prompt wrote the opposite anyway. **THE AGGRAVATING FACTOR, and why this is its own row rather than a footnote on 19:** the prediction also said *"Expected. NOT the re-coupling tripwire firing"* - it pre-authorised dismissing the very tripwire that would have caught it. A prediction that tells a reader what to DISREGARD must carry its grep. Being wrong costs a re-measurement; telling the builder to ignore a live alarm costs the alarm |
 | 22 | The tranche-2b prompt told Code to bend a ruled string to satisfy `fact.relation_positions`, invoking **"THE SENTENCE BENDS, NOT THE CHECK"** (the `aspek.比肩` ruling, tranche 1). That ruling is for a string tripping a **LEGITIMATE** ban - `style.adverbial`, `style.hedging` - where an engine string carrying the banned form punishes the renderer for obedience. `fact.relation_positions` is a **known false positive with three prior fixes**, and round 3 explicitly refused to bend prose for it: `lib/validate/fact.js` calls the 2026-08-11 firing *"a HARD finding on ordinary Indonesian that says nothing about any pillar"*, and `7f289f0` says in capitals **THE PROSE IS NOT THE BUG AND IS NOT CHANGED**. Reversed 2026-08-12: the check was fixed and Reyner's words restored | **A RULING APPLIED OUTSIDE THE DOMAIN IT WAS RULED FOR.** Distinct from error 21, which was a fact left unchecked; this was a fact checked and then generalised past its scope. Same family - **the disproving evidence was in hand**, and here it was a comment in the very file the fix edits. The tell that should have stopped it: the ruling's own logic is "do not punish the renderer for obeying the prompt", which presupposes the check is RIGHT. Applied to a broken check it inverts into "punish the author for writing Indonesian". **AGGRAVATING, and the reason it is worth its own row: bending the glossary cannot fix the renderer's free prose.** The gate reads LLM output, the LLM writes `di kemudian hari` whenever it likes, and rule 15 puts it in that path by design. So the bend treated the only surface that was cheap to treat - 15 fixed strings - and left the real one exposed. A fix that cannot reach the general case is a symptom fix, and calling it a ruling made it look principled |
+| 23 | The 2026-08-13 session scored a business-model comparison with a row reading **"Revenue to date: Rp 19.000 - it works"** against the alternative's "zero". That Rp 19.000 was **Reyner's own self-purchase test of the QRIS path** - the last step of the go-live ritual, n=1, his money through his own checkout. It is proof the MONEY PATH works: invoice created, QR scanned, webhook verified, `paid` flipped server-side. It is not one unit of demand. **Neither model has any market evidence**, and the honest row was "zero, zero" | **TREATED A SELF-TEST AS DEMAND EVIDENCE.** The number was real, the instrument was real, and the reading of it was still wrong: a payment-path smoke test measures the payment path. What makes this its own row rather than a footnote is WHERE it sat - **inside a comparison table built to decide a business model**, in the column that decides it, pointing at the wrong answer. A wrong fact in prose gets argued with; a wrong cell in a scoring table gets summed. **The tell that should have stopped it: the ledger itself records that purchase as a RITUAL STEP** (PROGRESS, THE INTERIM REGISTER - "Rp 19.000, own birthdate, own bank app"), so the disproving context was in the same file the table was built from. Errors 2/5/6/21/22 again: the evidence was in hand. **Rule: a revenue, signup or usage figure entering a decision table carries WHO GENERATED IT. If the answer is us, it is a test result, and it goes in the test column or nowhere** |
 
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
@@ -202,8 +239,10 @@ because they are the only things a session reads. "Fold in at the next quiet mom
 dies: fold it into the repo in the SAME turn it is ratified, or accept that it is a preference nobody
 will ever be bound by. **The five rules from that block are now in section 3, where they are readable.**
 
-**Five of these (2, 5, 6, 21, 22) are the same failure: I had the disproving evidence in hand and wrote the
+**Six of these (2, 5, 6, 21, 22, 23) are the same failure: I had the disproving evidence in hand and wrote the
 claim anyway.** Before asserting anything, check whether something you already measured contradicts it.
+**In 23 the evidence was in the very file the claim was built from** — the ledger records that
+Rp 19.000 as a ritual step, in the section the table was summarising.
 
 **Error 11 is the cheapest to prevent and the most embarrassing, so learn it once.** Two distinct
 mistakes compounded:
@@ -289,7 +328,9 @@ headlines, so you can recognise a re-litigation attempt:
 Two lists. Keep them short; if either grows past a handful of items, something is being deferred that
 should be decided.
 
-**Session state as of 2026-08-07 (end of the long Cowork session):**
+**Session state as of 2026-08-07 (end of the long Cowork session), corrected 2026-08-13 where the
+repo has since contradicted it. This block is a snapshot and ages; `PROGRESS.md` LIVE STATE is the
+thing that is kept current.**
 
 - Pipeline COMPLETE and measured honestly: gate 1.8.0, first-pass ~53%, shipped ~75%. Every
   gate false positive found and killed (the ledger rows tell the story). The house method, proven
@@ -297,13 +338,15 @@ should be decided.
   about the check, never about the text.
 - `hedge_construction` pooled truth is 28.8% (25.9% was a low draw) and is the next quality
   target. The "bukan berarti" carve-out (Reyner ruling A) already landed in gate 1.8.0.
-- **Prompt J (mirror route) is WRITTEN and UNSTARTED** — `docs/prompts/J-mirror-route.md`. It is
-  the next build: fenced preview route, rate limiting, promotion conditions baked in. Starts in a
-  FRESH Code session. After J: card component, then the fulfillment swap (retires the interim
-  funnel), then promotion.
-- Xendit: APPROVED, live keys swapped, **QRIS ACTIVATED 2026-08-11** — see PROGRESS INTERIM STATE
-  for the full go-live status. One step left in the ritual: the first real self-purchase, which is
-  Reyner's alone.
+- ~~**Prompt J (mirror route) is WRITTEN and UNSTARTED**~~ — **SHIPPED 2026-08-07.** `/api/mirror`
+  and `/api/mirror/[token]` exist, serve real Stage 3-6 readings, and are fenced behind
+  `MIRROR_PREVIEW_TOKEN`. **It serves no user**; promotion is 2 of 4 preconditions and blocked.
+  Corrected 2026-08-13 — this bullet said "unstarted" for six days after it merged, in the file a
+  session reads to learn what is going on.
+- Xendit: APPROVED, live keys swapped, **QRIS ACTIVATED 2026-08-11**, **first self-purchase reported
+  by Reyner 2026-08-13** — the go-live ritual is complete. That Rp 19.000 is a payment-path smoke
+  test and **not a unit of demand**; see error 23 before it enters any table. Full status:
+  `PROGRESS.md`, THE INTERIM REGISTER.
 - **Compat reading CONTENT session is QUEUED and is Cowork+Reyner work** (no code): author the
   ~5 element-relationship dynamics, the 4 affinity/fit quadrant blocks, the ~6 branch outcome
   blocks, and the P0 tease copy — the "low tens of cells" from the compat spec, every string
@@ -320,11 +363,16 @@ should be decided.
 | ~~Register-review the 刑 entry~~ | DONE 08-02 | Simpul confirmed, entry landed in `glossary.json` |
 | Card visual system | `content/sharecard-spec.md` | Card B must differ **at thumbnail size**. Now also decides the ID vs EN name display variant (rule 23 amendment) |
 | **Top up the Gemini billing** | PROGRESS, 2026-08-12 renderer pass | `RESOURCE_EXHAUSTED` - *"Your prepayment credits are depleted."* Every render now returns the module-assembly floor, so **promotion precondition 3 (Reyner's QA read) is blocked**, the palace-domain weave is measured but prose-unverified, and chart 5's `quietFloor` re-ask cannot be answered. The renderer pass itself is built and measured; only the read is blocked |
-| **The first real self-purchase** | PROGRESS, THE INTERIM STATE | Rp 19.000, own birthdate, own bank app, screenshot the paid invoice into the ledger. **The last step of the go-live ritual, and nobody else can do it** - it needs his bank app and his money. Xendit verification DONE 08-07, live keys swapped, **QRIS ACTIVATED 08-11**, so the money path is live and untested |
+| ~~**The first real self-purchase**~~ | DONE, reported 2026-08-13 | Rp 19.000 through his own checkout. **The go-live ritual is complete** - verification 08-07, live keys swapped, QRIS activated 08-11, money path proven end to end. **It is a smoke test, n=1, and it is not demand** (error 23) |
 
 **Engine and pipeline, in order.**
 
-1. **Stage 3** — Claude Code is on it now. `prompts/D2-stage3.md` + `prompts/D2a-stage3-anchors.md`.
+*(Corrected 2026-08-13: steps 1 to 3 are DONE — Stage 3 landed 08-02 in three phases, badge
+frequencies were re-measured 08-02, and Stage 5 + Stage 6 are live at gate 1.9.0. The list is kept
+whole because the ordering argument is still the record of why they were sequenced that way. The
+live sequence is now the swap package: `PROGRESS.md`, THE DEFERRED REGISTER.)*
+
+1. ~~**Stage 3**~~ **DONE 2026-08-02**, all three phases. `prompts/D2-stage3.md` + `prompts/D2a-stage3-anchors.md`.
 2. **Re-measure badge frequencies** from the verified anchors. The 2.5-average and the Penolong 77%
    are both stale — measured with the descoped 華蓋 in the mix — and Stage 3's extremity term reads
    them, so a stale number silently mis-scores every badge.
@@ -381,9 +429,13 @@ Katon session. Repo is D:\claude-projects\katon.
 
 Read these before responding, in order, and brief yourself only from them:
   1. CLAUDE.md              — 25 locked rules, it wins over anything you remember
-  2. docs/PROGRESS.md       — MEASUREMENTS, RESOLVED, DECIDED, SUPERSEDED
+  2. docs/PROGRESS.md       — LIVE STATE first, then MEASUREMENTS, RESOLVED, DECIDED, SUPERSEDED
   3. docs/NEXT.md           — what Claude Code is building
   4. docs/COWORK-BRIEF.md   — how I work, the error ledger, what is open
+
+Before advising on the product, verify what actually ships. CLAUDE.md describes the target;
+the code describes reality; they diverge. PROGRESS.md's LIVE STATE block is the one table that
+answers "what does a real user get today", and it is the first thing to read.
 
 Do NOT read anything in D:\Work\Katon assets\Katon md — it is a stale mirror with rejected
 Aspek names still in it. Everything worth keeping was rescued into the repo.
@@ -394,9 +446,10 @@ quality of the output, not to what is easier to build. I am the sole authority o
 register: propose wording, flag it, never auto-decide.
 
 Never improvise a BaZi rule, including tables I hand you. Verify against docs/, the repo's locked
-tests, or Joey's plotter, and stop if sources disagree. Twenty-two spec errors are in the ledger and
-all twenty-two were yours, so check before asserting. Section 3 carries the working-style rules,
-including the one you must not break: no git commands against my repo, reads only.
+tests, or Joey's plotter, and stop if sources disagree. Twenty-three spec errors are in the ledger and
+all twenty-three were yours, so check before asserting. Section 3 carries the working-style rules,
+including the one you must not break: no git commands against my repo, reads only. Anything we ratify
+this session goes into the repo the same turn, not into a handover file.
 
 Then tell me where we actually are and what you think the next move is. Do not write engine code.
 ```
@@ -412,4 +465,12 @@ It goes stale the same way `NEXT.md` did — by accumulating a copy of state tha
 - **Section 6 is the only part that should change often.** If you find yourself updating sections 1,
   2 or 5, ask whether the fact belongs in `PROGRESS.md` instead. It usually does.
 - **Never put a measurement in this file.** Rule 8. Numbers go to `PROGRESS.md` with a date.
+- **Never put "what ships" in this file either.** That is `PROGRESS.md`'s LIVE STATE block, kept
+  current by rule: it is updated in the same commit as any funnel change. Section 6's session-state
+  bullets are a snapshot and are allowed to age; a reader must never mistake them for reality, which
+  is why the corrected 2026-08-13 entries are struck through rather than deleted. Two of them
+  ("Prompt J is UNSTARTED", "Stage 3 — Claude Code is on it now") had been false for days.
+- **A rule agreed in a session goes into the repo before the session ends.** Section 3 rule 8, with
+  the split that decides what is a rule and what is session state. This file is where Cowork rules
+  land; `CLAUDE.md` is where project-wide locks land.
 - When the mirror is deleted, cut section 2 down to one line of history.
