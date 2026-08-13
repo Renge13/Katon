@@ -78,8 +78,10 @@ body {
 button { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled):active { transform: translateY(1px); }
 
-/* ── Form controls (birthday selects + WhatsApp/tel inputs) ── */
+/* ── Form controls (birth date/time inputs, selects, tel inputs) ── */
 select,
+input[type="date"],
+input[type="time"],
 input[type="text"],
 input[type="tel"],
 input[type="number"] {
@@ -103,12 +105,29 @@ select {
   background-position: right 12px center;
   padding-right: 34px;
 }
+/* iOS Safari gives date/time inputs no intrinsic height once `appearance` is
+   cleared above, so they collapse next to the selects they sit beside. The
+   min-height is the selects' own computed box (13px padding twice + one 15px
+   line), stated rather than inherited so the two controls line up. */
+input[type="date"],
+input[type="time"] {
+  cursor: pointer;
+  min-height: 48px;
+}
+/* Safari centres the value box and leaves the field looking empty-ish; this
+   pins it left, the way every other control in the form reads. */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator { opacity: .55; cursor: pointer; }
 
 /* Narrow mobile (~≤400px): trim horizontal padding + arrow gutter + a touch of
    font-size so long option labels ("September", "Tahun", "Menit") render in full
    inside the tight date/time grid tracks. */
 @media (max-width: 400px) {
   select,
+  input[type="date"],
+  input[type="time"],
   input[type="text"],
   input[type="tel"],
   input[type="number"] {
@@ -123,9 +142,13 @@ select {
 }
 input::placeholder { color: var(--faint); }
 select:hover,
+input[type="date"]:hover,
+input[type="time"]:hover,
 input[type="text"]:hover,
 input[type="tel"]:hover { border-color: var(--muted-warm); }
 select:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
 input[type="text"]:focus,
 input[type="tel"]:focus,
 input[type="number"]:focus {

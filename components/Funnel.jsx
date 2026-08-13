@@ -28,12 +28,15 @@ const ANTICIPATION = ['Membaca tanggal lahirmu', 'Menyusun empat pilarmu', 'Meng
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
 const ELEMENT_GLOSS = { Kayu: 'tumbuh dan menjangkau', Api: 'menyala dan menghangatkan', Bumi: 'menopang dan menampung', Logam: 'memadat dan menajam', Air: 'mengalir dan meresap' };
 const ELEMENT_ID = { Wood: 'Kayu', Fire: 'Api', Earth: 'Bumi', Metal: 'Logam', Water: 'Air' };
-const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-// Birth year: 1900 through the current year inclusive. The BaZi calc engine supports
-// 1900–2030 (lib/bazi/solarTerms.js), so the current year is always within range.
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = (() => { const a = []; for (let y = CURRENT_YEAR; y >= 1900; y--) a.push(y); return a; })();
 const RANGE = (n, from = 0) => Array.from({ length: n }, (_, i) => i + from);
+// Accepted birth dates: 1900-01-01 through today. The engine supports 1900-2030,
+// so today is always inside it. `max` is built from LOCAL time, not toISOString(),
+// which is UTC and would rule out today for the first seven hours of every WIB day.
+const EARLIEST_BIRTH_DATE = '1900-01-01';
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
 
 // The paid/deep-read accent + canvas resolve from the element theme via CSS vars
 // set once at the reading root (see themeVars). GLOW/SANCTUARY are indirections so
@@ -66,12 +69,16 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export default function Funnel() {
   const [phase, setPhase] = useState('input'); // input | calculating | season | result
-  const [form, setForm] = useState({ day: '', month: '', year: '', hour: '', minute: '', domain: 'hubungan' });
+  // `date` is an <input type="date"> value (YYYY-MM-DD) and `time` an
+  // <input type="time"> value snapped to the hour (HH:00). MINUTES ARE NOT ASKED
+  // HERE ON PURPOSE - see <Home> and the season branch in onSubmit.
+  const [form, setForm] = useState({ date: '', time: '', domain: 'hubungan' });
   const [error, setError] = useState(null);
   const [reading, setReading] = useState(null);
   const [step, setStep] = useState(0);
-  // Set only on the ~12 days a year a season turns inside the birth date AND no
-  // birth time was given: { birthDate, term, at }. See <SeasonGate>.
+  // Set only on the ~12 days a year a season turns inside the birth date and that
+  // turn is actually unresolved: { birthDate, term, at, birthHour }. `birthHour` is
+  // set only in the ask-for-the-minute case. See <SeasonGate>.
   const [season, setSeason] = useState(null);
 
   function reset() {
@@ -105,31 +112,48 @@ export default function Funnel() {
   async function onSubmit(e) {
     e.preventDefault();
     setError(null);
-    const { day, month, year, hour, minute } = form;
-    if (!day || !month || !year) { setError('Isi tanggal lahirmu dulu.'); return; }
-    const birthDate = `${year}-${pad(month)}-${pad(day)}`;
-    const birthTime = hour !== '' ? `${pad(hour)}:${pad(minute || 0)}` : null;
+    const birthDate = form.date;
+    if (!birthDate) { setError('Isi tanggal lahirmu dulu.'); return; }
+    if (birthDate < EARLIEST_BIRTH_DATE || birthDate > today()) {
+      setError('Periksa lagi tanggalnya. Katon menghitung kelahiran dari tahun 1900 sampai hari ini.');
+      return;
+    }
+    // The hour, never the minute. Snapped rather than trusted: an <input type="time">
+    // can still carry a minute when a browser ignores step, and a minute typed here
+    // would be false precision. It cannot change a single pillar off a solar-term
+    // day, and on one it is asked for properly, below.
+    const birthTime = form.time ? `${form.time.slice(0, 2)}:00` : null;
     setStep(0);
     setPhase('calculating');
     try {
-      // With no birth time, ask whether a season turns inside this date BEFORE
-      // creating the reading — so the row is written once, already resolved,
-      // rather than written and then mutated. Runs inside the anticipation
-      // pause; on ~353 days of the year it just returns needsHour: false.
+      // Ask whether a season turns inside this date BEFORE creating the reading, so
+      // the row is written once, already resolved, rather than written and mutated.
+      // Runs inside the anticipation pause; on ~353 days a year it returns
+      // needsHour: false and nothing else happens.
+      //
+      // ASKED ON EVERY SUBMIT NOW, not only when the time is blank. Hour-only input
+      // has its own unresolved case: a 節 that falls INSIDE the hour she gave. The
+      // whole hour used to be on one side of the turn because the minute came with
+      // it; now it can straddle. Measured on 1989-02-04 (立春 04:27:09): 04:00 gives
+      // 戊辰 乙丑, 04:30 gives 己巳 丙寅 - two pillars different, off the minute alone.
       const [turn] = await Promise.all([
-        birthTime === null
-          ? fetch('/api/season-check', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ birthDate }),
-            }).then((r) => r.json()).catch(() => null)
-          : Promise.resolve(null),
+        fetch('/api/season-check', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ birthDate }),
+        }).then((r) => r.json()).catch(() => null),
         delay(2500),
       ]);
 
       if (turn?.needsHour) {
-        setSeason({ birthDate, term: turn.term, at: turn.at });
-        setPhase('season');
-        return;
+        const birthHour = birthTime === null ? null : Number(birthTime.slice(0, 2));
+        // With no time at all, the turn is a whole day wide. With an hour, only the
+        // hour CONTAINING the turn is ambiguous - every other hour sits cleanly on
+        // one side of it and needs no question.
+        if (birthHour === null || birthHour === turn.hour) {
+          setSeason({ birthDate, term: turn.term, at: turn.at, birthHour });
+          setPhase('season');
+          return;
+        }
       }
       await createReading(birthDate, birthTime);
     } catch {
@@ -219,20 +243,27 @@ function Home({ form, setForm, error, onSubmit }) {
         <form onSubmit={onSubmit}>
           <Reveal delay={0.22} style={{ marginTop: 28 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
+              {/* NATIVE PICKERS. Three selects (day / month / year) became one
+                  <input type="date">: on a phone that is the OS date wheel, and the
+                  year no longer has to be scrolled one option at a time from the
+                  current year back to the 1920s. `min` keeps it inside the engine's
+                  supported range and `max` stops a birthdate in the future. */}
               <FieldLabel>Tanggal lahir</FieldLabel>
-              <div style={{ display: 'grid', gridTemplateColumns: '0.8fr 1.45fr 1.2fr', gap: 8 }}>
-                <select value={form.day} onChange={set('day')} aria-label="Tanggal"><option value="">Tgl</option>{RANGE(31, 1).map((d) => <option key={d} value={d}>{d}</option>)}</select>
-                <select value={form.month} onChange={set('month')} aria-label="Bulan"><option value="">Bulan</option>{MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}</select>
-                <select value={form.year} onChange={set('year')} aria-label="Tahun"><option value="">Tahun</option>{YEARS.map((y) => <option key={y} value={y}>{y}</option>)}</select>
-              </div>
+              <input type="date" value={form.date} onChange={set('date')} min={EARLIEST_BIRTH_DATE} max={today()} aria-label="Tanggal lahir" />
 
               <div style={{ height: 16 }} />
+              {/* HOUR, NOT HOUR AND MINUTE. Measured 2026-08-12 against
+                  calculateBaziChart: over 5,664 minute values on four ordinary
+                  dates, ZERO changed a pillar. Every 時辰 boundary sits on an exact
+                  odd hour (14:59 and 15:00 differ; 14:00 through 14:59 do not), so a
+                  minute field on the front door collects precision that cannot be
+                  used. The one place it CAN matter is a solar-term day, where the
+                  season gate asks for it and explains why. `step=3600` asks the
+                  browser for whole hours; onSubmit snaps regardless, because a
+                  browser that ignores step must not turn into stored precision. */}
               <FieldLabel>Jam lahir · opsional</FieldLabel>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <select value={form.hour} onChange={set('hour')} aria-label="Jam"><option value="">Jam</option>{RANGE(24).map((h) => <option key={h} value={h}>{pad(h)}</option>)}</select>
-                <select value={form.minute} onChange={set('minute')} aria-label="Menit"><option value="">Menit</option>{RANGE(60).map((m) => <option key={m} value={m}>{pad(m)}</option>)}</select>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Isi kalau kamu ingat. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.</div>
+              <input type="time" step="3600" value={form.time} onChange={set('time')} aria-label="Jam lahir" />
+              <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Jamnya saja sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.</div>
               {/* Domain selector removed from the front door — moved to the paywall (the
                   live-decision prompt). Reading still defaults domain to "hubungan"
                   (Funnel form state), so free-reading generation is unaffected. */}
@@ -272,10 +303,22 @@ function Anticipation({ step }) {
 }
 
 /* ---------------- Season gate ----------------
-   Fires ONLY when a 節 (solar term) falls inside the birth date AND no birth
-   time was given — roughly 12 days a year. On those dates the month pillar
-   depends on which side of the turn the birth sits, and with no time nothing
-   can recover it: probing noon only picks the likelier branch, silently.
+   Fires ONLY when a 節 (solar term) falls inside the birth date and that turn is
+   genuinely unresolved — roughly 12 days a year. On those dates the month pillar
+   depends on which side of the turn the birth sits.
+
+   TWO unresolved shapes, and the second is new since the front door stopped
+   asking for minutes:
+     1. NO TIME AT ALL. The turn is somewhere in a 24-hour day and nothing can
+        recover it: probing noon only picks the likelier branch, silently.
+        Answered with `termSide`, which resolves the MONTH and never invents an
+        hour pillar.
+     2. AN HOUR THAT CONTAINS THE TURN (`season.birthHour`). Every other hour on
+        the date sits cleanly on one side, so only this one is asked about, and
+        only the minute is missing. Answered with a real `birthTime`, because
+        pillars.ts honours `termSide` only when the time is unknown — and a
+        minute inside a known hour is not a guess about the hour pillar: every
+        minute of that hour yields the same one.
 
    Placed AFTER the anticipation pause, not at the input step. At input it would
    read as one more form field before any value has been delivered. Here the
@@ -284,11 +327,12 @@ function Anticipation({ step }) {
 
    The ask is a consequence, never the headline. Lead with the rarity.
 
-   Answers resolve the MONTH pillar only (termSide) unless the user actually
-   knows their hour. We never turn "pagi" into a fabricated clock time — that
-   would render as a real fourth pillar built out of a guess. */
+   We never turn "pagi" into a fabricated clock time — that would render as a
+   real fourth pillar built out of a guess. Not remembering the minute is an
+   answer too: it falls back to the side question and simply drops the hour. */
 function SeasonGate({ season, onAnswer }) {
-  const [mode, setMode] = useState('choose'); // choose | exact
+  const askMinute = season?.birthHour !== null && season?.birthHour !== undefined;
+  const [mode, setMode] = useState(askMinute ? 'minute' : 'choose'); // choose | exact | minute
   const [hour, setHour] = useState('');
   const [minute, setMinute] = useState('');
   const [busy, setBusy] = useState(false);
@@ -319,7 +363,9 @@ function SeasonGate({ season, onAnswer }) {
 
       <Reveal delay={0.12}>
         <Para style={{ marginTop: 14 }}>
-          Hanya 12 hari dalam setahun seperti ini. Di tahun kelahiranmu, musimnya berganti tepat jam {at}.
+          {askMinute
+            ? <>Hanya 12 hari dalam setahun seperti ini. Di tahun kelahiranmu, musimnya berganti tepat jam {at}, dan itu jatuh di dalam jam yang kamu isi.</>
+            : <>Hanya 12 hari dalam setahun seperti ini. Di tahun kelahiranmu, musimnya berganti tepat jam {at}.</>}
         </Para>
       </Reveal>
 
@@ -327,11 +373,35 @@ function SeasonGate({ season, onAnswer }) {
 
       <Reveal delay={0.22}>
         <Para style={{ color: 'var(--tinta)' }}>
-          Kamu lahir sebelum atau setelah jam itu? Jawabannya menentukan pilar bulanmu: inti dari seluruh bacaan.
+          {mode === 'minute'
+            ? <>Menit berapa kamu lahir? Jawabannya menentukan pilar bulanmu: inti dari seluruh bacaan.</>
+            : <>Kamu lahir sebelum atau setelah jam itu? Jawabannya menentukan pilar bulanmu: inti dari seluruh bacaan.</>}
         </Para>
       </Reveal>
 
-      {mode === 'choose' ? (
+      {/* Minute mode. The ONLY place Katon asks for a minute, and it asks because
+          here it is the difference between two month pillars. The hour is already
+          known, so it is shown fixed rather than re-asked. */}
+      {mode === 'minute' ? (
+        <Reveal style={{ marginTop: 22 }}>
+          <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
+            <FieldLabel>Menit lahir</FieldLabel>
+            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 10, alignItems: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--tinta)' }}>{pad(season.birthHour)}:</div>
+              <select value={minute} onChange={(e) => setMinute(e.target.value)} aria-label="Menit"><option value="">Menit</option>{RANGE(60).map((m) => <option key={m} value={m}>{pad(m)}</option>)}</select>
+            </div>
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <Button onClick={() => answer({ birthTime: `${pad(season.birthHour)}:${pad(minute)}` })} disabled={busy || minute === ''}>
+              {busy ? 'Menyusun ulang...' : 'Lanjut'}
+            </Button>
+          </div>
+          <button type="button" onClick={() => setMode('choose')} disabled={busy}
+            style={{ display: 'block', margin: '14px auto 0', background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13.5, cursor: 'pointer', fontFamily: 'var(--font-sans)' }}>
+            Aku tidak ingat menitnya
+          </button>
+        </Reveal>
+      ) : mode === 'choose' ? (
         <Reveal delay={0.28} style={{ display: 'grid', gap: 10, marginTop: 22 }}>
           <button type="button" style={choice} disabled={busy} onClick={() => answer({ termSide: 'before' })}>
             Sebelum jam {at}
@@ -339,13 +409,26 @@ function SeasonGate({ season, onAnswer }) {
           <button type="button" style={choice} disabled={busy} onClick={() => answer({ termSide: 'after' })}>
             Setelah jam {at}
           </button>
-          <button type="button" style={choice} disabled={busy} onClick={() => setMode('exact')}>
-            Aku ingat jam lahirku
-          </button>
+          {/* Not offered when she already gave an hour and has just said she does
+              not remember the minute — asking for the clock time again is asking
+              the same question she declined. */}
+          {!askMinute && (
+            <button type="button" style={choice} disabled={busy} onClick={() => setMode('exact')}>
+              Aku ingat jam lahirku
+            </button>
+          )}
           <button type="button" style={{ ...choice, background: 'transparent', border: 'none', color: 'var(--muted-warm)', fontSize: 14, textAlign: 'center', padding: '10px 0' }}
             disabled={busy} onClick={() => answer({})}>
             Aku tidak yakin
           </button>
+          {/* Both side answers resolve the MONTH pillar and carry no hour, so an
+              hour given at the front door is dropped here. Said plainly rather
+              than left as a silently missing pillar. */}
+          {askMinute && (
+            <div style={{ fontSize: 12.5, color: 'var(--muted-warm)', lineHeight: 1.55, textAlign: 'center', marginTop: 2 }}>
+              Tanpa menitnya, pilar jam tidak bisa dipakai. Pilar bulanmu tetap tepat.
+            </div>
+          )}
         </Reveal>
       ) : (
         <Reveal style={{ marginTop: 22 }}>
