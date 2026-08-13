@@ -198,11 +198,22 @@ function Home({ form, setForm, error, onSubmit }) {
     <div style={wrap}>
       <div style={{ paddingTop: 60 }}>
         <Reveal><Wordmark /></Reveal>
+        {/* THE PROMISE, AND IT COMES BEFORE THE ASK. Reyner's ruled copy, applied
+            verbatim 2026-08-13; swept against lib/validate/blocklist.json, the
+            typography rule and the slang list on 2026-08-12. Replaces "Kamu punya
+            pola." / "Dan mungkin selama ini, kamu belum pernah benar-benar
+            melihatnya.", which named the pattern but never said what the reader
+            gets for handing over a birthdate.
+
+            DO NOT ADD "langkah aksi mingguan" OR "hasil dalam 30 detik" HERE OR
+            ANYWHERE. The first promises a weekly cadence this product does not
+            have; the second is a latency claim nothing measures. Both pass every
+            automated gate, which is exactly why they are named in the code. */}
         <Reveal delay={0.08} style={{ marginTop: 44 }}>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 34, lineHeight: 1.12, letterSpacing: '-.01em', color: 'var(--tinta)', margin: 0 }}>Kamu punya pola.</h1>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 34, lineHeight: 1.12, letterSpacing: '-.01em', color: 'var(--tinta)', margin: 0 }}>Ada pola di balik setiap keputusanmu.</h1>
         </Reveal>
         <Reveal delay={0.14}>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '12px 0 0' }}>Dan mungkin selama ini, kamu belum pernah benar-benar melihatnya.</p>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '12px 0 0' }}>Pahami dinamika diri, potensi, dan arah langkah berikutnya lewat bacaan yang objektif.</p>
         </Reveal>
 
         <form onSubmit={onSubmit}>
