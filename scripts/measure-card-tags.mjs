@@ -17,30 +17,35 @@
 //                       a week — the exact failure the hybrid rule was chosen to
 //                       avoid (sharecard-spec, decision 2).
 //
-//   PENOLONG IN TOP 3   Bintang Penolong is in 77% of charts, so it is the
-//                       obvious way the differentiation could quietly fail. It is
-//                       ruled never-a-headline, and `lib/card/cardData.js`
-//                       deliberately adds NO filter for it — the claim is that
-//                       Stage 3's own importance ranking already pushes it down,
-//                       because 77% is not extremity and one position is not
-//                       convergence. PROGRESS records 0/13 against the FULL fact
-//                       list; the card reads a SUBSET, so that figure does not
-//                       transfer and has to be measured here.
+//   PENOLONG IN TOP 3   Bintang Penolong is in 77% of charts and was the obvious
+//                       way differentiation could quietly fail. **This is now 0 BY
+//                       CONSTRUCTION**, since the 08-13 dedupe removed every
+//                       Bintang from the tag row, so it has stopped being evidence
+//                       about the hierarchy. Kept as a regression guard: if it
+//                       ever fires again, the dedupe has broken.
 //
-// A rise in the second number, or a fall in the first, is the signal that the
-// no-filter decision needs revisiting. Neither is a gate.
+//   FEWER THAN 3 TAGS   the cost of that dedupe, and the row to watch. It went
+//                       1 -> 2 of 13 when Bintang left the pool, because two of
+//                       chart 12's three tags had been Bintang. The ruling says
+//                       three; the card renders what exists rather than inventing
+//                       one (rule 14). If this climbs as the fixture grows, the
+//                       ruled "3 dynamic" is what is under pressure.
+//
+// A fall in the first number is the signal that the dedupe cost more than it
+// bought. None of the three is a gate.
 // ============================================================
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
-import { dynamicTags } from '../lib/card/cardData.js';
+import { dynamicTags, allBadges } from '../lib/card/cardData.js';
 import { VALIDATION_CHARTS } from '../tests/bazi-validation.fixture.js';
 
 const PENOLONG = 'Bintang Penolong';
 
 const rows = VALIDATION_CHARTS.map((c) => {
   const chart = calculateBaziChart({ birthDate: c.date, birthTime: c.time });
-  const tags = dynamicTags(buildSemanticJson(chart).facts);
+  const sj = buildSemanticJson(chart);
+  const tags = dynamicTags(sj.facts, allBadges(sj.facts));
   return { id: c.id, date: c.date, tags };
 });
 

@@ -38,7 +38,8 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData } from '../lib/card/cardData.js';
 import { CARD_TOKENS } from '../lib/card/tokens.js';
-import { CardA, CardB } from '../components/cards/Card.js';
+import { auditContrast } from '../lib/card/contrast.js';
+import { CardA, CardB, TEXT_ROLES, BAND_TINT, MIN_CONTRAST } from '../components/cards/Card.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'reports', 'card-preview.html');
@@ -79,13 +80,28 @@ function main() {
 
   const unapproved = rows.filter((r) => !r.approved).map((r) => r.data.nameId);
 
+  // Worst role per token, for the review table. Same module the test asserts with.
+  const worst = {};
+  for (const r of auditContrast(TEXT_ROLES, CARD_TOKENS, BAND_TINT)) {
+    if (!worst[r.stem]) worst[r.stem] = r; // audit is already sorted worst-first
+  }
+
   const html = `<!doctype html>
 <meta charset="utf-8">
 <title>Katon card preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- ARCHIVO, ruled 2026-08-13, and loaded HERE rather than in app/layout.js: the
+     card is wired to no route, so shipping a font download on every page for it
+     would be a cost with no reader. The commit that wires a card must add it to
+     the layout as --font-archivo. -->
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap" rel="stylesheet">
 <style>
-  :root { --font-hanken: system-ui, -apple-system, "Segoe UI", sans-serif;
-          --font-spectral: Georgia, "Times New Roman", serif; }
-  body { background:#111113; color:#d9d7d2; font-family:var(--font-hanken);
+  /* The card sets box-sizing on its own boxes now, but the preview's own chrome
+     needs the reset too, and its absence is what hid a real geometry bug once. */
+  * { box-sizing: border-box; }
+  :root { --font-archivo: 'Archivo', system-ui, -apple-system, sans-serif; }
+  body { background:#111113; color:#d9d7d2; font-family:var(--font-archivo);
          margin:0; padding:40px 36px 120px; }
   h1 { font-size:26px; margin:0 0 8px; letter-spacing:.01em; }
   h2 { font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:#84817a;
@@ -116,9 +132,20 @@ ones; they must not ship. Source and measurements:
 <br><br><b>2. What separates the card object from the canvas</b> when both carry the same colour.
 Rendered here as a hairline inset plus a soft shadow, which needs no fourth token per archetype. The
 alternative is a different surface value for the card, which does.
-<br><br><b>3. Does Card B read as the paid one at thumbnail size?</b> The shelf at the bottom is the
+<br><br><b>3. Does Card B read as the paid one at thumbnail size?</b> The shelf below is the
 test. Print resolution is invisible in a feed, so the difference has to be the 9:16 silhouette, the
-Indonesian name above the English one, and the appendix band.</div>
+Indonesian name above the English one, and the appendix band.
+<br><br><b>4. The footer separator.</b> Rendered as <code>|</code>. The 08-03 mock used a middle dot,
+which rule 20 bans with zero exceptions, so it cannot come back - but any keyboard character can.</div>
+
+<p>Changed in this pass, from Reyner's review: the Day Master stem is now a single translucent
+watermark and the pictogram set is dropped; the type scale is rebuilt from the live product's card
+(everything under the headline was 20-35% too small, which is what made Card A read as half empty);
+Archivo throughout; the four pillars use the live <code>PillarCell</code> treatment with INTI DIRI;
+Istana Konsepsi is off the card and still on the engine; and nothing appears both as a tag and as a
+badge. <b>Contrast is now asserted</b> - ${Object.keys(TEXT_ROLES).length} text roles x
+${Object.keys(CARD_TOKENS).length} tokens, floor ${MIN_CONTRAST}, printed per archetype below and
+failing a test if any pair drops under. Run <code>npm run audit:card-contrast</code> for the grid.</p>
 
 <h2>Thumbnail shelf — the only test that matters for questions 2 and 3</h2>
 <div class="shelf">
@@ -135,7 +162,9 @@ ${rows.map((r) => `
 <div class="pair"><div>${r.a}</div><div>${r.b}</div></div>
 <p class="cap">Chart ${esc(r.iso)} 09:00. Token <span class="${r.approved ? 'yes' : 'no'}">${r.approved ? 'LOCKED' : 'PROPOSED, not approved'}</span>.
 Aspek <b>${esc(r.data.aspek)}</b>. Fixed tags ${esc(r.data.tags.fixed.join(', '))}.
-Dynamic ${esc(r.data.tags.dynamic.join(', ')) || '(none)'}.
+Dynamic ${esc(r.data.tags.dynamic.join(', ')) || '(none)'}${r.data.tags.dynamic.length < 3 ? ` <span class="no">(only ${r.data.tags.dynamic.length} - the chart has no more)</span>` : ''}.
+Badges ${esc(r.data.badges.map((b) => b.label).join(', ')) || '(none)'}.
+Worst contrast <b>${worst[r.stem].ratio.toFixed(2)}</b> on <code>${esc(worst[r.stem].role)}</code>, floor ${MIN_CONTRAST}.
 Footer <b>${esc(r.data.footer.left)}</b>${r.data.footer.gender ? '' : ' (null gender: date and source only)'}.</p>
 `).join('\n')}
 `;

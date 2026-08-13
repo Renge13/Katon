@@ -21,7 +21,13 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData, buildFooter, formatCardDate, dynamicTags } from '../lib/card/cardData.js';
 import { CARD_TOKENS, tokenFor, APPROVED_STEMS } from '../lib/card/tokens.js';
-import { CARD_A, CARD_B } from '../components/cards/Card.js';
+import { auditContrast, contrast, composite } from '../lib/card/contrast.js';
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import { CARD_A, CARD_B, CardA, CardB, TEXT_ROLES, BAND_TINT, MIN_CONTRAST } from '../components/cards/Card.js';
+import { VALIDATION_CHARTS } from './bazi-validation.fixture.js';
+
+const { renderToStaticMarkup } = ReactDOMServer;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
@@ -51,6 +57,24 @@ test('Card A is a 63:88 object on a 3:4 canvas at ONE uniform margin', () => {
   assert.equal(Math.round(1080 - 2 * m), CARD_A.card.w);
   assert.equal(Math.round(1440 - 2 * m), CARD_A.card.h);
   assert.ok(Math.abs(CARD_A.card.w / CARD_A.card.h - 63 / 88) < 0.0005);
+});
+
+test('the ruled size is the BORDER box, declared by the card and not borrowed', () => {
+  // THE BUG THIS EXISTS FOR, found 2026-08-13 in the review preview: the card
+  // relied on the app's global `* { box-sizing: border-box }`. Without it, 72px of
+  // padding and the hairline are added OUTSIDE the ruled width, so the object
+  // draws 1051x1411 instead of 907x1267 and the 86.4 margin becomes 14.5.
+  //
+  // It was verified green beforehand by reading getComputedStyle().width, which
+  // returns the CONTENT box and therefore reported 907 while 1051 was on screen.
+  // So this asserts the DECLARATION in the rendered markup instead.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  for (const [name, Card] of [['CardA', CardA], ['CardB', CardB]]) {
+    const html = renderToStaticMarkup(React.createElement(Card, { data }));
+    const declared = html.match(/box-sizing:\s*border-box/g) || [];
+    assert.ok(declared.length >= 2, `${name} must declare border-box on canvas AND card, found ${declared.length}`);
+  }
 });
 
 test('the superseded 4:5 proposal is not what we build', () => {
@@ -92,6 +116,51 @@ test('the APPROVED triples match docs/content/sharecard-mockups-02.html verbatim
         `${stem}.${k} ${t[k]} is marked approved but is not in the ruled mockup`,
       );
     }
+  }
+});
+
+// ── CONTRAST: every text role x every token ────────────────
+// Added 2026-08-13 on Reyner's review. The iteration READS correctly now, so this
+// exists to keep it that way: `accent` is by definition the mid-lightness value
+// and five of ten fields are pale, so a plausible-looking new hex can halve a
+// ratio silently. A bad token must fail a test, not ship.
+
+test('NO text role on ANY token falls below the locked set\'s own floor', () => {
+  const rows = auditContrast(TEXT_ROLES, CARD_TOKENS, BAND_TINT);
+  // 15 roles x 10 tokens. If either count moves, the grid moved and this test is
+  // no longer covering what its name claims.
+  assert.equal(rows.length, Object.keys(TEXT_ROLES).length * Object.keys(CARD_TOKENS).length);
+  const under = rows.filter((r) => r.ratio < MIN_CONTRAST);
+  assert.deepEqual(
+    under.map((r) => `${r.stem}.${r.role}=${r.ratio.toFixed(2)}`), [],
+    `below the ${MIN_CONTRAST} floor. Run: npm run audit:card-contrast`,
+  );
+});
+
+test('the floor is the LOCKED set\'s worst case, so it can never demand more than a ruled token gives', () => {
+  // Matahari is the binding token: a vivid orange field caps accent at 2.22.
+  // A WCAG-style 3.0 or 4.5 floor would fail a colour Reyner ruled, which is why
+  // the rule is "no worse than what already shipped" instead.
+  const matahari = CARD_TOKENS['丙'];
+  const accentCeiling = contrast(matahari.accent, matahari.field);
+  assert.ok(accentCeiling < 3.0, `Matahari accent is ${accentCeiling.toFixed(2)}`);
+  assert.ok(MIN_CONTRAST <= accentCeiling, 'the floor must be reachable by every locked token');
+});
+
+test('opacity is part of the measurement, not decoration', () => {
+  // The trap this catches: a role measured from the raw hex passes, and the text
+  // the card actually draws does not. Half-opacity ink on its own field is a
+  // genuinely different colour, and several roles are drawn that way.
+  const t = CARD_TOKENS['丙'];
+  const raw = contrast(t.ink, t.field);
+  const dimmed = contrast(composite(t.ink, t.field, 0.5), t.field);
+  assert.ok(dimmed < raw - 0.5, `dimming must lower the ratio: ${raw.toFixed(2)} -> ${dimmed.toFixed(2)}`);
+  // And every declared role carries an opacity, so none can skip the composite.
+  for (const [name, role] of Object.entries(TEXT_ROLES)) {
+    assert.equal(typeof role.opacity, 'number', `${name} has no opacity`);
+    assert.ok(role.opacity > 0 && role.opacity <= 1, `${name} opacity ${role.opacity}`);
+    assert.ok(['ink', 'accent'].includes(role.on), `${name} draws in ${role.on}`);
+    assert.ok(['field', 'band'].includes(role.over), `${name} sits over ${role.over}`);
   }
 });
 
@@ -142,9 +211,38 @@ test('dynamic tags come from the chart and are capped at three', () => {
   // must appear in the same relative order as the facts they came from.
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
   const facts = buildSemanticJson(chart).facts;
-  const expected = facts.filter((f) => (f.type === 'badge' || f.type === 'convergence') && f.label)
+  const taken = new Set(d.badges.map((b) => b.label));
+  const expected = facts
+    .filter((f) => (f.type === 'badge' || f.type === 'convergence') && f.label && !taken.has(f.label))
     .slice(0, 3).map((f) => f.label);
   assert.deepEqual(d.tags.dynamic, expected);
+});
+
+test('NOTHING appears both as a dynamic tag and in the badge row', () => {
+  // The defect Reyner caught 2026-08-13: a chart's Bintang printed twice on one
+  // card, dimmed in the tag row and again with its palace below. The tag row
+  // exists to differentiate, so a repeat costs a slot and gains nothing.
+  // Checked across the whole fixture, not one chart — the collision only happens
+  // when a Bintang ranks high enough to reach the top three.
+  for (const c of VALIDATION_CHARTS) {
+    const d = cardFor(c.date, { birthTime: c.time });
+    const badgeLabels = new Set(d.badges.map((b) => b.label));
+    const dupes = d.tags.dynamic.filter((t) => badgeLabels.has(t));
+    assert.deepEqual(dupes, [], `chart ${c.id} repeats ${dupes.join(', ')}`);
+  }
+});
+
+test('the exclusion reads the BADGE ROW, not the fact type', () => {
+  // Equivalent today, because the badge row renders every badge. They stop being
+  // equivalent the moment that row is capped, and the version that survives a cap
+  // is the one that reads what is really on the card.
+  const facts = [
+    { type: 'badge', label: 'Shown' },
+    { type: 'badge', label: 'Cut' },
+    { type: 'convergence', label: 'Aspek X' },
+  ];
+  // Only "Shown" reaches the badge row, so "Cut" is still available as a tag.
+  assert.deepEqual(dynamicTags(facts, [{ label: 'Shown' }]), ['Cut', 'Aspek X']);
 });
 
 test('a thin chart yields fewer than three dynamic tags rather than an invented one', () => {
@@ -207,24 +305,38 @@ test('Card A data carries no strength verdict and no numbers', () => {
   assert.doesNotMatch(cardAsurface, /\d+([.,]\d+)?\s?%/);
 });
 
-test('the eight characters are Card B only, and each is paired to stay readable', () => {
+test('the four pillar characters are Card B only, and none is left bare', () => {
   const d = cardFor('1989-09-13');
-  // Not on Card A's surface at all.
+  // Card A's PROSE carries no hanzi. The single watermark stem is separate: it is
+  // decorative texture drawn by the component, not a field of this data.
   assert.equal(d.hook.includes('丙'), false);
-  // On Card B, never bare: every pillar carries its Indonesian element and animal.
+  // On Card B the four pillars STAY (ruled 2026-08-13) and every character is
+  // paired so it can be read: stem and branch split out for the cell treatment,
+  // element and polarity beneath, the branch's animal beneath that (rule 23).
   for (const p of d.appendix.pillars) {
-    assert.ok(p.ganzhi && p.element && p.animal, `${p.key} is bare hanzi`);
+    assert.ok(p.stem && p.branch, `${p.key} is missing a split stem/branch`);
+    assert.equal(p.ganzhi, `${p.stem}${p.branch}`);
+    assert.ok(p.element && p.polarity && p.animal, `${p.key} is bare hanzi`);
     assert.doesNotMatch(p.element, /Wood|Fire|Earth|Metal|Water/,
       'element must be Indonesian on a user-facing surface');
+    assert.match(p.polarity, /^(Yin|Yang)$/);
   }
+  assert.equal(d.appendix.pillars.filter((p) => p.isDayMaster).length, 1, 'exactly one INTI DIRI');
 });
 
-test('胎元 is present and 命宮 is absent (D1b)', () => {
-  const d = cardFor('1989-09-13');
-  assert.ok(d.appendix.conception, '胎元 is 5/5 against Joey and stays');
+test('胎元 is OFF the card and still ON the engine (ruled 2026-08-13)', () => {
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const d = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  // The engine keeps computing it — 5/5 against Joey, and the reading's own chart
+  // block still shows it. The card drops it: a chart-sheet fact on an object
+  // whose one job is to travel.
+  assert.ok(chart.conceptionPalace, 'the engine must still compute 胎元');
   const json = JSON.stringify(d);
-  assert.ok(!json.includes('命宮') && !json.includes('Istana Kehidupan'),
-    '命宮 has no convention that reproduces Joey; a wrong value in a legitimacy block is worse than none');
+  assert.ok(!json.includes('Istana Konsepsi'), '胎元 must not reach the card');
+  assert.equal(d.appendix.conception, undefined);
+  // 命宮 was already absent and stays absent for a different reason: no candidate
+  // convention reproduces Joey better than 4/5 (D1b).
+  assert.ok(!json.includes('命宮') && !json.includes('Istana Kehidupan'));
 });
 
 test('an hour-less chart still renders a card, with three pillars', () => {

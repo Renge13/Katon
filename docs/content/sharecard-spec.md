@@ -67,6 +67,18 @@ This maps exactly onto the revenue model and stops the two jobs fighting each ot
 - **Percentages or numbers of any kind.** They invite comparison of the wrong thing.
 - **The eight characters.** They are the legitimacy object, but legitimacy is the reading's job. On a
   card they are visual noise to everyone who cannot read them.
+
+  **CLARIFIED 2026-08-13 (Reyner), because this line and the watermark look like a contradiction and
+  are not.** The ban is on **the grid as CONTENT** — eight characters a reader is asked to decode —
+  **not on a single stem as TEXTURE.** Card A carries one translucent Day Master stem as a watermark
+  behind the headline, the live product's own treatment, and that is the whole of hanzi on the free
+  card. CLAUDE.md rule 23 draws the same line: hanzi you can point at is fine, hanzi you must read is
+  not, and nobody reads a watermark. **The four pillar characters STAY on Card B**, unchanged — they
+  are the cross-checkable legitimacy object and were never what this bullet was about.
+
+  **The pictogram glyph set is DROPPED** (the per-archetype marks sketched in
+  `sharecard-tokens-proposal.html`). It repeated what the headline already said, and a drawn mark is
+  invention where the stem is data the engine computed. Do not commission or re-derive them.
 - **Prose.** One hook line, nothing else.
 
 ### CARD B — the paid hi-res artifact (~19k). Optimised for keeping.
