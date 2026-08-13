@@ -482,10 +482,13 @@ function Reading({ reading, onReset, initialFull }) {
 }
 
 /* ---------------- Paywall (progressive disclosure, server-gated) ---------------- */
-function Paywall({ reading, initialFull }) {
+function Paywall({ reading, initialFull, initialStage }) {
   // initialFull (optional): when provided (re-access to an already-paid reading), the
   // paywall opens straight to the unlocked view. Omitted in the funnel → default flow.
-  const [stage, setStage] = useState(initialFull ? 'unlocked' : 'teaser'); // teaser | pending | unlocking | unlocked
+  // initialStage (optional): 'pending' when Xendit's success redirect brought the
+  // buyer back before the webhook landed. Same polling, same UI as the in-session
+  // wait — it only stops the offer being shown to somebody who just paid.
+  const [stage, setStage] = useState(initialFull ? 'unlocked' : (initialStage || 'teaser')); // teaser | pending | unlocking | unlocked
   const [full, setFull] = useState(initialFull || null);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -841,6 +844,13 @@ export function ReadingByToken({ token }) {
   const [status, setStatus] = useState('loading'); // loading | notfound | ready
   const [freeView, setFreeView] = useState(null);
   const [full, setFull] = useState(null);
+  // Xendit's success_redirect_url lands here with `?bayar=selesai` (see the pay
+  // route). It says only "she came back from checkout", never "she paid" — the
+  // paid flag comes from the server below, and a hand-typed query string must not
+  // be able to change what she is shown beyond which waiting state opens first.
+  const [fromCheckout] = useState(() =>
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('bayar') === 'selesai');
 
   useEffect(() => {
     let cancelled = false;
@@ -873,11 +883,16 @@ export function ReadingByToken({ token }) {
 
   // UNPAID → teaser + paywall ONLY (returning visitor already saw the free portrait;
   // put the unlock decision at the top rather than below a re-scroll).
+  //
+  // Unless she has just come back from checkout: the success redirect regularly
+  // beats the webhook by a few seconds, and re-offering a product to someone who
+  // has already paid for it is the worst reading of this moment. The paywall opens
+  // in its waiting state and unlocks the instant the poll sees `paid`.
   return (
     <div style={{ ...wrap, ...themeVars(freeView.chart?.dayMasterElement), paddingTop: 26 }}>
       <button onClick={goHome} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '0 0 20px', fontFamily: 'var(--font-sans)' }}>← Beranda</button>
       <Reveal><Wordmark /></Reveal>
-      <div style={{ marginTop: 22 }}><Paywall reading={freeView} /></div>
+      <div style={{ marginTop: 22 }}><Paywall reading={freeView} initialStage={fromCheckout ? 'pending' : undefined} /></div>
     </div>
   );
 }

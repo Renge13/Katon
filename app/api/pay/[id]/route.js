@@ -3,6 +3,7 @@ import { createQrisInvoice } from '@/lib/xendit';
 import { priceFor, isSellable, DEFAULT_SKU, SELLABLE_SKUS } from '@/lib/pricing';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
 import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
+import { readingUrl } from '@/lib/site/baseUrl';
 
 export const runtime = 'nodejs';
 
@@ -75,10 +76,24 @@ export async function POST(request, { params }) {
   }
 
   try {
+    // WHERE THE XENDIT TAB ENDS UP. Without these the buyer's last screen is a
+    // Xendit page with no link back to the reading she just paid for.
+    //
+    // SUCCESS carries `?bayar=selesai`, and it is a HINT ABOUT THE UI, never an
+    // entitlement: the funnel reads it only to open the paywall in its waiting
+    // state instead of showing the offer again, because the redirect regularly
+    // beats the webhook by a few seconds. `paid` still flips in the verified
+    // webhook alone, and the page it lands on re-reads that from the server.
+    //
+    // FAILURE goes to the same reading with NO marker, so the paywall renders
+    // normally and the price and the button are already on screen. That is the
+    // retry; a failed payment needs no separate state.
     const { invoiceId, invoiceUrl } = await createQrisInvoice({
       readingId: id,
       amount: priceFor(sku),
       description: INVOICE_DESCRIPTION[sku],
+      successRedirectUrl: readingUrl(id, '?bayar=selesai'),
+      failureRedirectUrl: readingUrl(id),
     });
     // The sku is stored with the invoice so the webhook can verify the settled
     // amount against THIS product's price rather than against any known price.
