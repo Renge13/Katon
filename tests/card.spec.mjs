@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // tests/card.spec.mjs — the card rulings, made executable
 // ============================================================
 // Every assertion here is a RULING, not a preference, and each one names its
@@ -21,15 +21,30 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData, buildFooter, formatCardDate, dynamicTags } from '../lib/card/cardData.js';
 import { CARD_TOKENS, tokenFor, APPROVED_STEMS } from '../lib/card/tokens.js';
-import { contrast, composite, luminance, inkPoles, inkVerdict } from '../lib/card/contrast.js';
+import { BRASS, brassFor, inkIsDark } from '../lib/card/tokens.js';
+import {
+  contrast, composite, luminance, inkPoles, inkVerdict,
+  accentAudit,
+} from '../lib/card/contrast.js';
 import { auditRendered } from '../lib/card/domContrast.js';
 import { GLOSSARY } from '../lib/semantic/glossary.js';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import {
-  CARD_A, CARD_B, CardA, CardB, TEXT_ROLES, MIN_CONTRAST, roleStyle,
-  AA_EXEMPT, GRADIENT_STOPS, stepAway, CARD_B_BADGE_LIMIT, MAX_LABEL_MEANING,
+  CARD_A, CARD_B, CardA, CardB, TEXT_ROLES, MIN_CONTRAST, roleStyle, paletteFor,
+  AA_EXEMPT, DIM_EXEMPT, GRADIENT_STOPS, stepAway, CARD_B_BADGE_LIMIT, MAX_LABEL_MEANING,
+  RADIUS, PADDING, splitName, brassTextFor, brassTextFallbacks,
+  WATERMARK_FILL, OBJECT_ID_SUFFIX,
 } from '../components/cards/Card.js';
+// The DESCRIPTOR only. `captureCard` needs a DOM; `captureSpec` is pure so the
+// ruled export sizes are asserted here rather than only in a browser nobody opens.
+import { captureSpec, CAPTURE_KINDS } from '../components/cards/exportCards.js';
+
+/** rgba() the way the card writes it, for comparing against rendered markup. */
+const alphaOf = (hex, a) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  return `rgba(${r},${g},${b},${a})`;
+};
 import { VALIDATION_CHARTS } from './bazi-validation.fixture.js';
 
 const { renderToStaticMarkup } = ReactDOMServer;
@@ -131,7 +146,7 @@ test('the APPROVED triples match docs/content/sharecard-mockups-02.html verbatim
 // against the card ground. An assertion that reads the intent it is checking is
 // not an assertion.
 
-/** Every text run on both cards, for one token. */
+/** Every text run on both cards, for one token, measured on the flat field. */
 function runsFor(stem) {
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
   const data = { ...buildCardData({ chart, semanticJson: buildSemanticJson(chart), birthDate: '1989-09-13', gender: 'female' }), stem };
@@ -143,16 +158,86 @@ function runsFor(stem) {
   return out.sort((a, b) => a.ratio - b.ratio);
 }
 
-test('EVERY RENDERED text run meets WCAG AA, on every token but the known one', () => {
+/** The roles a run could be, for the exemption check: role name -> its ratio. */
+const ROLE_RATIO = (role, token) => {
+  const palette = paletteFor(token);
+  const s = roleStyle(role, palette);
+  const ground = TEXT_ROLES[role].over === 'brass' ? palette.brass : token.field;
+  return contrast(composite(s.color, ground, s.opacity), ground);
+};
+
+test('EVERY role OUTSIDE DIM_EXEMPT meets WCAG AA, on every token but the known one', () => {
+  // Spec §7.4. The floor did NOT move on 2026-08-14 — the ruling admitted an
+  // exemption list, and everything off that list still has to clear 4.5.
   assert.equal(MIN_CONTRAST, 4.5, 'the target is WCAG AA and it is not negotiable downward');
+  const full = Object.keys(TEXT_ROLES).filter((r) => !DIM_EXEMPT.includes(r));
+  assert.ok(full.length >= 4, 'if nothing is left at full opacity, this test has stopped meaning anything');
+
   for (const stem of STEMS) {
     if (AA_EXEMPT.includes(stem)) continue;
-    const under = runsFor(stem).filter((r) => r.ratio < MIN_CONTRAST);
+    const under = full
+      .map((role) => ({ role, ratio: ROLE_RATIO(role, CARD_TOKENS[stem]) }))
+      .filter((r) => r.ratio < MIN_CONTRAST);
     assert.deepEqual(
-      under.map((r) => `${r.card}:${JSON.stringify(r.text.slice(0, 24))}=${r.ratio.toFixed(2)}`), [],
-      `${stem} has rendered text under AA. Run: npm run audit:card-contrast`,
+      under.map((r) => `${r.role}=${r.ratio.toFixed(2)}`), [],
+      `${stem} draws a non-exempt role under AA. Run: npm run audit:card-contrast`,
     );
   }
+});
+
+test('the RENDERED markup draws no colour the roles did not produce', () => {
+  // The dimmed roles mean the old "every run clears 4.5" assertion cannot stand
+  // as written, and the thing that must NOT be lost with it is the DOM walk: the
+  // audit still has to see the real markup, or a stray inline colour becomes
+  // invisible again. So this asserts the weaker true thing — every rendered run
+  // resolves to a hex that some role produces, at an opacity some role declares.
+  const allowed = new Set();
+  for (const stem of STEMS) {
+    const palette = paletteFor(CARD_TOKENS[stem]);
+    for (const role of Object.keys(TEXT_ROLES)) {
+      const s = roleStyle(role, palette);
+      allowed.add(`${s.color.toLowerCase()}@${s.opacity}`);
+    }
+  }
+  for (const stem of STEMS) {
+    for (const r of runsFor(stem)) {
+      assert.match(r.color || '', /^#[0-9a-f]{6}$/i, `${stem}: ${JSON.stringify(r.text.slice(0, 20))} has no resolvable colour`);
+      assert.ok(
+        allowed.has(`${r.color.toLowerCase()}@${Number(r.opacity.toFixed(2))}`),
+        `${stem}: ${JSON.stringify(r.text.slice(0, 20))} is drawn ${r.color}@${r.opacity}, which no role declares`,
+      );
+    }
+  }
+});
+
+test('DIM_EXEMPT IS EXACTLY THE SET OF DIMMED ROLES, so a role cannot be dimmed unlisted', () => {
+  // Spec §7.3, and it is the whole mechanism of the 08-14 ruling: dimmed ink is
+  // an exemption with a pinned list, not a lowered floor. The list can only
+  // shrink, and nothing joins it without someone editing that line in Card.js.
+  const dimmed = Object.entries(TEXT_ROLES)
+    .filter(([, r]) => r.opacity < 1)
+    .map(([name]) => name)
+    .sort();
+  assert.deepEqual(dimmed, [...DIM_EXEMPT].sort(),
+    'a role is dimmed without being listed in DIM_EXEMPT, or listed without being dimmed');
+});
+
+test('the ink levels are EXACTLY the ruled ones (spec §2.7 and §3.6)', () => {
+  // Transcribed from the two tables, so a drift in either direction fails here
+  // rather than being noticed on a card six weeks later. Where a role exists on
+  // both cards it takes the SAME value — one role, one opacity, no per-card drift.
+  const ruled = {
+    headline: 1, hook: 1, pillarStem: 1, nameId: 1, badgeLabelFoil: 1, intiDiri: 1,
+    pillarMetaDay: 0.90, pillarBranchDay: 0.88, badgeLabel: 0.82, pillarLabelDay: 0.82,
+    pillarBranch: 0.80, aspek: 0.75, pillarMeta: 0.74, badgeMeaning: 0.72,
+    pillarAnimalDay: 0.64, barLabel: 0.58, footer: 0.53,
+    pillarLabel: 0.51, pillarAnimal: 0.51, tagFixed: 0.51, tagDynamic: 0.51,
+    kicker: 0.48,
+  };
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(TEXT_ROLES).map(([k, v]) => [k, v.opacity])),
+    ruled,
+  );
 });
 
 test('the audit sees text the roles table cannot describe', () => {
@@ -161,13 +246,16 @@ test('the audit sees text the roles table cannot describe', () => {
   const runs = runsFor('壬');
   assert.ok(runs.length > Object.keys(TEXT_ROLES).length,
     `only ${runs.length} runs found; the DOM walk is not reaching the card`);
-  // Every run resolves to a real hex, so none is falling back to a browser
-  // default and none is being scored as 0 for an unparseable colour.
-  for (const r of runs) assert.match(r.color || '', /^#[0-9a-f]{6}$/i, JSON.stringify(r.text.slice(0, 20)));
   // And the INTI DIRI pill is measured against the PILL, not the card ground.
+  // The pill declares a SOLID background-color under its gradient for exactly
+  // this reason: domContrast can only resolve a hex as a ground, so a gradient
+  // pill would be scored against the card field and would report the pill's dark
+  // brass ink sitting on a dark green card. The solid is the gradient's DARKEST
+  // stop, so the number is the worst case rather than a flattering one.
   const pill = runs.find((r) => r.text.toLowerCase().includes('inti diri'));
   assert.ok(pill, 'the INTI DIRI pill must appear in the audit');
-  assert.equal(pill.ground, CARD_TOKENS['壬'].ink, 'the pill must be measured on its own background');
+  assert.equal(pill.ground, BRASS.light.solid, 'the pill must be measured on its own background');
+  assert.ok(pill.ratio > MIN_CONTRAST, `the pill measures ${pill.ratio.toFixed(2)}`);
 });
 
 test('the watermark is exempt BY DECLARATION, not by the audit knowing about it', () => {
@@ -181,10 +269,16 @@ test('the watermark is exempt BY DECLARATION, not by the audit knowing about it'
   assert.ok(!runs.some((r) => r.text === data.stem), 'a decorative watermark must not be audited as text');
 });
 
-test('the AA exemption list is pinned, so it can only shrink', () => {
-  // A REPORT, NOT A PERMISSION. Matahari LEFT this list on 2026-08-13 when Reyner
-  // darkened its field to #CC3F0E; only Gunung remains and Gunung is PROPOSED.
-  assert.deepEqual(AA_EXEMPT, ['戊']);
+test('THE AA EXEMPTION LIST IS EMPTY, and the mechanism survives it', () => {
+  // A REPORT, NOT A PERMISSION, and it can only shrink. It has now shrunk to
+  // nothing: Matahari left on 2026-08-13 (#CC3F0E) and Gunung on 2026-08-15
+  // (#4A3A1E, ink 4.21 -> 10.02). Every token clears AA on its own field.
+  assert.deepEqual(AA_EXEMPT, []);
+  // The list must STAY, empty. An empty exemption list is the outcome it existed
+  // for, not evidence it was unnecessary — it is where the next under-AA token
+  // gets recorded instead of MIN_CONTRAST being lowered to hide it.
+  assert.ok(Array.isArray(AA_EXEMPT), 'the mechanism must not be deleted with its last entry');
+
   for (const stem of AA_EXEMPT) {
     const t = CARD_TOKENS[stem];
     assert.ok(contrast(t.ink, t.field) < MIN_CONTRAST, `${stem} now reaches AA - take it off AA_EXEMPT`);
@@ -192,6 +286,53 @@ test('the AA exemption list is pinned, so it can only shrink', () => {
   for (const [stem, t] of Object.entries(CARD_TOKENS)) {
     if (AA_EXEMPT.includes(stem)) continue;
     assert.ok(contrast(t.ink, t.field) >= MIN_CONTRAST, `${stem} is under AA and unlisted`);
+  }
+});
+
+test("GUNUNG'S FIELD IS #4A3A1E and its ink and accent are unchanged (Reyner, 2026-08-15)", () => {
+  // ONE HEX fixed three separate failures, because they all had the same cause:
+  // the field was not dark enough for a system built on near-white ink on a deep
+  // field. Measured with contrast(), which is what the audit and this test read,
+  // so the numbers in lib/card/tokens.js cannot drift from the code.
+  const g = CARD_TOKENS['戊'];
+  assert.equal(g.field, '#4A3A1E');
+  assert.equal(g.ink, '#FAF4E9', 'the ink was explicitly kept');
+  assert.equal(g.accent, '#E3CFA8', 'the accent was explicitly kept');
+
+  assert.ok(Math.abs(contrast(g.ink, g.field) - 10.02) < 0.01, 'ink');
+  assert.ok(Math.abs(contrast(g.accent, g.field) - 7.18) < 0.01, 'accent');
+  assert.ok(Math.abs(contrast(BRASS.light.text, g.field) - 6.00) < 0.01, 'brass text');
+
+  // It clears all three bars it used to fail.
+  assert.ok(contrast(g.ink, g.field) >= MIN_CONTRAST, 'AA');
+  assert.ok(!accentAudit(CARD_TOKENS).under.includes('戊'), 'the accent floor');
+  assert.equal(brassTextFor(g), BRASS.light.text, 'brass text must no longer fall back');
+
+  // STILL PROPOSED. This fixed the card's contrast, not the token's approval.
+  assert.equal(g.approved, false, 'the triple is Reyner\'s to rule and he has not ruled it');
+  assert.ok(luminance(g.ink) > luminance(g.field), 'Gunung must stay a light-ink token');
+});
+
+test('the object gradient still steps AWAY from the ink (spec §1, not reopened)', () => {
+  // This is what lets the audit measure ONE ground per token and cover every
+  // pixel the GRADIENT produces: the flat field is its worst surface. The 08-14
+  // finish sits on top of this rather than replacing it, so it still holds — the
+  // sheen is a separate overlay and is measured separately, in audit:card-contrast.
+  for (const [stem, t] of Object.entries(CARD_TOKENS)) {
+    for (const step of GRADIENT_STOPS) {
+      const stop = stepAway(t.field, t.ink, step);
+      assert.ok(contrast(t.ink, stop) >= contrast(t.ink, t.field) - 0.001,
+        `${stem}: gradient stop ${step} has LESS contrast than the flat field`);
+    }
+  }
+  // And the canvas stays FLAT, which is the other half of the 08-13 ruling.
+  const data = cardFor('1989-09-13');
+  for (const [name, C] of [['CardA', CardA], ['CardB', CardB]]) {
+    const html = renderToStaticMarkup(React.createElement(C, { data }));
+    const root = html.slice(0, html.indexOf('>'));
+    assert.ok(root.includes(`background:${CARD_TOKENS[data.stem].field}`),
+      `${name}'s canvas must be the flat field`);
+    assert.ok(!/radial-gradient/.test(html), `${name} draws a radial gradient`);
   }
 });
 
@@ -211,20 +352,31 @@ test('THE INK POLE IS A GUARD, NOT A CHOOSER', () => {
   // Nothing may auto-apply the winning pole: a token edit could then silently
   // repaint every word on the card and still pass. The declared ink is authority;
   // the report only refuses to stay quiet.
-  const gunung = CARD_TOKENS['戊'];
-  const v = inkVerdict('戊', gunung, MIN_CONTRAST);
+  //
+  // ── THIS USES A SYNTHETIC TOKEN AS OF 2026-08-15, and it has to ──
+  // It used to fail 戊 Gunung, the last real token under AA. Gunung's field moved
+  // to #4A3A1E and now measures 10.02, so NO shipped token fails any more — which
+  // is good, and which would have quietly turned this test into an assertion that
+  // nothing ever fails. A guard that can only be exercised while the codebase is
+  // broken is not a guard. So the failing case is constructed here.
+  const failing = { field: '#8F7040', ink: '#FAF4E9', accent: '#E3CFA8' };
+  assert.ok(contrast(failing.ink, failing.field) < MIN_CONTRAST,
+    'the synthetic token must actually fail, or this test proves nothing');
+  const v = inkVerdict('戊', failing, MIN_CONTRAST);
   assert.equal(v.ok, false);
   assert.match(v.message, /LIGHTER|DARKER/, 'the failure must name the pole that works');
   assert.match(v.message, /NOT APPLIED/, 'and must say it did not apply it');
   // The declared ink is untouched by asking.
-  assert.equal(CARD_TOKENS['戊'].ink, gunung.ink);
+  assert.equal(failing.ink, '#FAF4E9');
 
-  // A passing token produces no verdict at all.
-  assert.equal(inkVerdict('壬', CARD_TOKENS['壬'], MIN_CONTRAST).ok, true);
+  // Every REAL token now passes, which is the state the guard exists to protect.
+  for (const [stem, t] of Object.entries(CARD_TOKENS)) {
+    assert.equal(inkVerdict(stem, t, MIN_CONTRAST).ok, true, `${stem} fails its own ink`);
+  }
 
   // And the poles are reported for BOTH directions, so the report is a fact about
   // the field rather than a recommendation dressed as one.
-  const poles = inkPoles(gunung.field, MIN_CONTRAST);
+  const poles = inkPoles(failing.field, MIN_CONTRAST);
   assert.ok(poles.light.ceiling > 1 && poles.dark.ceiling > 1);
   assert.ok(['light', 'dark'].includes(poles.better));
 });
@@ -241,14 +393,18 @@ test('ACCENT CARRIES NO TEXT — it is a mid-lightness value and cannot reach AA
   assert.ok(failing.length >= 5, 'if accent now clears AA broadly, this rule can be revisited');
 });
 
-test('opacity is no longer a hierarchy tool, and the roles say so', () => {
-  // Bambu is the binding LOCKED token at ink 4.93, so its lowest usable opacity
-  // is 0.94. Anything dimmer fails a colour Reyner ruled.
+test('THE ARITHMETIC BEHIND THE 08-13 NOTE IS STILL TRUE, which is why the list is an exemption', () => {
+  // The 2026-08-14 ruling re-admitted dimmed ink on the DESIGN question. It did
+  // not, and could not, change this: Bambu is the binding LOCKED token at ink
+  // 4.93, so its lowest usable opacity is 0.94, and every dimmed row is under it.
+  // That is exactly why the mechanism is a pinned exemption rather than a lower
+  // MIN_CONTRAST — the number stays honest and the list carries the decision.
   const bambu = CARD_TOKENS['乙'];
   assert.ok(contrast(composite(bambu.ink, bambu.field, 0.9), bambu.field) < MIN_CONTRAST,
-    'Bambu at 0.9 opacity should be under AA - that is why roles sit at 1');
-  for (const [name, role] of Object.entries(TEXT_ROLES)) {
-    assert.equal(role.opacity, 1, `${name} is dimmed; see the note on TEXT_ROLES`);
+    'Bambu at 0.9 opacity should be under AA - that is what DIM_EXEMPT is exempting');
+  for (const role of DIM_EXEMPT) {
+    assert.ok(TEXT_ROLES[role], `DIM_EXEMPT names "${role}", which is not a role`);
+    assert.ok(TEXT_ROLES[role].opacity < 1, `${role} is exempt but not dimmed`);
   }
 });
 
@@ -258,8 +414,16 @@ test('THE ROLES TABLE IS ACTUALLY CONSUMED', () => {
   // inherited. `roleStyle` is now the only source of text colour.
   const t = CARD_TOKENS['壬'];
   assert.deepEqual(roleStyle('headline', t), { color: t.ink, opacity: 1 });
-  assert.deepEqual(roleStyle('intiDiri', t), { color: t.field, opacity: 1 });
   assert.throws(() => roleStyle('nope', t), /No text role/);
+
+  // The brass roles read palette keys that are NOT on the token. Handing them a
+  // bare token THROWS rather than falling back, because a fallback here is the
+  // exact failure mode this test exists for: a role that resolves to something
+  // plausible and wrong.
+  assert.throws(() => roleStyle('intiDiri', t), /brassInk/);
+  const palette = paletteFor(t);
+  assert.deepEqual(roleStyle('intiDiri', palette), { color: BRASS.light.ink, opacity: 1 });
+  assert.deepEqual(roleStyle('nameId', palette), { color: BRASS.light.text, opacity: 1 });
 
   // And the root must NOT set a colour, or inheritance hides an unwired role.
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
@@ -269,31 +433,385 @@ test('THE ROLES TABLE IS ACTUALLY CONSUMED', () => {
   assert.ok(!/color:/.test(rootStyle), 'the canvas must not set an inheritable colour');
 });
 
-test('BOTH cards carry the gradient, and the canvas stays flat', () => {
-  // Card A had none until 2026-08-13, which left it with nothing separating
-  // object from canvas once the outline came off.
+// ── 1a AND 1e (docs/content/card-polish-spec.md, ruled 2026-08-14) ──
+// Reference renders: docs/content/card-1a-free.png, card-1e-paid.png,
+// card-1e-ten-tokens.png. Each assertion below is a ruling from that spec.
+
+test('THE OBJECT DIMENSIONS ARE UNCHANGED BY THE POLISH PASS', () => {
+  // Spec §1 and §7.1: geometry is locked and this pass may not move it. Asserted
+  // in the RENDERED MARKUP, because a computed-style read reports the content box
+  // and once "confirmed" 907 while 1051 was on screen.
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
   const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
-  for (const [name, C] of [['CardA', CardA], ['CardB', CardB]]) {
+  for (const [name, C, spec] of [['CardA', CardA, CARD_A], ['CardB', CardB, CARD_B]]) {
     const html = renderToStaticMarkup(React.createElement(C, { data }));
-    const gradients = html.match(/linear-gradient/g) || [];
-    assert.equal(gradients.length, 1, `${name} must have exactly one gradient, the object's`);
-    // THE EDGE IS THE GRADIENT: no outline, no shadow (ruled 2026-08-13).
-    assert.ok(!/box-shadow/.test(html), `${name} still draws a shadow`);
-    assert.ok(!/border-top/.test(html), `${name} still draws the appendix band rule`);
+    // The canvas is the first element; the object is the next one that declares
+    // border-box. Both sizes have to appear, in that order.
+    const canvas = `width:${spec.canvas.w}px;height:${spec.canvas.h}px`;
+    const object = `width:${spec.card.w}px;height:${spec.card.h}px`;
+    assert.ok(html.includes(canvas), `${name} canvas is not ${spec.canvas.w}x${spec.canvas.h}`);
+    assert.ok(html.includes(object), `${name} object is not ${spec.card.w}x${spec.card.h}`);
+    assert.ok(html.indexOf(canvas) < html.indexOf(object), `${name} draws the object outside the canvas`);
+    assert.ok(html.includes(`border-radius:${RADIUS}px`), `${name} radius moved`);
+    assert.ok(html.includes(`padding:${PADDING}px`), `${name} padding moved`);
+    const declared = html.match(/box-sizing:\s*border-box/g) || [];
+    assert.ok(declared.length >= 2, `${name} must declare border-box on canvas AND object, found ${declared.length}`);
+  }
+  // And the margin the geometry implies is still uniform on both. Compared with a
+  // tolerance rather than rounded: the object width is ITSELF a rounding of
+  // 1080 - 2*86.4 = 907.2, so re-deriving the margin from it lands on 86.5.
+  for (const spec of [CARD_A, CARD_B]) {
+    assert.ok(Math.abs((spec.canvas.w - spec.card.w) / 2 - spec.margin) < 0.5);
   }
 });
 
-test('the gradient steps AWAY from the ink, so the flat field is the worst surface', () => {
-  // This is what lets the audit measure one ground and cover every pixel.
+test('THE KICKER IS A LEADING ARTICLE, not the first word (甲 vs 癸)', () => {
+  // Spec §2.1 and §7.2. Nine of ten name_en values start with "The"; 癸 Embun is
+  // "Morning Dew". A first-word rule would print MORNING as a kicker and leave
+  // DEW as the whole headline, which is not the archetype's name.
+  assert.deepEqual(splitName('The Teak'), { kicker: 'The', head: ['Teak'] });
+  assert.deepEqual(splitName('Morning Dew'), { kicker: null, head: ['Morning', 'Dew'] });
+  // Every real value goes through the same rule rather than a table.
+  const names = STEMS.map((s) => GLOSSARY.arketipe[s].name_en);
+  assert.ok(names.includes('Morning Dew'), 'the fixture must still contain the article-less name');
+  assert.equal(names.filter((n) => splitName(n).kicker === null).length, 1,
+    'exactly one archetype has no article');
+
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const base = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  const render = (stem, nameEn) => renderToStaticMarkup(
+    React.createElement(CardA, { data: { ...base, stem, nameEn } }));
+
+  // 甲: a kicker, and a ONE-line headline at the full 139.
+  const jati = render('甲', 'The Teak');
+  assert.ok(jati.includes('>The</div>'), '甲 must render "The" as its own kicker element');
+  assert.ok(jati.includes('font-size:139px'), '甲 headline must be the full 139');
+
+  // 癸: no kicker, and a TWO-line headline reduced to 0.80 because "MORNING" at
+  // 139 leaves only 23px of the 763px measure.
+  const embun = render('癸', 'Morning Dew');
+  assert.ok(!embun.includes('>The</div>'), '癸 must render no kicker');
+  assert.ok(embun.includes('>Morning</div>') && embun.includes('>Dew</div>'),
+    '癸 headline must be two lines');
+  assert.ok(embun.includes(`font-size:${139 * 0.8}px`), '癸 headline must come down for measure');
+});
+
+test('BRASS IS A GLOBAL FINISH, selected by the ink pole and never by a stem list', () => {
+  // Spec §5 and §6.3. A stem list desyncs the moment a token is re-hexed, and
+  // re-hexing the five proposed tokens is exactly what is expected next.
+  const light = STEMS.filter((s) => inkIsDark(CARD_TOKENS[s]));
+  assert.deepEqual(light, ['己', '辛', '癸'], 'Taman, Permata, Embun take the inverted finish');
+  // The predicate must agree with luminance, or a token's ink is fighting its
+  // field and `inkVerdict` is the thing that should be saying so.
   for (const [stem, t] of Object.entries(CARD_TOKENS)) {
-    for (const step of GRADIENT_STOPS) {
-      const stop = stepAway(t.field, t.ink, step);
-      assert.ok(contrast(t.ink, stop) >= contrast(t.ink, t.field) - 0.001,
-        `${stem}: gradient stop ${step} has LESS contrast than the flat field`);
-    }
+    assert.equal(inkIsDark(t), luminance(t.ink) < luminance(t.field), `${stem}`);
+    assert.equal(brassFor(t), inkIsDark(t) ? BRASS.dark : BRASS.light, `${stem} has the wrong brass`);
+  }
+  // Brass is NOT a fourth token slot: it does not vary per archetype.
+  assert.equal(new Set(STEMS.map((s) => brassFor(CARD_TOKENS[s]))).size, 2,
+    'there must be exactly two brasses for the whole set');
+  for (const t of Object.values(CARD_TOKENS)) {
+    for (const k of Object.keys(t)) assert.ok(!/brass/i.test(k), 'CARD_TOKENS must stay a triple');
   }
 });
+
+test('§6.4 MEASURED — brass text fails on four tokens and falls back to ink', () => {
+  // The spec predicted brass text would "clear 4.5 comfortably" on dark fields
+  // and flagged Taman as the one risk. Measured, it failed on five. 戊 Gunung
+  // left the set on 2026-08-15 when its field went to #4A3A1E (2.52 -> 6.00), so
+  // it is four now, two of them still dark fields: pale brass is a LIGHT metallic
+  // and Bambu's green and Matahari's orange are not dark enough to carry it.
+  //
+  // RULED AS BUILT 2026-08-15: the per-token retreat to ink stays, and there is
+  // to be no second darker BRASS_TEXT — brass is two global values (§6.3).
+  const failing = brassTextFallbacks(CARD_TOKENS).map((f) => f.stem);
+  assert.deepEqual(failing, ['乙', '丙', '己', '癸'],
+    'the brass-text fallback set moved - re-read the §6.4 report in Card.js');
+  assert.equal(new Set(STEMS.map((s) => brassFor(CARD_TOKENS[s]))).size, 2,
+    'brass must stay two global values, never a third darker one');
+
+  for (const [stem, t] of Object.entries(CARD_TOKENS)) {
+    const drawn = brassTextFor(t);
+    if (failing.includes(stem)) {
+      assert.equal(drawn, t.ink, `${stem} must retreat to ink`);
+    } else {
+      assert.equal(drawn, brassFor(t).text, `${stem} must keep brass text`);
+      assert.ok(contrast(drawn, t.field) >= MIN_CONTRAST, `${stem} keeps brass under AA`);
+    }
+  }
+  // The fallback is per TOKEN, not per role: dropping brass text everywhere
+  // because Bambu cannot hold it would spend the tokens that can.
+  assert.ok(failing.length < STEMS.length, 'brass text must survive somewhere');
+  // And brass stays on NON-text everywhere, including the fallback tokens — that
+  // is what keeps 1e reading as the paid card on all ten.
+  for (const stem of failing) {
+    const html = renderToStaticMarkup(React.createElement(CardB, {
+      data: { ...cardFor('1989-09-13'), stem },
+    }));
+    assert.ok(html.includes(brassFor(CARD_TOKENS[stem]).stops[1]), `${stem} lost the brass seal`);
+  }
+});
+
+test('THE INTI DIRI PILL IS TOKEN-INDEPENDENT and beats the pair it replaced', () => {
+  // Spec §6.4's other prediction, and this one held. The pill is the brass's own
+  // ink on brass, so its ratio does not vary with the archetype at all.
+  for (const b of [BRASS.light, BRASS.dark]) {
+    assert.ok(contrast(b.ink, b.solid) >= MIN_CONTRAST, `${b.solid} cannot carry ${b.ink}`);
+  }
+  // TOKEN-INDEPENDENT is the actual claim, so it is the actual assertion: the
+  // pill's measured ratio takes exactly two values across all ten archetypes,
+  // one per brass, because neither side of the pair comes from the token.
+  const measured = new Set(STEMS.map((s) => {
+    const palette = paletteFor(CARD_TOKENS[s]);
+    return contrast(roleStyle('intiDiri', palette).color, palette.brass).toFixed(4);
+  }));
+  assert.equal(measured.size, 2, `the pill's ratio varies by token: ${[...measured].join(', ')}`);
+  for (const m of measured) assert.ok(Number(m) >= MIN_CONTRAST, `pill at ${m}`);
+});
+
+test('§4 — NEITHER SILENT EXPORT KILLER REACHES THE MARKUP', () => {
+  // `mask-composite` and `background-clip: text` both render correctly in a
+  // browser and both come out wrong through html-to-image, which is the export
+  // path. Guarding them in the markup is the only place the failure is visible,
+  // because the PNG is not something a test looks at.
+  const data = cardFor('1989-09-13');
+  for (const [name, C] of [['CardA', CardA], ['CardB', CardB]]) {
+    const html = renderToStaticMarkup(React.createElement(C, { data }));
+    assert.ok(!/mask-composite/i.test(html), `${name} uses mask-composite`);
+    assert.ok(!/-webkit-mask/i.test(html), `${name} uses a webkit mask`);
+    assert.ok(!/background-clip/i.test(html), `${name} uses background-clip`);
+    assert.ok(!/color:\s*transparent/i.test(html), `${name} draws transparent text`);
+  }
+});
+
+test('THE RIM IS AN SVG STROKE, on Card B only, with a unique gradient id', () => {
+  // Spec §3.1, §7.6, §7.7 and §7.8.
+  const data = cardFor('1989-09-13');
+  const a = renderToStaticMarkup(React.createElement(CardA, { data }));
+  const b = renderToStaticMarkup(React.createElement(CardB, { data }));
+
+  assert.ok(/<svg/.test(b) && /<rect/.test(b) && /stroke="url\(#/.test(b), 'Card B must draw an SVG rim');
+  assert.ok(/stroke-width="2"/.test(b), 'the rim is a 2px stroke');
+  // rx is 39, not 40: the stroke straddles the path, so a 2px stroke on a 40px
+  // radius overshoots the object's own corner and shows a hairline of canvas.
+  assert.ok(b.includes(`rx="${RADIUS - 1}"`), `the rim rx must be ${RADIUS - 1}, not ${RADIUS}`);
+
+  // Card A ships with NEITHER rim nor shadow — the 08-13 rejection stands for it.
+  assert.ok(!/<svg/.test(a), 'Card A must draw no rim');
+  assert.ok(!/box-shadow/.test(a), 'Card A must draw no shadow');
+  assert.ok(/box-shadow:0 20px 44px rgba\(0,0,0,\.38\)/.test(b), 'Card B must carry the ruled drop shadow');
+
+  // TWO CARDS IN ONE DOCUMENT MUST NOT SHARE A GRADIENT. The preview page renders
+  // ten of these plus ten thumbnails; a shared id means nine take the first one's
+  // colours, and it looks almost right, which is the worst kind of wrong.
+  const two = renderToStaticMarkup(React.createElement(React.Fragment, null,
+    React.createElement(CardB, { key: 1, data }),
+    React.createElement(CardB, { key: 2, data: { ...data, stem: '辛' } }),
+  ));
+  const ids = [...two.matchAll(/<linearGradient id="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(ids.length, 2, 'both cards must define a rim gradient');
+  assert.notEqual(ids[0], ids[1], 'rim gradient ids collide across instances');
+  // And an id must be usable in a url() reference — no colons from useId.
+  for (const id of ids) assert.doesNotMatch(id, /[:\s#]/, `"${id}" is not url()-safe`);
+});
+
+test('THE FINISH IS CARD B ONLY, and it survives being 100px tall', () => {
+  // 1a and 1e had to stop being one object at two densities. The finish is the
+  // axis that answers it, because a light effect survives a thumbnail and detail
+  // does not.
+  const data = cardFor('1989-09-13');
+  const a = renderToStaticMarkup(React.createElement(CardA, { data, scale: 0.093 }));
+  const b = renderToStaticMarkup(React.createElement(CardB, { data, scale: 0.07 }));
+  assert.ok(/<svg/.test(b) && !/<svg/.test(a), 'the rim is Card B only');
+  assert.ok(/rgba\(255,255,255,\.15\)/.test(b), 'the sheen is Card B only');
+  assert.ok(!/rgba\(255,255,255,\.15\)/.test(a));
+  // The seal, and the fact that Card A keeps katon.app on its footer line.
+  assert.ok(b.includes(BRASS.light.stops[1]), 'Card B must carry the brass seal');
+  assert.ok(!a.includes(BRASS.light.stops[1]), 'Card A must carry no brass');
+  assert.ok(a.includes(data.footer.right) && b.includes(data.footer.right));
+});
+
+test('the badges lost the diamond, on both cards', () => {
+  // Spec §2.5. It was the only non-typographic mark on Card A, and the hairline
+  // above the block already delimits it; on Card B the labels are brass.
+  const data = cardFor('1989-09-13');
+  for (const [name, C] of [['CardA', CardA], ['CardB', CardB]]) {
+    const html = renderToStaticMarkup(React.createElement(C, { data }));
+    assert.ok(!html.includes('◆'), `${name} still draws the diamond`);
+    assert.ok(html.includes(data.badges[0].label), `${name} lost the badge label`);
+  }
+});
+
+test('the SEAL and the WATERMARK are both decorative, and there is no third hanzi', () => {
+  // Spec §3.4. The stem appears twice on Card B — texture and mark — and neither
+  // is a character anyone is asked to read, so rule 23 holds.
+  const data = cardFor('1989-09-13');
+  const html = renderToStaticMarkup(React.createElement(CardB, { data }));
+  const stemCount = (html.match(new RegExp(data.stem, 'g')) || []).length;
+  // Watermark, seal, and the day pillar's own cell, which IS data and IS paired.
+  assert.equal(stemCount, 3, `the day master appears ${stemCount} times`);
+  // The two decorative ones are not audited as text.
+  const runs = auditRendered(html, CARD_TOKENS[data.stem].field);
+  assert.equal(runs.filter((r) => r.text === data.stem).length, 1,
+    'exactly one of the three is real text: the pillar cell');
+});
+
+test('§8.9 THE WATERMARK FILL IS ACCENT, on both cards, over all ten tokens', () => {
+  // Corrected 2026-08-14 (spec §3.5, §6.7). An earlier draft had Card B on
+  // `darken(field, .45)` and Card A on a lowered accent alpha, which put the same
+  // glyph on the same archetype LIGHTER than the field on A and DARKER on B.
+  assert.deepEqual(WATERMARK_FILL, { yang: 0.18, yin: 0.14 });
+  const YANG = ['甲', '丙', '戊', '庚', '壬'];
+  const base = cardFor('1989-09-13');
+
+  for (const stem of STEMS) {
+    const t = CARD_TOKENS[stem];
+    const expected = alphaOf(t.accent, YANG.includes(stem) ? 0.18 : 0.14);
+    for (const [name, C] of [['CardA', CardA], ['CardB', CardB]]) {
+      const html = renderToStaticMarkup(React.createElement(C, { data: { ...base, stem } }));
+      const wm = html.slice(html.indexOf('aria-hidden="true"'));
+      const style = wm.slice(0, wm.indexOf('>'));
+      assert.ok(style.includes(`color:${expected}`),
+        `${name} ${stem}: watermark is not accent at the ruled alpha - ${style.match(/color:[^;"]*/)}`);
+    }
+  }
+
+  // AND THE PATH STAYS CLEAN OF THE THING THAT CAUSED IT. Mixing a hex toward
+  // black in sRGB drops chroma with lightness, so a large darkening gives mud
+  // rather than a deeper token. `stepAway` has the same failure mode and is safe
+  // only at GRADIENT_STOPS' shallow amounts.
+  const src = fs.readFileSync(path.join(ROOT, 'components/cards/Card.js'), 'utf8');
+  const wmFn = src.slice(src.indexOf('function Watermark('));
+  const body = wmFn.slice(0, wmFn.indexOf('\n}\n'));
+  assert.ok(!/darken\(/.test(body), 'darken() is back in the watermark path (spec §6.7)');
+  assert.ok(!/stepAway\(/.test(body), 'stepAway() is in the watermark path (spec §6.7)');
+});
+
+test('§8.10 the deboss is CARD B on DARK FIELDS only', () => {
+  // Two hard 2px offsets, no blur: 2 export px on a 907px card is 0.2% of the
+  // width. Suppressed on the three light fields, where the dark half of the
+  // offset has no gradient to sink into and reads as grime around the strokes.
+  const base = cardFor('1989-09-13');
+  const debossOf = (C, stem) => {
+    const html = renderToStaticMarkup(React.createElement(C, { data: { ...base, stem } }));
+    const wm = html.slice(html.indexOf('aria-hidden="true"'));
+    const style = wm.slice(0, wm.indexOf('>'));
+    const m = style.match(/text-shadow:([^;"]*)/);
+    return m ? m[1] : null;
+  };
+
+  for (const stem of STEMS) {
+    const lightField = inkIsDark(CARD_TOKENS[stem]);
+    assert.equal(debossOf(CardA, stem), null, `${stem}: Card A must never deboss`);
+    const b = debossOf(CardB, stem);
+    if (lightField) {
+      assert.equal(b, null, `${stem} is a light field and must not deboss`);
+    } else {
+      assert.ok(b, `${stem} is a dark field and must deboss`);
+      // TWO HARD OFFSETS AND A ZERO BLUR RADIUS, asserted as the whole string.
+      // The third length in each half is the blur, and it must be 0: any blur at
+      // all renders as a misregistered second copy of the glyph rather than as
+      // depth. Matching the exact shape is what catches a "0 2px 1px" edit.
+      assert.match(
+        b,
+        /^0 2px 0 rgba\(\d+,\d+,\d+,0?\.07\), 0 -2px 0 rgba\(0,0,0,0?\.10?\)$/,
+        `${stem}: deboss is "${b}", not the ruled two hard 2px offsets`,
+      );
+    }
+  }
+  // The suppressed set is exactly the light-field branch, read off the predicate.
+  const suppressed = STEMS.filter((s) => debossOf(CardB, s) === null);
+  assert.deepEqual(suppressed, ['己', '辛', '癸'], 'Taman, Permata, Embun');
+});
+
+test('§8.11 TWO EXPORT TARGETS: share is the canvas, download is the object', () => {
+  // Spec §7. The download stops at the card edge; the share keeps the field,
+  // because the field is what makes the posted file feed-safe.
+  //
+  // ── THE PIXEL HALF OF §7.3 IS NOT HERE, AND CANNOT BE ─────
+  // "corners transparent, edge is rim not field" are claims about a raster.
+  // html-to-image renders through an SVG foreignObject and needs a real layout
+  // engine and a real canvas; jsdom has neither. So the raster assertions live in
+  // `npm run probe:card-export`, which inlines html-to-image, captures both
+  // targets for a dark-field and a light-field token, and reads pixels back off a
+  // canvas. It must be served over http (`npm run serve:reports`) — from a
+  // file:// or data: origin the document is opaque, every drawn image taints the
+  // canvas, and getImageData throws instead of measuring.
+  //
+  // RUN 2026-08-15, all four assertions passing:
+  //   甲 Card A  907x1267  corners alpha=0  edge #194529 (gradient, A has no rim)
+  //   甲 Card B  907x1747  corners alpha=0  edge #335a41 rim, distance 61 from field
+  //   辛 Card A  907x1267  corners alpha=0  edge #eeebe5 (gradient)
+  //   辛 Card B  907x1747  corners alpha=0  edge #d3d0cc rim, distance 76 from field
+  // Both rim branches are covered: on a dark field the rim reads lighter than the
+  // field, on a light field darker, and neither is the field itself.
+  //
+  // What FOLLOWS is the part that is checkable without a browser, and it is the
+  // part that would silently break the raster one: the descriptor, the ids and
+  // the radius.
+  assert.deepEqual(CAPTURE_KINDS, ['share', 'download']);
+
+  for (const [card, spec] of [['A', CARD_A], ['B', CARD_B]]) {
+    const share = captureSpec('share', card);
+    const dl = captureSpec('download', card);
+
+    // SHARE: the canvas node, at the ruled feed-native canvas size.
+    assert.equal(share.width, spec.canvas.w);
+    assert.equal(share.height, spec.canvas.h);
+    assert.ok(!share.nodeId.endsWith(OBJECT_ID_SUFFIX), 'share must capture the canvas');
+
+    // DOWNLOAD: the object node, at the object's own size, and no field.
+    assert.equal(dl.width, spec.card.w);
+    assert.equal(dl.height, spec.card.h);
+    assert.ok(dl.nodeId.endsWith(OBJECT_ID_SUFFIX), 'download must capture the object');
+
+    // PNG WITH ALPHA, never JPEG: the object's 40px radius leaves four
+    // transparent corners and a JPEG would fill them with solid triangles.
+    for (const s of [share, dl]) assert.equal(s.type, 'png');
+    // And nothing may set a background colour, which would fill those corners.
+    for (const s of [share, dl]) assert.equal(s.style.backgroundColor, undefined);
+
+    // CARD B'S DROP SHADOW is drawn outside the object bounds and would be
+    // clipped to a hard band. Dropped from the download, on both cards, so the
+    // contract is a property of the capture rather than of which card it got.
+    assert.equal(dl.style.boxShadow, 'none');
+    assert.equal(share.style.boxShadow, undefined, 'the share keeps the shadow - it has a canvas to sit on');
+  }
+  assert.throws(() => captureSpec('nope', 'A'), /Unknown capture kind/);
+
+  // The ids the capture reaches for must actually be in the rendered markup, or
+  // both exports throw at the one moment a user is watching.
+  const data = cardFor('1989-09-13');
+  for (const [card, C] of [['A', CardA], ['B', CardB]]) {
+    const html = renderToStaticMarkup(React.createElement(C, { data, id: 'probe' }));
+    assert.ok(html.includes('id="probe"'), `Card ${card} canvas has no id`);
+    assert.ok(html.includes(`id="probe${OBJECT_ID_SUFFIX}"`), `Card ${card} object has no id`);
+    // The object must be the one carrying the radius, or the crop has no corners
+    // to make transparent.
+    const obj = html.slice(html.indexOf(`id="probe${OBJECT_ID_SUFFIX}"`));
+    assert.match(obj.slice(0, obj.indexOf('>')), new RegExp(`border-radius:${RADIUS}px`));
+  }
+});
+
+test('THE ACCENT FLOOR IS DERIVED FROM THE LOCKED SET, never hardcoded', () => {
+  // Spec §6.6. A TOKEN report — `components/cards/Card.js` never calls it. The
+  // bar is the locked set's own worst case, not WCAG: accent is non-text.
+  const { floor, under, rows } = accentAudit(CARD_TOKENS);
+  assert.ok(Math.abs(floor - 3.31) < 0.01, `the floor moved to ${floor.toFixed(2)}`);
+  assert.ok(!under.includes('丙'), 'Matahari DEFINES the floor and cannot fail it');
+  // 戊 Gunung LEFT this list on 2026-08-15 (3.02 -> 7.18) when its field darkened.
+  // The two that remain are LIGHT fields and are a separate question.
+  assert.deepEqual(under.sort(), ['己', '癸'].sort(), 'Taman 3.26, Embun 3.05');
+  for (const stem of under) {
+    assert.equal(CARD_TOKENS[stem].approved, false, `${stem} is LOCKED and under the floor`);
+    assert.ok(inkIsDark(CARD_TOKENS[stem]), `${stem} should be a light field`);
+  }
+  // Derived, not written down: approving a lower token moves the bar on its own.
+  const withEmbun = accentAudit({ ...CARD_TOKENS, '癸': { ...CARD_TOKENS['癸'], approved: true } });
+  assert.ok(withEmbun.floor < floor, 'approving a lower token must lower the floor with no edit');
+  assert.equal(rows.length, 10);
+});
+
 
 test('the watermark sits TOP-RIGHT on both cards and both polarities', () => {
   // Ruled 2026-08-13. The headline is top-left, so top-right is the one large
@@ -408,14 +926,18 @@ test('badge bullets carry no palace', () => {
   }
 });
 
-test('Card B renders at most three badges', () => {
-  assert.equal(CARD_B_BADGE_LIMIT, 3);
+test('Card B renders at most TWO badges, which is the 08-14 re-probe result', () => {
+  // It was three. Spec §6.5 asked for the budget to be re-measured against 1e's
+  // taller footer, and the measurement said three no longer fits at all: 丁 Api
+  // Unggun's real copy, three entries all inside the 200 ceiling, overflowed the
+  // object by 63 export pixels and was clipped silently. See CARD_B_BADGE_LIMIT.
+  assert.equal(CARD_B_BADGE_LIMIT, 2);
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
   const base = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
   const data = { ...base, badges: [1, 2, 3, 4].map((i) => ({ label: `Bintang ${i}`, meaning: `M${i}`, palace: null })) };
   const b = renderToStaticMarkup(React.createElement(CardB, { data }));
-  assert.ok(b.includes('Bintang 3'), 'the third badge must render');
-  assert.ok(!b.includes('Bintang 4'), 'the fourth must be cut - Stage 3 ranked it least important');
+  assert.ok(b.includes('Bintang 2'), 'the second badge must render');
+  assert.ok(!b.includes('Bintang 3'), 'the third must be cut - Stage 3 ranked it less important');
   // Card A is NOT capped: without meanings each badge is one short line.
   const a = renderToStaticMarkup(React.createElement(CardA, { data }));
   assert.ok(a.includes('Bintang 4'));

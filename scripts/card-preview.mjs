@@ -39,7 +39,12 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData } from '../lib/card/cardData.js';
 import { CARD_TOKENS } from '../lib/card/tokens.js';
 import { auditRendered } from '../lib/card/domContrast.js';
-import { CardA, CardB, TEXT_ROLES, MIN_CONTRAST, AA_EXEMPT } from '../components/cards/Card.js';
+import { accentAudit } from '../lib/card/contrast.js';
+import { inkIsDark } from '../lib/card/tokens.js';
+import {
+  CardA, CardB, TEXT_ROLES, MIN_CONTRAST, AA_EXEMPT, DIM_EXEMPT, MAX_LABEL_MEANING,
+  brassTextFallbacks,
+} from '../components/cards/Card.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'reports', 'card-preview.html');
@@ -82,12 +87,16 @@ function main() {
 
   // Worst RENDERED text run per token, measured on the same markup this page
   // shows. Not the roles table - see lib/card/domContrast.js for why.
+  //
   const worst = {};
   for (const r of rows) {
-    const all = [auditRendered(r.a, CARD_TOKENS[r.stem].field), auditRendered(r.b, CARD_TOKENS[r.stem].field)]
+    const field = CARD_TOKENS[r.stem].field;
+    const all = [auditRendered(r.a, field), auditRendered(r.b, field)]
       .flat().sort((x, y) => x.ratio - y.ratio);
     worst[r.stem] = all[0];
   }
+  const accent = accentAudit(CARD_TOKENS);
+  const brassFallback = new Set(brassTextFallbacks(CARD_TOKENS).map((f) => f.stem));
 
   const html = `<!doctype html>
 <meta charset="utf-8">
@@ -127,28 +136,42 @@ function main() {
 3:4 1080x1440 canvas at a uniform 86.4 margin. Card B is 1080x1920. Both are shown scaled; every
 dimension in the markup is the real export pixel size.</p>
 
-<div class="flag"><b>Three things on this page are NOT decided, and looking at them is the point.</b>
+<div class="flag"><b>Four things on this page are NOT decided, and looking at them is the point.</b>
 <br><br><b>1. Colour tokens.</b> ${unapproved.length} of ten are the 2026-08-03 proposal and are
 unapproved: ${esc(unapproved.join(', '))}. They render so they can be judged next to the five locked
 ones; they must not ship. Source and measurements:
 <code>docs/content/sharecard-tokens-proposal.html</code>.
-<br><br><b>2. What separates the card object from the canvas</b> when both carry the same colour.
-Rendered here as a hairline inset plus a soft shadow, which needs no fourth token per archetype. The
-alternative is a different surface value for the card, which does.
-<br><br><b>3. Does Card B read as the paid one at thumbnail size?</b> The shelf below is the
-test. Print resolution is invisible in a feed, so the difference has to be the 9:16 silhouette, the
-Indonesian name above the English one, and the appendix band.
-<br><br><b>4. The footer separator.</b> Rendered as <code>|</code>. The 08-03 mock used a middle dot,
+<br><br><b>2. Accent on field, a SECOND question about the tokens.</b> The floor is the locked set's
+own worst case, ${accent.floor.toFixed(2)}, derived from the five approved triples rather than
+written down - approving one of the other five moves it on its own. Accent is decoration and large
+UI, so WCAG 4.5 was never the test for it. <span class="no">${esc(accent.under.join(', '))}</span>
+fall under the floor, and all three are proposed.
+<br><br><b>3. Brass on text, MEASURED and failing on five tokens.</b> The spec expected
+<code>#D9BC85</code> to clear 4.5 comfortably on dark fields, with Taman the one risk. It fails on
+<span class="no">${esc([...brassFallback].join(', '))}</span> - three of them dark fields, because
+pale brass is a light metallic and the brightest fields cannot carry it. Those tokens draw their
+name and badge labels in ink instead; brass stays on the rim, the seal, the cell border and the
+pill. Nothing was substituted silently. Fixing it is a token decision.
+<br><br><b>4. The sheen costs contrast in the lit corner.</b> Card B's sheen is white-alpha over
+the whole object, and on a light-ink token white moves the surface toward the ink - under the
+headline. Ruled at 0.15 and NOT reduced here; the number is in
+<code>npm run audit:card-contrast</code>.
+<br><br><b>5. The footer separator.</b> Rendered as <code>|</code>. The 08-03 mock used a middle dot,
 which rule 20 bans with zero exceptions, so it cannot come back - but any keyboard character can.</div>
 
-<p>Changed in this pass, from Reyner's review: the Day Master stem is now a single translucent
-watermark and the pictogram set is dropped; the type scale is rebuilt from the live product's card
-(everything under the headline was 20-35% too small, which is what made Card A read as half empty);
-Archivo throughout; the four pillars use the live <code>PillarCell</code> treatment with INTI DIRI;
-Istana Konsepsi is off the card and still on the engine; and nothing appears both as a tag and as a
-badge. <b>Contrast is now asserted</b> - ${Object.keys(TEXT_ROLES).length} text roles x
-${Object.keys(CARD_TOKENS).length} tokens, floor ${MIN_CONTRAST}, printed per archetype below and
-failing a test if any pair drops under. Run <code>npm run audit:card-contrast</code> for the grid.</p>
+<p><b>Changed in this pass</b>, to <code>docs/content/card-polish-spec.md</code> (ruled 2026-08-14).
+<b>Card A is 1a</b>: a leading "The" drops to a kicker so the noun owns the headline at 139px instead
+of 112, three hairlines divide the content zones, the hook grows to the second-largest thing on the
+card, the diamond comes off the badges, and the stem crops the corner instead of blooming behind it.
+<b>Card B is 1e</b>: a FINISH - an SVG rim, a specular sheen, brass on four elements, a foil seal and
+a debossed stem - over the pillar cells and bars it already had. Three light-field tokens run the
+INVERTED branch, selected by the ink pole and never by a stem list.
+<br><br><b>Ink hierarchy is back</b>, ruled 2026-08-14: ${DIM_EXEMPT.length} of
+${Object.keys(TEXT_ROLES).length} roles draw under full opacity. The floor did NOT move - it is an
+exemption with a pinned list (<code>DIM_EXEMPT</code>), every role off that list still clears
+${MIN_CONTRAST} on all ${Object.keys(CARD_TOKENS).length} tokens, and the audit keeps reporting the
+exempt roles' real ratios rather than skipping them. Run
+<code>npm run audit:card-contrast</code> for the grid.</p>
 
 <h2>Thumbnail shelf — the only test that matters for questions 2 and 3</h2>
 <div class="shelf">
@@ -162,14 +185,84 @@ apart without reading the captions, question 3 is answered no.</p>
 
 ${rows.map((r) => `
 <h2>${esc(r.data.nameId)} / ${esc(r.data.nameEn)} &mdash; ${esc(r.stem)} ${esc(r.data.element)}</h2>
-<div class="pair"><div>${r.a}</div><div>${r.b}</div></div>
+<div class="pair"><div>${r.a}</div><div class="cardwrap" data-stem="${esc(r.stem)}">${r.b}</div></div>
 <p class="cap">Chart ${esc(r.iso)} 09:00. Token <span class="${r.approved ? 'yes' : 'no'}">${r.approved ? 'LOCKED' : 'PROPOSED, not approved'}</span>.
 Aspek <b>${esc(r.data.aspek)}</b>. Fixed tags ${esc(r.data.tags.fixed.join(', '))}.
 Dynamic ${esc(r.data.tags.dynamic.join(', ')) || '(none)'}${r.data.tags.dynamic.length < 3 ? ` <span class="no">(only ${r.data.tags.dynamic.length} - the chart has no more)</span>` : ''}.
 Badges ${esc(r.data.badges.map((b) => b.label).join(', ')) || '(none)'}.
 Worst contrast <b>${worst[r.stem].ratio.toFixed(2)}</b> on ${esc(JSON.stringify(worst[r.stem].text.slice(0,22)))}, floor ${MIN_CONTRAST} (WCAG AA)${AA_EXEMPT.includes(r.stem) ? " <span class=\"no\">- cannot reach AA, Reyner to rule</span>" : ""}.
-Footer <b>${esc(r.data.footer.left)}</b>${r.data.footer.gender ? '' : ' (null gender: date and source only)'}.</p>
+Finish ${inkIsDark(CARD_TOKENS[r.stem]) ? '<b>inverted</b> (light field)' : 'as drawn'}.
+Brass text ${brassFallback.has(r.stem) ? '<span class="no">under AA - drawn in ink instead</span>' : 'ok'}.
+Accent on field ${accent.rows.find((x) => x.stem === r.stem).ratio.toFixed(2)}${accent.under.includes(r.stem) ? ` <span class="no">- under the ${accent.floor.toFixed(2)} floor</span>` : ''}.
+Footer <b>${esc(r.data.footer.left)}</b>${r.data.footer.gender ? '' : ' (null gender: date and source only)'}.
+Card B headroom <b data-headroom="${esc(r.stem)}">measuring</b>, at the ${MAX_LABEL_MEANING}-char ceiling
+<b data-ceiling="${esc(r.stem)}">measuring</b>.</p>
 `).join('\n')}
+
+<h2>Card B's vertical budget, measured in this page</h2>
+<p>Card B is a fixed rectangle and its badge block is the one content-driven height on it, so either
+the widest content fits or the design is only true for the charts that happen to be short. The
+numbers above are measured after layout, in export pixels: <b>headroom</b> is the space left below
+the appendix on the chart as rendered, and <b>ceiling</b> is the same measurement with every
+<code>label_meaning</code> replaced by ${MAX_LABEL_MEANING} characters of real Indonesian, which is
+the tripwire <code>MAX_LABEL_MEANING</code> sets. A negative number is content being clipped by the
+card's own <code>overflow: hidden</code>, silently.</p>
+<p class="cap">This check exists because the 2026-08-14 foil pass overflowed Api Unggun's Card B by
+94 export pixels and nothing caught it: every test passed, the contrast audit passed, and the clipped
+text simply was not on the card. A layout that is only correct for the charts you happened to look at
+is not a layout.</p>
+
+<script>
+(() => {
+  var SCALE = 0.28;
+  // Real Indonesian, not filler: synthetic "MaMaMa" is far wider than prose and
+  // would put the break in the wrong place, which is the same mistake the
+  // original budget probe recorded making.
+  var SRC = 'Kamu menyerap hal baru lebih cepat daripada orang di sekitarmu, terutama lewat membaca dan mengamati sendiri, dan itu membuat kamu terbiasa mencari jawaban lebih dulu tanpa menunggu siapa pun bicara.';
+  var CEIL = (SRC + ' ' + SRC).slice(0, ${MAX_LABEL_MEANING});
+
+  function headroom(obj) {
+    // The appendix is the last child that is NOT decorative. Taking
+    // lastElementChild grabs the SVG rim, which is inset to the object's own
+    // bounds and therefore reports exactly minus-the-padding on every card - a
+    // uniform wrong answer, which is the kind that looks like a real measurement.
+    var kids = [].slice.call(obj.children).filter(function (c) {
+      return c.getAttribute('aria-hidden') !== 'true';
+    });
+    var app = kids[kids.length - 1];
+    // It carries margin-top:auto, which eats all the slack and reports zero
+    // whether there is one pixel spare or three hundred. Zeroing it for the
+    // measurement is what turns "does it fit" into "by how much".
+    var prev = app.style.marginTop;
+    app.style.marginTop = '0px';
+    var box = obj.getBoundingClientRect();
+    var pad = parseFloat(getComputedStyle(obj).paddingBottom);
+    var gap = box.bottom - pad - app.getBoundingClientRect().bottom;
+    app.style.marginTop = prev;
+    return Math.round(gap / SCALE);
+  }
+
+  function paint(el, px) {
+    el.textContent = px + 'px';
+    el.className = px < 0 ? 'no' : '';
+  }
+
+  document.querySelectorAll('.cardwrap').forEach(function (wrap) {
+    var stem = wrap.getAttribute('data-stem');
+    var obj = wrap.firstElementChild.firstElementChild;
+    paint(document.querySelector('[data-headroom="' + stem + '"]'), headroom(obj));
+
+    // The ceiling is probed on a CLONE, off-screen, so the page keeps showing the
+    // card as it really renders.
+    var clone = wrap.cloneNode(true);
+    clone.style.cssText = 'position:absolute;left:-99999px;top:0';
+    document.body.appendChild(clone);
+    clone.querySelectorAll('[data-role="badgeMeaning"]').forEach(function (m) { m.textContent = CEIL; });
+    paint(document.querySelector('[data-ceiling="' + stem + '"]'), headroom(clone.firstElementChild.firstElementChild));
+    clone.remove();
+  });
+})();
+</script>
 `;
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
