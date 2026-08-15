@@ -128,14 +128,20 @@ for (const [stem, token] of Object.entries(CARD_TOKENS)) {
 // Derived from the `approved: true` triples, so approving one moves it with no
 // edit anywhere.
 {
-  const { floor, rows } = accentAudit(CARD_TOKENS);
-  console.log(`\nACCENT ON FIELD (floor ${floor.toFixed(2)}, derived from the locked five):`);
+  const { floor, rows, under, below } = accentAudit(CARD_TOKENS);
+  console.log(`\nACCENT ON FIELD (floor ${floor.toFixed(2)}, frozen at the 2026-08-13 measurement):`);
   for (const r of rows) {
+    // BELOW and EXEMPT are printed separately on purpose. An exemption suppresses
+    // the FAILURE, never the NUMBER or the fact — printing an excused token as if
+    // it were clean is how a known problem stops being known.
+    const state = r.below
+      ? (r.exempt ? '  UNDER THE FLOOR - exempt, see ACCENT_EXEMPT' : '  UNDER THE FLOOR')
+      : '';
     console.log(
-      `  ${r.stem}  ${r.approved ? 'LOCKED  ' : 'proposed'}  ${r.ratio.toFixed(2).padStart(5)}`
-      + `${r.under ? '  UNDER THE FLOOR' : ''}`,
+      `  ${r.stem}  ${r.approved ? 'approved' : 'proposed'}  ${r.ratio.toFixed(2).padStart(5)}${state}`,
     );
   }
+  console.log(`  ${below.length} below the floor, ${under.length} of them unexcused.`);
 }
 
 // THE INK-POLE GUARD. Reports which pole a failing field could carry; never

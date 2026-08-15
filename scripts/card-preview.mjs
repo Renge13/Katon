@@ -136,27 +136,28 @@ function main() {
 3:4 1080x1440 canvas at a uniform 86.4 margin. Card B is 1080x1920. Both are shown scaled; every
 dimension in the markup is the real export pixel size.</p>
 
-<div class="flag"><b>Four things on this page are NOT decided, and looking at them is the point.</b>
-<br><br><b>1. Colour tokens.</b> ${unapproved.length} of ten are the 2026-08-03 proposal and are
-unapproved: ${esc(unapproved.join(', '))}. They render so they can be judged next to the five locked
-ones; they must not ship. Source and measurements:
-<code>docs/content/sharecard-tokens-proposal.html</code>.
-<br><br><b>2. Accent on field, a SECOND question about the tokens.</b> The floor is the locked set's
-own worst case, ${accent.floor.toFixed(2)}, derived from the five approved triples rather than
-written down - approving one of the other five moves it on its own. Accent is decoration and large
-UI, so WCAG 4.5 was never the test for it. <span class="no">${esc(accent.under.join(', '))}</span>
-fall under the floor, and all three are proposed.
-<br><br><b>3. Brass on text, MEASURED and failing on five tokens.</b> The spec expected
-<code>#D9BC85</code> to clear 4.5 comfortably on dark fields, with Taman the one risk. It fails on
-<span class="no">${esc([...brassFallback].join(', '))}</span> - three of them dark fields, because
-pale brass is a light metallic and the brightest fields cannot carry it. Those tokens draw their
-name and badge labels in ink instead; brass stays on the rim, the seal, the cell border and the
-pill. Nothing was substituted silently. Fixing it is a token decision.
-<br><br><b>4. The sheen costs contrast in the lit corner.</b> Card B's sheen is white-alpha over
-the whole object, and on a light-ink token white moves the surface toward the ink - under the
-headline. Ruled at 0.15 and NOT reduced here; the number is in
-<code>npm run audit:card-contrast</code>.
-<br><br><b>5. The footer separator.</b> Rendered as <code>|</code>. The 08-03 mock used a middle dot,
+<div class="flag"><b>All ten colour tokens were approved on 2026-08-15.</b> ${unapproved.length === 0
+  ? 'Nothing on this page is an unruled colour any more.'
+  : `${unapproved.length} still unapproved: ${esc(unapproved.join(', '))}.`}
+What follows is what approval did NOT settle - four measured states that are known, named and
+carried rather than fixed.
+<br><br><b>1. Two approved tokens sit under the accent floor.</b> The floor is
+${accent.floor.toFixed(2)}, FROZEN at the 2026-08-13 measurement of the then-locked five. It is no
+longer derived: with all ten approved, deriving it would return the set's own minimum and the guard
+would report all clear at the exact moment a token sat below the bar. Under it:
+<span class="no">${esc(accent.below.join(', '))}</span>${accent.under.length === 0
+    ? ' - both exempt and listed in <code>ACCENT_EXEMPT</code>' : ''}. Both are light fields, where
+accent has less room between a pale field and a dark ink. Accent is decoration and large UI, so
+WCAG 4.5 was never the test for it.
+<br><br><b>2. Brass on text fails on ${brassFallback.size} tokens</b> and falls back to ink per
+token: <span class="no">${esc([...brassFallback].join(', '))}</span>. Two are dark fields, which the
+spec did not expect - pale brass is a LIGHT metallic and the brightest fields cannot carry it. Those
+tokens draw their name and badge labels in ink; brass stays on the rim, the seal, the cell border
+and the pill. Nothing was substituted silently.
+<br><br><b>3. The sheen costs contrast in the lit corner.</b> Card B's sheen is white-alpha over the
+whole object, and on a light-ink token white moves the surface toward the ink - under the headline.
+Ruled at 0.15 and NOT reduced here; the numbers are in <code>npm run audit:card-contrast</code>.
+<br><br><b>4. The footer separator.</b> Rendered as <code>|</code>. The 08-03 mock used a middle dot,
 which rule 20 bans with zero exceptions, so it cannot come back - but any keyboard character can.</div>
 
 <p><b>Changed in this pass</b>, to <code>docs/content/card-polish-spec.md</code> (ruled 2026-08-14).
@@ -193,7 +194,7 @@ Badges ${esc(r.data.badges.map((b) => b.label).join(', ')) || '(none)'}.
 Worst contrast <b>${worst[r.stem].ratio.toFixed(2)}</b> on ${esc(JSON.stringify(worst[r.stem].text.slice(0,22)))}, floor ${MIN_CONTRAST} (WCAG AA)${AA_EXEMPT.includes(r.stem) ? " <span class=\"no\">- cannot reach AA, Reyner to rule</span>" : ""}.
 Finish ${inkIsDark(CARD_TOKENS[r.stem]) ? '<b>inverted</b> (light field)' : 'as drawn'}.
 Brass text ${brassFallback.has(r.stem) ? '<span class="no">under AA - drawn in ink instead</span>' : 'ok'}.
-Accent on field ${accent.rows.find((x) => x.stem === r.stem).ratio.toFixed(2)}${accent.under.includes(r.stem) ? ` <span class="no">- under the ${accent.floor.toFixed(2)} floor</span>` : ''}.
+Accent on field ${accent.rows.find((x) => x.stem === r.stem).ratio.toFixed(2)}${accent.below.includes(r.stem) ? ` <span class="no">- under the ${accent.floor.toFixed(2)} floor${accent.under.includes(r.stem) ? '' : ', exempt'}</span>` : ''}.
 Footer <b>${esc(r.data.footer.left)}</b>${r.data.footer.gender ? '' : ' (null gender: date and source only)'}.
 Card B headroom <b data-headroom="${esc(r.stem)}">measuring</b>, at the ${MAX_LABEL_MEANING}-char ceiling
 <b data-ceiling="${esc(r.stem)}">measuring</b>.</p>
