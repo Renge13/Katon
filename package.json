@@ -38,6 +38,8 @@
     "measure:card-tags": "node scripts/measure-card-tags.mjs",
     "audit:card-contrast": "node scripts/audit-card-contrast.mjs",
     "audit:card-budget": "node scripts/audit-card-budget.mjs",
+    "probe:card-export": "node scripts/probe-card-export.mjs",
+    "serve:reports": "node scripts/serve-reports.mjs",
     "test:engine": "node tests/bazi-engine.report.mjs",
     "test:forge": "node --conditions=react-server scripts/forge-tests.mjs",
     "gallery:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/rejection-gallery.mjs"
