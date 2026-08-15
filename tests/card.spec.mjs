@@ -20,11 +20,11 @@ import { fileURLToPath } from 'node:url';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildCardData, buildFooter, formatCardDate, dynamicTags } from '../lib/card/cardData.js';
-import { CARD_TOKENS, tokenFor, APPROVED_STEMS } from '../lib/card/tokens.js';
+import { CARD_TOKENS, tokenFor, tokenApproved, APPROVED_STEMS } from '../lib/card/tokens.js';
 import { BRASS, brassFor, inkIsDark } from '../lib/card/tokens.js';
 import {
   contrast, composite, luminance, inkPoles, inkVerdict,
-  accentAudit,
+  accentAudit, accentFloorFromLocked, ACCENT_FLOOR, ACCENT_EXEMPT,
 } from '../lib/card/contrast.js';
 import { auditRendered } from '../lib/card/domContrast.js';
 import { GLOSSARY } from '../lib/semantic/glossary.js';
@@ -308,8 +308,9 @@ test("GUNUNG'S FIELD IS #4A3A1E and its ink and accent are unchanged (Reyner, 20
   assert.ok(!accentAudit(CARD_TOKENS).under.includes('戊'), 'the accent floor');
   assert.equal(brassTextFor(g), BRASS.light.text, 'brass text must no longer fall back');
 
-  // STILL PROPOSED. This fixed the card's contrast, not the token's approval.
-  assert.equal(g.approved, false, 'the triple is Reyner\'s to rule and he has not ruled it');
+  // The field ruling and the approval ruling were separate, and in that order:
+  // 08-15 fixed the CARD's contrast, then 08-15 approved the TOKEN.
+  assert.equal(g.approved, true);
   assert.ok(luminance(g.ink) > luminance(g.field), 'Gunung must stay a light-ink token');
 });
 
@@ -793,22 +794,54 @@ test('§8.11 TWO EXPORT TARGETS: share is the canvas, download is the object', (
   }
 });
 
-test('THE ACCENT FLOOR IS DERIVED FROM THE LOCKED SET, never hardcoded', () => {
+test('THE ACCENT FLOOR IS FROZEN AT ITS 08-13 MEASUREMENT, not derived any more', () => {
   // Spec §6.6. A TOKEN report — `components/cards/Card.js` never calls it. The
-  // bar is the locked set's own worst case, not WCAG: accent is non-text.
-  const { floor, under, rows } = accentAudit(CARD_TOKENS);
-  assert.ok(Math.abs(floor - 3.31) < 0.01, `the floor moved to ${floor.toFixed(2)}`);
-  assert.ok(!under.includes('丙'), 'Matahari DEFINES the floor and cannot fail it');
-  // 戊 Gunung LEFT this list on 2026-08-15 (3.02 -> 7.18) when its field darkened.
-  // The two that remain are LIGHT fields and are a separate question.
-  assert.deepEqual(under.sort(), ['己', '癸'].sort(), 'Taman 3.26, Embun 3.05');
-  for (const stem of under) {
-    assert.equal(CARD_TOKENS[stem].approved, false, `${stem} is LOCKED and under the floor`);
+  // bar is the ruled set's own worst case, not WCAG: accent is non-text.
+  //
+  // ── WHY IT STOPPED BEING DERIVED (2026-08-15) ──────────────
+  // Deriving it from the `approved: true` rows was right while five were locked
+  // and five proposed. With ALL TEN approved it becomes the set's own minimum,
+  // `under` comes back empty, and the guard degrades into an assertion that a set
+  // cannot be worse than its worst member — reporting "all clear" at the exact
+  // moment two ruled tokens sit below the bar.
+  const { floor, under, below, rows } = accentAudit(CARD_TOKENS);
+  assert.equal(floor, ACCENT_FLOOR);
+
+  // THE CONSTANT IS ITS OWN DERIVATION, recomputed from the five hexes the floor
+  // was read off on 08-13 — frozen because those hexes are history and do not
+  // move, not because someone typed the number.
+  assert.equal(ACCENT_FLOOR, accentFloorFromLocked());
+  // And it PRINTS as 3.31, which is the number in every doc and report. The true
+  // measurement is 3.3075: freezing the rounded-up 3.31 instead put the bar above
+  // the token that defines it and reported Matahari as failing its own floor.
+  assert.equal(ACCENT_FLOOR.toFixed(2), '3.31');
+  assert.ok(ACCENT_FLOOR < 3.31, 'the constant must be the measurement, not its presentation');
+
+  // AND THE DEGENERATE CASE IS PINNED, so nobody re-derives it by accident.
+  const derived = Math.min(...Object.values(CARD_TOKENS).map((t) => contrast(t.accent, t.field)));
+  assert.ok(derived < ACCENT_FLOOR,
+    'if the set minimum ever rises above the frozen floor, deriving becomes safe again');
+  assert.ok(Math.abs(derived - 3.05) < 0.01, 'Embun is the set minimum at 3.05');
+
+  // Two approved tokens sit BELOW the floor and are named rather than averaged
+  // away. Both are light fields, where accent has less room between field and ink.
+  assert.deepEqual(below.sort(), ['己', '癸'].sort(), 'Taman 3.26, Embun 3.05');
+  assert.deepEqual([...ACCENT_EXEMPT].sort(), below.sort(),
+    'ACCENT_EXEMPT must name exactly the approved tokens under the floor');
+  for (const stem of below) {
     assert.ok(inkIsDark(CARD_TOKENS[stem]), `${stem} should be a light field`);
   }
-  // Derived, not written down: approving a lower token moves the bar on its own.
-  const withEmbun = accentAudit({ ...CARD_TOKENS, '癸': { ...CARD_TOKENS['癸'], approved: true } });
-  assert.ok(withEmbun.floor < floor, 'approving a lower token must lower the floor with no edit');
+  // Excused, so nothing gates on them — but still measured and still printed.
+  assert.deepEqual(under, [], 'the exempt two must not be reported as unexcused failures');
+  for (const stem of ACCENT_EXEMPT) {
+    const row = rows.find((r) => r.stem === stem);
+    assert.ok(row.ratio > 0, `${stem}'s real ratio must still be reported, not skipped`);
+    assert.equal(row.exempt, true);
+  }
+
+  assert.ok(!below.includes('丙'), 'Matahari DEFINES the floor and cannot fail it');
+  // 戊 Gunung left this list on 2026-08-15 (3.02 -> 7.18) when its field darkened.
+  assert.ok(!below.includes('戊'), 'Gunung cleared the floor with its new field');
   assert.equal(rows.length, 10);
 });
 
@@ -832,12 +865,18 @@ test('the watermark sits TOP-RIGHT on both cards and both polarities', () => {
   }
 });
 
-test('exactly five tokens are approved, and the unapproved five are flagged', () => {
-  // Not a target — a tripwire. When Reyner approves one, this number moves and
-  // the failure is the prompt to update LIVE STATE and the deferred register.
-  assert.equal(APPROVED_STEMS.length, 5);
-  const unapproved = STEMS.filter((s) => !CARD_TOKENS[s].approved);
-  assert.deepEqual(unapproved, ['甲', '丁', '戊', '己', '癸']);
+test('ALL TEN tokens are approved, and this stays a tripwire', () => {
+  // It fired as designed on 2026-08-15: it read "exactly five" for two weeks and
+  // failed the moment Reyner ruled the other five, which is the prompt it exists
+  // to be. It is not retired now that the number is ten — it should fail again if
+  // anyone adds an eleventh token or flips one back to proposed.
+  assert.equal(APPROVED_STEMS.length, 10);
+  assert.equal(STEMS.length, 10, 'an eleventh archetype needs a colour ruling first');
+  assert.deepEqual(STEMS.filter((s) => !CARD_TOKENS[s].approved), []);
+  // The gate is still wired and still answers per stem, so an unapproved token
+  // added later cannot reach a route just because the count looks right.
+  for (const stem of STEMS) assert.equal(tokenApproved(stem), true, stem);
+  assert.throws(() => tokenApproved('X'), /No card token/);
 });
 
 // ── HEAD AND HEADLINE (2026-08-03 ruling 2, and 08-01 decision 3) ──
