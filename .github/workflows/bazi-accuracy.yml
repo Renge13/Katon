@@ -35,7 +35,7 @@ jobs:
 
       # The 13-chart Joey Yap fixture: pillars, Ten Gods, no-hour stability.
       - name: Engine validation report
-        run: npm run test:engine
+        run: npm run report:engine
 
       # Locks the naive-wall-clock convention and the 流派2 provider.
       - name: Time-convention lock
@@ -66,7 +66,7 @@ jobs:
 
       # Paywall fail-closed fence + webhook idempotency.
       - name: Paywall forge tests
-        run: npm run test:forge
+        run: npm run report:forge
 
       - name: Types
         run: npm run typecheck
