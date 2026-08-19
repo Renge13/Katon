@@ -61,8 +61,14 @@ derivation. The 0.815 factor (`763/936`) exists because type had to come down wi
 measure*. A one-word headline is not measure-constrained — "TEAK" at 139 occupies 63% of the
 763px inner width, so it cannot wrap. Add `SCALE.kicker = 30` (the live card's eyebrow size).
 
-**⚠ `癸` Embun is `"Morning Dew"` — no article.** Nine of ten `arketipe.name_en` values in
-`glossary.json` start with "The"; Embun does not. Do not write the kicker rule as "first word".
+**⚠ Do not write the kicker rule as "first word".** This warning stood on `癸` Embun being
+`"Morning Dew"` while the other nine started with "The". **Reyner ruled that away on 2026-08-19:
+Embun is `"The Morning Dew"`, and all ten now carry the article.** The warning survives its own
+premise and is deliberately kept — the rule is about what the field MAY contain, not about what it
+happens to contain today, and `splitName`'s article-less branch is still pinned by two unit cases in
+`tests/card.spec.mjs`. Cost of the article, measured on the real layout the same day: 癸 gains a
+kicker on top of an already two-line headline (248.3 -> 323.9 export px), the `flex-grow:1` hook
+paragraph absorbs all 75.6px, and 302.3px of headroom remain.
 
 ```js
 const words = String(data.nameEn || '').split(' ');

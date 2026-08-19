@@ -599,16 +599,23 @@ test('THE OBJECT DIMENSIONS ARE UNCHANGED BY THE POLISH PASS', () => {
 });
 
 test('THE KICKER IS A LEADING ARTICLE, not the first word (甲 vs 癸)', () => {
-  // Spec §2.1 and §7.2. Nine of ten name_en values start with "The"; 癸 Embun is
-  // "Morning Dew". A first-word rule would print MORNING as a kicker and leave
-  // DEW as the whole headline, which is not the archetype's name.
+  // Spec §2.1 and §7.2. THE RULE STAYS A LEADING-ARTICLE RULE even though all ten
+  // name_en values now carry an article — 癸 Embun became "The Morning Dew" on
+  // 2026-08-19 (Reyner's ruling). The two unit cases below are properties of the
+  // FUNCTION, asserted on literals, and they must hold whatever the fixture says:
+  // a first-word rule would print MORNING as a kicker and leave DEW as the whole
+  // headline, which is not the archetype's name.
   assert.deepEqual(splitName('The Teak'), { kicker: 'The', head: ['Teak'] });
   assert.deepEqual(splitName('Morning Dew'), { kicker: null, head: ['Morning', 'Dew'] });
-  // Every real value goes through the same rule rather than a table.
+  // THE FIXTURE CLAIMS ARE READ FROM THE GLOSSARY, NEVER TYPED. The 08-19 ruling
+  // broke this test precisely because the old version hardcoded "Morning Dew" in
+  // three places, so a one-field content ruling failed an assertion about the card
+  // instead of being carried by it.
   const names = STEMS.map((s) => GLOSSARY.arketipe[s].name_en);
-  assert.ok(names.includes('Morning Dew'), 'the fixture must still contain the article-less name');
-  assert.equal(names.filter((n) => splitName(n).kicker === null).length, 1,
-    'exactly one archetype has no article');
+  assert.equal(names.filter((n) => splitName(n).kicker === null).length, 0,
+    'all ten archetypes carry a definite article (ruled 2026-08-19)');
+  assert.deepEqual(names.filter((n) => splitName(n).head.length > 1), ['The Morning Dew'],
+    'exactly one archetype has a multi-word head, and it is the one that reduces to 0.80');
 
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
   const base = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
@@ -616,14 +623,20 @@ test('THE KICKER IS A LEADING ARTICLE, not the first word (甲 vs 癸)', () => {
     React.createElement(CardA, { data: { ...base, stem, nameEn } }));
 
   // 甲: a kicker, and a ONE-line headline at the full 139.
-  const jati = render('甲', 'The Teak');
+  const jati = render('甲', GLOSSARY.arketipe['甲'].name_en);
   assert.ok(jati.includes('>The</div>'), '甲 must render "The" as its own kicker element');
   assert.ok(jati.includes('font-size:139px'), '甲 headline must be the full 139');
 
-  // 癸: no kicker, and a TWO-line headline reduced to 0.80 because "MORNING" at
-  // 139 leaves only 23px of the 763px measure.
-  const embun = render('癸', 'Morning Dew');
-  assert.ok(!embun.includes('>The</div>'), '癸 must render no kicker');
+  // 癸: THE ONLY CARD CARRYING BOTH A KICKER AND A TWO-LINE HEADLINE, which is new
+  // as of the 08-19 ruling and is what the article cost. The headline still comes
+  // down to 0.80 because "MORNING" at 139 leaves only 23px of the 763px measure.
+  // MEASURED ON THE REAL LAYOUT, 2026-08-19, `npm run preview:cards` read through a
+  // browser: the headline block grows 248.3 -> 323.9 export px, and the hook
+  // paragraph is `flex-grow:1`, so it absorbs the whole 75.6px and keeps 302.3px
+  // (5.08 lines) of headroom. 癸 does not clip and is not the tightest card — 丁 is,
+  // at 280.7px. That is why the ruling needed no layout change to go with it.
+  const embun = render('癸', GLOSSARY.arketipe['癸'].name_en);
+  assert.ok(embun.includes('>The</div>'), '癸 must NOW render a kicker as well');
   assert.ok(embun.includes('>Morning</div>') && embun.includes('>Dew</div>'),
     '癸 headline must be two lines');
   assert.ok(embun.includes(`font-size:${139 * 0.8}px`), '癸 headline must come down for measure');
