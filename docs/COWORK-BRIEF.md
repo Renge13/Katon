@@ -285,6 +285,40 @@ past a full green suite because no test could observe the surface it broke. That
 
 | 43 | **COWORK (2026-08-19). A READING FAILURE, NOT A VERIFICATION FAILURE, and the distinction is the whole row.** The command was RUN, and run correctly: `grep -rln "bazi-validation.fixture" tests/`. Its output was then restated in prose as *"returns nine specs"* and the nine were listed. It returns **13 files, eleven of them inside the 24 gates** — `stage3-facts.spec.mjs` and `time-convention.spec.ts` were dropped from the list, and the 13th, `tests/bazi-profile-experiment.mjs`, was run by no script at all. **The conclusion drawn from it was correct and in fact understated;** only the count was wrong | **THE FIFTH INSTANCE THIS SESSION, and the one that shows row 42 was filed one notch too narrow.** Row 42 said the failure was reading a PARTIAL artifact as the whole. This one had the whole artifact, on screen, correct — and lost accuracy in the retelling. The other four: 22-vs-24 hedging matches (row 36), `.git/config` line attribution, PR #44's contents, the colour table read as a rendered surface (row 39). **THE RULE: when a command answers the question, QUOTE ITS OUTPUT. Do not re-derive the answer in a sentence beside it.** A paraphrase of a command's output is a second measurement taken by hand, from memory, with none of the first one's guarantees — and it is the one that ends up in the doc. **Why it is cheap to obey:** the quote is shorter than the paraphrase. Every one of these five cost a round to unwind and none of them would have survived a paste |
 
+### A CLASS, NOT AN INCIDENT: the instrument that describes itself instead of measuring
+
+**Promoted from the rows on 2026-08-19, because it has now happened five times in three
+different materials — code, an external service, and a guard written to catch it.** The rows
+below stay where they are; this section is what they have in common, and it is predictive in a
+way the individual rows are not.
+
+**THE SHAPE.** An instrument is consulted, answers confidently, and what it actually reports is
+its own declared intent rather than the state of the thing. It cannot fail loudly, because from
+the outside a component that returns *less than it was asked for* is indistinguishable from one
+that succeeded. The five:
+
+| # | the instrument | what it reported | what was true |
+|---|---|---|---|
+| 1 | `TEXT_ROLES`, audited since it was written | every role's colour, cleanly | the table was **consumed by nothing** — the card set `color` once on its root. The audit read the intention and the card was never measured (fixed 2026-08-13) |
+| 2 | `audit:card-contrast`, on Card B's sheen | `PASS`, exit 0 | *"UNDER AA IN THE CORNER"* sat twenty lines lower **in the same output**. The failures were computed and then dropped before the exit code (fixed 2026-08-17) |
+| 3 | the accent and sheen exemption reports | the excused tokens as `clears` | they were failing at 3.68 and 3.61. The row was recorded inside the `!exempt` branch, so the exemption suppressed **the number it exists to keep visible** (`21d690a`, then again 2026-08-19) |
+| 4 | Google Fonts' `text=` subsetter (row 35) | a subset, HTTP 200 | it declared **63 of the 65 glyphs requested**, dropping 申, which the card draws in a pillar cell |
+| 5 | the orphan guard, `scripts/test-all.mjs` | `0 orphans` | the comment **naming the file the guard was built for** counted as a reference to it, so the guard was blinded by its own documentation (2026-08-19) |
+
+**THE CHECK, and it is one sentence: compare the ANSWER to the QUESTION, never to itself.** Ask
+what the instrument would print if the thing were broken, and if that is the same as what it
+prints now, it is not an instrument. `domContrast.js`'s own header says the general form —
+*"an assertion that reads the intent it is checking is not an assertion"* — and instance 1 is
+that header's warning coming true in the file it warns in.
+
+**A SIBLING TRAP, worth its own line because the fix is different.** #5 was first "verified" by a
+run that began with `git stash` — which stashed **the guard along with the change under test**, so
+the run exercised the previous version and reported a pass. **Any verification that stashes,
+checks out, or reinstalls before running has to be asked whether it removed the instrument too.**
+The cheap defence is to make the instrument runnable on its own in a second (`npm test -- --list`
+now prints the orphan scan for exactly this reason); a guard nobody can exercise cheaply is a
+guard nobody verifies.
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
