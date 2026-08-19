@@ -1243,7 +1243,11 @@ test('a Stage 6 failure regenerates ONCE, and the retry carries the directive', 
   });
 });
 
-test('failing TWICE serves the floor and flags the chart for QA', async () => {
+test('failing THREE times serves the floor and flags the chart for QA', async () => {
+  // WAS "failing TWICE" until 2026-08-19, when the regeneration budget went from
+  // one to two on the depth-sweep evidence (gate floor 18% -> 3%). The shape of
+  // the guarantee is unchanged: the budget is spent, then the floor, never the
+  // secondary provider.
   __clearMemCache();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
@@ -1251,9 +1255,9 @@ test('failing TWICE serves the floor and flags the chart for QA', async () => {
       fetchImpl: async () => { calls += 1; return geminiSays(BAD); },
     });
 
-    assert.equal(calls, 2, 'one original plus one regeneration, then stop');
+    assert.equal(calls, 3, 'one original plus TWO regenerations, then stop');
     assert.equal(out.source, 'module_assembly');
-    assert.equal(out.qa_flag, 'stage6_failed_twice');
+    assert.equal(out.qa_flag, 'stage6_budget_spent');
     assert.ok(out.findings.length > 0, 'the reason must survive onto the QA row');
     // The floor is engine content, so no gate ran over it. Marked, not faked.
     assert.equal(out.stage6_version, `${STAGE6_VERSION}-floor`);
@@ -1282,6 +1286,64 @@ test('a floor result is NOT stored, and says so in its return value', async () =
     // Not even as an unservable row: a stored floor would be a cache hit for
     // every later request, and includeUnvalidated is the QA door, not a loophole.
     assert.equal(await readCache(out.cache_key, { includeUnvalidated: true }), null);
+  });
+});
+
+test('THE REGENERATION BUDGET IS REACHABLE — it was INERT before 2026-08-19', async () => {
+  // ── THIS TEST EXISTS BECAUSE THE ARGUMENT DID NOTHING ──────
+  // A single `attempt <= config.attemptsPerProvider` loop bounded transport
+  // retries AND regenerations together, so with attemptsPerProvider 2, budgets of
+  // 1, 2 and 3 all produced exactly TWO provider calls. Measured before the fix,
+  // which is the only reason it was noticed: setting the budget to 2 would have
+  // changed nothing and looked like it had.
+  //
+  // So the assertion is not "the budget is 2" - that is one constant and easy to
+  // read. It is that MOVING the budget MOVES the call count, which is the property
+  // that was false. A future change to attemptsPerProvider cannot silently cap it
+  // again without failing here.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    for (const [budget, expected] of [[0, 1], [1, 2], [2, 3], [3, 4]]) {
+      __clearMemCache();
+      let calls = 0;
+      await renderReading(CHART_1, {
+        validationRetries: budget,
+        fetchImpl: async () => { calls += 1; return geminiSays(BAD); },
+      });
+      assert.equal(calls, expected,
+        `validationRetries ${budget} must produce ${expected} calls, not ${calls} - `
+        + 'the budget is capped by something else again');
+    }
+  });
+});
+
+test('A TRANSPORT FAILURE DOES NOT SPEND THE REGENERATION BUDGET', async () => {
+  // The loop's own comment claimed this for months and the loop did not do it:
+  // "sharing one counter between them would let two timeouts consume the budget
+  // for a validation problem that was never diagnosed." They shared one counter.
+  //
+  // A 503 and a reading that says "kuat" about a weak chart are different events.
+  // Here the first call 503s and every later one fails the GATE, so the full
+  // regeneration budget must still be available afterwards: 1 transport failure
+  // + 1 original + 2 regenerations = 4 calls. Under the old shared counter this
+  // stopped at 2.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    const out = await renderReading(CHART_1, {
+      fetchImpl: async () => {
+        calls += 1;
+        if (calls === 1) return { ok: false, status: 503, text: async () => 'x', json: async () => ({}) };
+        return geminiSays(BAD);
+      },
+    });
+    assert.equal(calls, 4, 'a 503 must cost the TRANSPORT budget and leave both regenerations');
+    // And the gate attempts are distinguishable from the transport one on the
+    // attempts[] trail, which is what the measurement harness reads.
+    const gateAttempts = out.attempts.filter((a) => a.stage6);
+    assert.equal(gateAttempts.length, 3, 'three attempts actually reached Stage 6');
+    assert.equal(out.attempts.filter((a) => a.error).length, 1, 'exactly one transport failure');
+    assert.equal(out.source, 'module_assembly', 'and the budget spent still lands on the floor');
   });
 });
 
