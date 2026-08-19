@@ -96,7 +96,10 @@ function main() {
     worst[r.stem] = all[0];
   }
   const accent = accentAudit(CARD_TOKENS);
-  const brassFallback = new Set(brassTextFallbacks(CARD_TOKENS).map((f) => f.stem));
+  // PER CARD since 2026-08-19 - Card A judges brass on the flat field, Card B
+  // against the sheen ground, and four tokens differ. See brassTextFor.
+  const brassFallbackA = new Set(brassTextFallbacks(CARD_TOKENS, 'A').map((f) => f.stem));
+  const brassFallbackB = new Set(brassTextFallbacks(CARD_TOKENS, 'B').map((f) => f.stem));
 
   const html = `<!doctype html>
 <meta charset="utf-8">
@@ -149,11 +152,16 @@ would report all clear at the exact moment a token sat below the bar. Under it:
     ? ' - both exempt and listed in <code>ACCENT_EXEMPT</code>' : ''}. Both are light fields, where
 accent has less room between a pale field and a dark ink. Accent is decoration and large UI, so
 WCAG 4.5 was never the test for it.
-<br><br><b>2. Brass on text fails on ${brassFallback.size} tokens</b> and falls back to ink per
-token: <span class="no">${esc([...brassFallback].join(', '))}</span>. Two are dark fields, which the
-spec did not expect - pale brass is a LIGHT metallic and the brightest fields cannot carry it. Those
-tokens draw their name and badge labels in ink; brass stays on the rim, the seal, the cell border
-and the pill. Nothing was substituted silently.
+<br><br><b>2. Brass on text falls back to ink per token AND PER CARD.</b> Card A judges brass on the
+flat field and falls back on <span class="no">${esc([...brassFallbackA].join(', '))}</span>
+(${brassFallbackA.size} of 10). Card B carries the sheen, judges brass against every stop it
+composites, and falls back on <span class="no">${esc([...brassFallbackB].join(', '))}</span>
+(${brassFallbackB.size} of 10). The split is
+<b>${esc([...brassFallbackB].filter((s) => !brassFallbackA.has(s)).join(', ') || 'none')}</b>: brass
+on the free card, ink on the paid one, because only the paid one has a wash over the words. Two of
+Card A's failures are dark fields, which the spec did not expect - pale brass is a LIGHT metallic and
+the brightest fields cannot carry it. Fallback tokens draw their name and badge labels in ink; brass
+stays on the rim, the seal, the cell border and the pill. Nothing was substituted silently.
 <br><br><b>3. The sheen costs contrast in the lit corner.</b> Card B's sheen is white-alpha over the
 whole object, and on a light-ink token white moves the surface toward the ink - under the headline.
 Ruled at 0.15 and NOT reduced here; the numbers are in <code>npm run audit:card-contrast</code>.
@@ -193,7 +201,11 @@ Dynamic ${esc(r.data.tags.dynamic.join(', ')) || '(none)'}${r.data.tags.dynamic.
 Badges ${esc(r.data.badges.map((b) => b.label).join(', ')) || '(none)'}.
 Worst contrast <b>${worst[r.stem].ratio.toFixed(2)}</b> on ${esc(JSON.stringify(worst[r.stem].text.slice(0,22)))}, floor ${MIN_CONTRAST} (WCAG AA)${AA_EXEMPT.includes(r.stem) ? " <span class=\"no\">- cannot reach AA, Reyner to rule</span>" : ""}.
 Finish ${inkIsDark(CARD_TOKENS[r.stem]) ? '<b>inverted</b> (light field)' : 'as drawn'}.
-Brass text ${brassFallback.has(r.stem) ? '<span class="no">under AA - drawn in ink instead</span>' : 'ok'}.
+Brass text ${brassFallbackA.has(r.stem)
+    ? '<span class="no">under AA on BOTH cards - drawn in ink</span>'
+    : brassFallbackB.has(r.stem)
+      ? '<span class="no">brass on Card A, ink on Card B</span> (the sheen, not the field)'
+      : 'ok on both cards'}.
 Accent on field ${accent.rows.find((x) => x.stem === r.stem).ratio.toFixed(2)}${accent.below.includes(r.stem) ? ` <span class="no">- under the ${accent.floor.toFixed(2)} floor${accent.under.includes(r.stem) ? '' : ', exempt'}</span>` : ''}.
 Footer <b>${esc(r.data.footer.left)}</b>${r.data.footer.gender ? '' : ' (null gender: date and source only)'}.
 Card B headroom <b data-headroom="${esc(r.stem)}">measuring</b>, at the ${MAX_LABEL_MEANING}-char ceiling

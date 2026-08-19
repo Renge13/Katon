@@ -69,6 +69,7 @@
 import React from 'react';
 import { tokenFor, brassFor, inkIsDark } from '../../lib/card/tokens.js';
 import { contrast, composite } from '../../lib/card/contrast.js';
+import { HAN_FAMILY, hanFontFaceCss } from '../../lib/card/hanFont.js';
 
 const E = React.createElement;
 
@@ -104,7 +105,17 @@ export const OBJECT_ID_SUFFIX = '-object';
 const FONT = 'var(--font-archivo), Archivo, system-ui, -apple-system, sans-serif';
 
 /** The eight characters and the seal. Data you point at, never words you read. */
-const HAN = 'Georgia, "Times New Roman", serif';
+// THE HANZI FACE. Georgia has NO CJK GLYPHS, so until 2026-08-17 all four sites
+// below - pillar stem, pillar branch, seal, watermark - were drawn by whatever
+// the OS substituted, and the EXPORTED PNG differed between iPhone, Android and
+// Windows. On the object whose whole job is to travel, that is a defect.
+//
+// Ruled 2026-08-17: Noto Serif TC, self-hosted, subsetted to the 65 glyphs the
+// card can draw. TRADITIONAL, not Simplified - the set carries the traditional
+// forms (Wound, Kill, Canopy, Noble, Wealth, Post-horse), and SC would render
+// those with mainland shapes against a repo that writes traditional throughout.
+// The Georgia stack stays BEHIND it as the fallback.
+const HAN = `"${HAN_FAMILY}", Georgia, "Times New Roman", serif`;
 
 /**
  * WCAG AA. Asserted over the RENDERED MARKUP in tests/card.spec.mjs.
@@ -241,7 +252,61 @@ export const DIM_EXEMPT = [
 export const AA_EXEMPT = [];
 
 /**
- * ── §6.4, MEASURED: BRASS TEXT FAILS ON FIVE OF TEN TOKENS ──
+ * Tokens excused from the SHEEN gate — Card B's finish putting full-opacity text
+ * under AA in the lit band.
+ *
+ * ── IT WAS EMPTY, AND THAT IS WHY THE AUDIT EXITED 1 ───────
+ * Added 2026-08-17 with nothing in it, deliberately. The audit had been PRINTING
+ * "UNDER AA IN THE CORNER" since the finish shipped and never letting that reach
+ * `unexpected`, so the per-token line said PASS, the process exited 0, and the
+ * failure sat twenty lines further down the same output. An instrument that
+ * reports the broken state as passing is worse than no instrument, because it is
+ * evidence.
+ *
+ * SAME STANDING AS ITS THREE SIBLINGS — `AA_EXEMPT`, `DIM_EXEMPT`,
+ * `ACCENT_EXEMPT`: **a report, not a permission. It can only shrink, and nothing
+ * joins it without someone editing this line.** Putting a stem here is a ruling
+ * that the finish is worth the ratio on that token, and it is Reyner's to make.
+ * It is NOT the way to make the audit green.
+ *
+ * ── 乙 AND 丙. RULED BY REYNER 2026-08-19, WITH ALL THREE OPTIONS PRICED ──
+ * Their ratios stay PRINTED by `npm run audit:card-contrast`, on their own rows,
+ * every run. This is what an excused defect looks like when it is still known.
+ *
+ * WHAT FAILS: the sheen is white-alpha over the whole object, so on a LIGHT-INK
+ * token it moves the surface TOWARD the ink. 乙 Bambu 3.68 and 丙 Matahari 3.61
+ * against 4.5. On these two it is EVERY full-opacity role rather than one label,
+ * because their brass had already fallen back and so all of it is drawn in ink.
+ *
+ * THE THREE CHEAPER FIXES WERE TRIED AND ARE GONE, not skipped:
+ *   - PLACEMENT IS REFUTED. All 72 angles swept (`npm run probe:sheen`); the best
+ *     any angle reaches is 3.90, still under. The highlight is a BAND across the
+ *     top, not a corner, so there is no rotation that puts it where the text is
+ *     not.
+ *   - THE BRASS FALLBACK CANNOT REACH THEM. It is the mechanism that closed 甲 丁
+ *     戊 壬 under A2, and it closes nothing here: 乙 and 丙 fell back to ink on the
+ *     FLAT card, so there is no brass left to retreat from.
+ *   - MASKING IS NOT A FOURTH OPTION. Since it is all the text and not one run, a
+ *     mask that spares the text is the sheen removed.
+ *
+ * WHAT REYNER REJECTED, AND WHAT IT WOULD HAVE COST:
+ *   - CAPPING SHEEN ALPHA at 0.048, or at 0.007 to clear both. 0.007 is an ABSENT
+ *     finish on Matahari, not a subtler one.
+ *   - DARKENING THE FIELDS. That would darken Matahari TWICE IN FIVE DAYS, after
+ *     #FF4F12 -> #CC3F0E on 08-13, on the token whose whole job is to be the
+ *     bright half of Fire.
+ *
+ * AND THE STANDING ARGUMENT, which is why this is a ruling and not a lowered
+ * floor: 4.5 is a WEB accessibility floor for navigable interfaces, and Card B is
+ * a downloaded PNG. It inherited the bar by analogy, never by scope. Reyner
+ * accepts the legibility cost on two of ten paid cards KNOWINGLY.
+ *
+ * SHEEN, SHEEN_ANGLE and lib/card/tokens.js are untouched by this ruling.
+ */
+export const SHEEN_EXEMPT = ['乙', '丙'];
+
+/**
+ * ── §6.4, MEASURED: BRASS TEXT FAILS ON EIGHT OF TEN TOKENS ──
  *
  * RULED AS BUILT, 2026-08-15. Reyner read the cards and found every one legible,
  * which is the fallback doing its job. It is not provisional and there is to be
@@ -259,7 +324,8 @@ export const AA_EXEMPT = [];
  *     丁 Api Unggun  5.54  ok        壬 Samudra    6.46  ok
  *     戊 Gunung      6.00  ok        癸 Embun      4.19  FAILS
  *
- * FOUR failures, down from five: 戊 Gunung left the list when its field went to
+ * FOUR failures ON THE FLAT FIELD (read A2 below before quoting this as the set),
+ * down from five: 戊 Gunung left the list when its field went to
  * #4A3A1E, from 2.52 to 6.00, on the same edit that emptied AA_EXEMPT. The two
  * remaining dark-field failures are the point the spec did not expect — pale
  * brass is a LIGHT metallic, so Bambu's green and Matahari's orange are not dark
@@ -267,7 +333,8 @@ export const AA_EXEMPT = [];
  *
  * THE FALLBACK IS APPLIED PER TOKEN, not per role: where brass text fails, that
  * token's brass text retreats to `ink` and brass stays on everything non-text —
- * rim, seal, cell border, cell fill, pill background. 1e still reads as the paid
+ * rim, seal, cell border, pill background (the day cell's brass FILL is gone as
+ * of 2026-08-19 — see A1 in `PillarCells`). 1e still reads as the paid
  * card on all ten, because the seal and the rim are what carry it at thumbnail
  * size.
  *
@@ -275,18 +342,104 @@ export const AA_EXEMPT = [];
  * dropping brass text from all ten because Bambu cannot hold it would spend the
  * six tokens that can. Nothing is substituted silently — this comment, the
  * `brassText` role rows and `npm run audit:card-contrast` all name it.
+ *
+ * ── A2, APPLIED 2026-08-19: THE TEST IS THE FIELD **AND THE SHEEN** ──
+ * The four rows above marked `ok` were measured on the FLAT FIELD, and on Card B
+ * brass text is not drawn on the flat field. The sheen's peak white stop sits
+ * over the region "Bintang Penolong" occupies, and it lifts the ground toward
+ * the pale brass rather than away from it, so a token that clears 4.5 flat can be
+ * under it lit. Measured on `min(field, every sheenGrounds() stop)`:
+ *
+ *     甲 Jati       5.57 -> 3.63   丁 Api Unggun 5.54 -> 3.83
+ *     戊 Gunung     6.00 -> 3.80   壬 Samudra    6.46 -> 4.12
+ *     庚 Besi Tempa 8.06 -> 4.99 ok   辛 Permata  5.78 -> 4.97 ok
+ *
+ * So the fallback set goes from FOUR to EIGHT, and the four that join it are
+ * carried by ink instead: 甲 5.96, 丁 6.20, 戊 6.34, 壬 6.71 on the same lit
+ * ground. That is the whole of A2 — four `sheen` findings closed by the
+ * mechanism that was already here, measuring the surface it was already missing.
+ *
+ * ── THE DECISION IS PER CARD, NOT PER TOKEN (Reyner, 2026-08-19) ──
+ * A2 first shipped as one pooled answer per token. The ruling to split it is
+ * right, but **the reason given for it was factually wrong and the correction
+ * belongs here rather than only in a chat log.**
+ *
+ * THE CLAIM WAS: pooling made Card A pay for Card B's finish, because 甲 丁 戊 壬
+ * fail only under the sheen and lost brass on the free card anyway.
+ *
+ * THE FACT IS: **CARD A DRAWS NO BRASS TEXT AT ALL.** All three roles that read
+ * `brassText` — `nameId`, `badgeLabelFoil`, `pillarLabelDay` — are Card B only.
+ * Card A calls `<Headline>` without `showNameId`, passes `role: 'badgeLabel'` to
+ * `<Badges>`, and has no `<PillarCells>`. That follows from the 2026-08-14 ruling
+ * that Card A carries NO FINISH. So pooling degraded nothing on Card A, and this
+ * split **changes not one pixel of either card today.** Verified: `grep -n
+ * "roleStyle('nameId'\|badgeLabelFoil\|pillarLabelDay" components/cards/Card.js`
+ * returns three sites, all inside Card B's subtree (2026-08-19).
+ *
+ * ── SO WHY KEEP IT ─────────────────────────────────────────
+ * Because the pooled version was right by ACCIDENT and this one is right by
+ * CONSTRUCTION. It is one archetype on two surfaces with different physics: Card B
+ * carries a translucent white wash and Card A does not, so the same ink on the same
+ * field is a different measurement there. Every other value already varies by card
+ * (the rim and the drop shadow are Card B only). And it is a GUARD: the moment
+ * anyone gives Card A a `brassText` role, that card starts answering on its own
+ * physics instead of inheriting a sheen it does not have. The test pins the
+ * currently-unobservable half deliberately, so the guard cannot rot unnoticed.
+ *
+ *     CARD A decides on the FLAT FIELD          -> 乙 丙 己 癸 fall back (4)
+ *     CARD B decides on min(field, sheen stops) -> 甲 乙 丙 丁 戊 己 壬 癸 (8)
+ *
+ * No token moves under AA by this, on either card: A's four fallbacks were already
+ * failing on the flat field, and ink clears AA on all ten fields.
+ *
+ * `card` IS REQUIRED AND UNVALIDATED VALUES THROW. A default would let a caller
+ * silently take one card's answer for the other, which is the failure this split
+ * exists to prevent, and it is the same reason `roleStyle` throws on an unknown
+ * role rather than falling back to something plausible.
+ *
+ * WHAT NONE OF THIS CLOSES: 乙 Bambu and 丙 Matahari. Their brass had already
+ * retreated to ink on the flat card, so there is nothing left to retreat from,
+ * and their INK is what is under AA in the lit band — 3.68 and 3.61. That is
+ * SHEEN_EXEMPT's problem and Reyner ruled it on 2026-08-19; see the list.
  */
-export function brassTextFor(token) {
-  const brass = brassFor(token);
-  const ratio = contrast(brass.text, token.field);
-  return ratio >= MIN_CONTRAST ? brass.text : token.ink;
+export const CARD_SURFACES = ['A', 'B'];
+
+function assertSurface(card) {
+  if (!CARD_SURFACES.includes(card)) {
+    throw new Error(
+      `brass text needs a card surface, one of ${CARD_SURFACES.join(' / ')}, got ${JSON.stringify(card)}`
+      + ' — Card A decides on the flat field, Card B on the sheen ground, and they differ on four tokens',
+    );
+  }
 }
 
-/** Tokens where brass text does not reach AA and has retreated to ink. */
-export function brassTextFallbacks(tokens) {
+export function brassTextFor(token, card) {
+  return brassTextWorst(token, card) >= MIN_CONTRAST ? brassFor(token).text : token.ink;
+}
+
+/**
+ * The worst ground this token's brass text has to hold ON THIS CARD.
+ *
+ * Card B takes the minimum across ALL sheen stops rather than the largest alpha —
+ * the same rule `sheenGrounds()` states for its own callers, and for the same
+ * reason: white hurts on a dark field and the 7% black hurts on a light one, so
+ * "peak alpha" gets one branch right by luck. Card A has no overlay at all, so its
+ * worst ground is its only ground.
+ */
+export function brassTextWorst(token, card) {
+  assertSurface(card);
+  const brass = brassFor(token);
+  const grounds = card === 'B'
+    ? [token.field, ...sheenGrounds(token).map((g) => g.ground)]
+    : [token.field];
+  return grounds.reduce((worst, ground) => Math.min(worst, contrast(brass.text, ground)), Infinity);
+}
+
+/** Tokens where brass text does not reach AA on this card and has retreated to ink. */
+export function brassTextFallbacks(tokens, card) {
   return Object.entries(tokens)
-    .filter(([, t]) => contrast(brassFor(t).text, t.field) < MIN_CONTRAST)
-    .map(([stem, t]) => ({ stem, ratio: contrast(brassFor(t).text, t.field) }));
+    .map(([stem, t]) => ({ stem, ratio: brassTextWorst(t, card) }))
+    .filter((r) => r.ratio < MIN_CONTRAST);
 }
 
 /**
@@ -313,12 +466,18 @@ export function roleStyle(role, palette) {
   return { color, opacity: r.opacity };
 }
 
-/** The token's three hexes, plus the two values the brass finish adds. */
-export function paletteFor(token) {
+/**
+ * The token's three hexes, plus the two values the brass finish adds.
+ *
+ * `card` is REQUIRED because `brassText` differs between the two surfaces — see
+ * `brassTextFor`. It is not defaulted: a palette that quietly answered for Card A
+ * while rendering Card B is precisely the silent adoption the split forbids.
+ */
+export function paletteFor(token, card) {
   const brass = brassFor(token);
   return {
     ...token,
-    brassText: brassTextFor(token),
+    brassText: brassTextFor(token, card),
     brassInk: brass.ink,
     // The pill's ground, declared solid so domContrast can resolve it — see <Pill>.
     brass: brass.solid,
@@ -622,18 +781,74 @@ function Rim({ token, spec, px, id }) {
  * instead — `npm run audit:card-contrast` prints the row — and the fix, if
  * Reyner wants one, is the same field darkening that fixed Matahari on 08-13.
  */
+export const SHEEN_ANGLE = 158;
+
+/**
+ * THE SHEEN AS DATA, so the audit can measure the thing the card draws.
+ *
+ * It used to be two CSS strings inline in <Sheen>, and the audit carried its own
+ * copy of the peak alpha — `composite('#ffffff', field, .15)` written out by hand.
+ * That is two sources for one fact, and it went wrong in the direction these
+ * always go: the audit's copy modelled only the DARK branch, so the three light
+ * fields were skipped entirely and the black stop at the far corner was measured
+ * by nothing. The CSS is now DERIVED from these stops, and `sheenGrounds()` below
+ * is what the audit reads, so the two cannot drift.
+ *
+ * `light` is the branch for a LIGHT FIELD (dark ink, `inkIsDark` true). It is
+ * inverted on purpose: a hard white highlight along the top edge and a soft black
+ * at the far corner, so the gloss reads as a lit edge with a shadow under it
+ * rather than as a wash that would simply grey the card out.
+ */
+export const SHEEN = {
+  dark: [
+    { rgb: '255,255,255', a: 0.15, pos: 0 },
+    { rgb: '255,255,255', a: 0.05, pos: 26 },
+    { rgb: '255,255,255', a: 0, pos: 46 },
+    { rgb: '255,255,255', a: 0, pos: 100 },
+  ],
+  light: [
+    { rgb: '255,255,255', a: 0.62, pos: 0 },
+    { rgb: '255,255,255', a: 0.12, pos: 24 },
+    { rgb: '0,0,0', a: 0, pos: 46 },
+    { rgb: '0,0,0', a: 0.07, pos: 100 },
+  ],
+};
+
+// `.15`, not `0.15`, and a bare `0` for zero — the shape the cards already ship
+// and the shape tests/card.spec.mjs matches on. Derived rather than retyped.
+const sheenAlpha = (a) => (a === 0 ? '0' : String(a).replace(/^0/, ''));
+
+export function sheenCss(token) {
+  const stops = SHEEN[inkIsDark(token) ? 'light' : 'dark'];
+  return `linear-gradient(${SHEEN_ANGLE}deg, ${stops
+    .map((s) => `rgba(${s.rgb},${sheenAlpha(s.a)}) ${s.pos}%`).join(', ')})`;
+}
+
+/**
+ * Every opaque surface the sheen can put under a word on this token, as hexes.
+ *
+ * A CALLER MUST TAKE THE WORST OF THESE, not the largest alpha, and the reason is
+ * that the two branches hurt in opposite directions. On a dark field white is the
+ * enemy: it lifts the surface toward a near-white ink. On a light field white
+ * HELPS — it pushes the surface away from a dark ink — and the 7% black at the far
+ * corner is the stop that costs contrast. A measurement that reaches for "peak
+ * alpha" gets the dark branch right by luck and the light branch backwards.
+ */
+export function sheenGrounds(token) {
+  return SHEEN[inkIsDark(token) ? 'light' : 'dark']
+    .map((s) => {
+      const [r, g, b] = s.rgb.split(',').map(Number);
+      const hex = `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+      return { alpha: s.a, hex, ground: composite(hex, token.field, s.a) };
+    });
+}
+
 function Sheen({ token }) {
-  const light = inkIsDark(token);
   return E('div', {
     'aria-hidden': 'true',
     style: {
       position: 'absolute', pointerEvents: 'none', inset: 0,
-      background: light
-        // Inverted: a hard white highlight along the top edge and a soft black at
-        // the far corner, so the gloss reads as a lit edge with a shadow under it
-        // rather than as a wash that would simply grey the card out.
-        ? 'linear-gradient(158deg, rgba(255,255,255,.62) 0%, rgba(255,255,255,.12) 24%, rgba(0,0,0,0) 46%, rgba(0,0,0,.07) 100%)'
-        : 'linear-gradient(158deg, rgba(255,255,255,.15) 0%, rgba(255,255,255,.05) 26%, rgba(255,255,255,0) 46%, rgba(255,255,255,0) 100%)',
+      background: sheenCss(token),
     },
   });
 }
@@ -700,6 +915,13 @@ function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
         ...(foil ? { boxShadow: `0 ${px(20)}px ${px(44)}px rgba(0,0,0,.38)` } : null),
       },
     },
+      // THE HANZI @font-face TRAVELS WITH THE OBJECT, not with the page.
+      // It sits INSIDE the object div deliberately: exportCards captures the
+      // OBJECT for the download target, cropping to its bounds, so a <style> on
+      // the canvas or in globals.css would be outside the cropped node and the
+      // downloaded PNG would fall back to whatever the OS substitutes - the exact
+      // defect this replaced. Inside, both export targets carry it.
+      E('style', { key: 'hanfont', dangerouslySetInnerHTML: { __html: hanFontFaceCss() } }),
       // Under everything, clipped by the object's own overflow.
       E(Watermark, { key: 'wm', stem, token, spec, px, foil }),
       foil && E(Sheen, { key: 'sheen', token }),
@@ -936,20 +1158,35 @@ function FoilFooter({ data, palette, token, px, sc, brass }) {
  * left undecodable.
  */
 function PillarCells({ data, palette, token, px, sc, brass }) {
-  // The day cell's fill is brass at 13% over the object. Declared as a SOLID
-  // composite rather than an rgba so `lib/card/domContrast.js` can resolve it:
-  // an rgba background leaves the ground as the field, and the audit would then
-  // measure this cell's four rows against a surface they are not drawn on. The
-  // base is the flat field, which is the conservative choice — under the cells
-  // the object gradient has already stepped away from the ink.
-  const dayFill = composite(brass.tint, token.field, 0.13);
+  // ── A1, APPLIED 2026-08-19: THE DAY CELL'S BRASS WASH IS GONE ──
+  // It was `composite(brass.tint, token.field, 0.13)` — a solid brass wash under
+  // the day pillar only. It lifted that cell's ground toward the ink and put two
+  // tokens' branch glyph under AA on a surface no other cell paints: 乙 #EFF8EF
+  // on #398650 = 4.12, 丙 #FFF4EC on #d05322 = 3.93, both against a 4.93 / 4.53
+  // they measure on the plain field.
+  //
+  // REMOVED RATHER THAN REDUCED, because reducing it is not a finish:
+  //   - the alpha that would keep BOTH tokens at AA is a <= 0.005. That is not a
+  //     subtler wash, it is an absent one, and a 0.5% brass tint declared as if it
+  //     were an emphasis is the `sheen at 0.007` mistake in another cell.
+  //   - the inset glow was measured as the alternative carrier and it does not
+  //     reach the glyph: 0.000027 alpha over the stem, delta 0.0000 on both
+  //     tokens. It lights the cell's edge, not its middle, so it was never what
+  //     the wash was doing.
+  //
+  // THE DAY CELL IS STILL THE EMPHASISED ONE, by four marks the wash was not:
+  // the brass border at 0.55, the inset glow, the INTI DIRI pill, and four text
+  // rows lifted to their own `*Day` roles. The fill is now the same on all four
+  // cells, so `p.isDayMaster` no longer chooses a ground — which is also why the
+  // rendered gate can trust one ground per token again.
+  const cellFill = alpha(token.ink, inkIsDark(token) ? 0.07 : 0.05);
   return E('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: px(16), position: 'relative' } },
     data.appendix.pillars.map((p) => E('div', {
       key: p.key,
       style: {
         position: 'relative', textAlign: 'center', borderRadius: px(22),
         padding: `${px(p.isDayMaster ? 30 : 24)}px ${px(8)}px ${px(22)}px`,
-        background: p.isDayMaster ? dayFill : alpha(token.ink, inkIsDark(token) ? 0.07 : 0.05),
+        background: cellFill,
         border: `${Math.max(1, px(2))}px solid ${p.isDayMaster ? alpha(brass.tint, 0.55) : alpha(token.ink, inkIsDark(token) ? 0.22 : 0.16)}`,
         ...(p.isDayMaster ? { boxShadow: `inset 0 0 ${px(33)}px ${alpha(brass.tint, 0.12)}` } : null),
       },
@@ -1017,7 +1254,9 @@ function PillarCells({ data, palette, token, px, sc, brass }) {
  */
 export function CardA({ data, scale = 1, id = 'card-a' }) {
   const token = tokenFor(data.stem);
-  const palette = paletteFor(token);
+  // 'A' — the flat field is the only ground here, so brass text is judged on it
+  // and 甲 丁 戊 壬 keep their brass name. See brassTextFor.
+  const palette = paletteFor(token, 'A');
   const px = (n) => n * scale;
   const sc = SCALE_A;
 
@@ -1051,7 +1290,9 @@ export function CardA({ data, scale = 1, id = 'card-a' }) {
  */
 export function CardB({ data, scale = 1, id = 'card-b' }) {
   const token = tokenFor(data.stem);
-  const palette = paletteFor(token);
+  // 'B' — this card carries the sheen, so brass text is judged against every stop
+  // it composites and eight of ten tokens retreat to ink. See brassTextFor.
+  const palette = paletteFor(token, 'B');
   const brass = brassFor(token);
   const px = (n) => n * scale;
   const sc = SCALE_B;

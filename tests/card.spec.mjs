@@ -32,10 +32,12 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import {
   CARD_A, CARD_B, CardA, CardB, TEXT_ROLES, MIN_CONTRAST, roleStyle, paletteFor,
-  AA_EXEMPT, DIM_EXEMPT, GRADIENT_STOPS, stepAway, CARD_B_BADGE_LIMIT, MAX_LABEL_MEANING,
+  AA_EXEMPT, DIM_EXEMPT, SHEEN_EXEMPT, sheenCss, sheenGrounds,
+  GRADIENT_STOPS, stepAway, CARD_B_BADGE_LIMIT, MAX_LABEL_MEANING,
   RADIUS, PADDING, splitName, brassTextFor, brassTextFallbacks,
   WATERMARK_FILL, OBJECT_ID_SUFFIX,
 } from '../components/cards/Card.js';
+import { HAN_GLYPHS, HAN_FAMILY } from '../lib/card/hanFont.js';
 // The DESCRIPTOR only. `captureCard` needs a DOM; `captureSpec` is pure so the
 // ruled export sizes are asserted here rather than only in a browser nobody opens.
 import { captureSpec, CAPTURE_KINDS } from '../components/cards/exportCards.js';
@@ -158,13 +160,21 @@ function runsFor(stem) {
   return out.sort((a, b) => a.ratio - b.ratio);
 }
 
-/** The roles a run could be, for the exemption check: role name -> its ratio. */
-const ROLE_RATIO = (role, token) => {
-  const palette = paletteFor(token);
+/**
+ * The roles a run could be, for the exemption check: role name -> its ratio.
+ *
+ * TAKES A CARD since 2026-08-19: `brassText` differs between the two surfaces, so
+ * a ratio without a card is now two different numbers. `ROLE_WORST` keeps the
+ * worse of them, which is what an AA assertion has to test.
+ */
+const ROLE_RATIO = (role, token, card) => {
+  const palette = paletteFor(token, card);
   const s = roleStyle(role, palette);
   const ground = TEXT_ROLES[role].over === 'brass' ? palette.brass : token.field;
   return contrast(composite(s.color, ground, s.opacity), ground);
 };
+
+const ROLE_WORST = (role, token) => Math.min(ROLE_RATIO(role, token, 'A'), ROLE_RATIO(role, token, 'B'));
 
 test('EVERY role OUTSIDE DIM_EXEMPT meets WCAG AA, on every token but the known one', () => {
   // Spec §7.4. The floor did NOT move on 2026-08-14 — the ruling admitted an
@@ -176,7 +186,7 @@ test('EVERY role OUTSIDE DIM_EXEMPT meets WCAG AA, on every token but the known 
   for (const stem of STEMS) {
     if (AA_EXEMPT.includes(stem)) continue;
     const under = full
-      .map((role) => ({ role, ratio: ROLE_RATIO(role, CARD_TOKENS[stem]) }))
+      .map((role) => ({ role, ratio: ROLE_WORST(role, CARD_TOKENS[stem]) }))
       .filter((r) => r.ratio < MIN_CONTRAST);
     assert.deepEqual(
       under.map((r) => `${r.role}=${r.ratio.toFixed(2)}`), [],
@@ -191,12 +201,17 @@ test('the RENDERED markup draws no colour the roles did not produce', () => {
   // audit still has to see the real markup, or a stray inline colour becomes
   // invisible again. So this asserts the weaker true thing — every rendered run
   // resolves to a hex that some role produces, at an opacity some role declares.
+  // BOTH SURFACES union into the allowed set, because the runs being checked come
+  // from both cards and their brassText differs. Taking one card would report the
+  // other card's legitimate brass as a colour no role declares.
   const allowed = new Set();
   for (const stem of STEMS) {
-    const palette = paletteFor(CARD_TOKENS[stem]);
-    for (const role of Object.keys(TEXT_ROLES)) {
-      const s = roleStyle(role, palette);
-      allowed.add(`${s.color.toLowerCase()}@${s.opacity}`);
+    for (const card of ['A', 'B']) {
+      const palette = paletteFor(CARD_TOKENS[stem], card);
+      for (const role of Object.keys(TEXT_ROLES)) {
+        const s = roleStyle(role, palette);
+        allowed.add(`${s.color.toLowerCase()}@${s.opacity}`);
+      }
     }
   }
   for (const stem of STEMS) {
@@ -289,6 +304,98 @@ test('THE AA EXEMPTION LIST IS EMPTY, and the mechanism survives it', () => {
   }
 });
 
+/**
+ * The audit's GATE 3, reproduced: does this token have full-opacity Card B text
+ * under AA once the sheen is beneath it?
+ *
+ * Deliberately a copy of `scripts/audit-card-contrast.mjs` rather than an import
+ * — the script is a report and the test is the pin, and a pin that imports the
+ * thing it pins proves only that one file agrees with itself. Both read
+ * `sheenGrounds()`, which is the single source that actually matters.
+ *
+ * A run whose ground is not the field sits on a fill painted ABOVE the sheen
+ * (the INTI DIRI pill), so the wash cannot reach it and its flat ratio is honest.
+ */
+function sheenFailures(stem) {
+  const token = CARD_TOKENS[stem];
+  const html = renderToStaticMarkup(React.createElement(CardB, {
+    data: { ...cardFor('1989-09-13'), stem },
+  }));
+  return auditRendered(html, token.field)
+    .filter((r) => r.opacity === 1 && /^#[0-9a-f]{6}$/i.test(r.color || ''))
+    .map((r) => {
+      if (r.ground !== token.field) return { ...r, worst: r.ratio };
+      const worst = Math.min(...sheenGrounds(token)
+        .map((g) => contrast(composite(r.color, g.ground, r.opacity), g.ground)));
+      return { ...r, worst };
+    })
+    .filter((r) => r.worst < MIN_CONTRAST);
+}
+
+test('SHEEN_EXEMPT IS EXACTLY 乙 AND 丙, and both genuinely fail the sheen gate', () => {
+  // Added 2026-08-17 EMPTY, with the audit-gate fix, and filled on 2026-08-19 by
+  // Reyner after all three cheaper options were priced. Same standing as
+  // AA_EXEMPT above: a REPORT, NOT A PERMISSION, and it can only shrink.
+  //
+  // WHY IT MATTERED THAT IT STARTED EMPTY. The audit printed the sheen's failures
+  // for the whole life of the finish and never let them reach the exit code, so
+  // `npm run audit:card-contrast` said PASS and exited 0 on a card that fails AA
+  // on six tokens. Filling this list is how that becomes true ON PURPOSE, with a
+  // name against it. It was not how the audit was made green: four of those six
+  // were CLOSED by A2 (brass text now measured against the sheen ground), and
+  // only the two that no mechanism can reach are excused here.
+  //
+  // The ruling, the refuted alternatives and their prices are in Card.js beside
+  // the list. The reasoning lives with the list because two stems and no argument
+  // is how an excused defect stops being known.
+  assert.deepEqual(SHEEN_EXEMPT, ['乙', '丙'],
+    'SHEEN_EXEMPT moved - it is Reyner\'s ruling, not a way to make the audit green');
+  assert.ok(Array.isArray(SHEEN_EXEMPT), 'the mechanism must not be deleted with its last entry');
+
+  // DIRECTION 1 — every listed token still needs excusing. A token that has since
+  // been fixed must LEAVE the list, or the list is excusing nothing and hiding
+  // the fact that it is.
+  for (const stem of SHEEN_EXEMPT) {
+    assert.ok(CARD_TOKENS[stem], `${stem} is not a token - SHEEN_EXEMPT holds day-master stems`);
+    const failures = sheenFailures(stem);
+    assert.ok(failures.length > 0,
+      `${stem} now clears the sheen gate - take it OFF SHEEN_EXEMPT`);
+  }
+
+  // DIRECTION 2 — nothing else may fail unlisted. This is the half that keeps the
+  // exemption from becoming a lowered floor: a new failure has to be ruled on,
+  // not absorbed.
+  for (const stem of STEMS) {
+    if (SHEEN_EXEMPT.includes(stem)) continue;
+    const failures = sheenFailures(stem);
+    assert.equal(failures.length, 0,
+      `${stem} fails the sheen gate unlisted: ${failures.map((f) => `"${f.text.slice(0, 18)}" ${f.worst.toFixed(2)}`).join(', ')}`);
+  }
+});
+
+test('THE SHEEN CSS IS DERIVED FROM SHEEN, and still byte-identical to what shipped', () => {
+  // The declarations were two inline strings until 2026-08-17, and the audit
+  // carried a THIRD copy of the peak alpha as a hand-written `.15`. They are one
+  // source now — `SHEEN` — and this pins the rendered output so the refactor
+  // cannot have moved a pixel. `.15` not `0.15`, bare `0` for zero: the exact
+  // shape the cards already ship, which the Card-B-only assertion matches on.
+  const dark = sheenCss({ ink: '#ECF5EE', field: '#1B4A2C' });   // 甲, light ink
+  const light = sheenCss({ ink: '#1C1A17', field: '#EDEAE4' });  // 辛, dark ink
+  assert.equal(dark,
+    'linear-gradient(158deg, rgba(255,255,255,.15) 0%, rgba(255,255,255,.05) 26%, '
+    + 'rgba(255,255,255,0) 46%, rgba(255,255,255,0) 100%)');
+  assert.equal(light,
+    'linear-gradient(158deg, rgba(255,255,255,.62) 0%, rgba(255,255,255,.12) 24%, '
+    + 'rgba(0,0,0,0) 46%, rgba(0,0,0,.07) 100%)');
+
+  // AND THE GROUNDS THE AUDIT READS come from the same stops. The old audit
+  // modelled only white at peak, which is why the light branch — whose costly
+  // stop is 7% BLACK at the far corner — was skipped entirely.
+  const grounds = sheenGrounds(CARD_TOKENS['辛']);
+  assert.ok(grounds.some((g) => g.hex === '#000000' && g.alpha === 0.07),
+    'the light branch carries a black stop and the audit must be able to see it');
+});
+
 test("GUNUNG'S FIELD IS #4A3A1E and its ink and accent are unchanged (Reyner, 2026-08-15)", () => {
   // ONE HEX fixed three separate failures, because they all had the same cause:
   // the field was not dark enough for a system built on near-white ink on a deep
@@ -306,7 +413,17 @@ test("GUNUNG'S FIELD IS #4A3A1E and its ink and accent are unchanged (Reyner, 20
   // It clears all three bars it used to fail.
   assert.ok(contrast(g.ink, g.field) >= MIN_CONTRAST, 'AA');
   assert.ok(!accentAudit(CARD_TOKENS).under.includes('戊'), 'the accent floor');
-  assert.equal(brassTextFor(g), BRASS.light.text, 'brass text must no longer fall back');
+  // THE 08-15 RULING IS INTACT AND NOW VISIBLY SO. It was about the FLAT FIELD,
+  // which is Card A's whole test, and 戊 keeps its brass name there. Card B judges
+  // against the sheen ground, where 戊 measures 3.80 and retreats to ink. Both
+  // asserted, because one line saying "戊 falls back" would read as the 08-15 fix
+  // having been undone, and it has not been.
+  assert.ok(contrast(BRASS.light.text, g.field) >= MIN_CONTRAST,
+    'brass text must clear AA on the flat field - that was the 08-15 fix');
+  assert.equal(brassTextFor(g, 'A'), BRASS.light.text,
+    '戊 keeps brass on Card A: the 08-15 field fix stands');
+  assert.equal(brassTextFor(g, 'B'), g.ink,
+    '戊 gives it up on Card B because of the SHEEN, not the field');
 
   // The field ruling and the approval ruling were separate, and in that order:
   // 08-15 fixed the CARD's contrast, then 08-15 approved the TOKEN.
@@ -422,9 +539,24 @@ test('THE ROLES TABLE IS ACTUALLY CONSUMED', () => {
   // exact failure mode this test exists for: a role that resolves to something
   // plausible and wrong.
   assert.throws(() => roleStyle('intiDiri', t), /brassInk/);
-  const palette = paletteFor(t);
+  const palette = paletteFor(t, 'B');
   assert.deepEqual(roleStyle('intiDiri', palette), { color: BRASS.light.ink, opacity: 1 });
-  assert.deepEqual(roleStyle('nameId', palette), { color: BRASS.light.text, opacity: 1 });
+
+  // `nameId` reads `brassText`, which is the per-token AND PER-CARD answer.
+  // 壬 is the token the split is visible on: brass on Card A, ink on Card B,
+  // asserted BOTH WAYS so neither surface can quietly adopt the other's value.
+  assert.deepEqual(roleStyle('nameId', paletteFor(t, 'A')),
+    { color: BRASS.light.text, opacity: 1 }, '壬 keeps its brass name on Card A');
+  assert.deepEqual(roleStyle('nameId', palette),
+    { color: t.ink, opacity: 1 }, '壬 gives it up on Card B, where the sheen is');
+  // And a token that keeps brass on both, so the assertion above is about the
+  // SPLIT rather than about brass being gone everywhere.
+  for (const card of ['A', 'B']) {
+    assert.deepEqual(roleStyle('nameId', paletteFor(CARD_TOKENS['庚'], card)),
+      { color: BRASS.light.text, opacity: 1 }, `庚 keeps brass on Card ${card}`);
+  }
+  // A palette with no card at all must THROW rather than pick one.
+  assert.throws(() => paletteFor(t), /card surface/);
 
   // And the root must NOT set a colour, or inheritance hides an unwired role.
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
@@ -516,40 +648,106 @@ test('BRASS IS A GLOBAL FINISH, selected by the ink pole and never by a stem lis
   }
 });
 
-test('§6.4 MEASURED — brass text fails on four tokens and falls back to ink', () => {
+test('§6.4 MEASURED — the brass-text fallback is PER CARD: 4 on A, 8 on B', () => {
   // The spec predicted brass text would "clear 4.5 comfortably" on dark fields
-  // and flagged Taman as the one risk. Measured, it failed on five. 戊 Gunung
-  // left the set on 2026-08-15 when its field went to #4A3A1E (2.52 -> 6.00), so
-  // it is four now, two of them still dark fields: pale brass is a LIGHT metallic
-  // and Bambu's green and Matahari's orange are not dark enough to carry it.
+  // and flagged Taman as the one risk. Measured on the FLAT FIELD it failed on
+  // five, then four when 戊 Gunung's field went to #4A3A1E on 2026-08-15
+  // (2.52 -> 6.00): pale brass is a LIGHT metallic and Bambu's green and
+  // Matahari's orange are not dark enough to carry it. Those four are CARD A's
+  // set, and the flat field is Card A's entire test because it has no overlay.
   //
-  // RULED AS BUILT 2026-08-15: the per-token retreat to ink stays, and there is
-  // to be no second darker BRASS_TEXT — brass is two global values (§6.3).
-  const failing = brassTextFallbacks(CARD_TOKENS).map((f) => f.stem);
-  assert.deepEqual(failing, ['乙', '丙', '己', '癸'],
-    'the brass-text fallback set moved - re-read the §6.4 report in Card.js');
+  // A2, 2026-08-19: the flat field was never the surface CARD B draws brass text
+  // on. Against the field AND every `sheenGrounds()` stop, four more fail —
+  // 甲 5.57 -> 3.63, 丁 5.54 -> 3.83, 戊 6.00 -> 3.80, 壬 6.46 -> 4.12 — and
+  // retreat to ink, which holds 5.96 / 6.20 / 6.34 / 6.71 on that same lit ground.
+  //
+  // ── RULED PER CARD BY REYNER, 2026-08-19 ───────────────────
+  // A2 first shipped POOLED, which cost Card A its brass name on 甲 丁 戊 壬 to
+  // solve a problem Card A does not have. Card A is the free shareable card and
+  // the acquisition loop. One archetype on two surfaces with different physics is
+  // not two archetypes; the rim and the drop shadow are already Card B only.
+  //
+  // RULED AS BUILT 2026-08-15: the retreat to ink stays, and there is to be no
+  // second darker BRASS_TEXT — brass is two global values (§6.3).
+  const failA = brassTextFallbacks(CARD_TOKENS, 'A').map((f) => f.stem);
+  const failB = brassTextFallbacks(CARD_TOKENS, 'B').map((f) => f.stem);
+  assert.deepEqual(failA, ['乙', '丙', '己', '癸'],
+    "Card A's fallback set moved - it judges the FLAT FIELD, so only a token edit moves it");
+  assert.deepEqual(failB, ['甲', '乙', '丙', '丁', '戊', '己', '壬', '癸'],
+    "Card B's fallback set moved - re-read the §6.4 report in Card.js");
   assert.equal(new Set(STEMS.map((s) => brassFor(CARD_TOKENS[s]))).size, 2,
     'brass must stay two global values, never a third darker one');
 
+  // A IS A STRICT SUBSET OF B. Anything failing on the flat field also fails with
+  // a wash over it, so a token on A's list and off B's would be an arithmetic bug.
+  for (const stem of failA) {
+    assert.ok(failB.includes(stem), `${stem} fails on Card A but not Card B, which is impossible`);
+  }
+  // THE SPLIT IS EXACTLY THE FOUR TOKENS THE SHEEN COSTS, named so a silent
+  // widening of it fails here rather than in someone's eye.
+  assert.deepEqual(failB.filter((s) => !failA.includes(s)), ['甲', '丁', '戊', '壬'],
+    'the per-card split moved: these are the tokens brass survives on A and not on B');
+
   for (const [stem, t] of Object.entries(CARD_TOKENS)) {
-    const drawn = brassTextFor(t);
-    if (failing.includes(stem)) {
-      assert.equal(drawn, t.ink, `${stem} must retreat to ink`);
-    } else {
-      assert.equal(drawn, brassFor(t).text, `${stem} must keep brass text`);
-      assert.ok(contrast(drawn, t.field) >= MIN_CONTRAST, `${stem} keeps brass under AA`);
+    // NEITHER CARD MAY ADOPT THE OTHER'S ANSWER — asserted per card, per token,
+    // which is the whole point of the split being a parameter rather than a mood.
+    for (const [card, failing] of [['A', failA], ['B', failB]]) {
+      const drawn = brassTextFor(t, card);
+      if (failing.includes(stem)) {
+        assert.equal(drawn, t.ink, `${stem} must retreat to ink on Card ${card}`);
+      } else {
+        assert.equal(drawn, brassFor(t).text, `${stem} must keep brass text on Card ${card}`);
+        assert.ok(contrast(drawn, t.field) >= MIN_CONTRAST, `${stem} keeps brass under AA on ${card}`);
+      }
     }
   }
-  // The fallback is per TOKEN, not per role: dropping brass text everywhere
-  // because Bambu cannot hold it would spend the tokens that can.
-  assert.ok(failing.length < STEMS.length, 'brass text must survive somewhere');
+  // A MISSING OR BOGUS CARD THROWS. A default is how a surface silently inherits
+  // the wrong physics, and it is the failure this split exists to prevent.
+  for (const bad of [undefined, null, '', 'a', 'C', 0]) {
+    assert.throws(() => brassTextFor(CARD_TOKENS['甲'], bad), /card surface/,
+      `brassTextFor accepted ${JSON.stringify(bad)} as a card`);
+  }
+  // The fallback is per TOKEN and per CARD, never per role: dropping brass text
+  // everywhere because Bambu cannot hold it would spend the tokens that can.
+  assert.ok(failB.length < STEMS.length, 'brass text must survive somewhere even on Card B');
   // And brass stays on NON-text everywhere, including the fallback tokens — that
   // is what keeps 1e reading as the paid card on all ten.
-  for (const stem of failing) {
+  for (const stem of failB) {
     const html = renderToStaticMarkup(React.createElement(CardB, {
       data: { ...cardFor('1989-09-13'), stem },
     }));
     assert.ok(html.includes(brassFor(CARD_TOKENS[stem]).stops[1]), `${stem} lost the brass seal`);
+  }
+  // ── THE HALF OF THE SPLIT THAT IS CURRENTLY UNOBSERVABLE ───
+  // Card A's answer reaches no pixel today, and that is the honest state rather
+  // than a hole in the test. All three roles that read `brassText` are Card B
+  // only, because Card A carries NO FINISH (ruled 2026-08-14): no `nameId`, no
+  // `badgeLabelFoil`, no `PillarCells`.
+  //
+  // THIS ASSERTION IS WHY THE SPLIT IS NOT DEAD CODE. It pins the fact that makes
+  // Card A's answer invisible. The day someone gives Card A a brass role, this
+  // fails and tells them the per-card decision has just started to matter -
+  // instead of Card A silently inheriting a sheen it does not have.
+  const BRASS_ROLES = Object.entries(TEXT_ROLES)
+    .filter(([, r]) => r.on === 'brassText').map(([role]) => role);
+  assert.deepEqual(BRASS_ROLES.sort(), ['badgeLabelFoil', 'nameId', 'pillarLabelDay'],
+    'the set of roles reading brassText moved - re-check which card draws each');
+  for (const stem of ['甲', '丁', '戊', '壬']) {
+    const a = renderToStaticMarkup(React.createElement(CardA, {
+      data: { ...cardFor('1989-09-13'), stem },
+    }));
+    assert.ok(!a.includes(BRASS.light.text),
+      `Card A drew brass text on ${stem}. Card A has NO FINISH (08-14); if that ruling `
+      + 'changed, its brass now has to clear AA on the flat field and this test is the place to say so');
+  }
+  // Card B, by contrast, DOES draw the brass it keeps - so the split is measured
+  // on the surface where it is observable.
+  for (const stem of ['庚', '辛']) {
+    const b = renderToStaticMarkup(React.createElement(CardB, {
+      data: { ...cardFor('1989-09-13'), stem },
+    }));
+    assert.ok(b.includes(brassFor(CARD_TOKENS[stem]).text),
+      `${stem} keeps brass text on Card B and the markup does not contain it`);
   }
 });
 
@@ -563,7 +761,9 @@ test('THE INTI DIRI PILL IS TOKEN-INDEPENDENT and beats the pair it replaced', (
   // pill's measured ratio takes exactly two values across all ten archetypes,
   // one per brass, because neither side of the pair comes from the token.
   const measured = new Set(STEMS.map((s) => {
-    const palette = paletteFor(CARD_TOKENS[s]);
+    // 'B' — the INTI DIRI pill is Card B only. The role reads brassInk rather than
+    // brassText, so the card does not change this number; it is named for honesty.
+    const palette = paletteFor(CARD_TOKENS[s], 'B');
     return contrast(roleStyle('intiDiri', palette).color, palette.brass).toFixed(4);
   }));
   assert.equal(measured.size, 2, `the pill's ratio varies by token: ${[...measured].join(', ')}`);
@@ -1127,4 +1327,48 @@ test('an hour-less chart still renders a card, with three pillars', () => {
   const d = cardFor('1989-09-13', { birthTime: null });
   assert.equal(d.appendix.pillars.length, 3);
   assert.ok(d.nameEn && d.aspek);
+});
+
+test('EVERY HANZI THE CARD CAN DRAW IS IN THE SUBSET, on all ten tokens', () => {
+  // THE FAILURE MODE THIS EXISTS FOR IS TOFU, and tofu is silent: a missing glyph
+  // is a box in an exported PNG that no assertion about colour, size or layout
+  // can see. The subset is 65 glyphs derived from glossary.json; the card draws
+  // hanzi at four sites (pillar stem, pillar branch, seal, watermark). If a
+  // future badge, label or watermark introduces a character outside the set, it
+  // renders as a box and this is what says so.
+  const inSubset = new Set([...HAN_GLYPHS]);
+  const CJK = /[㐀-䶿一-鿿]/gu;
+  const missing = new Set();
+  for (const stem of STEMS) {
+    const data = cardFor('1989-09-13', { stem });
+    for (const C of [CardA, CardB]) {
+      const html = renderToStaticMarkup(React.createElement(C, { data }));
+      // The @font-face itself is base64 and carries no CJK; strip the <style>
+      // before scanning so the subset cannot appear to contain itself.
+      const body = html.replace(/<style[^>]*>[\s\S]*?<\/style>/g, '');
+      for (const ch of body.match(CJK) || []) if (!inSubset.has(ch)) missing.add(ch);
+    }
+  }
+  assert.deepEqual([...missing], [],
+    'the card draws a hanzi outside the subset - it will render as tofu. Run: npm run build:han-subset');
+});
+
+test('THE HANZI FACE TRAVELS INSIDE THE OBJECT, so the download target carries it', () => {
+  // exportCards crops the DOWNLOAD capture to the object. A @font-face on the
+  // canvas, on the page, or in globals.css is outside that crop, and the
+  // downloaded PNG would fall back to the OS - which is the defect this replaced,
+  // reintroduced through the export path only, where nobody would look.
+  const data = cardFor('1989-09-13');
+  for (const [name, C] of [['CardA', CardA], ['CardB', CardB]]) {
+    const html = renderToStaticMarkup(React.createElement(C, { data, id: 'x' }));
+    const objectAt = html.indexOf(`id="x${OBJECT_ID_SUFFIX}"`);
+    const styleAt = html.indexOf('@font-face');
+    assert.ok(objectAt > -1, `${name} must render the object id`);
+    assert.ok(styleAt > -1, `${name} must carry the @font-face`);
+    assert.ok(styleAt > objectAt,
+      `${name} declares the font OUTSIDE the object - the download crop would lose it`);
+    // React escapes the quotes inside a style attribute, so the markup carries
+    // &quot;Noto Serif TC&quot; rather than the literal. Match the family name.
+    assert.ok(html.includes(HAN_FAMILY), `${name} must ask for ${HAN_FAMILY}`);
+  }
 });
