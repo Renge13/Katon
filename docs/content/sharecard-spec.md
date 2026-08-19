@@ -1,9 +1,39 @@
 <!--
-STATUS: PROPOSAL — created 2026-08-01. Information architecture for the sharecard, rebuilt around
-what the engine can now surface. Supersedes content/bazi-card-skill-v4.md, which predates the
-Aspek/Bintang layer and the strength engine.
+STATUS: SUPERSEDED FOR EVERYTHING BUILT — see the banner below. Created 2026-08-01, last
+substantively written 2026-08-13.
 Reyner decides the register and the visual system. This doc decides WHAT information appears and WHY.
 -->
+
+# ⚠ SUPERSEDED BY `docs/content/card-polish-spec.md` (authority as of 2026-08-15)
+
+**If you are speccing, building or reviewing anything card-shaped, `card-polish-spec.md` wins.**
+This file is the 2026-08-01 information architecture — WHAT appears and WHY — and the reasoning in
+it is still good. Its PICTURES ARE NOT. Card A and Card B were built as 1a and 1e on 2026-08-14/15
+and the built cards diverge from the sketch below in at least seven places.
+
+**Why this banner exists at all.** On 2026-08-13 a session cost real time because the obvious
+filename was the wrong file. One line at the top prevents that permanently, and it is cheaper than
+reconciling two specs.
+
+**The divergences, each with the command that found it** (verified 2026-08-17, working tree at
+`21d690a`):
+
+| This file says | The built card does | Check |
+|---|---|---|
+| Card A headline is `MATAHARI` over `Sang Pengelola` (§3, and the sketch) | Card A prints **`name_en` alone**, split into a kicker and a noun (`THE` / `SUN`), with the Aspek beneath. The Indonesian name is **Card B only** | `components/cards/Card.js#CardA` passes no `showNameId`; `#Headline` gates `nameId` on it |
+| The Card A sketch shows **six** tag words | **Three fixed**, no dynamic tags. This file's own §2 amendment (2026-08-13) says so — the sketch was never updated to match it | `CardA` passes `showDynamic: false` |
+| Badges render as `◆ Bunga Persik` (the sketch, and the §1 amendment) | **No diamond.** The hairline above the block delimits it instead | `card-polish-spec.md` §2.5; `grep -n "◆" components/cards/Card.js` returns nothing |
+| Card B carries **all badges** including the common ones | **Two.** `CARD_B_BADGE_LIMIT = 2`, ruled 2026-08-15 after three overflowed the object by 63 export px and were silently clipped | `grep -n CARD_B_BADGE_LIMIT components/cards/Card.js` |
+| Card B carries 胎元 | **Not rendered**, ruled 2026-08-13. The engine still computes it and the reading still shows it; the card drops it | `components/cards/Card.js:1107`, `lib/card/cardData.js:176` |
+| Card B has **no URL watermark** | The footer carries **`katon.app`**, stacked above the seal | `lib/card/cardData.js#buildFooter` returns `right: 'katon.app'`; `#FoilFooter` renders it |
+| Bintang badges average **2.5** per person (§WHAT'S NEW) | **2.15**, range 1-4. Re-measured 2026-08-02 when 華蓋 left the set | `PROGRESS.md` MEASUREMENTS, "Badge frequency (avg per chart)" |
+
+**What in here is still authoritative:** the four 2026-08-01 decisions and their 08-13 amendments —
+Bintang Penolong is kept but never headlined, the tag hybrid is Card B only, the headline carries two
+axes, and Card B exists to be a visible badge of purchase. Those are rulings. The layout sketch is
+not, and it is the only part that has gone wrong.
+
+---
 
 # Sharecard — information architecture
 
