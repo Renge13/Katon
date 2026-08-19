@@ -58,7 +58,7 @@
 // ============================================================
 
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -89,6 +89,13 @@ const plan = [...suites, ...EXTRA_GATES];
 
 if (process.argv.includes('--list')) {
   console.log(`${plan.length} gates:\n${plan.map((s) => `  ${s}`).join('\n')}`);
+  // The orphan scan runs here too, so it can be checked in a second instead of by
+  // sitting through 24 gates. That is not a convenience: a guard nobody can exercise
+  // cheaply is a guard nobody verifies, and this one was first "verified" by a run
+  // that had stashed the guard itself along with the change under test.
+  const { orphans, scanned } = orphanTestFiles();
+  console.log(`\norphan scan: ${orphans.length} of ${scanned} code files in tests/ are unreferenced`
+    + `${orphans.length ? `\n${orphans.map((o) => `  tests/${o}`).join('\n')}` : ''}`);
   process.exit(0);
 }
 
@@ -100,6 +107,91 @@ if (suites.length < 15) {
   console.error(`test-all: only ${suites.length} test:* scripts matched, which is too few to be right.`);
   console.error('The selector has stopped seeing the suites. Refusing to report a green run.');
   process.exit(2);
+}
+
+/**
+ * ── THE ORPHAN SCAN: a file in tests/ that nothing calls ────
+ *
+ * Added 2026-08-19, after `tests/bazi-profile-experiment.mjs` was found by hand:
+ * 140 lines, zero assertions, run by no script, sitting in `tests/` for weeks.
+ * **A file nothing calls is the same defect class as a selector that stopped
+ * matching** — both report coverage that does not exist — so it belongs in the same
+ * runner as the `suites.length < 15` guard above.
+ *
+ * THREE WAYS A FILE IS LEGITIMATELY REACHED, and all three count:
+ *   1. a package.json script names it (a gate, or a `report:`)
+ *   2. another file imports it (a fixture or a helper — `bazi-validation.fixture.js`
+ *      is imported by twelve specs and run by nothing, which is correct)
+ *   3. it is a non-code file (fixture JSON and the like)
+ * Anything else is an orphan.
+ *
+ * IT REPORTS AND DOES NOT FAIL, which is a deliberate line rather than a soft
+ * option. Failing would break `npm test` in the window between creating a spec and
+ * wiring its script — a window every new test passes through — and a guard that
+ * fires during normal work is a guard people delete. It prints LAST, after the
+ * summary, so it is the final thing on screen; and it prints nothing at all when
+ * there are none, so it cannot become background noise. Making it fatal is a
+ * one-line change if that trade ever looks wrong.
+ */
+function orphanTestFiles() {
+  const testsDir = path.join(ROOT, 'tests');
+  const CODE = /\.(mjs|js|ts|jsx|tsx)$/;
+  let entries;
+  try {
+    entries = readdirSync(testsDir, { withFileTypes: true });
+  } catch {
+    return { orphans: [], scanned: 0 };
+  }
+  const files = entries.filter((e) => e.isFile() && CODE.test(e.name)).map((e) => e.name);
+
+  // Everything any script command mentions, by basename.
+  const scriptText = Object.values(scripts).join('\n');
+
+  // Everything the code tree imports, by basename. Deliberately a text scan over
+  // the source rather than a module-graph walk: a real import cannot hide from it,
+  // and it costs milliseconds. It over-forgives (a basename in a comment counts as
+  // a reference) and never over-accuses, which is the right direction for a guard
+  // that must not fire during normal work.
+  const CODE_DIRS = ['tests', 'scripts', 'lib', 'app', 'components'];
+  // THIS FILE IS EXCLUDED FROM ITS OWN CORPUS, and finding out why cost a round.
+  // The comment above names `bazi-profile-experiment.mjs` as the file this guard was
+  // built for - so on the first run the guard read its own documentation as a
+  // reference and forgave the orphan. A guard that is blinded by the note explaining
+  // it is worse than no guard. The runner invokes suites through npm scripts and
+  // never by path, so it has no legitimate reference to lose by this.
+  const SELF = path.join(ROOT, 'scripts', 'test-all.mjs');
+  let corpus = '';
+  const walk = (dir) => {
+    let items;
+    try { items = readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const it of items) {
+      if (it.name === 'node_modules' || it.name.startsWith('.')) continue;
+      const full = path.join(dir, it.name);
+      if (full === SELF) continue;
+      if (it.isDirectory()) walk(full);
+      else if (CODE.test(it.name) || it.name.endsWith('.json') || it.name.endsWith('.yml')) {
+        try { corpus += `\n<<${full}>>\n${readFileSync(full, 'utf8')}`; } catch { /* unreadable */ }
+      }
+    }
+  };
+  for (const d of CODE_DIRS) walk(path.join(ROOT, d));
+  walk(path.join(ROOT, '.github'));
+
+  const orphans = [];
+  for (const name of files) {
+    if (scriptText.includes(name)) continue;
+    // Strip THIS file's own text before asking whether anything references it,
+    // or every file trivially references itself.
+    const self = `<<${path.join(ROOT, 'tests', name)}>>`;
+    const at = corpus.indexOf(self);
+    let others = corpus;
+    if (at !== -1) {
+      const end = corpus.indexOf('\n<<', at + self.length);
+      others = corpus.slice(0, at) + (end === -1 ? '' : corpus.slice(end));
+    }
+    if (!others.includes(name)) orphans.push(name);
+  }
+  return { orphans, scanned: files.length };
 }
 
 console.log(`Running ${plan.length} gates (${suites.length} suites + ${EXTRA_GATES.length} other).\n`);
@@ -136,4 +228,15 @@ for (const r of results) {
 console.log(`${'='.repeat(60)}`);
 console.log(`${results.length - failed.length}/${results.length} passed in ${(total / 1000).toFixed(1)}s`);
 if (failed.length) console.log(`FAILED: ${failed.map((r) => r.name).join(', ')}`);
+
+// LAST, so it is the final thing on screen, and silent when there is nothing to say.
+const { orphans, scanned } = orphanTestFiles();
+if (orphans.length) {
+  console.log(`\nORPHANS IN tests/ — ${orphans.length} of ${scanned} code files are run by no`);
+  console.log('script and imported by nothing. An unrun file in tests/ reads as coverage that');
+  console.log('does not exist. Wire it to a script, give it a report: name, or delete it.');
+  for (const o of orphans) console.log(`  tests/${o}`);
+  console.log('This does NOT fail the build - see orphanTestFiles() for why.');
+}
+
 process.exitCode = failed.length ? 1 : 0;
