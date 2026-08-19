@@ -1,0 +1,1945 @@
+{
+ "rows": [
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 1,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \". Situasi mungkin berubah, tetapi kamu jarang ikut\"; /\\bcenderung\\b/ at \"nya. Kamu cenderung bertahan di situasi yang sudah\"",
+   "ctx": {
+    "before": "titik tengah yang Seimbang. Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar",
+    "phrase": ". Situasi mungkin berubah, tetapi kamu jarang ikut",
+    "after": " goyah karena kamu memiliki kelenturan yang tinggi. Titik tengah ini tidak memberi dorongan ekstrem yang"
+   },
+   "phrase": ". Situasi mungkin berubah, tetapi kamu jarang ikut"
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 1,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "element_missing_Metal: \"gift\" did not survive into the prose (0/8 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \". Situasi mungkin berubah, tetapi kamu jarang ikut\"",
+   "ctx": {
+    "before": "titik tengah yang Seimbang. Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar",
+    "phrase": ". Situasi mungkin berubah, tetapi kamu jarang ikut",
+    "after": " goyah karena kamu memiliki kelenturan yang tinggi. Titik tengah ini tidak memberi dorongan ekstrem yang"
+   },
+   "phrase": ". Situasi mungkin berubah, tetapi kamu jarang ikut"
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bcenderung\\b/ at \"nya. Kamu cenderung bertahan di situasi yang sudah\"",
+   "ctx": {
+    "before": "yang hilang. Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulai",
+    "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah",
+    "after": " jelas selesai. Meski ini memberimu kelebihan dalam memberi kesempatan lebih banyak kepada orang lain, hal"
+   },
+   "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah"
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "strength_balanced: \"gift\" did not survive into the prose (1/11 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "element_missing_Metal: \"gift\" did not survive into the prose (0/8 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 7,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bcenderung\\b/ at \"nya. Kamu cenderung bertahan di situasi yang sudah\"",
+   "ctx": {
+    "before": "elemen Logam. Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulai",
+    "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah",
+    "after": " jelas selesai. Meski ini membuatmu memberi kesempatan lebih banyak kepada orang lain, hal yang seharusnya"
+   },
+   "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah"
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bcenderung\\b/ at \"nya. Kamu cenderung bertahan di situasi yang sudah\"",
+   "ctx": {
+    "before": "elemen Logam. Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulai",
+    "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah",
+    "after": " jelas selesai. Meski ini membuatmu memberi kesempatan lebih banyak kepada orang lain, hal yang sudah"
+   },
+   "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah"
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "element_missing_Metal: \"gift\" did not survive into the prose (0/8 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bcenderung\\b/ at \"nya. Kamu cenderung bertahan di situasi yang sudah\"",
+   "ctx": {
+    "before": "elemen Logam. Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulai",
+    "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah",
+    "after": " jelas selesai. Beranikan diri mengakhiri urusan yang menggantung lewat satu percakapan tegas karena menggantung masalah"
+   },
+   "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah"
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bcenderung\\b/ at \"nya. Kamu cenderung bertahan di situasi yang sudah\"",
+   "ctx": {
+    "before": "elemen Logam. Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulai",
+    "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah",
+    "after": " jelas selesai. Meski ini memberimu kelebihan dalam memberi kesempatan lebih banyak kepada orang lain, hal"
+   },
+   "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah"
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 10,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \". Situasi mungkin berubah, tetapi kamu jarang ikut\"; /\\bcenderung\\b/ at \"nya. Kamu cenderung bertahan di situasi yang sudah\"",
+   "ctx": {
+    "before": "titik tengah yang Seimbang. Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar",
+    "phrase": ". Situasi mungkin berubah, tetapi kamu jarang ikut",
+    "after": " goyah karena kamu memiliki kelenturan yang tinggi. Titik tengah ini tidak memberi dorongan ekstrem yang"
+   },
+   "phrase": ". Situasi mungkin berubah, tetapi kamu jarang ikut"
+  },
+  {
+   "chart": "chart 5",
+   "hourKnown": true,
+   "run": 10,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bcenderung\\b/ at \"nya. Kamu cenderung bertahan di situasi yang sudah\"",
+   "ctx": {
+    "before": "yang hilang. Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulai",
+    "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah",
+    "after": " jelas selesai. Meski ini membuatmu memberi kesempatan lebih banyak kepada orang lain, hal-hal yang seharusnya"
+   },
+   "phrase": "nya. Kamu cenderung bertahan di situasi yang sudah"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 1,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "main_profile: \"cost\" did not survive into the prose (1/7 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 1,
+   "attempt": 2,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"jam lahir tidak diketahui\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"pilar jam yang tidak dapat dipetakan\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"at. Orang mungkin mengira kamu mudah mengikuti aru\"",
+   "ctx": {
+    "before": "di sekitarmu. Namun, kamu sulit melambat, bahkan di saat tubuh dan pikiranmu sangat membutuhkan istirah",
+    "phrase": "at. Orang mungkin mengira kamu mudah mengikuti aru",
+    "after": "s, padahal kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah. Baganmu berdiri di"
+   },
+   "phrase": "at. Orang mungkin mengira kamu mudah mengikuti aru"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \", kecuali pilar jam yang tidak dapat dipetakan kar\"",
+   "ctx": {
+    "before": "kesimpulan dan satu alasan paling kuat agar energimu tidak terkuras. Keempat pilar baganmu telah dipetakan",
+    "phrase": ", kecuali pilar jam yang tidak dapat dipetakan kar",
+    "after": "ena waktu lahir yang tidak diketahui. Kamu adalah pribadi yang tangguh dalam mengelola peluang dan terbiasa"
+   },
+   "phrase": ", kecuali pilar jam yang tidak dapat dipetakan kar"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"at. Orang mungkin mengira kamu mudah mengikuti aru\"",
+   "ctx": {
+    "before": "untuk ikut bergerak. Kamu sulit melambat, bahkan di saat tubuh dan pikiranmu sangat membutuhkan istirah",
+    "phrase": "at. Orang mungkin mengira kamu mudah mengikuti aru",
+    "after": "s, padahal kamu hanya sedang menunggu celah dan arah tujuanmu tidak pernah berubah. Baganmu berdiri di"
+   },
+   "phrase": "at. Orang mungkin mengira kamu mudah mengikuti aru"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 3,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"pilar jam yang tidak dapat dipetakan\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 3,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.tension_collapse",
+   "severity": "soft",
+   "message": "/\\bmembentuk (satu )?kesatuan\\b/ at \"iketahui, membentuk satu kesatuan yang unik. Kamu\"",
+   "ctx": {
+    "before": "pilar baganmu, termasuk pilar jam yang tidak dapat dipetakan karena waktu lahir yang tidak d",
+    "phrase": "iketahui, membentuk satu kesatuan yang unik. Kamu",
+    "after": " adalah seseorang yang terus bergerak maju dengan ketangguhan yang teruji oleh benturan. Apa yang kamu"
+   },
+   "phrase": "iketahui, membentuk satu kesatuan yang unik. Kamu"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 3,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \"termasuk pilar jam yang tidak dapat dipetakan kar\"",
+   "ctx": {
+    "before": "semua alur pikiranmu. Cukup sampaikan kesimpulannya dan satu alasan paling kuat. Keempat pilar baganmu, ",
+    "phrase": "termasuk pilar jam yang tidak dapat dipetakan kar",
+    "after": "ena waktu lahir yang tidak diketahui, membentuk satu kesatuan yang unik. Kamu adalah seseorang yang terus"
+   },
+   "phrase": "termasuk pilar jam yang tidak dapat dipetakan kar"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 3,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "main_profile: \"cost\" did not survive into the prose (1/7 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"pilar jam tidak dapat dipetakan\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"dipetakan secara pasti. Kamu adalah sosok yang mam\"",
+   "ctx": {
+    "before": "Keempat pilar dalam baganmu mencerminkan perjalanan yang terus bergerak, meski pilar jam tidak dapat ",
+    "phrase": "dipetakan secara pasti. Kamu adalah sosok yang mam",
+    "after": "pu menopang diri sendiri di tengah guncangan, dan keberhasilanmu akan lebih terasa saat kamu berani membagikan"
+   },
+   "phrase": "dipetakan secara pasti. Kamu adalah sosok yang mam"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \"ak, meski pilar jam tidak dapat dipetakan secara p\"",
+   "ctx": {
+    "before": "dengan kapasitas besar untuk mengelola peluang. Keempat pilar dalam baganmu mencerminkan perjalanan yang terus berger",
+    "phrase": "ak, meski pilar jam tidak dapat dipetakan secara p",
+    "after": "asti. Kamu adalah sosok yang mampu menopang diri sendiri di tengah guncangan, dan keberhasilanmu akan lebih"
+   },
+   "phrase": "ak, meski pilar jam tidak dapat dipetakan secara p"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "main_profile: \"cost\" did not survive into the prose (1/7 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"pilar jam yang tidak dapat dipetakan\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \"termasuk pilar jam yang tidak dapat dipetakan, me\"",
+   "ctx": {
+    "before": "tangguh dengan kemampuan alami untuk mengelola peluang dan tanggung jawab. Keempat pilar dalam baganmu, ",
+    "phrase": "termasuk pilar jam yang tidak dapat dipetakan, me",
+    "after": "mbentuk dirimu yang terus bergerak maju. Kamu memiliki kapasitas untuk menyeimbangkan tuntutan hidup dengan keteguhan hati"
+   },
+   "phrase": "termasuk pilar jam yang tidak dapat dipetakan, me"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"Situasi mungkin berubah, tetapi kamu jarang ikut\"",
+   "ctx": {
+    "before": "(Balanced), yang berarti kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar. ",
+    "phrase": "Situasi mungkin berubah, tetapi kamu jarang ikut",
+    "after": " goyah. Kelenturan ini membuatmu mampu bertahan saat perubahan mendadak membuat orang lain kehilangan arah. Karena"
+   },
+   "phrase": "Situasi mungkin berubah, tetapi kamu jarang ikut"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"at. Orang mungkin mengira kamu mudah mengikuti aru\"",
+   "ctx": {
+    "before": "di sekitarmu. Namun, kamu sulit melambat, bahkan di saat tubuh dan pikiranmu sangat membutuhkan istirah",
+    "phrase": "at. Orang mungkin mengira kamu mudah mengikuti aru",
+    "after": "s, padahal kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah. Baganmu berdiri di"
+   },
+   "phrase": "at. Orang mungkin mengira kamu mudah mengikuti aru"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.essay_connectives",
+   "severity": "soft",
+   "message": "/\\bhal ini\\b/ at \"tunggu. Hal ini berkaitan dengan Aspek Peraih (I\"",
+   "ctx": {
+    "before": "untuk kuartal ini dan parkir sisanya. Fokus selesaikan tiga hal itu sebelum menyentuh daftar ",
+    "phrase": "tunggu. Hal ini berkaitan dengan Aspek Peraih (I",
+    "after": "ndirect Wealth) di Pilar Kerja, yang berarti kamu melihat peluang di tempat yang dilewati orang lain."
+   },
+   "phrase": "tunggu. Hal ini berkaitan dengan Aspek Peraih (I"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 7,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \"termasuk pilar jam yang sudah terpetakan, menunju\"",
+   "ctx": {
+    "before": "tangguh dengan kemampuan alami untuk mengelola peluang dan tanggung jawab. Keempat pilar dalam baganmu, ",
+    "phrase": "termasuk pilar jam yang sudah terpetakan, menunju",
+    "after": "kkan bahwa kamu memiliki kapasitas besar untuk terus bergerak maju. Kamu hanya perlu belajar untuk membagi"
+   },
+   "phrase": "termasuk pilar jam yang sudah terpetakan, menunju"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"pilar jam lahirmu tidak dapat dipetakan\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \". Keempat pilar jam lahirmu tidak dapat dipetakan\"",
+   "ctx": {
+    "before": "kuat. Kamu adalah individu yang tangguh dengan kemampuan alami untuk mengelola peluang di tengah ketidakpastian",
+    "phrase": ". Keempat pilar jam lahirmu tidak dapat dipetakan",
+    "after": " karena data jam lahir tidak tersedia. Kamu memiliki kapasitas untuk terus maju, namun ingatlah untuk"
+   },
+   "phrase": ". Keempat pilar jam lahirmu tidak dapat dipetakan"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"Pilar jam lahirmu tidak dapat dipetakan\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \"ng kuat. Pilar jam lahirmu tidak dapat dipetakan\"",
+   "ctx": {
+    "before": "sendiri. Kamu tidak perlu menjelaskan semua alur pikiranmu. Cukup sampaikan kesimpulannya dan satu alasan pali",
+    "phrase": "ng kuat. Pilar jam lahirmu tidak dapat dipetakan",
+    "after": " karena informasi waktu tidak tersedia. Kamu adalah seseorang yang terus bergerak maju dengan ketangguhan yang"
+   },
+   "phrase": "ng kuat. Pilar jam lahirmu tidak dapat dipetakan"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 10,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"pilar jam yang tidak bisa dipetakan\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 10,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"at. Orang mungkin mengira kamu mudah mengikuti aru\"",
+   "ctx": {
+    "before": "di sekitarmu. Namun, kamu sulit melambat, bahkan di saat tubuh dan pikiranmu sangat membutuhkan istirah",
+    "phrase": "at. Orang mungkin mengira kamu mudah mengikuti aru",
+    "after": "s, padahal kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah. Baganmu berdiri di"
+   },
+   "phrase": "at. Orang mungkin mengira kamu mudah mengikuti aru"
+  },
+  {
+   "chart": "chart 13",
+   "hourKnown": true,
+   "run": 10,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \"termasuk pilar jam yang tidak bisa dipetakan, mem\"",
+   "ctx": {
+    "before": "kemampuan alami untuk mengelola peluang dan tanggung jawab yang besar. Keempat pilar dalam baganmu, ",
+    "phrase": "termasuk pilar jam yang tidak bisa dipetakan, mem",
+    "after": "bentuk dirimu yang terus bergerak maju. Teruslah melangkah dengan kesadaran penuh atas kapasitas dirimu sendiri."
+   },
+   "phrase": "termasuk pilar jam yang tidak bisa dipetakan, mem"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 1,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"rang lain mungkin menganggapnya berat. Kamu adala\"",
+   "ctx": {
+    "before": "dipengaruhi oleh Aspek Pengatur. Dinamika hubunganmu terasa wajar bagimu dengan pola yang disiplin, meskipun o",
+    "phrase": "rang lain mungkin menganggapnya berat. Kamu adala",
+    "after": "h sosok yang tangguh di bawah tekanan dan mampu menjadi tempat bersandar bagi orang lain. Kamu"
+   },
+   "phrase": "rang lain mungkin menganggapnya berat. Kamu adala"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 1,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"kan waktu secara konsisten. Sementara itu, Bintang\"",
+   "ctx": {
+    "before": "berusaha keras, namun perhatian datang lebih cepat daripada kedekatan. Bangunlah hubungan yang dekat dengan meluang",
+    "phrase": "kan waktu secara konsisten. Sementara itu, Bintang",
+    "after": " Penolong memastikan kamu tidak benar-benar sendirian di titik tersempit. Minta bantuan lebih awal dari yang"
+   },
+   "phrase": "kan waktu secara konsisten. Sementara itu, Bintang"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "day_master_Fire: \"gift\" did not survive into the prose (1/9 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"kan waktu secara konsisten bersama orang-orang ter\"",
+   "ctx": {
+    "before": "sebelum kamu mulai bicara, namun perhatian datang lebih cepat daripada kedekatan. Bangun hubungan dengan meluang",
+    "phrase": "kan waktu secara konsisten bersama orang-orang ter",
+    "after": "tentu. Kamu pun memiliki Bintang Penolong (Nobleman) di pilar ini. Saat kamu benar-benar jalan buntu, selalu"
+   },
+   "phrase": "kan waktu secara konsisten bersama orang-orang ter"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 3,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"tertentu secara konsisten. Kamu pun memiliki Bint\"",
+   "ctx": {
+    "before": "bahwa perhatian datang lebih cepat daripada kedekatan. Bangun hubungan dengan meluangkan waktu bersama orang-orang ",
+    "phrase": "tertentu secara konsisten. Kamu pun memiliki Bint",
+    "after": "ang Penolong (Nobleman) di sini. Saat kamu benar-benar jalan buntu, selalu ada orang yang muncul membantu."
+   },
+   "phrase": "tertentu secara konsisten. Kamu pun memiliki Bint"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"jam lahir tidak diketahui\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bcenderung\\b/ at \"ana, kamu cenderung membawa standar disiplin yang\"",
+   "ctx": {
+    "before": "di Fondasi Pasangan pada Pilar Diri yang mencakup kehidupan pribadi dan hubungan terdekatmu. Di s",
+    "phrase": "ana, kamu cenderung membawa standar disiplin yang",
+    "after": " sama, yang bagi orang lain bisa terasa berat. Kamu adalah sosok yang tangguh di bawah"
+   },
+   "phrase": "ana, kamu cenderung membawa standar disiplin yang"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"rang lain mungkin menganggapnya berat. Kamu adala\"",
+   "ctx": {
+    "before": "dipengaruhi oleh Aspek Pengatur. Dinamika hubunganmu terasa wajar bagimu dengan standar yang tinggi, meskipun o",
+    "phrase": "rang lain mungkin menganggapnya berat. Kamu adala",
+    "after": "h sosok yang tangguh dan disiplin dalam memegang tanggung jawab. Kamu memiliki kemampuan untuk menarik perhatian"
+   },
+   "phrase": "rang lain mungkin menganggapnya berat. Kamu adala"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"g pilihan secara konsisten. Kamu juga memiliki Bin\"",
+   "ctx": {
+    "before": "bicara, namun perhatian datang lebih cepat daripada kedekatan. Bangun hubungan dengan meluangkan waktu bersama orang-oran",
+    "phrase": "g pilihan secara konsisten. Kamu juga memiliki Bin",
+    "after": "tang Penolong di pilar ini. Saat kamu benar-benar jalan buntu, selalu ada orang yang muncul membantu."
+   },
+   "phrase": "g pilihan secara konsisten. Kamu juga memiliki Bin"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "strength_weak: \"gift\" did not survive into the prose (1/9 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "badge_桃花: \"cost\" did not survive into the prose (1/13 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.essay_connectives",
+   "severity": "soft",
+   "message": "/\\bhal ini\\b/ at \"u benar. Hal ini juga tercermin di Fondasi Pasang\"",
+   "ctx": {
+    "before": "untuk selalu benar tidak pernah berhenti. Buat jadwal sendiri untuk santai tanpa tuntutan harus selal",
+    "phrase": "u benar. Hal ini juga tercermin di Fondasi Pasang",
+    "after": "an, yaitu pilar hari yang menaungi kehidupan pribadi dan hubungan terdekatmu. Di sini, dinamika hubungan terasa"
+   },
+   "phrase": "u benar. Hal ini juga tercermin di Fondasi Pasang"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \"an, yaitu pilar hari yang menaungi kehidupan priba\"",
+   "ctx": {
+    "before": "sendiri untuk santai tanpa tuntutan harus selalu benar. Hal ini juga tercermin di Fondasi Pasang",
+    "phrase": "an, yaitu pilar hari yang menaungi kehidupan priba",
+    "after": "di dan hubungan terdekatmu. Di sini, dinamika hubungan terasa wajar bagimu jika ada struktur dan tanggung"
+   },
+   "phrase": "an, yaitu pilar hari yang menaungi kehidupan priba"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 7,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"jam lahir tidak diketahui\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 7,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"rang lain mungkin menganggapnya berat. Keempat pi\"",
+   "ctx": {
+    "before": "Aspek Pengatur. Dinamika hubunganmu terasa wajar saat kamu memegang kendali dan tanggung jawab, meskipun o",
+    "phrase": "rang lain mungkin menganggapnya berat. Keempat pi",
+    "after": "lar tidak dapat dipetakan secara lengkap karena jam lahir tidak diketahui. Kamu adalah sosok yang tangguh"
+   },
+   "phrase": "rang lain mungkin menganggapnya berat. Keempat pi"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 7,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"dipetakan secara lengkap karena jam lahir tidak di\"",
+   "ctx": {
+    "before": "kendali dan tanggung jawab, meskipun orang lain mungkin menganggapnya berat. Keempat pilar tidak dapat ",
+    "phrase": "dipetakan secara lengkap karena jam lahir tidak di",
+    "after": "ketahui. Kamu adalah sosok yang tangguh di bawah tekanan dan selalu menjadi tempat bersandar bagi orang"
+   },
+   "phrase": "dipetakan secara lengkap karena jam lahir tidak di"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 7,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "element_missing_Wood: \"gift\" did not survive into the prose (1/8 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 7,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "badge_桃花: \"cost\" did not survive into the prose (1/13 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"pilar jam yang tidak bisa dipetakan\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "void_stack_month: \"cost\" did not survive into the prose (0/7 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"ita jujur secara konsisten. Terakhir, kamu memilik\"",
+   "ctx": {
+    "before": "hanya membuka pintu dan kedekatan sungguhan harus dibangun pelan-pelan. Pilih beberapa orang untuk berbagi cer",
+    "phrase": "ita jujur secara konsisten. Terakhir, kamu memilik",
+    "after": "i Bintang Penolong di pilar ini. Saat kamu benar-benar jalan buntu, selalu ada orang yang muncul"
+   },
+   "phrase": "ita jujur secara konsisten. Terakhir, kamu memilik"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.raw_pillar",
+   "severity": "soft",
+   "message": "/\\bpilar\\s+(tahun|bulan|hari|jam)\\w*/ at \"termasuk pilar jam yang tidak bisa dipetakan, men\"",
+   "ctx": {
+    "before": "yang terasa wajar bagimu, meskipun orang lain bisa menganggapnya berat. Keempat pilar dalam baganmu, ",
+    "phrase": "termasuk pilar jam yang tidak bisa dipetakan, men",
+    "after": "unjukkan sosok yang tangguh di bawah tekanan namun sering lupa untuk menopang diri sendiri. Kamu adalah"
+   },
+   "phrase": "termasuk pilar jam yang tidak bisa dipetakan, men"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 8,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \". Baganmu secara keseluruhan didominasi oleh eleme\"",
+   "ctx": {
+    "before": "Fondasi Pasangan yang berada di Pilar Diri, tempat yang membaca kehidupan pribadi dan hubungan terdekatmu",
+    "phrase": ". Baganmu secara keseluruhan didominasi oleh eleme",
+    "after": "n Air yang membawa beban tanggung jawab dan ekspektasi publik. Lepaskan satu beban yang sebenarnya bukan"
+   },
+   "phrase": ". Baganmu secara keseluruhan didominasi oleh eleme"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.hour_known_contradiction",
+   "severity": "hard",
+   "message": "the birth hour IS known but the text says otherwise: \"jam lahir tidak diketahui\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "aspek_convergence_正官: \"gift\" did not survive into the prose (1/10 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"ma mereka secara konsisten. Arah dan Langkah Ter\"",
+   "ctx": null,
+   "phrase": "ma mereka secara konsisten. Arah dan Langkah Ter"
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "element_missing_Wood: \"gift\" did not survive into the prose (1/8 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "chart 1",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "badge_桃花: \"cost\" did not survive into the prose (1/13 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "fact.strength_contradiction",
+   "severity": "hard",
+   "message": "the strength block names \"lemah\" but the verdict is \"strong\"",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "fact.strength_same_breath",
+   "severity": "hard",
+   "message": "\"kuat\" appears without the substance of its meaning (0/9 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "day_master_Water: \"gift\" did not survive into the prose (0/5 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "strength_strong: \"label_meaning\" did not survive into the prose (0/9 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"rang lain mungkin mengira kamu sulit ditebak, pada\"",
+   "ctx": {
+    "before": "intensif setiap minggu. Sebagai Air, kamu menyesuaikan diri dengan keadaan tanpa kehilangan arah tujuan. O",
+    "phrase": "rang lain mungkin mengira kamu sulit ditebak, pada",
+    "after": "hal tujuanmu selalu sama, hanya jalurnya yang berganti-ganti. Jangan paksa dirimu masuk ke aturan yang kaku,"
+   },
+   "phrase": "rang lain mungkin mengira kamu sulit ditebak, pada"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 2,
+   "attempt": 1,
+   "hard": true,
+   "outcome": "passed on retry",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"hubungan secara perlahan dengan kehadiran yang ko\"",
+   "ctx": {
+    "before": "pertemuan tanpa kamu perlu berusaha keras. Perhatian datang lebih cepat daripada kedekatan, jadi bangunlah ",
+    "phrase": "hubungan secara perlahan dengan kehadiran yang ko",
+    "after": "nsisten. Di Pilar Akar, kamu juga memiliki Mata Pisau (Yang Blade). Ada titik di mana kamu"
+   },
+   "phrase": "hubungan secara perlahan dengan kehadiran yang ko"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 3,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"rang lain mungkin kesulitan menebak langkahmu, nam\"",
+   "ctx": {
+    "before": "tumpah menjadi konflik. Sebagai Air, kamu menyesuaikan diri dengan keadaan tanpa kehilangan arah tujuan. O",
+    "phrase": "rang lain mungkin kesulitan menebak langkahmu, nam",
+    "after": "un kamu mampu menembus situasi yang buntu bagi orang lain. Jangan paksa dirimu masuk ke aturan"
+   },
+   "phrase": "rang lain mungkin kesulitan menebak langkahmu, nam"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 3,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "badge_桃花: \"cost\" did not survive into the prose (0/13 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 3,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \". Jalanmu mungkin tidak selalu lurus, namun arah t\"",
+   "ctx": {
+    "before": "dalam dirimu. Kamu adalah sosok yang mandiri dengan ketajaman intuisi yang jarang dimiliki orang lain",
+    "phrase": ". Jalanmu mungkin tidak selalu lurus, namun arah t",
+    "after": "ujuanmu tetap terjaga. Teruslah melangkah dengan keyakinan pada apa yang sudah kamu bangun."
+   },
+   "phrase": ". Jalanmu mungkin tidak selalu lurus, namun arah t"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "day_master_Water: \"gift\" did not survive into the prose (0/5 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "day_master_Water: \"cost\" did not survive into the prose (0/11 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 2,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.strength_same_breath",
+   "severity": "hard",
+   "message": "\"kuat\" appears without the substance of its meaning (0/9 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 2,
+   "hard": true,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "strength_strong: \"label_meaning\" did not survive into the prose (0/9 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 4,
+   "attempt": 2,
+   "hard": true,
+   "outcome": "floored",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"hubungan secara pelan-pelan dengan kehadiran yang\"",
+   "ctx": {
+    "before": "pertemuan tanpa kamu perlu berusaha keras. Perhatian datang lebih cepat daripada kedekatan, jadi bangunlah ",
+    "phrase": "hubungan secara pelan-pelan dengan kehadiran yang",
+    "after": " konsisten. Selain itu, Pilar Akar membawa Mata Pisau (Yang Blade). Ada titik di mana kamu"
+   },
+   "phrase": "hubungan secara pelan-pelan dengan kehadiran yang"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "day_master_Water: \"gift\" did not survive into the prose (0/5 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "day_master_Water: \"cost\" did not survive into the prose (0/11 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 5,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"ma mereka secara konsisten. Ketegasan dalam Keput\"",
+   "ctx": {
+    "before": "cepat daripada kedekatan. Pilih beberapa orang, lalu bagikan cerita yang jujur dan luangkan waktu bersa",
+    "phrase": "ma mereka secara konsisten. Ketegasan dalam Keput",
+    "after": "usan. Di Pilar Akar, kamu memiliki Mata Pisau (Yang Blade). Ada titik di mana kamu berhenti"
+   },
+   "phrase": "ma mereka secara konsisten. Ketegasan dalam Keput"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "spouse_palace: \"label_meaning\" did not survive into the prose (1/15 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"ma mereka secara konsisten. Di Pilar Akar, kamu m\"",
+   "ctx": {
+    "before": "tidak pernah tertutup. Pilih beberapa orang, lalu bagikan cerita yang jujur dan luangkan waktu bersa",
+    "phrase": "ma mereka secara konsisten. Di Pilar Akar, kamu m",
+    "after": "emiliki Mata Pisau (Yang Blade). Ada titik di mana kamu berhenti menimbang dan langsung mengambil keputusan"
+   },
+   "phrase": "ma mereka secara konsisten. Di Pilar Akar, kamu m"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 2,
+   "hard": true,
+   "outcome": "floored",
+   "check": "fact.condition_named",
+   "severity": "hard",
+   "message": "\"Missing Wood\" is a condition, not a badge, and must not be named",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 6,
+   "attempt": 2,
+   "hard": true,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "badge_桃花: \"cost\" did not survive into the prose (1/13 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 7,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "spouse_palace: \"label_meaning\" did not survive into the prose (1/15 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "coverage.field_dropped",
+   "severity": "soft",
+   "message": "spouse_palace: \"label_meaning\" did not survive into the prose (1/15 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.hedging",
+   "severity": "soft",
+   "message": "/\\bmungkin\\b/ at \"rang lain mungkin kesulitan menebak langkahmu, nam\"",
+   "ctx": {
+    "before": "intensif setiap minggu. Sebagai Samudra, kamu menyesuaikan diri dengan keadaan tanpa kehilangan arah tujuan. O",
+    "phrase": "rang lain mungkin kesulitan menebak langkahmu, nam",
+    "after": "un kamu mampu menembus situasi yang buntu bagi orang lain. Jangan paksa dirimu masuk ke aturan"
+   },
+   "phrase": "rang lain mungkin kesulitan menebak langkahmu, nam"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 9,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "passed on retry",
+   "check": "style.adverbial",
+   "severity": "soft",
+   "message": "/\\bsecara \\w+/ at \"hubungan secara konsisten agar orang bertahan. Di\"",
+   "ctx": {
+    "before": "tanpa perlu usaha keras. Perhatian datang lebih cepat daripada kedekatan, sehingga kamu perlu membangun ",
+    "phrase": "hubungan secara konsisten agar orang bertahan. Di",
+    "after": " Pilar Akar, kamu memiliki Mata Pisau (Yang Blade) yang membuatmu mampu mengambil keputusan tegas saat"
+   },
+   "phrase": "hubungan secara konsisten agar orang bertahan. Di"
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 10,
+   "attempt": 1,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "badge_桃花: \"cost\" did not survive into the prose (0/13 stems)",
+   "ctx": null,
+   "phrase": null
+  },
+  {
+   "chart": "fresh-1996",
+   "hourKnown": true,
+   "run": 10,
+   "attempt": 2,
+   "hard": false,
+   "outcome": "floored",
+   "check": "coverage.cost_dropped",
+   "severity": "soft",
+   "message": "day_master_Water: \"cost\" did not survive into the prose (1/11 stems)",
+   "ctx": null,
+   "phrase": null
+  }
+ ],
+ "runs": [
+  {
+   "chart": "chart 5",
+   "run": 1,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ],
+    [
+     "coverage.field_dropped"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 5",
+   "run": 2,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 5",
+   "run": 3,
+   "outcome": "passed first",
+   "hourKnown": true,
+   "checksByAttempt": []
+  },
+  {
+   "chart": "chart 5",
+   "run": 4,
+   "outcome": "passed first",
+   "hourKnown": true,
+   "checksByAttempt": []
+  },
+  {
+   "chart": "chart 5",
+   "run": 5,
+   "outcome": "passed first",
+   "hourKnown": true,
+   "checksByAttempt": []
+  },
+  {
+   "chart": "chart 5",
+   "run": 6,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ],
+    [
+     "coverage.field_dropped",
+     "coverage.field_dropped"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 5",
+   "run": 7,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 5",
+   "run": 8,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ],
+    [
+     "coverage.field_dropped",
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 5",
+   "run": 9,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 5",
+   "run": 10,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ],
+    [
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 1,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "coverage.cost_dropped"
+    ],
+    [
+     "fact.hour_known_contradiction"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 2,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "style.hedging",
+     "style.raw_pillar"
+    ],
+    [
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 3,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "style.tension_collapse",
+     "style.raw_pillar"
+    ],
+    [
+     "coverage.cost_dropped"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 4,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "style.adverbial",
+     "style.raw_pillar"
+    ],
+    [
+     "coverage.cost_dropped"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 5,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "style.raw_pillar"
+    ],
+    [
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 6,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ],
+    [
+     "style.essay_connectives"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 7,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.raw_pillar"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 8,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "style.raw_pillar"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 9,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "style.raw_pillar"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 13",
+   "run": 10,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "style.hedging",
+     "style.raw_pillar"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 1,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging",
+     "style.adverbial"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 2,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "coverage.field_dropped",
+     "style.adverbial"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 3,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.adverbial"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 4,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction"
+    ],
+    [
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 5,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging",
+     "style.adverbial"
+    ],
+    [
+     "coverage.field_dropped",
+     "coverage.cost_dropped",
+     "style.essay_connectives",
+     "style.raw_pillar"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 6,
+   "outcome": "passed first",
+   "hourKnown": true,
+   "checksByAttempt": []
+  },
+  {
+   "chart": "chart 1",
+   "run": 7,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "style.hedging",
+     "style.adverbial"
+    ],
+    [
+     "coverage.field_dropped",
+     "coverage.cost_dropped"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 8,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "coverage.cost_dropped",
+     "style.adverbial",
+     "style.raw_pillar"
+    ],
+    [
+     "style.adverbial"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 9,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.hour_known_contradiction",
+     "coverage.field_dropped",
+     "style.adverbial"
+    ],
+    [
+     "coverage.field_dropped",
+     "coverage.cost_dropped"
+    ]
+   ]
+  },
+  {
+   "chart": "chart 1",
+   "run": 10,
+   "outcome": "passed first",
+   "hourKnown": true,
+   "checksByAttempt": []
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 1,
+   "outcome": "passed first",
+   "hourKnown": true,
+   "checksByAttempt": []
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 2,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "fact.strength_contradiction",
+     "fact.strength_same_breath",
+     "coverage.field_dropped",
+     "coverage.field_dropped",
+     "style.hedging",
+     "style.adverbial"
+    ]
+   ]
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 3,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "style.hedging"
+    ],
+    [
+     "coverage.cost_dropped",
+     "style.hedging"
+    ]
+   ]
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 4,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "coverage.field_dropped",
+     "coverage.cost_dropped"
+    ],
+    [
+     "fact.strength_same_breath",
+     "coverage.field_dropped",
+     "style.adverbial"
+    ]
+   ]
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 5,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "coverage.field_dropped",
+     "coverage.cost_dropped",
+     "style.adverbial"
+    ]
+   ]
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 6,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "coverage.field_dropped",
+     "style.adverbial"
+    ],
+    [
+     "fact.condition_named",
+     "coverage.cost_dropped"
+    ]
+   ]
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 7,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "coverage.field_dropped"
+    ]
+   ]
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 8,
+   "outcome": "passed first",
+   "hourKnown": true,
+   "checksByAttempt": []
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 9,
+   "outcome": "passed on retry",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "coverage.field_dropped",
+     "style.hedging",
+     "style.adverbial"
+    ]
+   ]
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 10,
+   "outcome": "floored",
+   "hourKnown": true,
+   "checksByAttempt": [
+    [
+     "coverage.cost_dropped"
+    ],
+    [
+     "coverage.cost_dropped"
+    ]
+   ]
+  }
+ ]
+}

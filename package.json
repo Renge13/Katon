@@ -43,7 +43,14 @@
     "serve:reports": "node scripts/serve-reports.mjs",
     "test:engine": "node tests/bazi-engine.report.mjs",
     "test:forge": "node --conditions=react-server scripts/forge-tests.mjs",
-    "gallery:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/rejection-gallery.mjs"
+    "gallery:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/rejection-gallery.mjs",
+    "probe:sheen": "node scripts/probe-sheen.mjs",
+    "qa:renders": "node --env-file-if-exists=.env.local --conditions=react-server scripts/qa-renders.mjs",
+    "probe:floor-rate": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-floor-rate.mjs",
+    "build:han-subset": "node scripts/build-han-subset.mjs",
+    "probe:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-rejections.mjs",
+    "probe:retry-depth": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-retry-depth.mjs",
+    "probe:retry-erosion": "node scripts/probe-retry-erosion.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",

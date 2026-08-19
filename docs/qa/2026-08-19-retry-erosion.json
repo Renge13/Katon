@@ -1,0 +1,2408 @@
+{
+ "trace": "docs/qa/2026-08-18-retry-depth.json",
+ "prompt": "2ff1a546fb7e6e53",
+ "gate": "1.9.0",
+ "rows": [
+  {
+   "chart": "chart 5",
+   "run": 2,
+   "stem": "丙",
+   "rejectedFor": [
+    "style.hedging"
+   ],
+   "a": {
+    "chars": 3816,
+    "paragraphs": 8,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu didominasi oleh elemen Tanah, yang berarti energi mengucur deras lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 0,
+      "bracketed": 0,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Tanah",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4449,
+    "paragraphs": 9,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu didominasi oleh elemen Tanah, yang berarti energi mengucur deras lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Aspek Pemikir"
+      ]
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Tanah",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": 1
+  },
+  {
+   "chart": "chart 5",
+   "run": 3,
+   "stem": "丙",
+   "rejectedFor": [
+    "coverage.field_dropped"
+   ],
+   "a": {
+    "chars": 4159,
+    "paragraphs": 10,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu didominasi oleh elemen Tanah yang mengalir lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Tanah",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 3908,
+    "paragraphs": 6,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": false,
+     "sentence": "Baganmu terisi oleh karya dan output yang mengucur lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 0,
+      "bracketed": 0,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": true,
+   "gainedElement": false,
+   "paraDelta": -4
+  },
+  {
+   "chart": "chart 5",
+   "run": 6,
+   "stem": "丙",
+   "rejectedFor": [
+    "style.hedging"
+   ],
+   "a": {
+    "chars": 4529,
+    "paragraphs": 10,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu didominasi oleh elemen Tanah, yang berarti energi mengucur deras lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Tanah",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4546,
+    "paragraphs": 7,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu terisi oleh dominasi elemen Tanah yang berarti energi mengucur deras lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Tanah",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -3
+  },
+  {
+   "chart": "chart 5",
+   "run": 7,
+   "stem": "丙",
+   "rejectedFor": [
+    "style.hedging"
+   ],
+   "a": {
+    "chars": 3896,
+    "paragraphs": 8,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu terisi oleh dominasi elemen Tanah, yang berarti energi mengucur deras lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 0,
+      "bracketed": 0,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Tanah",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4035,
+    "paragraphs": 6,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu didominasi oleh elemen Tanah yang berarti energi mengucur deras lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Aspek Pemikir"
+      ]
+     },
+     "bintang": {
+      "present": 0,
+      "bracketed": 0,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Tanah",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -2
+  },
+  {
+   "chart": "chart 5",
+   "run": 9,
+   "stem": "丙",
+   "rejectedFor": [
+    "coverage.field_dropped",
+    "style.hedging"
+   ],
+   "a": {
+    "chars": 4336,
+    "paragraphs": 7,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu didominasi oleh elemen Tanah, yang berarti energi mengucur deras lewat ide, kreasi, dan kejelian melihat ruang perbaikan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Tanah",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 3596,
+    "paragraphs": 6,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": false,
+     "sentence": "Baganmu terisi oleh karya dan output yang dominan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 0,
+      "bracketed": 0,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Api",
+       "Logam"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": true,
+   "gainedElement": false,
+   "paraDelta": -1
+  },
+  {
+   "chart": "chart 13",
+   "run": 2,
+   "stem": "乙",
+   "rejectedFor": [
+    "fact.hour_known_contradiction",
+    "style.raw_pillar"
+   ],
+   "a": {
+    "chars": 5138,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi oleh elemen Tanah yang dominan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 5410,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi elemen Tanah yang dominan, yang berarti hidupmu dipenuhi hal-hal yang menuntut pengelolaan seperti peluang, tanggung jawab, dan urusan orang lain."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": 0
+  },
+  {
+   "chart": "chart 13",
+   "run": 4,
+   "stem": "乙",
+   "rejectedFor": [
+    "fact.hour_known_contradiction",
+    "coverage.cost_dropped",
+    "style.raw_pillar"
+   ],
+   "a": {
+    "chars": 4973,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi oleh elemen Tanah yang dominan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4838,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi elemen Tanah yang dominan, yang berarti kamu dikelilingi hal-hal yang menuntut pengelolaan seperti peluang, tanggung jawab, dan urusan orang lain."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": 0
+  },
+  {
+   "chart": "chart 13",
+   "run": 5,
+   "stem": "乙",
+   "rejectedFor": [
+    "style.essay_connectives"
+   ],
+   "a": {
+    "chars": 5183,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi elemen Tanah yang dominan, yang berarti hidupmu dipenuhi hal-hal yang menuntut pengelolaan seperti peluang, tanggung jawab, dan urusan orang lain."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4038,
+    "paragraphs": 6,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi elemen Tanah yang dominan, yang berarti kamu dikelilingi oleh hal-hal yang menuntut pengelolaan seperti peluang, tanggung jawab, dan urusan orang lain."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -2
+  },
+  {
+   "chart": "chart 13",
+   "run": 6,
+   "stem": "乙",
+   "rejectedFor": [
+    "fact.hour_known_contradiction",
+    "style.raw_pillar"
+   ],
+   "a": {
+    "chars": 5465,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi oleh elemen Tanah yang dominan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 5336,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi elemen Tanah yang dominan, yang menuntut pengelolaan atas peluang, tanggung jawab, dan urusan orang lain."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Aspek Pendamping",
+       "Aspek Pengelola",
+       "Aspek Peraih",
+       "Aspek Pemikir"
+      ]
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Benturan"
+      ]
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": 0
+  },
+  {
+   "chart": "chart 13",
+   "run": 9,
+   "stem": "乙",
+   "rejectedFor": [
+    "fact.hour_known_contradiction",
+    "style.raw_pillar"
+   ],
+   "a": {
+    "chars": 5191,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi elemen Tanah yang dominan, yang berarti hidupmu dipenuhi hal-hal yang menuntut pengelolaan, mulai dari peluang, tanggung jawab, hingga urusan orang lain."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 5326,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi oleh elemen Tanah yang dominan, yang menandakan kamu dikelilingi oleh hal-hal yang menuntut pengelolaan, mulai dari peluang, tanggung jawab, hingga urusan orang lain."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": 0
+  },
+  {
+   "chart": "chart 13",
+   "run": 10,
+   "stem": "乙",
+   "rejectedFor": [
+    "fact.hour_known_contradiction",
+    "style.raw_pillar"
+   ],
+   "a": {
+    "chars": 5344,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi oleh elemen Tanah yang dominan."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 4,
+      "bracketed": 4,
+      "missing": []
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 3886,
+    "paragraphs": 6,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu dipenuhi oleh elemen Tanah yang dominan, yang menandakan banyaknya hal yang menuntut pengelolaan, mulai dari peluang, tanggung jawab, hingga urusan orang lain."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Aspek Peraih"
+      ]
+     },
+     "bintang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Benturan"
+      ]
+     },
+     "pilar": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Tanah"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -2
+  },
+  {
+   "chart": "chart 1",
+   "run": 1,
+   "stem": "丙",
+   "rejectedFor": [
+    "coverage.cost_dropped",
+    "coverage.field_dropped",
+    "coverage.cost_dropped"
+   ],
+   "a": {
+    "chars": 4026,
+    "paragraphs": 7,
+    "archetype": true,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Aspek Pengelola",
+       "Aspek Pengatur"
+      ]
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Bunga Persik",
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Setengah Gabungan"
+      ]
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Api"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4669,
+    "paragraphs": 6,
+    "archetype": false,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 3,
+      "bracketed": 2,
+      "missing": [
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Api"
+      ]
+     }
+    }
+   },
+   "lostArchetype": true,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -1
+  },
+  {
+   "chart": "chart 1",
+   "run": 5,
+   "stem": "丙",
+   "rejectedFor": [
+    "style.hedging",
+    "style.essay_connectives"
+   ],
+   "a": {
+    "chars": 4506,
+    "paragraphs": 10,
+    "archetype": true,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Aspek Pengelola",
+       "Aspek Pengatur"
+      ]
+     },
+     "bintang": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Bunga Persik",
+       "Bintang Penolong",
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Setengah Gabungan"
+      ]
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Api"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4258,
+    "paragraphs": 8,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Karena baganmu didominasi oleh elemen Air, kamu tangguh di bawah tekanan, namun selalu merasa ada standar baru yang menghantuimu."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Aspek Pengelola",
+       "Aspek Pengatur"
+      ]
+     },
+     "bintang": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Bunga Persik",
+       "Bintang Penolong",
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Setengah Gabungan"
+      ]
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Api",
+       "Air"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -2
+  },
+  {
+   "chart": "chart 1",
+   "run": 6,
+   "stem": "丙",
+   "rejectedFor": [
+    "coverage.field_dropped",
+    "coverage.field_dropped",
+    "coverage.cost_dropped"
+   ],
+   "a": {
+    "chars": 4494,
+    "paragraphs": 10,
+    "archetype": true,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 1,
+      "missing": [
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Setengah Gabungan"
+      ]
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Api"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 5539,
+    "paragraphs": 8,
+    "archetype": true,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Api"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -2
+  },
+  {
+   "chart": "chart 1",
+   "run": 9,
+   "stem": "丙",
+   "rejectedFor": [
+    "style.essay_connectives"
+   ],
+   "a": {
+    "chars": 4782,
+    "paragraphs": 10,
+    "archetype": true,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Aspek Pengelola",
+       "Aspek Pengatur"
+      ]
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Bunga Persik",
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 0,
+      "missing": [
+       "Setengah Gabungan"
+      ]
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Api"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4829,
+    "paragraphs": 5,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": true,
+     "sentence": "Baganmu secara keseluruhan didominasi oleh elemen Air yang membawa tuntutan luar berupa aturan dan ekspektasi publik."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 3,
+      "bracketed": 2,
+      "missing": [
+       "Tanda Kekosongan"
+      ]
+     },
+     "relasi_cabang": {
+      "present": 1,
+      "bracketed": 1,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 3,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Api",
+       "Air"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -5
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 2,
+   "stem": "壬",
+   "rejectedFor": [
+    "coverage.cost_dropped"
+   ],
+   "a": {
+    "chars": 5012,
+    "paragraphs": 7,
+    "archetype": true,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4356,
+    "paragraphs": 6,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": false,
+     "sentence": "Kamu memiliki Aspek Pelindung (Direct Resource) yang dominan di Pilar Kerja, yang berarti kamu cepat menyerap ilmu dan orang lain senang membimbingmu."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 3,
+      "bracketed": 3,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -1
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 4,
+   "stem": "壬",
+   "rejectedFor": [
+    "coverage.field_dropped"
+   ],
+   "a": {
+    "chars": 4763,
+    "paragraphs": 9,
+    "archetype": false,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 3,
+      "bracketed": 3,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4166,
+    "paragraphs": 5,
+    "archetype": true,
+    "dominance": {
+     "found": true,
+     "named": false,
+     "sentence": "Kamu memiliki Aspek Pelindung (Direct Resource) yang dominan di Pilar Kerja, yang mencakup area pekerjaan dan kariermu."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": true,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": -4
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 5,
+   "stem": "壬",
+   "rejectedFor": [
+    "fact.strength_same_breath",
+    "coverage.field_dropped"
+   ],
+   "a": {
+    "chars": 3865,
+    "paragraphs": 7,
+    "archetype": true,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 5364,
+    "paragraphs": 9,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": false,
+     "sentence": "Kamu memiliki Aspek Pelindung (Direct Resource) yang dominan di Pilar Kerja, yang mencakup area pekerjaan dan kariermu."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "lostArchetype": true,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": 2
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 8,
+   "stem": "壬",
+   "rejectedFor": [
+    "coverage.field_dropped",
+    "coverage.cost_dropped"
+   ],
+   "a": {
+    "chars": 4759,
+    "paragraphs": 7,
+    "archetype": false,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 4707,
+    "paragraphs": 8,
+    "archetype": false,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": 1
+  },
+  {
+   "chart": "fresh-1996",
+   "run": 10,
+   "stem": "壬",
+   "rejectedFor": [
+    "coverage.cost_dropped"
+   ],
+   "a": {
+    "chars": 4226,
+    "paragraphs": 7,
+    "archetype": false,
+    "dominance": {
+     "found": false,
+     "named": null,
+     "sentence": null
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "b": {
+    "chars": 5472,
+    "paragraphs": 9,
+    "archetype": false,
+    "dominance": {
+     "found": true,
+     "named": false,
+     "sentence": "Kamu memiliki Aspek Pelindung (Direct Resource) yang dominan di Pilar Kerja, yang mencakup area pekerjaan dan kariermu."
+    },
+    "brackets": {
+     "aspek": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "bintang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "relasi_cabang": {
+      "present": 2,
+      "bracketed": 2,
+      "missing": []
+     },
+     "pilar": {
+      "present": 4,
+      "bracketed": 0,
+      "missing": [
+       "Pilar Akar",
+       "Pilar Kerja",
+       "Pilar Diri",
+       "Pilar Arah"
+      ]
+     },
+     "elemen": {
+      "present": 2,
+      "bracketed": 0,
+      "missing": [
+       "Kayu",
+       "Air"
+      ]
+     }
+    }
+   },
+   "lostArchetype": false,
+   "gainedArchetype": false,
+   "lostElement": false,
+   "gainedElement": false,
+   "paraDelta": 2
+  }
+ ],
+ "bracketDelta": {
+  "aspek": {
+   "lost": 4,
+   "gained": 2,
+   "same": 14
+  },
+  "bintang": {
+   "lost": 2,
+   "gained": 3,
+   "same": 11
+  },
+  "relasi_cabang": {
+   "lost": 2,
+   "gained": 3,
+   "same": 15
+  },
+  "pilar": {
+   "lost": 0,
+   "gained": 0,
+   "same": 20
+  },
+  "elemen": {
+   "lost": 4,
+   "gained": 0,
+   "same": 16
+  }
+ },
+ "byAttempt": {
+  "1": {
+   "n": 1,
+   "renders": 40,
+   "passing": 12,
+   "cats": {
+    "aspek": {
+     "present": 100,
+     "bracketed": 86,
+     "rendersWithAny": 40,
+     "rendersComplete": 33
+    },
+    "bintang": {
+     "present": 71,
+     "bracketed": 52,
+     "rendersWithAny": 38,
+     "rendersComplete": 29
+    },
+    "relasi_cabang": {
+     "present": 50,
+     "bracketed": 42,
+     "rendersWithAny": 40,
+     "rendersComplete": 32
+    },
+    "pilar": {
+     "present": 143,
+     "bracketed": 0,
+     "rendersWithAny": 40,
+     "rendersComplete": 0
+    },
+    "elemen": {
+     "present": 86,
+     "bracketed": 10,
+     "rendersWithAny": 40,
+     "rendersComplete": 2
+    }
+   }
+  },
+  "2": {
+   "n": 2,
+   "renders": 27,
+   "passing": 20,
+   "cats": {
+    "aspek": {
+     "present": 62,
+     "bracketed": 52,
+     "rendersWithAny": 27,
+     "rendersComplete": 21
+    },
+    "bintang": {
+     "present": 47,
+     "bracketed": 36,
+     "rendersWithAny": 24,
+     "rendersComplete": 15
+    },
+    "relasi_cabang": {
+     "present": 32,
+     "bracketed": 27,
+     "rendersWithAny": 27,
+     "rendersComplete": 22
+    },
+    "pilar": {
+     "present": 97,
+     "bracketed": 0,
+     "rendersWithAny": 27,
+     "rendersComplete": 0
+    },
+    "elemen": {
+     "present": 60,
+     "bracketed": 3,
+     "rendersWithAny": 27,
+     "rendersComplete": 1
+    }
+   }
+  },
+  "3": {
+   "n": 3,
+   "renders": 7,
+   "passing": 6,
+   "cats": {
+    "aspek": {
+     "present": 13,
+     "bracketed": 10,
+     "rendersWithAny": 7,
+     "rendersComplete": 5
+    },
+    "bintang": {
+     "present": 14,
+     "bracketed": 9,
+     "rendersWithAny": 6,
+     "rendersComplete": 3
+    },
+    "relasi_cabang": {
+     "present": 7,
+     "bracketed": 5,
+     "rendersWithAny": 7,
+     "rendersComplete": 5
+    },
+    "pilar": {
+     "present": 25,
+     "bracketed": 0,
+     "rendersWithAny": 7,
+     "rendersComplete": 0
+    },
+    "elemen": {
+     "present": 17,
+     "bracketed": 0,
+     "rendersWithAny": 7,
+     "rendersComplete": 0
+    }
+   }
+  },
+  "4": {
+   "n": 4,
+   "renders": 1,
+   "passing": 0,
+   "cats": {
+    "aspek": {
+     "present": 2,
+     "bracketed": 2,
+     "rendersWithAny": 1,
+     "rendersComplete": 1
+    },
+    "bintang": {
+     "present": 0,
+     "bracketed": 0,
+     "rendersWithAny": 0,
+     "rendersComplete": 0
+    },
+    "relasi_cabang": {
+     "present": 1,
+     "bracketed": 1,
+     "rendersWithAny": 1,
+     "rendersComplete": 1
+    },
+    "pilar": {
+     "present": 3,
+     "bracketed": 0,
+     "rendersWithAny": 1,
+     "rendersComplete": 0
+    },
+    "elemen": {
+     "present": 3,
+     "bracketed": 0,
+     "rendersWithAny": 1,
+     "rendersComplete": 0
+    }
+   }
+  },
+  "5": {
+   "n": 5,
+   "renders": 1,
+   "passing": 0,
+   "cats": {
+    "aspek": {
+     "present": 2,
+     "bracketed": 2,
+     "rendersWithAny": 1,
+     "rendersComplete": 1
+    },
+    "bintang": {
+     "present": 0,
+     "bracketed": 0,
+     "rendersWithAny": 0,
+     "rendersComplete": 0
+    },
+    "relasi_cabang": {
+     "present": 1,
+     "bracketed": 1,
+     "rendersWithAny": 1,
+     "rendersComplete": 1
+    },
+    "pilar": {
+     "present": 3,
+     "bracketed": 0,
+     "rendersWithAny": 1,
+     "rendersComplete": 0
+    },
+    "elemen": {
+     "present": 2,
+     "bracketed": 0,
+     "rendersWithAny": 1,
+     "rendersComplete": 0
+    }
+   }
+  },
+  "6": {
+   "n": 6,
+   "renders": 1,
+   "passing": 1,
+   "cats": {
+    "aspek": {
+     "present": 2,
+     "bracketed": 1,
+     "rendersWithAny": 1,
+     "rendersComplete": 0
+    },
+    "bintang": {
+     "present": 2,
+     "bracketed": 2,
+     "rendersWithAny": 1,
+     "rendersComplete": 1
+    },
+    "relasi_cabang": {
+     "present": 1,
+     "bracketed": 1,
+     "rendersWithAny": 1,
+     "rendersComplete": 1
+    },
+    "pilar": {
+     "present": 3,
+     "bracketed": 0,
+     "rendersWithAny": 1,
+     "rendersComplete": 0
+    },
+    "elemen": {
+     "present": 2,
+     "bracketed": 0,
+     "rendersWithAny": 1,
+     "rendersComplete": 0
+    }
+   }
+  }
+ },
+ "passingBrackets": {
+  "present": 205,
+  "bracketed": 174,
+  "renders": 39,
+  "incomplete": 13,
+  "byN": {
+   "1": {
+    "renders": 12,
+    "present": 68,
+    "bracketed": 67,
+    "incomplete": 1
+   },
+   "2": {
+    "renders": 20,
+    "present": 103,
+    "bracketed": 84,
+    "incomplete": 7
+   },
+   "3": {
+    "renders": 6,
+    "present": 29,
+    "bracketed": 19,
+    "incomplete": 4
+   },
+   "6": {
+    "renders": 1,
+    "present": 5,
+    "bracketed": 4,
+    "incomplete": 1
+   }
+  }
+ }
+}
