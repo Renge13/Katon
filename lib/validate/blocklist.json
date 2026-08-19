@@ -179,10 +179,6 @@
     ],
     "hedging": [
       {
-        "pattern": "\\bmungkin\\b",
-        "note": "renderer-prompt: no hedging INSIDE a claim. Golden rule 7, one committed image per claim."
-      },
-      {
         "pattern": "\\bagak\\b",
         "note": "Hedging inside a claim. Golden rule 7, one committed image per claim."
       },
@@ -193,12 +189,6 @@
       {
         "pattern": "\\bsepertinya\\b",
         "note": "Hedging inside a claim. Golden rule 7, say the thing."
-      }
-    ],
-    "adverbial": [
-      {
-        "pattern": "\\bsecara \\w+",
-        "note": "renderer-prompt bans the 'secara ...' adverbial outright. Observed in gate-check run 1."
       }
     ],
     "essay_connectives": [
@@ -315,5 +305,10 @@
         "flags": "u"
       }
     ]
+  },
+  "_rule": "EDITING THIS FILE CHANGES WHAT THE GATE REJECTS, SO IT BUMPS STAGE6_VERSION in lib/validate/index.js IN THE SAME COMMIT. Adding a pattern, removing one, moving one into a function - all of them. There is no edit here too small to move the number: the two entries in _removed below are one deletion and one move, and they left 1.9.0 stamped on two different gates for a day. Read the docblock on STAGE6_VERSION before you commit.",
+  "_removed": {
+    "style.adverbial": "DELETED 2026-08-17 (Reyner, on the 2026-08-18 rejection gallery). Was a token ban for a CONSTRUCTION defect. Measured over 40 runs: 14 findings, 9 of them the plain adverb secara konsisten, and NOT ONE was the construction the ban was written for. It also rejected secara lengkap, which the DEFERRED REGISTER already recorded as a sentence the product must be able to say. It was never the lever on the floor rate - the sole style finding on only 3 of 19 floors, and the sole finding of any kind on ZERO.",
+    "style.hedging mungkin": "MOVED 2026-08-17 out of this file and into lib/validate/style.js#hedgeAboutReader. Golden rule 7 bans hedging INSIDE A CLAIM, and mungkin in a clause about a THIRD PARTY hedges that party guess, not the claim about her: Orang lain mungkin mengira X, padahal tujuanmu selalu sama is fully committed about her, and it is the salah_dikira shape the hooks are built on. Measured: 14 of 15 mungkin findings had a non-reader subject. cenderung, agak and sepertinya are UNCHANGED and stay here."
   }
 }

@@ -178,6 +178,14 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   about the code without its grep is a memory, not a fact. Error 13 (COWORK-BRIEF §4) entered this
   locked file exactly that way and every session inherited it as truth. Re-run the command before
   propagating the claim into a prompt; a check older than the code it describes proves nothing.
+- **A change to what Stage 6 ACCEPTS OR REJECTS bumps `STAGE6_VERSION` in the same commit.** New
+  check, deleted check, threshold move, blocklist pattern added or removed. No edit is too small:
+  deleting `style.adverbial` and moving `mungkin` out of `blocklist.json` on 2026-08-17 left **two
+  materially different gates both stamping `1.9.0`**, and `persistRendered` writes that field onto
+  every cached row precisely so "which readings passed under the old rules" stays answerable. A
+  stale constant is the one thing that makes it unanswerable. Fixed at `1.10.0`; the rule now also
+  sits on the constant's own docblock and in `blocklist.json#_rule`, because the person editing a
+  regex does not open `lib/validate/index.js`.
 
 ---
 

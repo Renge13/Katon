@@ -720,8 +720,11 @@ test('typography, hanzi, questions and arithmetic are all caught', () => {
     ['style.bare_polarity', 'Kamu Api Yang, dan itu membuat caramu hadir terasa terbuka.'],
     ['style.slang', 'Kamu ngerasa capek terus padahal kerjanya tidak seberapa berat.'],
     ['style.particles', 'Itu tuh yang bikin kamu bertahan lama di tempat yang sama.'],
+    // `mungkin` about the READER still fires - see the split test below.
     ['style.hedging', 'Kamu mungkin akan merasa lebih ringan setelah membaca ini semua.'],
-    ['style.adverbial', 'Kamu bergerak secara alami ketika ada yang memberi dorongan.'],
+    // `style.adverbial` was DELETED 2026-08-17. It is deliberately not replaced
+    // here: the check is gone, so a case asserting it fires would assert the
+    // opposite of the ruling.
     ['style.meta', 'Sebagai AI, saya membaca petamu dan menemukan pola yang menarik.'],
     ['style.essay_connectives', 'Hal ini membuat kamu terlihat tenang di mata orang lain.'],
   ];
@@ -1385,4 +1388,61 @@ test('a malformed response counts as a MODEL failure, not a transport failure', 
   const transport = { provider: 'gemini', ok: false, error: 'gemini 503: boom' };
   assert.equal(tagged.shape, true);
   assert.ok(!transport.shape, 'an HTTP failure must not be tagged as a shape failure');
+});
+
+test('style.adverbial IS GONE, and `secara lengkap` is sayable again', () => {
+  // RULED 2026-08-17 (Reyner, on the 2026-08-18 rejection gallery). `\bsecara \w+`
+  // was a TOKEN ban for a CONSTRUCTION defect. Measured over 40 runs: 14 findings,
+  // 9 of them the plain adverb `secara konsisten`, and not one the construction the
+  // ban was written for.
+  //
+  // THIS TEST IS THE DEFERRED REGISTER ROW CLOSING. PROGRESS recorded
+  // `secara lengkap` as "the gate rejects a sentence the product must be able to
+  // say" - it is the hour-less disclosure, which the product has to be able to
+  // print. It now passes.
+  const hourless = withBlockText(goodReading(), 'day_master_Fire',
+    'Tanpa jam lahir, petamu tetap bisa dibaca secara lengkap pada tiga pilar. '
+    + 'Satu kalimat lagi supaya blok ini punya panjang yang wajar.');
+  const checks = checksIn(validateRendering(hourless, CHART_1));
+  assert.ok(!checks.includes('style.adverbial'), 'style.adverbial must no longer exist');
+  assert.ok(!checks.some((c) => c === 'style.adverbial'), 'no adverbial finding may be produced');
+});
+
+test('style.hedging IS SPLIT: `mungkin` fires on the reader, not on a third party', () => {
+  // RULED 2026-08-17. Golden rule 7 bans hedging INSIDE A CLAIM. `mungkin` in a
+  // clause about someone else's PERCEPTION hedges their guess, and the claim about
+  // her stays committed - which is also the `salah_dikira` shape the product's own
+  // hook lines are built from. Measured: 14 of 15 `mungkin` findings over 40 runs
+  // had a non-reader subject, so the gate was rejecting the signature move.
+  //
+  // BOTH DIRECTIONS ARE ASSERTED. A one-directional test here would let the check
+  // be quietly gutted, which is the failure mode the `bare_polarity` and
+  // `english_leakage` false positives already cost this pipeline once.
+  const fires = (sentence) => {
+    const bad = withBlockText(goodReading(), 'day_master_Fire',
+      `${sentence} Satu kalimat lagi supaya blok ini punya panjang yang wajar.`);
+    return checksIn(validateRendering(bad, CHART_1)).includes('style.hedging');
+  };
+
+  // SUPPRESSED - the hedge is on someone else's guess, or on the world.
+  assert.ok(!fires('Orang lain mungkin mengira kamu sulit ditebak, padahal tujuanmu selalu sama.'),
+    'a third-party perception clause must not trip the hedge ban');
+  assert.ok(!fires('Situasi mungkin berubah, tetapi kamu jarang ikut berubah.'),
+    'a clause about the world must not trip the hedge ban');
+  assert.ok(!fires('Mereka mungkin menilai hasilmu terlalu cepat.'),
+    'mereka is a third party too');
+
+  // STILL FIRES - the hedge is inside a claim about her.
+  assert.ok(fires('Kamu mungkin menunda hal yang paling penting bagimu.'),
+    'mungkin about the reader is the case the ban exists for');
+  assert.ok(fires('Jalanmu mungkin tidak selalu lurus, namun arahnya tetap sama.'),
+    'a possessive about the reader is still the reader');
+
+  // UNTOUCHED - cenderung, agak and sepertinya stay in the blocklist.
+  assert.ok(fires('Kamu cenderung bertahan di situasi yang sudah jelas.'),
+    'cenderung was explicitly left as-is');
+  assert.ok(fires('Kamu agak menahan diri ketika orang lain sedang bicara.'),
+    'agak was explicitly left as-is');
+  assert.ok(fires('Sepertinya kamu menunggu izin yang tidak akan datang.'),
+    'sepertinya was explicitly left as-is');
 });
