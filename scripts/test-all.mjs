@@ -18,6 +18,29 @@
 // selector is `^test:` over the scripts block: **adding a `test:*` script enrols it
 // in `npm test` automatically, and there is no list to forget to update.**
 //
+// ── THE EXCLUSION, VERIFIED RATHER THAN ASSERTED (2026-08-19) ──
+// "These two are only reports" is a claim a future session will re-litigate, so the
+// command that settles it lives here with its output:
+//
+//     grep -rln "bazi-validation.fixture" tests/     -> 13 files
+//
+// Eleven of the thirteen are inside the 24 gates: badge-anchors (test:badges),
+// card, joey-bars, palaces, punishment, stage3-contract, stage3-facts (test:stage3),
+// stage3-hierarchy, stage5-render, stage6-validation, time-convention
+// (test:pillars). So **excluding report:engine removes a PRINTOUT, not the
+// fixture's safety net** - the 13-chart fixture is still asserted against by eleven
+// gated specs, and a regression in it fails `npm test` eleven different ways.
+//
+// TWO CORRECTIONS TO THE APPROVED VERSION OF THIS CLAIM, kept because a rounded
+// number is how a verified fact turns back into a remembered one:
+//   - it is 13 files and ELEVEN gated specs, not nine. `stage3-facts.spec.mjs` and
+//     `time-convention.spec.ts` were missing from the list. The conclusion is
+//     stronger than it was stated, not weaker.
+//   - `tests/bazi-profile-experiment.mjs` consumes the fixture and is run by NO
+//     npm script at all (checked against every `scripts` entry, not just `test:*`).
+//     It is the 13th file and it is neither a gate nor a report. Left alone here;
+//     it wants its own decision - delete it, or give it a `report:` name.
+//
 // THAT IS WHY THE `report:` PREFIX IS LOAD-BEARING, not cosmetic.
 // `tests/bazi-engine.report.mjs` and `scripts/forge-tests.mjs` print findings for a
 // human and do not gate. While they were called `test:engine` and `test:forge` they
