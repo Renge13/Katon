@@ -1904,3 +1904,77 @@ test('THE PROMPT NAMES BOTH BRANCHES, which is the actual fix', () => {
   assert.match(MASTER_PROMPT, /Only when it is FALSE/,
     'the instruction to state it must be scoped to the false branch');
 });
+
+// ── VERDICT WORDS ARE READ AS VERDICTS (fix 2, 2026-08-21) ──
+
+test('AN ELEMENT BEING BALANCED IS NOT A STRENGTH VERDICT', () => {
+  // Reproduced from fresh-1996's own semantic JSON: Day Master element Air, verdict
+  // `strong`, so "Seimbang" is a wrong word for it. The old subject list included the
+  // element, so element-DISTRIBUTION prose read as a verdict claim.
+  //
+  // CLAUDE.md rules 9 and 10 are the argument: the element bars are a display
+  // distribution and NEVER a strength score. A check reading "<element> seimbang" as a
+  // verdict makes exactly the conflation the engine forbids.
+  const fresh = buildSemanticJson(calculateBaziChart({
+    birthDate: '1996-10-02', birthTime: '19:20',
+  }));
+  assert.equal(fresh.strength.verdict, 'strong', 'fixture assumption');
+  assert.equal(fresh.core.element, 'Air', 'fixture assumption: the collision needs this element');
+
+  // The sentence goes in a NON-strength block, which is where element distribution
+  // belongs. A SECOND, stricter pass still fires on any wrong verdict word inside the
+  // block that CITES the strength fact, and that pass is deliberately NOT changed here:
+  // no false positive has been observed against it, and widening a check on a
+  // hypothesis is the thing this repo keeps paying for. Recorded as a limit, not fixed.
+  const other = fresh.facts.find((f) => f.provenance?.kind !== 'strength' && f.label_meaning);
+  const ok = withBlockText(goodReading(fresh), other.id,
+    'Unsur Air seimbang dengan Logam di baganmu. ' + other.label_meaning);
+  assert.ok(!checksIn(validateRendering(ok, fresh)).includes('fact.strength_contradiction'),
+    'describing element presence must not read as a verdict claim');
+});
+
+test('but a verdict claim ABOUT HER still hard-rejects', () => {
+  // The check must not have been widened into uselessness. The subject list is reader
+  // words, and every one of them still fires.
+  const fresh = buildSemanticJson(calculateBaziChart({
+    birthDate: '1996-10-02', birthTime: '19:20',
+  }));
+  const strengthId = fresh.facts.find((f) => f.provenance?.kind === 'strength').id;
+  for (const claim of ['Kamu seimbang di antara dua kutub', 'Baganmu lemah di area ini',
+    'Dirimu lemah saat tekanan datang']) {
+    const bad = withBlockText(goodReading(fresh), strengthId,
+      `${claim}. ${fresh.facts.find((f) => f.id === strengthId).label_meaning}`);
+    const result = validateRendering(bad, fresh);
+    assert.ok(checksIn(result).includes('fact.strength_contradiction'), `must catch: "${claim}"`);
+    assert.equal(result.hard, true, 'a verdict contradiction is HARD');
+  }
+});
+
+test('"yang kuat" IS AN ADJECTIVE and does not demand the strength meaning', () => {
+  // The literal string from the one fact.strength_same_breath in the 77-attempt trace:
+  // `kuat` modifies the Aspek, claims no verdict, and the check then demanded the
+  // strength meaning turn up beside it. Token ban where the defect is a construction.
+  const fresh = buildSemanticJson(calculateBaziChart({
+    birthDate: '1996-10-02', birthTime: '19:20',
+  }));
+  const strengthId = fresh.facts.find((f) => f.provenance?.kind === 'strength').id;
+  const adjectival = withBlockText(goodReading(fresh), strengthId,
+    'Kamu adalah seorang Samudra dengan Aspek Pelindung (Direct Resource) yang kuat. '
+    + 'Arahmu jelas dan langkahmu jarang goyah.');
+  assert.ok(!checksIn(validateRendering(adjectival, fresh))
+    .includes('fact.strength_same_breath'), 'an adjectival "yang kuat" claims no verdict');
+});
+
+test('AN ADJECTIVAL USE CANNOT HIDE A BARE LABEL LATER IN THE SAME BLOCK', () => {
+  // The other bug this could have been: skipping the first hit and returning null would
+  // let one early "yang kuat" mask a genuinely bare verdict further down. verdictUse
+  // scans on instead of bailing.
+  const fresh = buildSemanticJson(calculateBaziChart({
+    birthDate: '1996-10-02', birthTime: '19:20',
+  }));
+  const strengthId = fresh.facts.find((f) => f.provenance?.kind === 'strength').id;
+  const hidden = withBlockText(goodReading(fresh), strengthId,
+    'Aspek Pelindung yang kuat membentuk caramu bekerja. Baganmu Kuat. Titik.');
+  assert.ok(checksIn(validateRendering(hidden, fresh)).includes('fact.strength_same_breath'),
+    'the later bare verdict must still be caught');
+});
