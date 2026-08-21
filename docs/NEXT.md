@@ -60,11 +60,21 @@ a product statement; it is not a launch precondition.**
 So the remaining critical path is exactly two things: prompt L (readings sellable, precondition 3) and
 the PDF built (precondition 2's other half).
 
-**QUEUED BEHIND L, ruled 2026-08-19 and not yet written as a prompt:** the n-renders QA harness change.
-Precondition 3 was restated STRICT — a chart passes only on a live render — and a 4-of-4 gate on single
-renders can fail on a day nothing is wrong, because chart 5 flipped between floor and `gemini` across
-three invocations of unchanged code on 08-17. The fix is n renders per chart with the floor rate printed
-beside each verdict. **Do not fold it into L.**
+**PROMOTED TO NEXT, 2026-08-21: the n-renders QA harness. It is no longer queued behind anything.**
+
+Reason, and it is not a preference. Precondition 3 is ruled STRICT - every chart must RENDER and would
+be sold. **That criterion cannot be evaluated at n=1, and three consecutive runs proved it:** the same
+four charts returned floor rates of **0/4, 2/4 and 1/4** with the failing checks identical and
+untouched between runs (`style.hedging`, `coverage.field_dropped`, `fact.strength_*`). It is the 08-17
+"floor rate moves between identical batches" finding surfacing on a third metric.
+
+So the launch gate Reyner set is currently **unmeasurable with the instrument we have**, and every
+remaining ship/no-ship argument would be conducted on n=1 numbers. `qa:renders` runs each chart ONCE
+by design and its own header explains why re-running to get a pass is not QA. The fix is n renders per
+chart with the floor rate printed beside each verdict, which `probe-retry-depth` already does.
+
+**Nothing else on the critical path can be decided honestly before this lands.** Per-attempt evidence
+stays firm throughout - a rejection naming exactly one check is a fact. Only RATES are affected.
 
 **One item is Reyner's and is NOT in prompt L:** the cross-chart repetition variants — content work,
 drafted by Cowork and rewritten by him. Drafts and the ranked collision measurement are in
