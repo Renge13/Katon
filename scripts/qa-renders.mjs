@@ -151,6 +151,25 @@ if (ESTIMATE) {
   process.exit(0);
 }
 
+// ── IT REFUSES TO OVERWRITE AN ARTIFACT. ───────────────────
+// Added 2026-08-21 because the default path DESTROYED a committed measurement. The
+// default is `docs/qa/<today>-renders.md`, commit 1's n=1 artifact was already at
+// that path from earlier the same day, and the n=10 run silently replaced it. It was
+// recovered from git, but only because it had been committed - an uncommitted probe
+// result would simply be gone.
+//
+// An artifact is EVIDENCE. This repo's standing rule is that evidence is never
+// edited after the fact, and a same-day rerun is the one way to edit it by accident.
+// So the harness refuses and names the file. `--force` exists for the case where
+// overwriting is the actual intent, and is deliberately not the default.
+if (!ESTIMATE && fs.existsSync(OUT) && !process.argv.includes('--force')) {
+  console.error(`\nREFUSING: ${path.relative(ROOT, OUT)} already exists.`);
+  console.error('An artifact is evidence and is never edited after the fact. This is what a');
+  console.error('same-day rerun does by accident - it destroyed a committed measurement once.');
+  console.error('\nPass --out <FILE> to write elsewhere, or --force to overwrite deliberately.');
+  process.exit(2);
+}
+
 // ── the runs ───────────────────────────────────────────────
 // A run is classified three ways, and the distinction is the whole point:
 //   served     the reader would get the model's prose
@@ -322,9 +341,15 @@ if (printedFloors.length) {
   lines.push('ruled. It is fluent Indonesian and it is indistinguishable from a reading by eye. A register');
   lines.push('or quality verdict formed on one of these is a verdict on the glossary, not on the renderer.');
   lines.push('');
+  // NAMES THE PRINTED RUN AND NOTHING ELSE. This bullet used to say "failed twice
+  // on: <checks>" using RUN 1's attempts for any chart that floored at ALL, so on the
+  // 08-21 n=10 artifact it labelled three rendered runs as floors and printed their
+  // non-final rejections as floor reasons - one line came out empty because that
+  // chart's run 1 passed at attempt one. Floor reasons now live in their own section,
+  // covering every floored run rather than one.
   for (const f of printedFloors) {
-    const checks = (f.r.attempts || []).map((a) => (a.stage6 || []).join(', ') || a.error).join(' | ');
-    lines.push(`- **${f.label}** (${f.date} ${f.time}) — \`${f.r.source}\`, failed twice on: ${checks}`);
+    lines.push(`- **${f.label}** (${f.date} ${f.time}) — the reading printed below is `
+      + `\`${f.r.source}\`, from run 1 of ${N}.`);
   }
   lines.push('');
   lines.push('**They are included below anyway, labelled**, because what the floor produces is worth');
@@ -334,6 +359,64 @@ if (printedFloors.length) {
 
 lines.push('---');
 lines.push('');
+
+// ── EVERY FLOORED RUN, WITH ITS REJECTION LIST ─────────────
+// Added 2026-08-21 after the n=10 run could not answer the question it was paid for.
+// This file was recording per-attempt detail for RUN 1 ONLY, so a 40-run measurement
+// produced a floor RATE with no floor REASONS behind it - the eight floored runs'
+// rejection lists were never written down and the money is spent.
+//
+// Worse, the old banner printed run 1's attempts under the heading "failed twice on"
+// for any chart that floored at all. Run 1 had RENDERED on all four charts, so the
+// artifact labelled rendered runs as floors and listed their non-final rejections as
+// floor reasons. One chart's line came out empty because its run 1 passed at attempt
+// one. That is the third instance in this file of a summary disagreeing with the runs
+// underneath it.
+const flooredRuns = results.flatMap((x) => x.runs
+  .map((run, i) => ({ chart: x.label, run: i + 1, ...run }))
+  .filter((run) => run.r.source !== 'gemini' && !run.truncated));
+
+if (flooredRuns.length) {
+  lines.push(`## THE ${flooredRuns.length} FLOORED RUN(S), AND WHY EACH ONE FLOORED`);
+  lines.push('');
+  lines.push('Every floored run across all runs, not only the printed one. A run floors when Stage 6');
+  lines.push('rejected every attempt in the regeneration budget - one initial plus two regenerations.');
+  lines.push('Transport-truncated runs are NOT here: they are listed separately and were never');
+  lines.push('floored by the gate.');
+  lines.push('');
+  lines.push('| Chart | run | attempt | rejected on |');
+  lines.push('|---|---|---|---|');
+  for (const f of flooredRuns) {
+    const attempts = f.r.attempts || [];
+    if (!attempts.length) {
+      lines.push(`| ${f.chart} | ${f.run} | — | *(no attempts recorded)* |`);
+      continue;
+    }
+    for (const [i, a] of attempts.entries()) {
+      const checks = (a.stage6 || []).join(', ') || a.error || '*(none recorded)*';
+      lines.push(`| ${i === 0 ? f.chart : ''} | ${i === 0 ? f.run : ''} | ${i + 1} `
+        + `| ${checks}${a.hard ? ' **(HARD)**' : ''} |`);
+    }
+  }
+  lines.push('');
+
+  // The tally, so a fix list can be ranked without counting table rows by hand.
+  const tally = {};
+  for (const f of flooredRuns) {
+    for (const a of f.r.attempts || []) {
+      for (const c of a.stage6 || []) tally[c] = (tally[c] || 0) + 1;
+    }
+  }
+  const ranked = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+  if (ranked.length) {
+    lines.push('Checks by how often they fired inside a floored run:');
+    lines.push('');
+    lines.push('| check | fired |');
+    lines.push('|---|---|');
+    for (const [c, n] of ranked) lines.push(`| \`${c}\` | ${n} |`);
+    lines.push('');
+  }
+}
 
 for (const { label, date, time, note, semantic, r } of results) {
   const isFloor = r.source !== 'gemini';
