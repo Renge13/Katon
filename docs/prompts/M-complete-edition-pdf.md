@@ -16,7 +16,7 @@ critical path.**
 
 ---
 
-## THREE CORRECTIONS TO THE SPEC. Read these before its build order.
+## FOUR CORRECTIONS. Read these before the build order.
 
 ### 1. A `label: null` fact must never be named. Not in English, not in Indonesian.
 
@@ -76,6 +76,39 @@ Verify **by construction** (the shipped build's own recorded anchor pages must e
 printed), then bound it (no ref before the appendix's first page), then spot it (the entry's text
 is present on the page it claims). One check alone is not enough here.
 
+### 4. A RULING IN THE REPO BEATS A COWORK PROMPT. ALWAYS.
+
+**Added 2026-08-21, ruled by Reyner, and it reverses an instruction this prompt gave.**
+
+Corrections 1-3 above are Cowork correcting its own spec. This one is Reyner correcting Cowork,
+and it is the general rule the other three are instances of.
+
+**What this prompt told you to do, and must not:** ship a Cowork-drafted 胎元 line and "do not block
+on Reyner". That instructed a session to override a standing ruling of his. `glossary.json` ->
+`pilar.conception._note`, ruled 2026-08-07:
+
+> *"It has NO label_meaning on purpose: nothing downstream interprets it, and inventing one would be
+> unreviewed interpretive copy. Ruled by Reyner 2026-08-07, replacing the hand-authored 'Istana
+> Konsepsi' that lived in `lib/readingView.js` and in no glossary entry."*
+
+The line this prompt hands over is that exact thing a second time, and this prompt's group order used
+`Istana Konsepsi` - the very string the ruling replaced with `Pilar Konsepsi`.
+
+**THE RESOLUTION, now the ruled behaviour:** 胎元 ships with its glossary NAME and `display_only: true`,
+carrying no meaning and exempt from correction 2's gate. It is a chart-page item Joey also prints, not
+a mechanic being explained, so a legend of meanings owes it none. The day Reyner writes a
+`label_meaning` for `pilar.conception`, the entry starts carrying it with no code change.
+
+**THE PRECEDENCE, stated so no future session has to derive it:** a ruling recorded in the repo beats
+a build prompt written by Cowork, always, however recent or however confident the prompt is. A prompt
+may correct a spec. It may not overrule Reyner. Where a prompt and a repo ruling disagree, the prompt
+is the thing that is wrong, and the disagreement is worth a ledger row rather than a silent fix.
+
+**`claude/pdf-spec-complete-edition-2026-08-19.md` has NO STANDING** and its absence from this repo is
+not a gap. It is a Cowork proposal, not a ruling. This prompt is self-contained: nothing needs to be
+read out of that file, and "where they disagree, this file wins" is a statement about two Cowork
+documents rather than a precedence rule that matters.
+
 ---
 
 ## WHAT THE DRAFT CONFIRMED, so you do not re-litigate it
@@ -85,11 +118,11 @@ is present on the page it claims). One check alone is not enough here.
 | Appendix from her chart only | 22 entries for chart 1, not the whole glossary. Correct and small |
 | Reading verbatim from cache | The PDF authors nothing. Byte-identical to the served render |
 | Page count | 9 for chart 1. A consequence, never a target |
-| 胎元 | Ships with the descriptive line below. Reyner may overwrite it later; do not block on him |
-| Group order | Aspek, Bintang, Elemen dan Kekuatan, Relasi Cabang, Pilar, Shio, Istana Konsepsi |
+| 胎元 | ~~Ships with the descriptive line below; do not block on Reyner.~~ **REVERSED - see correction 4.** Name only, `display_only`, no meaning invented |
+| Group order | Aspek, Bintang, Elemen dan Kekuatan, Relasi Cabang, Pilar, Shio, **Pilar Konsepsi** (NOT "Istana Konsepsi" - correction 4) |
 | Pillar names | From `glossary.json` -> `pilar.<k>.name_id`. Cowork hand-typed `Pilar Leluhur` and the glossary says **`Pilar Akar`**. Never hand-type a name that exists as data |
 
-**The 胎元 line, as shipped in the draft** — descriptive, no verb of interpretation, no apology:
+**The 胎元 line Cowork drafted, RECORDED AND NOT SHIPPED** (correction 4). Kept so the proposal stays legible and nobody re-drafts it from scratch:
 
 > Pilar kelima, dihitung dari pilar bulanmu. Katon menampilkannya sebagai bagian dari peta, dan
 > tidak membacanya sebagai bagian dari dirimu.
