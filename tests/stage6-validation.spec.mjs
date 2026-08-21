@@ -1725,3 +1725,59 @@ test('style.hedging IS SPLIT: `mungkin` fires on the reader, not on a third part
   assert.ok(fires('Sepertinya kamu menunggu izin yang tidak akan datang.'),
     'sepertinya was explicitly left as-is');
 });
+
+// ── THE FUSED OPENING: COUNTED, NOT GATED (ruled 2026-08-21) ──
+
+test('THE FUSED OPENING IS FLAGGED AND NEVER REJECTED', () => {
+  // `Kamu adalah Api Matahari` puts the element in front of the image, which is the
+  // shape Reyner rejected on chart 13. It is NOT closed and does not get a gate: a
+  // rejecting check here is the same shape as the one that measured 0/4 -> 2/4 floors
+  // and was refused, and it would be measured with the same n=1 instrument that
+  // returned 0/4, 2/4 and 1/4 on identical code.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const fact = CHART_1.facts.find((f) => f.id === dmId);
+  const arche = CHART_1.core.archetype_name_id;
+
+  const fused = withBlockText(goodReading(), dmId,
+    `Kamu adalah ${fact.label} ${arche} yang Lemah. ${fact.label_meaning}`);
+  const result = validateRendering(fused, CHART_1);
+
+  const flagged = result.findings.filter((f) => f.check === 'opening.element_fused');
+  assert.equal(flagged.length, 1, `the fusion must be counted: ${checksIn(result).join(', ')}`);
+  assert.equal(flagged[0].severity, 'flag', 'it must NOT be able to reject');
+  // The load-bearing assertion: the verdict is unchanged by its presence.
+  assert.equal(result.ok, result.findings.filter((f) => f.severity !== 'flag').length === 0);
+});
+
+test('the ruled opening is NOT flagged, and a missing archetype is not double-reported', () => {
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const fact = CHART_1.facts.find((f) => f.id === dmId);
+  const arche = CHART_1.core.archetype_name_id;
+
+  // Ruled: archetype alone, element in the next breath.
+  const ruled = withBlockText(goodReading(), dmId,
+    `Kamu adalah ${arche} (${CHART_1.core.archetype_name_en}) yang Lemah. ${fact.label_meaning}`);
+  assert.ok(!checksIn(validateRendering(ruled, CHART_1)).includes('opening.element_fused'),
+    'the ruled sentence must not be flagged');
+
+  // And when the archetype is absent entirely, only the missing-name finding fires -
+  // reporting both would double-count one defect.
+  const absent = withBlockText(goodReading(), dmId, `Api (Fire). ${fact.label_meaning}`);
+  const checks = checksIn(validateRendering(absent, CHART_1));
+  assert.ok(checks.includes('opening.archetype_missing'));
+  assert.ok(!checks.includes('opening.element_fused'), 'one defect, one finding');
+});
+
+test('INSERTION CANNOT LAUNDER A FUSED OPENING, which is why the flag exists', () => {
+  // The exact sentence the 08-21 insertion run produced on chart 1:
+  // "Kamu adalah Api Matahari (The Sun)." Rule 23 is satisfied; the fusion remains.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const fact = CHART_1.facts.find((f) => f.id === dmId);
+  const arche = CHART_1.core.archetype_name_id;
+
+  const result = validateRendering(withBlockText(goodReading(), dmId,
+    `Kamu adalah ${fact.label} ${arche} yang Lemah. ${fact.label_meaning}`), CHART_1);
+
+  assert.ok(!checksIn(result).includes('brackets.unbracketed'), 'insertion satisfied rule 23');
+  assert.ok(checksIn(result).includes('opening.element_fused'), 'and the fusion is still counted');
+});
