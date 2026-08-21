@@ -48,6 +48,18 @@ Prompt L is **four** ordered commits that close it — `The Morning Dew` in the 
 content), the engine requiring the archetype name in the opening (commit 1), the rule-23 bracket check
 (commit 2), two harness defects (commit 3). Each is measured on its own; do not bundle or reorder them.
 
+## LAUNCH SCOPE, ruled 2026-08-19 by Reyner
+
+**Compatibility does NOT gate launch.** Live = the free full mirror served from the new pipeline, plus
+Rp 19.000 for the hi-res card and the Complete Edition PDF. That is the swap package ruled 2026-08-13,
+unchanged. Compat stays priced-but-unbuilt (`compat` absent from `SELLABLE_SKUS`, checkout 400s) and
+ships after there is real demand signal - `CLAUDE.md` says its price band is to be TESTED, and testing
+needs traffic that does not exist yet. **`CLAUDE.md` calls compat "the money engine" and that stands as
+a product statement; it is not a launch precondition.**
+
+So the remaining critical path is exactly two things: prompt L (readings sellable, precondition 3) and
+the PDF built (precondition 2's other half).
+
 **QUEUED BEHIND L, ruled 2026-08-19 and not yet written as a prompt:** the n-renders QA harness change.
 Precondition 3 was restated STRICT — a chart passes only on a live render — and a 4-of-4 gate on single
 renders can fail on a day nothing is wrong, because chart 5 flipped between floor and `gemini` across
