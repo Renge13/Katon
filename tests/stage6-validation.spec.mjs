@@ -672,21 +672,44 @@ test('the HEADING does not satisfy the opening rule; the sentence must', () => {
 
 // ── RULE 23 BRACKETS: A REPORTER, NOT A GATE ───────────────
 
-test('THE BRACKET REPORTER CANNOT REJECT ANYTHING', () => {
-  // Ruled 2026-08-21: the check lands reporting first and flips to enforcing in
-  // its own commit. This is the property that makes commit 1's floor-rate number
-  // interpretable - if the reporter could reject, a floor-rate move would have two
-  // candidate causes and no way to separate them afterwards (rule 13).
-  const reading = goodReading();
-  const result = validateRendering(reading, CHART_1);
-  const bracketFindings = result.findings.filter((f) => f.check.startsWith('brackets.'));
-  assert.ok(bracketFindings.length > 0,
-    'the floor brackets nothing in scope, so the reporter must have something to say');
-  for (const f of bracketFindings) {
-    assert.equal(f.severity, 'flag', `${f.check} must be a flag, never soft or hard`);
-  }
-  // The load-bearing assertion: the verdict is identical with the flags removed.
-  assert.equal(result.ok, result.findings.filter((f) => f.severity !== 'flag').length === 0);
+test('RULE 23 IS ENFORCED: an unbracketed first mention is REJECTED', () => {
+  // Flipped from reporting to enforcing 2026-08-21, in its own commit with its own
+  // measurement, after the reporting pass produced the number Reyner ruled on.
+  // SOFT, never hard: a missing bracket is one parenthetical short, which is what a
+  // regeneration fixes.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const arche = CHART_1.core.archetype_name_id;
+
+  // THE FUSED OPENING IS THE DEFECT THIS CATCHES, and it is caught because the fused
+  // form never brackets: "Api Matahari" puts no "(The Sun)" after the archetype.
+  const fused = withBlockText(goodReading(), dmId,
+    `Kamu adalah Api ${arche} yang Lemah. ${CHART_1.facts.find((f) => f.id === dmId).label_meaning}`);
+  const bad = validateRendering(fused, CHART_1);
+  assert.ok(checksIn(bad).includes('brackets.unbracketed'),
+    `the fused opening must be rejected: ${checksIn(bad).join(', ')}`);
+  assert.equal(bad.ok, false, 'and it must actually fail the gate now');
+  assert.equal(bad.hard, false, 'a missing bracket is soft, not a contradiction');
+
+  // The ruled sentence passes.
+  const ruled = withBlockText(goodReading(), dmId,
+    `Kamu adalah ${arche} (${CHART_1.core.archetype_name_en}) yang Lemah. `
+    + `${CHART_1.facts.find((f) => f.id === dmId).label_meaning}`);
+  assert.ok(!checksIn(validateRendering(ruled, CHART_1)).includes('brackets.unbracketed'),
+    'Kamu adalah <Arketipe> (<English>) is the ruled form and must pass');
+});
+
+test('a `no_pair` term is STILL not a rejection, even now the check enforces', () => {
+  // Rejecting a term the payload supplies no English for would oblige the renderer to
+  // invent terminology - rule 14 inverted. It is 0 across the fixture (pinned below),
+  // so this asserts the mechanism rather than a live case.
+  const semantic = structuredClone(CHART_1);
+  const aspek = semantic.facts.find((f) => f.id.startsWith('aspek_convergence_'));
+  delete aspek.label_bracket; // simulate a glossary gap
+  const result = validateRendering(goodReading(CHART_1), semantic);
+  const forThisTerm = result.findings.filter((f) => (f.where || []).includes(aspek.label));
+  assert.deepEqual(forThisTerm, [], `${aspek.label} has no supplied English and must not fail`);
+  const verdicts = result.metrics.brackets.filter((b) => b.term === aspek.label);
+  assert.deepEqual(verdicts.map((v) => v.verdict), ['no_pair'], 'it is reported, not enforced');
 });
 
 test('EVERY in-scope term already has its English in the payload - no_pair is empty', () => {

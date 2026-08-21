@@ -136,6 +136,26 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     `Bintang` = external marker. Collective term is **Sepuluh Aspek (Ten Gods)** — never "Dewa", which
     reads as a Hindu deity to a Muslim-majority audience. Full table: `docs/content/glossary-naming.md`.
 
+    **SCOPE, ruled 2026-08-19 and ENFORCED since 2026-08-21: bracket-once binds `Aspek`, `Bintang`
+    and `Arketipe`. It does NOT bind `Pilar` or `Elemen`.** The ambiguity is what produced the
+    question, so the answer is written here rather than inferred. Reyner: *"Missing English terms on
+    `Aspek Pengelola` in Chart 1 immediately feels like a dropped translation artifact because every
+    other card carries them. `Pilar` and `Elemen` should remain unbracketed to avoid visual clutter."*
+    The corpus had already been deciding it that way — `pilar` 0 of 274 bracketed, `elemen` 13 of 170 —
+    so the ruling ratifies rather than reverses, and those 13 are the exception to sweep.
+
+    Enforced by `lib/validate/brackets.js`, soft, at `STAGE6_VERSION` 1.12.0. It reads its scope from
+    the glossary rather than a list, because the first version's `provenance.kind` allowlist missed
+    `coherence_rule` (`Aspek Pengelola`, one of the two terms in the ruling's own live instance) and
+    `void_stack` (`Tanda Kekosongan`, a 空亡 bintang whose name starts with neither word). **It does not
+    look at `elemen` at all** — not to pass it, not to exempt it.
+
+    **The defect it actually catches is the FUSED opening**, which is why enforcement was ruled on
+    sentences rather than on the principle: `Kamu adalah Api Matahari yang Lemah` versus
+    `Kamu adalah Matahari (The Sun) yang Lemah`. **Reyner ruled the second, 2026-08-21.** Element then
+    image is the same shape he rejected on chart 13 as identity behind taxonomy, and it survived
+    commit 1 because that commit required the NAME and not the pattern.
+
     **EN display layer (ruled 2026-08-02):** archetype names and fixed tags carry an English pair
     (`glossary.json` → `arketipe.name_en`, later `tags_en`). Scope is names + tags + card strings
     ONLY — the reading body stays Indonesian. The brackets convention above applies to READING PROSE.
