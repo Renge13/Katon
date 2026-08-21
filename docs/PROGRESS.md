@@ -815,6 +815,84 @@ also said the move would be *"expected, NOT
 the re-coupling tripwire firing"*, which would have authorised dismissing a genuine alarm. **A
 prediction that tells a reader what to disregard must carry its grep.**
 
+## DECIDED 2026-08-19 — THE READ: precondition 3 executed, and five rulings
+
+Reyner read five readings across four charts as the buyer. **Full record, with the evidence and the
+measurement caveats, is `docs/qa/2026-08-19-READ-VERDICT.md`; the readings are
+`docs/qa/2026-08-19-THE-READ.md` and the raw renders are `docs/qa/2026-08-19-renders.md`.** This
+section is the ledger's copy of the rulings, folded 2026-08-21 after PR #45 merged — deferred until
+then on purpose, because main and #45 differed by 286 insertions in this file and folding earlier
+would have guaranteed a conflict in the one section that answers "what ships".
+
+**It did not pass clean. Three of five readings would be sold at Rp 19.000; two would not, and both
+failures are the same sentence.**
+
+| Reading | Chart | Sell? | Reyner's reason |
+|---|---|---|---|
+| chart 13 | 1989-02-04 04:00 | **NO** | missing the archetype image in sentence 1 (`Kamu adalah Kayu`) |
+| chart 1 | 1989-09-13 09:00 | YES | excellent reframing of "Lemah", strong momentum, punchy advice |
+| fresh-1996 | 1996-10-02 19:20 | **NO** | buries the Day Master behind an Aspek in the opening sentence |
+| chart 5, substitute A | 1988-07-10 22:00 | YES | zero padding, sharp flow, clear closing actions per block |
+| chart 5, substitute B | 1988-07-10 22:00 | YES | crisp execution, strong actionability across all sections |
+
+**PRECONDITION 3 WAS RESTATED STRICT on 2026-08-19, and it changes this table's arithmetic.** It is met
+when every chart in the reference QA set renders AND would be sold at the live price. Chart 5 FLOORED on
+the 08-19 run, so its two readings are prompt-identical stored prose from
+`docs/qa/2026-08-18-retry-depth.json` — zero cost, and not a live render. *"A promotion gate that relies
+on ghostly stored prose to claim a pass is just cope with extra steps. If Chart 5 floors on a live run, a
+paying customer gets nothing regardless of how brilliant yesterday's stored attempt looked."* So chart 5
+is UNPROVEN rather than passed and the 08-19 count is **1 of 4, not 2**.
+
+**1. THE ARCHETYPE IMAGE IN SENTENCE 1 IS NON-NEGOTIABLE.** *"It establishes identity before taxonomy.
+`Kamu adalah Kayu (Wood)` reads like a spreadsheet header."* **BUILT 2026-08-21**, and the cause was not
+the prompt: `core.archetype_name_id` was in the payload for every chart, but `core` is CONTEXT and
+obligation lives in `required_points`, whose day-master entry demanded `label_meaning, gift, cost` — and
+that fact's `label` is the ELEMENT. `must_cover` now carries `archetype` and `lib/validate/opening.js`
+checks it, soft, at `STAGE6_VERSION` 1.11.0. The MEASUREMENTS row carries the numbers; the short version
+is 4/4 in sentence 1 against a 41/77 baseline, with the floor rate at 0 of 4. The floor itself shipped
+first and separately: it had been opening `Api (Fire).` on every chart, which is the rejected sentence,
+and a soft finding on the floor keeps serving by the 08-11 ruling.
+
+**2. RULE 23 SCOPE: bracket-once binds `Aspek` and `Bintang`, and NOT `Pilar` or `Elemen`.** *"Missing
+English terms on `Aspek Pengelola` in Chart 1 immediately feels like a dropped translation artifact
+because every other card carries them. `Pilar` and `Elemen` should remain unbracketed to avoid visual
+clutter."* The ruling ratifies what the corpus had already been deciding — `pilar` 0 of 274 bracketed,
+`elemen` 13 of 170, and those 13 are the exception to sweep. Rule 23 was enforced by NOTHING, which is
+how chart 1 shipped `Aspek Pengelola` and `Aspek Pengatur` with 0 of 2 bracketed and passed the gate at
+attempt 2 — the modal served attempt. **A REPORTER landed 2026-08-21** (`lib/validate/brackets.js`, every
+finding `severity: 'flag'`, so it cannot reject, cost a regeneration or move the floor rate).
+**ENFORCEMENT IS NOT BUILT AND IS A REGISTER DECISION, not a threshold.** Measured over the 08-21 renders:
+**19 of 21 in-scope terms bracketed, 0 `no_pair`, 0 mismatch — and both misses are `Matahari`, the
+archetype, on the two charts that kept the fused idiomatic `Kamu adalah Api Matahari`.** Aspek and Bintang
+are already at 100%. So enforcement's entire effect would be to force `Kamu adalah Matahari (The Sun)`
+onto two openings Reyner PRAISED.
+
+**3. CROSS-CHART VERBATIM REPETITION IS UNACCEPTABLE.** *"Verbatim sentences across friends' reports
+shatters personalization. High-frequency glossary cells need 2-3 structural variants."* Measured over the
+five readings: **9 sentences appear in 2+ distinct charts, the worst in 3 of 4, and 0 repeat WITHIN a
+single reading.** The 3-of-4 sentence is `Orang lain melihat kamu berhasil di bidang ini, tetapi kamu
+sendiri sering merasa belum pantas menyandangnya.` **This is the architecture behaving as designed** — one
+fact maps to one glossary cell, so two readers sharing a fact share its sentence. Nothing is broken; the
+design has a consequence nobody had priced. **It is CONTENT, not code:** variants drafted by Cowork,
+rewritten by Reyner, landing as a rulings file the way tranches 1 and 2 did. Zero within-reading
+repetition means the previously-shipped defect is absent. Worksheet:
+`docs/content/tranche3-repetition-worksheet.md`.
+
+**4. PARAGRAPH COLLAPSE AT DEPTH 2 IS ACCEPTABLE. No wall check; depth 2 stays.** *"The attempt-2
+paragraph merges in Chart 1 and fresh-1996 feel tighter and more cohesive, not like wall-of-text
+fatigue."* This closes the open item in `docs/qa/2026-08-19-retry-erosion.md`: the 60% collapse rate at
+attempt 2 is a characteristic, not a defect. The read was blind to which blocks had collapsed — the
+verdict was formed on the prose and matched to the banner afterwards. Note this and ruling 1 pull opposite
+ways on one mechanism: retrying is sanctioned as harmless to paragraph structure while the archetype image
+it also erodes becomes gate-enforced, and the check in ruling 1 is what makes both true at once.
+
+**5. THE `quietFloor` RE-ASK IS CLOSED. It stays at 70, no re-fit.** *"Both Chart 5 substitutes prove
+tranche 2 fixed the padding issue. Padding is fixed; every block now ends with a clean action item."* The
+08-11 deferral is DISCHARGED and its attribution was correct: the padding was unwritten cells, never the
+threshold. Corroborating measurement — sentence-to-sentence redundancy inside every block of all five
+readings: 3 blocks at or above 0.45 overlap, all mild, max 0.57, and nothing resembling "one trait five
+ways".
+
 ## DECIDED 2026-08-10 — MIRROR QA VERDICT (Reyner, buyer-hat): promotion condition 3 NOT MET
 
 The four production QA readings (Prompt J run, gate `1.8.0`, all four passed the gate) were judged

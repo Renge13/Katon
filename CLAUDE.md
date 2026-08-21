@@ -164,7 +164,7 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   If `git status` shows a wall of changes with symmetric insert/delete counts, that is the cause.
 - **PR discipline:** each PR independently reviewable and revertable. Engine work, content work and
   infra work never ride together.
-- **GATE CHANGES SHIP ISOLATED** (adopted 2026-08-20). A commit that changes what Stage 6 ACCEPTS
+- **GATE CHANGES SHIP ISOLATED** (adopted 2026-08-21). A commit that changes what Stage 6 ACCEPTS
   carries nothing else, so a floor-rate move always has exactly one candidate cause. This is rule 13
   applied to shipping rather than to fitting: two accept-changing edits in one commit confound each
   other's floor rate permanently, because the floor is measured per commit and the commit cannot be
