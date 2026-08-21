@@ -201,7 +201,16 @@ for (const c of CHARTS) {
   });
 }
 
-const floors = results.filter((x) => x.stats.floored > 0);
+// TWO DIFFERENT THINGS, AND CONFLATING THEM WAS A DEFECT I SHIPPED FOR ONE RUN.
+// `everFloored` is "this chart floored at least once across n runs" - a property of
+// the RATE. `printedFloors` is "the reading printed below is a floor" - a property of
+// RUN 1, which is the only run whose prose this file shows. At n=1 they were the same
+// number and the banner was correct by accident. At n=10 the 08-21 artifact said
+// "3 of 4 ARE THE FLOOR" above four readings that were all `gemini`, which is the
+// harness-disagrees-with-its-own-artifact defect this file was corrected for once
+// already.
+const everFloored = results.filter((x) => x.stats.floored > 0);
+const printedFloors = results.filter((x) => x.r.source !== 'gemini');
 const pooled = results.reduce((a, x) => ({
   n: a.n + x.stats.n,
   scored: a.scored + x.stats.scored,
@@ -260,8 +269,51 @@ if (N === 1) {
   lines.push('and 1/4 with identical failing checks. Use `--n 10` to measure.');
   lines.push('');
 }
-if (floors.length) {
-  lines.push(`## ⚠ ${floors.length} of ${results.length} ARE THE FLOOR, NOT A READING`);
+// ── FLAG RATES ACROSS ALL n RUNS, NOT JUST THE PRINTED ONE ──
+// Added after the 08-21 n=10 run could not answer the question it was run for. Flags
+// are the repo's "count it before you gate it" mechanism - `opening.element_fused`
+// exists precisely so the fusion can be measured before anyone trades a floor rate
+// for it - and this file was recording findings for RUN 1 ONLY. So a 40-run
+// measurement produced a 4-run flag denominator, which is not the instrument the
+// decision is waiting on.
+//
+// THE DENOMINATOR IS RENDERED RUNS, NOT ALL RUNS, and that is not a technicality: a
+// floored run has no model opening to judge, so counting it would dilute the rate with
+// runs that could not have exhibited the thing being counted.
+const flagNames = [...new Set(results.flatMap((x) => x.runs
+  .flatMap((run) => (run.r.findings || [])
+    .filter((f) => f.severity === 'flag')
+    .map((f) => f.check))))].sort();
+
+if (flagNames.length) {
+  lines.push(`## FLAG RATES across all ${N} run(s) per chart`);
+  lines.push('');
+  lines.push(`| Chart | rendered runs | ${flagNames.join(' | ')} |`);
+  lines.push(`|---|---|${flagNames.map(() => '---').join('|')}|`);
+  const totals = Object.fromEntries(flagNames.map((n) => [n, 0]));
+  let renderedTotal = 0;
+  for (const x of results) {
+    const rendered = x.runs.filter((run) => run.r.source === 'gemini');
+    renderedTotal += rendered.length;
+    const cells = flagNames.map((name) => {
+      const hits = rendered.filter((run) => (run.r.findings || [])
+        .some((f) => f.check === name)).length;
+      totals[name] += hits;
+      return rendered.length ? `${hits}/${rendered.length}` : 'n/a';
+    });
+    lines.push(`| ${x.label} | ${rendered.length} | ${cells.join(' | ')} |`);
+  }
+  lines.push(`| **POOLED** | **${renderedTotal}** | `
+    + `${flagNames.map((n) => `**${totals[n]}/${renderedTotal}**`).join(' | ')} |`);
+  lines.push('');
+  lines.push('A flag never rejects. The DENOMINATOR IS RENDERED RUNS: a floored run has no model');
+  lines.push('output to judge, so including it would dilute the rate with runs that could not have');
+  lines.push('exhibited the thing being counted.');
+  lines.push('');
+}
+
+if (printedFloors.length) {
+  lines.push(`## ⚠ ${printedFloors.length} of ${results.length} READINGS BELOW ARE THE FLOOR, NOT A READING`);
   lines.push('');
   lines.push('`source: module_assembly` means Stage 6 rejected the model on every attempt in its');
   lines.push('budget - one initial plus two regenerations since 2026-08-19, so THREE, not the two');
@@ -270,7 +322,7 @@ if (floors.length) {
   lines.push('ruled. It is fluent Indonesian and it is indistinguishable from a reading by eye. A register');
   lines.push('or quality verdict formed on one of these is a verdict on the glossary, not on the renderer.');
   lines.push('');
-  for (const f of floors) {
+  for (const f of printedFloors) {
     const checks = (f.r.attempts || []).map((a) => (a.stage6 || []).join(', ') || a.error).join(' | ');
     lines.push(`- **${f.label}** (${f.date} ${f.time}) — \`${f.r.source}\`, failed twice on: ${checks}`);
   }
@@ -358,5 +410,13 @@ for (const { label, date, time, note, semantic, r } of results) {
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, `${lines.join('\n')}\n`);
 console.error(`\nwrote ${path.relative(ROOT, OUT)}`);
-console.error(`${results.length - floors.length} real render(s), ${floors.length} floor(s).`);
-if (floors.length) console.error(`FLOOR: ${floors.map((f) => f.label).join(', ')} — these are not readings.`);
+console.error(`printed readings: ${results.length - printedFloors.length} real render(s), `
+  + `${printedFloors.length} floor(s).`);
+if (printedFloors.length) {
+  console.error(`PRINTED FLOOR: ${printedFloors.map((f) => f.label).join(', ')} `
+    + '— these are not readings.');
+}
+if (N > 1) {
+  console.error(`floored at least once across ${N} runs: `
+    + `${everFloored.length} of ${results.length} chart(s)`);
+}
