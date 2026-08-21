@@ -954,9 +954,12 @@ function Hair({ token, px, top }) {
 /**
  * ── THE KICKER RULE IS "A LEADING ARTICLE", NOT "THE FIRST WORD" ──
  *
- * Nine of ten `arketipe.name_en` values start with "The". The tenth is 癸 Embun,
- * which is "Morning Dew" — so a first-word rule would print MORNING as a kicker
- * and DEW as the whole headline, which is not the name.
+ * ALL TEN `arketipe.name_en` values start with "The" as of 2026-08-19, when Reyner
+ * ruled 癸 Embun from "Morning Dew" to "The Morning Dew". THE RULE IS NOT RELAXED
+ * TO "THE FIRST WORD" ON THAT ACCOUNT: the tenth was bare until that ruling, a
+ * first-word rule would have printed MORNING as a kicker and left DEW as the whole
+ * headline, and the next name added is as likely to be bare as not. The two unit
+ * cases in the spec keep the article-less branch alive.
  *
  * A multi-word headline is also NOT measure-safe at 139: "MORNING" measures about
  * 740px against 763 of inner width. It fits, with 23px to spare, which is close
