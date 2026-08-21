@@ -689,26 +689,61 @@ test('THE BRACKET REPORTER CANNOT REJECT ANYTHING', () => {
   assert.equal(result.ok, result.findings.filter((f) => f.severity !== 'flag').length === 0);
 });
 
-test('an Aspek the payload gives no English is reported as no_pair, not as a violation', () => {
-  // THE COMMIT-2 PREREQUISITE, PINNED HERE SO IT CANNOT BE FORGOTTEN. Stage 3
-  // forwards English for the archetype (core.archetype_name_en) and for the main
-  // profile (core.main_profile_bracket) and for NOTHING ELSE. The glossary has it
-  // - 10 of 10 aspek and 8 of 8 bintang carry name_en - but convergence Aspek and
-  // Bintang facts reach the model carrying `label` alone.
+test('EVERY in-scope term already has its English in the payload - no_pair is empty', () => {
+  // THIS TEST REPLACES ONE THAT PINNED A BUG AS CORRECT BEHAVIOUR. The first
+  // version of brackets.js read `f.name_en`, found it absent on every fact, and
+  // concluded Stage 3 forwarded English for the archetype and main profile alone -
+  // reporting 12 of 20 in-scope terms as `no_pair` and calling that a prerequisite
+  // for the enforcing commit. The field is `label_bracket`, which the
+  // module-assembly floor has used for brackets all along, and every fact carries
+  // it. There was never a gap.
   //
-  // So enforcing brackets before Stage 3 forwards `name_en` would oblige the
-  // renderer to supply terminology from its own knowledge, which is rule 14
-  // inverted: the LLM deciding something true. This test fails the day someone
-  // flips the reporter to enforcing without closing that gap first.
-  const result = validateRendering(goodReading(), CHART_1);
-  const noPair = result.metrics.brackets.filter((b) => b.verdict === 'no_pair');
-  assert.ok(noPair.length > 0,
-    'chart 1 has convergence Aspek with no English in the payload; that must be reported');
-  for (const b of noPair) {
-    assert.equal(b.expected, null, `${b.term} was counted no_pair but an English pair exists`);
-    const fired = result.findings.some((f) => (f.where || []).includes(b.term));
-    assert.equal(fired, false, `${b.term} has no supplied English and must not be a violation`);
+  // `no_pair` stays in the taxonomy because a real glossary gap would still be
+  // one. This pins that it is EMPTY on the fixture, so the same misreading cannot
+  // be reported as a finding again.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const result = validateRendering(goodReading(semantic), semantic);
+    const noPair = result.metrics.brackets.filter((b) => b.verdict === 'no_pair');
+    assert.deepEqual(noPair.map((b) => b.term), [],
+      `chart ${tc.id}: the payload supplies English for every in-scope term`);
+    assert.ok(result.metrics.brackets.length > 0, `chart ${tc.id} exercised no scoped term`);
   }
+});
+
+test('THE BRACKET SCOPE IS READ FROM THE GLOSSARY, so no category can be missed', () => {
+  // The first scope was an allowlist of provenance.kind values and it was wrong
+  // twice: it missed `coherence_rule` ("Aspek Pengelola" - one of the two terms in
+  // the ruling's OWN live instance) and `void_stack` ("Tanda Kekosongan", a 空亡
+  // bintang). Membership is data, so it is asked of the data.
+  const inScope = new Set([
+    ...Object.values(GLOSSARY.aspek).map((v) => v.name_id),
+    ...Object.values(GLOSSARY.bintang).map((v) => v.name_id),
+  ].filter(Boolean));
+
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const reported = new Set(validateRendering(goodReading(semantic), semantic)
+      .metrics.brackets.map((b) => b.term));
+    for (const fact of semantic.facts) {
+      if (!inScope.has(fact.label)) continue;
+      // The floor renders every required point, so an in-scope label that reached
+      // a block must have been judged.
+      const rendered = assembleFallback(semantic).blocks
+        .some((b) => b.text.includes(fact.label));
+      if (rendered) {
+        assert.ok(reported.has(fact.label),
+          `chart ${tc.id}: "${fact.label}" is an ${inScope.has(fact.label) ? 'aspek/bintang' : '?'} `
+          + 'entry that reached the prose and was not judged');
+      }
+    }
+  }
+
+  // And the exclusions hold: Elemen is explicitly out of scope by the ruling.
+  const c1 = validateRendering(goodReading(), CHART_1);
+  const judged = c1.metrics.brackets.map((b) => b.term);
+  assert.ok(!judged.includes('Api'), 'Elemen must not be judged (Reyner, verdict section 3)');
+  assert.ok(!judged.includes('Fondasi Pasangan'), 'a palace is not an Aspek or a Bintang');
 });
 
 test('the slot-filling check is inert against today\'s Stage 3, and that is the point', () => {
