@@ -2045,3 +2045,46 @@ test('THE GLOSSARY CELL IS FLAT, which is what makes the hedge a defect', () => 
   assert.ok(flat, 'the cell the model softened must still exist');
   assert.ok(!/\bcenderung\b/i.test(flat), 'and it must still say it without a hedge');
 });
+
+// ── FIX 4: style.raw_pillar IS THE SAME DEFECT AS FIX 1 ────
+
+test('ALL SIX raw_pillar HITS WERE THE HOUR SENTENCE, so fix 1 covers them', () => {
+  // Applying the actual blocklist pattern to the paid prose - rather than eyeballing a
+  // nearby sentence - every one of the six style.raw_pillar occurrences matched inside:
+  //
+  //   "Pilar jam lahirmu tidak dapat dipetakan karena informasi waktu..."
+  //
+  // The same sentence as fact.hour_known_contradiction. fact.js's own docblock predicted
+  // this from the other direction: the hour defect was "caught by ACCIDENT" because "the
+  // raw_pillar STYLE ban, added hours earlier, happened to match the same sentence."
+  //
+  // So chart 13's top TWO checks - 6/18 and 5/18 - are ONE root cause, and the prompt fix
+  // in the first commit of this branch addresses both. NOTHING IS CHANGED in raw_pillar:
+  // it is correct, `pilar jam` IS the banned raw form where a palace name belongs, and it
+  // caught a real falsehood.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+  const observed = 'Pilar jam lahirmu tidak dapat dipetakan karena informasi waktu '
+    + 'kelahiran tidak tercatat.';
+
+  const checks = checksIn(validateRendering(
+    withBlockText(goodReading(), dmId, `${observed} ${meaning}`), CHART_1));
+  assert.ok(checks.includes('style.raw_pillar'), 'the raw pillar form is still banned');
+  assert.ok(checks.includes('fact.hour_known_contradiction'),
+    'and the SAME sentence still trips the hour check - one defect, two findings');
+});
+
+test('a PALACE name is never mistaken for a raw pillar', () => {
+  // The pattern's own note claims it is clean on all four "Pilar X" palace names, which
+  // are capital-P and never followed by a pillar word. Asserted rather than trusted,
+  // because five of the six observed hits sat in prose that ALSO used palace names
+  // correctly - so a pattern that could not tell them apart would have looked identical
+  // in the data.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+  const palaces = 'Pilar Kerja dan Pilar Diri ditempati oleh Benturan (Clash). '
+    + 'Pilar Akar dan Pilar Arah tetap tenang.';
+  assert.ok(!checksIn(validateRendering(
+    withBlockText(goodReading(), dmId, `${palaces} ${meaning}`), CHART_1))
+    .includes('style.raw_pillar'), 'palace names must never trip the raw-pillar ban');
+});
