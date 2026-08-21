@@ -1978,3 +1978,70 @@ test('AN ADJECTIVAL USE CANNOT HIDE A BARE LABEL LATER IN THE SAME BLOCK', () =>
   assert.ok(checksIn(validateRendering(hidden, fresh)).includes('fact.strength_same_breath'),
     'the later bare verdict must still be caught');
 });
+
+// ── FIX 3: style.hedging IS CORRECT, and chart 5's 41% IS STALE ──
+
+test('TWO OF THE FOUR OBSERVED HEDGE REJECTIONS ALREADY PASS', () => {
+  // chart 5's 41% comes from the 08-18 trace, which predates the 08-17 change moving
+  // `mungkin` out of the blocklist into hedgeAboutReader(). Run against TODAY's guard,
+  // two of the four strings that were rejected then are accepted now - so the 41% is an
+  // upper bound and the current rate is unknown, exactly as the analysis caveated.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+
+  const nowFine = [
+    // `sedikit` as an ordinary quantity, not a hedge about whether anything is true.
+    'Kamu memiliki kelenturan tinggi sehingga perubahan mendadak yang membuat orang lain '
+      + 'kehilangan arah biasanya hanya menggeser langkahmu sedikit saja.',
+    // `mungkin` about the WORLD. The clause subject is Situasi, not the reader.
+    'Situasi mungkin berubah, tetapi kamu jarang ikut goyah karena kamu memiliki '
+      + 'kelenturan yang tinggi.',
+  ];
+  for (const text of nowFine) {
+    const reading = withBlockText(goodReading(), dmId, `${text} ${meaning}`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('style.hedging'),
+      `must NOT be rejected today: ${JSON.stringify(text.slice(0, 60))}`);
+  }
+});
+
+test('and the two that SHOULD still fire, do', () => {
+  // `mungkin` about the READER is a real hedge and stays caught. `cenderung` is the
+  // interesting one: it fired on 4 separate runs, always attempt 1, always on the same
+  // sentence - and the glossary cell it comes from says it FLAT:
+  //
+  //   glossary: "Kamu bertahan di situasi yang sudah jelas selesai."
+  //   model:    "Kamu cenderung bertahan di situasi yang sudah jelas selesai."
+  //
+  // So the model is softening a sentence Reyner wrote without a hedge. The check is not
+  // firing on ordinary Indonesian - it is catching a ruled string being weakened - which
+  // is why NOTHING IS CHANGED here. This test is the evidence for that decision.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+  const stillCaught = [
+    'Kamu cenderung bertahan di situasi yang sudah jelas selesai.',
+    'Kamu mungkin merasa belum pantas menyandang keberhasilanmu sendiri meskipun orang '
+      + 'lain melihatmu berhasil.',
+  ];
+  for (const text of stillCaught) {
+    const reading = withBlockText(goodReading(), dmId, `${text} ${meaning}`);
+    assert.ok(checksIn(validateRendering(reading, CHART_1)).includes('style.hedging'),
+      `must still be caught: ${JSON.stringify(text.slice(0, 60))}`);
+  }
+});
+
+test('THE GLOSSARY CELL IS FLAT, which is what makes the hedge a defect', () => {
+  // The load-bearing fact behind leaving the check alone. If the ruled string itself
+  // hedged, the check would be the defect instead.
+  // It is elemen_hilang.金 - a MISSING METAL cell, which is why chart 5 in particular
+  // keeps meeting it. Searched across every section rather than a named one, so moving
+  // the cell does not silently make this test vacuous.
+  const cells = Object.values(GLOSSARY)
+    .filter((sec) => sec && typeof sec === 'object')
+    .flatMap((sec) => Object.values(sec))
+    .filter((v) => v && typeof v === 'object')
+    .map((v) => v.label_meaning)
+    .filter((c) => typeof c === 'string');
+  const flat = cells.find((c) => c.includes('bertahan di situasi yang sudah jelas selesai'));
+  assert.ok(flat, 'the cell the model softened must still exist');
+  assert.ok(!/\bcenderung\b/i.test(flat), 'and it must still say it without a hedge');
+});
