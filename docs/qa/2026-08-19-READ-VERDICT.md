@@ -136,6 +136,51 @@ $ python3 -c "... per-reading Aspek bracket tally over docs/qa/2026-08-19-THE-RE
 Rule 23 is enforced by no check, which is how 0 of 2 shipped. A check follows this ruling with its own
 measurement, in its own commit.
 
+### ENFORCEMENT RULED 2026-08-21 — and then MEASURED, which changed the mechanism
+
+Claude Code corrected its own prerequisite first. It had reported **12 of 20 `no_pair`** by reading
+`f.name_en`; the field is **`label_bracket`**, every fact carries it, and the floor has used it all
+along. Its scope was also an allowlist that missed `coherence_rule` - which is `Aspek Pengelola`, one
+of the two terms in the live instance above. Corrected: **19/21 (90%) bracketed, 0 `no_pair`,
+0 mismatch, and Aspek and Bintang already at 100%.** Both misses were **`Matahari`, the archetype**,
+on charts 5 and 1.
+
+**Those two were not missing a bracket. They kept the FUSED form** `Kamu adalah Api Matahari` -
+element then image, the same shape Reyner rejected on chart 13 as *"reads like a spreadsheet header
+... identity before taxonomy."* Commit 1 required the NAME, not the pattern, which is why the fusion
+survived at 4/4.
+
+**RULED on the sentences, not the principle.** Shown the pair, Reyner chose the second:
+
+> `Kamu adalah Api Matahari yang Lemah.`
+> `Kamu adalah Matahari (The Sun) yang Lemah.`
+
+**The ruling stands. The GATE mechanism does not.** Enforcement measured **floor rate 0/4 -> 2/4**,
+one chart attributable (chart 1's attempt 1 failed on `brackets.unbracketed` and nothing else;
+fresh-1996 floors regardless). Under the STRICT precondition 3 ruled the same day, a floored chart
+FAILS - so a gate that floors one chart does not cost one chart, it costs the launch gate.
+
+**Two findings from the build, both about the instrument:**
+
+1. **A heading is not a first mention.** Over the whole reading the first occurrence of
+   `Aspek Pengatur` is the floor's own bare HEADING, one line above the correctly bracketed sentence -
+   so bracket-once rejected the always-available floor on every fixture chart until the haystack
+   became `renderedProse`. **Reporting first did not catch this**: a `flag` fails nothing, and the
+   19/21 figure came off artifact prose that contains no headings. **The reporter and the gate were
+   reading different haystacks, so the reporter could not predict the gate.** That is a limit on the
+   reporter-then-enforce pattern Cowork recommended, and it belongs beside it.
+2. **The two checks chase each other.** Both floored charts have an attempt that failed
+   `opening.archetype_missing` ALONE - the regeneration sent to fix brackets rewrote the opening and
+   dropped the archetype. Two gates on the same sentence, each satisfiable at the other's expense.
+
+**MECHANISM CHANGE PROPOSED BY COWORK, for Reyner:** stop asking the model to remember a
+deterministic transformation. The engine owns `label` and `label_bracket`; inserting `(English)` on
+first prose mention is a formatting rule, not a word choice, and `lib/render/fallback.js` already
+does exactly it. Move compliance into the pipeline and the check becomes an assertion that can only
+fail if the pipeline is broken - never because the model forgot. Rule 14 reads the same way: the LLM
+chooses words, the engine owns names. Zero floor cost, and it removes one of the two obligations
+regeneration is currently trying to satisfy at once.
+
 **Measurement caveat, recorded so it is not quoted:** the same tally reported substitute B as 2/2, but
 its section of the read file also contains Cowork's own explanatory prose, which the regex counted.
 Chart 1's 0/2 is clean. Substitute B's figure is not, and should be re-measured against the raw
