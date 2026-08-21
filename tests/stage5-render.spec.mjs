@@ -198,6 +198,36 @@ test('the floor names a badge and never names a null-label condition', () => {
   assert.equal(missing.heading, '');
   assert.ok(missing.text.startsWith(fact.label_meaning), 'the condition is described, not named');
   assert.ok(!missing.text.includes('Missing Wood'), 'a condition must not wear its bracket');
+
+  // A HEADING-LESS BLOCK MUST STILL CARRY ITS CONTENT, because that is what makes
+  // it safe for a renderer to skip the heading rather than print an empty marker.
+  // Added 2026-08-21: docs/qa/2026-08-17-renders.md, chart 1's floored render,
+  // emitted a bare "### " between "Setengah Gabungan" and "Aspek Pengatur". The
+  // DATA above is correct and deliberate - the defect was in the renderer, and
+  // scripts/qa-renders.mjs now omits the marker instead of printing it empty.
+  // A floored reading is served to real readers (soft findings keep serving, the
+  // 2026-08-11 ruling), so this is a live surface and not a probe artifact.
+  assert.ok(missing.text.trim().length > 0,
+    'a block with no heading must still carry text, or skipping the heading loses it');
+});
+
+test('EVERY heading-less floor block still carries text, on every fixture chart', () => {
+  // The generalisation of the block above, across the fixture rather than one
+  // chart, so a new null-label fact type cannot reintroduce a block that renders
+  // as nothing at all.
+  let seen = 0;
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = buildSemanticJson(calculateBaziChart({
+      birthDate: tc.date, birthTime: tc.time,
+    }));
+    for (const b of assembleFallback(semantic).blocks) {
+      if (b.heading !== '') continue;
+      seen++;
+      assert.ok(b.text.trim().length > 0,
+        `chart ${tc.id}: ${b.fact_ids.join(',')} has neither heading nor text`);
+    }
+  }
+  assert.ok(seen > 0, 'no chart exercised a heading-less block, so this asserts nothing');
 });
 
 test('the floor reports the two things it cannot say', () => {

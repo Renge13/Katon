@@ -13,8 +13,26 @@
 // ── WHY THE HEADER MATTERS MORE THAN THE PROSE ─────────────
 // `assembleFallback` renders every string of every fact from the glossary, so a
 // FLOOR result is fluent Indonesian and reads exactly like a reading. On
-// 2026-08-17 two of these four came back `module_assembly` and the prose was
-// indistinguishable by eye. Anyone reading this file for register or for QA is
+// 2026-08-17 ONE of these four came back `module_assembly` - CHART 1 - and the
+// prose was indistinguishable by eye.
+//
+// CORRECTED 2026-08-21. This comment said "two of these four" and named no run, so
+// it could not be checked against anything. It disagreed with its own artifact in
+// two ways at once:
+//
+//   $ awk 'BEGIN{c=""} /^## (chart|fresh)/{c=$0} /\| `source` \|/{print c" -> "$0}' \
+//       docs/qa/2026-08-17-renders.md
+//   chart 5 -> gemini | chart 13 -> gemini | chart 1 -> module_assembly | fresh-1996 -> gemini
+//
+// One floor, not two, and the floored chart was 1 while chart 5 - the one this
+// file's own run-to-run note is about - RENDERED in that run. No recorded 08-17
+// run had two of four floor: PROGRESS ("THE FLOOR RATE MOVES BETWEEN IDENTICAL
+// BATCHES", 08-17) logs three invocations in which chart 5 went floor, then
+// `gemini`, then 4/10, and the artifact here is the one where it rendered. The
+// point the comment was making survives the correction intact - one floor is
+// enough to make the banner load-bearing.
+//
+// Anyone reading this file for register or for QA is
 // reading the MODEL's work only where `source: gemini` — everywhere else they are
 // reading the glossary, which Reyner already ruled, and a verdict formed on it
 // says nothing about the renderer. So the source banner is not metadata here, it
@@ -143,7 +161,17 @@ for (const { label, date, time, note, semantic, r } of results) {
   lines.push('---');
   lines.push('');
   for (const b of r.blocks) {
-    lines.push(`### ${esc(b.heading)}`);
+    // A HEADING-LESS BLOCK IS LEGITIMATE, AND THIS USED TO PRINT A BARE "### ".
+    // The floor gives a null-label fact no heading on purpose - a missing element
+    // is a CONDITION, described and never named, which is the failure the prompt
+    // calls out and which tests/stage5-render.spec.mjs pins as
+    // `assert.equal(missing.heading, '')`. So the empty string is correct DATA and
+    // the defect was here, in the renderer that printed a heading marker for it.
+    // Reproducible in docs/qa/2026-08-17-renders.md, chart 1's floored render,
+    // between "Setengah Gabungan" and "Aspek Pengatur". That artifact is evidence
+    // and is deliberately NOT rewritten.
+    if (esc(b.heading) !== '') lines.push(`### ${esc(b.heading)}`);
+    else lines.push('<!-- no heading: a null-label condition, described not named -->');
     lines.push('');
     lines.push(esc(b.text));
     lines.push('');
