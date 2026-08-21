@@ -1,8 +1,13 @@
 <!--
 STATUS: QUEUED BUILD PROMPT. Behind prompt L. Written by Cowork 2026-08-20 from
 claude/pdf-spec-complete-edition-2026-08-19.md, AMENDED by what building a real draft found.
-Where this file and that spec disagree, THIS FILE WINS: the spec was written before anything
-was built, and three of its assumptions did not survive contact.
+PRECEDENCE, and correction 4 is why this line exists: A RULING RECORDED IN THE REPO BEATS THIS
+FILE, ALWAYS. This file only outranks the PDF SPEC - the spec was written before anything was built
+and three of its assumptions did not survive contact. But M is a Cowork prompt, not a ruling, and it
+has no standing against Reyner's. If a prompt and a repo ruling disagree, the prompt is the defect.
+ALSO: the spec lives in the Claude project and Claude Code cannot read it. That is acceptable only
+because it is a PROPOSAL, never ratified. THIS FILE IS SELF-CONTAINED - if it needs something from
+the spec, that is a defect in this file, not a gap in your access.
 Reference artifact: Cowork's draft PDF for chart 1 (1989-09-13 09:00), 9 pages, built with
 reportlab. It is NOT the implementation - production is @react-pdf/renderer per the spec.
 It exists to prove the shape and to hand you the three traps below already sprung.
