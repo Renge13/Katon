@@ -672,21 +672,87 @@ test('the HEADING does not satisfy the opening rule; the sentence must', () => {
 
 // ── RULE 23 BRACKETS: A REPORTER, NOT A GATE ───────────────
 
-test('THE BRACKET REPORTER CANNOT REJECT ANYTHING', () => {
-  // Ruled 2026-08-21: the check lands reporting first and flips to enforcing in
-  // its own commit. This is the property that makes commit 1's floor-rate number
-  // interpretable - if the reporter could reject, a floor-rate move would have two
-  // candidate causes and no way to separate them afterwards (rule 13).
-  const reading = goodReading();
-  const result = validateRendering(reading, CHART_1);
-  const bracketFindings = result.findings.filter((f) => f.check.startsWith('brackets.'));
-  assert.ok(bracketFindings.length > 0,
-    'the floor brackets nothing in scope, so the reporter must have something to say');
-  for (const f of bracketFindings) {
-    assert.equal(f.severity, 'flag', `${f.check} must be a flag, never soft or hard`);
+test('THE PIPELINE INSERTS THE BRACKET, so an unbracketed model output still passes', () => {
+  // Ruled 2026-08-21 after enforcement was measured: floor rate 0/4 -> 2/4, and under
+  // the STRICT precondition 3 a floored chart FAILS, so that gate cost the launch gate
+  // rather than one chart. Compliance moved into the pipeline.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const arche = CHART_1.core.archetype_name_id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+
+  // The exact sentence that floored chart 1 under enforcement.
+  const fused = withBlockText(goodReading(), dmId, `Kamu adalah Api ${arche} yang Lemah. ${meaning}`);
+  const result = validateRendering(fused, CHART_1);
+
+  assert.ok(!checksIn(result).includes('brackets.unbracketed'),
+    `insertion must have fixed it, not rejected it: ${checksIn(result).join(', ')}`);
+  assert.ok(result.metrics.bracket_inserts > 0, 'it must record that it inserted');
+
+  // AND THE INSERTED TEXT IS WHAT GETS CACHED. `...gate.normalized` is spread into the
+  // served result, so validating one string and storing another would validate nothing.
+  const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId)).text;
+  assert.ok(served.includes(`${arche} (${CHART_1.core.archetype_name_en})`),
+    `the served text must carry the bracket: ${served.slice(0, 90)}`);
+});
+
+test('every insertion is REPORTED with its context, because reading badly is not assertable', () => {
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const arche = CHART_1.core.archetype_name_id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+  const result = validateRendering(
+    withBlockText(goodReading(), dmId, `Kamu adalah Api ${arche} yang Lemah. ${meaning}`), CHART_1);
+
+  const inserted = result.findings.filter((f) => f.check === 'brackets.inserted');
+  assert.ok(inserted.length > 0, 'an insertion must be visible to QA');
+  for (const f of inserted) {
+    assert.equal(f.severity, 'flag', 'an insertion is not a defect and must never reject');
+    assert.match(f.message, /READ THIS/, 'the context is the point of this finding');
   }
-  // The load-bearing assertion: the verdict is identical with the flags removed.
-  assert.equal(result.ok, result.findings.filter((f) => f.severity !== 'flag').length === 0);
+});
+
+test('INSERTION IS IDEMPOTENT: a reading that got it right is byte-identical after', () => {
+  // The floor already brackets everything (fallback.js has always done this insertion),
+  // so it is the natural fixture for "already correct".
+  const before = goodReading();
+  const result = validateRendering(structuredClone(before), CHART_1);
+  assert.equal(result.metrics.bracket_inserts, 0, 'nothing should need inserting');
+  for (const [i, block] of result.normalized.blocks.entries()) {
+    assert.equal(block.text, before.blocks[i].text, `block ${i} was rewritten`);
+  }
+  assert.ok(!checksIn(result).some((c) => c.startsWith('brackets.')),
+    'a compliant reading produces no bracket finding at all');
+});
+
+test('INSERTION NEVER TOUCHES Pilar, Elemen, OR A HEADING', () => {
+  // Rule 23's ruled scope, and the heading rule that stopped bracket-once rejecting
+  // the floor on every chart.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const reading = withBlockText(goodReading(), dmId,
+    'Api dan Pilar Diri dan Fondasi Pasangan berada di baganmu. '
+    + CHART_1.facts.find((f) => f.id === dmId).label_meaning);
+  const bare = reading.blocks.find((b) => b.fact_ids.includes(dmId));
+  bare.heading = 'Aspek Pengatur'; // a bare label in a title is not a first mention
+
+  const result = validateRendering(reading, CHART_1);
+  const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId));
+  assert.ok(!served.text.includes('Api (Fire)'), 'Elemen must never be bracketed');
+  assert.ok(!served.text.includes('Pilar Diri ('), 'Pilar must never be bracketed');
+  assert.ok(!served.text.includes('Fondasi Pasangan ('), 'a palace is not a bound term');
+  assert.equal(served.heading, 'Aspek Pengatur', 'a heading must never be rewritten');
+});
+
+test('the assertion CANNOT FLOOR A READER even when insertion is bypassed', () => {
+  // The property the whole redesign rests on. A pipeline defect must be visible and
+  // must never cost a reader their reading - a regeneration cannot fix a bug in our
+  // own code, so rejecting for one only burns the budget and lands on the floor.
+  const result = validateRendering(goodReading(), CHART_1);
+  for (const f of result.findings.filter((f) => f.check.startsWith('brackets.'))) {
+    assert.equal(f.severity, 'flag', `${f.check} must never be soft or hard`);
+  }
+  // And the verdict is computed identically with every bracket finding removed.
+  const withoutBrackets = result.findings
+    .filter((f) => !f.check.startsWith('brackets.') && f.severity !== 'flag');
+  assert.equal(result.ok, withoutBrackets.length === 0);
 });
 
 test('EVERY in-scope term already has its English in the payload - no_pair is empty', () => {
