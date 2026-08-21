@@ -164,6 +164,13 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   If `git status` shows a wall of changes with symmetric insert/delete counts, that is the cause.
 - **PR discipline:** each PR independently reviewable and revertable. Engine work, content work and
   infra work never ride together.
+- **GATE CHANGES SHIP ISOLATED** (adopted 2026-08-20). A commit that changes what Stage 6 ACCEPTS
+  carries nothing else, so a floor-rate move always has exactly one candidate cause. This is rule 13
+  applied to shipping rather than to fitting: two accept-changing edits in one commit confound each
+  other's floor rate permanently, because the floor is measured per commit and the commit cannot be
+  split afterwards. A check that FIRES AND LOGS BUT REJECTS NOTHING is not a gate change under this
+  rule and may travel — it cannot move the floor, which is the whole point of landing one that way
+  first. Corollary: `STAGE6_VERSION` bumps once per such commit, never twice, and never zero times.
 - **The commit message must describe everything staged.** `git add -A` routinely sweeps in more than
   the message names — this has happened twice, once carrying a locked-file renumbering under a
   "docs chore" subject. Either stage selectively, or widen the message. Run `git status` and read it
