@@ -185,9 +185,9 @@ test('the appendix ships on every fixture chart, with no duplicate entry', () =>
 });
 
 test('胎元 SHIPS DISPLAY-ONLY, and no invented meaning travels with it', () => {
-  // Prompt M supplies a descriptive 胎元 sentence and says to ship it without
-  // waiting for Reyner. It is NOT shipped, because a standing ruling of his says
-  // not to and a Cowork-written build prompt does not overrule him:
+  // An earlier prompt M supplied a descriptive 胎元 sentence and said to ship it
+  // without waiting for Reyner. Reversed by that prompt's own correction 4 (ruled
+  // 2026-08-21): a repo ruling beats a Cowork build prompt, always. The ruling:
   //
   //   glossary.json -> pilar.conception._note, ruled 2026-08-07 - "It has NO
   //   label_meaning on purpose: nothing downstream interprets it, and inventing one
