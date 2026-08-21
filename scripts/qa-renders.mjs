@@ -88,6 +88,9 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { renderReading } from '../lib/render/index.js';
 import { PROMPT_VERSION } from '../lib/render/prompt.js';
+// The threshold this artifact exists to make fittable. Imported rather than retyped so
+// the printed number cannot drift from the one the gate actually used.
+import { COVERAGE_PARAMS } from '../lib/validate/index.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -288,6 +291,73 @@ if (N === 1) {
   lines.push('and 1/4 with identical failing checks. Use `--n 10` to measure.');
   lines.push('');
 }
+// ── THE COVERAGE DISTRIBUTION, WHICH IS WHY fieldOverlap CAN BE FITTED ──
+// Added 2026-08-21, BEFORE the verification run rather than after it, because item 3 of
+// the floor-cause fix list cannot be worked without it and a run that omits it has to be
+// paid for twice.
+//
+// `COVERAGE_PARAMS.fieldOverlap` is UNFITTED by its own docblock, which says "the harness
+// reports the distribution". coverage.js has been RECORDING it - every check, pass or
+// fail - and nothing was writing it out. A threshold set from rejections alone cannot
+// tell "nothing came near the line" from "half the corpus sits one stem above it", which
+// is the whole argument for collecting passes too.
+//
+// THE CHECK IS A CONJUNCTION, so a one-dimensional histogram would mislead: a field fails
+// only when `ratio < fieldOverlap` AND `hits < fieldMinHits`. An entry under the ratio
+// line that carries 2+ hits is RESCUED, and counting it as a near-miss would overstate
+// how much moving the threshold would buy. Both are reported.
+const covEntries = results.flatMap((x) => x.runs.flatMap((run) => [
+  ...((run.r.stage6_metrics?.coverage) || []),
+  ...((run.r.attempts || []).flatMap((a) => (a.stage6_metrics?.coverage) || [])),
+]));
+
+if (covEntries.length) {
+  const T = COVERAGE_PARAMS.fieldOverlap;
+  const MIN_HITS = COVERAGE_PARAMS.fieldMinHits;
+  lines.push('## COVERAGE DISTRIBUTION, so `fieldOverlap` can be fitted from data');
+  lines.push('');
+  lines.push(`\`fieldOverlap\` = **${T}**, \`fieldMinHits\` = **${MIN_HITS}**. A field fails only when`);
+  lines.push('ratio is under the threshold AND hits are under the minimum, so the two columns are not');
+  lines.push('interchangeable. Every observation is here, passing and failing both - a threshold fitted');
+  lines.push('from rejections alone cannot tell "nothing came near the line" from "half the corpus sits');
+  lines.push('one stem above it".');
+  lines.push('');
+  lines.push('| ratio bucket | observations | of which hits >= ' + MIN_HITS + ' (rescued) | would FAIL |');
+  lines.push('|---|---|---|---|');
+  const BUCKETS = [0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.6, 1.01];
+  for (let i = 0; i < BUCKETS.length - 1; i++) {
+    const lo = BUCKETS[i];
+    const hi = BUCKETS[i + 1];
+    const inB = covEntries.filter((e) => e.ratio >= lo && e.ratio < hi);
+    if (!inB.length) continue;
+    const rescued = inB.filter((e) => e.hits >= MIN_HITS).length;
+    const failing = inB.filter((e) => e.ratio < T && e.hits < MIN_HITS).length;
+    const mark = hi <= T ? ' **(under threshold)**' : '';
+    lines.push(`| ${lo.toFixed(2)} - ${hi >= 1 ? '1.00' : hi.toFixed(2)}${mark} `
+      + `| ${inB.length} | ${rescued} | ${failing} |`);
+  }
+  const failing = covEntries.filter((e) => e.ratio < T && e.hits < MIN_HITS);
+  lines.push(`| **TOTAL** | **${covEntries.length}** | `
+    + `**${covEntries.filter((e) => e.hits >= MIN_HITS).length}** | **${failing.length}** |`);
+  lines.push('');
+  lines.push(`${failing.length} of ${covEntries.length} observations would fail `
+    + `(${Math.round((failing.length / covEntries.length) * 100)}%).`);
+  lines.push('');
+
+  // Which FIELDS fail, because "coverage" is four different demands wearing one name.
+  const byField = {};
+  for (const e of failing) byField[e.field] = (byField[e.field] || 0) + 1;
+  const ranked = Object.entries(byField).sort((a, b) => b[1] - a[1]);
+  if (ranked.length) {
+    lines.push('Failing observations by FIELD - `coverage` is four different demands under one name:');
+    lines.push('');
+    lines.push('| field | failing |');
+    lines.push('|---|---|');
+    for (const [f, n] of ranked) lines.push(`| \`${f}\` | ${n} |`);
+    lines.push('');
+  }
+}
+
 // ── FLAG RATES ACROSS ALL n RUNS, NOT JUST THE PRINTED ONE ──
 // Added after the 08-21 n=10 run could not answer the question it was run for. Flags
 // are the repo's "count it before you gate it" mechanism - `opening.element_fused`
