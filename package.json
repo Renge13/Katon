@@ -19,6 +19,7 @@
     "test:hidden-stems": "node --test tests/hidden-stems.spec.mjs",
     "test:punishment": "node --test tests/punishment.spec.mjs",
     "test:palaces": "node --test tests/palaces.spec.mjs",
+    "test:pdf-appendix": "node --conditions=react-server --test tests/pdf-appendix.spec.mjs",
     "test:badges": "node --test tests/badge-anchors.spec.mjs",
     "test:stage3": "node --test tests/stage3-facts.spec.mjs",
     "test:stage3-hierarchy": "node --test tests/stage3-hierarchy.spec.mjs",
