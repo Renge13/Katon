@@ -7,3 +7,7 @@
 *.pdf binary
 *.woff binary
 *.woff2 binary
+# Added with the PDF face. text=auto above would otherwise be free to
+# newline-mangle a font, and a corrupted TTF fails as tofu in a paid document.
+*.ttf binary
+*.otf binary

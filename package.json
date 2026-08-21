@@ -20,6 +20,7 @@
     "test:punishment": "node --test tests/punishment.spec.mjs",
     "test:palaces": "node --test tests/palaces.spec.mjs",
     "test:pdf-appendix": "node --conditions=react-server --test tests/pdf-appendix.spec.mjs",
+    "test:pdf-han-font": "node --test tests/pdf-han-font.spec.mjs",
     "test:badges": "node --test tests/badge-anchors.spec.mjs",
     "test:stage3": "node --test tests/stage3-facts.spec.mjs",
     "test:stage3-hierarchy": "node --test tests/stage3-hierarchy.spec.mjs",
@@ -50,6 +51,7 @@
     "qa:renders": "node --env-file-if-exists=.env.local --conditions=react-server scripts/qa-renders.mjs",
     "probe:floor-rate": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-floor-rate.mjs",
     "build:han-subset": "node scripts/build-han-subset.mjs",
+    "build:han-ttf": "node scripts/build-han-ttf.mjs",
     "probe:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-rejections.mjs",
     "probe:retry-depth": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-retry-depth.mjs",
     "probe:retry-erosion": "node scripts/probe-retry-erosion.mjs"
