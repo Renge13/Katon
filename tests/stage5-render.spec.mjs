@@ -29,6 +29,9 @@ import { STAGE6_VERSION, serveFenceReason, serveAllowed } from '../lib/render/fe
 import { STAGE6_VERSION as GATE_VERSION } from '../lib/validate/index.js';
 import { splitParagraphs, inspectParagraphs } from '../lib/render/paragraphs.js';
 import { RENDER_COPY } from '../lib/render/copy.js';
+// The gate's own splitter, so a test about the floor's FIRST SENTENCE counts
+// sentences the way the check that judges it counts them.
+import { sentences } from '../lib/validate/text.js';
 
 const jsonFor = (tc) => buildSemanticJson(calculateBaziChart({
   birthDate: tc.date, birthTime: tc.time,
@@ -637,4 +640,54 @@ test('target_language is set before keying, so two languages are two entries', (
   assert.equal(en.target_language, 'en');
   assert.equal(CHART_1.target_language, 'id', 'the input must not be mutated');
   assert.notEqual(cacheKey(en), cacheKey(CHART_1));
+});
+
+test('THE FLOOR OPENS WITH ONE CLAUSE, not two bare label-sentences', () => {
+  // CORRECTED 2026-08-21. Ordering the archetype first was necessary and not
+  // sufficient: the floor then opened "Matahari (The Sun)." "Api (Fire)." - two
+  // noun-phrases, no verb - and Reyner ruled that shape UNSELLABLE as-is.
+  //
+  // It passed `opening.archetype_missing` the whole time, because that check asserts
+  // the NAME is present and cannot see whether a sentence says anything. That
+  // weakness is recorded in PROGRESS rather than fixed here.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const first = assembleFallback(semantic).blocks[0];
+    const opening = sentences(first.text)[0];
+    const arche = semantic.core.archetype_name_id;
+    const element = semantic.facts.find((f) => f.id.startsWith('day_master_'))?.label;
+
+    // ONE sentence carries both, and it carries a verb from the copy bank.
+    assert.ok(opening.includes(arche), `chart ${tc.id}: the opening must name the archetype`);
+    assert.ok(opening.includes(element), `chart ${tc.id}: and the element, in the SAME sentence`);
+    assert.ok(opening.includes(RENDER_COPY.floorIdentity.lead),
+      `chart ${tc.id}: the clause must come from the audited bank, not from punctuation`);
+
+    // And the element is NOT bracketed: rule 23's ruled scope binds Aspek, Bintang
+    // and Arketipe and explicitly not Elemen.
+    const bracket = semantic.facts.find((f) => f.id.startsWith('day_master_'))?.label_bracket;
+    assert.ok(!opening.includes(`${element} (${bracket})`),
+      `chart ${tc.id}: Elemen must not be bracketed (Reyner, verdict section 3)`);
+
+    // The regression this test exists for: the element must not be its own sentence.
+    assert.ok(!sentences(first.text).includes(`${element} (${bracket}).`),
+      `chart ${tc.id}: the element is a bare label-sentence again`);
+  }
+});
+
+test('the floor is not FUSED either - the element follows the image, never precedes it', () => {
+  // `Api Matahari` is the shape rejected on chart 13. The clause puts the image
+  // first and the element after, so `opening.element_fused` must not fire on the
+  // always-available floor.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const opening = sentences(assembleFallback(semantic).blocks[0].text)[0];
+    const arche = semantic.core.archetype_name_id;
+    const element = semantic.facts.find((f) => f.id.startsWith('day_master_'))?.label;
+    // `\\s` and not `\s`: inside a template literal the single backslash is dropped,
+    // so the pattern would have been `Apis+Matahari` and matched nothing. eslint's
+    // no-useless-escape caught it, which is the only reason this test is not vacuous.
+    assert.ok(!new RegExp(`${element}\\s+${arche}`).test(opening),
+      `chart ${tc.id}: the floor opens fused - "${opening}"`);
+  }
 });
