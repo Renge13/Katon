@@ -585,14 +585,165 @@ test('a dropped cost is caught under its own check name', () => {
   assert.ok(checksIn(result).includes('coverage.cost_dropped'));
 });
 
-test('coverage never penalises ORDER', () => {
+test('coverage never penalises ORDER, PAST THE OPENING', () => {
   // The carried principle: validate coverage, never structural conformance. The
   // prompt promises the renderer it will not be punished for an unusual order,
   // and the gate has to keep that promise.
+  //
+  // RESCOPED 2026-08-21, and the scope is the prompt's own, not a concession to a
+  // new check. renderer-prompt.txt has always said "THE OPENING IS FIXED. THE REST
+  // OF THE ARRANGEMENT IS FREE", and the sentence this test was written from reads
+  // in full: "PAST THE OPENING THREE you will never be penalised for an unusual
+  // order." The old test reversed EVERY block, including the opening, so it
+  // asserted something broader than the contract it cites - and it passed only
+  // because nothing yet enforced the opening.
   const reading = goodReading();
-  reading.blocks = [...reading.blocks].reverse();
+  const [first, ...rest] = reading.blocks;
+  reading.blocks = [first, ...rest.reverse()];
   const result = validateRendering(reading, CHART_1);
-  assert.ok(result.ok, `reordering was penalised: ${checksIn(result).join(', ')}`);
+  assert.ok(result.ok, `reordering past the opening was penalised: ${checksIn(result).join(', ')}`);
+
+  // And the exception is real rather than notional: move the opening and the gate
+  // says so. Both halves live in one test on purpose - a reader who changes either
+  // rule has to look at the other.
+  const moved = goodReading();
+  moved.blocks = [...moved.blocks.slice(1), moved.blocks[0]];
+  assert.ok(checksIn(validateRendering(moved, CHART_1)).includes('opening.archetype_missing'),
+    'moving the day-master block out of first position must fire the opening rule');
+});
+
+// ── THE OPENING NAMES THE ARCHETYPE (Reyner, 2026-08-19) ───
+
+test('THE ARCHETYPE IS A REQUIRED POINT, not merely context', () => {
+  // The 08-19 diagnosis: `core.archetype_name_id` was in the payload for every
+  // chart and still went missing, because `core` is CONTEXT and obligation lives
+  // in `required_points`. Measured over the 77 stored attempt proses in
+  // docs/qa/2026-08-18-retry-depth.json, the archetype reached the first 250
+  // characters on 41 of 77 attempts and 16 of 39 PASSING ones.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const dm = semantic.required_points.find((p) => p.fact_id.startsWith('day_master_'));
+    assert.ok(dm, `chart ${tc.id} has no day-master required point`);
+    assert.ok(dm.must_cover.includes('archetype'),
+      `chart ${tc.id}: the day-master point must demand the archetype`);
+
+    // And ONLY that point. `archetype` is derived from a field only the day-master
+    // fact carries, so a second point demanding it would mean the field leaked.
+    const others = semantic.required_points
+      .filter((p) => p !== dm && p.must_cover.includes('archetype'));
+    assert.deepEqual(others.map((p) => p.fact_id), [],
+      `chart ${tc.id}: only the day-master point may demand the archetype`);
+  }
+});
+
+test('a reading that opens on the ELEMENT is rejected, and only softly', () => {
+  // "Kamu adalah Kayu (Wood) reads like a spreadsheet header" - Reyner. This is
+  // the exact sentence shape that made two of four charts unsellable.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const archetype = CHART_1.core.archetype_name_id;
+  const opensOnElement = withBlockText(goodReading(), dmId,
+    `Api (Fire). ${CHART_1.facts.find((f) => f.id === dmId).label_meaning}`);
+
+  const result = validateRendering(opensOnElement, CHART_1);
+  assert.ok(checksIn(result).includes('opening.archetype_missing'),
+    `an element-first opening must be caught: ${checksIn(result).join(', ')}`);
+  // SOFT, never hard. A missing archetype is one clause short, which a
+  // regeneration fixes; it is not a fact contradiction and not an ethics failure.
+  // fact.js hardcodes severity 'hard', which is why this rule is not in fact.js.
+  assert.equal(result.hard, false, 'a missing archetype is not a HARD failure');
+  assert.ok(!opensOnElement.blocks[0].text.includes(archetype), 'fixture must not name it');
+
+  // The floor, which DOES name it, is the control.
+  assert.ok(!checksIn(validateRendering(goodReading(), CHART_1))
+    .includes('opening.archetype_missing'), 'the floor names the archetype and must pass');
+});
+
+test('the HEADING does not satisfy the opening rule; the sentence must', () => {
+  // A section title is not the reader meeting herself in a sentence, and allowing
+  // the heading would let the rule pass on a label while the prose still opens on
+  // taxonomy.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const reading = withBlockText(goodReading(), dmId,
+    `Api (Fire). ${CHART_1.facts.find((f) => f.id === dmId).label_meaning}`);
+  reading.blocks[0].heading = CHART_1.core.archetype_name_id;
+  assert.ok(checksIn(validateRendering(reading, CHART_1)).includes('opening.archetype_missing'),
+    'the archetype in the heading must not satisfy the rule');
+});
+
+// ── RULE 23 BRACKETS: A REPORTER, NOT A GATE ───────────────
+
+test('THE BRACKET REPORTER CANNOT REJECT ANYTHING', () => {
+  // Ruled 2026-08-21: the check lands reporting first and flips to enforcing in
+  // its own commit. This is the property that makes commit 1's floor-rate number
+  // interpretable - if the reporter could reject, a floor-rate move would have two
+  // candidate causes and no way to separate them afterwards (rule 13).
+  const reading = goodReading();
+  const result = validateRendering(reading, CHART_1);
+  const bracketFindings = result.findings.filter((f) => f.check.startsWith('brackets.'));
+  assert.ok(bracketFindings.length > 0,
+    'the floor brackets nothing in scope, so the reporter must have something to say');
+  for (const f of bracketFindings) {
+    assert.equal(f.severity, 'flag', `${f.check} must be a flag, never soft or hard`);
+  }
+  // The load-bearing assertion: the verdict is identical with the flags removed.
+  assert.equal(result.ok, result.findings.filter((f) => f.severity !== 'flag').length === 0);
+});
+
+test('EVERY in-scope term already has its English in the payload - no_pair is empty', () => {
+  // THIS TEST REPLACES ONE THAT PINNED A BUG AS CORRECT BEHAVIOUR. The first
+  // version of brackets.js read `f.name_en`, found it absent on every fact, and
+  // concluded Stage 3 forwarded English for the archetype and main profile alone -
+  // reporting 12 of 20 in-scope terms as `no_pair` and calling that a prerequisite
+  // for the enforcing commit. The field is `label_bracket`, which the
+  // module-assembly floor has used for brackets all along, and every fact carries
+  // it. There was never a gap.
+  //
+  // `no_pair` stays in the taxonomy because a real glossary gap would still be
+  // one. This pins that it is EMPTY on the fixture, so the same misreading cannot
+  // be reported as a finding again.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const result = validateRendering(goodReading(semantic), semantic);
+    const noPair = result.metrics.brackets.filter((b) => b.verdict === 'no_pair');
+    assert.deepEqual(noPair.map((b) => b.term), [],
+      `chart ${tc.id}: the payload supplies English for every in-scope term`);
+    assert.ok(result.metrics.brackets.length > 0, `chart ${tc.id} exercised no scoped term`);
+  }
+});
+
+test('THE BRACKET SCOPE IS READ FROM THE GLOSSARY, so no category can be missed', () => {
+  // The first scope was an allowlist of provenance.kind values and it was wrong
+  // twice: it missed `coherence_rule` ("Aspek Pengelola" - one of the two terms in
+  // the ruling's OWN live instance) and `void_stack` ("Tanda Kekosongan", a 空亡
+  // bintang). Membership is data, so it is asked of the data.
+  const inScope = new Set([
+    ...Object.values(GLOSSARY.aspek).map((v) => v.name_id),
+    ...Object.values(GLOSSARY.bintang).map((v) => v.name_id),
+  ].filter(Boolean));
+
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const reported = new Set(validateRendering(goodReading(semantic), semantic)
+      .metrics.brackets.map((b) => b.term));
+    for (const fact of semantic.facts) {
+      if (!inScope.has(fact.label)) continue;
+      // The floor renders every required point, so an in-scope label that reached
+      // a block must have been judged.
+      const rendered = assembleFallback(semantic).blocks
+        .some((b) => b.text.includes(fact.label));
+      if (rendered) {
+        assert.ok(reported.has(fact.label),
+          `chart ${tc.id}: "${fact.label}" is an ${inScope.has(fact.label) ? 'aspek/bintang' : '?'} `
+          + 'entry that reached the prose and was not judged');
+      }
+    }
+  }
+
+  // And the exclusions hold: Elemen is explicitly out of scope by the ruling.
+  const c1 = validateRendering(goodReading(), CHART_1);
+  const judged = c1.metrics.brackets.map((b) => b.term);
+  assert.ok(!judged.includes('Api'), 'Elemen must not be judged (Reyner, verdict section 3)');
+  assert.ok(!judged.includes('Fondasi Pasangan'), 'a palace is not an Aspek or a Bintang');
 });
 
 test('the slot-filling check is inert against today\'s Stage 3, and that is the point', () => {
