@@ -19,12 +19,43 @@ dynamic tags/badges (CONTOH) and the Card B pillar row is ILLUSTRATIVE, not comp
 <style>
   :root{
     --bench:#111113; --bench-ink:#d9d7d2; --bench-dim:#84817a;
-    --sun-f:#FF4F12;   --sun-i:#FFF4EC;   --sun-a:#FFC9A8;
+    /* Matahari's field darkened 2026-08-13 by Reyner: #FF4F12 -> #CC3F0E, same
+       hue, ink kept. #FF4F12 could not reach WCAG AA against this ink (3.04);
+       #CC3F0E measures 4.53. This :root is the ruled source `lib/card/tokens.js`
+       copies and `tests/card.spec.mjs` pins against, so the two move together. */
+    --sun-f:#CC3F0E;   --sun-i:#FFF4EC;   --sun-a:#FFC9A8;
     --oce-f:#0E3A5C;   --oce-i:#EAF3F9;   --oce-a:#7FB6D9;
     --gem-f:#EDEAE4;   --gem-i:#1C1A17;   --gem-a:#8A7B5C;
     --bam-f:#1F7A43;   --bam-i:#EFF8EF;   --bam-a:#A8DBB4;
     --bes-f:#26282D;   --bes-i:#E8E9EC;   --bes-a:#9BA1AD;
+
+    /* THE OTHER FIVE, APPROVED 2026-08-15 by Reyner. All ten triples are now
+       ruled, so this :root is the ruled source for the whole set rather than for
+       half of it, and `tests/card.spec.mjs` pins all thirty hexes against it.
+
+       GUNUNG IS #4A3A1E, NOT #8F7040. Its field came down on 2026-08-15 (spec
+       §6.8) because every one of its three failures had the same cause - the
+       field was not dark. Measured with `contrast()`: ink 4.21 -> 10.02, accent
+       3.02 -> 7.18, brass text 2.52 -> 6.00. The old value must not come back.
+
+       The five CARDS below are the 08-03 mockups and still show the original
+       five archetypes; these five are drawn as swatches at the foot of the page
+       instead. Re-drawing five more full cards here would be re-authoring a
+       superseded artefact - `npm run preview:cards` renders all ten for real. */
+    --tea-f:#1B4A2C;   --tea-i:#ECF5EE;   --tea-a:#8FBF9F;
+    --bon-f:#7C2012;   --bon-i:#FDEEE8;   --bon-a:#EFA98C;
+    --mou-f:#4A3A1E;   --mou-i:#FAF4E9;   --mou-a:#E3CFA8;
+    --gar-f:#D0B87E;   --gar-i:#241E12;   --gar-a:#755C2C;
+    --dew-f:#A9CFE0;   --dew-i:#16242C;   --dew-a:#46748F;
   }
+  /* Swatch strip for the ten ruled triples: field with its ink on it, and the
+     accent as a bar beneath. Enough to see the set as a set; not a card. */
+  .swatches{display:flex;flex-wrap:wrap;gap:14px}
+  .sw{width:150px;border-radius:10px;overflow:hidden;background:var(--f);color:var(--i)}
+  .sw .top{padding:14px 12px 12px}
+  .sw .nm{font-variation-settings:'wdth' 92,'wght' 700;font-size:13px;letter-spacing:.02em;text-transform:uppercase}
+  .sw .hx{font-family:ui-monospace,monospace;font-size:10px;opacity:.72;margin-top:5px}
+  .sw .acc{height:16px;background:var(--a)}
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--bench);color:var(--bench-ink);font-family:'Archivo',sans-serif;padding:48px 40px 96px}
   h1{font-variation-settings:'wdth' 72,'wght' 800;font-size:34px;letter-spacing:.01em;margin-bottom:8px;text-transform:uppercase}
@@ -218,6 +249,26 @@ still stands in the footer.</div>
   (confirmed 08-02). Pillar values and bar heights here are ILLUSTRATIVE, not computed. 9:16 fills
   a full story - the height is the exclusivity signal.</p></div>
 </div>
+</section>
+
+<section>
+  <h2>The ten ruled triples</h2>
+  <p class="sub">All ten approved 2026-08-15. This strip exists so every hex in the <code>:root</code>
+  above is drawn rather than declared and forgotten - ink is set ON its field, accent is the bar
+  beneath. <b>Gunung is #4A3A1E</b>, down from #8F7040 on 08-15: ink 4.21 &rarr; 10.02, accent
+  3.02 &rarr; 7.18, brass text 2.52 &rarr; 6.00, all one edit (spec &sect;6.8).</p>
+  <div class="swatches" style="margin-top:24px">
+    <div class="sw" style="--f:var(--tea-f);--i:var(--tea-i);--a:var(--tea-a)"><div class="top"><div class="nm">Jati / Teak</div><div class="hx">#1B4A2C</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--bam-f);--i:var(--bam-i);--a:var(--bam-a)"><div class="top"><div class="nm">Bambu</div><div class="hx">#1F7A43</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--sun-f);--i:var(--sun-i);--a:var(--sun-a)"><div class="top"><div class="nm">Matahari</div><div class="hx">#CC3F0E</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--bon-f);--i:var(--bon-i);--a:var(--bon-a)"><div class="top"><div class="nm">Api Unggun</div><div class="hx">#7C2012</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--mou-f);--i:var(--mou-i);--a:var(--mou-a)"><div class="top"><div class="nm">Gunung</div><div class="hx">#4A3A1E</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--gar-f);--i:var(--gar-i);--a:var(--gar-a)"><div class="top"><div class="nm">Taman</div><div class="hx">#D0B87E</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--bes-f);--i:var(--bes-i);--a:var(--bes-a)"><div class="top"><div class="nm">Besi Tempa</div><div class="hx">#26282D</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--gem-f);--i:var(--gem-i);--a:var(--gem-a)"><div class="top"><div class="nm">Permata</div><div class="hx">#EDEAE4</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--oce-f);--i:var(--oce-i);--a:var(--oce-a)"><div class="top"><div class="nm">Samudra</div><div class="hx">#0E3A5C</div></div><div class="acc"></div></div>
+    <div class="sw" style="--f:var(--dew-f);--i:var(--dew-i);--a:var(--dew-a)"><div class="top"><div class="nm">Embun</div><div class="hx">#A9CFE0</div></div><div class="acc"></div></div>
+  </div>
 </section>
 
 </body>

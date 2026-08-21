@@ -18,7 +18,7 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import {
   buildSemanticJson, cacheKey, canonicalize, ENGINE_VERSION, SAFETY_FLAGS, CONTRACT_PARAMS,
 } from '../lib/semantic/index.js';
-import { ELEMENT_NAMES_ID } from '../lib/semantic/glossary.js';
+import { ELEMENT_NAMES_ID, GLOSSARY } from '../lib/semantic/glossary.js';
 import { VALIDATION_CHARTS } from './bazi-validation.fixture.js';
 import PROVECELL from '../docs/content/provecell-01-USER.json' with { type: 'json' };
 
@@ -279,7 +279,81 @@ test('the version and the unfitted contract constants are stated', () => {
   // the contract, so the version moves and every key in the table orphans. Free
   // at zero traffic, and the old rows can never be served again because the key
   // only moves with the version.
-  assert.equal(ENGINE_VERSION, '0.4.3-stage3');
+  //
+  // 0.4.4 as of 2026-08-12: every palace now carries its life domain
+  // (`palace_domain`, `palace_domains`, `provenance.palace_domains`). The payload
+  // the renderer sees changed, so the key must change with it.
+  assert.equal(ENGINE_VERSION, '0.4.4-stage3');
   assert.deepEqual(SAFETY_FLAGS, ['no_fatalism', 'no_medical', 'no_financial', 'no_god_ranking']);
   assert.deepEqual(CONTRACT_PARAMS, { coverageFloor: 65 });
+});
+
+// ── the palace-domain join (QA finding 5) ──────────────────
+
+test('EVERY PALACE CARRIES ITS LIFE DOMAIN, on every fixture chart', () => {
+  // QA finding 5: "Pilar Kerja" alone reads as an internal variable that leaked to
+  // the user. `domain_id` was ruled and landed as DATA in tranche 1 and nothing read
+  // it; this join is what puts it where the renderer can weave it.
+  //
+  // A palace without its domain is the failure mode: the renderer would then either
+  // omit the gloss or invent one, and inventing it is the rule-14 violation.
+  for (const tc of VALIDATION_CHARTS) {
+    const json = jsonFor(tc);
+    for (const fact of json.facts) {
+      if (fact.palace) {
+        assert.ok(fact.palace_domain,
+          `chart ${tc.id}: ${fact.id} names ${fact.palace} with no domain`);
+      }
+      if (fact.palaces) {
+        assert.equal(typeof fact.palace_domains, 'object',
+          `chart ${tc.id}: ${fact.id} has palaces[] and no domain map`);
+        for (const name of fact.palaces) {
+          assert.ok(fact.palace_domains[name], `chart ${tc.id}: ${fact.id} missing domain for ${name}`);
+        }
+      }
+      if (fact.provenance?.kind === 'branch_relation') {
+        for (const name of fact.provenance.palaces) {
+          assert.ok(fact.provenance.palace_domains?.[name],
+            `chart ${tc.id}: ${fact.id} missing domain for ${name}`);
+        }
+      }
+    }
+  }
+});
+
+test('THE DOMAIN MAP IS KEYED BY NAME, so it cannot be mis-zipped', () => {
+  // `palaces` is in EMISSION order and `positions_id` is in READING order, so a
+  // parallel array would let the renderer pair the wrong gloss with the wrong
+  // palace. Chart 6 is the case: the span reads "Pilar Akar dan Pilar Kerja" while
+  // the palaces array starts with Pilar Kerja. Glossing the Root Pillar as career
+  // is a plain falsehood about the reader's chart.
+  const six = VALIDATION_CHARTS.find((tc) => tc.id === 6);
+  const relation = jsonFor(six).facts.find((f) => f.provenance?.kind === 'branch_relation');
+  assert.ok(relation, 'chart 6 carries a branch relation');
+  assert.ok(!Array.isArray(relation.provenance.palace_domains), 'the domains must not be an array');
+  assert.equal(relation.provenance.palace_domains['Pilar Akar'], 'asal-usul dan latar belakangmu');
+  assert.equal(relation.provenance.palace_domains['Pilar Kerja'], 'pekerjaan dan kariermu');
+});
+
+test('the domain is NOT a required point - the weave is first mention, not every mention', () => {
+  // must_cover is derived from what a fact carries, so a domain field added there
+  // would demand the gloss on EVERY palace mention. Reyner's ruling is the opposite:
+  // weave it into the FIRST mention, once. Coverage stays a contract about the
+  // fact's own strings.
+  for (const tc of VALIDATION_CHARTS) {
+    for (const point of jsonFor(tc).required_points) {
+      assert.ok(!point.must_cover.some((f) => f.includes('domain')),
+        `chart ${tc.id}: ${point.fact_id} requires a domain gloss`);
+    }
+  }
+});
+
+test('palace display names stay distinct, or the reverse lookup collapses', () => {
+  // palaceDomainByName() is a Map built from the glossary, so two positions sharing
+  // a display name would silently give one of them the other's life domain.
+  const names = ['year', 'month', 'day', 'hour'].map((p) => GLOSSARY.pilar[p].name_id);
+  assert.equal(new Set(names).size, 4, `palace names are not distinct: ${names.join(', ')}`);
+  for (const position of ['year', 'month', 'day', 'hour']) {
+    assert.ok(GLOSSARY.pilar[position].domain_id, `pilar.${position} has no domain_id`);
+  }
 });

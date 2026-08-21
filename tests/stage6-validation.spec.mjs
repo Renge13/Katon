@@ -720,8 +720,11 @@ test('typography, hanzi, questions and arithmetic are all caught', () => {
     ['style.bare_polarity', 'Kamu Api Yang, dan itu membuat caramu hadir terasa terbuka.'],
     ['style.slang', 'Kamu ngerasa capek terus padahal kerjanya tidak seberapa berat.'],
     ['style.particles', 'Itu tuh yang bikin kamu bertahan lama di tempat yang sama.'],
+    // `mungkin` about the READER still fires - see the split test below.
     ['style.hedging', 'Kamu mungkin akan merasa lebih ringan setelah membaca ini semua.'],
-    ['style.adverbial', 'Kamu bergerak secara alami ketika ada yang memberi dorongan.'],
+    // `style.adverbial` was DELETED 2026-08-17. It is deliberately not replaced
+    // here: the check is gone, so a case asserting it fires would assert the
+    // opposite of the ruling.
     ['style.meta', 'Sebagai AI, saya membaca petamu dan menemukan pola yang menarik.'],
     ['style.essay_connectives', 'Hal ini membuat kamu terlihat tenang di mata orang lain.'],
   ];
@@ -1240,7 +1243,11 @@ test('a Stage 6 failure regenerates ONCE, and the retry carries the directive', 
   });
 });
 
-test('failing TWICE serves the floor and flags the chart for QA', async () => {
+test('failing THREE times serves the floor and flags the chart for QA', async () => {
+  // WAS "failing TWICE" until 2026-08-19, when the regeneration budget went from
+  // one to two on the depth-sweep evidence (gate floor 18% -> 3%). The shape of
+  // the guarantee is unchanged: the budget is spent, then the floor, never the
+  // secondary provider.
   __clearMemCache();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
@@ -1248,9 +1255,9 @@ test('failing TWICE serves the floor and flags the chart for QA', async () => {
       fetchImpl: async () => { calls += 1; return geminiSays(BAD); },
     });
 
-    assert.equal(calls, 2, 'one original plus one regeneration, then stop');
+    assert.equal(calls, 3, 'one original plus TWO regenerations, then stop');
     assert.equal(out.source, 'module_assembly');
-    assert.equal(out.qa_flag, 'stage6_failed_twice');
+    assert.equal(out.qa_flag, 'stage6_budget_spent');
     assert.ok(out.findings.length > 0, 'the reason must survive onto the QA row');
     // The floor is engine content, so no gate ran over it. Marked, not faked.
     assert.equal(out.stage6_version, `${STAGE6_VERSION}-floor`);
@@ -1279,6 +1286,64 @@ test('a floor result is NOT stored, and says so in its return value', async () =
     // Not even as an unservable row: a stored floor would be a cache hit for
     // every later request, and includeUnvalidated is the QA door, not a loophole.
     assert.equal(await readCache(out.cache_key, { includeUnvalidated: true }), null);
+  });
+});
+
+test('THE REGENERATION BUDGET IS REACHABLE — it was INERT before 2026-08-19', async () => {
+  // ── THIS TEST EXISTS BECAUSE THE ARGUMENT DID NOTHING ──────
+  // A single `attempt <= config.attemptsPerProvider` loop bounded transport
+  // retries AND regenerations together, so with attemptsPerProvider 2, budgets of
+  // 1, 2 and 3 all produced exactly TWO provider calls. Measured before the fix,
+  // which is the only reason it was noticed: setting the budget to 2 would have
+  // changed nothing and looked like it had.
+  //
+  // So the assertion is not "the budget is 2" - that is one constant and easy to
+  // read. It is that MOVING the budget MOVES the call count, which is the property
+  // that was false. A future change to attemptsPerProvider cannot silently cap it
+  // again without failing here.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    for (const [budget, expected] of [[0, 1], [1, 2], [2, 3], [3, 4]]) {
+      __clearMemCache();
+      let calls = 0;
+      await renderReading(CHART_1, {
+        validationRetries: budget,
+        fetchImpl: async () => { calls += 1; return geminiSays(BAD); },
+      });
+      assert.equal(calls, expected,
+        `validationRetries ${budget} must produce ${expected} calls, not ${calls} - `
+        + 'the budget is capped by something else again');
+    }
+  });
+});
+
+test('A TRANSPORT FAILURE DOES NOT SPEND THE REGENERATION BUDGET', async () => {
+  // The loop's own comment claimed this for months and the loop did not do it:
+  // "sharing one counter between them would let two timeouts consume the budget
+  // for a validation problem that was never diagnosed." They shared one counter.
+  //
+  // A 503 and a reading that says "kuat" about a weak chart are different events.
+  // Here the first call 503s and every later one fails the GATE, so the full
+  // regeneration budget must still be available afterwards: 1 transport failure
+  // + 1 original + 2 regenerations = 4 calls. Under the old shared counter this
+  // stopped at 2.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    const out = await renderReading(CHART_1, {
+      fetchImpl: async () => {
+        calls += 1;
+        if (calls === 1) return { ok: false, status: 503, text: async () => 'x', json: async () => ({}) };
+        return geminiSays(BAD);
+      },
+    });
+    assert.equal(calls, 4, 'a 503 must cost the TRANSPORT budget and leave both regenerations');
+    // And the gate attempts are distinguishable from the transport one on the
+    // attempts[] trail, which is what the measurement harness reads.
+    const gateAttempts = out.attempts.filter((a) => a.stage6);
+    assert.equal(gateAttempts.length, 3, 'three attempts actually reached Stage 6');
+    assert.equal(out.attempts.filter((a) => a.error).length, 1, 'exactly one transport failure');
+    assert.equal(out.source, 'module_assembly', 'and the budget spent still lands on the floor');
   });
 });
 
@@ -1385,4 +1450,61 @@ test('a malformed response counts as a MODEL failure, not a transport failure', 
   const transport = { provider: 'gemini', ok: false, error: 'gemini 503: boom' };
   assert.equal(tagged.shape, true);
   assert.ok(!transport.shape, 'an HTTP failure must not be tagged as a shape failure');
+});
+
+test('style.adverbial IS GONE, and `secara lengkap` is sayable again', () => {
+  // RULED 2026-08-17 (Reyner, on the 2026-08-18 rejection gallery). `\bsecara \w+`
+  // was a TOKEN ban for a CONSTRUCTION defect. Measured over 40 runs: 14 findings,
+  // 9 of them the plain adverb `secara konsisten`, and not one the construction the
+  // ban was written for.
+  //
+  // THIS TEST IS THE DEFERRED REGISTER ROW CLOSING. PROGRESS recorded
+  // `secara lengkap` as "the gate rejects a sentence the product must be able to
+  // say" - it is the hour-less disclosure, which the product has to be able to
+  // print. It now passes.
+  const hourless = withBlockText(goodReading(), 'day_master_Fire',
+    'Tanpa jam lahir, petamu tetap bisa dibaca secara lengkap pada tiga pilar. '
+    + 'Satu kalimat lagi supaya blok ini punya panjang yang wajar.');
+  const checks = checksIn(validateRendering(hourless, CHART_1));
+  assert.ok(!checks.includes('style.adverbial'), 'style.adverbial must no longer exist');
+  assert.ok(!checks.some((c) => c === 'style.adverbial'), 'no adverbial finding may be produced');
+});
+
+test('style.hedging IS SPLIT: `mungkin` fires on the reader, not on a third party', () => {
+  // RULED 2026-08-17. Golden rule 7 bans hedging INSIDE A CLAIM. `mungkin` in a
+  // clause about someone else's PERCEPTION hedges their guess, and the claim about
+  // her stays committed - which is also the `salah_dikira` shape the product's own
+  // hook lines are built from. Measured: 14 of 15 `mungkin` findings over 40 runs
+  // had a non-reader subject, so the gate was rejecting the signature move.
+  //
+  // BOTH DIRECTIONS ARE ASSERTED. A one-directional test here would let the check
+  // be quietly gutted, which is the failure mode the `bare_polarity` and
+  // `english_leakage` false positives already cost this pipeline once.
+  const fires = (sentence) => {
+    const bad = withBlockText(goodReading(), 'day_master_Fire',
+      `${sentence} Satu kalimat lagi supaya blok ini punya panjang yang wajar.`);
+    return checksIn(validateRendering(bad, CHART_1)).includes('style.hedging');
+  };
+
+  // SUPPRESSED - the hedge is on someone else's guess, or on the world.
+  assert.ok(!fires('Orang lain mungkin mengira kamu sulit ditebak, padahal tujuanmu selalu sama.'),
+    'a third-party perception clause must not trip the hedge ban');
+  assert.ok(!fires('Situasi mungkin berubah, tetapi kamu jarang ikut berubah.'),
+    'a clause about the world must not trip the hedge ban');
+  assert.ok(!fires('Mereka mungkin menilai hasilmu terlalu cepat.'),
+    'mereka is a third party too');
+
+  // STILL FIRES - the hedge is inside a claim about her.
+  assert.ok(fires('Kamu mungkin menunda hal yang paling penting bagimu.'),
+    'mungkin about the reader is the case the ban exists for');
+  assert.ok(fires('Jalanmu mungkin tidak selalu lurus, namun arahnya tetap sama.'),
+    'a possessive about the reader is still the reader');
+
+  // UNTOUCHED - cenderung, agak and sepertinya stay in the blocklist.
+  assert.ok(fires('Kamu cenderung bertahan di situasi yang sudah jelas.'),
+    'cenderung was explicitly left as-is');
+  assert.ok(fires('Kamu agak menahan diri ketika orang lain sedang bicara.'),
+    'agak was explicitly left as-is');
+  assert.ok(fires('Sepertinya kamu menunggu izin yang tidak akan datang.'),
+    'sepertinya was explicitly left as-is');
 });

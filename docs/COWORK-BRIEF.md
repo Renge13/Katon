@@ -97,19 +97,33 @@ What that means concretely:
 
 | Who | Role |
 |---|---|
-| **Cowork (you)** | thinking partner, spec author, oracle-driver, verifier. **Writes prompts. Does not write engine code.** |
-| **Claude Code** | the builder. Reads `NEXT.md` via `/next`, implements, pushes back. |
+| **Cowork (you)** | thinking partner, spec author, oracle-driver, verifier. **Writes prompts and docs. Does not write engine code, and does not commit.** |
+| **Reyner** | decides, and is the courier: he pastes prompts from you to Code. Nothing reaches Code except through him. |
+| **Claude Code** | the builder. **Holds the repo and push access** — every commit is Code's. Reads `NEXT.md` via `/next`, implements, pushes back. |
 | **Gemini (AI Studio)** | the runtime renderer. Prompt is `content/renderer-prompt.txt`. |
+
+Two consequences worth stating because they are easy to forget mid-flow. **A prompt is a deliverable,
+not a description** — Reyner pastes it verbatim, so anything you leave implicit is lost in transit.
+And **you cannot see the result of your own instruction** unless Reyner brings it back, which is why
+a prompt names the check Code should run rather than trusting Code to pick one.
 
 Claude Code is a good reviewer and has caught real spec errors. When it pushes back, **assume it is
 right until you have checked.** It has been right every time so far.
 
-### Working-style rules. Reyner-ratified 2026-08-11, folded in here 2026-08-12.
+### Working-style rules. 1-5 Reyner-ratified 2026-08-11. 6-8 added 2026-08-13. THE FOLD IS COMPLETE.
 
-**These are rules, not history.** They were ratified in a Cowork session and then lived only in that
+**These are rules, not history.** 1 to 5 were ratified in a Cowork session and then lived only in that
 session's handover file, which no Claude Code session can read — and the git rule below was then broken
 by a session that had no way to know it existed. That is error 20's real cause and it is written up
-under the ledger. **A rule not in the repo is not a rule.**
+under the ledger. **A rule not in the repo is not a rule** — which is now rule 8, generalised, so the
+same parking cannot happen twice.
+
+**CLOSED 2026-08-13.** The first fold (08-12) moved five rules across but flattened three of them:
+rule 3 carried only the DATE check and dropped the mechanism-read and same-day-paired-runs checks,
+and rule 4 carried the git prohibition without the write/review/commit division that explains it.
+Reyner pasted the handover's remaining text this session — Claude Code cannot read the Claude project
+— and rules 3 and 4 below are now the full versions. **Nothing from that handover is outstanding, and
+error 20's gap is closed at the source rather than at the symptom.**
 
 1. **EXEC SUMMARY FIRST, and it must be readable cold.** Open every substantial reply with the
    summary, not the reasoning that produced it. Gloss every piece of jargon on first use — engine
@@ -121,16 +135,29 @@ under the ledger. **A rule not in the repo is not a rule.**
    for are a register call (his, exclusively), a product decision, and permission to proceed with
    something irreversible. "Can you check X for me" is a question this brief exists to make
    unnecessary.
-3. **DATES COME FROM `git log`, NEVER FROM THE WALL CLOCK.** Any date claim about work — when a
-   commit landed, when a decision was made, when a measurement was taken — is verified with
-   `git log --format="%h a:%ad c:%cd %s" --date=iso` before it is written down. A session's own clock
-   describes the session, not the work. This is error 18, which nearly propagated a wrong date into
-   three files, each of which would then have been "evidence" for the next session.
-4. **NEVER WRITE TO THE REPO WHILE A CODE SESSION IS MID-BUILD. File READS are fine; GIT COMMANDS ARE
+3. **EVERY CLAIM CARRIES ITS CHECK. Three kinds, three checks, and each one has an error behind it.**
+
+   | Claim about | Verified with | Error it comes from |
+   |---|---|---|
+   | A DATE — when a commit landed, when a decision was made, when a measurement was taken | `git log --format="%h a:%ad c:%cd %s" --date=iso`. **Never the wall clock**, which describes the session and not the work. This chat spans days | **18**, which nearly propagated a wrong date into three files, each then "evidence" for the next |
+   | A MECHANISM — what a component does, where a value lives, what a prompt says | **A READ OF THE ACTUAL FILE**, in this session, before writing the claim down. Not the architecture, not the spec, not a summary | **19**, where "the renderer follows JSON order" was written against a prompt section headed ARRANGEMENT IS FREE that says the opposite. Also 9, 15, 17 |
+   | A HARNESS COMPARISON — arm A against arm B | **SAME-DAY PAIRED RUNS ONLY.** Both arms in one session, back to back, one variable between them. A batch compared against a number from another day is not a comparison | The extra-binomial variance recorded in PROGRESS: two identical batches once differed by 10.8 points on shipped, wider than the single-batch CI |
+
+   The half-true form is the dangerous one. Error 19's first clause was correct, which is what carried
+   the false second clause through.
+4. **COWORK WRITES DOCS TO DISK UNCOMMITTED. CODE REVIEWS THEM AGAINST THE REPO AND COMMITS.**
+   That is the whole division, and it is why the git rule is not merely a caution:
+
+   **NEVER WRITE TO THE REPO WHILE A CODE SESSION IS MID-BUILD. File READS are fine; GIT COMMANDS ARE
    NOT.** Device git leaves an `index.lock` that the bridge cannot delete, and it blocks the builder's
    working tree until someone clears it by hand. This is the topology table above enforced from the
    other side: Cowork gains nothing from running git that a prompt to Claude Code would not also
    achieve, and the downside is that the builder stops. Error 20.
+
+   The division is not bureaucracy — it is the review step. A doc Cowork writes has had no second
+   reader; Code reads it against the code it describes, and has caught real errors that way (the
+   ledger is mostly those). Writing the file and committing it in one motion removes the only check
+   Cowork's own output ever gets.
 5. **THE REGISTER FLOW, in order, and no step may be skipped or reordered:**
 
    | # | Who | Does what |
@@ -144,16 +171,68 @@ under the ledger. **A rule not in the repo is not a rule.**
    The reason step 3 is fenced so narrowly: a sweep that also "improves" a phrase is Cowork deciding
    register with extra steps, and it is unreviewable because his text and the edit arrive together.
 
+6. **VERIFY WHAT SHIPS BEFORE ADVISING ON THE PRODUCT. `CLAUDE.md` describes the TARGET; the code
+   describes REALITY; they diverge.** Added 2026-08-13 after a session argued a business-model
+   question for two rounds against a model that was already deployed. The answer is now one table:
+   **`PROGRESS.md`, the LIVE STATE block at the very top.** Read it before any product argument, and
+   if a claim in it disagrees with the code, the code wins and the block is the thing to fix.
+   Corollary: a locked rule is not evidence about what a user experiences. Rule 20's one-voice
+   requirement and rule 16's cache guarantee are both true and both describe surfaces that,
+   as of 2026-08-13, no user has ever reached.
+
+7. **A NUMBER ENTERING A DECISION TABLE CARRIES WHO GENERATED IT.** Revenue, signups, usage — if the
+   answer is "us", it is a test result and it goes in the test column or nowhere. Error 23, where a
+   self-purchase smoke test was scored as demand and pointed a model comparison at the wrong answer.
+   A wrong fact in prose gets argued with; a wrong cell in a scoring table gets summed.
+
+8. **RATIFY AND FOLD IN THE SAME TURN. THE HANDOVER FILE MAY CARRY SESSION STATE AND NOTHING ELSE.**
+   This is error 20's durable lesson promoted to a rule, because the lesson is bigger than git.
+   A rule agreed in a Cowork session and parked in `claude/KATON-session-state-*.md` — a file in the
+   Claude project — **does not exist**, because `CLAUDE.md`, `docs/` and the locked tests are the only
+   things a session reads. "Fold in at the next quiet moment" is how a rule dies; the five rules above
+   sat under a header saying exactly that, and rule 4 was then broken by a session with no way to know
+   it was a rule.
+
+   The split, so it is operable rather than a sentiment:
+
+   | Goes in the repo, same turn it is agreed | Stays in the Claude project |
+   |---|---|
+   | Anything phrased as always / never / must / the flow is | What I was mid-way through and where I stopped |
+   | A decision, a ruling, a price, a name, a threshold | Which files I had open, what I was about to check next |
+   | A working rule about how Cowork, Code and Reyner divide work | Draft text not yet proposed to Reyner |
+   | A correction to something the repo currently asserts | Scratch reasoning, rejected options, chat context |
+
+   **The test: could a Claude Code session break this by not knowing it?** If yes, it is a rule and it
+   belongs in `docs/` or `CLAUDE.md` before the turn ends. If it only describes where one conversation
+   got to, it is session state and it belongs in the handover, where going stale costs nothing.
+
 ---
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
 
-**Twenty-two spec errors so far. All twenty-two were mine.** Not listed to be self-flagellating; listed because
+**Errors 1-23 are all mine.** Not listed to be self-flagellating; listed because
 the pattern is predictive and knowing it changes what you do next. **Append here when a new one is
 caught, and never trim the list — the pattern is the value, not the count.**
 (Numbering corrected 2026-08-07: two appended rows reused 13 and 14, so the "fourteen" headline
 undercounted a sixteen-row table — a counting error in the error ledger itself. The D2a pair is now
 15 and 16; `CLAUDE.md` rule 20's cross-reference to "error 13" means the curly-quotes row, unchanged.)
+
+**ROWS 24-34 ARE APPENDED UNATTRIBUTED, 2026-08-17. Reyner assigns them; nobody else.** They come
+out of the 2026-08-14/15 cards session (`docs/handoff/2026-08-15-cards.md`, sections 5 and 5b) and
+they break the "all of them were mine" invariant that held for the first twenty-three, which is
+exactly why they cannot be folded in silently. Each row names **where** the error was found — a spec
+section, or the build — because a location is a fact and an author is a judgement. Two of them (27,
+28) were caught and fixed inside the same cycle; that loop worked and the rows are kept anyway,
+because a caught error is still evidence about the pattern.
+
+**What the eleven say as a group, which is the part worth reading.** Nine of the eleven are shapes
+already in rows 1-23 arriving through a new door — the disproving evidence in hand (24, 30, 34), a
+fact asserted where measuring was one call away (24, 26, 34), a prediction that tells the reader
+what to expect and thereby what to disregard (24, 25). **The two genuinely new ones are 29 and 32**,
+and they are the same shape as each other: *a check that cannot see the thing it is checking.* 29
+froze a number that appears in prose as if it were the number in a comparison; 32 shipped a defect
+past a full green suite because no test could observe the surface it broke. That shape has no row in
+1-23 and it is the one to watch for next.
 
 | # | Error | The pattern underneath |
 |---|---|---|
@@ -179,6 +258,66 @@ undercounted a sixteen-row table — a counting error in the error ledger itself
 | 20 | Ran a git command against the DEVICE REPO and left a `.git/index.lock` the bridge cannot delete, blocking the working tree until it was cleared by hand. Not a BaZi error and not a spec error - a ROLE error, which is why it belongs here anyway | the topology table in section 3 is the rule: **Cowork writes prompts and does not write engine code; Claude Code is the builder.** Operating the repo directly is the same boundary crossed from the other side. **CORRECTED 2026-08-12: this row said the failure was "foreseeable from the role split rather than prohibited outright". IT WAS PROHIBITED.** A Reyner-ratified rule already said so verbatim - see the correction note under the table - and it was invisible to every session that could only read the repo. The practical cost is asymmetric and that is still the argument: Cowork gains nothing from running git that a prompt to Claude Code would not also achieve, and a lock it cannot release stops the builder entirely |
 | 21 | The tranche-2a prompt predicted commit 3 (element_dominant reading its own group) would move fact order on **8 of 13** charts, "because the fact finally carries an actionable and `hierarchy.actionability` stops being a promise it cannot pay". Since #34 actionability is **DECLARED, not inferred**: `actionabilityOf` reads `ACTIONABLE_KINDS[fact.provenance?.kind]` and nothing else (`lib/semantic/hierarchy.js:219-221`), `element_dominant: true` (`lib/semantic/facts.js:105`), and it pays 100 whether or not the prose exists. Measured on the commit itself (`ac24441`): **0 of 13** fact orders moved, importances byte-identical (41, 70, 64, 70, 41, 70, 61, 67 before and after); only the 8 cache keys moved, which is just the strings changing | errors 2/5/6 again - **the disproving evidence was in hand.** The prompt had read that exact block: the comment above `ACTIONABLE_KINDS` names the five tranche-1 `aspek` cells whose prose "still ships, it just no longer buys them rank", which is the same claim in the same file, and the prompt wrote the opposite anyway. **THE AGGRAVATING FACTOR, and why this is its own row rather than a footnote on 19:** the prediction also said *"Expected. NOT the re-coupling tripwire firing"* - it pre-authorised dismissing the very tripwire that would have caught it. A prediction that tells a reader what to DISREGARD must carry its grep. Being wrong costs a re-measurement; telling the builder to ignore a live alarm costs the alarm |
 | 22 | The tranche-2b prompt told Code to bend a ruled string to satisfy `fact.relation_positions`, invoking **"THE SENTENCE BENDS, NOT THE CHECK"** (the `aspek.比肩` ruling, tranche 1). That ruling is for a string tripping a **LEGITIMATE** ban - `style.adverbial`, `style.hedging` - where an engine string carrying the banned form punishes the renderer for obedience. `fact.relation_positions` is a **known false positive with three prior fixes**, and round 3 explicitly refused to bend prose for it: `lib/validate/fact.js` calls the 2026-08-11 firing *"a HARD finding on ordinary Indonesian that says nothing about any pillar"*, and `7f289f0` says in capitals **THE PROSE IS NOT THE BUG AND IS NOT CHANGED**. Reversed 2026-08-12: the check was fixed and Reyner's words restored | **A RULING APPLIED OUTSIDE THE DOMAIN IT WAS RULED FOR.** Distinct from error 21, which was a fact left unchecked; this was a fact checked and then generalised past its scope. Same family - **the disproving evidence was in hand**, and here it was a comment in the very file the fix edits. The tell that should have stopped it: the ruling's own logic is "do not punish the renderer for obeying the prompt", which presupposes the check is RIGHT. Applied to a broken check it inverts into "punish the author for writing Indonesian". **AGGRAVATING, and the reason it is worth its own row: bending the glossary cannot fix the renderer's free prose.** The gate reads LLM output, the LLM writes `di kemudian hari` whenever it likes, and rule 15 puts it in that path by design. So the bend treated the only surface that was cheap to treat - 15 fixed strings - and left the real one exposed. A fix that cannot reach the general case is a symptom fix, and calling it a ruling made it look principled |
+| 23 | The 2026-08-13 session scored a business-model comparison with a row reading **"Revenue to date: Rp 19.000 - it works"** against the alternative's "zero". That Rp 19.000 was **Reyner's own self-purchase test of the QRIS path** - the last step of the go-live ritual, n=1, his money through his own checkout. It is proof the MONEY PATH works: invoice created, QR scanned, webhook verified, `paid` flipped server-side. It is not one unit of demand. **Neither model has any market evidence**, and the honest row was "zero, zero" | **TREATED A SELF-TEST AS DEMAND EVIDENCE.** The number was real, the instrument was real, and the reading of it was still wrong: a payment-path smoke test measures the payment path. What makes this its own row rather than a footnote is WHERE it sat - **inside a comparison table built to decide a business model**, in the column that decides it, pointing at the wrong answer. A wrong fact in prose gets argued with; a wrong cell in a scoring table gets summed. **The tell that should have stopped it: the ledger itself records that purchase as a RITUAL STEP** (PROGRESS, THE INTERIM REGISTER - "Rp 19.000, own birthdate, own bank app"), so the disproving context was in the same file the table was built from. Errors 2/5/6/21/22 again: the evidence was in hand. **Rule: a revenue, signup or usage figure entering a decision table carries WHO GENERATED IT. If the answer is us, it is a test result, and it goes in the test column or nowhere** |
+| 24 | **UNATTRIBUTED.** `card-polish-spec.md` §6.4 is headed *"Brass on text must be measured, not assumed"* and then asserts the outcome of the measurement it is ordering: brass *"should clear 4.5 comfortably"* on dark fields, with Taman named as the single risk. Measured, it failed on **five** of ten, three of them dark fields. Pale brass is a LIGHT metallic, so the brightest fields cannot carry it — Bambu's green and Matahari's orange fail alongside the light-field pair. Figures in `PROGRESS.md` MEASUREMENTS, 08-15 | **The disproving evidence was one function call away, in the paragraph that commissioned the call.** Errors 2/5/6/21/22's family. The aggravating half is the same as 21's: naming ONE risk tells the reader which four to stop looking at, so the prediction did not merely fail, it aimed attention away from where the failures were |
+| 25 | **UNATTRIBUTED.** `card-polish-spec.md` §6.5 framed a feasibility question as a magnitude question — *"there may still be headroom, but the tripwire moves"*. The real answer was that **three badges stopped fitting at all**, on real glossary copy that was inside the ceiling | **A prompt that asks "how much did X move" pre-commits the reader to X still existing.** The question's shape carried a premise the measurement was supposed to be free to reject. Distinct from 24: nothing here was asserted, the assumption rode in the grammar |
+| 26 | **UNATTRIBUTED.** `card-polish-spec.md` §6.8's table carried two hand-computed values that were wrong — accent 7.19 for 7.18, old brass 2.50 for 2.52. The section now says so itself | **Hand arithmetic where the function the tests read is one import away.** `CLAUDE.md`'s repo conventions already demand a code fact carry the command that produced it; a NUMBER is a code fact. Small, and listed because it recurred within the same session — see 34 |
+| 27 | **UNATTRIBUTED.** `card-polish-spec.md` §2.6 contradicted itself: its opening said the watermark fill stays `accent` at the ruled 0.18 / 0.14, and a later paragraph still argued that *"the alpha drop from the ruled 18% to 11.5% is what actually lets the headline read over it"* and called it load-bearing. Flagged during implementation and fixed in the spec | **A revised section that keeps its old argument.** The correction landed in the paragraph that stated the value and not in the paragraph that justified it, so the doc read as a live disagreement with itself rather than as a settled ruling. **Caught and closed in the same cycle** |
+| 28 | **UNATTRIBUTED.** `card-polish-spec.md` §3.5's predicate was inverted against its own examples: *"Suppress the deboss when `!inkIsDark(token)`"*, while the parenthetical named Taman, Permata and Embun — exactly the tokens where `inkIsDark` is **true**. The stated reason (a light field has no gradient for the dark half to sink into) matches the names, not the predicate. Implemented to the names; fixed in the spec after flagging | **The prose and the code line disagreed, and the prose was right.** Worth its own row because the resolution rule is not obvious: where a spec gives a predicate AND the set it is meant to select, the SET is the intent and the predicate is the typo. **Caught and closed in the same cycle** |
+| 29 | **UNATTRIBUTED.** The 2026-08-15 ruling *"FREEZE THE FLOOR AT 3.31"* froze a **displayed** value rather than a measurement. 3.31 is the two-decimal presentation of 3.3075, rounded UP, so freezing the literal put the bar 0.0025 above 丙 Matahari — the token that DEFINES the floor — and the audit reported Matahari as failing its own floor. The constant is now computed from the frozen source hexes, with a test pinning `toFixed(2)` to `"3.31"` | **A number that appears in prose and a number that appears in a comparison are not the same object.** One of the two genuinely new shapes in this batch, and the general form is worse than the instance: any rounded figure quoted from a report becomes a false constant the moment it is used as a threshold. The fix is the pattern to copy — freeze the SOURCE, derive the number, and pin the presentation in a test |
+| 30 | **UNATTRIBUTED.** `card-polish-spec.md` §1 cross-references "§5.4", which does not exist. The intended target is §6.5 | Minor, and kept because it is the cheapest possible instance of the family: **a pointer nobody followed.** A cross-reference is a claim about the document it sits in, and it is checkable by reading the table of contents |
+| 31 | **UNATTRIBUTED (self-reported by Claude Code).** Built roughly a full pass of both cards from the design conversation `Katon Cards.dc.html` before `card-polish-spec.md` arrived, then reworked it. Cost a turn | **Did not ask whether a spec existed.** The failure is upstream of any fact: the source-of-truth chain was assumed rather than established, on a task where two candidate sources were both in the repo. Cheap here, and the same move on a locked file is error 12's shape |
+| 32 | **UNATTRIBUTED (self-reported by Claude Code).** Introduced a **94px Card B overflow that no existing check could see.** Every test passed, the contrast audit passed, and the clipped text simply was not on the card. Fixed; the preview page now measures headroom per archetype after layout so it cannot recur silently | **A defect on a surface no instrument observed.** The second genuinely new shape in this batch, and the sibling of 29. A green suite is evidence about what the suite looks at, and `overflow: hidden` is the perfect crime: it removes the symptom along with the content. **The durable lesson is the fix, not the bug** — when a failure mode is invisible, the commit that repairs it must also add the eye that would have seen it |
+| 33 | **UNATTRIBUTED (self-reported by Claude Code).** Wrote an export-probe assertion ("edge != field") that would have failed Card A **for being correct**, since Card A has no rim by ruling | **A check generalised past the case it was derived from.** Error 22's shape — a rule applied outside the domain it was ruled for — reached this time through a test rather than a ruling. A false alarm and a missed alarm cost differently, but both come from the same failure to ask which objects a check is about |
+| 34 | **UNATTRIBUTED (self-reported by Claude Code).** Hand-wrote `10.03` for a `contrast()` value of `10.02` — **in the commit fixing error 26**, which is that exact defect | **The disproving evidence was not merely in hand, it was the subject of the commit.** Errors 2/5/6/21/22/24 again, at the shortest possible range. It says something the individual rows do not: knowing a pattern, and having just written it down, does not prevent it. Only reading the number out of the function does |
+| 35 | **UNATTRIBUTED. Not a spec error and not anyone's claim — an EXTERNAL tool answering a request with less than was asked, silently.** Google Fonts' `text=` subsetter was asked for 65 glyphs and returned a subset declaring **63**, dropping 印 and 申. 申 is an EARTHLY BRANCH the card draws in a pillar cell, so the first build shipped a face that would render tofu on every 申 chart. Asked for on their own, both come back fine. Caught by comparing the server's declared `unicode-range` against the request instead of trusting the request | **THE SAME SHAPE AS AN AUDIT THAT PRINTS PASS ON A FAILING RUN** (the 2026-08-17 gate defect, two rows of this ledger's own subject matter apart). A component that silently returns less than it was asked for is indistinguishable from one that succeeded, unless something compares the answer to the question. **The generalisation is the value: whenever a boundary is crossed — a subsetter, a provider, a cache, a font service — the reply is DATA and must be checked against the request, never assumed to be the request fulfilled.** Recorded here rather than only in PROGRESS because it is a method lesson, not a measurement, and because the class it belongs to has now cost this project twice in one session |
+| 36 | **COWORK (self-reported, 2026-08-18).** The gallery ruling classified 22 `style.hedging` findings as 10 perception / 5 world / 9 reader and **reported a count that contradicted its own section header** - the three classes sum to 24, the header says 22, and both numbers were in the same message. **The aggravating half: a first script in that same session printed 10/4/8, the correct split, and the second script's 24 was reported without reconciling the two.** Code reproduced 10/4/8 from the JSON before applying anything, which is the only reason the applied change was measured against the right denominator | **TWO NUMBERS PRODUCED IN ONE SESSION AND NEVER RECONCILED AGAINST EACH OTHER.** Errors 2/5/6/21/22/24/34 are all "the disproving evidence was in hand"; this is that family in its purest form, because the disproving evidence was **the session's own earlier output**. A second measurement that disagrees with the first is not a refinement, it is a defect in one of them, and shipping the later one because it is later is how a wrong denominator reaches a decision. **The rule: when two runs of your own disagree, neither is reportable until you know which is wrong.** |
+| 37 | **COWORK (self-reported, 2026-08-18).** The counterfactual for the same ruling was to be scored at CLASS level (perception/world/reader), which would have over-credited the fix: a single finding can carry BOTH a false-positive `mungkin` and a correctly-fired `cenderung`, and suppressing the first does not stop that finding firing. Code scored it at FINDING level instead, which is the correct instrument, and separately excluded three of eight recoveries because they landed at attempt 2 - whose prompt carries `stricterDirective(attempt-1 findings)`, so changing attempt 1 changes attempt 2's generation and its pass cannot be assumed | **THE UNIT OF A COUNTERFACTUAL MUST BE THE UNIT THE GATE ACTS ON.** The gate rejects an ATTEMPT if any finding survives, so classes and tokens are the wrong granularity and only findings-per-attempt answers it. **The recorded result is a BAND, not a point: firm 19 -> 14 floors (48% -> 35%), upper bound 11 (28%).** The three excluded recoveries are the same conditioned-draws problem this ruling correctly raised about retry depth, arriving inside the ruling's own arithmetic - which is why it is worth a row rather than a footnote |
+
+| 38 | **UNATTRIBUTED (self-reported by Claude Code, 2026-08-19).** The 08-17/18 gate fixes deleted `style.adverbial` and moved `mungkin` out of `blocklist.json` — a change to what Stage 6 REJECTS — and left `STAGE6_VERSION` at `1.9.0`. **Two materially different gates therefore both stamped `1.9.0`**, and the only thing separating them is file mtime. Caught while reconciling which of two probe artifacts belonged to which gate | **A CONSTANT WHOSE ONLY JOB IS PROVENANCE, LEFT STALE BY THE COMMIT IT EXISTS TO DESCRIBE.** `persistRendered` writes `stage6Version` onto every cached row deliberately — the version the reading ACTUALLY passed, not the version installed today — so leaving it stale removes the only handle on "which readings passed under the old rules". The cache happened to be clean (0 rows under either `1.9.0`), which is luck and not mitigation. **Same family as errors 32 and 35: a change that no instrument could see.** The fix is not the bump; the fix is that the rule now sits on the constant's docblock, in `blocklist.json#_rule`, and in CLAUDE.md's conventions — three places, because the person editing a regex does not open `lib/validate/index.js`, and a rule written only where the careful reader already is has not been written |
+
+| 39 | **AN INSTANCE OF ROW 42 — read that one for the pattern.** **COWORK (2026-08-19). AN UNGREPPED PREMISE OVERRODE A CORRECT JUDGEMENT.** Code had shipped the brass-text fallback POOLED and argued for it. Cowork overrode that with *"Card A pays for Card B's finish"* — that 甲 丁 戊 壬 lost brass on the free card to solve a sheen problem the free card does not have — called Code's counter-argument one that "does not hold", and instructed the per-card split. **Card A draws no brass text at all.** All three roles reading `brassText` are Card B only, following from the 08-14 ruling that Card A carries NO FINISH, so the surface being "degraded" was never drawing the thing. Code implemented the instruction, found the premise false while writing the test meant to confirm it, said so, and rebuilt the argument | **THE SHAPE IS THE POINT, AND IT IS NOT "A WRONG FACT".** It is: **a confident premise about rendered output, never grepped, used to override a correct call — and the correction had to be carried by the side that was overruled.** CLAUDE.md already says a claim about the code without its grep is a memory rather than a fact; this was worse, because it was an inference from a COLOUR TABLE to a RENDERED SURFACE with both files open, and it arrived as an instruction rather than a question. One `grep -n "roleStyle('nameId'\|badgeLabelFoil\|pillarLabelDay"` settles it in a second. **The asymmetry is the cost:** overriding is cheap and verifying is cheap, but only one of them was done, and the session that had to spend the round discovering it was the one that had been right. **Nearest sibling is error 31** (Cowork's spec arriving after Code had built to the conversation) — same asymmetry, opposite direction. The split is KEPT, on a rebuilt argument: pooled was right by accident, per-card is right by construction, and a test now pins Card A's zero-brass fact so the guard cannot rot. The correction lives in the docblock, not only in a chat log |
+| 40 | **COWORK (2026-08-19).** Called the 7.6s p50 render *"the biggest live product defect"* and *"now the biggest live product defect. SCOPE IT"*, ranking it above everything else in the round. **It is not live.** `/api/reading` imports `lib/content`, `lib/chart` and `lib/readingView` and no render function; the funnel's 2.5s pause is `Promise.all([season-check, delay(2500)])`, a designed beat and not a wait on work; the rendered path is `/api/mirror/[token]`, which 404s without `MIRROR_PREVIEW_TOKEN` — **unset even in `.env.local`** — and is linked from nowhere. Zero readers have ever waited on a render. Caught only because the instruction asked for the wait to be SCOPED, and scoping it meant reading the funnel | **ESCALATING A NON-LIVE COST MISALLOCATES THE SCARCE THING, WHICH IS ATTENTION** (Reyner's words, accepted in full). The measurement was real and useful — it is a genuine promotion cost and now sits in the register beside the floor rate — but "live defect" and "unpriced cost of a change nobody has made yet" compete for different budgets and rank against different alternatives. **Same family as error 36**, two rows up: a number produced correctly and then attached to the wrong claim. **The rule this yields: before ranking a defect by severity, establish that a user can reach it** — one grep for the route's own fence answers it, and the fence in this repo is deliberately a MISSING CAPABILITY rather than a flag precisely so that question has a cheap answer |
+
+| 41 | **AN INSTANCE OF ROW 42 — read that one for the pattern.** **COWORK (2026-08-19).** Instructed *"Rename the branch to what it is"* **without checking for an open PR against it**, with PR #44 visible in the screenshot being worked from. Self-reported and reversed one round later: GitHub cannot change a PR's HEAD branch, so pushing under a new name means closing #44 and opening a new one. Code carried out the local half of the rename before the reversal arrived | **THE SAME UNCHECKED-PREMISE SHAPE AS ROW 39, one layer out: not a claim about the code, a claim about the REPOSITORY.** `gh pr view 44` answers it in one call. **And the reversal rested on a second unverified premise from the same message** — that renaming would cost *"its CI history and any review threads."* Measured 2026-08-19: PR #44 has **0 reviews, 1 comment, reviewDecision empty**. The thing the reversal protected is nearly empty, so both the instruction and its correction were argued without the one command that settles them. **The lesson is that it is ONE command for both**, which is what makes this cheap to have avoided rather than merely unlucky. **A third fact the same call surfaced, and the one that actually mattered:** the remote branch was **21 commits behind** local, holding only the 4-commit renderer track, so the pre-flight STOP in the push instruction fired on a commit list of 21 where 6 were expected. The name `feat/palace-domain-join` was ACCURATE for what had been pushed; it only becomes wrong after the push it was being renamed for. Recorded because "the branch is misnamed" and "the branch is unpushed" look identical from a screenshot and differ entirely in what to do about them |
+
+| 42 | **COWORK (2026-08-19). THE PATTERN BEHIND 39 AND 41, AND IT SUPERSEDES FILING THEM SEPARATELY.** Four instances in ONE session, all the same shape: **a fact about the repository asserted from a PARTIAL ARTIFACT, treated as the whole record.** (a) a COLOUR TABLE read as a rendered surface — brass in `TEXT_ROLES` taken to mean brass on Card A, which draws none (row 39). (b) a SCREENSHOT read as branch state — a visible branch taken to mean a pushable branch, with PR #44 in the same image (row 41). (c) a LINE NUMBER read as a config section — *"`.git/config:43` still reads `merge = refs/heads/feat/palace-domain-join`"*; line 43 reads `feat/identity-first-order` and belongs to a different `[branch]` block, the correct mapping being line 46. The string was right, the section was not. (d) a PR's EXISTENCE read as a PR's CONTENTS — #44 assumed to carry the four tracks; it carried 4 commits of one, and the remote was 21 behind | **EVERY ONE WAS ONE COMMAND AWAY, AND FOR (b) AND (d) IT IS THE SAME COMMAND.** `gh pr view 44 --json commits,reviews` settles the original rename instruction, the reversal of it, AND the commit count in a single call. **THE RULE: before an instruction turns on a property of an artifact, run the command that reads that artifact WHOLE** — not the fragment already in view. A colour table is not a render, a screenshot is not a ref, a line is not a section, and a PR number is not a diff. **AND THE HARDEST HALF, which is why this is one row and not three:** the instruction AND its reversal were both wrong, in OPPOSITE directions, from the same missing call — first "rename it", then "do not rename it, you would lose the review history", when there were 0 reviews and the real reason was something neither instruction named. **A correction made without the check that was missing the first time is not a correction; it is a second guess with more confidence.** Rows 39 and 41 are instances of this row, not peers of it |
+
+| 43 | **COWORK (2026-08-19). A READING FAILURE, NOT A VERIFICATION FAILURE, and the distinction is the whole row.** The command was RUN, and run correctly: `grep -rln "bazi-validation.fixture" tests/`. Its output was then restated in prose as *"returns nine specs"* and the nine were listed. It returns **13 files, eleven of them inside the 24 gates** — `stage3-facts.spec.mjs` and `time-convention.spec.ts` were dropped from the list, and the 13th, `tests/bazi-profile-experiment.mjs`, was run by no script at all. **The conclusion drawn from it was correct and in fact understated;** only the count was wrong | **THE FIFTH INSTANCE THIS SESSION, and the one that shows row 42 was filed one notch too narrow.** Row 42 said the failure was reading a PARTIAL artifact as the whole. This one had the whole artifact, on screen, correct — and lost accuracy in the retelling. The other four: 22-vs-24 hedging matches (row 36), `.git/config` line attribution, PR #44's contents, the colour table read as a rendered surface (row 39). **THE RULE: when a command answers the question, QUOTE ITS OUTPUT. Do not re-derive the answer in a sentence beside it.** A paraphrase of a command's output is a second measurement taken by hand, from memory, with none of the first one's guarantees — and it is the one that ends up in the doc. **Why it is cheap to obey:** the quote is shorter than the paraphrase. Every one of these five cost a round to unwind and none of them would have survived a paste |
+
+### A CLASS, NOT AN INCIDENT: the instrument that describes itself instead of measuring
+
+**Promoted from the rows on 2026-08-19, because it has now happened five times in three
+different materials — code, an external service, and a guard written to catch it.** The rows
+below stay where they are; this section is what they have in common, and it is predictive in a
+way the individual rows are not.
+
+**THE SHAPE.** An instrument is consulted, answers confidently, and what it actually reports is
+its own declared intent rather than the state of the thing. It cannot fail loudly, because from
+the outside a component that returns *less than it was asked for* is indistinguishable from one
+that succeeded. The five:
+
+| # | the instrument | what it reported | what was true |
+|---|---|---|---|
+| 1 | `TEXT_ROLES`, audited since it was written | every role's colour, cleanly | the table was **consumed by nothing** — the card set `color` once on its root. The audit read the intention and the card was never measured (fixed 2026-08-13) |
+| 2 | `audit:card-contrast`, on Card B's sheen | `PASS`, exit 0 | *"UNDER AA IN THE CORNER"* sat twenty lines lower **in the same output**. The failures were computed and then dropped before the exit code (fixed 2026-08-17) |
+| 3 | the accent and sheen exemption reports | the excused tokens as `clears` | they were failing at 3.68 and 3.61. The row was recorded inside the `!exempt` branch, so the exemption suppressed **the number it exists to keep visible** (`21d690a`, then again 2026-08-19) |
+| 4 | Google Fonts' `text=` subsetter (row 35) | a subset, HTTP 200 | it declared **63 of the 65 glyphs requested**, dropping 申, which the card draws in a pillar cell |
+| 5 | the orphan guard, `scripts/test-all.mjs` | `0 orphans` | the comment **naming the file the guard was built for** counted as a reference to it, so the guard was blinded by its own documentation (2026-08-19) |
+
+**THE CHECK, and it is one sentence: compare the ANSWER to the QUESTION, never to itself.** Ask
+what the instrument would print if the thing were broken, and if that is the same as what it
+prints now, it is not an instrument. `domContrast.js`'s own header says the general form —
+*"an assertion that reads the intent it is checking is not an assertion"* — and instance 1 is
+that header's warning coming true in the file it warns in.
+
+**A SIBLING TRAP, worth its own line because the fix is different.** #5 was first "verified" by a
+run that began with `git stash` — which stashed **the guard along with the change under test**, so
+the run exercised the previous version and reported a pass. **Any verification that stashes,
+checks out, or reinstalls before running has to be asked whether it removed the instrument too.**
+The cheap defence is to make the instrument runnable on its own in a second (`npm test -- --list`
+now prints the orphan scan for exactly this reason); a guard nobody can exercise cheaply is a
+guard nobody verifies.
 
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
@@ -202,8 +341,18 @@ because they are the only things a session reads. "Fold in at the next quiet mom
 dies: fold it into the repo in the SAME turn it is ratified, or accept that it is a preference nobody
 will ever be bound by. **The five rules from that block are now in section 3, where they are readable.**
 
-**Five of these (2, 5, 6, 21, 22) are the same failure: I had the disproving evidence in hand and wrote the
+**AND THE FOLD ITSELF WAS PARTIAL FOR A DAY, which is the same failure one layer down.** The 08-12
+pass moved five rule HEADINGS across and dropped detail from two of them: the mechanism-read check and
+the same-day-paired-runs check fell out of rule 3, and rule 4 lost the write/review/commit division
+that is the reason the git prohibition exists at all. Both were still only in the handover. Reyner
+pasted the remainder on 2026-08-13 and section 3 now carries the full text. **A fold is done when the
+repo says everything the handover said, not when the headings match** — and only the person holding
+the handover can confirm that, because Claude Code cannot open it.
+
+**Six of these (2, 5, 6, 21, 22, 23) are the same failure: I had the disproving evidence in hand and wrote the
 claim anyway.** Before asserting anything, check whether something you already measured contradicts it.
+**In 23 the evidence was in the very file the claim was built from** — the ledger records that
+Rp 19.000 as a ritual step, in the section the table was summarising.
 
 **Error 11 is the cheapest to prevent and the most embarrassing, so learn it once.** Two distinct
 mistakes compounded:
@@ -289,7 +438,9 @@ headlines, so you can recognise a re-litigation attempt:
 Two lists. Keep them short; if either grows past a handful of items, something is being deferred that
 should be decided.
 
-**Session state as of 2026-08-07 (end of the long Cowork session):**
+**Session state as of 2026-08-07 (end of the long Cowork session), corrected 2026-08-13 where the
+repo has since contradicted it. This block is a snapshot and ages; `PROGRESS.md` LIVE STATE is the
+thing that is kept current.**
 
 - Pipeline COMPLETE and measured honestly: gate 1.8.0, first-pass ~53%, shipped ~75%. Every
   gate false positive found and killed (the ledger rows tell the story). The house method, proven
@@ -297,13 +448,15 @@ should be decided.
   about the check, never about the text.
 - `hedge_construction` pooled truth is 28.8% (25.9% was a low draw) and is the next quality
   target. The "bukan berarti" carve-out (Reyner ruling A) already landed in gate 1.8.0.
-- **Prompt J (mirror route) is WRITTEN and UNSTARTED** — `docs/prompts/J-mirror-route.md`. It is
-  the next build: fenced preview route, rate limiting, promotion conditions baked in. Starts in a
-  FRESH Code session. After J: card component, then the fulfillment swap (retires the interim
-  funnel), then promotion.
-- Xendit: APPROVED, live keys swapped, **QRIS ACTIVATED 2026-08-11** — see PROGRESS INTERIM STATE
-  for the full go-live status. One step left in the ritual: the first real self-purchase, which is
-  Reyner's alone.
+- ~~**Prompt J (mirror route) is WRITTEN and UNSTARTED**~~ — **SHIPPED 2026-08-07.** `/api/mirror`
+  and `/api/mirror/[token]` exist, serve real Stage 3-6 readings, and are fenced behind
+  `MIRROR_PREVIEW_TOKEN`. **It serves no user**; promotion is 2 of 4 preconditions and blocked.
+  Corrected 2026-08-13 — this bullet said "unstarted" for six days after it merged, in the file a
+  session reads to learn what is going on.
+- Xendit: APPROVED, live keys swapped, **QRIS ACTIVATED 2026-08-11**, **first self-purchase reported
+  by Reyner 2026-08-13** — the go-live ritual is complete. That Rp 19.000 is a payment-path smoke
+  test and **not a unit of demand**; see error 23 before it enters any table. Full status:
+  `PROGRESS.md`, THE INTERIM REGISTER.
 - **Compat reading CONTENT session is QUEUED and is Cowork+Reyner work** (no code): author the
   ~5 element-relationship dynamics, the 4 affinity/fit quadrant blocks, the ~6 branch outcome
   blocks, and the P0 tease copy — the "low tens of cells" from the compat spec, every string
@@ -319,11 +472,17 @@ should be decided.
 | ~~Write 30 fixed tags~~ | DONE 08-02 | `glossary.json` → `tag_arketipe`; `tags_en` pending, waits for card work |
 | ~~Register-review the 刑 entry~~ | DONE 08-02 | Simpul confirmed, entry landed in `glossary.json` |
 | Card visual system | `content/sharecard-spec.md` | Card B must differ **at thumbnail size**. Now also decides the ID vs EN name display variant (rule 23 amendment) |
-| **The first real self-purchase** | PROGRESS, THE INTERIM STATE | Rp 19.000, own birthdate, own bank app, screenshot the paid invoice into the ledger. **The last step of the go-live ritual, and nobody else can do it** - it needs his bank app and his money. Xendit verification DONE 08-07, live keys swapped, **QRIS ACTIVATED 08-11**, so the money path is live and untested |
+| **Top up the Gemini billing** | PROGRESS, 2026-08-12 renderer pass | `RESOURCE_EXHAUSTED` - *"Your prepayment credits are depleted."* Every render now returns the module-assembly floor, so **promotion precondition 3 (Reyner's QA read) is blocked**, the palace-domain weave is measured but prose-unverified, and chart 5's `quietFloor` re-ask cannot be answered. The renderer pass itself is built and measured; only the read is blocked |
+| ~~**The first real self-purchase**~~ | DONE, reported 2026-08-13 | Rp 19.000 through his own checkout. **The go-live ritual is complete** - verification 08-07, live keys swapped, QRIS activated 08-11, money path proven end to end. **It is a smoke test, n=1, and it is not demand** (error 23) |
 
 **Engine and pipeline, in order.**
 
-1. **Stage 3** — Claude Code is on it now. `prompts/D2-stage3.md` + `prompts/D2a-stage3-anchors.md`.
+*(Corrected 2026-08-13: steps 1 to 3 are DONE — Stage 3 landed 08-02 in three phases, badge
+frequencies were re-measured 08-02, and Stage 5 + Stage 6 are live at gate 1.9.0. The list is kept
+whole because the ordering argument is still the record of why they were sequenced that way. The
+live sequence is now the swap package: `PROGRESS.md`, THE DEFERRED REGISTER.)*
+
+1. ~~**Stage 3**~~ **DONE 2026-08-02**, all three phases. `prompts/D2-stage3.md` + `prompts/D2a-stage3-anchors.md`.
 2. **Re-measure badge frequencies** from the verified anchors. The 2.5-average and the Penolong 77%
    are both stale — measured with the descoped 華蓋 in the mix — and Stage 3's extremity term reads
    them, so a stale number silently mis-scores every badge.
@@ -380,9 +539,13 @@ Katon session. Repo is D:\claude-projects\katon.
 
 Read these before responding, in order, and brief yourself only from them:
   1. CLAUDE.md              — 25 locked rules, it wins over anything you remember
-  2. docs/PROGRESS.md       — MEASUREMENTS, RESOLVED, DECIDED, SUPERSEDED
+  2. docs/PROGRESS.md       — LIVE STATE first, then MEASUREMENTS, RESOLVED, DECIDED, SUPERSEDED
   3. docs/NEXT.md           — what Claude Code is building
   4. docs/COWORK-BRIEF.md   — how I work, the error ledger, what is open
+
+Before advising on the product, verify what actually ships. CLAUDE.md describes the target;
+the code describes reality; they diverge. PROGRESS.md's LIVE STATE block is the one table that
+answers "what does a real user get today", and it is the first thing to read.
 
 Do NOT read anything in D:\Work\Katon assets\Katon md — it is a stale mirror with rejected
 Aspek names still in it. Everything worth keeping was rescued into the repo.
@@ -393,9 +556,10 @@ quality of the output, not to what is easier to build. I am the sole authority o
 register: propose wording, flag it, never auto-decide.
 
 Never improvise a BaZi rule, including tables I hand you. Verify against docs/, the repo's locked
-tests, or Joey's plotter, and stop if sources disagree. Twenty-two spec errors are in the ledger and
-all twenty-two were yours, so check before asserting. Section 3 carries the working-style rules,
-including the one you must not break: no git commands against my repo, reads only.
+tests, or Joey's plotter, and stop if sources disagree. Twenty-three spec errors are in the ledger and
+all twenty-three were yours, so check before asserting. Section 3 carries the working-style rules,
+including the one you must not break: no git commands against my repo, reads only. Anything we ratify
+this session goes into the repo the same turn, not into a handover file.
 
 Then tell me where we actually are and what you think the next move is. Do not write engine code.
 ```
@@ -411,4 +575,12 @@ It goes stale the same way `NEXT.md` did — by accumulating a copy of state tha
 - **Section 6 is the only part that should change often.** If you find yourself updating sections 1,
   2 or 5, ask whether the fact belongs in `PROGRESS.md` instead. It usually does.
 - **Never put a measurement in this file.** Rule 8. Numbers go to `PROGRESS.md` with a date.
+- **Never put "what ships" in this file either.** That is `PROGRESS.md`'s LIVE STATE block, kept
+  current by rule: it is updated in the same commit as any funnel change. Section 6's session-state
+  bullets are a snapshot and are allowed to age; a reader must never mistake them for reality, which
+  is why the corrected 2026-08-13 entries are struck through rather than deleted. Two of them
+  ("Prompt J is UNSTARTED", "Stage 3 — Claude Code is on it now") had been false for days.
+- **A rule agreed in a session goes into the repo before the session ends.** Section 3 rule 8, with
+  the split that decides what is a rule and what is session state. This file is where Cowork rules
+  land; `CLAUDE.md` is where project-wide locks land.
 - When the mirror is deleted, cut section 2 down to one line of history.

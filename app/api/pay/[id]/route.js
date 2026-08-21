@@ -3,6 +3,7 @@ import { createQrisInvoice } from '@/lib/xendit';
 import { priceFor, isSellable, DEFAULT_SKU, SELLABLE_SKUS } from '@/lib/pricing';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
 import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
+import { readingUrl } from '@/lib/site/baseUrl';
 
 export const runtime = 'nodejs';
 
@@ -32,9 +33,9 @@ const INVOICE_DESCRIPTION = {
   artifact: 'Katon - Bacaan Mendalam',
 };
 
-// POST /api/pay/[id]   body: { wa_number, sku? }
-// Captures the WhatsApp number and creates the Xendit QRIS invoice
-// (external_id = reading id). NEVER sets paid=true — only the verified webhook can.
+// POST /api/pay/[id]   body: { sku?, wa_number? }
+// Creates the Xendit QRIS invoice (external_id = reading id).
+// NEVER sets paid=true — only the verified webhook can.
 //
 // THE CLIENT MAY NAME A SKU. IT MAY NEVER NAME A PRICE. The name is checked
 // against SELLABLE_SKUS and resolved to a number by priceFor(), both server-side,
@@ -58,10 +59,14 @@ export async function POST(request, { params }) {
   } catch {
     return badRequest('invalid JSON body');
   }
-  const waNumber = body?.wa_number;
-  if (!waNumber || typeof waNumber !== 'string') {
-    return badRequest('wa_number is required');
-  }
+  // `wa_number` IS OPTIONAL. It used to be required and this was a hard 400, which
+  // made a WhatsApp number mandatory to buy — for a delivery promise nothing behind
+  // this route could keep (no sender was ever built; `wa_sent` guards a send that
+  // does not exist). The checkout no longer asks for one, so the normal case is
+  // absent. The parameter stays accepted, and the column stays, so a WA channel can
+  // be wired later without another migration; anything else is ignored rather than
+  // stored under a name that claims to be a phone number.
+  const waNumber = typeof body?.wa_number === 'string' && body.wa_number ? body.wa_number : undefined;
 
   const sku = body?.sku ?? DEFAULT_SKU;
   if (!isSellable(sku)) {
@@ -71,10 +76,24 @@ export async function POST(request, { params }) {
   }
 
   try {
+    // WHERE THE XENDIT TAB ENDS UP. Without these the buyer's last screen is a
+    // Xendit page with no link back to the reading she just paid for.
+    //
+    // SUCCESS carries `?bayar=selesai`, and it is a HINT ABOUT THE UI, never an
+    // entitlement: the funnel reads it only to open the paywall in its waiting
+    // state instead of showing the offer again, because the redirect regularly
+    // beats the webhook by a few seconds. `paid` still flips in the verified
+    // webhook alone, and the page it lands on re-reads that from the server.
+    //
+    // FAILURE goes to the same reading with NO marker, so the paywall renders
+    // normally and the price and the button are already on screen. That is the
+    // retry; a failed payment needs no separate state.
     const { invoiceId, invoiceUrl } = await createQrisInvoice({
       readingId: id,
       amount: priceFor(sku),
       description: INVOICE_DESCRIPTION[sku],
+      successRedirectUrl: readingUrl(id, '?bayar=selesai'),
+      failureRedirectUrl: readingUrl(id),
     });
     // The sku is stored with the invoice so the webhook can verify the settled
     // amount against THIS product's price rather than against any known price.

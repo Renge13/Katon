@@ -164,6 +164,13 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   If `git status` shows a wall of changes with symmetric insert/delete counts, that is the cause.
 - **PR discipline:** each PR independently reviewable and revertable. Engine work, content work and
   infra work never ride together.
+- **GATE CHANGES SHIP ISOLATED** (adopted 2026-08-20). A commit that changes what Stage 6 ACCEPTS
+  carries nothing else, so a floor-rate move always has exactly one candidate cause. This is rule 13
+  applied to shipping rather than to fitting: two accept-changing edits in one commit confound each
+  other's floor rate permanently, because the floor is measured per commit and the commit cannot be
+  split afterwards. A check that FIRES AND LOGS BUT REJECTS NOTHING is not a gate change under this
+  rule and may travel — it cannot move the floor, which is the whole point of landing one that way
+  first. Corollary: `STAGE6_VERSION` bumps once per such commit, never twice, and never zero times.
 - **The commit message must describe everything staged.** `git add -A` routinely sweeps in more than
   the message names — this has happened twice, once carrying a locked-file renumbering under a
   "docs chore" subject. Either stage selectively, or widen the message. Run `git status` and read it
@@ -178,6 +185,14 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   about the code without its grep is a memory, not a fact. Error 13 (COWORK-BRIEF §4) entered this
   locked file exactly that way and every session inherited it as truth. Re-run the command before
   propagating the claim into a prompt; a check older than the code it describes proves nothing.
+- **A change to what Stage 6 ACCEPTS OR REJECTS bumps `STAGE6_VERSION` in the same commit.** New
+  check, deleted check, threshold move, blocklist pattern added or removed. No edit is too small:
+  deleting `style.adverbial` and moving `mungkin` out of `blocklist.json` on 2026-08-17 left **two
+  materially different gates both stamping `1.9.0`**, and `persistRendered` writes that field onto
+  every cached row precisely so "which readings passed under the old rules" stays answerable. A
+  stale constant is the one thing that makes it unanswerable. Fixed at `1.10.0`; the rule now also
+  sits on the constant's own docblock and in `blocklist.json#_rule`, because the person editing a
+  regex does not open `lib/validate/index.js`.
 
 ---
 

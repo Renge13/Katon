@@ -36,8 +36,13 @@ export async function POST(request) {
   }
 
   // needsHour is about THIS DATE, not about a particular user: it is true
-  // whenever the date carries a season turn. The caller applies it only when no
-  // birth time was given.
+  // whenever the date carries a season turn. What the caller does with it depends
+  // on what it already knows, which is why `hour` is returned alongside `at`:
+  // with no birth time the whole day is unresolved, but with an hour only the
+  // hour EQUAL TO `hour` straddles the turn — every other one sits cleanly on a
+  // side and needs no question. Same public calendar fact either way; `at` is
+  // for display, `hour` is for that comparison, so the caller never has to parse
+  // a formatted string back into a number.
   if (!turn) return json({ needsHour: false });
-  return json({ needsHour: true, term: turn.term, at: turn.at });
+  return json({ needsHour: true, term: turn.term, at: turn.at, hour: turn.hour, minute: turn.minute });
 }

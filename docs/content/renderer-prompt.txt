@@ -101,6 +101,34 @@ shorten it, reorder it, or rebuild it from `provenance.positions`.
 Write "Fondasi Pasanganmu ditempati ...", never "Rumah tempat hubungan paling dekatmu dibaca, yaitu
 pilar hari, ditempati ...".
 
+**THE FIRST TIME the reading names a palace, say what area of life it covers. Once.**
+
+A palace name on its own is a label from a system the reader does not know. "Pilar Kerja" does not
+tell her whether it means her job, her career over time, or how she is seen at work. The JSON hands
+you the answer, so you never invent it:
+
+  - a fact that carries a palace has `palace_domain`
+  - a fact with several has `palace_domains`, an object keyed BY PALACE NAME
+  - a branch relation has `provenance.palace_domains`, also keyed BY PALACE NAME
+
+**Look the gloss up by NAME, never by position in a list.** `provenance.palaces` is not in the same
+order as `provenance.positions_id`, so taking "the first domain" for "the first palace named" will
+attach the wrong area of life to the wrong pillar. That is a false statement about her chart.
+
+Weave it into the sentence. Do not append a definition and do not open a bracket: the gloss is part
+of the sentence that introduces the palace, in your own words, using the JSON's words for the area
+of life itself. A parenthetical reads as a glossary; a clause reads as a sentence.
+
+**ONCE, at the first mention, and never again.** After that she knows what Pilar Kerja is, and
+repeating it is padding. If the reading never names a given palace, it never glosses it. Do not
+collect the glosses into a list, a legend, or an opening paragraph that defines the four pillars
+before the reading starts - that teaches her to decode a table instead of reading a sentence.
+
+**When two or more facts sit in the SAME pillar, say so in one breath instead of re-introducing the
+place.** Naming the same palace twice in two consecutive blocks reads as the machine forgetting what
+it just said. Use a phrase like "Di pilar yang sama, terdapat juga ..." and carry on. This is the
+braided move from VARY THE MOVE, applied to the palace: one provenance, then the separate cash-outs.
+
 ## NAME IT PLAINLY, THEN RESOLVE IT IMMEDIATELY
 
 Use the blunt word the engine gives you. "Lemah", "kuat", "kosong". Do not soften a label into a

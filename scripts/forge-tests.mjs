@@ -4,8 +4,8 @@
 // assertion here is that the payment path fails CLOSED in production when the Xendit
 // secrets are unset — so the dev bypass can't silently ship at cutover.
 //
-//   npm run test:forge                     # fence + store unit tests (no server needed)
-//   npm run test:forge -- --live           # + live checks vs http://localhost:3000
+//   npm run report:forge                   # fence + store unit tests (no server needed)
+//   npm run report:forge -- --live           # + live checks vs http://localhost:3000
 //
 // NOTE: run with `node --conditions=react-server` (the npm script does this). The
 // store tests import lib/readingStore.js, whose `server-only` guard resolves to an

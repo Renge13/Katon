@@ -1,9 +1,39 @@
 <!--
-STATUS: PROPOSAL — created 2026-08-01. Information architecture for the sharecard, rebuilt around
-what the engine can now surface. Supersedes content/bazi-card-skill-v4.md, which predates the
-Aspek/Bintang layer and the strength engine.
+STATUS: SUPERSEDED FOR EVERYTHING BUILT — see the banner below. Created 2026-08-01, last
+substantively written 2026-08-13.
 Reyner decides the register and the visual system. This doc decides WHAT information appears and WHY.
 -->
+
+# ⚠ SUPERSEDED BY `docs/content/card-polish-spec.md` (authority as of 2026-08-15)
+
+**If you are speccing, building or reviewing anything card-shaped, `card-polish-spec.md` wins.**
+This file is the 2026-08-01 information architecture — WHAT appears and WHY — and the reasoning in
+it is still good. Its PICTURES ARE NOT. Card A and Card B were built as 1a and 1e on 2026-08-14/15
+and the built cards diverge from the sketch below in at least seven places.
+
+**Why this banner exists at all.** On 2026-08-13 a session cost real time because the obvious
+filename was the wrong file. One line at the top prevents that permanently, and it is cheaper than
+reconciling two specs.
+
+**The divergences, each with the command that found it** (verified 2026-08-17, working tree at
+`21d690a`):
+
+| This file says | The built card does | Check |
+|---|---|---|
+| Card A headline is `MATAHARI` over `Sang Pengelola` (§3, and the sketch) | Card A prints **`name_en` alone**, split into a kicker and a noun (`THE` / `SUN`), with the Aspek beneath. The Indonesian name is **Card B only** | `components/cards/Card.js#CardA` passes no `showNameId`; `#Headline` gates `nameId` on it |
+| The Card A sketch shows **six** tag words | **Three fixed**, no dynamic tags. This file's own §2 amendment (2026-08-13) says so — the sketch was never updated to match it | `CardA` passes `showDynamic: false` |
+| Badges render as `◆ Bunga Persik` (the sketch, and the §1 amendment) | **No diamond.** The hairline above the block delimits it instead | `card-polish-spec.md` §2.5; `grep -n "◆" components/cards/Card.js` returns nothing |
+| Card B carries **all badges** including the common ones | **Two.** `CARD_B_BADGE_LIMIT = 2`, ruled 2026-08-15 after three overflowed the object by 63 export px and were silently clipped | `grep -n CARD_B_BADGE_LIMIT components/cards/Card.js` |
+| Card B carries 胎元 | **Not rendered**, ruled 2026-08-13. The engine still computes it and the reading still shows it; the card drops it | `components/cards/Card.js:1107`, `lib/card/cardData.js:176` |
+| Card B has **no URL watermark** | The footer carries **`katon.app`**, stacked above the seal | `lib/card/cardData.js#buildFooter` returns `right: 'katon.app'`; `#FoilFooter` renders it |
+| Bintang badges average **2.5** per person (§WHAT'S NEW) | **2.15**, range 1-4. Re-measured 2026-08-02 when 華蓋 left the set | `PROGRESS.md` MEASUREMENTS, "Badge frequency (avg per chart)" |
+
+**What in here is still authoritative:** the four 2026-08-01 decisions and their 08-13 amendments —
+Bintang Penolong is kept but never headlined, the tag hybrid is Card B only, the headline carries two
+axes, and Card B exists to be a visible badge of purchase. Those are rulings. The layout sketch is
+not, and it is the only part that has gone wrong.
+
+---
 
 # Sharecard — information architecture
 
@@ -67,6 +97,18 @@ This maps exactly onto the revenue model and stops the two jobs fighting each ot
 - **Percentages or numbers of any kind.** They invite comparison of the wrong thing.
 - **The eight characters.** They are the legitimacy object, but legitimacy is the reading's job. On a
   card they are visual noise to everyone who cannot read them.
+
+  **CLARIFIED 2026-08-13 (Reyner), because this line and the watermark look like a contradiction and
+  are not.** The ban is on **the grid as CONTENT** — eight characters a reader is asked to decode —
+  **not on a single stem as TEXTURE.** Card A carries one translucent Day Master stem as a watermark
+  behind the headline, the live product's own treatment, and that is the whole of hanzi on the free
+  card. CLAUDE.md rule 23 draws the same line: hanzi you can point at is fine, hanzi you must read is
+  not, and nobody reads a watermark. **The four pillar characters STAY on Card B**, unchanged — they
+  are the cross-checkable legitimacy object and were never what this bullet was about.
+
+  **The pictogram glyph set is DROPPED** (the per-archetype marks sketched in
+  `sharecard-tokens-proposal.html`). It repeated what the headline already said, and a drawn mark is
+  invention where the stem is data the engine computed. Do not commission or re-derive them.
 - **Prose.** One hook line, nothing else.
 
 ### CARD B — the paid hi-res artifact (~19k). Optimised for keeping.
@@ -127,6 +169,13 @@ Two rules:
 - **Always render it with its palace, and say so when it is void.** Never "bantuan akan datang". Always
   "bantuan datang lewat pekerjaan".
 
+  **SCOPED 2026-08-13 (Reyner): the palace rule is about PROSE, and the card bullets drop it.** Read
+  the rule's own examples and they are sentences — "bantuan datang lewat pekerjaan" is a clause in a
+  reading, where a bare "help arrives" is the platitude the rule exists to prevent. A card bullet is
+  not making that claim. It now reads `◆ Penyendiri`, not `◆ Penyendiri Pilar Akar`: the reading
+  carries provenance, the card does not need it, and the line space is scarce. **The prose rule is
+  unchanged.**
+
 ### 2. Tags — HYBRID. 3 fixed per archetype + 3 dynamic from the chart.
 
 Fixed-only gives the card **10 possible states**, which is a zodiac sign — with birthdate-only input a
@@ -135,6 +184,21 @@ archetype and is combinatorially hard to QA.
 
 Three fixed tags anchor the archetype so every Matahari card has family resemblance. Three drawn from
 the actual Aspek and badges so no two are identical. **30 fixed strings total.**
+
+**AMENDED 2026-08-13 (Reyner): the hybrid is CARD B ONLY. Card A carries the three fixed trait words
+and no dynamic tags at all.** "Aspek Pengatur" is system vocabulary — it means nothing to someone
+meeting Katon in a feed, and **Card A has no comprehension budget to teach it.** Card B is a document
+its owner has paid for and read a reading beside, so the vocabulary has somewhere to land.
+
+The differentiation argument above still holds and is still measured: `npm run measure:card-tags`
+gives 13 of 13 distinct dynamic triples across the fixture. It now applies to Card B. Card A's
+differentiation comes from the archetype, the Aspek headline, the hook line and the badges, which is
+already more than the ten states the fixed-only option was rejected for.
+
+Two problems dissolved for free. The tag row no longer mixes one-word traits with two-word system
+labels in one style, so the restyle that needed never has to happen. And a Bintang could previously
+appear twice on Card A, dimmed in the tag row and again as a badge bullet; on Card A there is now no
+tag row to collide with. The dedupe in `lib/card/cardData.js#dynamicTags` still matters for Card B.
 
 ### 3. Headline — TWO AXES. Day Master stays, the weather-modifier is replaced by the Aspek.
 
