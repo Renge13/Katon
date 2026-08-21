@@ -1839,3 +1839,68 @@ test('AN EXHAUSTED GEMINI FLOORS, and there is no second provider to catch it', 
       assert.equal(out.source, 'module_assembly', 'the floor is the only failover');
     });
 });
+
+// ── THE HOUR CONTRADICTION: THE PROMPT WAS THE DEFECT ─────
+
+test('THE HOUR CHECK IS CORRECT - it fires on the strings that were actually observed', () => {
+  // Reproduced from paid prose in docs/qa/2026-08-18-retry-depth.json, 7 attempts that
+  // fired this check. These are the LITERAL matched phrases, not invented fixtures, and
+  // every one is a plain falsehood on an hour-bearing chart. The check is not firing on
+  // ordinary Indonesian, so it is not the thing to relax.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const observed = [
+    'Pilar jam lahirmu tidak dapat dipetakan',
+    'jam lahir tidak diketahui',
+    'waktu kelahiran tidak diketahui',
+    'pilar jam tidak dapat dipetakan',
+  ];
+  assert.equal(CHART_1.hour_known, true, 'fixture assumption: this chart HAS an hour');
+  for (const claim of observed) {
+    const reading = withBlockText(goodReading(), dmId,
+      `${claim} sehingga sebagian bacaan ini terbatas. `
+      + CHART_1.facts.find((f) => f.id === dmId).label_meaning);
+    assert.ok(checksIn(validateRendering(reading, CHART_1))
+      .includes('fact.hour_known_contradiction'), `must catch: "${claim}"`);
+  }
+});
+
+test('and it does NOT fire on prose that merely reads the hour pillar', () => {
+  // The narrowness matters: a reading may name Pilar Arah, discuss the hour pillar, and
+  // say some OTHER thing cannot be mapped, without tripping this.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const fine = withBlockText(goodReading(), dmId,
+    'Pilar Arah membawa jam lahirmu ke dalam bacaan ini. '
+    + CHART_1.facts.find((f) => f.id === dmId).label_meaning);
+  assert.ok(!checksIn(validateRendering(fine, CHART_1))
+    .includes('fact.hour_known_contradiction'), 'reading the hour pillar is not a contradiction');
+
+  // And the always-available floor never trips it on an hour-bearing chart.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    if (semantic.hour_known !== true) continue;
+    assert.ok(!checksIn(validateRendering(goodReading(semantic), semantic))
+      .includes('fact.hour_known_contradiction'), `chart ${tc.id}: the floor must not trip it`);
+  }
+});
+
+test('THE PROMPT NAMES BOTH BRANCHES, which is the actual fix', () => {
+  // THE DEFECT WAS THE PROMPT, not the payload and not the check. The payload is right -
+  // chart 13 carries hour_known=true and chart.hour="戊寅" - and the check fires only on
+  // real falsehoods. But the prompt described ONLY the false branch:
+  //
+  //   "hour_known: if false, state once, plainly, that the fourth pillar cannot be mapped"
+  //
+  // which HANDS THE MODEL THE SENTENCE and gives it no counter-instruction. The observed
+  // output was that sentence almost verbatim - "Pilar jam lahirmu tidak dapat dipetakan" -
+  // on 6 of 7 occurrences, all at attempt 1, concentrated on one chart. A conditional the
+  // model does not honour, whose consequent we supplied.
+  //
+  // So the prompt now states the TRUE branch explicitly. This test is what stops the
+  // negative half being dropped again in an edit that only reads the false half.
+  assert.match(MASTER_PROMPT, /hour_known: TRUE means/,
+    'the prompt must state what TRUE means, not only what FALSE means');
+  assert.match(MASTER_PROMPT, /never say or imply\s+it is missing, unmappable, or unknown/,
+    'and must forbid the claim outright when the hour is known');
+  assert.match(MASTER_PROMPT, /Only when it is FALSE/,
+    'the instruction to state it must be scoped to the false branch');
+});
