@@ -2188,6 +2188,30 @@ test('THE PROMPT SAYS THE BRACKET IS SUPPLIED, and names the field', () => {
     'with the observed failure as the example, so it is concrete');
 });
 
+test('AND IT CARVES THE CONDITION EXCEPTION OUT OF IT, which is what went wrong', () => {
+  // MEASURED CAUSE, docs/qa/2026-08-22-renders-n10-budget3.md: 48 of 56
+  // `fact.condition_named` firings were the LITERAL `label_bracket` reaching the page -
+  // "Missing Wood" 21 times, "Missing Metal" 14, "Dominant Output" 8, "Dominant Wealth" 5 -
+  // against 8 for the block-shaped second pass, and 7 of those 8 were the same sentence
+  // counted a second time.
+  //
+  // THE CAUSE WAS THE INSTRUCTION DIRECTLY ABOVE, added the previous day. It said "EVERY
+  // fact carries `label_bracket` ... COPY THAT STRING VERBATIM". Condition facts carry one
+  // too, so that sentence told the model to write the exact string the null-label paragraph
+  // three lines later forbids. It is the CONTRACT BUG shape checkPalaces already documents
+  // in this repo - "the prompt BANS in one section and ENCOURAGES in another" - and the rate
+  // is the receipt: 1 firing across 77 attempts before that edit, the leading floor cause
+  // after it.
+  assert.match(MASTER_PROMPT, /A fact that HAS a name carries `label_bracket`/,
+    'the copy-verbatim instruction must be scoped to facts that HAVE a name');
+  assert.doesNotMatch(MASTER_PROMPT, /Every fact carries `label_bracket`/,
+    'the unscoped claim is the defect itself and must not come back');
+  assert.match(MASTER_PROMPT, /`label` is null has NO name, and its `label_bracket` is NOT yours to copy/,
+    'and the exception must be stated outright, not implied');
+  assert.match(MASTER_PROMPT, /Kamu memiliki kondisi Missing Wood/,
+    'with an OBSERVED failure as the example rather than an invented one');
+});
+
 // ── THE ATTEMPT TRAIL CARRIES THE MESSAGE, NOT ONLY THE NAME ──
 
 test('A REJECTED ATTEMPT RECORDS THE FINDING MESSAGE, because a check name is not an attribution', async () => {
