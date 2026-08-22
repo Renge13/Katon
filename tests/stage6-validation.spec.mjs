@@ -18,6 +18,7 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { createHash } from 'node:crypto';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
@@ -27,13 +28,13 @@ import { VALIDATION_CHARTS, HOUR_UNKNOWN_CHARTS } from './bazi-validation.fixtur
 import { assembleFallback } from '../lib/render/fallback.js';
 import { renderReading, persistRendered } from '../lib/render/index.js';
 import { readCache, __clearMemCache } from '../lib/render/cache.js';
-import { MASTER_PROMPT } from '../lib/render/prompt.js';
+import { MASTER_PROMPT, PROMPT_VERSION } from '../lib/render/prompt.js';
 import { REGENERATION_BUDGET } from '../lib/render/config.js';
 import { parseRenderResponse } from '../lib/render/schema.js';
 import { scrubInternal, internalFieldNames } from '../lib/render/payload.js';
 import {
-  validateRendering, stricterDirective, STAGE6_VERSION, CATEGORIES, STRUCTURE_PARAMS,
-  STYLE_PARAMS,
+  validateRendering, stricterDirective, DIRECTIVE_TEMPLATE, STAGE6_VERSION, CATEGORIES,
+  STRUCTURE_PARAMS, STYLE_PARAMS,
 } from '../lib/validate/index.js';
 import { hasUnsanctionedQuestion } from '../lib/validate/style.js';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
@@ -2210,6 +2211,51 @@ test('AND IT CARVES THE CONDITION EXCEPTION OUT OF IT, which is what went wrong'
     'and the exception must be stated outright, not implied');
   assert.match(MASTER_PROMPT, /Kamu memiliki kondisi Missing Wood/,
     'with an OBSERVED failure as the example rather than an invented one');
+});
+
+// ── THE DIRECTIVE IS PROMPT TEXT, SO IT IS PROMPT-VERSIONED ──
+
+test('PROMPT_VERSION COVERS THE DIRECTIVE TEMPLATE, ruled 2026-08-22', () => {
+  // `stricterDirective` is appended to MASTER_PROMPT on every regeneration, so from
+  // the model's side it IS prompt text - and it had no version stamp of any kind. It
+  // moves neither STAGE6_VERSION (the gate's ACCEPT boundary, which a directive does
+  // not touch) nor, until this commit, PROMPT_VERSION.
+  //
+  // The property under test is not the hash value - that changes with every prompt
+  // edit and pinning it would be a chore with no meaning. It is that the template
+  // PARTICIPATES: change the template, and the version must move.
+  const before = createHash('sha256').update(MASTER_PROMPT).update(' directive ')
+    .update(DIRECTIVE_TEMPLATE).digest('hex').slice(0, 16);
+  assert.equal(PROMPT_VERSION, before,
+    'PROMPT_VERSION must be the hash of the prompt AND the directive template');
+
+  const after = createHash('sha256').update(MASTER_PROMPT).update(' directive ')
+    .update(`${DIRECTIVE_TEMPLATE} edited`).digest('hex').slice(0, 16);
+  assert.notEqual(after, PROMPT_VERSION,
+    'editing the directive template must move the version - that is the whole ruling');
+
+  // And the separator has to be there. Without it, a character moved from the end of
+  // the prompt to the start of the template hashes identically, which is precisely
+  // the collision a version stamp exists to rule out.
+  const unseparated = createHash('sha256').update(MASTER_PROMPT)
+    .update(DIRECTIVE_TEMPLATE).digest('hex').slice(0, 16);
+  assert.notEqual(PROMPT_VERSION, unseparated, 'the two inputs must be separated');
+});
+
+test('the template is the SCAFFOLDING and the findings are substituted into it', () => {
+  // Keeping the fixed text as one constant is what makes it hashable. A directive
+  // assembled from pieces at call time would hash to something that depends on the
+  // call, and a version stamp cannot tolerate that.
+  assert.ok(DIRECTIVE_TEMPLATE.includes('{findings}'), 'one substitution point');
+  const out = stricterDirective([
+    { check: 'style.hedging', message: 'a message', severity: 'soft' },
+    { check: 'opening.element_fused', message: 'ignored', severity: 'flag' },
+  ]);
+  assert.ok(out.includes('- [style.hedging] a message'), 'the rejecting finding is named');
+  assert.ok(!out.includes('opening.element_fused'),
+    'a flag never earns a regeneration, so it is never named in the directive');
+  assert.ok(!out.includes('{findings}'), 'the placeholder must be consumed');
+  assert.ok(out.startsWith('\n## REGENERATION'), 'and the scaffolding is unchanged around it');
 });
 
 // ── THE ATTEMPT TRAIL CARRIES THE MESSAGE, NOT ONLY THE NAME ──
