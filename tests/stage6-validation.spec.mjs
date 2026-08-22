@@ -2088,3 +2088,62 @@ test('a PALACE name is never mistaken for a raw pillar', () => {
     withBlockText(goodReading(), dmId, `${palaces} ${meaning}`), CHART_1))
     .includes('style.raw_pillar'), 'palace names must never trip the raw-pillar ban');
 });
+
+// ── INSERTION IS SCOPED: bracket-ONCE means once (2026-08-22) ──
+
+test('A TERM THE MODEL BRACKETED LATER IS LEFT ALONE ENTIRELY', () => {
+  // Demonstrated defect, and invisible to style.unsanctioned_bracket because BOTH
+  // values are sanctioned:
+  //
+  //   before  "Kamu adalah Matahari yang tenang. Dan Matahari (The Sun) selalu terlihat."
+  //   after   "Kamu adalah Matahari (The Sun) yang tenang. Dan Matahari (The Sun) ..."
+  //
+  // Two bracketed mentions is rule 23 BROKEN, not kept. Insertion only checked whether
+  // a bracket followed the FIRST occurrence, so a correctly-bracketed later mention did
+  // not stop it.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const arche = CHART_1.core.archetype_name_id;
+  const en = CHART_1.core.archetype_name_en;
+  const reading = withBlockText(goodReading(), dmId,
+    `Kamu adalah ${arche} yang tenang. Dan ${arche} (${en}) selalu terlihat.`);
+
+  const result = validateRendering(reading, CHART_1);
+  const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId)).text;
+  // Counted by splitting rather than by a built regex: the term is glossary data and
+  // may carry regex metacharacters, and a heredoc has already eaten the backslashes in
+  // this file's escapes three times today.
+  const bracketed = served.split(`${arche} (`).length - 1;
+  assert.equal(bracketed, 1, `bracket-ONCE means once, got ${bracketed}: ${served.slice(0, 110)}`);
+  assert.equal(result.metrics.bracket_inserts, 0, 'and nothing should have been inserted');
+});
+
+test('INSERTION CANNOT CREATE AN UNSANCTIONED BRACKET, on any fixture chart', () => {
+  // Measured 2026-08-22 over every fixture chart plus fresh-1996: 100 insertions, and
+  // every value insertion can emit is a glossary name_en, which is exactly what
+  // SANCTIONED is built from. So the 9 style.unsanctioned_bracket occurrences in the
+  // 08-22 run are NOT insertion's doing - they are the model inventing a gloss, which
+  // insertion correctly SKIPS because a bracket already follows the term.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const bare = (semantic.core.archetype_name_id
+      ? [`Ada ${semantic.core.archetype_name_id} di baganmu.`] : [])
+      .concat(semantic.facts.filter((f) => f.label && f.label_bracket)
+        .map((f) => `Ada ${f.label} di baganmu.`))
+      .join(' ');
+    const dmId = semantic.facts.find((f) => f.id.startsWith('day_master_')).id;
+    const result = validateRendering(withBlockText(goodReading(semantic), dmId, bare), semantic);
+    assert.ok(!checksIn(result).includes('style.unsanctioned_bracket'),
+      `chart ${tc.id}: insertion produced an unsanctioned bracket`);
+  }
+});
+
+test('the model INVENTING a gloss is what fires it, and insertion stands aside', () => {
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const arche = CHART_1.core.archetype_name_id;
+  const invented = withBlockText(goodReading(), dmId,
+    `Kamu adalah ${arche} (Sun) yang tenang. Arahmu jelas dan langkahmu jarang goyah.`);
+  const result = validateRendering(invented, CHART_1);
+  assert.ok(checksIn(result).includes('style.unsanctioned_bracket'),
+    'an invented English gloss is the model\'s defect and must still be caught');
+  assert.equal(result.metrics.bracket_inserts, 0, 'insertion must not add a second bracket');
+});
