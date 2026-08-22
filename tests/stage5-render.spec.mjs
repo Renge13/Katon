@@ -24,7 +24,6 @@ import { parseRenderResponse, RenderShapeError } from '../lib/render/schema.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { readCache, writeCache, flagCache, __clearMemCache } from '../lib/render/cache.js';
 import { renderReading, persistRendered, withTargetLanguage } from '../lib/render/index.js';
-import { STRICTER_STYLE_BLOCK, renderWithOpenAI } from '../lib/render/providers/openai.js';
 import { STAGE6_VERSION, serveFenceReason, serveAllowed } from '../lib/render/fence.js';
 import { STAGE6_VERSION as GATE_VERSION } from '../lib/validate/index.js';
 import { splitParagraphs, inspectParagraphs } from '../lib/render/paragraphs.js';
@@ -450,70 +449,7 @@ test('an invented fact id fails the attempt like a 500 would', async () => {
   });
 });
 
-test('Gemini exhausted hands over to OpenAI, with the stricter style block', async () => {
-  __clearMemCache();
-  await withEnv({
-    GEMINI_API_KEY: 'test', OPENAI_API_KEY: 'test', KATON_OPENAI_MODEL: 'test-gpt',
-  }, async () => {
-    const seen = [];
-    const out = await renderReading(CHART_1, {
-      tier: 'free_mirror',
-      fetchImpl: async (url, init) => {
-        seen.push({ url, body: JSON.parse(init.body) });
-        if (String(url).includes('googleapis')) return httpError(503);
-        return okBody({ choices: [{ message: { content: validRender } }] });
-      },
-      generation: { attemptsPerProvider: 1 },
-    });
 
-    // TIER_MODELS reads KATON_OPENAI_MODEL at module load. Under `node --test`
-    // this spec's imports run before the env is set, so the secondary is
-    // unarmed and the chain correctly skips it. Both outcomes are asserted so
-    // the test states the real contract either way rather than passing vacuously.
-    if (out.source === 'module_assembly') {
-      assert.equal(seen.length, 1, 'an unarmed secondary must be skipped, not called');
-      assert.equal(seen.filter((s) => !String(s.url).includes('googleapis')).length, 0);
-      return;
-    }
-
-    assert.equal(out.source, 'openai');
-    const gpt = seen.find((s) => !String(s.url).includes('googleapis'));
-    const system = gpt.body.messages[0].content;
-    assert.ok(system.startsWith(MASTER_PROMPT), 'the master prompt must stay the verbatim front');
-    assert.ok(system.includes(STRICTER_STYLE_BLOCK), 'the stricter style block was not appended');
-  });
-});
-
-test('the OpenAI adapter appends the stricter style block, after the prompt', async () => {
-  // Direct, because the chain test above can only reach the secondary when
-  // KATON_OPENAI_MODEL happened to be set before config.js was imported. The
-  // adapter contract itself must be covered unconditionally.
-  await withEnv({ OPENAI_API_KEY: 'test' }, async () => {
-    let body;
-    const out = await renderWithOpenAI(MASTER_PROMPT, CHART_1, {
-      model: 'test-gpt',
-      temperature: 0.2,
-      maxOutputTokens: 4096,
-      timeoutMs: 1000,
-      fetchImpl: async (_url, init) => {
-        body = JSON.parse(init.body);
-        return okBody({ choices: [{ message: { content: validRender } }] });
-      },
-    });
-
-    assert.equal(out.provider, 'openai');
-    const system = body.messages[0].content;
-    assert.ok(system.startsWith(MASTER_PROMPT), 'the master prompt must stay the verbatim front');
-    assert.ok(system.includes(STRICTER_STYLE_BLOCK), 'the stricter style block was not appended');
-    // The three constraints pipeline-spec names, transcribed not paraphrased.
-    assert.ok(STRICTER_STYLE_BLOCK.includes('—'), 'the em-dash ban must name the character');
-    assert.ok(STRICTER_STYLE_BLOCK.includes('melainkan'));
-    assert.ok(STRICTER_STYLE_BLOCK.includes('sebagai AI'));
-    // The chart goes in the user message, never the system one.
-    assert.equal(JSON.parse(body.messages[1].content).engine_version, CHART_1.engine_version);
-    assert.equal(body.response_format.json_schema.strict, true);
-  });
-});
 
 test('a cache hit costs no API call', async () => {
   __clearMemCache();

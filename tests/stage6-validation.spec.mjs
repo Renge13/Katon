@@ -32,6 +32,7 @@ import { parseRenderResponse } from '../lib/render/schema.js';
 import { scrubInternal, internalFieldNames } from '../lib/render/payload.js';
 import {
   validateRendering, stricterDirective, STAGE6_VERSION, CATEGORIES, STRUCTURE_PARAMS,
+  STYLE_PARAMS,
 } from '../lib/validate/index.js';
 import { hasUnsanctionedQuestion } from '../lib/validate/style.js';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
@@ -1004,13 +1005,19 @@ test('an unsanctioned English bracket is caught, a glossary one is not', () => {
     .includes('style.unsanctioned_bracket'));
 });
 
-test('OpenAI output is graded on the same checks, with its own allowance knob', () => {
+test('the style allowance is per-provider, and there is only ONE provider now', () => {
+  // Was "OpenAI output is graded on the same checks, with its own allowance knob".
+  // The openai arm went with the provider on 2026-08-22, and removing it changed
+  // nothing: its allowance was 0, IDENTICAL to gemini, so the "own knob" was never
+  // actually looser. module_assembly is the other live value and is also 0.
   const bad = withBlockText(goodReading(), 'day_master_Fire',
     'Kamu bukan orang yang lambat, tapi orang yang menunggu pemicunya dari luar.');
-  for (const provider of ['gemini', 'openai']) {
+  for (const provider of ['gemini', 'module_assembly']) {
     const result = validateRendering(bad, CHART_1, { provider });
     assert.ok(checksIn(result).includes('style.hedge_construction'), provider);
   }
+  assert.deepEqual(Object.keys(STYLE_PARAMS.allowance).sort(), ['gemini', 'module_assembly'],
+    'a provider key here that cannot occur is an availability illusion');
 });
 
 // ── 5. STRUCTURE ───────────────────────────────────────────
@@ -1433,6 +1440,15 @@ async function withEnv(env, fn) {
 }
 
 const asResponse = (reading) => JSON.stringify(reading);
+
+// A REAL provider HTTP error, matching the shape the 503 test builds inline. Added
+// 2026-08-22 because two new tests referenced an `httpError` that did not exist here:
+// the fetchImpl threw a ReferenceError, renderReading handled it as a transport failure,
+// and BOTH TESTS PASSED FOR THE WRONG REASON. eslint no-undef caught it; the runtime
+// could not, because a thrown fetch and a 503 look identical from inside the loop.
+const httpError = (status) => ({
+  ok: false, status, text: async () => String(status), json: async () => ({}),
+});
 const GOOD = asResponse(goodReading());
 const BAD = asResponse(withBlockText(goodReading(), 'strength_weak', 'Kamu Api Lemah.'));
 
@@ -1780,4 +1796,46 @@ test('INSERTION CANNOT LAUNDER A FUSED OPENING, which is why the flag exists', (
 
   assert.ok(!checksIn(result).includes('brackets.unbracketed'), 'insertion satisfied rule 23');
   assert.ok(checksIn(result).includes('opening.element_fused'), 'and the fusion is still counted');
+});
+
+// ── ONE PROVIDER, AND THE TRANSPORT RETRY SURVIVED IT ──────
+
+test('A 503 IS STILL RETRIED AGAINST GEMINI after the OpenAI path was deleted', async () => {
+  // The deletion's one real risk. `transportLeft` is scoped INSIDE
+  // `for (const provider of chain)`, so collapsing that loop away - which looks like
+  // tidying once the chain can only hold one entry - would have taken the 503 retry
+  // with it. Reyner's ruling removed FAILOVER and kept the retry, and those are
+  // different things: retrying a 503 against the same provider is not failover.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    const out = await renderReading(CHART_1, {
+      fetchImpl: async () => {
+        calls += 1;
+        if (calls === 1) return httpError(503);
+        return geminiSays(asResponse(goodReading()));
+      },
+      generation: { attemptsPerProvider: 2 },
+    });
+    assert.equal(calls, 2, 'the 503 must be retried against the SAME provider');
+    assert.equal(out.source, 'gemini', 'and the retry must produce a real render');
+  });
+});
+
+test('AN EXHAUSTED GEMINI FLOORS, and there is no second provider to catch it', async () => {
+  // The consequence of the ruling, asserted rather than described. This is what a
+  // Gemini outage or an exhausted balance looks like for every reader at once: the
+  // floor. It is the availability budget now, and PROGRESS records that the
+  // replacement mitigation is a balance alert that does not exist yet.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: 'test', KATON_OPENAI_MODEL: 'gpt-x' },
+    async () => {
+      const out = await renderReading(CHART_1, {
+        fetchImpl: async () => httpError(503),
+        generation: { attemptsPerProvider: 1 },
+      });
+      // Note the env above ARMS what used to be the secondary. It changes nothing,
+      // which is the point: there is no code left to read those variables.
+      assert.equal(out.source, 'module_assembly', 'the floor is the only failover');
+    });
 });

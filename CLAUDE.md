@@ -99,7 +99,24 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
 14. **The engine owns ALL facts, hierarchy and structure. The LLM chooses only words.** If the LLM
     is ever in a position to decide something true, the design is wrong.
 15. **Runtime LLM rendering is ON** (reversal of the old rule) — for the RENDERING layer only.
-    Gemini primary, OpenAI secondary, both behind one provider interface.
+    **ONE PROVIDER: Gemini. The deterministic floor is the failover.** Module assembly is not a
+    degraded mode here, it is the second half of the design (rule 17), and there is no second
+    model behind it.
+
+    **Amended 2026-08-22 on Reyner's ruling**, replacing "Gemini primary, OpenAI secondary, both
+    behind one provider interface." The secondary was deleted rather than fixed, and the reason is
+    that it had never run: arming it required a model id no document in this repo ever named, so
+    `openaiConfigured()` returned false for the project's entire life and the chain skipped it on
+    every request. A branch that reads like a mitigation and has never once executed is worse than
+    no branch, because it gets counted in availability reasoning.
+
+    **THE CONSEQUENCE IS OPERATIONAL AND IT IS NOT SOFTENED.** With no second provider, a Gemini
+    outage or an exhausted balance means a **100% floor rate** - every reader served module
+    assembly. The floor IS the availability budget now. The 2026-08-12 credit-depletion incident
+    has no architectural mitigation any more; the replacement is a balance alert on the Gemini
+    account, which **does not exist yet** and sits in the deferred register with an owner and an
+    end condition. The transport retry inside Gemini stays: retrying a 503 against the same
+    provider is not failover and was kept deliberately.
 16. Every reading is **result-cached** on `hash(semantic_JSON + engine_version)` - deterministic
     after the first generation THAT PASSES STAGE 6. **Module-assembly floor results serve but are
     never persisted; the next request retries the render.** (Amended 2026-08-07, ratified by Reyner.
