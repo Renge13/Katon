@@ -28,6 +28,7 @@ import { VALIDATION_CHARTS, HOUR_UNKNOWN_CHARTS } from './bazi-validation.fixtur
 import { assembleFallback } from '../lib/render/fallback.js';
 import { renderReading, persistRendered } from '../lib/render/index.js';
 import { readCache, __clearMemCache } from '../lib/render/cache.js';
+import { __clearMemRateLimit } from '../lib/ratelimit.js';
 import { MASTER_PROMPT, PROMPT_VERSION } from '../lib/render/prompt.js';
 import { REGENERATION_BUDGET } from '../lib/render/config.js';
 import { parseRenderResponse } from '../lib/render/schema.js';
@@ -1462,7 +1463,7 @@ const GOOD = asResponse(goodReading());
 const BAD = asResponse(withBlockText(goodReading(), 'strength_weak', 'Kamu Api Lemah.'));
 
 test('a Stage 6 failure regenerates ONCE, and the retry carries the directive', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     const systems = [];
     const out = await renderReading(CHART_1, {
@@ -1491,7 +1492,7 @@ test('spending the WHOLE regeneration budget serves the floor and flags the char
   // while the guarantee it describes was untouched. The number now comes from
   // `REGENERATION_BUDGET`, so this asserts the SHAPE and never the constant: the
   // budget is spent, then the floor. There is no secondary to reach.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
     const out = await renderReading(CHART_1, {
@@ -1519,7 +1520,7 @@ test('a floor result is NOT stored, and says so in its return value', async () =
   // provider outage cost those charts their real reading PERMANENTLY, because
   // the next request is a cache hit and the chain never runs again. Determinism
   // now attaches to the first generation that PASSES STAGE 6.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     const out = await renderReading(CHART_1, { fetchImpl: async () => geminiSays(BAD) });
     assert.equal(out.source, 'module_assembly');
@@ -1545,10 +1546,10 @@ test('THE REGENERATION BUDGET IS REACHABLE — it was INERT before 2026-08-19', 
   // read. It is that MOVING the budget MOVES the call count, which is the property
   // that was false. A future change to attemptsPerProvider cannot silently cap it
   // again without failing here.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     for (const [budget, expected] of [[0, 1], [1, 2], [2, 3], [3, 4]]) {
-      __clearMemCache();
+      __clearMemCache(); __clearMemRateLimit();
       let calls = 0;
       await renderReading(CHART_1, {
         validationRetries: budget,
@@ -1572,7 +1573,7 @@ test('A TRANSPORT FAILURE DOES NOT SPEND THE REGENERATION BUDGET', async () => {
   // + 1 original + REGENERATION_BUDGET regenerations. Under the old shared counter
   // this stopped at 2. The arithmetic is derived, not typed: it was typed as "= 4
   // calls" and went stale the day the budget moved.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
     const out = await renderReading(CHART_1, {
@@ -1597,7 +1598,7 @@ test('A TRANSPORT FAILURE DOES NOT SPEND THE REGENERATION BUDGET', async () => {
 test('validationRetries 0 measures the FIRST-PASS rate', async () => {
   // The number that says whether the PROMPT works, as distinct from whether the
   // pipeline works. The harness needs both.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
     const out = await renderReading(CHART_1, {
@@ -1615,7 +1616,7 @@ test('a transport failure does not count against the FIRST-PASS rate', async () 
   // is a first-pass PASS. Getting this backwards would make the prompt look
   // worse every time the provider had a bad afternoon, and prompt quality is
   // exactly what the number is for.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let call = 0;
     const out = await renderReading(CHART_1, {
@@ -1820,7 +1821,7 @@ test('A 503 IS STILL RETRIED AGAINST GEMINI after the OpenAI path was deleted', 
   // tidying once the chain can only hold one entry - would have taken the 503 retry
   // with it. Reyner's ruling removed FAILOVER and kept the retry, and those are
   // different things: retrying a 503 against the same provider is not failover.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
     const out = await renderReading(CHART_1, {
@@ -1841,7 +1842,7 @@ test('AN EXHAUSTED GEMINI FLOORS, and there is no second provider to catch it', 
   // Gemini outage or an exhausted balance looks like for every reader at once: the
   // floor. It is the availability budget now, and PROGRESS records that the
   // replacement mitigation is a balance alert that does not exist yet.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: 'test', KATON_OPENAI_MODEL: 'gpt-x' },
     async () => {
       const out = await renderReading(CHART_1, {
@@ -2340,7 +2341,7 @@ test('A REJECTED ATTEMPT RECORDS THE FINDING MESSAGE, because a check name is no
   // The harness prints `stage6_detail` and falls back to "no message recorded" when
   // it is absent, which is exactly the silent degrade this test exists to prevent:
   // the artifact would still generate, and it would still answer nothing.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     const out = await renderReading(CHART_1, {
       validationRetries: 1,
@@ -2369,7 +2370,7 @@ test('THE REGENERATION BUDGET IS A NAMED CONSTANT, so the artifact can print it'
   // sentence describing a gate that no longer existed - the stale-constant defect
   // that STAGE6_VERSION has its own repo rule about.
   assert.equal(typeof REGENERATION_BUDGET, 'number');
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
     await renderReading(CHART_1, {

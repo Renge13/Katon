@@ -51,9 +51,30 @@
 //      leaves a live SKU selling something the same commit just gave away.
 //      NOT MET. The full package is PROGRESS.md, THE DEFERRED REGISTER.
 //
-//   3. Reyner has QA'd real readings through this preview. NOT MET, and BLOCKED:
-//      the Gemini prepayment credits are depleted, so every render returns the
-//      module-assembly floor. Nothing to read until billing is topped up.
+//   3. RE-RULED 2026-08-22 (Reyner), FINAL FORM. Met when the POOLED FLOOR RATE
+//      IS AT OR BELOW 10% AT n=10 - not when every chart renders.
+//
+//      **MET 2026-08-22.** docs/qa/2026-08-22-renders-n10-postfixes.md, pooled
+//      4/40 = 10%, gate 1.17.0, prompt 22316c3349d0ea46.
+//
+//      The absolute form went because it is arithmetic, not taste: "every chart
+//      renders at n=10" is 40 draws, and at a 10% per-run floor a clean sweep
+//      has probability 0.90^40 = 1.5%. It would need the rate six times better
+//      than today just to be a coin flip. Worse than hard, it is STOCHASTIC - an
+//      absolute criterion over a random variable is a lottery, and the same
+//      unchanged system passes it one day and fails it the next. A pooled rate
+//      is the only form of this the instrument can answer.
+//
+//      Two earlier statements of this condition are now history rather than
+//      rules. It read "Reyner has QA'd real readings through this preview. NOT
+//      MET, and BLOCKED: the Gemini prepayment credits are depleted" - that
+//      block ended long before this edit and the sentence outlived it, which is
+//      the drift this header's closing note warns about. And the READ itself is
+//      not retired by the threshold: the 08-19 read found 2 of 4 charts failing
+//      on quality, both causes have since been fixed and measured, and a fresh
+//      read of the 08-22 artifact remains Reyner's to give.
+//
+//      Reasoning and the arithmetic: PROGRESS.md, RULED 2026-08-22.
 //
 //   4. fact.relation_positions no longer reads a temporal `hari` as a pillar —
 //      the NOT_A_SPAN fix for `kemudian hari` / `suatu hari` / `hari ini`.
@@ -65,7 +86,7 @@
 //      Indonesian uses `hari` temporally more than positionally and the renderer
 //      writes free prose. History: PROGRESS.md, the 08-12 tranche-2b section.
 //
-// 2 of 4. Promotion is blocked.
+// 3 of 4 as of 2026-08-22. Promotion is blocked on precondition 2 alone.
 //
 // (This header read "1 of 4" and "4. NOT MET" until 2026-08-13, while
 // PROGRESS.md had condition 4 MET since 08-12. A checklist kept in two places

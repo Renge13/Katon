@@ -43,7 +43,9 @@ const semantic = buildSemanticJson(chart);
 // may never pass this.
 const result = fallbackOnly
   ? { ...assembleFallback(semantic), model: null, prompt_version: null, cached: false, attempts: [] }
-  : await renderReading(semantic, { allowUnvalidatedCache: true });
+  // spendGuards off: a dev script re-rendering one chart should not be silently
+  // floored by the per-key cap after the third run of an hour.
+  : await renderReading(semantic, { allowUnvalidatedCache: true, spendGuards: false });
 
 if (asJson) {
   console.log(JSON.stringify(result, null, 2));

@@ -145,7 +145,8 @@ a later session can tell "deferred with a reason" from "forgotten". Every row ve
 | **Email capture at checkout** | Recovery and delivery channel. Today the reading URL is the only address Katon holds, and checkout asks for nothing (`d81434a` removed the WhatsApp field) | A register call on the wording plus a column. Also **required by the compat spec**, which creates account + email at the first compat CHECKOUT while the mirror stays anonymous |
 | **Server-side conversion counters** | Nothing records funnel steps. `d81434a` removed a required field between intent and checkout with no instrumentation to see the effect | A build. **This BLOCKS the 25-45k price test CLAUDE.md requires** — a price test with no conversion measurement is a coin toss with extra steps. Note the /privasi correction under this table |
 | **The Pending poll dead end** | `components/Funnel.jsx` polls `/full` every 3s and gives up after 60 tries onto a permanent spinner. Reachable in-session and now also via the Xendit success redirect (`c5e649c`) | A decision on what a 3-minute-old unconfirmed payment should say. It cannot fall back to the offer — she paid — so it needs copy, which is a register call |
-| **THE UNDE-DUPLICATED RENDER — PRECONDITION-SHAPED, added 2026-08-19** | **WHAT IT IS:** nothing de-duplicates a render that is already in flight. `readCache` returns a finished row or `null`, the dev `mem` store is a `Map` of completed rows, and **no promise map, lock or in-flight registry exists anywhere in `lib/render/`** (grep: `inFlight\|pending\|dedup\|lock\|mutex` over `lib/render/*.js`, 2026-08-19 — no hits that are one). So every concurrent cache miss for one chart starts its own full chain. Against the funnel's 3s poll and a measured p50 of 7.6s per attempt (up to ~23s at 3 attempts), that is **~8 polls inside one render**, and rule 16 forbids persisting a floor, so a chart that keeps flooring **re-renders on every request forever** — unbounded, not a fixed multiple. **IT IS NOT A POLL BUG.** The same hazard fires on a plain page refresh, two open tabs, or a shared link opened twice; the poll is only the loudest caller. `tests/mirror-route.spec.mjs` documents the underlying behaviour as CORRECT and deliberate — *"the second request must retry the provider, not serve a frozen floor"* — so this is the cost of a right rule, not a defect to remove. **WHY IT IS ACCEPTED FOR NOW:** it costs nothing today. `/api/reading` imports no render function, and the rendered path is `/api/mirror/[token]`, which 404s without `MIRROR_PREVIEW_TOKEN` — unset even locally. Zero readers reach a render, so the multiplier is on an empty base. **WHAT ENDS IT:** it must be closed BEFORE the funnel is wired to the mirror route, in the same package as that wiring — this is a promotion precondition, not a follow-up. Closed by the poll never touching the render path: the render is kicked once when the reading is created, the poll reads a status, and both refresh and second tab then hit a warm cache. An in-process promise map is a cheap complement, not the fix, because serverless instances do not share one. A longer poll interval is not a fix at all — it leaves refresh and the unbounded floor case untouched. **WHO CHECKS:** Reyner, at the promotion commit, alongside the floor rate. |
+| ~~**THE UNDE-DUPLICATED RENDER — PRECONDITION-SHAPED, added 2026-08-19**~~ **CLOSED 2026-08-22 by the three spend guards** | **WHAT IT IS:** nothing de-duplicates a render that is already in flight. `readCache` returns a finished row or `null`, the dev `mem` store is a `Map` of completed rows, and **no promise map, lock or in-flight registry exists anywhere in `lib/render/`** (grep: `inFlight\|pending\|dedup\|lock\|mutex` over `lib/render/*.js`, 2026-08-19 — no hits that are one). So every concurrent cache miss for one chart starts its own full chain. Against the funnel's 3s poll and a measured p50 of 7.6s per attempt (up to ~23s at 3 attempts), that is **~8 polls inside one render**, and rule 16 forbids persisting a floor, so a chart that keeps flooring **re-renders on every request forever** — unbounded, not a fixed multiple. **IT IS NOT A POLL BUG.** The same hazard fires on a plain page refresh, two open tabs, or a shared link opened twice; the poll is only the loudest caller. `tests/mirror-route.spec.mjs` documents the underlying behaviour as CORRECT and deliberate — *"the second request must retry the provider, not serve a frozen floor"* — so this is the cost of a right rule, not a defect to remove. **WHY IT IS ACCEPTED FOR NOW:** it costs nothing today. `/api/reading` imports no render function, and the rendered path is `/api/mirror/[token]`, which 404s without `MIRROR_PREVIEW_TOKEN` — unset even locally. Zero readers reach a render, so the multiplier is on an empty base. **WHAT ENDS IT:** it must be closed BEFORE the funnel is wired to the mirror route, in the same package as that wiring — this is a promotion precondition, not a follow-up. Closed by the poll never touching the render path: the render is kicked once when the reading is created, the poll reads a status, and both refresh and second tab then hit a warm cache. An in-process promise map is a cheap complement, not the fix, because serverless instances do not share one. A longer poll interval is not a fix at all — it leaves refresh and the unbounded floor case untouched. **WHO CHECKS:** Reyner, at the promotion commit, alongside the floor rate. |
+| **THE POLL STILL TOUCHES THE RENDER PATH — successor to the row above, added 2026-08-22** | **WHAT IT IS:** the row above is closed on its CONCERN (unbounded cost), not on its named MECHANISM. Its own text said so before any of this was built: *"An in-process promise map is a cheap complement, not the fix, because serverless instances do not share one."* That is still true. Guard (b) collapses the same-instance burst and guard (a) bounds the cross-instance case at 3 renders per key per hour, so the COST is bounded - but `components/Funnel.jsx` still polls a route that can START a render, which is the arrangement the row wanted gone. **WHY IT IS ACCEPTED NOW:** what made it urgent was the unbounded spend, and that is capped. What is left is shape, not money. **WHAT ENDS IT:** the render is kicked ONCE when the reading is created, the poll reads a STATUS, and refresh and second tab then hit a warm cache. That is a funnel change plus a status field and it belongs to the promotion commit that wires the funnel to the mirror route - the same package the closed row demanded, for the same reason. A longer poll interval is still not a fix. **WHO CHECKS:** Reyner, at the promotion commit. **This row exists so a closed row does not swallow an open obligation:** the guards were allowed to close that entry because they bound the damage, and the thing the entry actually asked for is smaller now but not done |
 | ~~**`secara lengkap` in the hour-less disclosure**~~ **CLOSED 2026-08-17** | `style.adverbial` was `\bsecara \w+` and the hour-less sentence uses `secara lengkap`, so **the gate rejected a sentence the product must be able to say** | **RESOLVED BY DELETING THE CHECK (Reyner, on the 2026-08-18 rejection gallery).** The row asked which side bends; the answer was neither, because the check was measurably not doing its job. Over 40 runs it produced **14 findings, 9 of them the plain adverb `secara konsisten`, and NOT ONE the construction it was written for.** It was also never the lever on the floor rate: the sole style finding on only 3 of 19 floors and the sole finding of any kind on **zero**. So this closes a false-positive source, not a rate problem. `tests/stage6-validation.spec.mjs` now asserts the hour-less sentence passes. **NOTE, deliberately not changed:** `renderer-prompt.txt:234` still tells the model to avoid the `secara ...` adverbial. Guidance to the writer and a rejection gate are different instruments, and removing the instruction is a prompt change needing its own measurement (rule 13) |
 | **FINDING MESSAGES IN THE DIRECTIVE ARE UNSTAMPED — accepted, not forgotten, added 2026-08-22** | **WHAT IT IS:** `stricterDirective` appends to `MASTER_PROMPT` on every regeneration, so from the model's side it is prompt text. Its SCAFFOLDING is stamped — `PROMPT_VERSION` hashes `DIRECTIVE_TEMPLATE` (ruled 2026-08-22, `51051f8`). The finding **messages** interpolated into `{findings}` are NOT: they are produced by code across **six** modules — `grep -c "finding(\|check: '" lib/validate/*.js` on 2026-08-22 gives fact 11, style 8, structure 6, coverage 3, brackets 2, opening 2, and zero for `directive.js`, `index.js` and `text.js`. Rewording one changes the model's input on every regeneration and moves no version. **THE FIRST INSTANCE IS ALREADY IN THE HISTORY, so this is not hypothetical:** the commit that scrubbed forbidden condition labels out of the directive changed what every regeneration of a condition-carrying chart is told, and `PROMPT_VERSION` stayed `22316c3349d0ea46` on both sides of it, because the template was untouched. Two rows can carry the same `prompt_version` and have been given different instructions. **WHY IT IS ACCEPTED:** Reyner ruled it explicitly on 2026-08-22 — *fix the loop, not the versioning*. The leak was a live defect on the retry path (the gate rejecting the model for a string, and the next prompt handing that string back); the stamp is bookkeeping. Shipping the defect fix behind a versioning mechanism nobody has designed would have left the defect live for the sake of the record of it. **WHAT WOULD CLOSE IT:** a mechanism that hashes the message-producing code of every check, which has never been proposed or costed — and the honest note is that hashing source text is not the same as hashing message BEHAVIOUR, so a cheap version of this would produce a stamp that moves on a comment edit and misses a changed interpolation. **THE OPERATIONAL CONSEQUENCE, so it is not rediscovered:** across a commit that changes message text, `prompt_version` is not a valid discriminator and the COMMIT is the only version. A floor-rate comparison spanning one must cite the commit. Stated in `lib/validate/directive.js` and `lib/render/prompt.js` docblocks as well, because the person editing a check's message opens neither this file nor the other one | **A ruling that message-level attribution is worth a mechanism.** Not queued: no measurement to date has needed it, and the one comparison that spans a message change (the next paid run) can cite the commit instead |
 | **`renderer-prompt.txt` hygiene** | Em-dashes at **:59** and **:92**, and **`ramalan` at :207** — a token `forbidden_content.fatalism` bans HARD (`\bramalan\b`), sitting in the instructions the model reads. The line is *"Timing is cuaca, never ramalan"*, so the prompt teaches the banned word while banning the concept | A rewrite that states the rule without naming the token, plus its own measurement (rule 13). The em-dashes are prompt text, not user-facing strings, so rule 20 does not reach them — but the model is being shown the character we ban |
@@ -834,6 +835,62 @@ also said the move would be *"expected, NOT
 the re-coupling tripwire firing"*, which would have authorised dismissing a genuine alarm. **A
 prediction that tells a reader what to disregard must carry its grep.**
 
+## RULED 2026-08-22 — PRECONDITION 3, FINAL FORM: a pooled rate, not an absolute
+
+**Reyner's ruling, and it supersedes the STRICT restatement of 2026-08-19 below.**
+
+> **Precondition 3 is met when the pooled floor rate is at or below 10% at n=10.**
+> Not when every chart renders.
+
+**WHY THE ABSOLUTE FORM HAD TO GO, and the reason is arithmetic rather than
+preference.** "Every chart renders at n=10" is 40 independent draws against a
+per-run floor probability. At the measured pooled rate of 10% the chance of a clean
+sweep is:
+
+```
+$ node -e "console.log(Math.pow(0.90,40))"          # 2026-08-22
+0.0147   ->  1.5%
+$ node -e "console.log((1-Math.pow(0.5,1/40)))"
+0.0172   ->  the per-run rate needed for a COIN FLIP on a clean sweep
+```
+
+So the absolute criterion fails a 10%-floor system **98.5% of the time**, and it
+would need the rate roughly **six times better than today** merely to become a coin
+flip. **The deeper defect is not that it is hard, it is that it is STOCHASTIC:** an
+absolute criterion over a random variable is not a gate, it is a lottery, and the
+same unchanged system passes it on Tuesday and fails it on Wednesday. Every
+ship/no-ship argument would then be conducted on which run someone happened to
+look at - which is the same instrument failure the 08-21 harness row was built to
+end, arriving one level up. A pooled RATE is the only form of this criterion that
+the instrument can actually answer.
+
+**IT IS MET.** `docs/qa/2026-08-22-renders-n10-postfixes.md`: pooled **4/40 = 10%**,
+at or below the threshold. Promotion goes **2 of 4 -> 3 of 4**.
+
+**WHAT THIS RULING DOES NOT DO, stated because a threshold is easy to over-read.**
+It does not say a 10% floor is good, and it does not retire the READ. Precondition
+3 exists so that Reyner has judged real readings sellable, and the 08-19 READ found
+2 of 4 charts failing on quality - chart 13 opening on the element instead of the
+archetype, and fresh-1996 burying the day master behind an Aspek. **Both have since
+been fixed and measured** (`must_cover: 'archetype'`, and the coverage floor taking
+fresh-1996's `opening.archetype_missing` from 10/10 to 2/10), which is why the
+render clause is what remains to rule on. A fresh read of the 08-22 artifact is
+still Reyner's to give and no threshold substitutes for it.
+
+**AND THE FLOOR-RATE WORK IS CLOSED AT 10% POOLED.** Ruled 2026-08-22: no further
+gate or prompt change is proposed against the floor rate. The eight remaining rows
+of the prompt ambiguity audit stay backlogged
+(`docs/content/2026-08-22-prompt-ambiguity-backlog.md`) until real reader feedback,
+not until another audit pass. **This is the ruling that makes the three spend
+guards critical path rather than deferred** - see the commits that close THE
+UNDE-DUPLICATED RENDER row: a 10% floor that is ACCEPTED is a 10% floor that is
+permanent, and rule 16 forbids caching it, so the reload-heals-quality behaviour
+is now a standing cost rather than a transient one.
+
+**Kept in three places and changed in one commit**, per the route header's own
+rule: this section, `app/api/mirror/[token]/route.js`'s precondition list, and
+`docs/NEXT.md`. A checklist in three places drifts, and it already did once.
+
 ## DECIDED 2026-08-19 — THE READ: precondition 3 executed, and five rulings
 
 Reyner read five readings across four charts as the buyer. **Full record, with the evidence and the
@@ -854,8 +911,11 @@ failures are the same sentence.**
 | chart 5, substitute A | 1988-07-10 22:00 | YES | zero padding, sharp flow, clear closing actions per block |
 | chart 5, substitute B | 1988-07-10 22:00 | YES | crisp execution, strong actionability across all sections |
 
-**PRECONDITION 3 WAS RESTATED STRICT on 2026-08-19, and it changes this table's arithmetic.** It is met
-when every chart in the reference QA set renders AND would be sold at the live price. Chart 5 FLOORED on
+**PRECONDITION 3 WAS RESTATED STRICT on 2026-08-19, and it changes this table's arithmetic.**
+**~~It is met when every chart in the reference QA set renders~~ SUPERSEDED 2026-08-22 - the absolute
+form is a lottery over 40 draws, not a gate. The criterion is now a pooled floor rate at or below 10%
+at n=10; see RULED 2026-08-22 above. The clause below about being SOLD is untouched by that ruling.**
+It is met when every chart in the reference QA set renders AND would be sold at the live price. Chart 5 FLOORED on
 the 08-19 run, so its two readings are prompt-identical stored prose from
 `docs/qa/2026-08-18-retry-depth.json` — zero cost, and not a live render. *"A promotion gate that relies
 on ghostly stored prose to claim a pass is just cope with extra steps. If Chart 5 floors on a live run, a
