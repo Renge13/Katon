@@ -23,7 +23,8 @@ import { MASTER_PROMPT, PROMPT_VERSION, assertPromptLoaded } from '../lib/render
 import { parseRenderResponse, RenderShapeError } from '../lib/render/schema.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { readCache, writeCache, flagCache, __clearMemCache } from '../lib/render/cache.js';
-import { __clearMemRateLimit } from '../lib/ratelimit.js';
+import { __clearMemRateLimit, consume, RATE_LIMITS } from '../lib/ratelimit.js';
+import { DAILY_ATTEMPT_CEILING } from '../lib/render/config.js';
 import {
   renderReading, persistRendered, withTargetLanguage, __clearInFlight,
 } from '../lib/render/index.js';
@@ -391,6 +392,61 @@ test('a first-try Gemini render returns with its attribution', async () => {
     assert.equal(out.cached, false);
     assert.equal(out.cache_key, cacheKey(CHART_1));
   });
+});
+
+// ── SPEND GUARD (c): THE HARD DAILY ATTEMPT CEILING ──
+
+test('SPEND GUARD (c): the ceiling stops rendering, and it is charged PER ATTEMPT', async () => {
+  // The last line of defence, and the only one not per-chart. Guards (a) and (b)
+  // bound how often ONE chart renders; neither bounds how many charts there are,
+  // and an unbounded number of distinct cache keys sits inside both.
+  //
+  // PER ATTEMPT, not per render, is the property under test. A regeneration is a
+  // provider call and costs the same as a first call, so a per-render check would
+  // let the budget overrun by the whole regeneration budget on every render past
+  // the line.
+  __clearMemCache(); __clearMemRateLimit(); __clearInFlight();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    // Burn the day's ceiling down to one remaining attempt.
+    for (let i = 0; i < DAILY_ATTEMPT_CEILING - 1; i += 1) {
+      await consume('render_attempts_daily', { global: 'all' }, {
+        limits: { global: DAILY_ATTEMPT_CEILING },
+      });
+    }
+
+    let calls = 0;
+    // A response the gate REJECTS, so the chain wants a regeneration and would
+    // spend a second attempt if the ceiling were charged per render.
+    const out = await renderReading(CHART_1, {
+      spendGuards: true,
+      fetchImpl: async () => { calls += 1; return geminiSays(validRender); },
+    });
+    assert.equal(calls, 1, 'the last attempt of the day is spent');
+
+    __clearMemCache();
+    const after = await renderReading(CHART_1, {
+      spendGuards: true,
+      fetchImpl: async () => { calls += 1; return geminiSays(validRender); },
+    });
+    assert.equal(calls, 1, 'and past the ceiling the provider is never called again');
+    assert.equal(after.source, 'module_assembly', 'the reader gets the floor, not a 503');
+    assert.equal(after.qa_flag, 'spend_guard_daily_ceiling');
+    assert.ok(out.source, 'the pre-ceiling render still produced something');
+  });
+});
+
+test('SPEND GUARD (c): a bucket declaring limit null THROWS rather than becoming infinite', () => {
+  // The ceiling lives in lib/render/config.js with the arithmetic behind it, not
+  // in the limiter's table, so the bucket declares `limit: null` and the number is
+  // injected. An unresolved null must never default to unlimited: a spend guard
+  // that silently becomes infinite is worse than no spend guard, because it is
+  // counted in the reasoning about how much a bad day can cost.
+  assert.equal(RATE_LIMITS.render_attempts_daily.global.limit, null,
+    'the number deliberately does not live here');
+  assert.rejects(
+    () => consume('render_attempts_daily', { global: 'all' }),
+    /has no limit/,
+  );
 });
 
 // ── SPEND GUARD (b): IN-FLIGHT DE-DUPLICATION ──
