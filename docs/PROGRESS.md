@@ -834,6 +834,62 @@ also said the move would be *"expected, NOT
 the re-coupling tripwire firing"*, which would have authorised dismissing a genuine alarm. **A
 prediction that tells a reader what to disregard must carry its grep.**
 
+## RULED 2026-08-22 — PRECONDITION 3, FINAL FORM: a pooled rate, not an absolute
+
+**Reyner's ruling, and it supersedes the STRICT restatement of 2026-08-19 below.**
+
+> **Precondition 3 is met when the pooled floor rate is at or below 10% at n=10.**
+> Not when every chart renders.
+
+**WHY THE ABSOLUTE FORM HAD TO GO, and the reason is arithmetic rather than
+preference.** "Every chart renders at n=10" is 40 independent draws against a
+per-run floor probability. At the measured pooled rate of 10% the chance of a clean
+sweep is:
+
+```
+$ node -e "console.log(Math.pow(0.90,40))"          # 2026-08-22
+0.0147   ->  1.5%
+$ node -e "console.log((1-Math.pow(0.5,1/40)))"
+0.0172   ->  the per-run rate needed for a COIN FLIP on a clean sweep
+```
+
+So the absolute criterion fails a 10%-floor system **98.5% of the time**, and it
+would need the rate roughly **six times better than today** merely to become a coin
+flip. **The deeper defect is not that it is hard, it is that it is STOCHASTIC:** an
+absolute criterion over a random variable is not a gate, it is a lottery, and the
+same unchanged system passes it on Tuesday and fails it on Wednesday. Every
+ship/no-ship argument would then be conducted on which run someone happened to
+look at - which is the same instrument failure the 08-21 harness row was built to
+end, arriving one level up. A pooled RATE is the only form of this criterion that
+the instrument can actually answer.
+
+**IT IS MET.** `docs/qa/2026-08-22-renders-n10-postfixes.md`: pooled **4/40 = 10%**,
+at or below the threshold. Promotion goes **2 of 4 -> 3 of 4**.
+
+**WHAT THIS RULING DOES NOT DO, stated because a threshold is easy to over-read.**
+It does not say a 10% floor is good, and it does not retire the READ. Precondition
+3 exists so that Reyner has judged real readings sellable, and the 08-19 READ found
+2 of 4 charts failing on quality - chart 13 opening on the element instead of the
+archetype, and fresh-1996 burying the day master behind an Aspek. **Both have since
+been fixed and measured** (`must_cover: 'archetype'`, and the coverage floor taking
+fresh-1996's `opening.archetype_missing` from 10/10 to 2/10), which is why the
+render clause is what remains to rule on. A fresh read of the 08-22 artifact is
+still Reyner's to give and no threshold substitutes for it.
+
+**AND THE FLOOR-RATE WORK IS CLOSED AT 10% POOLED.** Ruled 2026-08-22: no further
+gate or prompt change is proposed against the floor rate. The eight remaining rows
+of the prompt ambiguity audit stay backlogged
+(`docs/content/2026-08-22-prompt-ambiguity-backlog.md`) until real reader feedback,
+not until another audit pass. **This is the ruling that makes the three spend
+guards critical path rather than deferred** - see the commits that close THE
+UNDE-DUPLICATED RENDER row: a 10% floor that is ACCEPTED is a 10% floor that is
+permanent, and rule 16 forbids caching it, so the reload-heals-quality behaviour
+is now a standing cost rather than a transient one.
+
+**Kept in three places and changed in one commit**, per the route header's own
+rule: this section, `app/api/mirror/[token]/route.js`'s precondition list, and
+`docs/NEXT.md`. A checklist in three places drifts, and it already did once.
+
 ## DECIDED 2026-08-19 — THE READ: precondition 3 executed, and five rulings
 
 Reyner read five readings across four charts as the buyer. **Full record, with the evidence and the
@@ -854,8 +910,11 @@ failures are the same sentence.**
 | chart 5, substitute A | 1988-07-10 22:00 | YES | zero padding, sharp flow, clear closing actions per block |
 | chart 5, substitute B | 1988-07-10 22:00 | YES | crisp execution, strong actionability across all sections |
 
-**PRECONDITION 3 WAS RESTATED STRICT on 2026-08-19, and it changes this table's arithmetic.** It is met
-when every chart in the reference QA set renders AND would be sold at the live price. Chart 5 FLOORED on
+**PRECONDITION 3 WAS RESTATED STRICT on 2026-08-19, and it changes this table's arithmetic.**
+**~~It is met when every chart in the reference QA set renders~~ SUPERSEDED 2026-08-22 - the absolute
+form is a lottery over 40 draws, not a gate. The criterion is now a pooled floor rate at or below 10%
+at n=10; see RULED 2026-08-22 above. The clause below about being SOLD is untouched by that ruling.**
+It is met when every chart in the reference QA set renders AND would be sold at the live price. Chart 5 FLOORED on
 the 08-19 run, so its two readings are prompt-identical stored prose from
 `docs/qa/2026-08-18-retry-depth.json` — zero cost, and not a live render. *"A promotion gate that relies
 on ghostly stored prose to claim a pass is just cope with extra steps. If Chart 5 floors on a live run, a
