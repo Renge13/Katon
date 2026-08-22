@@ -88,6 +88,9 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { renderReading } from '../lib/render/index.js';
 import { PROMPT_VERSION } from '../lib/render/prompt.js';
+// The regeneration budget, imported rather than described in prose. The artifact's own
+// sentence about "one initial plus N regenerations" is generated from this.
+import { REGENERATION_BUDGET } from '../lib/render/config.js';
 // The threshold this artifact exists to make fittable. Imported rather than retyped so
 // the printed number cannot drift from the one the gate actually used.
 import { COVERAGE_PARAMS } from '../lib/validate/index.js';
@@ -182,8 +185,11 @@ if (!ESTIMATE && fs.existsSync(OUT) && !process.argv.includes('--force')) {
 //              where one 503 was the whole difference between a reported 3% floor
 //              and a real 0 of 39. IT IS RARER HERE THAN IN THAT PROBE, and worse
 //              when it happens: this runs the PRODUCTION chain, which keeps the
-//              transport retry separate from the regeneration budget and fails
-//              over to OpenAI, so a truncated run means BOTH providers failed.
+//              transport retry separate from the regeneration budget, so a
+//              truncated run means Gemini failed its transport budget outright.
+//              (This comment said "fails over to OpenAI, so a truncated run means
+//              BOTH providers failed" until 2026-08-22. There is no secondary any
+//              more - #63 deleted it - and it had never once executed.)
 const results = [];
 for (const c of CHARTS) {
   const chart = calculateBaziChart({ birthDate: c.date, birthTime: c.time });
@@ -450,7 +456,10 @@ if (flooredRuns.length) {
   lines.push(`## THE ${flooredRuns.length} FLOORED RUN(S), AND WHY EACH ONE FLOORED`);
   lines.push('');
   lines.push('Every floored run across all runs, not only the printed one. A run floors when Stage 6');
-  lines.push('rejected every attempt in the regeneration budget - one initial plus two regenerations.');
+  lines.push(`rejected every attempt in the regeneration budget - one initial plus ${REGENERATION_BUDGET} `
+    + 'regeneration(s). THE NUMBER IS READ FROM `lib/render/config.js`, never written here: this '
+    + 'sentence said "plus two regenerations" as a literal until 2026-08-22, which would have '
+    + 'described the wrong gate the moment the budget moved.');
   lines.push('Transport-truncated runs are NOT here: they are listed separately and were never');
   lines.push('floored by the gate.');
   lines.push('');
@@ -486,6 +495,116 @@ if (flooredRuns.length) {
     for (const [c, n] of ranked) lines.push(`| \`${c}\` | ${n} |`);
     lines.push('');
   }
+}
+
+// ── THE REJECTION MESSAGES, FOR EVERY REJECTED ATTEMPT ─────
+// Added 2026-08-22, and it is the same lesson one level deeper. The 08-21 run
+// produced a floor RATE with no floor REASONS. The fix recorded the check NAMES.
+// This run then made `fact.condition_named` the leading floor cause at 16 firings
+// and the names could not say WHICH OF ITS TWO PASSES fired - the fact's own
+// `label_bracket` surfacing, or any name-with-bracket construction inside a
+// conditions-only block. Those are a prompt gap and an over-broad check
+// respectively, they call for opposite fixes, and the prose that would have
+// separated them is gone the moment the process exits.
+//
+// So: the MESSAGE for every rejecting finding of every rejected attempt, in every
+// run, floored or not. A check name is an index; the message is the evidence, and
+// it is the message that carries the matched text.
+//
+// NOT ONLY FLOORED RUNS. A run that passes at attempt 2 still rejected at attempt
+// 1, and that rejection is a real observation of the gate that the floored-run
+// table above throws away by construction.
+const rejectedAttempts = results.flatMap((x) => x.runs.flatMap((run, i) => (run.r.attempts || [])
+  .map((a, j) => ({ chart: x.label, run: i + 1, attempt: j + 1, a, run_r: run.r, truncated: run.truncated }))
+  .filter(({ a }) => (a.stage6 || []).length > 0)));
+
+if (rejectedAttempts.length) {
+  lines.push(`## EVERY REJECTED ATTEMPT, WITH THE FINDING'S OWN MESSAGE (${rejectedAttempts.length})`);
+  lines.push('');
+  lines.push('Across ALL runs, not only floored ones. `outcome` says what became of the run this');
+  lines.push('attempt belongs to, so a rejection that a later attempt fixed is not read as a floor.');
+  lines.push('');
+  for (const { chart, run, attempt, a, run_r: rr, truncated } of rejectedAttempts) {
+    const outcome = truncated ? 'transport-truncated'
+      : (rr.source === 'gemini' ? 'run RENDERED' : 'run FLOORED');
+    lines.push(`**${chart}, run ${run}, attempt ${attempt}** — ${outcome}`
+      + `${a.hard ? ' — **HARD**' : ''}`);
+    lines.push('');
+    const detail = a.stage6_detail || (a.stage6 || []).map((c) => ({ check: c, message: null }));
+    for (const d of detail) {
+      const msg = (d.message || '*(no message recorded - attempt predates stage6_detail)*')
+        .replace(/\s+/g, ' ').slice(0, 400);
+      lines.push(`- \`${d.check}\` — ${msg}`);
+    }
+    lines.push('');
+  }
+  lines.push('---');
+  lines.push('');
+}
+
+// ── RETRY EROSION: WHAT THE STRICTER DIRECTIVE BREAKS ──────
+// `stricterDirective` names the failed checks to the model, and the 08-19 erosion
+// probe measured what that costs the PROSE at depth 2. This measures a different
+// cost that no probe has ever reported: whether a regeneration introduces checks
+// the previous attempt had PASSED. That is the mechanism behind the chase the
+// archetype demotion was ruled on - a bracket finding at attempt N followed by an
+// opening finding at N+1 - and it is the thing that decides whether a DEEPER
+// budget buys floors or just trades findings for findings.
+//
+// FIXED means present at attempt N and gone at N+1. NEW means absent at N and
+// present at N+1. A step that is all-fixed is the budget working; a step with NEW
+// findings is the directive breaking something to satisfy something else.
+const steps = [];
+for (const x of results) {
+  for (const [i, run] of x.runs.entries()) {
+    const atts = (run.r.attempts || []).filter((a) => (a.stage6 || []).length > 0 || a.ok);
+    for (let j = 0; j + 1 < atts.length; j++) {
+      const before = new Set(atts[j].stage6 || []);
+      const after = new Set(atts[j + 1].stage6 || []);
+      steps.push({
+        chart: x.label,
+        run: i + 1,
+        step: `${j + 1} -> ${j + 2}`,
+        depth: j + 1,
+        fixed: [...before].filter((c) => !after.has(c)),
+        kept: [...before].filter((c) => after.has(c)),
+        added: [...after].filter((c) => !before.has(c)),
+      });
+    }
+  }
+}
+
+if (steps.length) {
+  const byDepth = {};
+  for (const s of steps) {
+    const d = (byDepth[s.depth] ||= { steps: 0, withNew: 0, newCount: 0, keptCount: 0 });
+    d.steps += 1;
+    if (s.added.length) d.withNew += 1;
+    d.newCount += s.added.length;
+    d.keptCount += s.kept.length;
+  }
+  lines.push('## RETRY EROSION IN FINDINGS — does a regeneration break what it had passed?');
+  lines.push('');
+  lines.push('| step | regeneration steps | steps introducing a NEW check | new checks | checks that SURVIVED the directive |');
+  lines.push('|---|---|---|---|---|');
+  for (const d of Object.keys(byDepth).sort()) {
+    const v = byDepth[d];
+    lines.push(`| attempt ${d} -> ${Number(d) + 1} | ${v.steps} | ${v.withNew} `
+      + `(${Math.round((v.withNew / v.steps) * 100)}%) | ${v.newCount} | ${v.keptCount} |`);
+  }
+  lines.push('');
+  lines.push('A check in the SURVIVED column was named to the model by `stricterDirective` and fired');
+  lines.push('again anyway. A check that survives every step of the budget is not short of chances.');
+  lines.push('');
+  lines.push('| Chart | run | step | fixed | survived | NEW |');
+  lines.push('|---|---|---|---|---|---|');
+  for (const s of steps) {
+    lines.push(`| ${s.chart} | ${s.run} | ${s.step} | ${s.fixed.join(', ') || '—'} `
+      + `| ${s.kept.join(', ') || '—'} | ${s.added.join(', ') || '—'} |`);
+  }
+  lines.push('');
+  lines.push('---');
+  lines.push('');
 }
 
 for (const { label, date, time, note, semantic, r } of results) {

@@ -28,6 +28,7 @@ import { assembleFallback } from '../lib/render/fallback.js';
 import { renderReading, persistRendered } from '../lib/render/index.js';
 import { readCache, __clearMemCache } from '../lib/render/cache.js';
 import { MASTER_PROMPT } from '../lib/render/prompt.js';
+import { REGENERATION_BUDGET } from '../lib/render/config.js';
 import { parseRenderResponse } from '../lib/render/schema.js';
 import { scrubInternal, internalFieldNames } from '../lib/render/payload.js';
 import {
@@ -2180,4 +2181,56 @@ test('THE PROMPT SAYS THE BRACKET IS SUPPLIED, and names the field', () => {
     'and must say to reproduce it rather than translate it');
   assert.match(MASTER_PROMPT, /\(The Sun\)` is not `\(Sun\)/,
     'with the observed failure as the example, so it is concrete');
+});
+
+// ── THE ATTEMPT TRAIL CARRIES THE MESSAGE, NOT ONLY THE NAME ──
+
+test('A REJECTED ATTEMPT RECORDS THE FINDING MESSAGE, because a check name is not an attribution', async () => {
+  // WHY THIS IS PINNED. `fact.condition_named` has two passes with two different
+  // messages, and an n=10 run on 2026-08-22 made it the leading floor cause at 16
+  // firings while recording only the NAME - so which pass fired was unrecoverable
+  // and the prose was gone. The two passes want opposite fixes (a prompt line
+  // versus a narrower regex), so the artifact has to carry the message.
+  //
+  // The harness prints `stage6_detail` and falls back to "no message recorded" when
+  // it is absent, which is exactly the silent degrade this test exists to prevent:
+  // the artifact would still generate, and it would still answer nothing.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    const out = await renderReading(CHART_1, {
+      validationRetries: 1,
+      fetchImpl: async () => geminiSays(BAD),
+    });
+    const rejected = out.attempts.filter((a) => (a.stage6 || []).length > 0);
+    assert.ok(rejected.length >= 1, 'the fixture must actually be rejected');
+    for (const a of rejected) {
+      assert.ok(Array.isArray(a.stage6_detail), 'every rejected attempt carries stage6_detail');
+      assert.equal(a.stage6_detail.length, a.stage6.length,
+        'one detail entry per rejecting finding - a flag must not appear here either');
+      assert.deepEqual(a.stage6_detail.map((d) => d.check), a.stage6,
+        'and in the same order, so the two views cannot disagree');
+      for (const d of a.stage6_detail) {
+        assert.equal(typeof d.message, 'string', `${d.check} must carry a message`);
+        assert.ok(d.message.length > 0, `${d.check}'s message must not be empty`);
+      }
+    }
+  });
+});
+
+test('THE REGENERATION BUDGET IS A NAMED CONSTANT, so the artifact can print it', async () => {
+  // It was a default parameter in the function signature, which meant the QA
+  // harness described it in prose instead: "one initial plus two regenerations",
+  // typed by hand into the artifact. Moving the budget would have left that
+  // sentence describing a gate that no longer existed - the stale-constant defect
+  // that STAGE6_VERSION has its own repo rule about.
+  assert.equal(typeof REGENERATION_BUDGET, 'number');
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    await renderReading(CHART_1, {
+      fetchImpl: async () => { calls += 1; return geminiSays(BAD); },
+    });
+    assert.equal(calls, REGENERATION_BUDGET + 1,
+      'the constant must be the budget the chain actually spends, not a second opinion on it');
+  });
 });
