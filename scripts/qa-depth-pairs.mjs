@@ -78,6 +78,12 @@ if (fs.existsSync(OUT)) {
 
 const trace = JSON.parse(fs.readFileSync(SRC, 'utf8'));
 
+// Counted from the trace, never spelled out, for the same reason the source path is:
+// a hardcoded "77 attempts of a 40-run trace" describes one file and this script now
+// reads any of them.
+const TRACE_RUNS = trace.runs.length;
+const TRACE_ATTEMPTS = trace.runs.reduce((n, r) => n + r.attempts.length, 0);
+
 /** Served depth = the index of the attempt that PASSED. null if the run floored. */
 const servedDepth = (run) => {
   const i = run.attempts.findIndex((a) => a.ok);
@@ -113,9 +119,15 @@ const lines = [
   '',
   `# Served readings, depth 1 beside depth 3 — ${today}`,
   '',
-  'Two charts, each at two depths. **Zero cost:** every word is lifted verbatim from',
-  '`docs/qa/2026-08-18-retry-depth.json`, which stored the prose of all 77 attempts of a',
-  '40-run trace already paid for.',
+  // THE SOURCE PATH IS READ FROM `--from`, NOT SPELLED OUT. It was hardcoded to the
+  // 08-18 trace, and the first run that passed `--from` produced an artifact naming a
+  // file its prose had not come from - which is the "check the artifact, never its
+  // description" failure this repo keeps paying for, in the one file whose whole job
+  // is to be evidence. A reader would have judged current-gate prose as a 1.9.0
+  // vintage. The attempt count moves with the trace for the same reason.
+  `Two charts, each at two depths. **Zero cost:** every word is lifted verbatim from`,
+  `\`${path.relative(ROOT, SRC).replace(/\\/g, '/')}\`, which stored the prose of all `
+    + `${TRACE_ATTEMPTS} attempts of a ${TRACE_RUNS}-run trace already paid for.`,
   '',
   'The question is the one the 45% / 65% / 33% findings-erosion figure cannot answer:',
   'does a reader who waited for two extra regenerations get a worse reading. Depth 2 was',
