@@ -2143,13 +2143,28 @@ test('INSERTION CANNOT CREATE AN UNSANCTIONED BRACKET, on any fixture chart', ()
   }
 });
 
-test('the model INVENTING a gloss is what fires it, and insertion stands aside', () => {
+test('AN INVENTED GLOSS IS NORMALISED, not skipped and not rejected', () => {
+  // CHANGED 2026-08-22 on Reyner's ruling, and this test used to assert the opposite -
+  // that the invented gloss fires the check while insertion stands aside. That was the
+  // defect: skipping meant the bad value survived, `style.unsanctioned_bracket` fired
+  // SOFT, and a regeneration was spent on a formatting rule the engine already owns.
   const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
   const arche = CHART_1.core.archetype_name_id;
+  const en = CHART_1.core.archetype_name_en;
   const invented = withBlockText(goodReading(), dmId,
     `Kamu adalah ${arche} (Sun) yang tenang. Arahmu jelas dan langkahmu jarang goyah.`);
+
   const result = validateRendering(invented, CHART_1);
-  assert.ok(checksIn(result).includes('style.unsanctioned_bracket'),
-    'an invented English gloss is the model\'s defect and must still be caught');
-  assert.equal(result.metrics.bracket_inserts, 0, 'insertion must not add a second bracket');
+  const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId)).text;
+
+  assert.ok(served.includes(`${arche} (${en})`), `the value must be corrected: ${served.slice(0, 90)}`);
+  assert.ok(!served.includes('(Sun)'), 'and the paraphrase must be gone');
+  assert.ok(!checksIn(result).includes('style.unsanctioned_bracket'),
+    'so the check has nothing left to fire on, and no regeneration is spent');
+  assert.equal(result.metrics.bracket_normalised, 1, 'the correction must be counted');
+  assert.equal(result.metrics.bracket_inserts, 0, 'and must not also insert a second bracket');
+  // Surfaced for a human, because a corrected paraphrase is louder than an insertion:
+  // the model was GIVEN the value and wrote something else.
+  assert.ok(result.findings.some((f) => f.check === 'brackets.normalised'),
+    'and it must be visible to QA');
 });
