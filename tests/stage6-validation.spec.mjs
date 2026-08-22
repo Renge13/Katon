@@ -28,6 +28,7 @@ import { assembleFallback } from '../lib/render/fallback.js';
 import { renderReading, persistRendered } from '../lib/render/index.js';
 import { readCache, __clearMemCache } from '../lib/render/cache.js';
 import { MASTER_PROMPT } from '../lib/render/prompt.js';
+import { REGENERATION_BUDGET } from '../lib/render/config.js';
 import { parseRenderResponse } from '../lib/render/schema.js';
 import { scrubInternal, internalFieldNames } from '../lib/render/payload.js';
 import {
@@ -1482,11 +1483,12 @@ test('a Stage 6 failure regenerates ONCE, and the retry carries the directive', 
   });
 });
 
-test('failing THREE times serves the floor and flags the chart for QA', async () => {
-  // WAS "failing TWICE" until 2026-08-19, when the regeneration budget went from
-  // one to two on the depth-sweep evidence (gate floor 18% -> 3%). The shape of
-  // the guarantee is unchanged: the budget is spent, then the floor, never the
-  // secondary provider.
+test('spending the WHOLE regeneration budget serves the floor and flags the chart for QA', async () => {
+  // THE TITLE USED TO CARRY THE NUMBER - "failing TWICE", then "failing THREE
+  // times" - and it went stale on 2026-08-19 and again on 2026-08-22, both times
+  // while the guarantee it describes was untouched. The number now comes from
+  // `REGENERATION_BUDGET`, so this asserts the SHAPE and never the constant: the
+  // budget is spent, then the floor. There is no secondary to reach.
   __clearMemCache();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
@@ -1494,7 +1496,8 @@ test('failing THREE times serves the floor and flags the chart for QA', async ()
       fetchImpl: async () => { calls += 1; return geminiSays(BAD); },
     });
 
-    assert.equal(calls, 3, 'one original plus TWO regenerations, then stop');
+    assert.equal(calls, REGENERATION_BUDGET + 1,
+      'one original plus the whole regeneration budget, then stop');
     assert.equal(out.source, 'module_assembly');
     assert.equal(out.qa_flag, 'stage6_budget_spent');
     assert.ok(out.findings.length > 0, 'the reason must survive onto the QA row');
@@ -1564,8 +1567,9 @@ test('A TRANSPORT FAILURE DOES NOT SPEND THE REGENERATION BUDGET', async () => {
   // A 503 and a reading that says "kuat" about a weak chart are different events.
   // Here the first call 503s and every later one fails the GATE, so the full
   // regeneration budget must still be available afterwards: 1 transport failure
-  // + 1 original + 2 regenerations = 4 calls. Under the old shared counter this
-  // stopped at 2.
+  // + 1 original + REGENERATION_BUDGET regenerations. Under the old shared counter
+  // this stopped at 2. The arithmetic is derived, not typed: it was typed as "= 4
+  // calls" and went stale the day the budget moved.
   __clearMemCache();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
@@ -1576,11 +1580,13 @@ test('A TRANSPORT FAILURE DOES NOT SPEND THE REGENERATION BUDGET', async () => {
         return geminiSays(BAD);
       },
     });
-    assert.equal(calls, 4, 'a 503 must cost the TRANSPORT budget and leave both regenerations');
+    assert.equal(calls, REGENERATION_BUDGET + 2,
+      'a 503 must cost the TRANSPORT budget and leave the regeneration budget whole');
     // And the gate attempts are distinguishable from the transport one on the
     // attempts[] trail, which is what the measurement harness reads.
     const gateAttempts = out.attempts.filter((a) => a.stage6);
-    assert.equal(gateAttempts.length, 3, 'three attempts actually reached Stage 6');
+    assert.equal(gateAttempts.length, REGENERATION_BUDGET + 1,
+      'the original plus every regeneration actually reached Stage 6');
     assert.equal(out.attempts.filter((a) => a.error).length, 1, 'exactly one transport failure');
     assert.equal(out.source, 'module_assembly', 'and the budget spent still lands on the floor');
   });
@@ -2180,4 +2186,80 @@ test('THE PROMPT SAYS THE BRACKET IS SUPPLIED, and names the field', () => {
     'and must say to reproduce it rather than translate it');
   assert.match(MASTER_PROMPT, /\(The Sun\)` is not `\(Sun\)/,
     'with the observed failure as the example, so it is concrete');
+});
+
+test('AND IT CARVES THE CONDITION EXCEPTION OUT OF IT, which is what went wrong', () => {
+  // MEASURED CAUSE, docs/qa/2026-08-22-renders-n10-budget3.md: 48 of 56
+  // `fact.condition_named` firings were the LITERAL `label_bracket` reaching the page -
+  // "Missing Wood" 21 times, "Missing Metal" 14, "Dominant Output" 8, "Dominant Wealth" 5 -
+  // against 8 for the block-shaped second pass, and 7 of those 8 were the same sentence
+  // counted a second time.
+  //
+  // THE CAUSE WAS THE INSTRUCTION DIRECTLY ABOVE, added the previous day. It said "EVERY
+  // fact carries `label_bracket` ... COPY THAT STRING VERBATIM". Condition facts carry one
+  // too, so that sentence told the model to write the exact string the null-label paragraph
+  // three lines later forbids. It is the CONTRACT BUG shape checkPalaces already documents
+  // in this repo - "the prompt BANS in one section and ENCOURAGES in another" - and the rate
+  // is the receipt: 1 firing across 77 attempts before that edit, the leading floor cause
+  // after it.
+  assert.match(MASTER_PROMPT, /A fact that HAS a name carries `label_bracket`/,
+    'the copy-verbatim instruction must be scoped to facts that HAVE a name');
+  assert.doesNotMatch(MASTER_PROMPT, /Every fact carries `label_bracket`/,
+    'the unscoped claim is the defect itself and must not come back');
+  assert.match(MASTER_PROMPT, /`label` is null has NO name, and its `label_bracket` is NOT yours to copy/,
+    'and the exception must be stated outright, not implied');
+  assert.match(MASTER_PROMPT, /Kamu memiliki kondisi Missing Wood/,
+    'with an OBSERVED failure as the example rather than an invented one');
+});
+
+// ── THE ATTEMPT TRAIL CARRIES THE MESSAGE, NOT ONLY THE NAME ──
+
+test('A REJECTED ATTEMPT RECORDS THE FINDING MESSAGE, because a check name is not an attribution', async () => {
+  // WHY THIS IS PINNED. `fact.condition_named` has two passes with two different
+  // messages, and an n=10 run on 2026-08-22 made it the leading floor cause at 16
+  // firings while recording only the NAME - so which pass fired was unrecoverable
+  // and the prose was gone. The two passes want opposite fixes (a prompt line
+  // versus a narrower regex), so the artifact has to carry the message.
+  //
+  // The harness prints `stage6_detail` and falls back to "no message recorded" when
+  // it is absent, which is exactly the silent degrade this test exists to prevent:
+  // the artifact would still generate, and it would still answer nothing.
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    const out = await renderReading(CHART_1, {
+      validationRetries: 1,
+      fetchImpl: async () => geminiSays(BAD),
+    });
+    const rejected = out.attempts.filter((a) => (a.stage6 || []).length > 0);
+    assert.ok(rejected.length >= 1, 'the fixture must actually be rejected');
+    for (const a of rejected) {
+      assert.ok(Array.isArray(a.stage6_detail), 'every rejected attempt carries stage6_detail');
+      assert.equal(a.stage6_detail.length, a.stage6.length,
+        'one detail entry per rejecting finding - a flag must not appear here either');
+      assert.deepEqual(a.stage6_detail.map((d) => d.check), a.stage6,
+        'and in the same order, so the two views cannot disagree');
+      for (const d of a.stage6_detail) {
+        assert.equal(typeof d.message, 'string', `${d.check} must carry a message`);
+        assert.ok(d.message.length > 0, `${d.check}'s message must not be empty`);
+      }
+    }
+  });
+});
+
+test('THE REGENERATION BUDGET IS A NAMED CONSTANT, so the artifact can print it', async () => {
+  // It was a default parameter in the function signature, which meant the QA
+  // harness described it in prose instead: "one initial plus two regenerations",
+  // typed by hand into the artifact. Moving the budget would have left that
+  // sentence describing a gate that no longer existed - the stale-constant defect
+  // that STAGE6_VERSION has its own repo rule about.
+  assert.equal(typeof REGENERATION_BUDGET, 'number');
+  __clearMemCache();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    await renderReading(CHART_1, {
+      fetchImpl: async () => { calls += 1; return geminiSays(BAD); },
+    });
+    assert.equal(calls, REGENERATION_BUDGET + 1,
+      'the constant must be the budget the chain actually spends, not a second opinion on it');
+  });
 });

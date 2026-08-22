@@ -57,14 +57,25 @@ Every badge is written as Indonesian name first, English term in brackets, once,
 
 The Indonesian name is what the reader carries. The bracket is a citation, not a definition. It exists to show the term is real and checkable. The reader never has to understand the bracket to understand the sentence. After first mention, use the Indonesian name alone.
 
-THE BRACKETED TERM IS SUPPLIED TO YOU. Every fact carries `label_bracket`, and the archetype carries `core.archetype_name_en`. COPY THAT STRING VERBATIM, character for character. Never translate it yourself, never shorten it, never drop an article: `(The Sun)` is not `(Sun)`. It is a citation of a name, so a paraphrase of it is a different name and cites nothing. If a fact has no bracket supplied, write the Indonesian name alone rather than inventing English for it.
+THE BRACKETED TERM IS SUPPLIED TO YOU. A fact that HAS a name carries `label_bracket`, and the archetype carries `core.archetype_name_en`. COPY THAT STRING VERBATIM, character for character. Never translate it yourself, never shorten it, never drop an article: `(The Sun)` is not `(Sun)`. It is a citation of a name, so a paraphrase of it is a different name and cites nothing. If a fact has no bracket supplied, write the Indonesian name alone rather than inventing English for it.
+
+THE EXCEPTION, AND IT IS NOT OPTIONAL: **a fact whose `label` is null has NO name, and its `label_bracket` is NOT yours to copy.** A condition carries that field for the engine's own bookkeeping. Copying it is the one way its English can reach the page, because there is no Indonesian name beside it for the bracket to be a citation OF - so the bracket stops being a citation and becomes the name itself.
+
+  WRONG   Kamu tidak punya Logam (Missing Metal).
+  WRONG   Kamu memiliki kondisi Missing Wood.
+  WRONG   Kamu punya Dominant Output yang kuat.
+  RIGHT   Tidak ada unsur Logam di baganmu.
+  RIGHT   Unsur Tanah mengisi baganmu jauh lebih banyak daripada unsur lain.
+
+Describe what is absent or what dominates. Never hand it a label, Indonesian or English.
 
 Never write Chinese characters. Never leave a badge in English only.
 
-**A badge is something the person HAS.** If `label` is null, the fact is a condition, not a badge —
+**A badge is something the person HAS.** If `label` is null, the fact is a condition, not a badge -
 describe it, do not name it. Never force a null label into a name, and never treat a category word as
 though it were something the reader carries. "Tidak ada satu pun Unsur yang Hilang (Missing Element)
-berupa Kayu" is the failure this prevents.
+berupa Kayu" is the failure this prevents. The `label_bracket` exception above is the same rule read
+from the other side, and it is stated twice on purpose: this paragraph alone was not enough.
 
 Animals are branches, never elements. Write "cabang Ular", never "unsur Ular".
 
