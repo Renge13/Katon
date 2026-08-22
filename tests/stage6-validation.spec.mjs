@@ -33,7 +33,8 @@ import { REGENERATION_BUDGET } from '../lib/render/config.js';
 import { parseRenderResponse } from '../lib/render/schema.js';
 import { scrubInternal, internalFieldNames } from '../lib/render/payload.js';
 import {
-  validateRendering, stricterDirective, DIRECTIVE_TEMPLATE, STAGE6_VERSION, CATEGORIES,
+  validateRendering, stricterDirective, DIRECTIVE_TEMPLATE, forbiddenLiterals,
+  STAGE6_VERSION, CATEGORIES,
   STRUCTURE_PARAMS, STYLE_PARAMS,
 } from '../lib/validate/index.js';
 import { hasUnsanctionedQuestion } from '../lib/validate/style.js';
@@ -2256,6 +2257,75 @@ test('the template is the SCAFFOLDING and the findings are substituted into it',
     'a flag never earns a regeneration, so it is never named in the directive');
   assert.ok(!out.includes('{findings}'), 'the placeholder must be consumed');
   assert.ok(out.startsWith('\n## REGENERATION'), 'and the scaffolding is unchanged around it');
+});
+
+// ── THE DIRECTIVE NEVER QUOTES A STRING THE GATE WOULD REJECT ──
+
+test('THE DIRECTIVE NEVER HANDS BACK A FORBIDDEN CONDITION LABEL, closed 2026-08-22', () => {
+  // The defect: `fact.condition_named`'s message quotes the very string the check
+  // forbids, and `stricterDirective` passed messages through verbatim. So the gate
+  // rejected the model for writing "Missing Metal" and the next prompt handed
+  // "Missing Metal" straight back to it, inside an instruction to stop writing it.
+  //
+  // Both messages below are VERBATIM from the 2026-08-22 budget-3 tape, which is
+  // the artifact that recorded messages for the first time. Pass (a) was 48 of 56
+  // firings; pass (b) leaks the same literal a second way, inside the quoted
+  // construction it reports.
+  const findings = [
+    {
+      check: 'fact.condition_named',
+      severity: 'hard',
+      message: '"Missing Metal" is a condition, not a badge, and must not be named',
+    },
+    {
+      check: 'fact.condition_named',
+      severity: 'hard',
+      message: 'element_dominant_Earth is a condition and this block names it: "Logam (Missing Metal)"',
+    },
+  ];
+  const out = stricterDirective(findings, ['Missing Metal', 'Dominant Output']);
+
+  assert.ok(!out.includes('Missing Metal'), 'pass (a) must not quote the literal back');
+  assert.ok(!out.includes('Dominant Output'),
+    'and a label that did NOT fire is just as unsafe to echo - the set comes from the chart');
+
+  // AND NOT THE SHAPE EITHER. Scrubbing only the literal inside the parens would
+  // leave `"Logam (the English label you wrote)"`, which still matches
+  // checkConditionNamed's own name-with-bracket regex - the directive demonstrating
+  // the rejected shape in the act of forbidding it, which is this defect one layer
+  // out. A literal alone inside parens takes the parens with it.
+  const NAME_WITH_BRACKET = /\b[A-Z][\wÀ-ÿ]*(?:\s+[a-zA-Z][\wÀ-ÿ]*){0,3}\s*\([^)]+\)/;
+  assert.ok(!NAME_WITH_BRACKET.test(out),
+    'the directive must not contain the construction the check rejects');
+
+  // Still actionable: the check name and enough of the sentence to locate it.
+  assert.ok(out.includes('- [fact.condition_named]'), 'the check is still named');
+  assert.ok(out.includes('"Logam"'), 'and pass (b) still points at the offending sentence');
+});
+
+test('forbiddenLiterals takes the unsafe set from the CHART, not from the findings', () => {
+  // A condition fact carries `label: null` because a missing or dominant element is
+  // not something you HAVE, so there is no Indonesian name for the prose to cite -
+  // which is why its English bracket can only ever surface as a name. Every one of
+  // them is unsafe to echo, including the ones that did not fire.
+  const semantic = {
+    facts: [
+      { id: 'element_missing_Metal', label: null, label_bracket: 'Missing Metal' },
+      { id: 'element_dominant_Earth', label: null, label_bracket: 'Dominant Output' },
+      { id: 'profile_main', label: 'Aspek Pelindung', label_bracket: 'The Protector' },
+      { id: 'no_bracket', label: null, label_bracket: null },
+    ],
+  };
+  assert.deepEqual(forbiddenLiterals(semantic), ['Missing Metal', 'Dominant Output']);
+
+  // A NAMED fact's bracket is NOT forbidden. renderer-prompt tells the model to copy
+  // it verbatim, and `fact.condition_named` only fires on `label === null`. Scrubbing
+  // it would redact a string the prompt mandates.
+  assert.ok(!forbiddenLiterals(semantic).includes('The Protector'));
+
+  // And it survives the shapes a caller can actually hand it.
+  assert.deepEqual(forbiddenLiterals({}), []);
+  assert.deepEqual(forbiddenLiterals(null), []);
 });
 
 // ── THE ATTEMPT TRAIL CARRIES THE MESSAGE, NOT ONLY THE NAME ──
