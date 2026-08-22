@@ -1483,11 +1483,12 @@ test('a Stage 6 failure regenerates ONCE, and the retry carries the directive', 
   });
 });
 
-test('failing THREE times serves the floor and flags the chart for QA', async () => {
-  // WAS "failing TWICE" until 2026-08-19, when the regeneration budget went from
-  // one to two on the depth-sweep evidence (gate floor 18% -> 3%). The shape of
-  // the guarantee is unchanged: the budget is spent, then the floor, never the
-  // secondary provider.
+test('spending the WHOLE regeneration budget serves the floor and flags the chart for QA', async () => {
+  // THE TITLE USED TO CARRY THE NUMBER - "failing TWICE", then "failing THREE
+  // times" - and it went stale on 2026-08-19 and again on 2026-08-22, both times
+  // while the guarantee it describes was untouched. The number now comes from
+  // `REGENERATION_BUDGET`, so this asserts the SHAPE and never the constant: the
+  // budget is spent, then the floor. There is no secondary to reach.
   __clearMemCache();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
@@ -1495,7 +1496,8 @@ test('failing THREE times serves the floor and flags the chart for QA', async ()
       fetchImpl: async () => { calls += 1; return geminiSays(BAD); },
     });
 
-    assert.equal(calls, 3, 'one original plus TWO regenerations, then stop');
+    assert.equal(calls, REGENERATION_BUDGET + 1,
+      'one original plus the whole regeneration budget, then stop');
     assert.equal(out.source, 'module_assembly');
     assert.equal(out.qa_flag, 'stage6_budget_spent');
     assert.ok(out.findings.length > 0, 'the reason must survive onto the QA row');
@@ -1565,8 +1567,9 @@ test('A TRANSPORT FAILURE DOES NOT SPEND THE REGENERATION BUDGET', async () => {
   // A 503 and a reading that says "kuat" about a weak chart are different events.
   // Here the first call 503s and every later one fails the GATE, so the full
   // regeneration budget must still be available afterwards: 1 transport failure
-  // + 1 original + 2 regenerations = 4 calls. Under the old shared counter this
-  // stopped at 2.
+  // + 1 original + REGENERATION_BUDGET regenerations. Under the old shared counter
+  // this stopped at 2. The arithmetic is derived, not typed: it was typed as "= 4
+  // calls" and went stale the day the budget moved.
   __clearMemCache();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
@@ -1577,11 +1580,13 @@ test('A TRANSPORT FAILURE DOES NOT SPEND THE REGENERATION BUDGET', async () => {
         return geminiSays(BAD);
       },
     });
-    assert.equal(calls, 4, 'a 503 must cost the TRANSPORT budget and leave both regenerations');
+    assert.equal(calls, REGENERATION_BUDGET + 2,
+      'a 503 must cost the TRANSPORT budget and leave the regeneration budget whole');
     // And the gate attempts are distinguishable from the transport one on the
     // attempts[] trail, which is what the measurement harness reads.
     const gateAttempts = out.attempts.filter((a) => a.stage6);
-    assert.equal(gateAttempts.length, 3, 'three attempts actually reached Stage 6');
+    assert.equal(gateAttempts.length, REGENERATION_BUDGET + 1,
+      'the original plus every regeneration actually reached Stage 6');
     assert.equal(out.attempts.filter((a) => a.error).length, 1, 'exactly one transport failure');
     assert.equal(out.source, 'module_assembly', 'and the budget spent still lands on the floor');
   });
