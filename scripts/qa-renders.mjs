@@ -93,7 +93,7 @@ import { PROMPT_VERSION } from '../lib/render/prompt.js';
 import { REGENERATION_BUDGET } from '../lib/render/config.js';
 // The threshold this artifact exists to make fittable. Imported rather than retyped so
 // the printed number cannot drift from the one the gate actually used.
-import { COVERAGE_PARAMS } from '../lib/validate/index.js';
+import { COVERAGE_PARAMS, STAGE6_VERSION } from '../lib/validate/index.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -200,7 +200,12 @@ for (const c of CHARTS) {
     process.stderr.write(`${c.label} run ${run}/${N} ... `);
     // allowUnvalidatedCache is a QA affordance and it is reported, never hidden:
     // a cache hit is a previous run's prose, not this one's.
-    const r = await renderReading(semantic, { allowUnvalidatedCache: true });
+    const r = await renderReading(semantic, {
+      allowUnvalidatedCache: true,
+      // Banks every attempt's prose for the sidecar trace. See the TRACE block at
+      // the end of this file for why a rate without its prose keeps costing money.
+      captureProse: true,
+    });
     const truncated = r.source !== 'gemini'
       && (r.attempts || []).some((a) => a.error && !(a.stage6 || []).length);
     runs.push({ r, truncated });
@@ -626,6 +631,12 @@ for (const { label, date, time, note, semantic, r } of results) {
   lines.push(`| \`stage6_version\` | ${r.stage6_version ?? '—'} |`);
   lines.push(`| \`qa_flag\` | ${r.qa_flag ?? '—'} |`);
   lines.push(`| \`cached\` | ${r.cached} |`);
+  // THE DEPTH THIS READING WAS SERVED AT. Absent until 2026-08-22, and its absence
+  // was why the budget-3 artifact could not supply a depth-1 reading for the
+  // erosion read: run 1 landed at depth 3, 2, 4 and 3 on the four charts and the
+  // file never said so, so nobody could tell that the pair was missing.
+  lines.push(`| served at attempt | ${(r.attempts || []).findIndex((a) => a.ok) + 1 || '— (floor)'} `
+    + `of ${(r.attempts || []).length || '—'} |`);
   lines.push(`| pillars | ${semantic.chart.year} ${semantic.chart.month} ${semantic.chart.day} ${semantic.chart.hour ?? '—'} |`);
   lines.push(`| facts / required | ${semantic.facts.length} / ${semantic.required_points.length} |`);
   lines.push('');
@@ -681,7 +692,54 @@ for (const { label, date, time, note, semantic, r } of results) {
 
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, `${lines.join('\n')}\n`);
+
+// ── THE SIDECAR TRACE: EVERY ATTEMPT'S PROSE, BANKED ───────
+// Added 2026-08-22. The .md is what a human reads and it prints ONE reading per
+// chart, always run 1, because choosing a nicer run is sampling until the answer
+// is pretty. That rule is right and it has a cost: the prose of the other 90-odd
+// attempts is destroyed when the process exits, and twice now a question has come
+// back that the prose would have answered for free.
+//
+//   1. the 08-22 verify run made `fact.condition_named` the leading floor cause
+//      and could not say which of its two passes fired;
+//   2. the budget-3 run measured findings-erosion at depth 3 and could not supply
+//      a depth-1 reading beside a depth-3 one, because run 1 was never depth 1.
+//
+// `probe-retry-depth` solved this on 08-18 by writing a sidecar JSON, and that one
+// file has since answered four separate questions at zero cost - including both of
+// the above, at the wrong vintage. So this writes one too. It is EVIDENCE, in the
+// same sense the .md is: generated, verbatim, not edited.
+//
+// The .md is still the artifact. This is the tape.
+const TRACE = OUT.replace(/\.md$/, '.json');
+fs.writeFileSync(TRACE, `${JSON.stringify({
+  generated: today,
+  prompt: PROMPT_VERSION,
+  gate: STAGE6_VERSION,
+  regeneration_budget: REGENERATION_BUDGET,
+  n: N,
+  runs: results.flatMap((x) => x.runs.map((run, i) => ({
+    chart: x.label,
+    run: i + 1,
+    source: run.r.source,
+    truncated: run.truncated,
+    cached: run.r.cached,
+    servedAt: (run.r.attempts || []).findIndex((a) => a.ok) + 1 || null,
+    attempts: (run.r.attempts || []).map((a) => ({
+      provider: a.provider,
+      ok: Boolean(a.ok),
+      checks: a.stage6 || [],
+      detail: a.stage6_detail || [],
+      error: a.error,
+      // The prose of a REJECTED attempt is the thing nothing else keeps. A passing
+      // attempt's prose is the served reading and is recoverable from the row.
+      prose: a.prose ?? null,
+    })),
+  }))),
+}, null, 2)}\n`);
+
 console.error(`\nwrote ${path.relative(ROOT, OUT)}`);
+console.error(`wrote ${path.relative(ROOT, TRACE)} (the tape: every attempt, verbatim)`);
 console.error(`printed readings: ${results.length - printedFloors.length} real render(s), `
   + `${printedFloors.length} floor(s).`);
 if (printedFloors.length) {

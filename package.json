@@ -55,7 +55,8 @@
     "build:han-ttf": "node scripts/build-han-ttf.mjs",
     "probe:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-rejections.mjs",
     "probe:retry-depth": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-retry-depth.mjs",
-    "probe:retry-erosion": "node scripts/probe-retry-erosion.mjs"
+    "probe:retry-erosion": "node scripts/probe-retry-erosion.mjs",
+    "qa:depth-pairs": "node --conditions=react-server scripts/qa-depth-pairs.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
