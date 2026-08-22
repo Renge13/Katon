@@ -637,7 +637,7 @@ test('THE ARCHETYPE IS A REQUIRED POINT, not merely context', () => {
   }
 });
 
-test('a reading that opens on the ELEMENT is rejected, and only softly', () => {
+test('a reading that opens on the ELEMENT is COUNTED, and never rejected', () => {
   // "Kamu adalah Kayu (Wood) reads like a spreadsheet header" - Reyner. This is
   // the exact sentence shape that made two of four charts unsellable.
   const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
@@ -648,10 +648,16 @@ test('a reading that opens on the ELEMENT is rejected, and only softly', () => {
   const result = validateRendering(opensOnElement, CHART_1);
   assert.ok(checksIn(result).includes('opening.archetype_missing'),
     `an element-first opening must be caught: ${checksIn(result).join(', ')}`);
-  // SOFT, never hard. A missing archetype is one clause short, which a
-  // regeneration fixes; it is not a fact contradiction and not an ethics failure.
-  // fact.js hardcodes severity 'hard', which is why this rule is not in fact.js.
-  assert.equal(result.hard, false, 'a missing archetype is not a HARD failure');
+  // DEMOTED TO A FLAG 2026-08-22 on the n=10 measurement. It had been soft on the
+  // reasoning that "a regeneration fixes it" - and the data says it does not: 20
+  // occurrences inside floored runs, present in 13 of the 14, at attempt 1 in 9. It was
+  // the leading cause of floors, and a floored reader receives a document the model
+  // never wrote. The obligation stays in the prompt and in `must_cover`; only the
+  // rejection went. So it must be COUNTED and must not change the verdict.
+  assert.equal(result.hard, false, 'never a HARD failure');
+  const failing = result.findings.filter((f) => f.severity !== 'flag');
+  assert.ok(!failing.some((f) => f.check === 'opening.archetype_missing'),
+    'it must not be able to reject a reading');
   assert.ok(!opensOnElement.blocks[0].text.includes(archetype), 'fixture must not name it');
 
   // The floor, which DOES name it, is the control.
@@ -1838,4 +1844,340 @@ test('AN EXHAUSTED GEMINI FLOORS, and there is no second provider to catch it', 
       // which is the point: there is no code left to read those variables.
       assert.equal(out.source, 'module_assembly', 'the floor is the only failover');
     });
+});
+
+// ── THE HOUR CONTRADICTION: THE PROMPT WAS THE DEFECT ─────
+
+test('THE HOUR CHECK IS CORRECT - it fires on the strings that were actually observed', () => {
+  // Reproduced from paid prose in docs/qa/2026-08-18-retry-depth.json, 7 attempts that
+  // fired this check. These are the LITERAL matched phrases, not invented fixtures, and
+  // every one is a plain falsehood on an hour-bearing chart. The check is not firing on
+  // ordinary Indonesian, so it is not the thing to relax.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const observed = [
+    'Pilar jam lahirmu tidak dapat dipetakan',
+    'jam lahir tidak diketahui',
+    'waktu kelahiran tidak diketahui',
+    'pilar jam tidak dapat dipetakan',
+  ];
+  assert.equal(CHART_1.hour_known, true, 'fixture assumption: this chart HAS an hour');
+  for (const claim of observed) {
+    const reading = withBlockText(goodReading(), dmId,
+      `${claim} sehingga sebagian bacaan ini terbatas. `
+      + CHART_1.facts.find((f) => f.id === dmId).label_meaning);
+    assert.ok(checksIn(validateRendering(reading, CHART_1))
+      .includes('fact.hour_known_contradiction'), `must catch: "${claim}"`);
+  }
+});
+
+test('and it does NOT fire on prose that merely reads the hour pillar', () => {
+  // The narrowness matters: a reading may name Pilar Arah, discuss the hour pillar, and
+  // say some OTHER thing cannot be mapped, without tripping this.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const fine = withBlockText(goodReading(), dmId,
+    'Pilar Arah membawa jam lahirmu ke dalam bacaan ini. '
+    + CHART_1.facts.find((f) => f.id === dmId).label_meaning);
+  assert.ok(!checksIn(validateRendering(fine, CHART_1))
+    .includes('fact.hour_known_contradiction'), 'reading the hour pillar is not a contradiction');
+
+  // And the always-available floor never trips it on an hour-bearing chart.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    if (semantic.hour_known !== true) continue;
+    assert.ok(!checksIn(validateRendering(goodReading(semantic), semantic))
+      .includes('fact.hour_known_contradiction'), `chart ${tc.id}: the floor must not trip it`);
+  }
+});
+
+test('THE PROMPT NAMES BOTH BRANCHES, which is the actual fix', () => {
+  // THE DEFECT WAS THE PROMPT, not the payload and not the check. The payload is right -
+  // chart 13 carries hour_known=true and chart.hour="戊寅" - and the check fires only on
+  // real falsehoods. But the prompt described ONLY the false branch:
+  //
+  //   "hour_known: if false, state once, plainly, that the fourth pillar cannot be mapped"
+  //
+  // which HANDS THE MODEL THE SENTENCE and gives it no counter-instruction. The observed
+  // output was that sentence almost verbatim - "Pilar jam lahirmu tidak dapat dipetakan" -
+  // on 6 of 7 occurrences, all at attempt 1, concentrated on one chart. A conditional the
+  // model does not honour, whose consequent we supplied.
+  //
+  // So the prompt now states the TRUE branch explicitly. This test is what stops the
+  // negative half being dropped again in an edit that only reads the false half.
+  assert.match(MASTER_PROMPT, /hour_known: TRUE means/,
+    'the prompt must state what TRUE means, not only what FALSE means');
+  assert.match(MASTER_PROMPT, /never say or imply\s+it is missing, unmappable, or unknown/,
+    'and must forbid the claim outright when the hour is known');
+  assert.match(MASTER_PROMPT, /Only when it is FALSE/,
+    'the instruction to state it must be scoped to the false branch');
+});
+
+// ── VERDICT WORDS ARE READ AS VERDICTS (fix 2, 2026-08-21) ──
+
+test('AN ELEMENT BEING BALANCED IS NOT A STRENGTH VERDICT', () => {
+  // Reproduced from fresh-1996's own semantic JSON: Day Master element Air, verdict
+  // `strong`, so "Seimbang" is a wrong word for it. The old subject list included the
+  // element, so element-DISTRIBUTION prose read as a verdict claim.
+  //
+  // CLAUDE.md rules 9 and 10 are the argument: the element bars are a display
+  // distribution and NEVER a strength score. A check reading "<element> seimbang" as a
+  // verdict makes exactly the conflation the engine forbids.
+  const fresh = buildSemanticJson(calculateBaziChart({
+    birthDate: '1996-10-02', birthTime: '19:20',
+  }));
+  assert.equal(fresh.strength.verdict, 'strong', 'fixture assumption');
+  assert.equal(fresh.core.element, 'Air', 'fixture assumption: the collision needs this element');
+
+  // The sentence goes in a NON-strength block, which is where element distribution
+  // belongs. A SECOND, stricter pass still fires on any wrong verdict word inside the
+  // block that CITES the strength fact, and that pass is deliberately NOT changed here:
+  // no false positive has been observed against it, and widening a check on a
+  // hypothesis is the thing this repo keeps paying for. Recorded as a limit, not fixed.
+  const other = fresh.facts.find((f) => f.provenance?.kind !== 'strength' && f.label_meaning);
+  const ok = withBlockText(goodReading(fresh), other.id,
+    'Unsur Air seimbang dengan Logam di baganmu. ' + other.label_meaning);
+  assert.ok(!checksIn(validateRendering(ok, fresh)).includes('fact.strength_contradiction'),
+    'describing element presence must not read as a verdict claim');
+});
+
+test('but a verdict claim ABOUT HER still hard-rejects', () => {
+  // The check must not have been widened into uselessness. The subject list is reader
+  // words, and every one of them still fires.
+  const fresh = buildSemanticJson(calculateBaziChart({
+    birthDate: '1996-10-02', birthTime: '19:20',
+  }));
+  const strengthId = fresh.facts.find((f) => f.provenance?.kind === 'strength').id;
+  for (const claim of ['Kamu seimbang di antara dua kutub', 'Baganmu lemah di area ini',
+    'Dirimu lemah saat tekanan datang']) {
+    const bad = withBlockText(goodReading(fresh), strengthId,
+      `${claim}. ${fresh.facts.find((f) => f.id === strengthId).label_meaning}`);
+    const result = validateRendering(bad, fresh);
+    assert.ok(checksIn(result).includes('fact.strength_contradiction'), `must catch: "${claim}"`);
+    assert.equal(result.hard, true, 'a verdict contradiction is HARD');
+  }
+});
+
+test('"yang kuat" IS AN ADJECTIVE and does not demand the strength meaning', () => {
+  // The literal string from the one fact.strength_same_breath in the 77-attempt trace:
+  // `kuat` modifies the Aspek, claims no verdict, and the check then demanded the
+  // strength meaning turn up beside it. Token ban where the defect is a construction.
+  const fresh = buildSemanticJson(calculateBaziChart({
+    birthDate: '1996-10-02', birthTime: '19:20',
+  }));
+  const strengthId = fresh.facts.find((f) => f.provenance?.kind === 'strength').id;
+  const adjectival = withBlockText(goodReading(fresh), strengthId,
+    'Kamu adalah seorang Samudra dengan Aspek Pelindung (Direct Resource) yang kuat. '
+    + 'Arahmu jelas dan langkahmu jarang goyah.');
+  assert.ok(!checksIn(validateRendering(adjectival, fresh))
+    .includes('fact.strength_same_breath'), 'an adjectival "yang kuat" claims no verdict');
+});
+
+test('AN ADJECTIVAL USE CANNOT HIDE A BARE LABEL LATER IN THE SAME BLOCK', () => {
+  // The other bug this could have been: skipping the first hit and returning null would
+  // let one early "yang kuat" mask a genuinely bare verdict further down. verdictUse
+  // scans on instead of bailing.
+  const fresh = buildSemanticJson(calculateBaziChart({
+    birthDate: '1996-10-02', birthTime: '19:20',
+  }));
+  const strengthId = fresh.facts.find((f) => f.provenance?.kind === 'strength').id;
+  const hidden = withBlockText(goodReading(fresh), strengthId,
+    'Aspek Pelindung yang kuat membentuk caramu bekerja. Baganmu Kuat. Titik.');
+  assert.ok(checksIn(validateRendering(hidden, fresh)).includes('fact.strength_same_breath'),
+    'the later bare verdict must still be caught');
+});
+
+// ── FIX 3: style.hedging IS CORRECT, and chart 5's 41% IS STALE ──
+
+test('TWO OF THE FOUR OBSERVED HEDGE REJECTIONS ALREADY PASS', () => {
+  // chart 5's 41% comes from the 08-18 trace, which predates the 08-17 change moving
+  // `mungkin` out of the blocklist into hedgeAboutReader(). Run against TODAY's guard,
+  // two of the four strings that were rejected then are accepted now - so the 41% is an
+  // upper bound and the current rate is unknown, exactly as the analysis caveated.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+
+  const nowFine = [
+    // `sedikit` as an ordinary quantity, not a hedge about whether anything is true.
+    'Kamu memiliki kelenturan tinggi sehingga perubahan mendadak yang membuat orang lain '
+      + 'kehilangan arah biasanya hanya menggeser langkahmu sedikit saja.',
+    // `mungkin` about the WORLD. The clause subject is Situasi, not the reader.
+    'Situasi mungkin berubah, tetapi kamu jarang ikut goyah karena kamu memiliki '
+      + 'kelenturan yang tinggi.',
+  ];
+  for (const text of nowFine) {
+    const reading = withBlockText(goodReading(), dmId, `${text} ${meaning}`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('style.hedging'),
+      `must NOT be rejected today: ${JSON.stringify(text.slice(0, 60))}`);
+  }
+});
+
+test('and the two that SHOULD still fire, do', () => {
+  // `mungkin` about the READER is a real hedge and stays caught. `cenderung` is the
+  // interesting one: it fired on 4 separate runs, always attempt 1, always on the same
+  // sentence - and the glossary cell it comes from says it FLAT:
+  //
+  //   glossary: "Kamu bertahan di situasi yang sudah jelas selesai."
+  //   model:    "Kamu cenderung bertahan di situasi yang sudah jelas selesai."
+  //
+  // So the model is softening a sentence Reyner wrote without a hedge. The check is not
+  // firing on ordinary Indonesian - it is catching a ruled string being weakened - which
+  // is why NOTHING IS CHANGED here. This test is the evidence for that decision.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+  const stillCaught = [
+    'Kamu cenderung bertahan di situasi yang sudah jelas selesai.',
+    'Kamu mungkin merasa belum pantas menyandang keberhasilanmu sendiri meskipun orang '
+      + 'lain melihatmu berhasil.',
+  ];
+  for (const text of stillCaught) {
+    const reading = withBlockText(goodReading(), dmId, `${text} ${meaning}`);
+    assert.ok(checksIn(validateRendering(reading, CHART_1)).includes('style.hedging'),
+      `must still be caught: ${JSON.stringify(text.slice(0, 60))}`);
+  }
+});
+
+test('THE GLOSSARY CELL IS FLAT, which is what makes the hedge a defect', () => {
+  // The load-bearing fact behind leaving the check alone. If the ruled string itself
+  // hedged, the check would be the defect instead.
+  // It is elemen_hilang.金 - a MISSING METAL cell, which is why chart 5 in particular
+  // keeps meeting it. Searched across every section rather than a named one, so moving
+  // the cell does not silently make this test vacuous.
+  const cells = Object.values(GLOSSARY)
+    .filter((sec) => sec && typeof sec === 'object')
+    .flatMap((sec) => Object.values(sec))
+    .filter((v) => v && typeof v === 'object')
+    .map((v) => v.label_meaning)
+    .filter((c) => typeof c === 'string');
+  const flat = cells.find((c) => c.includes('bertahan di situasi yang sudah jelas selesai'));
+  assert.ok(flat, 'the cell the model softened must still exist');
+  assert.ok(!/\bcenderung\b/i.test(flat), 'and it must still say it without a hedge');
+});
+
+// ── FIX 4: style.raw_pillar IS THE SAME DEFECT AS FIX 1 ────
+
+test('ALL SIX raw_pillar HITS WERE THE HOUR SENTENCE, so fix 1 covers them', () => {
+  // Applying the actual blocklist pattern to the paid prose - rather than eyeballing a
+  // nearby sentence - every one of the six style.raw_pillar occurrences matched inside:
+  //
+  //   "Pilar jam lahirmu tidak dapat dipetakan karena informasi waktu..."
+  //
+  // The same sentence as fact.hour_known_contradiction. fact.js's own docblock predicted
+  // this from the other direction: the hour defect was "caught by ACCIDENT" because "the
+  // raw_pillar STYLE ban, added hours earlier, happened to match the same sentence."
+  //
+  // So chart 13's top TWO checks - 6/18 and 5/18 - are ONE root cause, and the prompt fix
+  // in the first commit of this branch addresses both. NOTHING IS CHANGED in raw_pillar:
+  // it is correct, `pilar jam` IS the banned raw form where a palace name belongs, and it
+  // caught a real falsehood.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+  const observed = 'Pilar jam lahirmu tidak dapat dipetakan karena informasi waktu '
+    + 'kelahiran tidak tercatat.';
+
+  const checks = checksIn(validateRendering(
+    withBlockText(goodReading(), dmId, `${observed} ${meaning}`), CHART_1));
+  assert.ok(checks.includes('style.raw_pillar'), 'the raw pillar form is still banned');
+  assert.ok(checks.includes('fact.hour_known_contradiction'),
+    'and the SAME sentence still trips the hour check - one defect, two findings');
+});
+
+test('a PALACE name is never mistaken for a raw pillar', () => {
+  // The pattern's own note claims it is clean on all four "Pilar X" palace names, which
+  // are capital-P and never followed by a pillar word. Asserted rather than trusted,
+  // because five of the six observed hits sat in prose that ALSO used palace names
+  // correctly - so a pattern that could not tell them apart would have looked identical
+  // in the data.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+  const palaces = 'Pilar Kerja dan Pilar Diri ditempati oleh Benturan (Clash). '
+    + 'Pilar Akar dan Pilar Arah tetap tenang.';
+  assert.ok(!checksIn(validateRendering(
+    withBlockText(goodReading(), dmId, `${palaces} ${meaning}`), CHART_1))
+    .includes('style.raw_pillar'), 'palace names must never trip the raw-pillar ban');
+});
+
+// ── INSERTION IS SCOPED: bracket-ONCE means once (2026-08-22) ──
+
+test('A TERM THE MODEL BRACKETED LATER IS LEFT ALONE ENTIRELY', () => {
+  // Demonstrated defect, and invisible to style.unsanctioned_bracket because BOTH
+  // values are sanctioned:
+  //
+  //   before  "Kamu adalah Matahari yang tenang. Dan Matahari (The Sun) selalu terlihat."
+  //   after   "Kamu adalah Matahari (The Sun) yang tenang. Dan Matahari (The Sun) ..."
+  //
+  // Two bracketed mentions is rule 23 BROKEN, not kept. Insertion only checked whether
+  // a bracket followed the FIRST occurrence, so a correctly-bracketed later mention did
+  // not stop it.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const arche = CHART_1.core.archetype_name_id;
+  const en = CHART_1.core.archetype_name_en;
+  const reading = withBlockText(goodReading(), dmId,
+    `Kamu adalah ${arche} yang tenang. Dan ${arche} (${en}) selalu terlihat.`);
+
+  const result = validateRendering(reading, CHART_1);
+  const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId)).text;
+  // Counted by splitting rather than by a built regex: the term is glossary data and
+  // may carry regex metacharacters, and a heredoc has already eaten the backslashes in
+  // this file's escapes three times today.
+  const bracketed = served.split(`${arche} (`).length - 1;
+  assert.equal(bracketed, 1, `bracket-ONCE means once, got ${bracketed}: ${served.slice(0, 110)}`);
+  assert.equal(result.metrics.bracket_inserts, 0, 'and nothing should have been inserted');
+});
+
+test('INSERTION CANNOT CREATE AN UNSANCTIONED BRACKET, on any fixture chart', () => {
+  // Measured 2026-08-22 over every fixture chart plus fresh-1996: 100 insertions, and
+  // every value insertion can emit is a glossary name_en, which is exactly what
+  // SANCTIONED is built from. So the 9 style.unsanctioned_bracket occurrences in the
+  // 08-22 run are NOT insertion's doing - they are the model inventing a gloss, which
+  // insertion correctly SKIPS because a bracket already follows the term.
+  for (const tc of VALIDATION_CHARTS) {
+    const semantic = jsonFor(tc);
+    const bare = (semantic.core.archetype_name_id
+      ? [`Ada ${semantic.core.archetype_name_id} di baganmu.`] : [])
+      .concat(semantic.facts.filter((f) => f.label && f.label_bracket)
+        .map((f) => `Ada ${f.label} di baganmu.`))
+      .join(' ');
+    const dmId = semantic.facts.find((f) => f.id.startsWith('day_master_')).id;
+    const result = validateRendering(withBlockText(goodReading(semantic), dmId, bare), semantic);
+    assert.ok(!checksIn(result).includes('style.unsanctioned_bracket'),
+      `chart ${tc.id}: insertion produced an unsanctioned bracket`);
+  }
+});
+
+test('AN INVENTED GLOSS IS NORMALISED, not skipped and not rejected', () => {
+  // CHANGED 2026-08-22 on Reyner's ruling, and this test used to assert the opposite -
+  // that the invented gloss fires the check while insertion stands aside. That was the
+  // defect: skipping meant the bad value survived, `style.unsanctioned_bracket` fired
+  // SOFT, and a regeneration was spent on a formatting rule the engine already owns.
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const arche = CHART_1.core.archetype_name_id;
+  const en = CHART_1.core.archetype_name_en;
+  const invented = withBlockText(goodReading(), dmId,
+    `Kamu adalah ${arche} (Sun) yang tenang. Arahmu jelas dan langkahmu jarang goyah.`);
+
+  const result = validateRendering(invented, CHART_1);
+  const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId)).text;
+
+  assert.ok(served.includes(`${arche} (${en})`), `the value must be corrected: ${served.slice(0, 90)}`);
+  assert.ok(!served.includes('(Sun)'), 'and the paraphrase must be gone');
+  assert.ok(!checksIn(result).includes('style.unsanctioned_bracket'),
+    'so the check has nothing left to fire on, and no regeneration is spent');
+  assert.equal(result.metrics.bracket_normalised, 1, 'the correction must be counted');
+  assert.equal(result.metrics.bracket_inserts, 0, 'and must not also insert a second bracket');
+  // Surfaced for a human, because a corrected paraphrase is louder than an insertion:
+  // the model was GIVEN the value and wrote something else.
+  assert.ok(result.findings.some((f) => f.check === 'brackets.normalised'),
+    'and it must be visible to QA');
+});
+
+test('THE PROMPT SAYS THE BRACKET IS SUPPLIED, and names the field', () => {
+  // The prompt half of the 08-22 normalisation fix. The model HAS label_bracket on every
+  // fact and invented "(Sun)" anyway, so the instruction now names the field and forbids
+  // paraphrasing it. Pinned because an edit that only reads the badge-naming section
+  // would drop it without noticing.
+  assert.match(MASTER_PROMPT, /label_bracket/,
+    'the prompt must name the field the value comes from');
+  assert.match(MASTER_PROMPT, /COPY THAT STRING VERBATIM/,
+    'and must say to reproduce it rather than translate it');
+  assert.match(MASTER_PROMPT, /\(The Sun\)` is not `\(Sun\)/,
+    'with the observed failure as the example, so it is concrete');
 });
