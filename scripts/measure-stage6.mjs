@@ -178,6 +178,10 @@ for (const testChart of charts) {
           // A hit would return a previous run's prose and quietly count as a
           // pass, which is the one thing a measurement must not do.
           allowUnvalidatedCache: false,
+          // And neither must a spend guard: guard (a) caps renders per cache key
+          // at 3/hour and this runs many per chart, so it would floor its own
+          // arms. See qa-renders.mjs for the full note.
+          spendGuards: false,
         });
       } catch (err) {
         s.errors += 1;

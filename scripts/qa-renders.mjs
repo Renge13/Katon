@@ -205,6 +205,12 @@ for (const c of CHARTS) {
       // Banks every attempt's prose for the sidecar trace. See the TRACE block at
       // the end of this file for why a rate without its prose keeps costing money.
       captureProse: true,
+      // SPEND GUARDS OFF. Not a convenience - guard (a) caps renders per cache key
+      // at 3/hour, and this renders ONE chart n times in a few minutes, so runs 4+
+      // would be refused into the floor and the artifact would report a floor rate
+      // that is the guard's own doing. A measurement instrument must not be subject
+      // to the thing it measures.
+      spendGuards: false,
     });
     const truncated = r.source !== 'gemini'
       && (r.attempts || []).some((a) => a.error && !(a.stage6 || []).length);

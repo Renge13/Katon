@@ -57,7 +57,12 @@ for (const c of CHARTS) {
     const t0 = Date.now();
     let r;
     try {
-      r = await renderReading(semantic, { allowUnvalidatedCache: false });
+      // spendGuards off: this measures the floor rate and guard (a) would floor
+      // runs 4+ of the same chart itself. See qa-renders.mjs for the full note.
+      r = await renderReading(semantic, {
+        allowUnvalidatedCache: false,
+        spendGuards: false,
+      });
     } catch (e) {
       r = { source: 'THREW', error: String(e && e.message), attempts: [] };
     }

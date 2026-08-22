@@ -23,6 +23,7 @@ import { MASTER_PROMPT, PROMPT_VERSION, assertPromptLoaded } from '../lib/render
 import { parseRenderResponse, RenderShapeError } from '../lib/render/schema.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { readCache, writeCache, flagCache, __clearMemCache } from '../lib/render/cache.js';
+import { __clearMemRateLimit } from '../lib/ratelimit.js';
 import { renderReading, persistRendered, withTargetLanguage } from '../lib/render/index.js';
 import { STAGE6_VERSION, serveFenceReason, serveAllowed } from '../lib/render/fence.js';
 import { STAGE6_VERSION as GATE_VERSION } from '../lib/validate/index.js';
@@ -246,7 +247,7 @@ test('the floor reports the two things it cannot say', () => {
 // the two paths are the same shape by construction.
 
 test('a stored reading round-trips on its key, with its attribution', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   const key = cacheKey(CHART_1);
   const out = assembleFallback(CHART_1);
 
@@ -273,7 +274,7 @@ test('a row written with no Stage 6 gate is never returned to a serve path', asy
   // G task 3. This is the pre-H state: nothing validated it, so nothing serves
   // it - and it stays unservable AFTER H lands, because the discriminator is the
   // absent stage6_version rather than a status that H would start overwriting.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   const key = cacheKey(CHART_1);
   await writeCache(key, {
     engineVersion: CHART_1.engine_version,
@@ -290,7 +291,7 @@ test('a row written with no Stage 6 gate is never returned to a serve path', asy
 });
 
 test('the cache refuses to store an empty reading', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await assert.rejects(
     () => writeCache('k', { engineVersion: 'v', blocks: [], source: 'gemini' }),
     /empty reading/,
@@ -304,7 +305,7 @@ test('the cache refuses to store an empty reading', async () => {
 test('a flagged reading keeps serving', async () => {
   // pipeline-spec Stage 7: pulling it leaves a hole for every user who shares
   // that semantic profile.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   const key = cacheKey(CHART_1);
   await writeCache(key, {
     engineVersion: CHART_1.engine_version,
@@ -375,7 +376,7 @@ async function withEnv(env, fn) {
 }
 
 test('a first-try Gemini render returns with its attribution', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
     const out = await renderReading(CHART_1, {
@@ -390,10 +391,103 @@ test('a first-try Gemini render returns with its attribution', async () => {
   });
 });
 
+// ── SPEND GUARD (a): RENDERS PER CACHE KEY ──
+
+test('SPEND GUARD (a): the fourth render of one chart in an hour serves the floor', async () => {
+  // WHAT THIS BOUNDS. Rule 16 forbids persisting a floor, so a floored reader who
+  // reloads gets a genuinely fresh render - which self-heals quality and is the
+  // same sentence as unbounded cost. Three per hour per cache key, tuned so one
+  // reload still heals (Reyner, 2026-08-22).
+  __clearMemCache(); __clearMemRateLimit();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    // The cache is cleared between renders so every call is a genuine miss. That
+    // is the floored-reader-reloading shape: nothing was persisted, so nothing hits.
+    const render = async () => {
+      __clearMemCache();
+      return renderReading(CHART_1, {
+        fetchImpl: async () => { calls += 1; return geminiSays(validRender); },
+      });
+    };
+
+    for (let i = 1; i <= 3; i += 1) {
+      const out = await render();
+      assert.equal(out.source, 'gemini', `render ${i} of 3 must still reach the provider`);
+    }
+    assert.equal(calls, 3, 'three renders, three provider calls');
+
+    const fourth = await render();
+    assert.equal(calls, 3, 'the fourth must not reach the provider at all');
+
+    // IT SERVES, IT DOES NOT 503. Rule 17 names module assembly the
+    // always-available floor and this is the condition it is for. A spend guard
+    // that took the page away would trade a cost problem for an outage.
+    assert.equal(fourth.source, 'module_assembly');
+    assert.ok(fourth.blocks.length > 0, 'the reader still gets a reading');
+    assert.equal(fourth.qa_flag, 'spend_guard_renders_per_key',
+      'and the floor names the guard, not a gate it never reached');
+    assert.equal(fourth.stage6_version, `${STAGE6_VERSION}-floor`);
+
+    // The refusal is recorded as an attempt so a floor-rate measurement can tell
+    // it from a GATE floor. Conflating the two is the transport-truncation trap
+    // one level up, where one 503 turned a real 0 of 39 into a reported 3%.
+    const guarded = (fourth.attempts || []).filter((a) => a.spend_guard);
+    assert.equal(guarded.length, 1);
+    assert.equal(guarded[0].provider, null, 'no provider was involved');
+    assert.ok(guarded[0].retry_after > 0, 'and it carries when to try again');
+  });
+});
+
+test('SPEND GUARD (a): a cache HIT is never charged, so a returning reader is free', async () => {
+  // The guard is charged after the cache read for exactly this reason. A shared
+  // link that gets read a hundred times costs one render, and metering the reads
+  // would refuse the 4th visitor a reading that was already paid for and stored.
+  __clearMemCache(); __clearMemRateLimit();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    const key = cacheKey(CHART_1);
+    await writeCache(key, {
+      engineVersion: CHART_1.engine_version,
+      blocks: assembleFallback(CHART_1).blocks,
+      penutup: 'x',
+      source: 'gemini',
+      model: 'm',
+      promptVersion: 'p',
+      stage6Version: STAGE6_VERSION,
+    });
+    for (let i = 0; i < 6; i += 1) {
+      const out = await renderReading(CHART_1, {
+        fetchImpl: async () => { throw new Error('must not be called'); },
+      });
+      assert.equal(out.cached, true, `visit ${i + 1} is a hit`);
+      assert.equal(out.source, 'gemini', 'and it is the real reading, not the floor');
+    }
+  });
+});
+
+test('SPEND GUARD (a): the QA opt-out exists, because the guard would break the instrument', async () => {
+  // `qa:renders --n 10` renders one chart ten times in minutes. With the guard on,
+  // runs 4-10 would floor and the artifact would report a ~70% floor rate for a
+  // system at 10% - the guard destroying the instrument that measures the thing
+  // the guard exists to bound. Asserted rather than trusted to a comment.
+  __clearMemCache(); __clearMemRateLimit();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    for (let i = 0; i < 6; i += 1) {
+      __clearMemCache();
+      const out = await renderReading(CHART_1, {
+        spendGuards: false,
+        fetchImpl: async () => { calls += 1; return geminiSays(validRender); },
+      });
+      assert.equal(out.source, 'gemini', `run ${i + 1} must reach the provider`);
+    }
+    assert.equal(calls, 6, 'six runs, six provider calls, no guard in the way');
+  });
+});
+
 test('the master prompt is the front and the chart JSON is the back', async () => {
   // pipeline-spec PAYLOAD STRUCTURE. Chart data in the system instruction would
   // break the cacheable prefix on every call.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let body;
     await renderReading(CHART_1, {
@@ -412,7 +506,7 @@ test('the master prompt is the front and the chart JSON is the back', async () =
 });
 
 test('a transient failure retries once, then the chain lands on the floor', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
     const out = await renderReading(CHART_1, {
@@ -426,7 +520,7 @@ test('a transient failure retries once, then the chain lands on the floor', asyn
 });
 
 test('a non-retryable failure does not spend the second attempt', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     let calls = 0;
     await renderReading(CHART_1, {
@@ -437,7 +531,7 @@ test('a non-retryable failure does not spend the second attempt', async () => {
 });
 
 test('an invented fact id fails the attempt like a 500 would', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     const invented = JSON.stringify({
       blocks: [{ fact_ids: ['badge_naga_emas'], heading: 'h', text: 't' }],
@@ -452,7 +546,7 @@ test('an invented fact id fails the attempt like a 500 would', async () => {
 
 
 test('a cache hit costs no API call', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   const key = cacheKey(CHART_1);
   await writeCache(key, {
     engineVersion: CHART_1.engine_version,
@@ -476,7 +570,7 @@ test('a cache hit costs no API call', async () => {
 test('production with no Gemini key REFUSES rather than degrading quietly', async () => {
   // G task 1: a misconfigured deploy must be loud. Silently serving the floor
   // forever is indistinguishable from an outage and means something else.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ NODE_ENV: 'production', GEMINI_API_KEY: undefined }, async () => {
     await assert.rejects(
       () => renderReading(CHART_1, { fetchImpl: async () => geminiSays(validRender) }),
@@ -486,7 +580,7 @@ test('production with no Gemini key REFUSES rather than degrading quietly', asyn
 });
 
 test('measurement mode refuses the floor instead of counting it as a pass', async () => {
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     await assert.rejects(
       () => renderReading(CHART_1, {
@@ -509,7 +603,7 @@ test('the fence is OPEN now that Prompt H built the gate, and it names the gate'
   assert.equal(serveFenceReason(), null);
   assert.equal(serveAllowed(), true);
 
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
     const out = await renderReading(CHART_1, { fetchImpl: async () => geminiSays(validRender) });
     assert.equal(out.stage6_version, STAGE6_VERSION, 'a passing render records its gate');
@@ -525,7 +619,7 @@ test('the fence is OPEN now that Prompt H built the gate, and it names the gate'
 test('rows written before the gate existed stay unservable after it exists', async () => {
   // The discriminator was chosen to survive exactly this moment. A status flag
   // would have been overwritten by H; a null stage6_version cannot be.
-  __clearMemCache();
+  __clearMemCache(); __clearMemRateLimit();
   await writeCache('legacy-key', {
     engineVersion: CHART_1.engine_version,
     blocks: [{ fact_ids: ['day_master_Fire'], heading: 'h', text: 'ditulis sebelum gerbang ada' }],
