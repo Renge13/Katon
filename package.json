@@ -10,6 +10,7 @@
     "test": "node scripts/test-all.mjs",
     "lint": "eslint .",
     "check:copy": "node scripts/check-copy.js",
+    "check:bytes": "node scripts/check-bytes.mjs",
     "typecheck": "tsc -p tsconfig.check.json",
     "calibrate:strength": "node scripts/calibrate-strength.mjs",
     "gen:solar-terms": "node scripts/gen-solar-term-fixture.mjs",

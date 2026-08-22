@@ -70,10 +70,20 @@ const scripts = pkg.scripts || {};
  * The non-`test:` gates, named explicitly because there is no prefix that groups
  * them. Each one FAILS on a real defect rather than printing an observation:
  * `lint` and `typecheck` are self-evident, `check:copy` enforces rule 20's
- * keyboard-characters-only line on the copy banks, and the two audits enforce the
- * card's contrast rulings and its content budget.
+ * keyboard-characters-only line on the copy banks, `check:bytes` rejects stray
+ * control bytes in tracked source, and the two audits enforce the card's contrast
+ * rulings and its content budget.
+ *
+ * `check:bytes` is here because lint, typecheck and check:copy all read TEXT and
+ * a corrupt byte inside a string literal is invisible to all three - added
+ * 2026-08-22 after NUL bytes reached a literal that `PROMPT_VERSION` is hashed
+ * from, and after the same scan found a `\b` that had been eaten into a literal
+ * 0x08 in PROGRESS.md months earlier.
  */
-const EXTRA_GATES = ['lint', 'typecheck', 'check:copy', 'audit:card-contrast', 'audit:card-budget'];
+const EXTRA_GATES = [
+  'lint', 'typecheck', 'check:copy', 'check:bytes',
+  'audit:card-contrast', 'audit:card-budget',
+];
 
 // `^test:` and nothing cleverer. `test` itself does not match, so this cannot
 // recurse; `report:*` does not match, which is the whole point of that prefix.
