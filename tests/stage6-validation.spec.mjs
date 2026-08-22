@@ -2168,3 +2168,16 @@ test('AN INVENTED GLOSS IS NORMALISED, not skipped and not rejected', () => {
   assert.ok(result.findings.some((f) => f.check === 'brackets.normalised'),
     'and it must be visible to QA');
 });
+
+test('THE PROMPT SAYS THE BRACKET IS SUPPLIED, and names the field', () => {
+  // The prompt half of the 08-22 normalisation fix. The model HAS label_bracket on every
+  // fact and invented "(Sun)" anyway, so the instruction now names the field and forbids
+  // paraphrasing it. Pinned because an edit that only reads the badge-naming section
+  // would drop it without noticing.
+  assert.match(MASTER_PROMPT, /label_bracket/,
+    'the prompt must name the field the value comes from');
+  assert.match(MASTER_PROMPT, /COPY THAT STRING VERBATIM/,
+    'and must say to reproduce it rather than translate it');
+  assert.match(MASTER_PROMPT, /\(The Sun\)` is not `\(Sun\)/,
+    'with the observed failure as the example, so it is concrete');
+});

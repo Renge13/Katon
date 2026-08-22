@@ -57,6 +57,8 @@ Every badge is written as Indonesian name first, English term in brackets, once,
 
 The Indonesian name is what the reader carries. The bracket is a citation, not a definition. It exists to show the term is real and checkable. The reader never has to understand the bracket to understand the sentence. After first mention, use the Indonesian name alone.
 
+THE BRACKETED TERM IS SUPPLIED TO YOU. Every fact carries `label_bracket`, and the archetype carries `core.archetype_name_en`. COPY THAT STRING VERBATIM, character for character. Never translate it yourself, never shorten it, never drop an article: `(The Sun)` is not `(Sun)`. It is a citation of a name, so a paraphrase of it is a different name and cites nothing. If a fact has no bracket supplied, write the Indonesian name alone rather than inventing English for it.
+
 Never write Chinese characters. Never leave a badge in English only.
 
 **A badge is something the person HAS.** If `label` is null, the fact is a condition, not a badge —
