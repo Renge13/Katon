@@ -24,7 +24,9 @@ import { parseRenderResponse, RenderShapeError } from '../lib/render/schema.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { readCache, writeCache, flagCache, __clearMemCache } from '../lib/render/cache.js';
 import { __clearMemRateLimit } from '../lib/ratelimit.js';
-import { renderReading, persistRendered, withTargetLanguage } from '../lib/render/index.js';
+import {
+  renderReading, persistRendered, withTargetLanguage, __clearInFlight,
+} from '../lib/render/index.js';
 import { STAGE6_VERSION, serveFenceReason, serveAllowed } from '../lib/render/fence.js';
 import { STAGE6_VERSION as GATE_VERSION } from '../lib/validate/index.js';
 import { splitParagraphs, inspectParagraphs } from '../lib/render/paragraphs.js';
@@ -388,6 +390,79 @@ test('a first-try Gemini render returns with its attribution', async () => {
     assert.equal(out.prompt_version, PROMPT_VERSION);
     assert.equal(out.cached, false);
     assert.equal(out.cache_key, cacheKey(CHART_1));
+  });
+});
+
+// ── SPEND GUARD (b): IN-FLIGHT DE-DUPLICATION ──
+
+test('SPEND GUARD (b): eight concurrent misses on one chart share ONE chain', async () => {
+  // THE SHAPE THIS EXISTS FOR. The funnel polls every 3s and a render takes a
+  // measured p50 of 7.6s per attempt, up to ~23s at three - so roughly eight polls
+  // land inside one render, and before this each one started its own chain. Not a
+  // poll bug: a refresh, two tabs, or a shared link opened twice do the same.
+  __clearMemCache(); __clearMemRateLimit(); __clearInFlight();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    let release;
+    const gate = new Promise((r) => { release = r; });
+    // One transport object, shared by every caller: that is what production looks
+    // like, where all of them pass undefined.
+    const fetchImpl = async () => { calls += 1; await gate; return geminiSays(validRender); };
+
+    const all = Promise.all(Array.from({ length: 8 }, () => renderReading(CHART_1, { fetchImpl })));
+    // Let all eight reach the map before the single chain is allowed to finish.
+    await new Promise((r) => { setImmediate(r); });
+    release();
+    const outs = await all;
+
+    assert.equal(calls, 1, 'eight concurrent callers, ONE provider call');
+    assert.equal(outs.length, 8);
+    for (const out of outs) assert.equal(out.source, 'gemini', 'and every caller gets the reading');
+
+    // A SHALLOW COPY EACH, not one shared object. Two callers holding one
+    // reference means one can mutate a field the other reads.
+    assert.ok(outs[0] !== outs[1], 'each caller gets its own object');
+    outs[0].source = 'mutated';
+    assert.equal(outs[1].source, 'gemini', 'and mutating one must not touch another');
+  });
+});
+
+test('SPEND GUARD (b): the map is cleared on failure, so one chart is not pinned to it', async () => {
+  // A rejected chain left in the map would serve its own failure to every later
+  // caller for the life of the instance - a cache of a failure, which is the exact
+  // thing rule 16 refuses for the floor.
+  __clearMemCache(); __clearMemRateLimit(); __clearInFlight();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    const boom = async () => { throw new Error('transport is down'); };
+    await assert.rejects(
+      () => renderReading(CHART_1, { fetchImpl: boom, allowFallback: false }),
+    );
+
+    // A fresh caller must get a fresh chain rather than the stored rejection.
+    __clearMemCache();
+    let calls = 0;
+    const out = await renderReading(CHART_1, {
+      fetchImpl: async () => { calls += 1; return geminiSays(validRender); },
+    });
+    assert.equal(calls, 1, 'the next caller ran its own chain');
+    assert.equal(out.source, 'gemini');
+  });
+});
+
+test('SPEND GUARD (b): callers wanting DIFFERENT renders are never given each other\'s', async () => {
+  // A shared promise hands the first caller's options to every later one. Two
+  // callers wanting one chart at different regeneration budgets want different
+  // renders, and quietly serving one the other's result would be a correctness bug
+  // wearing a performance fix's clothes. The map key carries an option signature.
+  __clearMemCache(); __clearMemRateLimit(); __clearInFlight();
+  await withEnv({ GEMINI_API_KEY: 'test', OPENAI_API_KEY: undefined }, async () => {
+    let calls = 0;
+    const fetchImpl = async () => { calls += 1; return geminiSays(validRender); };
+    await Promise.all([
+      renderReading(CHART_1, { fetchImpl, validationRetries: 0 }),
+      renderReading(CHART_1, { fetchImpl, validationRetries: 3 }),
+    ]);
+    assert.equal(calls, 2, 'different options, different chains');
   });
 });
 
