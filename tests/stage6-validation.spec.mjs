@@ -637,7 +637,7 @@ test('THE ARCHETYPE IS A REQUIRED POINT, not merely context', () => {
   }
 });
 
-test('a reading that opens on the ELEMENT is rejected, and only softly', () => {
+test('a reading that opens on the ELEMENT is COUNTED, and never rejected', () => {
   // "Kamu adalah Kayu (Wood) reads like a spreadsheet header" - Reyner. This is
   // the exact sentence shape that made two of four charts unsellable.
   const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
@@ -648,10 +648,16 @@ test('a reading that opens on the ELEMENT is rejected, and only softly', () => {
   const result = validateRendering(opensOnElement, CHART_1);
   assert.ok(checksIn(result).includes('opening.archetype_missing'),
     `an element-first opening must be caught: ${checksIn(result).join(', ')}`);
-  // SOFT, never hard. A missing archetype is one clause short, which a
-  // regeneration fixes; it is not a fact contradiction and not an ethics failure.
-  // fact.js hardcodes severity 'hard', which is why this rule is not in fact.js.
-  assert.equal(result.hard, false, 'a missing archetype is not a HARD failure');
+  // DEMOTED TO A FLAG 2026-08-22 on the n=10 measurement. It had been soft on the
+  // reasoning that "a regeneration fixes it" - and the data says it does not: 20
+  // occurrences inside floored runs, present in 13 of the 14, at attempt 1 in 9. It was
+  // the leading cause of floors, and a floored reader receives a document the model
+  // never wrote. The obligation stays in the prompt and in `must_cover`; only the
+  // rejection went. So it must be COUNTED and must not change the verdict.
+  assert.equal(result.hard, false, 'never a HARD failure');
+  const failing = result.findings.filter((f) => f.severity !== 'flag');
+  assert.ok(!failing.some((f) => f.check === 'opening.archetype_missing'),
+    'it must not be able to reject a reading');
   assert.ok(!opensOnElement.blocks[0].text.includes(archetype), 'fixture must not name it');
 
   // The floor, which DOES name it, is the control.
