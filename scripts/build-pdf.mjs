@@ -50,7 +50,8 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { assembleFallback } from '../lib/render/fallback.js';
-import { completeEdition, readingOnly, glyphProof } from '../lib/pdf/document.js';
+import { readingOnly, glyphProof } from '../lib/pdf/document.js';
+import { buildCompleteEditionPdf } from '../lib/pdf/build.js';
 import { buildAppendix } from '../lib/pdf/appendix.js';
 import { roundTrip } from '../lib/pdf/inspect.js';
 import { CANARY } from '../lib/pdf/fonts.js';
@@ -95,11 +96,20 @@ if (!rendered) {
   source = 'module_assembly (THE FLOOR - not a reading)';
 }
 
-const doc = READING_ONLY
-  ? readingOnly({ chart, semanticJson, rendered })
-  : completeEdition({ chart, semanticJson, rendered });
-
-const buf = await renderToBuffer(doc);
+// THE COMPLETE EDITION GOES THROUGH THE FIXED POINT, ALWAYS. This script does not
+// render one itself: `buildCompleteEditionPdf` is the only door to those bytes,
+// because build step 4 is ship-blocking and a script that could bypass it is a
+// script that will. `--reading-only` is build step 2's one page and has no appendix,
+// so it has nothing to cross-reference and renders directly.
+let buf;
+let refReport = null;
+if (READING_ONLY) {
+  buf = await renderToBuffer(readingOnly({ chart, semanticJson, rendered }));
+} else {
+  const built = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  buf = built.buffer;
+  refReport = built.report;
+}
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, buf);
 
@@ -128,6 +138,26 @@ console.error(`chart ${DATE} ${TIME} - ${semanticJson.core?.archetype_name_id}`)
 console.error(`reading source: ${source}`);
 console.error(`appendix: ${appendix.count} entries in `
   + `${appendix.groups.filter((g) => g.entries.length).length} groups`);
+
+// ── BUILD STEP 4's REPORT ─────────────────────────────────
+// Printed in the shape prompt M's correction 3 specifies, because the point of that
+// shape is that a reader can tell which of the three checks passed rather than
+// reading one aggregate OK. Nothing here can be false: every line reports a number
+// the build already refused to proceed without.
+if (refReport) {
+  const r = refReport;
+  console.error(`\npage map converged after ${r.rebuilds} rebuild(s)`);
+  console.error(`REF VERIFY (by construction): ${r.anchors}/${r.anchors} anchors land where printed`);
+  console.error(`appendix starts on page ${r.appendixStart} of ${r.pages}; `
+    + `refs pointing before it: ${r.refsBeforeAppendix}`);
+  console.error(`reference rows drawn on the chart page: ${r.referenced}/${r.referenced}`);
+  // The gap between anchors and refs is correction 1, not a shortfall. Named, so
+  // nobody reads 19 of 21 as two missing references.
+  if (r.unreferenced.length) {
+    console.error(`anchored but not referenced (conditions - correction 1): `
+      + `${r.unreferenced.join(', ')}`);
+  }
+}
 console.error(`embedded fonts: ${trip.fonts.map((f) => `${f.glyphs} glyphs/${f.bytes}B`).join(', ')}`);
 
 if (!trip.ok) {
