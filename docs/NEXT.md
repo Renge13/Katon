@@ -32,9 +32,59 @@ more than another clause.
    MEASUREMENTS (**read the 08-11 baseline row FIRST — a stored gate row is not a valid comparator
    for a later change**), and THE INTERIM STATE (Xendit go-live status — read it before touching
    anything near the paid path).
-3. `prompts/L-opening-gate.md` — the active build prompt. FOUR ordered commits, 0 to 3.
+3. `prompts/M-tranche3.md` — the active build prompt. Commits 0 and 1 are docs-only; **commits 2
+   to 4 touch `glossary.json` and `facts.js`** and were held until the promotion merged. It has.
 
-**THE READ IS DONE. The current work is `docs/prompts/L-opening-gate.md`.**
+# THE PROMOTION LANDED, 2026-08-23. THE PRODUCT IS LIVE.
+
+`#71` and `#72` merged (`f9c1c83`, `a27053f`). **Free is the full mirror, served from the new
+pipeline, and Rp 19.000 buys the hi-res Card B plus the Complete Edition PDF.** `contents/*.md`,
+`lib/content/`, `lib/readingView.js`, every `/api/reading/*` route and `lib/mirror/fence.js` are
+deleted. Smoke-tested on production the same day: the mirror serves ungated, the offer sits after the
+reading, the delivery endpoints 402 unpaid, and all five static pages render.
+
+**ALL FOUR PRECONDITIONS WERE MET.** 1 MET 08-07 · 2 MET 08-23 · 3a CLEARED 08-23 · 3b MET 08-23
+(fresh-1996 SHIPS, chart 5 PROSE PASS) · 4 MET 08-12.
+
+**3a WAS RULED OUT OF THE GATE. IT WAS NOT MEASURED INTO COMPLIANCE AND IT WAS NOT WIDENED.**
+Reyner, 2026-08-23, verbatim:
+
+> **Rule 3a Clearance:** The 10% floor rate threshold is officially removed as a launch blocker. The
+> deterministic fallback floor (module assembly) renders ruled, production-grade glossary prose, is
+> never cached, and self-heals on a simple reload. A 20% floor rate represents a safe, graceful
+> degradation rather than a broken customer state. Precondition 3a is cleared for promotion.
+
+**No number was edited. 10% was not changed to 20% anywhere in the codebase**, and a session that
+finds it changed has found a defect rather than the ruling. The floor rate is still measured
+(PROGRESS MEASUREMENTS, 08-23, ~20% at `REGENERATION_BUDGET 2`) and it is still the availability
+budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
+or no-ship.
+
+**THE CURRENT WORK IS `docs/prompts/M-tranche3.md`** - the tranche-3 repetition variants, option C
+with B as the fallback (ruled 08-22). Not the critical path; the critical path is done.
+
+## OPEN AND OWNED BY REYNER, not by a commit
+
+- **UNSET `MIRROR_PREVIEW_TOKEN` in Vercel.** Inert now, and a stale secret in a deploy is how a
+  test flag became architecture once already.
+- **Confirm the Xendit keys in Vercel are LIVE, not test.** Precondition 1 is recorded MET; a
+  recorded fact about a dashboard is worth re-reading on the day money can move.
+- **The Gemini balance alert still does not exist.** Interim register, his end condition requires it
+  to have fired once. With one provider an exhausted balance is a 100% floor rate - and after this
+  merge that reaches real customers rather than a preview.
+
+## STILL UNRULED
+
+- **Whether BREADTH becomes an explicit gate requirement.** Only 7 of 13 facts on chart 5 are
+  required points, so a reading's fullness is a side effect of how much the model writes rather than
+  something the gate guarantees. PROGRESS, RULED 2026-08-22 (evening), section 3.
+
+---
+
+## The prompt-L history below is kept as the record of how the read was closed
+
+**Prompt L is DONE.** Its four commits landed and the read it answered is in
+`docs/qa/2026-08-19-READ-VERDICT.md`.
 
 Reyner read five readings across four charts on 2026-08-19 and ruled five items. The verdict, the
 rulings and the measurements are in `docs/qa/2026-08-19-READ-VERDICT.md`. **That file lands on main,
