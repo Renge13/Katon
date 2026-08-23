@@ -49,7 +49,31 @@
 //      free mirror — the card + PDF exist and ship — AND `/harga`, `/syarat` and
 //      INVOICE_DESCRIPTION describe that, not the deep read. Otherwise promotion
 //      leaves a live SKU selling something the same commit just gave away.
-//      NOT MET. The full package is PROGRESS.md, THE DEFERRED REGISTER.
+//      **NOT MET.** The full package is PROGRESS.md, THE DEFERRED REGISTER.
+//
+//      TWO CLAUSES HERE TOO, and one of them moved on 2026-08-23:
+//
+//      2a. THE DELIVERABLE EXISTS AND IS WIRED. **MET 2026-08-23.** The Complete
+//          Edition PDF renders from `render_cache` with the page-reference fixed
+//          point ship-blocking (prompt M steps 1-5), and `lib/deliver/handlers.js`
+//          gates both artifacts behind `row.paid === true` as ONE delivery
+//          (step 6). `tests/deliver-route.spec.mjs`.
+//
+//      2b. THE COPY DESCRIBES IT. **NOT MET, and it is deliberately last.**
+//          `/harga`, `/syarat` and `INVOICE_DESCRIPTION` still name the deep
+//          read, because that is still what the paid path delivers today. Moving
+//          those strings BEFORE promotion would charge for card + PDF and hand
+//          over the 7-beat read - the merchant-compliance problem
+//          INVOICE_DESCRIPTION's own docblock exists to record, reintroduced.
+//          They move IN THE PROMOTION COMMIT.
+//
+//      AND NOTE WHAT 2a's WIRING IMPLIES, because it is the same sequencing this
+//      row already argues: both artifacts read the NEW pipeline, so
+//      `lib/deliver/handlers.js` refuses a reading with no `cache_key` rather
+//      than building a PDF on the floor or a card that names her Bambu beside a
+//      reading that names her Akar. A legacy funnel row has no cache_key. So the
+//      delivery cannot serve a buyer until promotion, BY CONSTRUCTION, and the
+//      constraint is now checked in code instead of described in a doc.
 //
 //   3. TWO CLAUSES, AND THEY HAVE SEPARATE ANSWERS. The 08-19 STRICT form was
 //      "every chart RENDERS **and would be SOLD** at the live price". The

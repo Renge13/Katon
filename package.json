@@ -29,6 +29,7 @@
     "test:stage5": "node --conditions=react-server --test tests/stage5-render.spec.mjs",
     "test:stage6": "node --conditions=react-server --test tests/stage6-validation.spec.mjs",
     "test:mirror": "node --conditions=react-server --test tests/mirror-route.spec.mjs",
+    "test:deliver": "node --conditions=react-server --test tests/deliver-route.spec.mjs",
     "test:ratelimit": "node --conditions=react-server --test tests/ratelimit.spec.mjs",
     "measure:stage6": "node --env-file-if-exists=.env.local --conditions=react-server scripts/measure-stage6.mjs",
     "emit:semantic": "node scripts/emit-semantic.mjs",
