@@ -846,6 +846,11 @@ contradiction is his to settle, not this file's to smooth over.**
 > *"Depth 3 is thinner, not tighter. It completely dropped entire factual nodes to hit length
 > targets."*
 
+**THE ARTIFACT: `docs/qa/2026-08-22-depth-1-vs-3-postfixes.md`** - two charts, each at two
+depths, every word lifted verbatim from the 40-run trace already paid for. Prompt
+`22316c3349d0ea46`, gate `1.17.0`. Cited here because it was cited NOWHERE until 2026-08-22, and an
+uncited artifact is one nobody can find from the ruling it produced.
+
 `REGENERATION_BUDGET` 3 -> 2, shipped as its own commit. **The padding test passed at depth 3;
 BREADTH DID NOT.** This is the erosion question arriving as a verdict rather than as a curve: the
 08-22 measurement could say a regeneration re-introduces a check the previous attempt passed (45% at

@@ -91,6 +91,7 @@ import { PROMPT_VERSION } from '../lib/render/prompt.js';
 // The regeneration budget, imported rather than described in prose. The artifact's own
 // sentence about "one initial plus N regenerations" is generated from this.
 import { REGENERATION_BUDGET } from '../lib/render/config.js';
+import { collides } from './check-qa-artifacts.mjs';
 // The threshold this artifact exists to make fittable. Imported rather than retyped so
 // the printed number cannot drift from the one the gate actually used.
 import { COVERAGE_PARAMS, STAGE6_VERSION } from '../lib/validate/index.js';
@@ -157,6 +158,26 @@ if (ESTIMATE) {
   process.exit(0);
 }
 
+/**
+ * Does this output path collide with an artifact already in the same directory?
+ *
+ * ONE IMPLEMENTATION, TWO CALLERS.  lives in check-qa-artifacts.mjs and is
+ * imported rather than restated: a write-time guard and a build-time check that
+ * disagreed about what a collision is would be worse than either alone, and this repo
+ * has paid for a verifier that was a second implementation before.
+ */
+function collidingArtifact(outPath) {
+  const dir = path.dirname(outPath);
+  const me = path.basename(outPath);
+  if (!fs.existsSync(dir)) return null;
+  for (const other of fs.readdirSync(dir)) {
+    if (other === me || !/.(md|json)$/.test(other)) continue;
+    const how = collides(me, other);
+    if (how) return { other, how };
+  }
+  return null;
+}
+
 // ── IT REFUSES TO OVERWRITE AN ARTIFACT. ───────────────────
 // Added 2026-08-21 because the default path DESTROYED a committed measurement. The
 // default is `docs/qa/<today>-renders.md`, commit 1's n=1 artifact was already at
@@ -174,6 +195,34 @@ if (!ESTIMATE && fs.existsSync(OUT) && !process.argv.includes('--force')) {
   console.error('same-day rerun does by accident - it destroyed a committed measurement once.');
   console.error('\nPass --out <FILE> to write elsewhere, or --force to overwrite deliberately.');
   process.exit(2);
+}
+
+// ── AND IT REFUSES A COLLIDING NAME. ───────────────────────
+// Ruled by Reyner 2026-08-22, and enforced HERE for the same reason the guard above
+// is: at the moment somebody picks `--out`, not in a convention doc they are not
+// reading. `2026-08-22-renders-n10-postfix.md` and `...-postfixes.md` differ by one
+// `s`, hold two different traces with two different floor rates, and sent him to the
+// WRONG FILE mid-verdict.
+//
+// THE OVERWRITE GUARD IS WHAT MAKES THIS NECESSARY, which is the part worth seeing.
+// Told it cannot overwrite, the obvious next move is to add a character - a plural, a
+// `2`, a `-v2` - and that produces exactly the collision. The two guards are one
+// mechanism: the first stops you destroying evidence, and without the second it
+// pushes you into making evidence unciteable instead.
+//
+// `--force` does NOT bypass it. Forcing an overwrite is a deliberate act on a file
+// that already exists; forcing a bad NAME is not a thing anyone needs to do.
+if (!ESTIMATE) {
+  const collision = collidingArtifact(OUT);
+  if (collision) {
+    console.error(`\nREFUSING: ${path.basename(OUT)} differs from the existing `
+      + `${collision.other} only by ${collision.how}.`);
+    console.error('Ruled 2026-08-22: name an artifact for what it MEASURES, not for which');
+    console.error('attempt it was. A citation that resolves to the wrong evidence is worse');
+    console.error('than a missing one, because the argument still completes.');
+    console.error('\nPick a name that says what changed. `npm run check:qa` enforces the same rule.');
+    process.exit(2);
+  }
 }
 
 // ── the runs ───────────────────────────────────────────────
