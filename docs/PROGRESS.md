@@ -864,11 +864,36 @@ look at - which is the same instrument failure the 08-21 harness row was built t
 end, arriving one level up. A pooled RATE is the only form of this criterion that
 the instrument can actually answer.
 
-**IT IS MET.** `docs/qa/2026-08-22-renders-n10-postfixes.md`: pooled **4/40 = 10%**,
-at or below the threshold. Promotion goes **2 of 4 -> 3 of 4**.
+**THE RENDER CLAUSE IS MET.** `docs/qa/2026-08-22-renders-n10-postfixes.md`: pooled
+**4/40 = 10%**, at or below the threshold.
+
+**AND THAT IS ONE OF TWO CLAUSES — AMENDED 2026-08-23 (Reyner).** The 08-19 STRICT
+form was "every chart in the reference QA set **renders** AND **would be sold** at the
+live price". The threshold above replaces the RENDER clause and **only** that clause.
+The SOLD clause stands unamended and is **NOT MET**:
+
+| | Precondition 3 clause | Status | Who closes it |
+|---|---|---|---|
+| **3a** | RENDER — pooled floor rate at or below 10% at n=10 | **MET 2026-08-22**, pooled 4/40, gate 1.17.0, prompt 22316c3349d0ea46 | closed; the measurement is the artifact |
+| **3b** | SOLD — Reyner has read real readings AS THE BUYER and would sell them | **NOT MET.** Owed on the **08-22** artifact | **Reyner.** No measurement closes it |
+
+So promotion is **2 of 4 whole**, plus 3a. It is blocked on **precondition 2 AND on
+3b** — not, as this section said until 2026-08-23, on precondition 2 alone.
+
+**WHY THAT NUMBER WAS WRONG AND IS WORTH THE PARAGRAPH.** `b843631` wrote "Promotion
+goes 2 of 4 -> 3 of 4", and the same commit's body says *"a fresh read of the 08-22
+artifact is still Reyner's to give and no threshold substitutes for it"*. Both
+sentences are in the same commit. The second one is correct and the first one counts
+as though it were not: **a precondition with two clauses cannot be counted met while
+one clause is outstanding.** The reason it matters more than a tally is that the count
+is the field a promotion decision actually reads - the paragraph explaining the
+caveat is the field it does not. Every other line here restates a ruling; this one
+corrects an arithmetic error in how a ruling was recorded, and 3a's threshold is
+untouched by it.
 
 **WHAT THIS RULING DOES NOT DO, stated because a threshold is easy to over-read.**
-It does not say a 10% floor is good, and it does not retire the READ. Precondition
+It does not say a 10% floor is good, and **it does not retire the READ** - which is
+clause 3b above, and the reason that clause needed writing down separately. Precondition
 3 exists so that Reyner has judged real readings sellable, and the 08-19 READ found
 2 of 4 charts failing on quality - chart 13 opening on the element instead of the
 archetype, and fresh-1996 burying the day master behind an Aspek. **Both have since
@@ -914,7 +939,10 @@ failures are the same sentence.**
 **PRECONDITION 3 WAS RESTATED STRICT on 2026-08-19, and it changes this table's arithmetic.**
 **~~It is met when every chart in the reference QA set renders~~ SUPERSEDED 2026-08-22 - the absolute
 form is a lottery over 40 draws, not a gate. The criterion is now a pooled floor rate at or below 10%
-at n=10; see RULED 2026-08-22 above. The clause below about being SOLD is untouched by that ruling.**
+at n=10; see RULED 2026-08-22 above. The clause below about being SOLD is untouched by that ruling** -
+it is clause **3b**, it is **STILL OPEN**, and it is owed on the 08-22 artifact. This sentence already
+said "untouched" on 2026-08-22 and the promotion count said "3 of 4" anyway, which is the whole reason
+the clauses are now numbered and tabled above rather than described in passing.
 It is met when every chart in the reference QA set renders AND would be sold at the live price. Chart 5 FLOORED on
 the 08-19 run, so its two readings are prompt-identical stored prose from
 `docs/qa/2026-08-18-retry-depth.json` — zero cost, and not a live render. *"A promotion gate that relies

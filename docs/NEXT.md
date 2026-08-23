@@ -62,12 +62,19 @@ the PDF built (precondition 2's other half).
 
 **PROMOTED TO NEXT, 2026-08-21: the n-renders QA harness. It is no longer queued behind anything.**
 
-**AMENDED 2026-08-22: precondition 3 is a POOLED RATE, at or below 10% at n=10, and it is MET** (pooled
-4/40 on `docs/qa/2026-08-22-renders-n10-postfixes.md`). The absolute form below is superseded - at a 10%
-per-run floor a clean 40-draw sweep has probability 1.5%, so it was a lottery rather than a gate. The
-paragraph stands as the record of why the n-renders harness was built, which is unchanged. Full
-reasoning: PROGRESS.md, RULED 2026-08-22. **The floor-rate work is closed at 10% pooled; no further gate
-or prompt change is proposed against it.**
+**AMENDED 2026-08-22: precondition 3's RENDER clause is a POOLED RATE, at or below 10% at n=10, and it
+is MET** (pooled 4/40 on `docs/qa/2026-08-22-renders-n10-postfixes.md`). The absolute form below is
+superseded - at a 10% per-run floor a clean 40-draw sweep has probability 1.5%, so it was a lottery
+rather than a gate. The paragraph stands as the record of why the n-renders harness was built, which is
+unchanged. Full reasoning: PROGRESS.md, RULED 2026-08-22. **The floor-rate work is closed at 10% pooled;
+no further gate or prompt change is proposed against it.**
+
+**AMENDED AGAIN 2026-08-23: THE THRESHOLD REPLACED THE RENDER CLAUSE ONLY.** Precondition 3 has two
+clauses and the paragraph below states both - *renders* AND *would be sold*. Clause **3a (render) is
+MET**; clause **3b (sold) is NOT MET and is owed by Reyner, on the 08-22 artifact**. So promotion is
+**2 of 4 whole plus 3a**, blocked on precondition 2 AND on 3b - the 08-22 wording of "MET" and "3 of 4"
+over-counted a two-clause precondition as one. **Do not read "precondition 3 is met" anywhere as
+covering sellability.** The clause table is in PROGRESS.md, RULED 2026-08-22.
 
 Reason, and it is not a preference. Precondition 3 is ruled STRICT - every chart must RENDER and would
 be sold. **That criterion cannot be evaluated at n=1, and three consecutive runs proved it:** the same

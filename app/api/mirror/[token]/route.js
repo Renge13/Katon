@@ -51,11 +51,28 @@
 //      leaves a live SKU selling something the same commit just gave away.
 //      NOT MET. The full package is PROGRESS.md, THE DEFERRED REGISTER.
 //
-//   3. RE-RULED 2026-08-22 (Reyner), FINAL FORM. Met when the POOLED FLOOR RATE
-//      IS AT OR BELOW 10% AT n=10 - not when every chart renders.
+//   3. TWO CLAUSES, AND THEY HAVE SEPARATE ANSWERS. The 08-19 STRICT form was
+//      "every chart RENDERS **and would be SOLD** at the live price". The
+//      2026-08-22 threshold ruling replaced the RENDER clause ONLY. The SOLD
+//      clause stands, unamended, and it is not met.
 //
-//      **MET 2026-08-22.** docs/qa/2026-08-22-renders-n10-postfixes.md, pooled
-//      4/40 = 10%, gate 1.17.0, prompt 22316c3349d0ea46.
+//      3a. RENDER - RE-RULED 2026-08-22 (Reyner), FINAL FORM. Met when the POOLED
+//          FLOOR RATE IS AT OR BELOW 10% AT n=10, not when every chart renders.
+//          **MET 2026-08-22.** docs/qa/2026-08-22-renders-n10-postfixes.md,
+//          pooled 4/40 = 10%, gate 1.17.0, prompt 22316c3349d0ea46.
+//
+//      3b. SOLD - Reyner has read real readings AS THE BUYER and would sell them.
+//          **NOT MET. Owed by Reyner, on the 08-22 artifact.** No measurement
+//          closes this one and no threshold substitutes for it: 3a is a property
+//          of the system, 3b is a judgement about the product, and a rate cannot
+//          make it.
+//
+//      WHY THE SPLIT IS WRITTEN OUT RATHER THAN LEFT IMPLIED. This row read
+//      "MET 2026-08-22" with the sell clause mentioned only in a closing
+//      paragraph, and "MET" is what a later session reads. The threshold ruling
+//      said in its own text that it "does not retire the READ" - so the row was
+//      already carrying both facts and only advertising one. Two clauses, two
+//      lines, two answers.
 //
 //      The absolute form went because it is arithmetic, not taste: "every chart
 //      renders at n=10" is 40 draws, and at a 10% per-run floor a clean sweep
@@ -65,14 +82,13 @@
 //      unchanged system passes it one day and fails it the next. A pooled rate
 //      is the only form of this the instrument can answer.
 //
-//      Two earlier statements of this condition are now history rather than
-//      rules. It read "Reyner has QA'd real readings through this preview. NOT
+//      One earlier statement of this condition is now history rather than a
+//      rule. It read "Reyner has QA'd real readings through this preview. NOT
 //      MET, and BLOCKED: the Gemini prepayment credits are depleted" - that
 //      block ended long before this edit and the sentence outlived it, which is
-//      the drift this header's closing note warns about. And the READ itself is
-//      not retired by the threshold: the 08-19 read found 2 of 4 charts failing
-//      on quality, both causes have since been fixed and measured, and a fresh
-//      read of the 08-22 artifact remains Reyner's to give.
+//      the drift this header's closing note warns about. Note what SURVIVES in
+//      it though: "Reyner has QA'd real readings" is clause 3b, and it was never
+//      ruled away - only its stale blocker was.
 //
 //      Reasoning and the arithmetic: PROGRESS.md, RULED 2026-08-22.
 //
@@ -86,7 +102,16 @@
 //      Indonesian uses `hari` temporally more than positionally and the renderer
 //      writes free prose. History: PROGRESS.md, the 08-12 tranche-2b section.
 //
-// 3 of 4 as of 2026-08-22. Promotion is blocked on precondition 2 alone.
+// 2 OF 4 WHOLE, as of 2026-08-23, plus precondition 3's RENDER clause. Promotion is
+// blocked on precondition 2 AND on precondition 3b, Reyner's sell/no-sell read of
+// the 08-22 artifact.
+//
+// THIS LINE READ "3 of 4 ... blocked on precondition 2 alone" from b843631 until
+// 2026-08-23, and that was an over-count rather than a ruling: the same commit's own
+// body says "a fresh read of the 08-22 artifact is still Reyner's to give and no
+// threshold substitutes for it". A precondition with two clauses cannot be counted as
+// met while one of them is outstanding, and the count is the field a promotion
+// decision actually reads. Reyner ruled the split explicit on 2026-08-23.
 //
 // (This header read "1 of 4" and "4. NOT MET" until 2026-08-13, while
 // PROGRESS.md had condition 4 MET since 08-12. A checklist kept in two places
