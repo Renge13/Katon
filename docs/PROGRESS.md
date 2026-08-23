@@ -49,64 +49,90 @@ PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section
 
 ---
 
-## LIVE STATE — what a real user gets TODAY (verified 2026-08-13; card row re-verified 2026-08-17)
+## LIVE STATE — what a real user gets TODAY (rewritten 2026-08-23 at the promotion)
 
 **Read this before advising on the product, and before arguing about the business model.**
-`CLAUDE.md` describes the TARGET. This block describes what the deployed code actually does. They
-diverge, and every other section of this file is about how we get from one to the other.
+`CLAUDE.md` describes the TARGET. This block describes what the deployed code actually does.
 
-| Surface | What a real user gets today | Served by | Gate |
+**READ THIS FIRST: THE PROMOTION IS WRITTEN AND NOT LANDED.** This block describes the branch
+`feat/promotion`, held for Reyner's precondition-3b read. **Until that branch merges, what a real
+user gets is the version of this block on `main`** - `git show main:docs/PROGRESS.md`, and note that
+the relative ref you might reach for instead is wrong on a rebased branch.
+
+A block that described an unmerged branch as live would be the exact failure this section was created
+to end, in the opposite direction. **What follows is what merging makes true, not what is true now.**
+
+| Surface | What a real user gets | Served by | Gate |
 |---|---|---|---|
-| Free reading | Archetype + modifier, day master (element/polarity/hanzi), four pillars, 胎元, five element bars, three prose sections (`siapaKamu`, `kenapaBegini`, `keMana`), one teaser lead | `contents/*hubungan*.md` -> `scripts/build-content.mjs` -> `lib/content/<archetype>.js`. **No LLM, zero provider calls** | none, ungated |
-| Sharecard | Downloadable PNG of the same free content | same | none |
-| **Bacaan Mendalam, Rp 19.000** | The **7-beat deep read** (`paidContent.beat1..beat7`) + the paid pillar recap and post-pay hour door | **the same `contents/*hubungan*.md` cells**, `getPaidDomain(stem, state, domain)` | **PAYWALL.** `row.paid === true`, flipped only in the verified Xendit webhook |
-| **The Rp 19.000 delivery** (card + PDF, built 2026-08-23) | **Nothing, and it cannot be anything yet.** `GET /api/deliver/[id]` / `/card` / `/pdf` exist and are gated on `row.paid === true`, and every one of them REFUSES a reading with no `cache_key` - which every legacy funnel row is. So a buyer today still receives the 7-beat deep read from the row above, and the delivery serves its first byte on the day promotion lands | `lib/deliver/handlers.js` -> `lib/pdf/build.js` (fixed point, ship-blocking) + `lib/card/cardData.js`. Prose VERBATIM from `render_cache` | **PAID, plus a readiness gate.** Linked from nowhere: there is no client surface, on purpose. A download button that can only fail is worse than none |
-| Karier / Uang | Nothing. A "Segera" row that captures a WhatsApp number (`interest_wa`) | no content exists — every file in `contents/` is `*-hubungan-FINAL.md` | n/a |
+| **The reading. FREE, AND IT IS THE WHOLE THING** | Archetype (Indonesian name, English pair once), day master, the reading's own blocks with their own headings, `penutup`, the four pillars with palace/animal/element, 胎元, five element bars with the engine's own caveat | `POST /api/mirror` -> `GET /api/mirror/[token]`: engine semantic JSON -> Gemini -> Stage 6 -> `render_cache`. **The `contents/*.md` cells are DELETED** | **none, ungated, and nothing in it is withheld.** No teaser, no blurred placeholder, no `LockedLines` |
+| **The shareable. FREE** | Card A as a downloadable PNG, 1080x1440 share capture | `lib/mirror/view.js` -> `buildCardData` minus `appendix` -> `components/cards/Card.js#CardA` | none, ungated |
+| **Complete Edition, Rp 19.000** | Card B at download resolution (907x1747, no shadow, alpha corners) **and** the Complete Edition PDF - cover, reading verbatim from `render_cache`, chart page with `hal. N` cross-references, appendix of every mechanic in her chart, colophon | `lib/deliver/handlers.js` -> `lib/pdf/build.js` (page-map fixed point, ship-blocking) + `lib/card/cardData.js` (full, with `appendix`) | **PAYWALL.** `row.paid === true`, flipped only in the verified Xendit webhook. Offered AFTER the reading, never in front of it |
+| Karier / Uang | **Nothing, and no capture either.** The "Segera" rows and `POST /api/reading/[id]/interest` are deleted with the domain concept - the domain is not a product (`CLAUDE.md` SUPERSEDED), and the pillars are the domains positionally | n/a | n/a. See THE DEFERRED REGISTER for the demand signal this costs |
 | Compatibility | Nothing. Not purchasable | not built | `compat` is priced (45.000/29.000) and **absent from `SELLABLE_SKUS`**, so checkout 400s |
-| **The new pipeline** (`/api/mirror`) | **Nothing. It serves no user.** Engine semantic JSON -> Gemini -> Stage 6 -> `render_cache` | Stage 3-6, `docs/content/glossary.json` + `renderer-prompt.txt` | **FENCED.** 404 unless `MIRROR_PREVIEW_TOKEN` is set AND presented. Linked from nowhere |
-| Sharecard (the one that exists) | A 9:16 poster: legacy archetype name, modifier, element tag, one literary line, feed/drain columns, `katon.app` | `components/Sharecard.jsx` from `lib/content` — the SAME legacy cells | none, ungated |
-| **Card A / Card B** (built 2026-08-13, rebuilt as 1a / 1e 2026-08-14/15) | **Nothing a user can reach.** As of 2026-08-23 the card's DATA has a gated server endpoint (`GET /api/deliver/[id]/card`, `row.paid === true`) and there is still **no client surface that draws it**, so nothing renders it outside `reports/card-preview.html` via `npm run preview:cards` | `lib/card/` + `components/cards/Card.js`, from `glossary.json` + Stage 3 facts; delivery gate `lib/deliver/handlers.js` | **NOT SHIPPABLE YET.** Two of the three 08-13 blockers are CLOSED: **all ten colour tokens were approved 2026-08-15** (`lib/card/tokens.js`, no PROPOSED tokens remain; 戊 Gunung's field came down to `#4A3A1E` and every token's ink clears AA on its own field, so `AA_EXEMPT` is empty), and **Archivo is loaded app-wide** as `--font-archivo` (`76e0f5a`, `app/layout.js`, asserted by `npm run test:app-fonts`). What remains: the archetype names still disagree with the reading's (see below), which is a sequencing constraint on the swap package; and **eight AA findings, ALL OF THEM CARD B** — Card A has zero, because it carries no sheen and no pillar cells. **The free shareable is not blocked by the contrast work; the paid artifact is.** The hanzi face was also OS-substituted at four sites until 2026-08-17 (Georgia has no CJK), which made the exported PNG differ per device — now Noto Serif TC, subsetted, embedded in the object. See the 08-17 rows in MEASUREMENTS |
+| **Card A / Card B** | **Both reach a user now.** A is the free shareable in the reading; B is half the paid delivery. `Card.js` says which is which in its own docblock - *"CARD B - the paid artifact"* - so the A/B split was never an open question, only an unread one | `lib/card/` + `components/cards/Card.js` | Card A ungated, Card B behind `row.paid === true` |
 | Static pages | `/harga` `/tentang` `/privasi` `/syarat` `/pengembalian` + footer | `lib/site/copy.js` | none |
 
-**The one-line summary: every word a real user reads today comes from `contents/*hubungan*.md`.**
-The new pipeline — the engine, the glossary, the renderer, the Stage-6 gate, every measurement in the
-MEASUREMENTS table below — has never served a single reader.
+**The one-line summary, and it is the inverse of the one that stood here for ten days: every word a
+real user reads now comes from the engine, the glossary and the renderer.** `contents/*.md`,
+`lib/content/`, `lib/readingView.js`, `lib/chart.js`, `scripts/build-content.mjs`,
+`components/Sharecard.jsx` and every `/api/reading/*` route are deleted. The old summary read *"every
+word a real user reads today comes from `contents/*hubungan*.md`"* and *"the new pipeline has never
+served a single reader."* Both are now false, which is what promotion means.
 
-**Two divergences from the locked model, both live:**
+**THE TWO LIVE DIVERGENCES FROM THE LOCKED MODEL, RECORDED 2026-08-13, BOTH CLOSE HERE.** They are
+struck rather than deleted, because a divergence with no record of how it closed is indistinguishable
+from one nobody noticed.
 
-1. **FREE IS NOT THE FULL MIRROR.** `CLAUDE.md` says free is the full mirror and paid is "an upsell
-   offered AFTER the free reading lands, never a gate." What actually happens is that the 7-beat
-   deep read sits behind the Rp 19.000 wall. The gate is back. It has been back since 2026-08-05 and
-   the reason is in THE INTERIM REGISTER below. **Reyner ruled the revert to the locked model on
-   2026-08-13**; nothing has shipped yet.
-2. **NOT ONE CELL IS FOUNDER-VALIDATED, AND A PAYING CUSTOMER RECEIVES THEM.** Counted 2026-08-13,
-   `contents/` holds 20 files, all `*-hubungan-FINAL.md`. `grep -l "pending founder" contents/*.md`
-   returns **16** — e.g. `akar-amplified-hubungan-FINAL.md:3`, *"STATUS: LIVE (helper-PRIMARY, Claude
-   structure+register-fix; pending founder validation)"*. Of the remaining four, three are stamped
-   **SCAFFOLD, pre-validation** (`akar-balanced:2`, `jati-balanced:2`, `pedang-balanced:2`) and
-   `matahari-balanced` carries **no STATUS header at all**. The only two files containing the word
-   `VALIDATED` (`gunung-balanced:18`, `samudra-amplified:18`) use it about one inline fix and both
-   also carry `pending founder validation` in their own STATUS line. **Zero founder-validated cells,
-   free or paid.**
-3. **TWO ARCHETYPE NAME SETS ARE LIVE IN THE REPO, and they disagree on five of ten.** Found
-   2026-08-13 while building the card. The legacy path a user reads today
-   (`grep -n archetypeName lib/content/*.js`) says **AKAR, PELITA, LADANG, PEDANG, HUJAN** for
-   乙丁己庚癸. `docs/content/glossary.json` -> `arketipe`, which the new pipeline and the card both
-   read, says **Bambu, Api Unggun, Taman, Besi Tempa, Embun**. 甲丙戊辛壬 agree (Jati, Matahari,
-   Gunung, Permata, Samudra). **This is why the card cannot simply be wired to the funnel**: the card
-   would name her Bambu and the reading beside it would name her Akar. It resolves itself when the
-   swap package retires the `contents/*.md` path — the glossary set is the one that survives — so it
-   is a sequencing constraint, not a third open decision.
+1. ~~**FREE IS NOT THE FULL MIRROR.**~~ **CLOSED.** `CLAUDE.md` says free is the full mirror and paid
+   is "an upsell offered AFTER the free reading lands, never a gate." From 2026-08-05 the 7-beat deep
+   read sat behind the Rp 19.000 wall, so the gate was back. **The deep read is now deleted, not
+   moved.** Free is the mirror, whole, and Rp 19.000 buys an artifact instead of a paragraph. The
+   thing that makes this durable rather than a re-flip waiting to happen: there is no longer any
+   prose the paywall COULD hide, because the paid path holds no prose of its own.
+2. ~~**NOT ONE CELL IS FOUNDER-VALIDATED, AND A PAYING CUSTOMER RECEIVES THEM.**~~ **CLOSED, by
+   deletion.** Counted 2026-08-13: `grep -l "pending founder" contents/*.md` returned 16 of 20, three
+   more were stamped SCAFFOLD/pre-validation and one carried no STATUS at all - zero founder-validated
+   cells, and a paying customer got them. `contents/` no longer exists, so `grep -l "pending founder"
+   contents/*.md` has nothing to match. **What replaces the validation question is not an answer to
+   it:** the renderer's output passes Stage 6 on every serve, which is a different guarantee from a
+   founder read, and precondition 3b is the founder read. It is still open.
+3. ~~**TWO ARCHETYPE NAME SETS ARE LIVE, AND THEY DISAGREE ON FIVE OF TEN.**~~ **CLOSED.** The legacy
+   path said AKAR, PELITA, LADANG, PEDANG, HUJAN for 乙丁己庚癸; `glossary.json` says Bambu, Api
+   Unggun, Taman, Besi Tempa, Embun. This was numbered third in a block headed "two divergences",
+   which is its own small lesson about counting. It was the reason the card could not simply be wired
+   to the funnel - the card would have named her Bambu beside a reading naming her Akar. **One set
+   survives, the glossary's**, and `tests/mirror-route.spec.mjs` now asserts that a reading and its
+   card name the same archetype rather than leaving it to a reader to notice.
+
+**AND ONE STALE BLOCKER STRUCK, because it was the reason the card was called unshippable.** This
+block said **"eight AA findings, ALL OF THEM CARD B"** from 2026-08-13, re-verified 08-17. It stopped
+being true on **2026-08-19**, four days before this commit:
+
+```
+$ git log --oneline -1 --format='%h %ad %s' --date=short lib/card/tokens.js
+053250f 2026-08-19 feat(card): A1, A2 per card, and the audit is green for the first time
+$ npm run audit:card-contrast | tail -4
+  roles      0 under AA outside AA_EXEMPT (none)
+  rendered   0 full-opacity run(s) under AA on their real ground
+  sheen      0 token(s) with full-opacity text under AA outside SHEEN_EXEMPT (乙, 丙)
+  PASS
+```
+
+**THE AUDIT IS THE AUTHORITY, NOT THIS BLOCK** - it is a gate in `npm test` and it has been passing
+for four days. The two `SHEEN_EXEMPT` tokens are recorded exemptions rather than open findings. The
+number stayed here because nobody re-read the row after the commit that fixed it, which is the same
+failure mode the block exists to prevent, arriving from inside.
 
 **THE RULE FOR THIS BLOCK: it is updated in the SAME COMMIT as any funnel change.** A commit that
 changes what a user gets and does not touch this block is incomplete, and a reviewer should say so.
 
 **Why it exists.** On 2026-08-13 a Cowork session argued a business-model question for two rounds
 without noticing that the model it was arguing against **was already live** — the fact was sitting in
-this file at the "the gate is back" line (the 2026-08-05 INTERIM section), inside a wall of history
-nobody reads to the bottom. `CLAUDE.md` described the target, the code ran something else, and
-nothing anywhere recorded the difference. A ledger that only records decisions cannot answer
-"what ships?", and that is the question every product argument actually rests on.
+this file at the "the gate is back" line, inside a wall of history nobody reads to the bottom.
+`CLAUDE.md` described the target, the code ran something else, and nothing anywhere recorded the
+difference. A ledger that only records decisions cannot answer "what ships?", and that is the question
+every product argument actually rests on. **That is also why the header of this block now says the
+promotion is written and not landed:** the failure mode is not only staleness in one direction.
 
 ---
 

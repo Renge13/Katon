@@ -20,7 +20,6 @@ import { test, beforeEach, afterEach } from 'node:test';
 import {
   createMirrorReading, serveMirrorReading, recordMirrorFeedback, floorRefusalReason,
 } from '../lib/mirror/handlers.js';
-import { PREVIEW_HEADER, previewFenceReason } from '../lib/mirror/fence.js';
 import { readCache, writeCache, __clearMemCache } from '../lib/render/cache.js';
 import { STAGE6_VERSION } from '../lib/render/fence.js';
 import { assembleFallback } from '../lib/render/fallback.js';
@@ -30,7 +29,6 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { RATE_LIMITS, __clearMemRateLimit } from '../lib/ratelimit.js';
 import { SESSION_COOKIE } from '../lib/mirror/session.js';
 
-const PREVIEW = 'preview-token-for-tests';
 const ORIGIN = 'http://localhost/api/mirror';
 
 // Two charts that are not the same person, so their semantic profiles - and
@@ -42,9 +40,8 @@ const CHART_B = { birthDate: '1994-11-21', birthTime: '13:45' };
 /** The dev in-memory reading store, pinned on globalThis by lib/readingStore.js. */
 const readingMem = () => globalThis.__katonReadingMem;
 
-function request({ method = 'GET', token = PREVIEW, body, url = ORIGIN, session, ip } = {}) {
+function request({ method = 'GET', body, url = ORIGIN, session, ip } = {}) {
   const headers = { 'content-type': 'application/json' };
-  if (token !== null) headers[PREVIEW_HEADER] = token;
   // Omitted by default so the rate limiter charges nothing: every request mints
   // a throwaway session and has no resolvable IP, which is what lets the other
   // tests here create as many readings as they need. The limiter's own tests
@@ -130,7 +127,6 @@ async function warmCache(token) {
 }
 
 beforeEach(() => {
-  process.env.MIRROR_PREVIEW_TOKEN = PREVIEW;
   // A key must be PRESENT or the chain has no providers to skip, and the
   // zero-calls assertion would prove nothing.
   process.env.GEMINI_API_KEY = 'test-key-never-sent-anywhere';
@@ -145,37 +141,45 @@ beforeEach(() => {
 afterEach(() => {
   globalThis.fetch = realFetch;
   delete process.env.GEMINI_API_KEY;
-  process.env.MIRROR_PREVIEW_TOKEN = PREVIEW;
 });
 
-// ── the fence ──────────────────────────────────────────────
+// ── the fence is GONE. This is what replaced it. ──────────
+//
+// Until 2026-08-23 three tests here pinned `MIRROR_PREVIEW_TOKEN`: unset meant the
+// route could admit nobody, a wrong token 404'd, and a refusal was byte-identical
+// to an unknown reading. The promotion removed the fence, because the funnel front
+// door now creates and reads mirror readings and a fence in front of the mirror is
+// a fence in front of the site.
+//
+// THE TESTS ARE REPLACED RATHER THAN DELETED, and the reason is that deleting them
+// would leave no record that the route is deliberately open - which reads, to the
+// next person, exactly like an oversight. So the pair below asserts the two things
+// that must STILL be true with nothing in front:
 
-test('with MIRROR_PREVIEW_TOKEN unset the route has no way to admit anyone', async () => {
-  delete process.env.MIRROR_PREVIEW_TOKEN;
-  assert.equal(previewFenceReason(), 'mirror_preview_token_unset');
-
-  // Even a request carrying what WOULD be the right token.
-  assert.equal((await create(CHART_A)).status, 404);
-  assert.equal((await serve('anything')).status, 404);
-});
-
-test('no preview token = 404, wrong preview token = 404, right token = 200', async () => {
-  assert.equal((await create(CHART_A, { token: null })).status, 404);
-  assert.equal((await create(CHART_A, { token: 'wrong' })).status, 404);
-  // Same length as the real one, so the refusal is not a length check.
-  assert.equal((await create(CHART_A, { token: 'x'.repeat(PREVIEW.length) })).status, 404);
-
+test('the route is OPEN - no token, no header, and it serves', async () => {
+  assert.equal(process.env.MIRROR_PREVIEW_TOKEN, undefined,
+    'nothing in this suite sets a preview token any more');
   const token = await createOk();
-  assert.equal((await serve(token, { token: null })).status, 404);
-  assert.equal((await serve(token, { token: 'wrong' })).status, 404);
   assert.equal((await serve(token)).status, 200);
 });
 
-test('a refused request is indistinguishable from an unknown reading', async () => {
-  const token = await createOk();
-  const refused = await (await serve(token, { token: 'wrong' })).json();
-  const unknown = await (await serve('no-such-reading-token')).json();
-  assert.deepEqual(refused, unknown);
+test('an unknown reading is still a BARE 404, because harvesting is the risk', async () => {
+  // Rule 19's named risk is content harvesting, and a body that distinguished
+  // "no such reading" from anything else would tell a harvester which tokens are
+  // real. With the fence gone this is the ONLY refusal the serve path makes, so it
+  // is the only one that can leak - which makes it worth more than it was before.
+  const unknown = await serve('no-such-reading-token');
+  assert.equal(unknown.status, 404);
+  assert.deepEqual(await unknown.json(), { error: 'not_found' });
+
+  // A LEGACY row - one with no cache_key - gets the same answer, byte for byte.
+  // Those rows are the retired funnel's, and nothing creates one after this commit;
+  // the branch stays because rows written before it are still in the table.
+  const legacy = await createOk();
+  readingMem().get(legacy).cache_key = null;
+  const stale = await serve(legacy);
+  assert.equal(stale.status, 404);
+  assert.deepEqual(await stale.json(), { error: 'not_found' });
 });
 
 // ── POST validation ────────────────────────────────────────
@@ -343,13 +347,28 @@ test('the serve path is limited too, because the cache IS the thing worth harves
   assert.equal((await over.json()).error, 'rate_limited_ip');
 });
 
-test('a refused request never reaches the limiter, so a stranger cannot burn a quota', async () => {
+// THIS TEST USED TO ASSERT THE FENCE RAN FIRST - that a wrong-token request was
+// refused before it could charge a real client's session quota. There is no fence,
+// so there is no request that gets refused ahead of the limiter, and the property
+// it protected has to be restated rather than kept: the LIMITER is now the outermost
+// gate on this route, and everything it admits is charged.
+test('the limiter is now the OUTERMOST gate, so even a rejected body is charged', async () => {
   const { limit } = RATE_LIMITS.mirror_create.session;
-  for (let i = 0; i < limit * 3; i += 1) {
-    assert.equal((await create(CHART_A, { session: SESSION, token: 'wrong' })).status, 404);
+
+  // A garbage body still costs the session a unit. THAT IS DELIBERATE, and with the
+  // fence gone it is the load-bearing half: if validation ran first and only valid
+  // requests were counted, a scraper could send malformed bodies at this route all
+  // day for free. `admit` runs before the body is parsed, and the 400's own
+  // set-cookie test below is the other half of the same arrangement.
+  for (let i = 0; i < limit; i += 1) {
+    assert.equal((await create({ birthDate: 'nope' }, { session: SESSION })).status, 400);
   }
-  // The fence ran first, so the session's own quota is untouched.
-  assert.equal((await create(CHART_A, { session: SESSION })).status, 201);
+  const over = await create(CHART_A, { session: SESSION });
+  assert.equal(over.status, 429, "the rejected bodies should have exhausted the session");
+  assert.equal((await over.json()).error, 'rate_limited_session');
+
+  // And the ceiling is per identity, not global: a different session is unaffected.
+  assert.equal((await create(CHART_A, { session: 'a-different-session-entirely' })).status, 201);
 });
 
 test('a session cookie is minted on first contact and not re-minted after', async () => {
@@ -545,12 +564,12 @@ test('a thumbs-up is accepted and changes no status', async () => {
   assert.equal((await readCache(readingMem().get(token).cache_key)).status, 'unreviewed');
 });
 
-test('the feedback endpoint is behind the same fence and rejects a bad vote', async () => {
+test('the feedback endpoint rejects an unknown reading and a bad vote', async () => {
   const token = await createOk();
   await serve(token);
 
-  assert.equal((await feedback(token, { vote: 'down' }, { token: null })).status, 404);
-  assert.equal((await feedback(token, { vote: 'down' }, { token: 'wrong' })).status, 404);
+  // The two preview-token cases that stood here went with the fence. What is left
+  // is the part that was never the fence's job.
   assert.equal((await feedback('no-such-token', { vote: 'down' })).status, 404);
   assert.equal((await feedback(token, { vote: 'maybe' })).status, 400);
   assert.equal((await feedback(token, {})).status, 400);
@@ -730,4 +749,49 @@ test('命宮 is still absent, and stays that way', () => {
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
   assert.equal(chart.lifePalace, undefined);
   assert.equal(chart.mingGong, undefined);
+});
+
+// ── the free shareable, and what the paywall on it actually is ──
+
+test('the serve payload carries Card A, and WITHHOLDS Card B\'s appendix', async () => {
+  const token = await createOk();
+  const body = await (await serve(token)).json();
+
+  assert.ok(body.card, 'the free payload carries card data');
+  // Card A's fields. It replaced components/Sharecard.jsx, which read the retired
+  // contents/*.md cells - which is why the card and the reading can no longer
+  // disagree about her archetype's name.
+  for (const field of ['stem', 'nameEn', 'nameId', 'element', 'aspek', 'tags', 'badges', 'footer']) {
+    assert.ok(body.card[field] !== undefined, `card.${field} is missing`);
+  }
+
+  // THE PAYWALL ON THE CARD IS THE APPENDIX. It is Card B's second half - the four
+  // pillar characters with their palaces and the element distribution - and it is
+  // served by /api/deliver/[id]/card behind `row.paid === true`, never here.
+  assert.equal(body.card.appendix, undefined,
+    'the free payload must not carry the paid card\'s appendix');
+
+  // AND NO BIRTH DATE LEAVES THE SERVER on the free path. That is this view layer's
+  // standing invariant, and the card footer is the one place it could slip out - so
+  // the footer is built with `birthDate: null` and the client merges its own.
+  assert.equal(body.card.footer.date, '', 'the free footer carries no date');
+  assert.equal(body.card.footer.gender, null);
+  assert.equal(JSON.stringify(body).includes(CHART_A.birthDate), false,
+    'the birth date must not appear anywhere in the payload');
+});
+
+test('the reading and its card name the SAME archetype - the 08-13 divergence, closed', async () => {
+  // Two archetype name sets were live and disagreed on five of ten: the funnel path
+  // said AKAR / PELITA / LADANG / PEDANG / HUJAN and glossary.json says Bambu / Api
+  // Unggun / Taman / Besi Tempa / Embun. That is why the card could not simply be
+  // wired to the funnel - it would have named her Bambu beside a reading naming her
+  // Akar. Retiring contents/*.md leaves ONE set, and this is the assertion that it
+  // is one: both fields now resolve from the same Stage 3 core.
+  for (const chart of [CHART_A, CHART_B]) {
+    const token = await createOk(chart);
+    const body = await (await serve(token)).json();
+    assert.equal(body.card.nameId, body.chart.archetype.name_id,
+      'the card and the reading disagree about her archetype');
+    assert.equal(body.card.nameEn, body.chart.archetype.name_en);
+  }
 });

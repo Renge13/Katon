@@ -14,9 +14,12 @@
 // count. A token tally provably inverts on fixture charts 1 and 9: chart 1 is
 // token-rich in Fire but seasonally dead in it; chart 9 is token-sparse in Fire
 // but seasonally live. No reweighting fixes a token-vs-strength inversion.
-// `buildElementBars` in lib/readingView.js is element PRESENCE for display only.
-// Different function, different name, different file. Never conflate them
-// (CLAUDE.md rules 9 and 10).
+// The DISPLAY normalisation is a different computation in a different file, and the
+// two must never be conflated (CLAUDE.md rules 9 and 10). It used to be
+// `buildElementBars` in lib/readingView.js; that file was retired at the 2026-08-23
+// promotion and its job now belongs to `presenceBars` in components/Funnel.jsx and
+// to the chart page in lib/pdf/document.js, both reading `element_presence` and both
+// printing the engine's own caveat beside it.
 //
 // Every tunable lives in STRENGTH_PARAMS. There are no magic numbers below it,
 // and there is no chart-specific branch anywhere in this file — a chart-specific

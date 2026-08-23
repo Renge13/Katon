@@ -1,33 +1,61 @@
 'use client';
+// ============================================================
+// The funnel — PROMOTED to the mirror pipeline (2026-08-23)
+// ============================================================
+// Until this commit the front door created a row through `POST /api/reading` and
+// read hand-authored prose out of `contents/*hubungan*.md`, and the Rp 19.000
+// paywall unlocked a 7-beat "Bacaan Mendalam" sliced from those same cells. All of
+// that is retired. What a reader gets now:
+//
+//   FREE   the full mirror. Engine semantic JSON -> Gemini -> Stage 6 -> cache,
+//          served by `/api/mirror/[token]`. Plus Card A as the shareable.
+//   PAID   Rp 19.000 for the hi-res Card B and the Complete Edition PDF,
+//          delivered by `/api/deliver/[token]/*` behind `row.paid === true`.
+//          Offered AFTER the reading lands. NEVER a gate.
+//
+// ── WHY IT IS ONE COMMIT ──────────────────────────────────
+// The route header for `/api/mirror/[token]` argues it and the argument is the
+// reason this file changed all at once: retiring the gate and replacing the
+// unvalidated prose are the same act. The paid beats and the free prose came from
+// ONE source, so promoting the free half orphans the paid half in the same breath.
+// And any partial state is visibly incoherent: the card names her Bambu where the
+// legacy reading names her Akar (two live archetype name sets, five of ten
+// disagreeing), and renaming the invoice alone would charge for a card and a PDF
+// while handing over the deep read.
+//
+// ── WHAT THE FREE READING NO LONGER HIDES ─────────────────
+// There is no teaser, no `LockedLines`, no blurred placeholder. The mirror is
+// ungated BY DESIGN (CLAUDE.md, and its SUPERSEDED list names the test flag that
+// once stood in for this). The offer below the reading is an upsell on an artifact,
+// not a lock on a paragraph.
+//
+// ── THE THINGS THIS FILE MUST NOT INVENT ──────────────────
+// `boundary` is exposed by the serve view and deliberately NOT rendered: prompt J
+// only surfaces the flag, and the copy for "read this softly" is Reyner's pass.
+// Nothing here writes a sentence about it.
+// ============================================================
 
 import { useEffect, useRef, useState } from 'react';
-import Sharecard from './Sharecard.jsx';
-import { exportSharecardPNG } from './exportCard.js';
+import { CardA, CardB } from './cards/Card.js';
+import { downloadCard } from './cards/exportCards.js';
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
 import { formatIdr } from '../lib/site/format.js';
 
-const DOMAINS = [
-  { key: 'hubungan', label: 'Hubungan' },
-  { key: 'karier', label: 'Karier' },
-  { key: 'uang', label: 'Uang' },
-];
-const DOMAIN_LABEL = { hubungan: 'Hubungan', karier: 'Karier', uang: 'Uang' };
-// Locked paid-beat headings (mirror of lib/content BEAT_HEADINGS; that module is
-// server-only so the client keeps its own display copy).
-const BEAT_HEADINGS = {
-  1: 'Yang Perlu Kamu Dengar Dulu',
-  2: 'Bagaimana Ini Muncul',
-  3: 'Yang Sebenarnya Terjadi',
-  4: 'Yang Menenangkan vs Yang Melelahkan',
-  5: 'Empat Pilarmu (Four Pillars)',
-  6: 'Cara Memutuskannya',
-  7: 'Apa Artinya',
-};
 const ANTICIPATION = ['Membaca tanggal lahirmu', 'Menyusun empat pilarmu', 'Menghitung keseimbangan energimu'];
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
-const ELEMENT_GLOSS = { Kayu: 'tumbuh dan menjangkau', Api: 'menyala dan menghangatkan', Bumi: 'menopang dan menampung', Logam: 'memadat dan menajam', Air: 'mengalir dan meresap' };
-const ELEMENT_ID = { Wood: 'Kayu', Fire: 'Api', Earth: 'Bumi', Metal: 'Logam', Water: 'Air' };
+//
+// KEYED ON THE GLOSSARY'S NAMES, which is a change: this map used to say `Bumi`
+// and `element_presence` says `Tanah`. lib/semantic/glossary.js flags that exact
+// drift in its own header, and with the legacy view layer gone the glossary is the
+// only source of an element's Indonesian name.
+const ELEMENT_GLOSS = {
+  Kayu: 'tumbuh dan menjangkau',
+  Api: 'menyala dan menghangatkan',
+  Tanah: 'menopang dan menampung',
+  Logam: 'memadat dan menajam',
+  Air: 'mengalir dan meresap',
+};
 const RANGE = (n, from = 0) => Array.from({ length: n }, (_, i) => i + from);
 // Accepted birth dates: 1900-01-01 through today. The engine supports 1900-2030,
 // so today is always inside it. `max` is built from LOCAL time, not toISOString(),
@@ -38,17 +66,21 @@ const today = () => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
-// The paid/deep-read accent + canvas resolve from the element theme via CSS vars
-// set once at the reading root (see themeVars). GLOW/SANCTUARY are indirections so
-// every sanctuary surface follows the element instead of a hardcoded water tint.
+// The paid accent + canvas resolve from the element theme via CSS vars set once at
+// the reading root (see themeVars). GLOW/SANCTUARY are indirections so every
+// sanctuary surface follows the element instead of a hardcoded water tint.
 const SANCTUARY = 'var(--el-sanctuary)';
 const GLOW = 'var(--el-glow)';
 const LIGHT = '#EAF1F2';
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
-const darkField = { backgroundColor: 'rgba(9,18,21,.4)', borderColor: 'var(--el-g30)', color: LIGHT };
+
+// The card display scale. Card A is 1080 wide and the column is 460 at most, so it
+// renders at a third and `captureCard` scales the clone back up off the measured
+// node width. Nothing about the exported pixels depends on this number.
+const CARD_SCALE = 0.34;
 
 // Element theme → CSS vars, set ONCE at the reading root; every nested surface
-// (persona, chart, bridge, paywall, deep-read) inherits the same accent.
+// inherits the same accent.
 function themeVars(element) {
   const t = elColor(element);
   return {
@@ -67,44 +99,78 @@ function themeVars(element) {
 const pad = (n) => String(n).padStart(2, '0');
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * The display bars, from `element_presence`.
+ *
+ * NORMALISED TO THE MAX, and that is display normalisation ONLY — rule 9 forbids
+ * reading these as a strength score, and rule 10 records that a token tally
+ * provably inverts on two fixture charts. The engine's own caveat travels with
+ * them (`element_presence_note`), the same way the PDF prints it, rather than being
+ * left to whoever reads the bar.
+ */
+function presenceBars(presence) {
+  const entries = Object.entries(presence || {});
+  const max = Math.max(1, ...entries.map(([, v]) => Number(v) || 0));
+  return entries.map(([label, value]) => ({
+    label,
+    element: label,
+    value: Number(value) || 0,
+    pct: Math.round(((Number(value) || 0) / max) * 100),
+  }));
+}
+
 export default function Funnel() {
   const [phase, setPhase] = useState('input'); // input | calculating | season | result
   // `date` is an <input type="date"> value (YYYY-MM-DD) and `time` an
   // <input type="time"> value snapped to the hour (HH:00). MINUTES ARE NOT ASKED
   // HERE ON PURPOSE - see <Home> and the season branch in onSubmit.
-  const [form, setForm] = useState({ date: '', time: '', domain: 'hubungan' });
+  const [form, setForm] = useState({ date: '', time: '', gender: '' });
   const [error, setError] = useState(null);
   const [reading, setReading] = useState(null);
   const [step, setStep] = useState(0);
   // Set only on the ~12 days a year a season turns inside the birth date and that
-  // turn is actually unresolved: { birthDate, term, at, birthHour }. `birthHour` is
-  // set only in the ask-for-the-minute case. See <SeasonGate>.
+  // turn is actually unresolved: { birthDate, term, at, birthHour }.
   const [season, setSeason] = useState(null);
 
   function reset() {
     setReading(null); setError(null); setSeason(null); setPhase('input');
-    // Return the URL to root (additive; pushState only — no route remount).
     if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
   }
 
-  // Create the reading and reveal it. `resolution` carries whatever the season
-  // gate learned: a real birthTime, a termSide, or neither.
+  /**
+   * Create the reading, then read it. TWO CALLS, and the split is the pipeline's:
+   * `POST /api/mirror` writes the row and deliberately does not render, so a create
+   * can never quietly buy an LLM call; `GET /api/mirror/[token]` is where the cache
+   * is consulted and a provider is called on a miss. The anticipation stays on
+   * screen for the whole of it rather than for a fixed 2.5s, because a miss is a
+   * real render and it is not instant.
+   */
   async function createReading(birthDate, birthTime, resolution = {}) {
-    const res = await fetch('/api/reading', {
+    const created = await fetch('/api/mirror', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         birthDate,
         birthTime: resolution.birthTime ?? birthTime,
         termSide: resolution.termSide ?? null,
-        domain: form.domain,
+        gender: form.gender || null,
       }),
     }).then((r) => r.json());
-    if (res.error) { setError(readableError(res)); setSeason(null); setPhase('input'); return; }
-    setReading({ ...res, birthDate }); // birthDate kept client-side for the card header
-    // Make the reading bookmarkable/shareable without remounting: swap the URL to
-    // /r/<id> via history.pushState (NOT router.push, which would mount the /r route
-    // and discard this in-session state). In-session unlock behavior is unchanged.
-    if (res.token && typeof window !== 'undefined') window.history.pushState(null, '', `/r/${res.token}`);
+    if (created.error || !created.token) {
+      setError(readableError(created)); setSeason(null); setPhase('input'); return;
+    }
+
+    const served = await fetch(`/api/mirror/${created.token}`).then((r) => r.json());
+    if (served.error || !served.token) {
+      setError(readableError(served)); setSeason(null); setPhase('input'); return;
+    }
+
+    // birthDate is kept CLIENT-SIDE for the card footer. The serve payload does not
+    // carry it - lib/mirror/view.js builds the free card with `birthDate: null` so
+    // no birth data leaves the server on the free path.
+    setReading({ ...served, birthDate, gender: form.gender || null });
+    // Bookmarkable without remounting: swap the URL via history.pushState, NOT
+    // router.push, which would mount the /r route and discard this state.
+    if (typeof window !== 'undefined') window.history.pushState(null, '', `/r/${created.token}`);
     setSeason(null);
     setPhase('result');
   }
@@ -128,14 +194,11 @@ export default function Funnel() {
     try {
       // Ask whether a season turns inside this date BEFORE creating the reading, so
       // the row is written once, already resolved, rather than written and mutated.
-      // Runs inside the anticipation pause; on ~353 days a year it returns
-      // needsHour: false and nothing else happens.
       //
-      // ASKED ON EVERY SUBMIT NOW, not only when the time is blank. Hour-only input
-      // has its own unresolved case: a 節 that falls INSIDE the hour she gave. The
-      // whole hour used to be on one side of the turn because the minute came with
-      // it; now it can straddle. Measured on 1989-02-04 (立春 04:27:09): 04:00 gives
-      // 戊辰 乙丑, 04:30 gives 己巳 丙寅 - two pillars different, off the minute alone.
+      // ASKED ON EVERY SUBMIT, not only when the time is blank. Hour-only input has
+      // its own unresolved case: a 節 that falls INSIDE the hour she gave. Measured
+      // on 1989-02-04 (立春 04:27:09): 04:00 gives 戊辰 乙丑, 04:30 gives 己巳 丙寅 -
+      // two pillars different, off the minute alone.
       const [turn] = await Promise.all([
         fetch('/api/season-check', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -165,6 +228,7 @@ export default function Funnel() {
   // Answer from the season gate. `resolution` is { termSide } | { birthTime } | {}.
   async function onSeasonAnswer(resolution) {
     setError(null);
+    setPhase('calculating');
     try {
       await createReading(season.birthDate, null, resolution);
     } catch {
@@ -173,6 +237,9 @@ export default function Funnel() {
     }
   }
 
+  // The three lines cycle and then HOLD on the last one, because the render behind
+  // them has no deadline. A fourth timer that advanced past the list would leave a
+  // blank where a line had been.
   useEffect(() => {
     if (phase !== 'calculating') return;
     const t1 = setTimeout(() => setStep(1), 850);
@@ -187,7 +254,11 @@ export default function Funnel() {
 }
 
 function readableError(res) {
-  if (res.error === 'archetype_content_unavailable') return `Bacaan untuk arketipe ${res.dayMaster || 'ini'} belum siap.`;
+  // The mirror route's 429 is the one refusal worth naming: it is recoverable by
+  // waiting, and "something went wrong" would send her to retry immediately.
+  if (res?.error === 'rate_limited' || res?.error === 'session' || res?.error === 'ip') {
+    return 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.';
+  }
   return 'Ada yang salah. Coba lagi sebentar.';
 }
 
@@ -224,10 +295,7 @@ function Home({ form, setForm, error, onSubmit }) {
         <Reveal><Wordmark /></Reveal>
         {/* THE PROMISE, AND IT COMES BEFORE THE ASK. Reyner's ruled copy, applied
             verbatim 2026-08-13; swept against lib/validate/blocklist.json, the
-            typography rule and the slang list on 2026-08-12. Replaces "Kamu punya
-            pola." / "Dan mungkin selama ini, kamu belum pernah benar-benar
-            melihatnya.", which named the pattern but never said what the reader
-            gets for handing over a birthdate.
+            typography rule and the slang list on 2026-08-12.
 
             DO NOT ADD "langkah aksi mingguan" OR "hasil dalam 30 detik" HERE OR
             ANYWHERE. The first promises a weekly cadence this product does not
@@ -243,11 +311,8 @@ function Home({ form, setForm, error, onSubmit }) {
         <form onSubmit={onSubmit}>
           <Reveal delay={0.22} style={{ marginTop: 28 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
-              {/* NATIVE PICKERS. Three selects (day / month / year) became one
-                  <input type="date">: on a phone that is the OS date wheel, and the
-                  year no longer has to be scrolled one option at a time from the
-                  current year back to the 1920s. `min` keeps it inside the engine's
-                  supported range and `max` stops a birthdate in the future. */}
+              {/* NATIVE PICKERS. `min` keeps it inside the engine's supported range
+                  and `max` stops a birthdate in the future. */}
               <FieldLabel>Tanggal lahir</FieldLabel>
               <input type="date" value={form.date} onChange={set('date')} min={EARLIEST_BIRTH_DATE} max={today()} aria-label="Tanggal lahir" />
 
@@ -264,27 +329,28 @@ function Home({ form, setForm, error, onSubmit }) {
               <FieldLabel>Jam lahir · opsional</FieldLabel>
               <input type="time" step="3600" value={form.time} onChange={set('time')} aria-label="Jam lahir" />
               <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Jamnya saja sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.</div>
-              {/* Domain selector removed from the front door — moved to the paywall (the
-                  live-decision prompt). Reading still defaults domain to "hubungan"
-                  (Funnel form state), so free-reading generation is unaffected. */}
 
-              {/* GENDER IS MISSING HERE ON PURPOSE, AND IT HAS A RE-ADD CONDITION.
-                  Left out because it changes nothing the READING renders: the API
-                  accepts it, the row stores it, and `computePillars` `void`s it
-                  (lib/bazi/pillars.ts) since it touches luck-pillar direction only
-                  and no luck pillars exist.
+              <div style={{ height: 16 }} />
+              {/* GENDER IS BACK, AND THE CONDITION FOR RE-ADDING IT IS THIS COMMIT.
+                  The note that stood here said it plainly: "re-add the field in the
+                  same commit that ships a card, or the card ships with a footer that
+                  can never fill." This commit ships both cards.
 
-                  THAT REASONING DOES NOT COVER THE CARD, which is the correction
-                  recorded 2026-08-13. The 2026-08-03 ruling puts PEREMPUAN /
-                  LAKI-LAKI in the footer of BOTH cards, so gender is a card input.
-                  It is harmless today only because no card is wired to anything
-                  (PROGRESS, LIVE STATE), and `buildFooter` renders the null case
-                  as date + source with no placeholder and no gap.
+                  It still changes NOTHING the reading renders - `computePillars`
+                  `void`s it (lib/bazi/pillars.ts) because it touches luck-pillar
+                  direction only and no luck pillars exist. What it feeds is the CARD
+                  FOOTER, where the 2026-08-03 ruling puts PEREMPUAN / LAKI-LAKI on
+                  both cards.
 
-                  SO: re-add the field in the same commit that ships a card, or the
-                  card ships with a footer that can never fill. Nothing will prompt
-                  you — a missing input is silent by construction, which is why the
-                  dependency is written here rather than only in the ledger. */}
+                  OPTIONAL, and the null case is first-class rather than degraded:
+                  `buildFooter` renders date + source with no placeholder and no gap
+                  where a word would be. That is the same 08-03 ruling. */}
+              <FieldLabel>Jenis kelamin · opsional</FieldLabel>
+              <select value={form.gender} onChange={set('gender')} aria-label="Jenis kelamin">
+                <option value="">Tidak diisi</option>
+                <option value="female">Perempuan</option>
+                <option value="male">Laki-laki</option>
+              </select>
             </div>
           </Reveal>
 
@@ -308,46 +374,14 @@ function Anticipation({ step }) {
       <div style={{ position: 'relative', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <span className="k-ring" style={{ animationDelay: '0s' }} />
         <span className="k-ring" style={{ animationDelay: '1s' }} />
-        <span className="k-ring" style={{ animationDelay: '2s' }} />
-        <span style={{ width: 11, height: 11, borderRadius: '50%', background: 'var(--clay)', boxShadow: '0 0 0 6px rgba(196,98,42,.12)' }} />
+        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--clay)' }} />
       </div>
-      <div style={{ height: 34, marginTop: 30, position: 'relative', width: 280, textAlign: 'center' }}>
-        {ANTICIPATION.map((l, i) => (
-          <div key={i} style={{ position: 'absolute', inset: 0, fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--tinta-soft)', opacity: step === i ? 1 : 0, transform: step === i ? 'none' : 'translateY(6px)', transition: 'all .6s var(--ease-quiet)' }}>{l}...</div>
-        ))}
-      </div>
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, color: 'var(--muted-warm)', marginTop: 28, minHeight: 22 }}>{ANTICIPATION[step]}</p>
     </div>
   );
 }
 
-/* ---------------- Season gate ----------------
-   Fires ONLY when a 節 (solar term) falls inside the birth date and that turn is
-   genuinely unresolved — roughly 12 days a year. On those dates the month pillar
-   depends on which side of the turn the birth sits.
-
-   TWO unresolved shapes, and the second is new since the front door stopped
-   asking for minutes:
-     1. NO TIME AT ALL. The turn is somewhere in a 24-hour day and nothing can
-        recover it: probing noon only picks the likelier branch, silently.
-        Answered with `termSide`, which resolves the MONTH and never invents an
-        hour pillar.
-     2. AN HOUR THAT CONTAINS THE TURN (`season.birthHour`). Every other hour on
-        the date sits cleanly on one side, so only this one is asked about, and
-        only the minute is missing. Answered with a real `birthTime`, because
-        pillars.ts honours `termSide` only when the time is unknown — and a
-        minute inside a known hour is not a guess about the hour pillar: every
-        minute of that hour yields the same one.
-
-   Placed AFTER the anticipation pause, not at the input step. At input it would
-   read as one more form field before any value has been delivered. Here the
-   user has already committed, so it lands as the engine knowing something a
-   generic calculator does not — which is what this moment is.
-
-   The ask is a consequence, never the headline. Lead with the rarity.
-
-   We never turn "pagi" into a fabricated clock time — that would render as a
-   real fourth pillar built out of a guess. Not remembering the minute is an
-   answer too: it falls back to the side question and simply drops the hour. */
+/* ---------------- Season gate (unchanged by promotion) ---------------- */
 function SeasonGate({ season, onAnswer }) {
   const askMinute = season?.birthHour !== null && season?.birthHour !== undefined;
   const [mode, setMode] = useState(askMinute ? 'minute' : 'choose'); // choose | exact | minute
@@ -475,87 +509,112 @@ function SeasonGate({ season, onAnswer }) {
   );
 }
 
-/* ---------------- Reading (one continuous scroll) ---------------- */
-function Reading({ reading, onReset, initialFull }) {
-  const fc = reading.freeContent;
+/* ---------------- Reading (the full mirror, ungated) ---------------- */
+/**
+ * ONE CONTINUOUS SCROLL, AND NOTHING IN IT IS WITHHELD.
+ *
+ * The block order is the ENGINE's. `blocks[]` arrives importance-ordered from Stage
+ * 3 through the renderer, and re-sorting here would be the client second-guessing
+ * the hierarchy - rule 14 inverted. There is no fixed heading map any more either:
+ * the retired deep read had seven locked beat headings, and a mirror block carries
+ * its own heading or none, so the client prints what it is given.
+ *
+ * PARAGRAPHS ARRIVE PRE-SPLIT. `lib/mirror/view.js` does it, because a block's
+ * `text` separates paragraphs with two newlines and HTML collapses whitespace - a
+ * client that dropped the raw string into one element would lose every break
+ * SILENTLY and the reading would still read, just as a wall.
+ */
+function Reading({ reading, onReset, initialStage }) {
   const chart = reading.chart;
-  const el = elColor(chart?.dayMasterElement || fc?.dayMasterElement);
-  const [saving, setSaving] = useState(false);
-  async function save() {
-    setSaving(true);
-    try { await exportSharecardPNG('sharecard', `katon-${(fc.archetypeName || 'kamu').toLowerCase()}.png`); } catch { /* */ }
-    setSaving(false);
-  }
+  const element = chart?.day_master?.element;
+  const el = elColor(element);
+  const bars = presenceBars(chart?.element_presence);
 
-  const bars = chart?.elementBars || [];
-  let domIdx = -1, minIdx = -1, maxPct = -1, minPct = 101;
-  bars.forEach((b, i) => { if (b.pct > maxPct) { maxPct = b.pct; domIdx = i; } if (b.pct < minPct) { minPct = b.pct; minIdx = i; } });
+  let domIdx = -1; let minIdx = -1; let maxPct = -1; let minPct = 101;
+  bars.forEach((b, i) => {
+    if (b.pct > maxPct) { maxPct = b.pct; domIdx = i; }
+    if (b.pct < minPct) { minPct = b.pct; minIdx = i; }
+  });
 
-  const name = fc.archetypeName || '';
-  const titleName = name ? name.charAt(0) + name.slice(1).toLowerCase() : '';
-  const chinese = chart?.dayMasterChinese || fc.dayMasterChinese;
-  const polarity = chart?.dayMasterPolarity;
-  const elLabel = ELEMENT_ID[chart?.dayMasterElement || fc.dayMasterElement];
+  const arch = chart?.archetype || {};
+  // The card footer's date and gender are the CLIENT's - the free payload carries
+  // neither (lib/mirror/view.js). On a re-access there is no session and no date,
+  // and `buildFooter` treats that as a first-class case rather than a gap.
+  const cardData = reading.card
+    ? { ...reading.card, footer: mergeFooter(reading.card.footer, reading.birthDate, reading.gender) }
+    : null;
 
   return (
-    <div className="k-fade" style={{ ...wrap, ...themeVars(chart?.dayMasterElement || fc?.dayMasterElement) }}>
+    <div className="k-fade" style={{ ...wrap, ...themeVars(element) }}>
       <button onClick={onReset} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '18px 0 0', fontFamily: 'var(--font-sans)' }}>← Ganti tanggal</button>
 
-      {/* persona */}
+      {/* persona. RULE 23's BRACKET-ONCE: the Indonesian name leads and the English
+          pair appears once, here, and never again in the body. */}
       <Reveal><Eyebrow>Refleksimu</Eyebrow></Reveal>
-      <Reveal delay={0.06}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 44, lineHeight: 1, color: el.deep, margin: '16px 0 0' }}>{titleName}</div></Reveal>
-      {/* modifier sits directly under the title as one unit; element tag moved below it */}
-      {fc.card?.modifier && <Reveal delay={0.1}><p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--kayu)', margin: '12px 0 0' }}>{fc.card.modifier}</p></Reveal>}
+      <Reveal delay={0.06}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 44, lineHeight: 1, color: el.deep, margin: '16px 0 0' }}>{arch.name_id}</div></Reveal>
+      {arch.name_en && <Reveal delay={0.1}><p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--kayu)', margin: '12px 0 0' }}>{arch.name_en}</p></Reveal>}
       <Reveal delay={0.14}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--tinta-soft)' }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: el.mid }} /> {elLabel}{polarity ? ` · ${polarity}` : ''}{chinese ? ` · ${chinese}` : ''}
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: el.mid }} /> {element}{chart?.day_master?.stem ? ` · ${chart.day_master.stem}` : ''}
         </div>
       </Reveal>
-      {fc.river?.siapaKamu && <Reveal delay={0.18}><Para style={{ marginTop: 16 }}>{fc.river.siapaKamu}</Para></Reveal>}
 
-      {/* Empat Pilarmu — FREE, neutral labels only */}
-      {chart?.pillars && (
-        <Section eyebrow="Empat Pilarmu">
+      {/* the reading */}
+      {(reading.blocks || []).map((b, i) => (
+        <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
+          {(b.paragraphs || []).map((p, j) => (
+            <Reveal key={j} delay={j * 0.04}><Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para></Reveal>
+          ))}
+        </Section>
+      ))}
+      {reading.penutup && (
+        <Reveal delay={0.06} style={{ marginTop: 34 }}>
+          <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
+        </Reveal>
+      )}
+
+      {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
+          characters ARE the chart and they are what lets a reader cross-check Katon
+          against any other calculator. Never bare - each carries its animal and
+          element. */}
+      {chart?.pillars?.length > 0 && (
+        <Section eyebrow="Bagan Kelahiran">
           <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 16px', lineHeight: 1.55 }}>Empat lapisan energi dari tanggal lahirmu. Yang di tengah adalah intinya.</p></Reveal>
           <Reveal delay={0.06}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 9 }}>
-              {['tahun', 'bulan', 'hari', 'jam'].map((k) => {
-                const pl = chart.pillars[k];
-                return pl
-                  ? <PillarCell key={k} label={pl.label} stem={pl.stem} branch={pl.branch} elementId={pl.elementId} element={pl.element} polarity={pl.polarity} isDayMaster={pl.isDayMaster} />
-                  : <PillarCell key={k} label="Jam" />;
-              })}
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${chart.pillars.length},1fr)`, gap: 9 }}>
+              {chart.pillars.map((p) => (
+                <PillarCell key={p.position} label={p.palace} stem={p.stem} branch={p.branch}
+                  elementId={p.element} element={p.element} polarity={p.animal} isDayMaster={p.is_day_master} />
+              ))}
             </div>
           </Reveal>
-          {/* 胎元 — display only, no interpretation. It appears on every Joey
-              chart, so its absence is what a cross-checking user notices.
-              命宮 is deliberately not here: no convention reproduces Joey better
-              than 4/5, and a wrong value in a legitimacy block is worse than a
-              missing one. See docs/prompts/D1b-remove-life-palace.md. */}
-          {chart.palaces?.konsepsi && (
+          {/* 胎元 — display only, no interpretation, and no invented label. Reyner
+              ruled `pilar.conception` carries NO label_meaning on purpose (2026-08-07);
+              it prints because Joey prints it and a cross-checking reader notices its
+              absence. 命宮 is deliberately absent: two candidate conventions score
+              4/5 and 3/5 against Joey's own printed values, and in a block whose only
+              job is to be checkable a wrong value is worse than a missing one. */}
+          {chart.conception_pillar && (
             <Reveal delay={0.12} style={{ marginTop: 14 }}>
               <div style={{ textAlign: 'center', border: '1px solid var(--divider)', borderRadius: 12, padding: '10px 4px', background: 'var(--kertas-2)', maxWidth: 180, margin: '0 auto' }}>
-                <div style={{ fontSize: 9.5, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>
-                  {chart.palaces.konsepsi.label}
-                </div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--tinta)', margin: '5px 0 2px' }}>
-                  {chart.palaces.konsepsi.stem}{chart.palaces.konsepsi.branch}
-                </div>
-                <div style={{ fontSize: 10.5, color: 'var(--muted-warm)' }}>
-                  {chart.palaces.konsepsi.elementId} · {chart.palaces.konsepsi.animal}
-                </div>
+                <div style={{ fontSize: 9.5, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>{chart.conception_pillar.label}</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--tinta)', margin: '5px 0 2px' }}>{chart.conception_pillar.hanzi}</div>
+                <div style={{ fontSize: 10.5, color: 'var(--muted-warm)' }}>{chart.conception_pillar.element} · {chart.conception_pillar.animal}</div>
               </div>
             </Reveal>
           )}
         </Section>
       )}
 
-      {/* Komposisi Energimu — FREE, neutral labels only */}
+      {/* Sebaran Unsur. THE ENGINE'S OWN CAVEAT TRAVELS WITH THE NUMBERS - rule 9
+          forbids reading these as a strength score, and the note is the engine's
+          words rather than the client's. */}
       {bars.length > 0 && (
-        <Section eyebrow="Komposisi Energimu">
+        <Section eyebrow="Sebaran Unsur">
+          {chart.element_presence_note && <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>{chart.element_presence_note}</p></Reveal>}
           <div style={{ display: 'grid', gap: 16 }}>
             {bars.map((b, i) => (
-              <Reveal key={b.element} delay={i * 0.04}>
+              <Reveal key={b.label} delay={i * 0.04}>
                 <BalanceBar label={b.label} gloss={ELEMENT_GLOSS[b.label]} pct={b.pct} element={b.element} isDominant={i === domIdx} isMissing={i === minIdx} />
               </Reveal>
             ))}
@@ -563,57 +622,111 @@ function Reading({ reading, onReset, initialFull }) {
         </Section>
       )}
 
-      {/* free prose */}
-      {fc.river?.kenapaBegini && <Section eyebrow="Kenapa begini"><Reveal><Para>{fc.river.kenapaBegini}</Para></Reveal></Section>}
-      {fc.keMana && <Section eyebrow="Ke mana ini bawa kamu"><Reveal><Para>{fc.keMana}</Para></Reveal></Section>}
-
-      {/* sharecard */}
-      <Section eyebrow="Simpan sebagai kartu" style={{ marginTop: 52 }}>
-        <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>Satu kartu ringkas tentang dirimu, untuk disimpan atau dibagikan.</p></Reveal>
-        <Reveal delay={0.06} style={{ display: 'flex', justifyContent: 'center' }}><Sharecard data={fc} birthDate={reading.birthDate} /></Reveal>
-        <Reveal delay={0.12} style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-          <Button variant="gold" onClick={save} disabled={saving} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Icon.save size={17} /> {saving ? 'Menyimpan...' : 'Simpan Gambar'}</Button>
-        </Reveal>
-      </Section>
-
-      {/* bridge */}
-      {fc.bridge?.[0] && (
-        <Reveal delay={0.04} style={{ marginTop: 52 }}>
-          <div style={{ background: `radial-gradient(120% 80% at 50% 0%, ${el.wash}, var(--kertas-2))`, border: '1px solid var(--border)', borderRadius: 20, padding: '30px 24px', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.4, letterSpacing: '-.01em', color: 'var(--kayu)', margin: 0 }}>{fc.bridge[0]}</p>
-            <div style={{ margin: '22px auto' }}><Rule width={120} /></div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13.5, lineHeight: 1.65, color: 'var(--tinta-soft)', margin: 0 }}>Bacaan mendalam menelusuri pola ini lebih jauh, tanpa menyuruhmu memilih.</p>
-          </div>
-        </Reveal>
+      {/* the free shareable — Card A. It replaces the retired <Sharecard>, and the
+          reason it can sit beside the reading now is that both name her archetype
+          from the same glossary. */}
+      {cardData && (
+        <Section eyebrow="Simpan sebagai kartu" style={{ marginTop: 52 }}>
+          <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>Satu kartu ringkas tentang dirimu, untuk disimpan atau dibagikan.</p></Reveal>
+          <ShareCardA data={cardData} />
+        </Section>
       )}
 
-      {/* paywall */}
-      <div style={{ marginTop: 36 }}><Paywall reading={reading} initialFull={initialFull} /></div>
+      {/* the offer. AFTER the reading, never in front of it. */}
+      <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
     </div>
   );
 }
 
-/* ---------------- Paywall (progressive disclosure, server-gated) ---------------- */
-function Paywall({ reading, initialFull, initialStage }) {
-  // initialFull (optional): when provided (re-access to an already-paid reading), the
-  // paywall opens straight to the unlocked view. Omitted in the funnel → default flow.
-  // initialStage (optional): 'pending' when Xendit's success redirect brought the
-  // buyer back before the webhook landed. Same polling, same UI as the in-session
-  // wait — it only stops the offer being shown to somebody who just paid.
-  const [stage, setStage] = useState(initialFull ? 'unlocked' : (initialStage || 'teaser')); // teaser | pending | unlocking | unlocked
-  const [full, setFull] = useState(initialFull || null);
+/** The client's own footer values, merged over the server's date-less one. */
+function mergeFooter(footer, birthDate, gender) {
+  if (!birthDate && !gender) return footer;
+  const label = gender === 'female' ? 'PEREMPUAN' : (gender === 'male' ? 'LAKI-LAKI' : null);
+  const date = formatCardDate(birthDate);
+  return {
+    ...footer,
+    gender: label,
+    date,
+    left: [label, date].filter(Boolean).join(' | '),
+  };
+}
+
+/**
+ * `1989-09-13` -> `13 Sep 1989`.
+ *
+ * A SECOND IMPLEMENTATION OF `formatCardDate`, and it is deliberate rather than
+ * sloppy: `lib/card/cardData.js` is reached through `server-only` modules on every
+ * path that imports it, and this is a client component. The month table is the same
+ * three-letter Indonesian set, and `tests/card.spec.mjs` pins the server's. If the
+ * two ever disagree the card's footer disagrees with the paid card's footer, which
+ * is why they are named for each other here.
+ */
+const ID_MONTHS_CLIENT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+function formatCardDate(iso) {
+  if (!iso || typeof iso !== 'string') return '';
+  const [y, m, d] = iso.split('-');
+  const mi = parseInt(m, 10) - 1;
+  if (!(mi >= 0 && mi < 12)) return iso;
+  return `${parseInt(d, 10)} ${ID_MONTHS_CLIENT[mi]} ${y}`;
+}
+
+/**
+ * Card A, rendered and downloadable.
+ *
+ * THE SHARE CAPTURE, not the download one. `captureSpec` rules the difference:
+ * share takes the CANVAS (1080x1440, field included) because the field is what
+ * makes the file feed-safe, and download takes the OBJECT. The object alone is
+ * 63:88, which is neither 3:4 nor 4:5, so every platform letterboxes or auto-crops
+ * it - and an auto-crop takes the top and bottom of a card whose headline is at the
+ * top and whose seal is at the bottom.
+ */
+function ShareCardA({ data }) {
+  const [saving, setSaving] = useState(false);
+  const [failed, setFailed] = useState(false);
+  async function save() {
+    setSaving(true); setFailed(false);
+    try {
+      await downloadCard('share', 'A', { id: 'card-a', filename: `katon-${(data.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
+    } catch {
+      setFailed(true);
+    }
+    setSaving(false);
+  }
+  return (
+    <>
+      <Reveal delay={0.06} style={{ display: 'flex', justifyContent: 'center' }}>
+        <CardA data={data} scale={CARD_SCALE} id="card-a" />
+      </Reveal>
+      <Reveal delay={0.12} style={{ marginTop: 20 }}>
+        <Button variant="gold" onClick={save} disabled={saving} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Icon.save size={17} /> {saving ? 'Menyimpan...' : 'Simpan Gambar'}
+        </Button>
+        {failed && <div style={{ color: 'var(--red)', fontSize: 13, marginTop: 10 }}>Gambarnya gagal dibuat. Coba lagi.</div>}
+      </Reveal>
+    </>
+  );
+}
+
+/* ---------------- The offer: Rp 19.000, card + PDF ---------------- */
+/**
+ * AN UPSELL, NOT A GATE. Nothing above this point is hidden, and the closing line
+ * is the FREE-is-never-a-gate guarantee - Reyner's string, reused verbatim from
+ * `SITE_COPY.harga.artifact.noteAfter` rather than re-worded here.
+ *
+ * ── THE POLL WATCHES THE DELIVERY, NOT THE READING ────────
+ * It used to poll `/api/reading/[id]/full` and wait for paid PROSE to appear. There
+ * is no paid prose any more, so it polls the delivery manifest and waits for the
+ * two items to become ready. That is one predicate for both artifacts by design
+ * (`lib/deliver/handlers.js`): they are bought together, gated together, and
+ * refused together.
+ */
+function Offer({ reading, initialStage }) {
+  // offer | pending | delivered
+  const [stage, setStage] = useState(initialStage || 'offer');
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [busy, setBusy] = useState(false);
-  // Domain choice now lives at the paywall (moved from the front door). Defaults to the
-  // reading's domain (itself "hubungan" by default). Only "hubungan" is live; Karier/Uang
-  // are "Segera" demand-capture. The live pay flow uses the reading as created (hubungan).
-  const [selectedDomain, setSelectedDomain] = useState(reading.domain || 'hubungan');
   const pollRef = useRef(null);
 
-  // "Buka Refleksiku" goes STRAIGHT to invoice creation. There is no field between
-  // intent and checkout any more: the WhatsApp step used to sit here and was removed
-  // because the promise attached to it ("Ke mana bacaanmu dikirim?") had no sender
-  // behind it. See the note on the pay route for the delivery channel decision.
   async function startCheckout() {
     if (busy) return;
     setBusy(true);
@@ -621,9 +734,9 @@ function Paywall({ reading, initialFull, initialStage }) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
     }).then((r) => r.json()).catch(() => null);
-    // Open the Xendit checkout (QRIS) in a new tab; this tab keeps polling /full and
-    // unlocks when the verified webhook flips paid. (Triggered from the click gesture
-    // so it isn't popup-blocked; a fallback link shows in the pending state too.)
+    // Open the Xendit checkout (QRIS) in a new tab; this tab keeps polling and
+    // unlocks when the verified webhook flips paid. Triggered from the click gesture
+    // so it is not popup-blocked, and a fallback link shows in the pending state.
     if (res?.invoiceUrl) { setInvoiceUrl(res.invoiceUrl); window.open(res.invoiceUrl, '_blank', 'noopener'); }
     setBusy(false);
     setStage('pending');
@@ -634,126 +747,61 @@ function Paywall({ reading, initialFull, initialStage }) {
     let tries = 0;
     pollRef.current = setInterval(async () => {
       tries += 1;
-      const r = await fetch(`/api/reading/${reading.token}/full`).then((x) => x.json()).catch(() => null);
-      if (r && r.paid && r.paidContent) {
+      const m = await fetch(`/api/deliver/${reading.token}`).then((x) => x.json()).catch(() => null);
+      if (m?.paid && m.items?.length && m.items.every((i) => i.ready)) {
         clearInterval(pollRef.current);
-        setFull(r);
-        setStage('unlocking');
+        setStage('delivered');
       }
       if (tries > 60) clearInterval(pollRef.current);
     }, 3000);
     return () => clearInterval(pollRef.current);
   }, [stage, reading.token]);
 
-  useEffect(() => {
-    if (stage !== 'unlocking') return;
-    const t = setTimeout(() => setStage('unlocked'), 1700);
-    return () => clearTimeout(t);
-  }, [stage]);
-
-  if (stage === 'unlocked' && full) return <Unlocked full={full} token={reading.token} onUpdate={setFull} />;
-  if (stage === 'unlocking') return <Unlocking />;
+  if (stage === 'delivered') return <Delivery token={reading.token} />;
   if (stage === 'pending') return <Pending invoiceUrl={invoiceUrl} />;
-  return <Teaser reading={reading} onOpen={startCheckout} busy={busy} selectedDomain={selectedDomain} setSelectedDomain={setSelectedDomain} />;
-}
 
-// Frosted placeholder — generic blurred bars, NEVER the real locked copy.
-function LockedLines() {
-  return (
-    <div style={{ position: 'relative', marginTop: 16 }}>
-      <div style={{ opacity: 0.45, userSelect: 'none', filter: 'blur(4px)', maskImage: 'linear-gradient(180deg,#000 0%, transparent 94%)', WebkitMaskImage: 'linear-gradient(180deg,#000 0%, transparent 94%)' }}>
-        {[96, 88, 92, 74].map((w, i) => <div key={i} style={{ height: 11, width: `${w}%`, borderRadius: 6, background: 'rgba(207,225,232,.32)', margin: '13px 0' }} />)}
-      </div>
-      <div style={{ position: 'absolute', left: '50%', bottom: -2, transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 7, fontSize: 11.5, letterSpacing: '.06em', color: GLOW }}>
-        <Icon.lock size={14} /> Terkunci
-      </div>
-    </div>
-  );
-}
-
-// Teaser + price in ONE sanctuary card. "Buka Refleksiku" is now the LAST tap before
-// the Xendit checkout — the old teaser→offer tap collapsed into this card (PROGRESS.md),
-// and the WhatsApp step that followed it was removed outright.
-function Teaser({ reading, onOpen, busy, selectedDomain, setSelectedDomain }) {
-  const t = reading.teaser;
-  const domain = selectedDomain || reading.domain || 'hubungan';
-  const domainLabel = DOMAIN_LABEL[domain] || '';
-  const isLive = domain === 'hubungan'; // only Hubungan is a live paid read; others = Segera
   return (
     <Reveal>
       <div style={{ position: 'relative', overflow: 'hidden', background: SANCTUARY, borderRadius: 26, padding: '30px 24px 26px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.22em', textTransform: 'uppercase', color: GLOW, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Icon.sparkle size={14} /> Bacaan Mendalam{domainLabel ? ` · ${domainLabel}` : ''}
+          <Icon.sparkle size={14} /> Complete Edition
         </div>
+        {/* REYNER-APPROVED, and RESTORED rather than written. This is the artifact
+            body from before 2026-08-05, when it was replaced because the paid path
+            delivered a 7-beat reading and there was no card and no PDF behind it.
+            The delivery exists now, so the string it was replaced FOR is the string
+            that comes back. */}
+        <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '20px 0 0' }}>Kartu resolusi tinggi dan PDF dari bacaanmu, siap disimpan atau dicetak.</p>
 
-        {/* Domain selector (moved here from the front door) — the live-decision prompt.
-            Hubungan = live paid read; Karier/Uang = Segera demand-capture (not wired live). */}
-        <div style={{ marginTop: 16 }}>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, lineHeight: 1.4, color: '#F2F6F6', marginBottom: 12 }}>Yang lagi kamu bawa sekarang?</div>
-          <div style={{ display: 'flex', background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g20)', borderRadius: 12, padding: 4, gap: 4 }}>
-            {DOMAINS.map((d) => {
-              const active = domain === d.key;
-              return (
-                <button type="button" key={d.key} aria-pressed={active} onClick={() => setSelectedDomain(d.key)}
-                  style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 13.5, fontWeight: 500, padding: '9px 0', borderRadius: 9, border: 'none', cursor: 'pointer', transition: '.2s', background: active ? GLOW : 'transparent', color: active ? '#0b1417' : 'rgba(234,241,242,.7)' }}>
-                  {d.label}
-                </button>
-              );
-            })}
+        <div style={{ height: 24 }} />
+        <div style={{ background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g22)', borderRadius: 16, padding: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            {/* Resolved from lib/pricing.js, never hardcoded: the offer must show
+                exactly what the invoice charges. */}
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff' }}>{formatIdr(priceFor('artifact'))}</div>
+            <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW }}>sekali bayar</div>
           </div>
+          <div style={{ marginTop: 16 }}>
+            <Button onClick={startCheckout} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {busy ? 'Menyiapkan pembayaran...' : <>Ambil Complete Edition <Icon.arrow size={17} /></>}
+            </Button>
+          </div>
+          {/* THE GUARANTEE, AND IT IS NOT OPTIONAL. Verbatim from
+              SITE_COPY.harga.artifact.noteAfter, which is where it already carries
+              Reyner's approval. */}
+          <div style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(234,241,242,.7)', marginTop: 14, textAlign: 'center' }}>Melewatinya tidak mengurangi apa pun dari bacaan gratismu.</div>
         </div>
-
-        {isLive ? (
-          <>
-            {t?.lead && <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '20px 0 0' }}>{t.lead}<span style={{ color: 'rgba(234,241,242,.45)' }}> ...</span></p>}
-            <LockedLines />
-            <div style={{ height: 24 }} />
-            <div style={{ background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g22)', borderRadius: 16, padding: 18 }}>
-              <div style={{ fontSize: 12.5, color: 'rgba(234,241,242,.6)' }}>Sekali konsultasi biasanya Rp 300-500rb.</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, margin: '6px 0 0' }}>
-                {/* Resolved from lib/pricing.js, never hardcoded: the paywall must show
-                    exactly what the invoice charges. The old literal Rp 49.000 was the
-                    retired pre-pivot price and the checkout was already billing
-                    priceFor('artifact'), so the shown and charged amounts disagreed. */}
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff' }}>{formatIdr(priceFor('artifact'))}</div>
-                <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW }}>sekali bayar</div>
-              </div>
-              <div style={{ marginTop: 16 }}>
-                <Button onClick={onOpen} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  {busy ? 'Menyiapkan pembayaran...' : <>Buka Refleksiku <Icon.arrow size={17} /></>}
-                </Button>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 11.5, color: GLOW, opacity: 0.85, marginTop: 14 }}><Icon.lock size={13} /> Sekali baca. Milikmu selamanya.</div>
-            </div>
-          </>
-        ) : (
-          <div style={{ marginTop: 20 }}>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13.5, lineHeight: 1.65, color: 'rgba(234,241,242,.7)', margin: '0 0 12px' }}>Bacaan {domainLabel} sedang disiapkan. Tinggalkan nomor kalau mau dikabari begitu siap.</p>
-            <SegeraRow token={reading.token} domain={domain} label={domainLabel} />
-          </div>
-        )}
       </div>
     </Reveal>
   );
 }
-
-/* The `wa` stage lived here: a WhatsApp field between "Buka Refleksiku" and the
-   Xendit invoice, headed "Ke mana bacaanmu dikirim?". It was REMOVED, not made
-   optional. The number was mandatory (the pay route 400'd without it) and the
-   promise attached to it was never kept: migration 0002 added `wa_sent` as a
-   send-once guard and no sender was ever built behind it. Sending on the WhatsApp
-   Business Platform bills per message and needs a verified business plus template
-   approval, which is disproportionate for MVP, so email becomes the delivery and
-   recovery channel instead (already required by the compatibility spec).
-   The coming-soon demand capture in <SegeraRow> is untouched: "kalau mau dikabari"
-   is a promise we can keep. */
 
 function Pending({ invoiceUrl }) {
   return (
     <div style={{ background: SANCTUARY, borderRadius: 26, padding: '40px 24px', color: LIGHT, boxShadow: 'var(--shadow-deep)', textAlign: 'center' }}>
       <div className="k-spin" style={{ width: 34, height: 34, border: '3px solid var(--el-g25)', borderTopColor: GLOW, borderRadius: '50%', margin: '0 auto 16px' }} />
       <p style={{ fontFamily: 'var(--font-serif)', fontSize: 18, color: '#F2F6F6', margin: 0 }}>Menunggu konfirmasi pembayaran...</p>
-      <p style={{ fontSize: 13, color: 'rgba(234,241,242,.6)', marginTop: 8 }}>Begitu masuk, bacaanmu langsung terbuka di sini.</p>
+      <p style={{ fontSize: 13, color: 'rgba(234,241,242,.6)', marginTop: 8 }}>Begitu masuk, kartu dan PDF-mu langsung siap di sini.</p>
       {invoiceUrl && (
         <p style={{ fontSize: 13, marginTop: 14, color: 'rgba(234,241,242,.7)' }}>
           Halaman pembayaran tidak terbuka?{' '}
@@ -764,225 +812,135 @@ function Pending({ invoiceUrl }) {
   );
 }
 
-function Unlocking() {
-  return (
-    <div className="k-fade" style={{ position: 'relative', overflow: 'hidden', background: SANCTUARY, borderRadius: 26, padding: '56px 24px', color: LIGHT, boxShadow: 'var(--shadow-deep)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div className="k-gleam" />
-      <div style={{ position: 'relative', width: 74, height: 74, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: '1px solid rgba(174,132,63,.5)', color: 'var(--emas)' }}>
-        <span className="k-seal"><Icon.lock size={26} /></span>
-        <span className="k-seal-check" style={{ position: 'absolute' }}><Icon.check size={28} /></span>
-      </div>
-      <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 16, color: 'rgba(234,241,242,.8)', marginTop: 26 }}>Refleksimu terbuka...</p>
-    </div>
-  );
-}
+/* ---------------- The delivery: two artifacts, one purchase ---------------- */
+/**
+ * ── WHY THE CARD IS FETCHED AND THE PDF IS A LINK ─────────
+ * They are different mechanisms and the difference is in the artifacts, not in the
+ * gate. The PDF is server-rendered bytes, so the browser downloads a URL. The card
+ * is a capture of a live DOM node at ruled pixel sizes (html-to-image), so the
+ * data has to come down and be drawn before it can be saved - and prompt M rules
+ * OUT embedding the card in the PDF precisely so the document does not depend on
+ * that path.
+ *
+ * The card DATA is fetched rather than reused from the reading: the free payload
+ * withholds `appendix`, which is Card B's whole second half - the four pillar
+ * characters with their palaces and the element distribution. That withholding is
+ * the paywall on the card.
+ *
+ * CARD B IS RENDERED OFF-SCREEN AT FULL SIZE and never shown at 1:1. `captureCard`
+ * needs the node in the document to clone it, and it measures the rendered width to
+ * scale the clone, so a hidden node must still have a real width - `visibility:
+ * hidden` inside a clipped box, never `display: none`, which has no box to measure.
+ */
+function Delivery({ token }) {
+  const [paidCard, setPaidCard] = useState(null);
+  const [state, setState] = useState('loading'); // loading | ready | failed
+  const [saving, setSaving] = useState(null); // 'card' | 'pdf' | null
 
-/* ---------------- Unlocked (deep-read, 7 real beats) ---------------- */
-function DarkParas({ text, dropcap }) {
-  if (!text) return null;
-  return text.split('\n\n').map((p, i) => (
-    <p key={i} className={dropcap && i === 0 ? 'k-dropcap' : ''} style={{ fontFamily: 'var(--font-sans)', fontSize: 15.5, lineHeight: 1.8, color: 'rgba(234,241,242,.86)', margin: i ? '12px 0 0' : 0 }}>{p}</p>
-  ));
-}
-function ReframeCard({ children }) {
-  return (
-    <div style={{ background: 'rgba(9,18,21,.4)', borderLeft: `3px solid ${GLOW}`, borderRadius: 12, padding: 16, margin: '12px 0 0' }}>
-      <p style={{ margin: 0, fontFamily: 'var(--font-serif)', fontSize: 16, fontStyle: 'italic', lineHeight: 1.55, color: '#EAF1F2' }}>{children}</p>
-    </div>
-  );
-}
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const r = await fetch(`/api/deliver/${token}/card`).then((x) => x.json()).catch(() => null);
+      if (cancelled) return;
+      if (r?.card) {
+        // NO FOOTER MERGE HERE, unlike Card A. The paid endpoint supplies the birth
+        // date and gender from the row itself, so a buyer opening her link on a
+        // fresh device still gets a correct footer - which is the whole reason that
+        // endpoint sends them and the free one does not.
+        setPaidCard(r.card);
+        setState('ready');
+      } else {
+        setState('failed');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [token]);
 
-function Unlocked({ full, token, onUpdate }) {
-  const c = full.paidContent;
-  const H = BEAT_HEADINGS;
-  const domainLabel = DOMAIN_LABEL[full.domain] || '';
-  const chinese = full.chart?.dayMasterChinese || '';
-  if (!c) return null;
-
-  const BEAT = { marginBottom: 34 };
-  const H3 = { fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.2, color: '#F4F8F8', margin: '0 0 12px' };
-  const BODY = { fontFamily: 'var(--font-sans)', fontSize: 15.5, lineHeight: 1.8, color: 'rgba(234,241,242,.86)', margin: '0 0 10px' };
-  const label4 = { fontSize: 11, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW, opacity: 0.8 };
-  const kicker = (t) => <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '.18em', textTransform: 'uppercase', color: GLOW, opacity: 0.8, marginBottom: 10 }}>{t}</div>;
-
-  return (
-    <div className="k-fade" style={{ background: SANCTUARY, borderRadius: 26, padding: '30px 22px 40px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
-      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.2em', textTransform: 'uppercase', color: GLOW }}>Bacaan Mendalam{chinese ? ` · ${chinese}` : ''}</div>
-      <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 34, lineHeight: 1.05, color: '#fff', margin: '12px 0 0' }}>{domainLabel}</h2>
-      <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 15.5, lineHeight: 1.7, color: 'rgba(234,241,242,.72)', margin: '14px 0 0' }}>Bukan ramalan, bukan nasihat. Satu cara melihat pola yang sama lebih dekat.</p>
-
-      <div style={{ margin: '22px 0 30px' }}><Rule light /></div>
-
-      <div id="b1" style={BEAT}>{kicker('Bagian satu')}<h3 style={H3}>{H[1]}</h3><DarkParas text={c.beat1} dropcap /></div>
-
-      <div id="b2" style={BEAT}>{kicker('Bagian dua')}<h3 style={H3}>{H[2]}</h3>
-        {c.beat2?.intro && <p style={BODY}>{c.beat2.intro}</p>}
-        <ul style={{ margin: 0, paddingLeft: 18, color: 'rgba(234,241,242,.86)' }}>{(c.beat2?.scenes || []).map((s, i) => <li key={i} style={{ margin: '8px 0', lineHeight: 1.7 }}>{s}</li>)}</ul>
-      </div>
-
-      <div id="b3" style={BEAT}>{kicker('Bagian tiga')}<h3 style={H3}>{H[3]}</h3><DarkParas text={c.beat3?.body} />{c.beat3?.pull && <ReframeCard>{c.beat3.pull}</ReframeCard>}</div>
-
-      <div id="b4" style={BEAT}>{kicker('Bagian empat')}<h3 style={H3}>{H[4]}</h3>
-        <div style={{ ...label4, margin: '0 0 6px' }}>Yang melelahkan</div><p style={BODY}>{c.beat4?.drain}</p>
-        <div style={{ ...label4, margin: '14px 0 6px' }}>Yang menenangkan</div><p style={BODY}>{c.beat4?.feed}</p>
-        {c.beat4?.sign && <ReframeCard>{c.beat4.sign}</ReframeCard>}
-      </div>
-
-      <PaidPillars id="b5" chart={full.chart} token={token} onUpdate={onUpdate} explanation={c.beat5?.explanation} hourNote={c.beat5?.hourNote} kicker={kicker('Bagian lima')} H3={H3} BODY={BODY} />
-
-      <div id="b6" style={BEAT}>{kicker('Bagian enam')}<h3 style={H3}>{H[6]}</h3>
-        {c.beat6?.lead && <p style={BODY}>{c.beat6.lead}</p>}
-        {c.beat6?.rule && <div style={{ background: 'rgba(174,132,63,.12)', border: '1px solid rgba(174,132,63,.4)', borderRadius: 14, padding: 18, margin: '12px 0' }}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontStyle: 'italic', color: '#F0D9AE', lineHeight: 1.4 }}>"{c.beat6.rule}"</div></div>}
-        {c.beat6?.body && <p style={BODY}>{c.beat6.body}</p>}
-      </div>
-
-      <div id="b7" style={BEAT}>{kicker('Bagian tujuh')}<h3 style={H3}>{H[7]}</h3><DarkParas text={c.beat7} /></div>
-
-      {c.closer && <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 15, color: 'rgba(234,241,242,.75)', lineHeight: 1.7, margin: '8px 0 0' }}>{c.closer}</p>}
-
-      {full.segeraDomains?.length > 0 && (
-        <div id="b-domains" style={{ marginTop: 40 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.18em', textTransform: 'uppercase', color: GLOW, opacity: 0.8, marginBottom: 14 }}>Dua sisi lain dari dirimu</div>
-          <div style={{ display: 'grid', gap: 12 }}>
-            {full.segeraDomains.map((d) => <SegeraRow key={d.domain} token={token} domain={d.domain} label={d.label} />)}
-          </div>
-          <p style={{ fontSize: 12, color: 'rgba(234,241,242,.5)', marginTop: 12 }}>Karier dan Uang sedang disiapkan. Tinggalkan nomor kalau mau dikabari.</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* Beat 5 — Empat Pilarmu recap (from the live chart) + interpretive explanation
-   (paid) + post-pay hour-enrichment door. Pillars themselves are also shown FREE;
-   this recap reflects any hour added here. No BaZi numbers come from content. */
-function PaidPillars({ id, chart, token, onUpdate, explanation, hourNote, kicker, H3, BODY }) {
-  const p = chart?.pillars;
-  const [hour, setHour] = useState('');
-  const [minute, setMinute] = useState('');
-  const [busy, setBusy] = useState(false);
-  if (!p) return null;
-
-  async function addHour(e) {
-    e.preventDefault();
-    if (hour === '') return;
-    setBusy(true);
-    const birthTime = `${pad(hour)}:${pad(minute || 0)}`;
-    const r = await fetch(`/api/reading/${token}/hour`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ birthTime }),
-    }).then((x) => x.json()).catch(() => null);
-    setBusy(false);
-    if (r && r.chart) onUpdate(r);
+  async function saveCard() {
+    setSaving('card');
+    try {
+      await downloadCard('download', 'B', { id: 'card-b', filename: `katon-${(paidCard?.nameId || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
+    } catch { /* the button re-enables; the PDF is unaffected */ }
+    setSaving(null);
   }
 
   return (
-    <div id={id} style={{ marginBottom: 34 }}>
-      {kicker}
-      <h3 style={H3}>Empat Pilarmu (Four Pillars)</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, margin: '6px 0 16px' }}>
-        {['tahun', 'bulan', 'hari', 'jam'].map((k) => {
-          const pl = p[k];
-          return (
-            <div key={k} style={{ textAlign: 'center', border: '1px solid var(--el-g25)', borderRadius: 12, padding: '12px 4px', background: 'rgba(9,18,21,.3)' }}>
-              <div style={{ fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(234,241,242,.5)' }}>{pl ? pl.label : 'Jam'}</div>
-              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, color: '#EAF1F2', margin: '6px 0 2px' }}>{pl ? `${pl.stem}${pl.branch}` : '··'}</div>
-              <div style={{ fontSize: 10, color: GLOW }}>{pl ? pl.elementId : 'belum diisi'}</div>
-            </div>
-          );
-        })}
-      </div>
-      {explanation && <p style={BODY}>{explanation}</p>}
-      {!p.hasHour && hourNote && <ReframeCard>{hourNote}</ReframeCard>}
-      {!p.hasHour && (
-        <form onSubmit={addHour} style={{ marginTop: 12, padding: 14, border: '1px dashed var(--el-g30)', borderRadius: 12, background: 'rgba(9,18,21,.25)' }}>
-          <div style={{ fontSize: 13, color: 'rgba(234,241,242,.7)' }}>Jam lahir belum diisi. Tambahkan untuk bacaan yang lebih lengkap.</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, marginTop: 10 }}>
-            <select value={hour} onChange={(e) => setHour(e.target.value)} aria-label="Jam" style={darkField}><option value="">Jam</option>{RANGE(24).map((h) => <option key={h} value={h}>{pad(h)}</option>)}</select>
-            <select value={minute} onChange={(e) => setMinute(e.target.value)} aria-label="Menit" style={darkField}><option value="">Menit</option>{RANGE(60).map((m) => <option key={m} value={m}>{pad(m)}</option>)}</select>
-            <Button type="submit" variant="gold" light disabled={busy || hour === ''} style={{ width: 'auto', padding: '0 18px' }}>{busy ? '...' : 'Tambah'}</Button>
+    <div className="k-fade" style={{ background: SANCTUARY, borderRadius: 26, padding: '30px 22px 34px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.2em', textTransform: 'uppercase', color: GLOW }}>Complete Edition</div>
+      <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 30, lineHeight: 1.1, color: '#fff', margin: '12px 0 0' }}>Sudah siap.</h2>
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, lineHeight: 1.7, color: 'rgba(234,241,242,.72)', margin: '12px 0 0' }}>Kartu dan PDF-mu bisa diunduh kapan saja dari tautan bacaan ini.</p>
+
+      <div style={{ margin: '22px 0 24px' }}><Rule light /></div>
+
+      {state === 'loading' && <p style={{ fontSize: 13.5, color: 'rgba(234,241,242,.6)', margin: 0 }}>Menyiapkan kartumu...</p>}
+      {state === 'failed' && <p style={{ fontSize: 13.5, color: 'rgba(234,241,242,.75)', margin: 0 }}>Kartumu belum bisa dimuat. Muat ulang halaman ini.</p>}
+
+      {state === 'ready' && paidCard && (
+        <>
+          {/* Off-screen at scale 1. Clipped rather than hidden with display:none,
+              which would leave nothing for captureCard to measure. */}
+          <div aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}>
+            <CardB data={paidCard} scale={1} id="card-b" />
           </div>
-        </form>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <CardB data={paidCard} scale={CARD_SCALE * 0.72} id="card-b-preview" />
+          </div>
+          <div style={{ display: 'grid', gap: 12, marginTop: 22 }}>
+            <Button variant="gold" light onClick={saveCard} disabled={saving === 'card'} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <Icon.save size={17} /> {saving === 'card' ? 'Menyimpan...' : 'Simpan Kartu'}
+            </Button>
+            {/* A PLAIN LINK, not a fetch-then-blob. The endpoint sets
+                Content-Disposition: attachment, so the browser saves it and the tab
+                keeps its state; building a blob would hold a whole PDF in memory to
+                achieve the same thing. */}
+            <a href={`/api/deliver/${token}/pdf`} style={{ textDecoration: 'none' }}>
+              <Button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <Icon.save size={17} /> Unduh PDF
+              </Button>
+            </a>
+          </div>
+        </>
       )}
-    </div>
-  );
-}
-
-/* A "segera" (coming-soon) domain row with WhatsApp demand-capture. CAPTURE ONLY. */
-function SegeraRow({ token, domain, label }) {
-  const [open, setOpen] = useState(false);
-  const [wa, setWa] = useState('');
-  const [done, setDone] = useState(false);
-
-  async function submit(e) {
-    e.preventDefault();
-    if (!/^[0-9+]{8,}$/.test(wa.replace(/\s/g, ''))) return;
-    await fetch(`/api/reading/${token}/interest`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domain, wa_number: wa }),
-    }).catch(() => null);
-    setDone(true);
-  }
-
-  return (
-    <div style={{ background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g20)', borderRadius: 16, padding: 18 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 19, color: '#EEF3F3' }}>{label}</div>
-          <div style={{ fontSize: 12, color: GLOW, opacity: 0.7 }}>Segera</div>
-        </div>
-        {!done && <button type="button" onClick={() => setOpen((o) => !o)} style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--emas)', border: '1px solid rgba(174,132,63,.4)', borderRadius: 999, padding: '8px 16px', background: 'transparent', cursor: 'pointer' }}>Kabari aku</button>}
-      </div>
-      {open && !done && (
-        <form onSubmit={submit} style={{ marginTop: 12 }}>
-          <input type="tel" placeholder="08xxxxxxxxxx" value={wa} onChange={(e) => setWa(e.target.value)} style={darkField} />
-          <div style={{ marginTop: 8 }}><Button type="submit">Kabari kalau sudah siap</Button></div>
-        </form>
-      )}
-      {done && <div style={{ fontSize: 12.5, color: 'rgba(234,241,242,.6)', marginTop: 10 }}>Oke. Kami kabari kamu kalau bacaan {label} sudah siap.</div>}
     </div>
   );
 }
 
 /* ---------------- Re-access route: /r/[token] ----------------
-   The receiving end of the link the app builds (sendReadingLink → /r/<id>) and of
-   the URL the funnel now pushes on reading creation. `token` is the reading id.
-   Fetches the SAME server-gated endpoints the funnel uses — no new gating path:
-     - GET /api/reading/[token]        → free view + `paid` flag (always safe)
-     - GET /api/reading/[token]/full   → paid content ONLY if paid===true
-   Render: paid → full reading (free portrait + Unlocked, reusing <Reading>);
-   unpaid → teaser + paywall only (decision at the top); invalid token → not-found. */
+   The receiving end of the URL the funnel pushes on reading creation. `token` is
+   the reading id. Reads the SAME endpoints the funnel does - no second gating path:
+     GET /api/mirror/[token]    the full mirror, ungated
+     GET /api/deliver/[token]   whether the card + PDF are hers yet
+   The reading is shown either way, because it is free. The delivery opens beneath it
+   when it is ready. */
 export function ReadingByToken({ token }) {
   const [status, setStatus] = useState('loading'); // loading | notfound | ready
-  const [freeView, setFreeView] = useState(null);
-  const [full, setFull] = useState(null);
-  // Xendit's success_redirect_url lands here with `?bayar=selesai` (see the pay
-  // route). It says only "she came back from checkout", never "she paid" — the
-  // paid flag comes from the server below, and a hand-typed query string must not
-  // be able to change what she is shown beyond which waiting state opens first.
-  const [fromCheckout] = useState(() =>
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('bayar') === 'selesai');
+  const [reading, setReading] = useState(null);
+  const [delivered, setDelivered] = useState(false);
+  // Xendit's success_redirect_url lands here with `?bayar=selesai`. It says only
+  // "she came back from checkout", never "she paid" - the paid flag comes from the
+  // server, and a hand-typed query string must not change what she is shown beyond
+  // which waiting state opens first.
+  const [fromCheckout] = useState(() => typeof window !== 'undefined'
+    && new URLSearchParams(window.location.search).get('bayar') === 'selesai');
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/reading/${token}`);
+        const res = await fetch(`/api/mirror/${token}`);
         if (!res.ok) { if (!cancelled) setStatus('notfound'); return; }
-        const fv = await res.json();
-        if (!fv || fv.error || !fv.token) { if (!cancelled) setStatus('notfound'); return; }
-        let paidFull = null;
-        if (fv.paid) {
-          const fr = await fetch(`/api/reading/${token}/full`).then((r) => r.json()).catch(() => null);
-          if (fr && fr.paid && fr.paidContent) paidFull = fr;
-        }
-        if (!cancelled) { setFreeView(fv); setFull(paidFull); setStatus('ready'); }
+        const served = await res.json();
+        if (!served || served.error || !served.token) { if (!cancelled) setStatus('notfound'); return; }
+
+        const m = await fetch(`/api/deliver/${token}`).then((r) => r.json()).catch(() => null);
+        if (cancelled) return;
+        setReading(served);
+        setDelivered(Boolean(m?.paid && m.items?.length && m.items.every((i) => i.ready)));
+        setStatus('ready');
       } catch {
         if (!cancelled) setStatus('notfound');
       }
     })();
-    return () => { cancelled = true; };
   }, [token]);
 
   const goHome = () => { if (typeof window !== 'undefined') window.location.href = '/'; };
@@ -990,22 +948,17 @@ export function ReadingByToken({ token }) {
   if (status === 'loading') return <ReadingLoading />;
   if (status === 'notfound') return <ReadingNotFound onHome={goHome} />;
 
-  // PAID → full reading (free portrait + Unlocked), reusing <Reading> with initialFull.
-  if (full) return <Reading reading={freeView} onReset={goHome} initialFull={full} />;
-
-  // UNPAID → teaser + paywall ONLY (returning visitor already saw the free portrait;
-  // put the unlock decision at the top rather than below a re-scroll).
-  //
-  // Unless she has just come back from checkout: the success redirect regularly
-  // beats the webhook by a few seconds, and re-offering a product to someone who
-  // has already paid for it is the worst reading of this moment. The paywall opens
-  // in its waiting state and unlocks the instant the poll sees `paid`.
+  // `delivered` opens the offer straight into its delivered state for a buyer
+  // returning to her link. `fromCheckout` is the near-miss case: the success
+  // redirect regularly beats the webhook by a few seconds, and re-offering a product
+  // to somebody who has already paid for it is the worst reading of that moment - so
+  // it opens in the waiting state and the poll finishes the job.
   return (
-    <div style={{ ...wrap, ...themeVars(freeView.chart?.dayMasterElement), paddingTop: 26 }}>
-      <button onClick={goHome} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '0 0 20px', fontFamily: 'var(--font-sans)' }}>← Beranda</button>
-      <Reveal><Wordmark /></Reveal>
-      <div style={{ marginTop: 22 }}><Paywall reading={freeView} initialStage={fromCheckout ? 'pending' : undefined} /></div>
-    </div>
+    <Reading
+      reading={reading}
+      onReset={goHome}
+      initialStage={delivered ? 'delivered' : (fromCheckout ? 'pending' : undefined)}
+    />
   );
 }
 

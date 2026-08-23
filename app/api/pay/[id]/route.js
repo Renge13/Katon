@@ -29,8 +29,24 @@ export const runtime = 'nodejs';
 // The pre-pivot `Katon: Bacaan Mendalam (${row.domain})` is still dead: it sold a
 // per-domain reading, and the domain is not a product. The product name returning
 // here is not that string returning — there is no domain in it.
+// SWAPPED 2026-08-23 WITH THE PROMOTION, and the note above is its own instruction:
+// "when paid really is card + PDF, this string names them again." It does now.
+//
+// NOT THE OLD STRING BACK. `Katon - CE card + PDF reading` was the pre-08-05 value
+// and it is NOT restored, because the delivery mismatch was only half of what was
+// wrong with it: it is English on an Indonesian buyer's bank statement, and `CE` is
+// an internal abbreviation for a product page that spells the name out. Rule 20 is
+// one composed voice EVERYWHERE INCLUDING CHROME, and a statement line is chrome.
+//
+// So this reuses the two strings that already carry Reyner's approval -
+// `SITE_COPY.harga.artifact.name` and the funnel's own offer heading, both
+// `Complete Edition` - and adds nothing. Keyboard characters only, no em-dash.
+//
+// APPROVED BY REYNER, 2026-08-22. He had approved `Complete Edition` as a product NAME
+// on 2026-08-03 (the EN tier layer) and had not seen it as a statement line; it was
+// flagged here for exactly that reason, and the flag is now closed. The wording is his.
 const INVOICE_DESCRIPTION = {
-  artifact: 'Katon - Bacaan Mendalam',
+  artifact: 'Katon - Complete Edition',
 };
 
 // POST /api/pay/[id]   body: { sku?, wa_number? }
