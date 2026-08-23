@@ -81,7 +81,7 @@ const scripts = pkg.scripts || {};
  * 0x08 in PROGRESS.md months earlier.
  */
 const EXTRA_GATES = [
-  'lint', 'typecheck', 'check:copy', 'check:bytes',
+  'lint', 'typecheck', 'check:copy', 'check:bytes', 'check:qa',
   'audit:card-contrast', 'audit:card-budget',
 ];
 

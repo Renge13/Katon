@@ -171,8 +171,13 @@ test('the full document has all five sections and more than one page', async () 
   assert.match(text, /Bacaanmu/, 'the reading section');
   assert.match(text, /Bagan Kelahiran/, 'the chart page, and NOT a hanzi heading');
   assert.match(text, /Istilah dalam Bacaanmu/, 'the appendix');
-  // The colophon is SITE_COPY.syarat.limits - already rule 25 in ruled Indonesian.
-  assert.match(text, /Batas layanan/, 'the colophon');
+  // RULE 25 IS ONE LINE NOW, not a page. Reyner killed the colophon on 2026-08-22
+  // ("copy-pasted Terms of Service text kills the product experience right at the
+  // finish line"), so the obligation moved to the foot of the chart page and the
+  // document ends on her own material. The old assertion was /Batas layanan/.
+  assert.match(text, /cermin refleksi diri/, 'rule 25, in Reyner\'s one line');
+  assert.equal(text.includes('Batas layanan'), false,
+    'the ToS page is GONE, not merely shortened');
 });
 
 test('THE PDF AUTHORS NOTHING: the reading is the cached prose, verbatim', async () => {
@@ -198,7 +203,11 @@ test('THE PDF AUTHORS NOTHING: the reading is the cached prose, verbatim', async
   assert.ok(text.includes(strip(rendered.penutup)), 'the penutup too');
 });
 
-test('the colophon carries the provenance a stray file needs to be traced', async () => {
+test('the provenance survived the colophon it used to live on', async () => {
+  // The ruling was about the ToS text and said nothing about these two lines. They
+  // moved to the chart-page foot rather than dying with the page, because a document
+  // in someone's downloads folder still has to be traceable to the engine, prompt and
+  // gate that produced it - and `stage6_version` is the gate that CLEARED this prose.
   const { chart, semanticJson, rendered } = fixture('chart 1');
   const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
   const text = latinText(buf);
@@ -478,7 +487,16 @@ test('pageTexts attributes each page its OWN text', async () => {
   assert.equal(texts.length, pageObjectOrder(buffer).length, 'one text per page');
   assert.equal(texts.length, report.pages);
   assert.ok(texts[0].includes(semanticJson.core.archetype_name_id), 'page 1 is the cover');
-  assert.ok(texts[report.pages - 1].includes('Batas layanan'), 'the last page is the colophon');
+  // THE LAST PAGE IS THE APPENDIX NOW. It was the colophon until 2026-08-22; the
+  // document deliberately ends on her own material. Asserted by CONSTRUCTION rather
+  // than by a substring that happens to be there: the appendix's final entry is the
+  // last thing the document emits, so its name must be on the last page.
+  const entries = buildAppendix({ chart, semanticJson }).groups.flatMap((g) => g.entries);
+  const last = entries[entries.length - 1];
+  assert.ok(texts[report.pages - 1].includes(last.name || last.meaning.slice(0, 24)),
+    'the last page must carry the appendix\'s final entry');
+  assert.equal(texts[report.pages - 1].includes('Batas layanan'), false,
+    'and it must not carry the ToS text the ruling removed');
   assert.ok(!texts[0].includes(APPENDIX_HEADING), 'the cover does not carry the appendix heading');
 });
 

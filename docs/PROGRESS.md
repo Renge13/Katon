@@ -836,6 +836,116 @@ also said the move would be *"expected, NOT
 the re-coupling tripwire firing"*, which would have authorised dismissing a genuine alarm. **A
 prediction that tells a reader what to disregard must carry its grep.**
 
+## RULED 2026-08-22 (evening) — THE DEPTH PAIR, AND A COLLISION THAT IS NOT RESOLVED
+
+**Reyner's evening rulings, recorded together because two of them contradict each other and the
+contradiction is his to settle, not this file's to smooth over.**
+
+### 1. The budget goes back to 2. Depth 3 is thinner, not tighter.
+
+> *"Depth 3 is thinner, not tighter. It completely dropped entire factual nodes to hit length
+> targets."*
+
+**THE ARTIFACT: `docs/qa/2026-08-22-depth-1-vs-3-postfixes.md`** - two charts, each at two
+depths, every word lifted verbatim from the 40-run trace already paid for. Prompt
+`22316c3349d0ea46`, gate `1.17.0`. Cited here because it was cited NOWHERE until 2026-08-22, and an
+uncited artifact is one nobody can find from the ruling it produced.
+
+`REGENERATION_BUDGET` 3 -> 2, shipped as its own commit. **The padding test passed at depth 3;
+BREADTH DID NOT.** This is the erosion question arriving as a verdict rather than as a curve: the
+08-22 measurement could say a regeneration re-introduces a check the previous attempt passed (45% at
+1->2, 65% at 2->3, 33% at 3->4) and could not say WHAT the model gives up to satisfy the stricter
+directive. The answer is content. **A reading that loses a fact to gain a gate pass is worse than a
+floored one, because a floor is visible and a missing node is not.**
+
+Note what this overrides. The constant's own docblock set the exit condition as *"if it does not
+move, the number goes back to 2"* — and the floor DID move, 20% -> 10%. On the terms that docblock
+set for itself, depth 3 had earned its place. It is reverted on evidence the floor rate cannot see.
+
+### 2. THE COLLISION. The revert un-meets precondition 3a, ruled the same day.
+
+**Both of these are Reyner's, both from 2026-08-22, and they cannot both hold:**
+
+| | Ruling | Consequence |
+|---|---|---|
+| morning | Precondition **3a** is met when the pooled floor rate is **at or below 10% at n=10** | MET on `docs/qa/2026-08-22-renders-n10-postfixes.md`, pooled 4/40 |
+| evening | `REGENERATION_BUDGET` goes back to **2** | The pooled floor returns to roughly **20%** — the 8/40 measured before the raise |
+
+So **3a is UN-MET by the evening ruling**, on a threshold set that morning. Recorded as a collision
+rather than absorbed, and **it is deliberately NOT resolved here.**
+
+**WHY NOBODY BUT REYNER MAY CLOSE IT.** The obvious fix is to widen 3a to 20%, and that fix would
+make the gate meaningless: a threshold moved to accommodate whatever the system currently does is not
+a gate, it is a formality with an audit trail. It is also the SAME DECISION as the breadth question
+in section 3 below — both ask whether a 10% floor bought with thinner prose is better than a 20%
+floor with whole prose — and answering half of it in a commit message would pre-empt the other half.
+
+**What a later session must not do:** read "3a MET" anywhere and carry it forward. As of this
+section, precondition 3 stands at **3a UN-MET (threshold un-met by a later ruling, awaiting Reyner)**
+and **3b NOT MET** (section 4). The route header's count is the field that matters and it is stale the
+moment this is read without it.
+
+### 3. RECORDED, NOT BUILT — the breadth finding. Fullness is a side effect, not a guarantee.
+
+**Depth 3 breached no gate while dropping factual nodes, and this is why it could.** Verified
+2026-08-22 on chart 5:
+
+```
+$ node reports/probe-breadth.mjs          # coverageFloor + required_points vs facts, chart 5
+coverageFloor = 65
+facts 13, required_points 7
+
+REQUIRED  imp  67  spine      strength_balanced        (Seimbang)
+REQUIRED  imp  78  finding    relation_六合_寅亥        (Ikatan)
+REQUIRED  imp  70  finding    element_missing_Metal
+REQUIRED  imp  70  finding    element_dominant_Earth
+REQUIRED  imp  55  spine      day_master_Fire          (Api)
+REQUIRED  imp  55  spine      main_profile             (Aspek Pemijar)
+REQUIRED  imp  55  spine      spouse_palace            (Fondasi Pasangan)
+  not     imp  59  finding    badge_空亡               (Tanda Kekosongan)
+  not     imp  57  finding    aspek_convergence_傷官    (Aspek Pemijar)
+  not     imp  52  finding    aspek_convergence_食神    (Aspek Perajin)
+  not     imp  43  finding    badge_天乙貴人            (Bintang Penolong)
+  not     imp  41  finding    aspek_convergence_偏印    (Aspek Pemikir)
+  not     imp  31  finding    aspek_convergence_正印    (Aspek Pelindung)
+```
+
+**Only 7 of 13 facts are required points.** `aspek_convergence_食神` (Aspek Perajin, importance 52)
+and `aspek_convergence_正印` (Aspek Pelindung, 31) are among the six that are not, exactly as
+Reyner's read reported.
+
+**THE RULE THAT PRODUCES THIS**, read off `lib/semantic/index.js#requiredPoints` rather than
+inferred: a fact is required when `hierarchy.role === 'spine'` **OR** `importance >= coverageFloor`,
+and `coverageFloor` is **65**. So the three spines at 55 are required despite sitting under the
+floor, and every finding from 59 down is optional. There is no breadth term anywhere in it.
+
+**SO A READING'S FULLNESS IS A SIDE EFFECT OF HOW MUCH THE MODEL CHOOSES TO WRITE, NOT SOMETHING THE
+GATE GUARANTEES.** Stage 6 can pass a reading that covers seven of thirteen facts, and it did. That
+is not a defect in `coverage.js` — it is doing what it was specified to do — it is a gap between what
+the gate checks and what Reyner reads for.
+
+**UNRULED, AND LISTED HERE SO IT IS NOT BUILT BY ACCIDENT:** whether breadth becomes an explicit
+requirement. It is the same decision as the collision in section 2, and the options are not
+symmetric — a breadth requirement raises the floor rate by construction, which is the thing the
+budget revert already did once. **Do not add a breadth check without that ruling.**
+
+### 4. Sellability, from the depth-pair read. Precondition 3b: 2 of 4 SELL.
+
+| Chart | Verdict | Note |
+|---|---|---|
+| chart 13 | **SHIPS** | |
+| chart 1 | **SHIPS** | |
+| fresh-1996 | **REJECT, PROVISIONAL** | The artifact printed run 1, which is one of the 2 in 10 that still flag `opening.archetype_missing`. So the verdict may be a verdict on an unlucky sample. A passing sample is owed and is being produced |
+| chart 5 | **NOT JUDGED** | The artifact printed `module_assembly` for it — the floor, not a reading. That chart has never been judged on a live render |
+
+**PRECONDITION 3b IS NOT MET. 2 of 4 sell.**
+
+**AND TWO FINDINGS THAT ARE NOT ABOUT THE VERDICTS.** *"Buku Terjemahan leaks zero — native,
+grounded, conversational."* Padding is **eliminated**. Reyner's own named failure mode for drafted
+Indonesian does not appear in the rendered prose at all, which is the first time that has been true.
+
+---
+
 ## RULED 2026-08-22 — PRECONDITION 3, FINAL FORM: a pooled rate, not an absolute
 
 **Reyner's ruling, and it supersedes the STRICT restatement of 2026-08-19 below.**
@@ -865,8 +975,12 @@ look at - which is the same instrument failure the 08-21 harness row was built t
 end, arriving one level up. A pooled RATE is the only form of this criterion that
 the instrument can actually answer.
 
-**THE RENDER CLAUSE IS MET.** `docs/qa/2026-08-22-renders-n10-postfixes.md`: pooled
-**4/40 = 10%**, at or below the threshold.
+**THE RENDER CLAUSE WAS MET, AND IS NOT ANY MORE — READ THE EVENING SECTION ABOVE FIRST.**
+`docs/qa/2026-08-22-renders-n10-postfixes.md`: pooled **4/40 = 10%**, at or below the threshold, and
+that measurement was taken at `REGENERATION_BUDGET` 3. **Reyner reverted the budget to 2 the same
+evening**, which returns the pooled floor to roughly 20% and un-meets this threshold. The collision is
+recorded in RULED 2026-08-22 (evening), section 2, and it is HIS to resolve. Nothing below this line
+should be read as "3a is met".
 
 **AND THAT IS ONE OF TWO CLAUSES — AMENDED 2026-08-23 (Reyner).** The 08-19 STRICT
 form was "every chart in the reference QA set **renders** AND **would be sold** at the
@@ -1229,6 +1343,33 @@ both live the moment the deploy lands, plus one live-key swap that must not be f
    word that distinguishes the free product. **Reyner-approved copy set, 2026-08-05: every surface now
    says `Bacaan Mendalam`** — the name the funnel has always used
    (`components/Funnel.jsx:587`, `:712`).
+
+   **RE-VERIFIED 2026-08-22, AND THE ROW WAS ALREADY RIGHT — but the way it was nearly changed is
+   worth more than the check.** A Cowork read reported that `lib/site/copy.js:151` already said
+   `name: 'Complete Edition'`, concluded that `/harga` was promising a card and a PDF while the paid
+   path delivered the deep read, and asked for this row to be corrected to record a LIVE compliance
+   defect. There is no such defect. On `main`:
+
+   ```
+   $ git show HEAD:lib/site/copy.js | grep -n "name: 'Bacaan Mendalam'"
+   124:      name: 'Bacaan Mendalam',
+   ```
+
+   Line 151 reads `Complete Edition` only in the **unlanded** `feat/promotion` working tree, where it
+   is that branch's own edit. On main the copy says `Bacaan Mendalam / deeper reading` and the paid
+   path delivers the 7-beat deep read: **they agree, and no customer is being mis-promised anything.**
+
+   **THE LESSON IS THE SKILL'S OWN RULE ARRIVING ONE LEVEL UP.** "Check the artifact, never its
+   description" was obeyed — a real file was grepped — and it was still the wrong artifact, because a
+   working tree carrying unlanded work is not the deployed state. **A claim about what SHIPS must be
+   greppped against `git show HEAD:<file>` or a clean tree, never against the tree you are editing.**
+   That is now the second time an argument has been built on a mis-read of live state; the first is
+   the reason the LIVE STATE block exists at all, and it failed in the opposite direction.
+
+   The 2026-08-03 `Complete Edition` approval is real and is not overturned. The 08-05 replacement was
+   not an error either: it went in because there was no card and no PDF, and `copy.js` records beside
+   the string that **both revert together at the fulfillment swap.** That is exactly what the
+   promotion commit does, in one commit, with the delivery.
 
    | Surface | Now reads |
    |---|---|

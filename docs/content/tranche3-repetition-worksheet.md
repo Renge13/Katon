@@ -1,7 +1,10 @@
 <!--
-STATUS: PROPOSALS, not ruled. Cowork's drafts for Reyner to rewrite. Nothing here reaches the
-glossary until it comes back in his register as a rulings file applied with
-`scripts/apply-rulings.mjs --expect N`.
+STATUS: THE MECHANISM IS RULED (section 2, Reyner 2026-08-22: option C where the fact carries a
+discriminating field, option B where it does not). THE PROSE IS STILL PROPOSALS. Cowork's drafts for
+Reyner to rewrite; nothing here reaches the glossary until it comes back in his register as a rulings
+file applied with `scripts/apply-rulings.mjs --expect N`.
+The "settle this first" blocker at the top of this file is CLOSED — drafting may proceed against the
+ruled mechanism.
 Origin: docs/qa/2026-08-19-READ-VERDICT.md section 4 — cross-chart verbatim repetition ruled
 UNACCEPTABLE for a Rp 19.000 reading, 2026-08-19.
 Measurements below were produced this session at zero provider cost. Commands are inline.
@@ -12,8 +15,9 @@ Measurements below were produced this session at zero provider cost. Commands ar
 **The ruling:** *"Verbatim sentences across friends' reports shatters personalization. High-frequency
 glossary cells need 2-3 structural variants."*
 
-**One thing must be settled before any prose is written**, and it is section 2. Drafting the wrong KIND
-of variant wastes Reyner's rewrite, which is the expensive step.
+**Section 2 IS SETTLED as of 2026-08-22: option C, with B as the fallback for cells carrying no
+discriminating field.** The warning that stood here - that drafting the wrong KIND of variant wastes
+Reyner's rewrite, which is the expensive step - is kept as the reason the fork was settled first.
 
 ---
 
@@ -51,7 +55,36 @@ anywhere near it. Treat the top five as sound and the tail as indicative.
 
 ---
 
-## 2. THE FORK — what a "structural variant" should be. Settle this first.
+## 2. THE FORK — ~~settle this first~~ **RULED 2026-08-22 (Reyner): OPTION C, WITH B AS FALLBACK.**
+
+> **Option C where the fact carries a discriminating field. Option B for cells that carry none.**
+
+**That is the shape this section's own closing paragraph proposed**, and it is ruled as proposed: *"the
+ruling may well be C where a field exists, B elsewhere, rather than one mechanism everywhere."* So the
+mechanism is per-cell rather than global, and which mechanism a cell gets is decided by the cell's own
+fact rather than by preference.
+
+**WHAT THIS MEANS FOR THE DRAFTING WORK, because it changes the brief rather than the volume.** A cell
+with a discriminating field gets **one variant per value of that field, each saying something
+genuinely different and true** — the `elemen_dominan` pattern, five cells keyed on
+`relation_to_day_master`, each ruled separately. A cell without one gets **n phrasings of one meaning
+and the renderer picks**, which is rule-14 clean because words are the LLM's to choose.
+
+**AND OPTION B CARRIES A KNOWN, MEASURABLE RISK THAT IS NOT CLOSED BY THIS RULING:** the LLM cannot
+see what other readers received, so it may converge on one phrasing and the collision returns. That is
+cheap to measure and it can only be measured after the prose exists. **Do not treat B as safe because
+it is ruled** — it is ruled as the fallback for cells where C is impossible, and its convergence
+behaviour is still unmeasured.
+
+**Option A is not ruled out; it is unused.** Nothing in the queue currently needs a deterministic
+engine-side pick, and the objection to it stands: two readers get different words for no reason either
+could ever be told.
+
+**NOTHING HERE IS A BUILD TASK.** Cowork drafts the variants against this ruling and Reyner rewrites
+them; the sweep in §3 runs before he sees anything. Claude Code applies the ruled cells with
+`scripts/apply-rulings.mjs --expect <N>` and authors none of them.
+
+### The options as they were stated, kept because the ruling is a choice among them
 
 **Option A — same meaning, n phrasings, picked deterministically by the engine.** Index off something
 stable in the chart so the cache key stays deterministic. Honest but arbitrary: two readers get

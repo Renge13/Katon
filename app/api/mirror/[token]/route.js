@@ -82,14 +82,30 @@
 //
 //      3a. RENDER - RE-RULED 2026-08-22 (Reyner), FINAL FORM. Met when the POOLED
 //          FLOOR RATE IS AT OR BELOW 10% AT n=10, not when every chart renders.
-//          **MET 2026-08-22.** docs/qa/2026-08-22-renders-n10-postfixes.md,
-//          pooled 4/40 = 10%, gate 1.17.0, prompt 22316c3349d0ea46.
+//
+//          **MET on 2026-08-22 morning, UN-MET the same evening, AND THE
+//          COLLISION IS UNRESOLVED.** The 4/40 = 10% measurement
+//          (docs/qa/2026-08-22-renders-n10-postfixes.md, gate 1.17.0, prompt
+//          22316c3349d0ea46) was taken at `REGENERATION_BUDGET` 3. Reyner
+//          reverted the budget to 2 that evening - "depth 3 is thinner, not
+//          tighter" - which returns the pooled floor to roughly 20%.
+//
+//          SO THIS THRESHOLD IS CURRENTLY NOT MET, by a later ruling of his own
+//          rather than by a regression. DO NOT resolve it by widening the
+//          threshold to 20%: a threshold moved to fit whatever the system
+//          currently does is a formality, not a gate, and it is the same decision
+//          as the unruled breadth question. PROGRESS.md, RULED 2026-08-22
+//          (evening), section 2.
 //
 //      3b. SOLD - Reyner has read real readings AS THE BUYER and would sell them.
-//          **NOT MET. Owed by Reyner, on the 08-22 artifact.** No measurement
-//          closes this one and no threshold substitutes for it: 3a is a property
-//          of the system, 3b is a judgement about the product, and a rate cannot
-//          make it.
+//          **NOT MET. 2 of 4 SELL** on the 08-22 depth-pair read: chart 13 SHIPS,
+//          chart 1 SHIPS, fresh-1996 REJECT (provisional - the artifact printed
+//          one of the 2-in-10 runs that flag `opening.archetype_missing`, so a
+//          passing sample is owed), chart 5 NOT JUDGED (the artifact printed
+//          module_assembly, the floor, so that chart has never been judged on a
+//          live render). No measurement closes this one and no threshold
+//          substitutes for it: 3a is a property of the system, 3b is a judgement
+//          about the product, and a rate cannot make it.
 //
 //      WHY THE SPLIT IS WRITTEN OUT RATHER THAN LEFT IMPLIED. This row read
 //      "MET 2026-08-22" with the sell clause mentioned only in a closing
@@ -126,9 +142,10 @@
 //      Indonesian uses `hari` temporally more than positionally and the renderer
 //      writes free prose. History: PROGRESS.md, the 08-12 tranche-2b section.
 //
-// 2 OF 4 WHOLE, as of 2026-08-23, plus precondition 3's RENDER clause. Promotion is
-// blocked on precondition 2 AND on precondition 3b, Reyner's sell/no-sell read of
-// the 08-22 artifact.
+// 2 OF 4 WHOLE, as of 2026-08-22 evening. NOT "plus 3a" any more: the budget revert
+// un-met 3a's own threshold the same day it was set. Promotion is blocked on
+// precondition 2, on precondition 3a (threshold un-met, and whether the threshold
+// MOVES is Reyner's open question), and on precondition 3b (2 of 4 sell).
 //
 // THIS LINE READ "3 of 4 ... blocked on precondition 2 alone" from b843631 until
 // 2026-08-23, and that was an over-count rather than a ruling: the same commit's own

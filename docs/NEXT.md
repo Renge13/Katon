@@ -69,7 +69,15 @@ rather than a gate. The paragraph stands as the record of why the n-renders harn
 unchanged. Full reasoning: PROGRESS.md, RULED 2026-08-22. **The floor-rate work is closed at 10% pooled;
 no further gate or prompt change is proposed against it.**
 
-**AMENDED AGAIN 2026-08-23: THE THRESHOLD REPLACED THE RENDER CLAUSE ONLY.** Precondition 3 has two
+**AMENDED A THIRD TIME, 2026-08-22 EVENING: 3a's THRESHOLD IS UN-MET AGAIN, BY REYNER'S OWN LATER
+RULING.** The 4/40 = 10% measurement was taken at `REGENERATION_BUDGET` 3. He reverted the budget to 2
+the same evening - *"depth 3 is thinner, not tighter; it completely dropped entire factual nodes to hit
+length targets"* - which returns the pooled floor to roughly 20%. **The collision is recorded and NOT
+resolved: do not widen the threshold to fit.** PROGRESS.md, RULED 2026-08-22 (evening). Also open and
+unruled there: whether BREADTH becomes an explicit gate requirement at all, since only 7 of 13 facts on
+chart 5 are required points.
+
+**AMENDED 2026-08-23: THE THRESHOLD REPLACED THE RENDER CLAUSE ONLY.** Precondition 3 has two
 clauses and the paragraph below states both - *renders* AND *would be sold*. Clause **3a (render) is
 MET**; clause **3b (sold) is NOT MET and is owed by Reyner, on the 08-22 artifact**. So promotion is
 **2 of 4 whole plus 3a**, blocked on precondition 2 AND on 3b - the 08-22 wording of "MET" and "3 of 4"
