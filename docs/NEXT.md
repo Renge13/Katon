@@ -69,13 +69,23 @@ rather than a gate. The paragraph stands as the record of why the n-renders harn
 unchanged. Full reasoning: PROGRESS.md, RULED 2026-08-22. **The floor-rate work is closed at 10% pooled;
 no further gate or prompt change is proposed against it.**
 
-**AMENDED A THIRD TIME, 2026-08-22 EVENING: 3a's THRESHOLD IS UN-MET AGAIN, BY REYNER'S OWN LATER
-RULING.** The 4/40 = 10% measurement was taken at `REGENERATION_BUDGET` 3. He reverted the budget to 2
-the same evening - *"depth 3 is thinner, not tighter; it completely dropped entire factual nodes to hit
-length targets"* - which returns the pooled floor to roughly 20%. **The collision is recorded and NOT
-resolved: do not widen the threshold to fit.** PROGRESS.md, RULED 2026-08-22 (evening). Also open and
-unruled there: whether BREADTH becomes an explicit gate requirement at all, since only 7 of 13 facts on
-chart 5 are required points.
+**RESOLVED 2026-08-23: 3a IS OUT OF THE GATE, AND THE THRESHOLD WAS NOT WIDENED.** The 4/40 = 10%
+measurement was taken at `REGENERATION_BUDGET` 3; the 08-22 evening revert to 2 - *"depth 3 is thinner,
+not tighter"* - returned the pooled floor to roughly 20% and un-met the threshold. Reyner resolved the
+collision by **removing the threshold as a launch blocker**, verbatim:
+
+> **Rule 3a Clearance:** The 10% floor rate threshold is officially removed as a launch blocker. The
+> deterministic fallback floor (module assembly) renders ruled, production-grade glossary prose, is
+> never cached, and self-heals on a simple reload. A 20% floor rate represents a safe, graceful
+> degradation rather than a broken customer state. Precondition 3a is cleared for promotion.
+
+**NO NUMBER WAS EDITED. 10% was not changed to 20% anywhere**, and a session that finds it changed has
+found a defect rather than the ruling. The floor rate is still measured - it is still the availability
+budget, and with one provider a Gemini outage is a 100% floor - it just no longer decides ship or
+no-ship.
+
+**Still open and unruled:** whether BREADTH becomes an explicit gate requirement, since only 7 of 13
+facts on chart 5 are required points. PROGRESS.md, RULED 2026-08-22 (evening), section 3.
 
 **AMENDED 2026-08-23: THE THRESHOLD REPLACED THE RENDER CLAUSE ONLY.** Precondition 3 has two
 clauses and the paragraph below states both - *renders* AND *would be sold*. Clause **3a (render) is

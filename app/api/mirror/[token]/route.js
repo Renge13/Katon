@@ -96,32 +96,47 @@
 //      2026-08-22 threshold ruling replaced the RENDER clause ONLY. The SOLD
 //      clause stands, unamended, and it is not met.
 //
-//      3a. RENDER - RE-RULED 2026-08-22 (Reyner), FINAL FORM. Met when the POOLED
-//          FLOOR RATE IS AT OR BELOW 10% AT n=10, not when every chart renders.
+//      3a. RENDER - **CLEARED 2026-08-23 (Reyner). THE THRESHOLD WAS REMOVED AS A
+//          GATE, NOT WIDENED TO FIT.** His words:
 //
-//          **MET on 2026-08-22 morning, UN-MET the same evening, AND THE
-//          COLLISION IS UNRESOLVED.** The 4/40 = 10% measurement
+//            "The 10% floor rate threshold is officially removed as a launch
+//             blocker. The deterministic fallback floor (module assembly) renders
+//             ruled, production-grade glossary prose, is never cached, and
+//             self-heals on a simple reload. A 20% floor rate represents a safe,
+//             graceful degradation rather than a broken customer state.
+//             Precondition 3a is cleared for promotion."
+//
+//          READ THE DIFFERENCE, BECAUSE IT IS THE WHOLE RECORD. Nobody edited 10%
+//          to 20% anywhere. The threshold stopped DECIDING ship or no-ship; the
+//          floor rate is still a real quality metric and still the availability
+//          budget - with one provider a Gemini outage is a 100% floor - and it
+//          keeps being measured (PROGRESS MEASUREMENTS, dated, never a locked
+//          constant). A later session that finds ~20% here has found the ruled
+//          state. A later session that finds the number 10% EDITED to 20% has
+//          found the thing this paragraph exists to prevent.
+//
+//          History: it was met at 4/40 on 2026-08-22 morning
 //          (docs/qa/2026-08-22-renders-n10-postfixes.md, gate 1.17.0, prompt
-//          22316c3349d0ea46) was taken at `REGENERATION_BUDGET` 3. Reyner
-//          reverted the budget to 2 that evening - "depth 3 is thinner, not
-//          tighter" - which returns the pooled floor to roughly 20%.
-//
-//          SO THIS THRESHOLD IS CURRENTLY NOT MET, by a later ruling of his own
-//          rather than by a regression. DO NOT resolve it by widening the
-//          threshold to 20%: a threshold moved to fit whatever the system
-//          currently does is a formality, not a gate, and it is the same decision
-//          as the unruled breadth question. PROGRESS.md, RULED 2026-08-22
-//          (evening), section 2.
+//          22316c3349d0ea46, taken at `REGENERATION_BUDGET` 3), then un-met the
+//          same evening when Reyner reverted the budget to 2 - "depth 3 is
+//          thinner, not tighter". That collision is what this ruling resolves,
+//          and it resolves it by removing the gate rather than by moving it.
 //
 //      3b. SOLD - Reyner has read real readings AS THE BUYER and would sell them.
-//          **NOT MET. 2 of 4 SELL** on the 08-22 depth-pair read: chart 13 SHIPS,
-//          chart 1 SHIPS, fresh-1996 REJECT (provisional - the artifact printed
-//          one of the 2-in-10 runs that flag `opening.archetype_missing`, so a
-//          passing sample is owed), chart 5 NOT JUDGED (the artifact printed
-//          module_assembly, the floor, so that chart has never been judged on a
-//          live render). No measurement closes this one and no threshold
-//          substitutes for it: 3a is a property of the system, 3b is a judgement
-//          about the product, and a rate cannot make it.
+//          **MET 2026-08-23.** fresh-1996 **SHIPS** (re-judged on the unflagged
+//          run 2; the earlier REJECT was formed on run 1, one of the 2 in 10 that
+//          carry `opening.archetype_missing`), and chart 5 **PROSE PASS** - judged
+//          on a live render for the first time, the printed run having been
+//          `module_assembly`. Both from docs/qa/2026-08-22-owed-samples.md.
+//
+//          **AND THE CAVEAT TRAVELS WITH IT: cleared on DEPTH-3 prose while the
+//          shipping configuration is DEPTH 2** (`lib/render/config.js:163`, and
+//          the artifact says so itself at line 10). This is CONSERVATIVE rather
+//          than optimistic, which is why it is a caveat and not a re-open: his own
+//          depth-pair ruling is that depth 3 is THINNER - it dropped Aspek Perajin
+//          and Aspek Pelindung from chart 5 - so a buyer at depth 2 gets a FULLER
+//          reading than the one he passed. The row still has to say which bytes it
+//          was formed on, so nobody reads "3b MET" as "met on what ships".
 //
 //      WHY THE SPLIT IS WRITTEN OUT RATHER THAN LEFT IMPLIED. This row read
 //      "MET 2026-08-22" with the sell clause mentioned only in a closing
@@ -158,34 +173,25 @@
 //      Indonesian uses `hari` temporally more than positionally and the renderer
 //      writes free prose. History: PROGRESS.md, the 08-12 tranche-2b section.
 //
-// 3 OF 4 WHOLE. Preconditions 1, 2 and 4 are met - 2 closed in THIS commit, both its
-// clauses. PRECONDITION 3 IS NOT MET, and neither clause of it is:
+// ***4 OF 4. ALL FOUR PRECONDITIONS ARE MET AND THE PROMOTION IS AUTHORISED.***
+// 1 MET 08-07. 2 MET 08-23 (both clauses, in the promotion commit). 3a CLEARED 08-23
+// by ruling - the threshold was REMOVED as a gate, not widened. 3b MET 08-23. 4 MET
+// 08-12.
 //
-//   3a  threshold UN-MET. The 10% measurement was taken at REGENERATION_BUDGET 3 and
-//       Reyner reverted the budget to 2 on 2026-08-22 evening, which returns the
-//       pooled floor to roughly 20%. Whether the threshold MOVES is his open
-//       question and must not be answered by widening it.
-//   3b  NOT MET. 2 of 4 sell.
+// THE LIST IS KEPT RATHER THAN DELETED, and now more than before: it is the record of
+// what promotion was allowed to require, and of the one clause that was closed by a
+// RULING rather than by a measurement. A future gate argument that reaches for "the
+// floor rate must be under 10%" needs to find 3a's paragraph above and read why that
+// stopped being the question.
 //
-// So promotion is blocked on precondition 3 alone - both halves of it.
-//
-// ***THE ONE THAT IS STILL OPEN IS 3b, AND IT IS WHY THIS COMMIT MUST NOT MERGE.***
-// 3b is Reyner's sell/no-sell read of the 08-22 artifact, no measurement closes it,
-// and it is the last precondition standing. The code in this file IS promoted - the
-// fence is gone, the funnel points here - and that is deliberate: the promotion had
-// to be written as one reviewable change because every partial state is incoherent.
-// Written is not landed. A session that finds this branch merged without 3b answered
-// has found a defect, not a decision.
-//
-// THE COUNT HAS READ "3 of 4" TWICE, FOR TWO DIFFERENT REASONS, AND ONLY ONE OF THEM
-// WAS ARITHMETIC. `b843631` wrote "3 of 4 ... blocked on precondition 2 alone" by
-// counting precondition 3 as met when only its RENDER clause was; Reyner ruled that an
-// over-count and confirmed 2 of 4 on 2026-08-23. It is 3 of 4 again now because
-// precondition 2 ACTUALLY CLOSED - and precondition 3 is fully un-met, both clauses,
-// so "blocked on precondition 2 alone" has become "blocked on precondition 3 alone".
-// The two 3-of-4s share a number and nothing else. A precondition with two clauses
-// cannot be counted met while one is outstanding, and the count is the field a
-// promotion decision actually reads.
+// THE COUNT'S OWN HISTORY, kept because it is a worked example of the failure this
+// header warns about. It read "3 of 4 ... blocked on precondition 2 alone" from
+// `b843631`, which counted precondition 3 as met when only its RENDER clause was;
+// Reyner ruled that an over-count and confirmed 2 of 4. It then read 3 of 4 again for
+// a real reason - precondition 2 closed - and 4 of 4 now. **Three different states have
+// worn the same numeral.** A precondition with two clauses cannot be counted met while
+// one is outstanding, and the count is the field a promotion decision actually reads,
+// which is why the clauses are enumerated above rather than summed here.
 //
 // (This header read "1 of 4" and "4. NOT MET" until 2026-08-13, while
 // PROGRESS.md had condition 4 MET since 08-12. A checklist kept in two places
