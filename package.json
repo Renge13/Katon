@@ -51,6 +51,7 @@
     "gallery:rejections": "node --env-file-if-exists=.env.local --conditions=react-server scripts/rejection-gallery.mjs",
     "probe:sheen": "node scripts/probe-sheen.mjs",
     "qa:renders": "node --env-file-if-exists=.env.local --conditions=react-server scripts/qa-renders.mjs",
+    "qa:samples": "node --conditions=react-server scripts/qa-samples.mjs",
     "probe:floor-rate": "node --env-file-if-exists=.env.local --conditions=react-server scripts/probe-floor-rate.mjs",
     "build:han-subset": "node scripts/build-han-subset.mjs",
     "build:han-ttf": "node scripts/build-han-ttf.mjs",
