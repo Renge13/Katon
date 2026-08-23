@@ -194,8 +194,10 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   before writing the subject line, not after.
 - **Migrations** are applied manually in the Supabase SQL editor (no CLI migration tracking).
   Always run the migration BEFORE deploying code that depends on it.
-- `contents/*.md` are the DEPRECATED hand-authored cells. They still feed `scripts/build-content.mjs`
-  and the currently-live readings — **do not delete them** until the new pipeline ships.
+- ~~`contents/*.md` are the DEPRECATED hand-authored cells... do not delete them until the new
+  pipeline ships.~~ **DONE 2026-08-23 — the pipeline shipped and they are deleted.** See SUPERSEDED
+  for what went with them. The line is struck rather than removed because it is the record of a
+  do-not-delete instruction being DISCHARGED rather than ignored.
 - Reyner is the **sole authority on Indonesian register**. Propose wording, flag it, never
   auto-decide.
 - **A code-fact written into any doc carries the command that produced it, and its date.** A claim
@@ -241,3 +243,40 @@ docs/archive/                 superseded, kept for history only
 - ~~CR-5, "weak is banned as a consumer word"~~ → lifted. See rule 18.
 - ~~The `NEXT_PUBLIC_FREE_FULL_READING` test flag as the mechanism for a free mirror~~ → the mirror
   is ungated BY DESIGN. Remove the flag; do not let a test flag become the architecture.
+- ~~`contents/*.md` are the DEPRECATED hand-authored cells... **do not delete them** until the new
+  pipeline ships~~ → **THE PIPELINE SHIPPED AND THEY ARE DELETED** (2026-08-23, the promotion). That
+  instruction lived in REPO CONVENTIONS above and was correct for as long as it was: those cells fed
+  the live readings. `contents/`, `lib/content/`, `lib/readingView.js`, `lib/chart.js`,
+  `scripts/build-content.mjs`, `components/Sharecard.jsx` and every `/api/reading/*` route are gone.
+  `grep -rn "lib/content" lib app components` returns only comments recording the history.
+- ~~`MIRROR_PREVIEW_TOKEN` and the mirror preview fence~~ → removed with the promotion. The funnel
+  front door creates and reads mirror readings, so a fence in front of that route is a fence in front
+  of the site. **UNSET IT IN VERCEL**: it is inert, and a stale secret left in a deploy is exactly how
+  the flag on the line above became architecture. `lib/mirror/fence.js` is deleted rather than kept as
+  a switch nothing flips.
+
+---
+
+## THE TWO LIVE DIVERGENCES, CLOSED 2026-08-23
+
+`docs/PROGRESS.md`'s LIVE STATE block existed because **this file described the TARGET and the code ran
+something else**, and nothing recorded the gap. Both divergences it recorded on 2026-08-13 close with
+the promotion commit. They are written here, in the file that was wrong, rather than only in the ledger
+that caught it:
+
+1. **FREE IS THE FULL MIRROR AGAIN.** The 7-beat deep read sat behind the Rp 19.000 wall from
+   2026-08-05, so "paid is an upsell offered AFTER the free reading lands, never a gate" was false for
+   eighteen days. **The deep read is now DELETED, not moved.** What makes this durable rather than a
+   re-flip waiting to happen: there is no prose the paywall COULD hide any more, because the paid path
+   holds none of its own. Rp 19.000 buys an artifact.
+2. **NO UNVALIDATED CELL REACHES A PAYING CUSTOMER, because there are no cells.** On 2026-08-13,
+   `grep -l "pending founder" contents/*.md` returned 16 of 20, three more were stamped
+   SCAFFOLD/pre-validation, one carried no STATUS at all - zero founder-validated cells, and a paying
+   customer received them. **This is closed by deletion, which is not the same as being answered:**
+   what replaces it is Stage 6 passing on every serve, and a gate pass is a different guarantee from a
+   founder read. **Precondition 3b IS that founder read and it is still open.**
+
+A third item was numbered in that block under a heading that said "two divergences" - two live
+archetype name sets disagreeing on five of ten. It also closes: the glossary's set is the one that
+survives, and `tests/mirror-route.spec.mjs` now asserts that a reading and its card name the same
+archetype rather than leaving it to a reader to notice.

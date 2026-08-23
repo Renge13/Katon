@@ -2,7 +2,7 @@
    Katon — global stylesheet (Claude Design "Sunyi")
    Tokens + reset + motion keyframes + form controls.
    Component visuals live as inline styles in the JSX (see
-   components/kit.jsx, Funnel.jsx, Sharecard.jsx).
+   components/kit.jsx, Funnel.jsx, cards/Card.js).
    ============================================================ */
 
 :root {
