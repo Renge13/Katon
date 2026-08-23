@@ -60,11 +60,12 @@ diverge, and every other section of this file is about how we get from one to th
 | Free reading | Archetype + modifier, day master (element/polarity/hanzi), four pillars, 胎元, five element bars, three prose sections (`siapaKamu`, `kenapaBegini`, `keMana`), one teaser lead | `contents/*hubungan*.md` -> `scripts/build-content.mjs` -> `lib/content/<archetype>.js`. **No LLM, zero provider calls** | none, ungated |
 | Sharecard | Downloadable PNG of the same free content | same | none |
 | **Bacaan Mendalam, Rp 19.000** | The **7-beat deep read** (`paidContent.beat1..beat7`) + the paid pillar recap and post-pay hour door | **the same `contents/*hubungan*.md` cells**, `getPaidDomain(stem, state, domain)` | **PAYWALL.** `row.paid === true`, flipped only in the verified Xendit webhook |
+| **The Rp 19.000 delivery** (card + PDF, built 2026-08-23) | **Nothing, and it cannot be anything yet.** `GET /api/deliver/[id]` / `/card` / `/pdf` exist and are gated on `row.paid === true`, and every one of them REFUSES a reading with no `cache_key` - which every legacy funnel row is. So a buyer today still receives the 7-beat deep read from the row above, and the delivery serves its first byte on the day promotion lands | `lib/deliver/handlers.js` -> `lib/pdf/build.js` (fixed point, ship-blocking) + `lib/card/cardData.js`. Prose VERBATIM from `render_cache` | **PAID, plus a readiness gate.** Linked from nowhere: there is no client surface, on purpose. A download button that can only fail is worse than none |
 | Karier / Uang | Nothing. A "Segera" row that captures a WhatsApp number (`interest_wa`) | no content exists — every file in `contents/` is `*-hubungan-FINAL.md` | n/a |
 | Compatibility | Nothing. Not purchasable | not built | `compat` is priced (45.000/29.000) and **absent from `SELLABLE_SKUS`**, so checkout 400s |
 | **The new pipeline** (`/api/mirror`) | **Nothing. It serves no user.** Engine semantic JSON -> Gemini -> Stage 6 -> `render_cache` | Stage 3-6, `docs/content/glossary.json` + `renderer-prompt.txt` | **FENCED.** 404 unless `MIRROR_PREVIEW_TOKEN` is set AND presented. Linked from nowhere |
 | Sharecard (the one that exists) | A 9:16 poster: legacy archetype name, modifier, element tag, one literary line, feed/drain columns, `katon.app` | `components/Sharecard.jsx` from `lib/content` — the SAME legacy cells | none, ungated |
-| **Card A / Card B** (built 2026-08-13, rebuilt as 1a / 1e 2026-08-14/15) | **Nothing. Wired to no route and no component.** Renders only into `reports/card-preview.html` via `npm run preview:cards` | `lib/card/` + `components/cards/Card.js`, from `glossary.json` + Stage 3 facts | **NOT SHIPPABLE YET.** Two of the three 08-13 blockers are CLOSED: **all ten colour tokens were approved 2026-08-15** (`lib/card/tokens.js`, no PROPOSED tokens remain; 戊 Gunung's field came down to `#4A3A1E` and every token's ink clears AA on its own field, so `AA_EXEMPT` is empty), and **Archivo is loaded app-wide** as `--font-archivo` (`76e0f5a`, `app/layout.js`, asserted by `npm run test:app-fonts`). What remains: the archetype names still disagree with the reading's (see below), which is a sequencing constraint on the swap package; and **eight AA findings, ALL OF THEM CARD B** — Card A has zero, because it carries no sheen and no pillar cells. **The free shareable is not blocked by the contrast work; the paid artifact is.** The hanzi face was also OS-substituted at four sites until 2026-08-17 (Georgia has no CJK), which made the exported PNG differ per device — now Noto Serif TC, subsetted, embedded in the object. See the 08-17 rows in MEASUREMENTS |
+| **Card A / Card B** (built 2026-08-13, rebuilt as 1a / 1e 2026-08-14/15) | **Nothing a user can reach.** As of 2026-08-23 the card's DATA has a gated server endpoint (`GET /api/deliver/[id]/card`, `row.paid === true`) and there is still **no client surface that draws it**, so nothing renders it outside `reports/card-preview.html` via `npm run preview:cards` | `lib/card/` + `components/cards/Card.js`, from `glossary.json` + Stage 3 facts; delivery gate `lib/deliver/handlers.js` | **NOT SHIPPABLE YET.** Two of the three 08-13 blockers are CLOSED: **all ten colour tokens were approved 2026-08-15** (`lib/card/tokens.js`, no PROPOSED tokens remain; 戊 Gunung's field came down to `#4A3A1E` and every token's ink clears AA on its own field, so `AA_EXEMPT` is empty), and **Archivo is loaded app-wide** as `--font-archivo` (`76e0f5a`, `app/layout.js`, asserted by `npm run test:app-fonts`). What remains: the archetype names still disagree with the reading's (see below), which is a sequencing constraint on the swap package; and **eight AA findings, ALL OF THEM CARD B** — Card A has zero, because it carries no sheen and no pillar cells. **The free shareable is not blocked by the contrast work; the paid artifact is.** The hanzi face was also OS-substituted at four sites until 2026-08-17 (Georgia has no CJK), which made the exported PNG differ per device — now Noto Serif TC, subsetted, embedded in the object. See the 08-17 rows in MEASUREMENTS |
 | Static pages | `/harga` `/tentang` `/privasi` `/syarat` `/pengembalian` + footer | `lib/site/copy.js` | none |
 
 **The one-line summary: every word a real user reads today comes from `contents/*hubungan*.md`.**
@@ -864,11 +865,36 @@ look at - which is the same instrument failure the 08-21 harness row was built t
 end, arriving one level up. A pooled RATE is the only form of this criterion that
 the instrument can actually answer.
 
-**IT IS MET.** `docs/qa/2026-08-22-renders-n10-postfixes.md`: pooled **4/40 = 10%**,
-at or below the threshold. Promotion goes **2 of 4 -> 3 of 4**.
+**THE RENDER CLAUSE IS MET.** `docs/qa/2026-08-22-renders-n10-postfixes.md`: pooled
+**4/40 = 10%**, at or below the threshold.
+
+**AND THAT IS ONE OF TWO CLAUSES — AMENDED 2026-08-23 (Reyner).** The 08-19 STRICT
+form was "every chart in the reference QA set **renders** AND **would be sold** at the
+live price". The threshold above replaces the RENDER clause and **only** that clause.
+The SOLD clause stands unamended and is **NOT MET**:
+
+| | Precondition 3 clause | Status | Who closes it |
+|---|---|---|---|
+| **3a** | RENDER — pooled floor rate at or below 10% at n=10 | **MET 2026-08-22**, pooled 4/40, gate 1.17.0, prompt 22316c3349d0ea46 | closed; the measurement is the artifact |
+| **3b** | SOLD — Reyner has read real readings AS THE BUYER and would sell them | **NOT MET.** Owed on the **08-22** artifact | **Reyner.** No measurement closes it |
+
+So promotion is **2 of 4 whole**, plus 3a. It is blocked on **precondition 2 AND on
+3b** — not, as this section said until 2026-08-23, on precondition 2 alone.
+
+**WHY THAT NUMBER WAS WRONG AND IS WORTH THE PARAGRAPH.** `b843631` wrote "Promotion
+goes 2 of 4 -> 3 of 4", and the same commit's body says *"a fresh read of the 08-22
+artifact is still Reyner's to give and no threshold substitutes for it"*. Both
+sentences are in the same commit. The second one is correct and the first one counts
+as though it were not: **a precondition with two clauses cannot be counted met while
+one clause is outstanding.** The reason it matters more than a tally is that the count
+is the field a promotion decision actually reads - the paragraph explaining the
+caveat is the field it does not. Every other line here restates a ruling; this one
+corrects an arithmetic error in how a ruling was recorded, and 3a's threshold is
+untouched by it.
 
 **WHAT THIS RULING DOES NOT DO, stated because a threshold is easy to over-read.**
-It does not say a 10% floor is good, and it does not retire the READ. Precondition
+It does not say a 10% floor is good, and **it does not retire the READ** - which is
+clause 3b above, and the reason that clause needed writing down separately. Precondition
 3 exists so that Reyner has judged real readings sellable, and the 08-19 READ found
 2 of 4 charts failing on quality - chart 13 opening on the element instead of the
 archetype, and fresh-1996 burying the day master behind an Aspek. **Both have since
@@ -914,7 +940,10 @@ failures are the same sentence.**
 **PRECONDITION 3 WAS RESTATED STRICT on 2026-08-19, and it changes this table's arithmetic.**
 **~~It is met when every chart in the reference QA set renders~~ SUPERSEDED 2026-08-22 - the absolute
 form is a lottery over 40 draws, not a gate. The criterion is now a pooled floor rate at or below 10%
-at n=10; see RULED 2026-08-22 above. The clause below about being SOLD is untouched by that ruling.**
+at n=10; see RULED 2026-08-22 above. The clause below about being SOLD is untouched by that ruling** -
+it is clause **3b**, it is **STILL OPEN**, and it is owed on the 08-22 artifact. This sentence already
+said "untouched" on 2026-08-22 and the promotion count said "3 of 4" anyway, which is the whole reason
+the clauses are now numbered and tabled above rather than described in passing.
 It is met when every chart in the reference QA set renders AND would be sold at the live price. Chart 5 FLOORED on
 the 08-19 run, so its two readings are prompt-identical stored prose from
 `docs/qa/2026-08-18-retry-depth.json` — zero cost, and not a live render. *"A promotion gate that relies

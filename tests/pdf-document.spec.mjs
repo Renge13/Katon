@@ -22,14 +22,22 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { assembleFallback } from '../lib/render/fallback.js';
-import { buildAppendix, assertEveryMechanicExplained } from '../lib/pdf/appendix.js';
-import { completeEdition, readingOnly, glyphProof } from '../lib/pdf/document.js';
+import {
+  buildAppendix, assertEveryMechanicExplained, anchorId, anchorIds,
+} from '../lib/pdf/appendix.js';
+import {
+  completeEdition, readingOnly, glyphProof, refRow,
+} from '../lib/pdf/document.js';
+import {
+  buildCompleteEditionPdf, verifyReferences, APPENDIX_HEADING, CHART_HEADING,
+} from '../lib/pdf/build.js';
 import { HAN_GLYPHS } from '../lib/card/hanFont.js';
 import {
   registerPdfFonts, __resetPdfFonts, CANARY, FAMILY_HAN,
 } from '../lib/pdf/fonts.js';
 import {
-  roundTrip, drawnCodePoints, embeddedFonts, latinText,
+  roundTrip, drawnCodePoints, embeddedFonts, latinText, pageTexts, pageObjectOrder,
+  namedDestinationPages,
 } from '../lib/pdf/inspect.js';
 
 const CHARTS = {
@@ -98,7 +106,7 @@ test('THE VERIFIER IS NOT PERMISSIVE: it reports only what was drawn', async () 
   // characters and 申 is not one of them, so the verifier must say so. If this ever
   // starts passing, the CMap parser has gone back to expanding ranges it cannot read.
   const { chart, semanticJson, rendered } = fixture('chart 1');
-  const buf = await renderToBuffer(completeEdition({ chart, semanticJson, rendered }));
+  const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
   const drawn = drawnCodePoints(buf);
 
   assert.ok(!drawn.has(CANARY.codePointAt(0)),
@@ -130,7 +138,7 @@ test('BUILD STEP 2: the one-page deliverable renders, with prose and hanzi toget
 test('every hanzi the chart page draws survives, on three charts', async () => {
   for (const which of Object.keys(CHARTS)) {
     const { chart, semanticJson, rendered } = fixture(which);
-    const buf = await renderToBuffer(completeEdition({ chart, semanticJson, rendered }));
+    const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
     const chars = [...new Set(['year', 'month', 'day', 'hour']
       .flatMap((k) => [...(semanticJson.chart?.[k] || '')]))];
     const trip = roundTrip(buf, chars);
@@ -150,7 +158,7 @@ test('an HOUR-LESS chart draws three pillars, not a blank fourth', async () => {
 
 test('the full document has all five sections and more than one page', async () => {
   const { chart, semanticJson, rendered } = fixture('chart 1');
-  const buf = await renderToBuffer(completeEdition({ chart, semanticJson, rendered }));
+  const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
   const text = latinText(buf);
 
   // Page count is a CONSEQUENCE, never a target (prompt M), so this asserts only
@@ -171,7 +179,7 @@ test('THE PDF AUTHORS NOTHING: the reading is the cached prose, verbatim', async
   // A PDF that regenerates its own prose is a second reading wearing the first one's
   // name. Every block's text must appear as given - not re-wrapped, not tidied.
   const { chart, semanticJson, rendered } = fixture('chart 1');
-  const buf = await renderToBuffer(completeEdition({ chart, semanticJson, rendered }));
+  const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
   // WHITESPACE IS REMOVED ON BOTH SIDES, not collapsed, and the difference matters.
   // react-pdf writes each LINE as its own show operation and drops the space it broke
   // at, so a concatenation of runs joins the last word of one line to the first of the
@@ -192,7 +200,7 @@ test('THE PDF AUTHORS NOTHING: the reading is the cached prose, verbatim', async
 
 test('the colophon carries the provenance a stray file needs to be traced', async () => {
   const { chart, semanticJson, rendered } = fixture('chart 1');
-  const buf = await renderToBuffer(completeEdition({ chart, semanticJson, rendered }));
+  const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
   const text = latinText(buf);
   assert.match(text, /testprompt00/, 'the prompt version that produced the prose');
   assert.match(text, /1\.17\.0/, 'and the gate that cleared it');
@@ -211,7 +219,7 @@ test('CORRECTION 1: a `label: null` condition is named in NEITHER English NOR In
     const conditions = (semanticJson.facts || []).filter((f) => f.label === null);
     assert.ok(conditions.length > 0, `${which} should carry a condition fact`);
 
-    const buf = await renderToBuffer(completeEdition({ chart, semanticJson, rendered }));
+    const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
     const text = latinText(buf);
 
     for (const c of conditions) {
@@ -266,7 +274,7 @@ test('CORRECTION 2: the gate runs at the document door, not only in the script',
   assert.throws(() => assertEveryMechanicExplained(broken), /no label_meaning for/);
 
   // The document itself calls it, so this cannot be bypassed by a caller.
-  assert.ok(await renderToBuffer(completeEdition({ chart, semanticJson, rendered })));
+  assert.ok((await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer);
 });
 
 test('CORRECTION 2: the gate is INDIFFERENT to a missing name', () => {
@@ -287,9 +295,202 @@ test('胎元 prints its glossary NAME and no invented meaning', async () => {
   // PURPOSE, and prompt M's correction 4 records a prompt telling a session to ship a
   // drafted line for it anyway. The name is read from the glossary, never typed.
   const { chart, semanticJson, rendered } = fixture('chart 1');
-  const buf = await renderToBuffer(completeEdition({ chart, semanticJson, rendered }));
+  const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
   const text = latinText(buf);
   assert.match(text, /Pilar Konsepsi/, 'the glossary name');
   assert.ok(!text.includes('Istana Konsepsi'),
     'that is the string the 08-07 ruling REPLACED');
+});
+
+// ── build step 4: the reference fixed point, and the three verifies ──
+//
+// PROMPT M CALLS THIS STEP SHIP-BLOCKING, so most of what is below is NEGATIVE.
+// A refusal that has never been observed refusing is a branch nobody has run, and
+// this repo has already paid for one of those: `openaiConfigured()` returned false
+// for the project's whole life and the failover it guarded never once executed.
+
+test('the fixed point converges, and the report accounts for every anchor', async () => {
+  for (const which of Object.keys(CHARTS)) {
+    const { chart, semanticJson, rendered } = fixture(which);
+    const { buffer, pageMap, report } = await buildCompleteEditionPdf({
+      chart, semanticJson, rendered,
+    });
+    const appendix = buildAppendix({ chart, semanticJson });
+
+    assert.ok(report.rebuilds >= 1,
+      `${which}: converged in 0 rebuilds, which means pass 1 already had the map - `
+      + 'pass 1 prints from {} and cannot');
+    assert.equal(report.anchors, appendix.count, `${which}: an anchor per entry`);
+    assert.equal(Object.keys(pageMap).length, appendix.count,
+      `${which}: the map covers every entry`);
+    assert.equal(report.refsBeforeAppendix, 0, `${which}: no ref points into the reading`);
+    assert.ok(report.appendixStart > 1 && report.appendixStart <= report.pages,
+      `${which}: appendix start ${report.appendixStart} of ${report.pages}`);
+
+    // THE COUNTS DIFFER BY EXACTLY THE CONDITIONS, which is correction 1 rather
+    // than a shortfall. Asserted as an equation so a future change that started
+    // referencing conditions fails here instead of looking like an improvement.
+    const conditions = appendix.groups.flatMap((g) => g.entries).filter((e) => e.condition);
+    assert.equal(report.anchors - report.referenced, conditions.length,
+      `${which}: every unreferenced anchor is a condition`);
+    assert.deepEqual(
+      [...report.unreferenced].sort(),
+      conditions.map((e) => anchorId(e)).sort(),
+      `${which}: the unreferenced set IS the condition set`,
+    );
+
+    // And the whole point of a fixed point: the emitted bytes' own destinations
+    // agree with the map that was printed into them.
+    const dests = namedDestinationPages(buffer);
+    for (const [id, page] of Object.entries(pageMap)) {
+      assert.equal(dests.get(id), page, `${which}: ${id} drifted`);
+    }
+  }
+});
+
+test('every reference row is drawn, and points at the page the term is on', async () => {
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const { buffer, pageMap } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const texts = pageTexts(buffer);
+  const appendix = buildAppendix({ chart, semanticJson });
+
+  for (const e of appendix.groups.flatMap((g) => g.entries)) {
+    const page = pageMap[anchorId(e)];
+    if (e.condition || !e.name) {
+      // CORRECTION 1, ASSERTED ON THE ARTIFACT. A condition is anchored and
+      // explained and carries NO reference row - so the assertion is that its
+      // meaning is on the page it anchors to, and that nothing before the appendix
+      // names it. `assertConditionsUnnamed` covers the naming elsewhere; here it is
+      // the reference surface specifically.
+      assert.ok(texts[page - 1].includes(e.meaning.slice(0, 24)),
+        `a condition's meaning is not on its anchored page ${page}`);
+      continue;
+    }
+    // The row, as drawn, somewhere before the appendix.
+    const before = texts.slice(0, page - 1).join('\n');
+    assert.ok(before.includes(refRow(e.name, page)),
+      `${e.name} has no reference row reading "${refRow(e.name, page)}"`);
+    // And the term really is on the page its reference claims.
+    assert.ok(texts[page - 1].includes(e.name),
+      `${e.name} is referenced to page ${page} and is not on it`);
+  }
+});
+
+test('verify 1 REFUSES a stale map - the drift correction 3 is about', async () => {
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const { buffer, pageMap } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const anchors = Object.keys(pageMap);
+  const referenced = anchors.map((id) => ({ id, name: 'x' }));
+
+  // Every anchor claimed one page later than it is: the off-by-one a two-pass build
+  // produces when its own second pass pushed the appendix.
+  const stale = Object.fromEntries(anchors.map((id) => [id, pageMap[id] + 1]));
+  assert.throws(
+    () => verifyReferences({
+      buffer, pageMap: stale, anchors, referenced,
+    }),
+    /REF VERIFY 1 failed/,
+    'a map that disagrees with the emitted bytes must not verify',
+  );
+});
+
+test('verify 2 REFUSES a reference pointing before the appendix', async () => {
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const { buffer, pageMap } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const anchors = Object.keys(pageMap);
+  const [first] = anchors;
+
+  // Page 2 is the reading. This is the exact failure the discarded verifier had: it
+  // found `Pilar Kerja` in the reading and called that the appendix entry.
+  assert.throws(
+    () => verifyReferences({
+      buffer,
+      pageMap: { ...pageMap, [first]: 2 },
+      anchors,
+      referenced: [{ id: first, name: 'x' }],
+    }),
+    /REF VERIFY [12] failed/,
+    'a reference into the reading must not verify',
+  );
+});
+
+test('verify 3 REFUSES a document that printed no reference rows', async () => {
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const appendix = buildAppendix({ chart, semanticJson });
+  const anchors = anchorIds(appendix);
+
+  // An EMPTY map is pass 1's real state, and pass 1's document has no references in
+  // it. So this is not a synthetic case: it is what shipping without the fixed point
+  // would produce, and checks 1 and 2 are both satisfied by it. Only check 3 sees it.
+  const buffer = await renderToBuffer(completeEdition({
+    chart, semanticJson, rendered, pageMap: {},
+  }));
+  const measured = namedDestinationPages(buffer);
+  const pageMap = Object.fromEntries(anchors.map((id) => [id, measured.get(id)]));
+  const referenced = appendix.groups
+    .flatMap((g) => g.entries)
+    .filter((e) => !e.condition && e.name)
+    .map((e) => ({ id: anchorId(e), name: e.name }));
+
+  assert.throws(
+    () => verifyReferences({
+      buffer, pageMap, anchors, referenced,
+    }),
+    /REF VERIFY 3 failed/,
+    'a converged map that reached no reader must not verify',
+  );
+});
+
+test('completeEdition REFUSES to build without a page map', () => {
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  assert.throws(
+    () => completeEdition({ chart, semanticJson, rendered }),
+    /pageMap is required/,
+    'a caller who does not know about the fixed point gets an error, not a '
+    + 'reference-free document',
+  );
+  // `{}` is legal, because pass 1 has nothing to print yet.
+  assert.ok(completeEdition({
+    chart, semanticJson, rendered, pageMap: {},
+  }));
+});
+
+test('the two headings the verifies locate pages by are really in the document', async () => {
+  // THE ONE SOFT SPOT in build.js, named in its own docblock: the verifies find the
+  // chart page and the appendix by heading string. A rename in document.js would
+  // otherwise break a check rather than the document, silently.
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const texts = pageTexts(buffer);
+  for (const heading of [APPENDIX_HEADING, CHART_HEADING]) {
+    assert.equal(texts.filter((t) => t.includes(heading)).length, 1,
+      `"${heading}" must appear on exactly one page - the verifies index by it`);
+  }
+});
+
+test('pageTexts attributes each page its OWN text', async () => {
+  // The first cut of this reader used a lazy regex that ran from an object with no
+  // stream to the NEXT object's stream, so every page got its neighbour's text. The
+  // symptom would be invisible in an aggregate check, so this pins the shape.
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const { buffer, report } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const texts = pageTexts(buffer);
+  assert.equal(texts.length, pageObjectOrder(buffer).length, 'one text per page');
+  assert.equal(texts.length, report.pages);
+  assert.ok(texts[0].includes(semanticJson.core.archetype_name_id), 'page 1 is the cover');
+  assert.ok(texts[report.pages - 1].includes('Batas layanan'), 'the last page is the colophon');
+  assert.ok(!texts[0].includes(APPENDIX_HEADING), 'the cover does not carry the appendix heading');
+});
+
+test('anchorId is deterministic, collision-free, and safe for a PDF name', () => {
+  for (const which of Object.keys(CHARTS)) {
+    const { chart, semanticJson } = fixture(which);
+    const ids = anchorIds(buildAppendix({ chart, semanticJson }));
+    assert.equal(new Set(ids).size, ids.length, `${which}: anchors collide`);
+    for (const id of ids) {
+      assert.match(id, /^[A-Za-z0-9_.-]+$/,
+        `${id} carries bytes a PDF name string cannot: Shio keys are hanzi and must `
+        + 'be escaped, not passed through');
+    }
+  }
 });
