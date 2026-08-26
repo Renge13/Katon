@@ -40,11 +40,11 @@ open sends the next session to do work that is already done.
    MEASUREMENTS (**read the 08-11 baseline row FIRST — a stored gate row is not a valid comparator
    for a later change**), and THE INTERIM STATE (Xendit go-live status — read it before touching
    anything near the paid path).
-3. `prompts/P-card-frame.md` — the queued build prompt, and it is **HELD** pending Reyner's ruling
-   on sequencing. `prompts/M-tranche3.md` is behind it: commits 0 and 1 are docs-only, **commits 2
+3. `prompts/M-tranche3.md` — the queued build prompt. Commits 0 and 1 are docs-only, **commits 2
    to 4 touch `glossary.json` and `facts.js`**, and those now also have to clear
    `tests/card-budget.spec.mjs` — Card B has 7px of slack and a glossary edit can spend it.
    `spouse_palace` and `kekuatan` do not reach the card, so tranche 3 as scoped is clear.
+   (`prompts/P-card-frame.md` is CLOSED, not queued — it returns with the 1080x1350 design pass.)
 
 # THE PROMOTION LANDED, 2026-08-23. THE PRODUCT IS LIVE.
 
@@ -80,9 +80,12 @@ artifacts, in the order a new session should read them:
 - `docs/qa/2026-08-26-card-capture-cause.md` ......... why the share card was blank
 - `docs/qa/2026-08-26-card-capture-verification.md` .. the un-fix, and the page at both widths
 - `docs/qa/2026-08-26-card-b-overflow.md` ............ the paid card's prose, 9 of 13 charts
-- `docs/prompts/P-card-frame.md` .................... **HELD.** Commit 1 is one line at the Card A
-  button; Reyner is ruling sequencing, and commit 2 is his design pass. Note its `sed -n '689p'`
-  is stale - the line is 740 after the card work.
+- `docs/prompts/P-card-frame.md` .................... **CLOSED 2026-08-26, NOT PENDING.** Ruled: Card
+  A keeps the mat, and the frame change batches with the 1080x1350 design pass so a reader
+  experiences ONE layout shift instead of two. Commit 1 is not a small win to be picked up early -
+  shipping it alone is what creates the second shift. It returns WITH the design pass or not at all,
+  so it is not tracked here as work waiting to start. (When it does return: its `sed -n '689p'` is
+  stale, the line is 740 after the card commits.)
 
 `docs/prompts/M-tranche3.md` - the tranche-3 repetition variants, option C with B as the fallback
 (ruled 08-22) - is queued behind it. Neither is the critical path; the critical path is done.
