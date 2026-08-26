@@ -82,7 +82,9 @@ const E = React.createElement;
 // 86.4 margin is carried over for family resemblance and the resulting 907x1747
 // is a CONSEQUENCE, not a second ratio ruling.
 export const CARD_A = { canvas: { w: 1080, h: 1440 }, margin: 86.4, card: { w: 907, h: 1267 } };
-export const CARD_B = { canvas: { w: 1080, h: 1920 }, margin: 86.4, card: { w: 907, h: 1747 } };
+// `padY` — CARD B ONLY, and it is the largest single item in the 2026-08-26
+// spacing reclaim. See RECLAIMED_B for the whole ledger and the measurement.
+export const CARD_B = { canvas: { w: 1080, h: 1920 }, margin: 86.4, card: { w: 907, h: 1747 }, padY: 56 };
 
 export const RADIUS = 40;
 export const PADDING = 72;
@@ -615,6 +617,70 @@ const SCALE_A = { ...SCALE, badgeLabel: 30 };
 const SCALE_B = { ...SCALE, badgeLabel: 29 };
 
 /**
+ * ── CARD B'S VERTICAL RECLAIM, 2026-08-26. RULED BY REYNER ──
+ *
+ * WHAT WENT WRONG. Card B's object is a fixed-height column flex with
+ * `overflow: hidden`, so content past the bottom is clipped SILENTLY - there is
+ * no scrollbar, no warning, and nothing on screen shows it, because the node the
+ * card is captured from is off-screen in a 1px box. It is visible only in the
+ * exported file, which is where it shipped.
+ *
+ * Once `cae2cbb` let the prose wrap again, **9 of the 13 fixture charts
+ * overflowed**, by up to 121 export pixels. Three things vary per chart and the
+ * card's height is the sum of all three:
+ *
+ *     hook            91 to 118 chars   GLOSSARY.salah_dikira, per stem
+ *     badge meaning   114 to 344 chars  up to CARD_B_BADGE_LIMIT of them
+ *     tag rows        4 or 6 tags       3 fixed + up to 3 dynamic, deduped
+ *
+ * THE CHART THAT SURFACED IT RANKED SEVENTH OF THIRTEEN by total prose, so the
+ * 85px it showed was never the number to design against. `npm run
+ * audit:card-budget -- --overflow` measures all thirteen and is the instrument
+ * this table was fitted on.
+ *
+ * REYNER'S RULING, and the two things it forbids are as load-bearing as the one
+ * it requires: **tighten vertical spacing. Do not trim prose - it is what the
+ * customer paid for. Do not change the outer dimensions - 907x1747 is a ruled
+ * export ratio.** So every number below is a margin, a padding or a gap. No type
+ * size moved, no line-height moved, and no string was shortened.
+ *
+ * ── WHY A TABLE RATHER THAN EDITED LITERALS ────────────────
+ * Because the next person needs to see what was spent. Each line is a WITHDRAWAL
+ * from the card's air, and air is a design decision that was made once at these
+ * values. Scattered as literals it reads as a redesign; gathered here it reads as
+ * a debt, with the old value beside the new one so it can be paid back if the
+ * layout ever absorbs length properly.
+ *
+ * ── EVERY VALUE HERE IS CARD B'S ALONE ─────────────────────
+ * Card A is untouched, and that is asserted rather than asserted-to: the shared
+ * components take these as PROPS whose defaults are Card A's current values, so
+ * Card A's rendered markup is byte-identical across this change.
+ * `tests/card.spec.mjs` pins that.
+ */
+const RECLAIMED_B = {
+  // was 18 - the Indonesian name over the brass hairline
+  headNameGap: 12,
+  // was 14 - under the THE kicker
+  headKickerGap: 10,
+  // was 25 - over "Aspek ..."
+  headAspekGap: 16,
+  // was 36 - the hairline under the headline block
+  hairTop: 24,
+  // was 28 / 14 - the tag rows, and the gap BETWEEN wrapped rows
+  tagsTop: 20,
+  tagRowGap: 10,
+  // was 40 - over the quote
+  hookTop: 28,
+  // was 24 - over the badge block
+  badgesTop: 16,
+  // was 30 - the appendix's own top padding, under `marginTop: auto`
+  appendixTop: 18,
+  // was 26 / 11 - the element bars and their labels
+  barsTop: 18,
+  barLabelTop: 8,
+};
+
+/**
  * The Day Master stem, once, as a watermark.
  *
  * RULED 2026-08-13: hanzi on the card is DECORATIVE ONLY. Nobody reads a
@@ -911,7 +977,15 @@ function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
         boxSizing: 'border-box',
         width: px(card.w), height: px(card.h), background: ground,
         borderRadius: px(RADIUS), position: 'relative', overflow: 'hidden',
-        display: 'flex', flexDirection: 'column', padding: px(PADDING),
+        display: 'flex', flexDirection: 'column',
+        // VERTICAL PADDING IS PER-SPEC; HORIZONTAL IS NOT. `spec.padY` lets Card B
+        // buy back frame space without narrowing the text measure - a narrower
+        // measure would re-break every line and change the very thing being
+        // measured. Card A leaves `padY` unset and emits the single-value form it
+        // always has, so its markup is unchanged character for character.
+        padding: spec.padY && spec.padY !== PADDING
+          ? `${px(spec.padY)}px ${px(PADDING)}px`
+          : px(PADDING),
         ...(foil ? { boxShadow: `0 ${px(20)}px ${px(44)}px rgba(0,0,0,.38)` } : null),
       },
     },
@@ -975,7 +1049,7 @@ export function splitName(nameEn) {
   };
 }
 
-function Headline({ data, palette, px, sc, showNameId, brassHair }) {
+function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, kickerGap = 14, aspekGap = 25 }) {
   const { kicker, head } = splitName(data.nameEn);
   const headSize = head.length > 1 ? sc.headline * 0.80 : sc.headline;
   return E('div', { style: { position: 'relative', display: 'flex', flexDirection: 'column' } },
@@ -984,7 +1058,7 @@ function Headline({ data, palette, px, sc, showNameId, brassHair }) {
     // Card B it is brass with a brass hairline running off to its right.
     showNameId && E('div', {
       key: 'id',
-      style: { display: 'flex', alignItems: 'center', gap: px(22), marginBottom: px(18) },
+      style: { display: 'flex', alignItems: 'center', gap: px(22), marginBottom: px(nameGap) },
     },
       E('span', {
         key: 'n',
@@ -997,7 +1071,7 @@ function Headline({ data, palette, px, sc, showNameId, brassHair }) {
     ),
     kicker && E('div', {
       key: 'kick',
-      style: { ...roleStyle('kicker', palette), fontFamily: FONT, fontWeight: 700, fontSize: px(sc.kicker), letterSpacing: px(5.6), textTransform: 'uppercase', marginBottom: px(14) },
+      style: { ...roleStyle('kicker', palette), fontFamily: FONT, fontWeight: 700, fontSize: px(sc.kicker), letterSpacing: px(5.6), textTransform: 'uppercase', marginBottom: px(kickerGap) },
     }, kicker),
     E('div', {
       key: 'en',
@@ -1012,7 +1086,7 @@ function Headline({ data, palette, px, sc, showNameId, brassHair }) {
     // 2026-08-13, and accent cannot reach AA on six of ten tokens.
     E('div', {
       key: 'aspek',
-      style: { ...roleStyle('aspek', palette), fontFamily: FONT, fontStyle: 'italic', fontWeight: 480, fontSize: px(sc.aspek), marginTop: px(25) },
+      style: { ...roleStyle('aspek', palette), fontFamily: FONT, fontStyle: 'italic', fontWeight: 480, fontSize: px(sc.aspek), marginTop: px(aspekGap) },
     }, data.aspek),
   );
 }
@@ -1025,10 +1099,10 @@ function Headline({ data, palette, px, sc, showNameId, brassHair }) {
  * has no comprehension budget to teach it. Card B is a document its owner has
  * paid for and read a reading alongside, so the vocabulary lands there.
  */
-function Tags({ data, palette, px, sc, showDynamic, top = 31 }) {
+function Tags({ data, palette, px, sc, showDynamic, top = 31, rowGap = 14 }) {
   const base = { fontFamily: FONT, fontWeight: 650, fontSize: px(sc.tag), letterSpacing: px(3.4), textTransform: 'uppercase' };
   return E('div', {
-    style: { display: 'flex', flexWrap: 'wrap', gap: `${px(14)}px ${px(32)}px`, marginTop: px(top), position: 'relative', ...base },
+    style: { display: 'flex', flexWrap: 'wrap', gap: `${px(rowGap)}px ${px(32)}px`, marginTop: px(top), position: 'relative', ...base },
   },
     data.tags.fixed.map((t) => E('span', { key: `f-${t}`, style: roleStyle('tagFixed', palette) }, t)),
     showDynamic ? data.tags.dynamic.map((t) => E('span', { key: `d-${t}`, style: roleStyle('tagDynamic', palette) }, t)) : null,
@@ -1070,7 +1144,7 @@ function Hook({ data, palette, px, sc, grow = true, top = 61 }) {
 function Badges({ data, palette, px, sc, withMeaning, max, role }) {
   const list = max ? data.badges.slice(0, max) : data.badges;
   if (!list.length) return null;
-  return E('div', { style: { display: 'flex', flexDirection: 'column', gap: px(withMeaning ? 14 : 14), position: 'relative' } },
+  return E('div', { style: { display: 'flex', flexDirection: 'column', gap: px(withMeaning ? 10 : 14), position: 'relative' } },
     list.map((b) => E('div', { key: b.label },
       E('div', {
         style: { ...roleStyle(role, palette), fontFamily: FONT, fontWeight: 640, fontSize: px(sc.badgeLabel), letterSpacing: px(1.2) },
@@ -1082,7 +1156,7 @@ function Badges({ data, palette, px, sc, withMeaning, max, role }) {
         // matching on text content, which is a probe that breaks the moment the
         // copy it is checking changes.
         'data-role': 'badgeMeaning',
-        style: { ...roleStyle('badgeMeaning', palette), fontFamily: FONT, fontWeight: 400, fontSize: px(sc.badgeMeaning), lineHeight: 1.45, marginTop: px(6) },
+        style: { ...roleStyle('badgeMeaning', palette), fontFamily: FONT, fontWeight: 400, fontSize: px(sc.badgeMeaning), lineHeight: 1.45, marginTop: px(withMeaning ? 4 : 6) },
       }, b.meaning),
     )),
   );
@@ -1117,7 +1191,7 @@ function FoilFooter({ data, palette, token, px, sc, brass }) {
     fontSize: px(sc.footer), letterSpacing: px(2.6), textTransform: 'uppercase',
   };
   return E('div', {
-    style: { display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: px(18), position: 'relative' },
+    style: { display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: px(12), position: 'relative' },
   },
     E('div', { key: 'l', style: { display: 'flex', flexDirection: 'column', gap: px(8) } },
       data.footer.left ? E('span', { key: 'a', style: line }, data.footer.left) : null,
@@ -1222,7 +1296,7 @@ function PillarCells({ data, palette, token, px, sc, brass }) {
         key: 'stem',
         style: {
           ...roleStyle('pillarStem', palette), fontFamily: HAN,
-          fontSize: px(sc.pillarStem), lineHeight: 1, marginTop: px(12),
+          fontSize: px(sc.pillarStem), lineHeight: 1, marginTop: px(8),
           // The day stem glows. Decorative: a text-shadow does not change the
           // colour the audit measures.
           ...(p.isDayMaster ? { textShadow: `0 0 ${px(39)}px rgba(242,230,196,.42)` } : null),
@@ -1230,15 +1304,15 @@ function PillarCells({ data, palette, token, px, sc, brass }) {
       }, p.stem),
       E('div', {
         key: 'branch',
-        style: { ...roleStyle(p.isDayMaster ? 'pillarBranchDay' : 'pillarBranch', palette), fontFamily: HAN, fontSize: px(sc.pillarBranch), lineHeight: 1, marginTop: px(6) },
+        style: { ...roleStyle(p.isDayMaster ? 'pillarBranchDay' : 'pillarBranch', palette), fontFamily: HAN, fontSize: px(sc.pillarBranch), lineHeight: 1, marginTop: px(4) },
       }, p.branch),
       E('div', {
         key: 'meta',
-        style: { ...roleStyle(p.isDayMaster ? 'pillarMetaDay' : 'pillarMeta', palette), fontFamily: FONT, fontWeight: 500, fontSize: px(sc.pillarMeta), marginTop: px(14) },
+        style: { ...roleStyle(p.isDayMaster ? 'pillarMetaDay' : 'pillarMeta', palette), fontFamily: FONT, fontWeight: 500, fontSize: px(sc.pillarMeta), marginTop: px(10) },
       }, `${p.element}${p.polarity ? ` ${p.polarity}` : ''}`),
       E('div', {
         key: 'animal',
-        style: { ...roleStyle(p.isDayMaster ? 'pillarAnimalDay' : 'pillarAnimal', palette), fontFamily: FONT, fontWeight: 400, fontSize: px(sc.pillarMeta), marginTop: px(4) },
+        style: { ...roleStyle(p.isDayMaster ? 'pillarAnimalDay' : 'pillarAnimal', palette), fontFamily: FONT, fontWeight: 400, fontSize: px(sc.pillarMeta), marginTop: px(3) },
       }, p.animal),
     )),
   );
@@ -1308,7 +1382,10 @@ export function CardB({ data, scale = 1, id = 'card-b' }) {
   const brassHair = `linear-gradient(90deg, ${alpha(brass.tint, 0.6)}, ${alpha(brass.tint, 0)})`;
 
   return E(Canvas, { spec: CARD_B, token, scale, stem: data.stem, foil: true, rimId, id },
-    E(Headline, { key: 'h', data, palette, px, sc, showNameId: true, brassHair }),
+    E(Headline, {
+      key: 'h', data, palette, px, sc, showNameId: true, brassHair,
+      nameGap: RECLAIMED_B.headNameGap, kickerGap: RECLAIMED_B.headKickerGap, aspekGap: RECLAIMED_B.headAspekGap,
+    }),
     // ── CARD B'S VERTICAL SPACING IS TIGHTER THAN CARD A'S ──
     // §2.2, §2.3 and §2.4 are Card A deltas and are drawn at their ruled values
     // there. Card B is a DOSSIER carrying three badges with their meanings where
@@ -1317,12 +1394,12 @@ export function CardB({ data, scale = 1, id = 'card-b' }) {
     // overflowed the object by 63 export pixels and was clipped by
     // `overflow: hidden` — silently, which is the only way this can fail.
     // Measured in the preview page's own budget probe; see MAX_LABEL_MEANING.
-    E(Hair, { key: 'r1', token, px, top: 36 }),
+    E(Hair, { key: 'r1', token, px, top: RECLAIMED_B.hairTop }),
     // The Aspek tags live here and only here — Card B is a document its owner has
     // read a reading beside, so the system vocabulary has somewhere to land.
-    E(Tags, { key: 't', data, palette, px, sc, showDynamic: true, top: 28 }),
-    E(Hook, { key: 'k', data, palette, px, sc, grow: false, top: 40 }),
-    E('div', { key: 'bd', style: { marginTop: px(24) } },
+    E(Tags, { key: 't', data, palette, px, sc, showDynamic: true, top: RECLAIMED_B.tagsTop, rowGap: RECLAIMED_B.tagRowGap }),
+    E(Hook, { key: 'k', data, palette, px, sc, grow: false, top: RECLAIMED_B.hookTop }),
+    E('div', { key: 'bd', style: { marginTop: px(RECLAIMED_B.badgesTop) } },
       E(Badges, { data, palette, px, sc, withMeaning: true, max: CARD_B_BADGE_LIMIT, role: 'badgeLabelFoil' })),
 
     // THE APPENDIX. Not a band (ruled 2026-08-13): it had its own tinted plate
@@ -1332,19 +1409,19 @@ export function CardB({ data, scale = 1, id = 'card-b' }) {
     // give the region its own structure.
     E('div', {
       key: 'app',
-      style: { marginTop: 'auto', paddingTop: px(30), position: 'relative' },
+      style: { marginTop: 'auto', paddingTop: px(RECLAIMED_B.appendixTop), position: 'relative' },
     },
       E(PillarCells, { key: 'pillars', data, palette, token, px, sc, brass }),
 
       // Element bars: visual, NO numbers. Numbers invite comparison of the wrong
       // thing, and these are a display distribution, never a strength score.
       // Accent is a NON-TEXT colour and this is one of the places it survives.
-      E('div', { key: 'bars', style: { display: 'flex', gap: px(10), marginTop: px(26) } },
+      E('div', { key: 'bars', style: { display: 'flex', gap: px(10), marginTop: px(RECLAIMED_B.barsTop) } },
         Object.entries(bars).map(([name, v]) => E('div', { key: name, style: { flex: 1 } },
           E('div', { key: 'track', style: { height: px(9), background: alpha(token.ink, 0.16), borderRadius: px(5), overflow: 'hidden' } },
             E('div', { style: { width: `${(v / max) * 100}%`, height: '100%', background: token.accent } }),
           ),
-          E('div', { key: 'l', style: { ...roleStyle('barLabel', palette), fontFamily: FONT, fontWeight: 600, fontSize: px(sc.barLabel), letterSpacing: px(1.4), textTransform: 'uppercase', marginTop: px(11) } }, name),
+          E('div', { key: 'l', style: { ...roleStyle('barLabel', palette), fontFamily: FONT, fontWeight: 600, fontSize: px(sc.barLabel), letterSpacing: px(1.4), textTransform: 'uppercase', marginTop: px(RECLAIMED_B.barLabelTop) } }, name),
         )),
       ),
 
