@@ -22,6 +22,14 @@ had become commit 0. Claude Code caught it, not Cowork. The 08-07 rule already c
 pointer is PART of writing or queueing a build prompt, and AMENDING a prompt is writing one. No new rule
 is needed. What is recorded here is that the rule was insufficient to make Cowork obey it, which is worth
 more than another clause.
+
+2026-08-26: refreshed after #74, #75, #76 and #77. Two items under OPEN AND OWNED BY REYNER were
+still listed as open and were both closed - MIRROR_PREVIEW_TOKEN (deleted from Vercel that day) and the
+Xendit LIVE keys (swapped 08-07, first self-purchase 08-13). Neither had a commit that could close it,
+which is exactly why they sat: this file is where an owner-held item goes stale, because nothing in CI
+ever reads it. The 08-19 rule already covers it - the pointer is updated when the CURRENT WORK changes -
+and what is added here is that OWNER-HELD items need the same sweep, since a closed one still reading as
+open sends the next session to do work that is already done.
 -->
 
 # NEXT
@@ -32,8 +40,11 @@ more than another clause.
    MEASUREMENTS (**read the 08-11 baseline row FIRST — a stored gate row is not a valid comparator
    for a later change**), and THE INTERIM STATE (Xendit go-live status — read it before touching
    anything near the paid path).
-3. `prompts/M-tranche3.md` — the active build prompt. Commits 0 and 1 are docs-only; **commits 2
-   to 4 touch `glossary.json` and `facts.js`** and were held until the promotion merged. It has.
+3. `prompts/P-card-frame.md` — the queued build prompt, and it is **HELD** pending Reyner's ruling
+   on sequencing. `prompts/M-tranche3.md` is behind it: commits 0 and 1 are docs-only, **commits 2
+   to 4 touch `glossary.json` and `facts.js`**, and those now also have to clear
+   `tests/card-budget.spec.mjs` — Card B has 7px of slack and a glossary edit can spend it.
+   `spouse_palace` and `kekuatan` do not reach the card, so tranche 3 as scoped is clear.
 
 # THE PROMOTION LANDED, 2026-08-23. THE PRODUCT IS LIVE.
 
@@ -60,18 +71,39 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
-**THE CURRENT WORK IS `docs/prompts/M-tranche3.md`** - the tranche-3 repetition variants, option C
-with B as the fallback (ruled 08-22). Not the critical path; the critical path is done.
+## THE CURRENT WORK, 2026-08-26 - THE CARD, AND IT IS LIVE
+
+**The free share button had been producing a blank rectangle since the promotion.** Fixed and on
+production (`#74`), with the paid card's prose and its overflow fixed behind it (`#76`). Four
+artifacts, in the order a new session should read them:
+
+- `docs/qa/2026-08-26-card-capture-cause.md` ......... why the share card was blank
+- `docs/qa/2026-08-26-card-capture-verification.md` .. the un-fix, and the page at both widths
+- `docs/qa/2026-08-26-card-b-overflow.md` ............ the paid card's prose, 9 of 13 charts
+- `docs/prompts/P-card-frame.md` .................... **HELD.** Commit 1 is one line at the Card A
+  button; Reyner is ruling sequencing, and commit 2 is his design pass. Note its `sed -n '689p'`
+  is stale - the line is 740 after the card work.
+
+`docs/prompts/M-tranche3.md` - the tranche-3 repetition variants, option C with B as the fallback
+(ruled 08-22) - is queued behind it. Neither is the critical path; the critical path is done.
 
 ## OPEN AND OWNED BY REYNER, not by a commit
 
-- **UNSET `MIRROR_PREVIEW_TOKEN` in Vercel.** Inert now, and a stale secret in a deploy is how a
-  test flag became architecture once already.
-- **Confirm the Xendit keys in Vercel are LIVE, not test.** Precondition 1 is recorded MET; a
-  recorded fact about a dashboard is worth re-reading on the day money can move.
-- **The Gemini balance alert still does not exist.** Interim register, his end condition requires it
-  to have fired once. With one provider an exhausted balance is a 100% floor rate - and after this
-  merge that reaches real customers rather than a preview.
+- ~~**UNSET `MIRROR_PREVIEW_TOKEN` in Vercel.**~~ **CLOSED 2026-08-26.** Reyner deleted the variable
+  and redeployed before `#74` merged. `lib/mirror/fence.js` was already gone with the promotion, so
+  nothing reads it in either direction now.
+- ~~**Confirm the Xendit keys in Vercel are LIVE, not test.**~~ **CLOSED.** Swapped 2026-08-07;
+  the interim register records QRIS activated 08-11 and Reyner's first self-purchase completed
+  08-13, which is a live key exercised end to end rather than a dashboard read.
+- **The Gemini balance alert still does not exist. STILL OPEN, and it is the only unmitigated single
+  point of failure on the live path.** Interim register; his end condition requires it to have fired
+  once. With one provider an exhausted balance is a 100% floor rate, and it reaches real customers
+  now rather than a preview.
+- **Whether a Gemini key may be reachable from PREVIEW deployments.** Added to the deferred register
+  2026-08-26. `GEMINI_API_KEY` is Production-only, so a preview cannot render a reading at all - the
+  fail-closed fence refuses first, correctly. **Until it is ruled, every pre-merge check of the
+  reading, the card or the paid path is local and then production AFTER the merge, with no stage in
+  between.** A verification plan that says "check it on the preview" cannot run.
 
 ## STILL UNRULED
 
