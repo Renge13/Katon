@@ -651,6 +651,21 @@ const SCALE_B = { ...SCALE, badgeLabel: 29 };
  * a debt, with the old value beside the new one so it can be paid back if the
  * layout ever absorbs length properly.
  *
+ * ── IT LEAVES 7px, AND SEVEN SURFACES CAN SPEND IT ─────────
+ * The tightest of 23 measured cases is 癸 at maximum prose, clearing the card by
+ * 7 export pixels - a fifth of a line. `tests/card-budget.spec.mjs` freezes every
+ * glossary surface that reaches Card B so the build fails when one grows; the
+ * full table and the reasoning are in `docs/qa/2026-08-26-card-b-overflow.md`.
+ *
+ * THE THREE OBVIOUS ONES ARE NOT THE DANGEROUS ONES. `lib/card/cardData.js` names
+ * `bintang`, `tag_arketipe` and `salah_dikira`. Three more arrive indirectly:
+ * `aspek.name_id` is both the Aspek line and - through a convergence fact's label
+ * - the dynamic tag row, though nothing here mentions `GLOSSARY.aspek`;
+ * `arketipe.name_en` sets the HEADLINE and spends by WORD COUNT rather than
+ * length, which is how 癸 became the tightest case; `arketipe.name_id` is the
+ * kicker. A rename from "The Sun" to "The Rising Sun" costs a headline line,
+ * about 100px against 7, and no length ceiling would see it coming.
+ *
  * ── EVERY VALUE HERE IS CARD B'S ALONE ─────────────────────
  * Card A is untouched, and that is asserted rather than asserted-to: the shared
  * components take these as PROPS whose defaults are Card A's current values, so
