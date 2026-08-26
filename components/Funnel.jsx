@@ -108,6 +108,49 @@ const pad = (n) => String(n).padStart(2, '0');
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
+ * A card RENDERED at export size and shown small. Display only.
+ *
+ * ── WHY THE SCALE IS MEASURED AND NOT A CONSTANT ──
+ * `CARD_SCALE` is picked for the widest the column ever gets (460 minus 22px of
+ * padding each side). At a 375px viewport the column is 331, and 1080 x 0.34 is
+ * 367 - so a fixed scale overflows by 36px on every phone, which is the whole
+ * audience. Clipped, that takes 7px off the RIGHT EDGE OF THE CARD ITSELF and
+ * leaves the field 29px on the left and 0 on the right.
+ *
+ * The card used to be a direct flex item at `scale={CARD_SCALE}`, and flex
+ * SHRANK it to 331: the canvas re-centred its child, so the object stayed whole
+ * and only the field got narrower. That was survivable to look at and fatal to
+ * the export, because `captureCard` measured the shrunken node and scaled the
+ * clone by 1080/331 instead of 1080/367. Rendering at export size fixed the
+ * export and inherited the layout problem, because the card no longer shrinks -
+ * it is a block child now, and block layout does not touch an explicit width.
+ * Hence: measure the box, fit the scale to it, never exceed CARD_SCALE.
+ *
+ * The capture is unaffected either way. It reads `offsetWidth`, which is the
+ * layout box and always 1080 here, whatever this scale is.
+ */
+function ScaledCard({ spec, max = CARD_SCALE, children }) {
+  const box = useRef(null);
+  const [k, setK] = useState(max);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return undefined;
+    const fit = () => setK(Math.min(max, el.clientWidth / spec.canvas.w));
+    fit();
+    // Not a window resize listener: the column also changes width when a
+    // scrollbar appears, which fires no resize event.
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [spec, max]);
+  return (
+    <div ref={box} style={{ width: '100%', maxWidth: spec.canvas.w * max, height: spec.canvas.h * k, overflow: 'hidden' }}>
+      <div style={{ transform: `scale(${k})`, transformOrigin: 'top left' }}>{children}</div>
+    </div>
+  );
+}
+
+/**
  * The display bars, from `element_presence`.
  *
  * NORMALISED TO THE MAX, and that is display normalisation ONLY — rule 9 forbids
@@ -704,18 +747,14 @@ function ShareCardA({ data }) {
     <>
       <Reveal delay={0.06} style={{ display: 'flex', justifyContent: 'center' }}>
         {/* RENDERED AT EXPORT SIZE, SHRUNK FOR DISPLAY ONLY.
-            `captureCard` captures this node at 1:1 and refuses a node that is
-            laid out at anything other than the export size, because scaling the
-            clone back up is what blanked the share card. A CSS transform does
-            not change the layout box, so #card-a stays 1080x1440 to the capture
-            while the reader sees it at CARD_SCALE. The wrapper carries the
-            display size explicitly and clips, since the transformed child still
-            occupies its full 1080x1440 in flow. */}
-        <div style={{ width: CARD_A.canvas.w * CARD_SCALE, height: CARD_A.canvas.h * CARD_SCALE, overflow: 'hidden' }}>
-          <div style={{ transform: `scale(${CARD_SCALE})`, transformOrigin: 'top left' }}>
-            <CardA data={data} scale={1} id="card-a" />
-          </div>
-        </div>
+            `captureCard` captures this node at 1:1 and refuses a node laid out
+            at anything else, because scaling the clone back up is what blanked
+            the share card. A CSS transform does not change the layout box, so
+            #card-a stays 1080x1440 to the capture while the reader sees it at
+            whatever fits her column. See ScaledCard. */}
+        <ScaledCard spec={CARD_A}>
+          <CardA data={data} scale={1} id="card-a" />
+        </ScaledCard>
       </Reveal>
       <Reveal delay={0.12} style={{ marginTop: 20 }}>
         <Button variant="gold" onClick={save} disabled={saving} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
