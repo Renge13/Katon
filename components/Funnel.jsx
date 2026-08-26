@@ -938,7 +938,17 @@ function Delivery({ token }) {
         <>
           {/* Off-screen at scale 1. Clipped rather than hidden with display:none,
               which would leave nothing for captureCard to measure. */}
-          <div aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}>
+          {/* NO `whiteSpace: nowrap` HERE, and its absence is the point.
+              This is the sr-only recipe minus that one property. In sr-only it
+              stops a screen reader's text collapsing oddly inside a 1px box - but
+              this container is aria-hidden and holds no text for anyone to read.
+              It exists ONLY to give captureCard a full-size node to measure.
+              `white-space` INHERITS, so nowrap reached every text node in Card B
+              and the paid card exported with its quote and both badge lines
+              running off the right edge, unwrapped. Nothing on screen showed it:
+              the container is clipped to 1px, so the damage was visible only in
+              the downloaded file. */}
+          <div aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>
             <CardB data={paidCard} scale={1} id="card-b" />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
