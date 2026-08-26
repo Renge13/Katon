@@ -36,7 +36,7 @@
 // ============================================================
 
 import { useEffect, useRef, useState } from 'react';
-import { CardA, CardB } from './cards/Card.js';
+import { CardA, CardB, CARD_A } from './cards/Card.js';
 import { downloadCard } from './cards/exportCards.js';
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
@@ -75,8 +75,16 @@ const LIGHT = '#EAF1F2';
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
 
 // The card display scale. Card A is 1080 wide and the column is 460 at most, so it
-// renders at a third and `captureCard` scales the clone back up off the measured
-// node width. Nothing about the exported pixels depends on this number.
+// is shown at roughly a third.
+//
+// IT IS A DISPLAY NUMBER AND NOTHING ELSE. The card is RENDERED at 1080x1440 and
+// shrunk by a CSS transform on a wrapper; `captureCard` reads the layout box,
+// which a transform does not change, so the export is 1:1 whatever this is set to.
+// The previous version of this comment ended "nothing about the exported pixels
+// depends on this number" while the capture was scaling the clone by its inverse -
+// which is precisely how the exported pixels depended on it, and how the share card
+// came out blank. Changing this value must not change a single exported pixel; the
+// "vs bare1" column in `scripts/probe-card-export.mjs` is what holds that.
 const CARD_SCALE = 0.34;
 
 // Element theme → CSS vars, set ONCE at the reading root; every nested surface
@@ -98,6 +106,49 @@ function themeVars(element) {
 
 const pad = (n) => String(n).padStart(2, '0');
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * A card RENDERED at export size and shown small. Display only.
+ *
+ * ── WHY THE SCALE IS MEASURED AND NOT A CONSTANT ──
+ * `CARD_SCALE` is picked for the widest the column ever gets (460 minus 22px of
+ * padding each side). At a 375px viewport the column is 331, and 1080 x 0.34 is
+ * 367 - so a fixed scale overflows by 36px on every phone, which is the whole
+ * audience. Clipped, that takes 7px off the RIGHT EDGE OF THE CARD ITSELF and
+ * leaves the field 29px on the left and 0 on the right.
+ *
+ * The card used to be a direct flex item at `scale={CARD_SCALE}`, and flex
+ * SHRANK it to 331: the canvas re-centred its child, so the object stayed whole
+ * and only the field got narrower. That was survivable to look at and fatal to
+ * the export, because `captureCard` measured the shrunken node and scaled the
+ * clone by 1080/331 instead of 1080/367. Rendering at export size fixed the
+ * export and inherited the layout problem, because the card no longer shrinks -
+ * it is a block child now, and block layout does not touch an explicit width.
+ * Hence: measure the box, fit the scale to it, never exceed CARD_SCALE.
+ *
+ * The capture is unaffected either way. It reads `offsetWidth`, which is the
+ * layout box and always 1080 here, whatever this scale is.
+ */
+function ScaledCard({ spec, max = CARD_SCALE, children }) {
+  const box = useRef(null);
+  const [k, setK] = useState(max);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return undefined;
+    const fit = () => setK(Math.min(max, el.clientWidth / spec.canvas.w));
+    fit();
+    // Not a window resize listener: the column also changes width when a
+    // scrollbar appears, which fires no resize event.
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [spec, max]);
+  return (
+    <div ref={box} style={{ width: '100%', maxWidth: spec.canvas.w * max, height: spec.canvas.h * k, overflow: 'hidden' }}>
+      <div style={{ transform: `scale(${k})`, transformOrigin: 'top left' }}>{children}</div>
+    </div>
+  );
+}
 
 /**
  * The display bars, from `element_presence`.
@@ -695,7 +746,15 @@ function ShareCardA({ data }) {
   return (
     <>
       <Reveal delay={0.06} style={{ display: 'flex', justifyContent: 'center' }}>
-        <CardA data={data} scale={CARD_SCALE} id="card-a" />
+        {/* RENDERED AT EXPORT SIZE, SHRUNK FOR DISPLAY ONLY.
+            `captureCard` captures this node at 1:1 and refuses a node laid out
+            at anything else, because scaling the clone back up is what blanked
+            the share card. A CSS transform does not change the layout box, so
+            #card-a stays 1080x1440 to the capture while the reader sees it at
+            whatever fits her column. See ScaledCard. */}
+        <ScaledCard spec={CARD_A}>
+          <CardA data={data} scale={1} id="card-a" />
+        </ScaledCard>
       </Reveal>
       <Reveal delay={0.12} style={{ marginTop: 20 }}>
         <Button variant="gold" onClick={save} disabled={saving} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -879,7 +938,17 @@ function Delivery({ token }) {
         <>
           {/* Off-screen at scale 1. Clipped rather than hidden with display:none,
               which would leave nothing for captureCard to measure. */}
-          <div aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}>
+          {/* NO `whiteSpace: nowrap` HERE, and its absence is the point.
+              This is the sr-only recipe minus that one property. In sr-only it
+              stops a screen reader's text collapsing oddly inside a 1px box - but
+              this container is aria-hidden and holds no text for anyone to read.
+              It exists ONLY to give captureCard a full-size node to measure.
+              `white-space` INHERITS, so nowrap reached every text node in Card B
+              and the paid card exported with its quote and both badge lines
+              running off the right edge, unwrapped. Nothing on screen showed it:
+              the container is clipped to 1px, so the damage was visible only in
+              the downloaded file. */}
+          <div aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>
             <CardB data={paidCard} scale={1} id="card-b" />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>

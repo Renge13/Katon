@@ -586,7 +586,17 @@ test('THE OBJECT DIMENSIONS ARE UNCHANGED BY THE POLISH PASS', () => {
     assert.ok(html.includes(object), `${name} object is not ${spec.card.w}x${spec.card.h}`);
     assert.ok(html.indexOf(canvas) < html.indexOf(object), `${name} draws the object outside the canvas`);
     assert.ok(html.includes(`border-radius:${RADIUS}px`), `${name} radius moved`);
-    assert.ok(html.includes(`padding:${PADDING}px`), `${name} padding moved`);
+    // PADDING IS PER-CARD ON THE VERTICAL AXIS ONLY (2026-08-26). Card B buys
+    // frame space back to fit its prose; the HORIZONTAL padding is identical on
+    // both cards and must stay so, because it sets the text measure and a
+    // narrower measure re-breaks every line. Card A has no `padY` and still emits
+    // the single-value form, character for character as before.
+    const padY = spec.padY ?? PADDING;
+    assert.ok(
+      html.includes(padY === PADDING ? `padding:${PADDING}px` : `padding:${padY}px ${PADDING}px`),
+      `${name} padding moved - expected ${padY}px vertical, ${PADDING}px horizontal`,
+    );
+    assert.equal(PADDING, 72, 'the horizontal padding is the shared one and is ruled');
     const declared = html.match(/box-sizing:\s*border-box/g) || [];
     assert.ok(declared.length >= 2, `${name} must declare border-box on canvas AND object, found ${declared.length}`);
   }
@@ -596,6 +606,28 @@ test('THE OBJECT DIMENSIONS ARE UNCHANGED BY THE POLISH PASS', () => {
   for (const spec of [CARD_A, CARD_B]) {
     assert.ok(Math.abs((spec.canvas.w - spec.card.w) / 2 - spec.margin) < 0.5);
   }
+});
+
+test("CARD B'S SPACING RECLAIM DOES NOT REACH CARD A", () => {
+  // Added 2026-08-26 with RECLAIMED_B. Card B's prose overflowed its object on
+  // 9 of 13 fixture charts, and the fix tightened its vertical spacing. Three of
+  // those spacings live in components SHARED with Card A - the kicker gap and the
+  // Aspek gap in <Headline>, and the row gap in <Tags>.
+  //
+  // They are PROPS whose defaults are Card A's values, so Card B passes tighter
+  // numbers and Card A keeps its own. THE FAILURE THIS CATCHES is someone
+  // reclaiming another few pixels by editing the DEFAULT instead of the value
+  // Card B passes: nothing would look wrong on Card B, every card test would
+  // still pass, and Card A - the free share card, the acquisition engine - would
+  // quietly restyle. Card A's spacing was ruled at these values and is not part
+  // of the overflow problem.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  const a = renderToStaticMarkup(React.createElement(CardA, { data }));
+  assert.ok(a.includes('margin-bottom:14px'), 'Card A kicker gap moved - see RECLAIMED_B');
+  assert.ok(a.includes('margin-top:25px'), 'Card A Aspek gap moved - see RECLAIMED_B');
+  assert.ok(a.includes('gap:14px 32px'), 'Card A tag row gap moved - see RECLAIMED_B');
+  assert.ok(a.includes(`padding:${PADDING}px`), 'Card A padding moved - padY is Card B only');
 });
 
 test('THE KICKER IS A LEADING ARTICLE, not the first word (甲 vs 癸)', () => {

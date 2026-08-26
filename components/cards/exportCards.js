@@ -92,8 +92,42 @@ export const CAPTURE_KINDS = ['share', 'download'];
  * transparent, and the download depends on that for its four rounded corners.
  * Passing a colour here would fill them and silently undo the whole point of
  * cropping to the object.
+ *
+ * ── THE CARD MUST BE LAID OUT AT EXPORT SIZE. THERE IS NO SCALING HERE ──
+ *
+ * This function used to render the clone back up to export size with
+ * `transform: scale(s.width / node.getBoundingClientRect().width)` and a
+ * top-left origin. That produced a BLANK share card in production for three
+ * days, and the reason is html-to-image's own `applyStyle`:
+ *
+ *     e.width && (n.width = "".concat(e.width, "px"))
+ *
+ * It writes the OUTPUT width onto the clone before our `style` is applied. So a
+ * canvas laid out at 367px was relayouted to 1080px while its child object kept
+ * its 367px-scale metrics; the canvas CENTRES its child (Card.js:904), which put
+ * the object at (386, 505); and the top-left scale of 2.941 then threw it to
+ * (1135, 1484), outside a 1080x1440 box, where `overflow: hidden` clipped it.
+ * What was left was the canvas background: one colour, correct size, correct
+ * corner pixel, and every geometry assertion in the probe still green.
+ *
+ * The download target escaped the blanking, because the object stacks from the
+ * top-left rather than centring - but not the relayout, so it exported the left
+ * third of a card three times too wide, with anything the column flex pushed to
+ * the bottom below the captured area. It was damaged, not correct.
+ *
+ * THE FIX IS TO REMOVE THE SCALING, NOT TO CORRECT IT. Callers render the card
+ * at true export size and shrink it for DISPLAY with a CSS transform on a
+ * wrapper (`components/Funnel.jsx`). A transform does not change an element's
+ * layout box, so the clone here is 1:1 with the output and there is nothing to
+ * undo. Measured 0 differing pixels between a wrapped card and a bare one, on
+ * both targets of both cards - `scripts/probe-card-export.mjs`, the "vs bare1"
+ * column.
+ *
+ * `width`/`height` are still passed. They are a no-op on a correctly laid out
+ * node - they write the size the node already has - and they keep the output
+ * contract stated at the call site rather than inferred from the DOM.
  */
-export async function captureCard(kind, card, { id, scale = 1 } = {}) {
+export async function captureCard(kind, card, { id } = {}) {
   if (typeof document === 'undefined') throw new Error('export must run in the browser');
   await document.fonts.ready;
 
@@ -101,26 +135,28 @@ export async function captureCard(kind, card, { id, scale = 1 } = {}) {
   const node = document.getElementById(s.nodeId);
   if (!node) throw new Error(`#${s.nodeId} not found - is the card rendered with id="${id}"?`);
 
-  // The card is rendered at some display `scale` and exported at 1:1 export
-  // pixels, so the clone is scaled back up by the inverse. Measured off the node
-  // rather than trusted from the argument when it can be: a caller that renders
-  // at 0.36 and forgets to say so would otherwise export a 327px-wide card.
-  const rendered = node.getBoundingClientRect().width;
-  const factor = rendered > 0 ? s.width / rendered : 1 / scale;
+  // REFUSE A DISPLAY-SCALED NODE RATHER THAN EXPORT IT WRONG. `offsetWidth` is
+  // the layout box, so it is unaffected by any CSS transform on this node or on
+  // an ancestor - which is exactly the distinction that matters: the display
+  // wrapper is invisible here, a card actually rendered small is not.
+  //
+  // The old code treated this case as routine and compensated for it. That is
+  // what produced the blank card, so it is now the one thing this function will
+  // not do. An error reaches the reader as "coba lagi"; a silently wrong card
+  // reaches her feed.
+  if (Math.abs(node.offsetWidth - s.width) > 1) {
+    throw new Error(
+      `#${s.nodeId} is laid out at ${node.offsetWidth}px but the ${kind} capture is ${s.width}px. `
+      + 'Render the card at scale 1 and shrink it for display with a CSS transform on a wrapper.',
+    );
+  }
 
   return toPng(node, {
     width: s.width,
     height: s.height,
     pixelRatio: 1,
     cacheBust: true,
-    style: {
-      ...s.style,
-      transform: `scale(${factor})`,
-      transformOrigin: 'top left',
-      // The transform does not change layout, so the clone is still laid out at
-      // its rendered size; the width/height above define the output box.
-      margin: '0',
-    },
+    style: { ...s.style, margin: '0' },
   });
 }
 

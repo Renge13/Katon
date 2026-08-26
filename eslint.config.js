@@ -7,7 +7,12 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 // Flat config for the Katon Next.js app. Server route handlers + lib use Node
 // globals (process, Buffer); client components use browser globals. JSX enabled.
 export default defineConfig([
-  globalIgnores(['.next', 'dist', 'node_modules', 'out', '.claude', 'Katon Design System']),
+  // `reports/` is generated and gitignored. It now also holds `reports/vendor/`,
+  // where `scripts/probe-card-export.mjs` copies the minified html-to-image bundle
+  // and the real `exportCards.js` so the probe imports the shipped capture instead
+  // of a hand-copy of it. Linting a minified vendor bundle produced 36 errors and
+  // failed `npm run lint` for anyone who had run the probe.
+  globalIgnores(['.next', 'dist', 'node_modules', 'out', '.claude', 'reports', 'Katon Design System']),
   {
     files: ['**/*.{js,jsx,mjs}'],
     extends: [js.configs.recommended, reactHooks.configs.flat.recommended],
