@@ -163,6 +163,52 @@ test('THE FLOOR SAYS WHERE A RELATION SITS, on every chart that has one', () => 
   assert.ok(relations >= 17, `expected the fixture to exercise relations, saw ${relations}`);
 });
 
+test('THE FLOOR DOES NOT SAY THE LABEL TWICE, where the meaning already says it', () => {
+  // ── THIS TEST EXISTS BECAUSE ITS ABSENCE SHIPPED A LIE ──
+  //
+  // Ruled 2026-08-26: where `label_meaning` already opens by naming the fact, the
+  // bare label sentence in front of it is a duplicate and is suppressed. The
+  // commit that landed that ruling merged its COMMENTS AND NOT ITS CODE - a
+  // `git checkout --` during an unrelated experiment reverted the file while the
+  // change was uncommitted, and the comment edit then re-applied cleanly on top.
+  //
+  // NOTHING CAUGHT IT. The adjacency check below was rewritten in the same commit
+  // to accept BOTH shapes - suppressed and not - because both satisfy rule 21.
+  // That is correct for what it tests and it is exactly why it could not see a
+  // reverted implementation. A rule that permits two shapes cannot tell you which
+  // one you shipped.
+  //
+  // So this asserts the BEHAVIOUR, computed from the glossary rather than
+  // hardcoded: any fact whose meaning opens with its own label must not also
+  // carry the standalone label sentence.
+  let checked = 0;
+  for (const tc of VALIDATION_CHARTS) {
+    const json = jsonFor(tc);
+    const out = assembleFallback(json);
+    for (const fact of json.facts) {
+      if (!fact.label || !fact.label_meaning || fact.archetype?.name_id) continue;
+      const opens = fact.label_meaning.trimStart().toLowerCase()
+        .startsWith(String(fact.label).trim().toLowerCase());
+      if (!opens) continue;
+      const block = out.blocks.find((b) => b.fact_ids[0] === fact.id);
+      if (!block) continue;
+      checked += 1;
+      const duplicate = fact.label_bracket
+        ? `${fact.label} (${fact.label_bracket}).`
+        : `${fact.label}.`;
+      assert.ok(
+        !block.text.includes(duplicate),
+        `chart ${tc.id}: ${fact.id} still emits "${duplicate}" before a meaning that `
+        + 'already opens with the label - the 2026-08-26 suppression is not in effect',
+      );
+    }
+  }
+  // Two cells in the glossary restate their own label - kekuatan.weak and
+  // relasi_cabang.害 - and the fixture has to actually reach one, or this passes
+  // by finding nothing.
+  assert.ok(checked > 0, 'no fixture chart exercised a self-naming meaning');
+});
+
 test('the floor never leaves a strength label bare (rule 21, same breath)', () => {
   // glossary kekuatan._note: lemah/kuat must co-occur with its meaning sentence.
   // Structural here - the label and its meaning share ONE text field, so no
