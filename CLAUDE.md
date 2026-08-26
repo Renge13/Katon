@@ -200,6 +200,19 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   do-not-delete instruction being DISCHARGED rather than ignored.
 - Reyner is the **sole authority on Indonesian register**. Propose wording, flag it, never
   auto-decide.
+- **A NEW CARD CHECK IS SHOWN FAILING BEFORE IT IS TRUSTED.** Point it at a deliberately broken
+  input, watch it go red, then fix the input. This is a convention rather than three bug reports
+  because **three card instruments in three days were each written so they could not fail**, and each
+  was green while the defect it existed to catch was live: `probe-card-export` asserted one corner
+  pixel and a size, both of which a completely blank PNG passes; the same probe ran `skipFonts: true`
+  against a production path that loads fonts; and `audit-card-budget` ended with an unconditional
+  `process.exitCode = 0` inside a file whose own header calls its cap *"enforced as a TEST"*. The
+  shape is always the same and it is never dishonest — the check is written from the requirement it
+  is documenting, so it asserts what is easy to assert rather than what would break. **The card is
+  where this keeps happening**, because its failures are silent by construction: the object is
+  `overflow: hidden`, the captured node is off-screen in a 1px box, and a wrong card looks like a
+  card. Nothing on screen ever shows it. So: no card check counts as evidence until it has produced
+  a red on purpose, and the run that proves it belongs in the commit message.
 - **A code-fact written into any doc carries the command that produced it, and its date.** A claim
   about the code without its grep is a memory, not a fact. Error 13 (COWORK-BRIEF §4) entered this
   locked file exactly that way and every session inherited it as truth. Re-run the command before
