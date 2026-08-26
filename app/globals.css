@@ -191,3 +191,16 @@ input[type="number"]:focus {
   .k-gleam { animation: none; opacity: 0; }
   .k-rise, .k-bar, .k-fade, .k-seal, .k-seal-check, .k-spin { animation: none; }
 }
+
+/* ── THE PROSE SKELETON, 2026-08-26 ────────────────────────
+   The reading's chart renders the moment POST returns; the prose arrives after
+   the render. These bars hold that space while it does.
+
+   NO WORDS, DELIBERATELY. Reyner ruled on 2026-08-26 that the loading copy is
+   written against what is actually on screen, AFTER chart-early ships - the old
+   anticipation lines describe work the reader can now see is already done. A
+   wordless placeholder is the only honest thing to show until he writes it, and
+   it is why this is CSS rather than a string. */
+.k-skel { background: var(--el-g12, rgba(0,0,0,.06)); border-radius: 5px; animation: kSkel 1.6s var(--ease-quiet) infinite; }
+@keyframes kSkel { 0%, 100% { opacity: .45; } 50% { opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { .k-skel { animation: none; opacity: .6; } }

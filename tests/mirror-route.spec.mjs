@@ -216,7 +216,25 @@ test('an hour-less birthdate is accepted, and the chart says the hour is unknown
 test('the POST persists birth data server-side and never echoes it back', async () => {
   const res = await create(CHART_A);
   const body = await res.json();
-  assert.deepEqual(Object.keys(body).sort(), ['path', 'token']);
+  // `chart` joined token and path on 2026-08-26 so the funnel can draw the
+  // pillars, the bars, 胎元 and the archetype name before the render starts.
+  assert.deepEqual(Object.keys(body).sort(), ['chart', 'path', 'token']);
+
+  // THE INVARIANT THIS TEST IS ACTUALLY FOR, asserted directly rather than
+  // through the key list. The key list alone would pass a `chart` that carried
+  // the birth date inside it, which is the failure worth catching - the pillars
+  // are DERIVED from the birth datetime and a careless view could round-trip it.
+  // Nothing in the payload may spell the date or the time back.
+  const serialised = JSON.stringify(body);
+  for (const secret of [CHART_A.birthDate, CHART_A.birthTime, CHART_A.birthDate.slice(0, 4)]) {
+    assert.ok(!serialised.includes(secret), `the create echoed "${secret}" back`);
+  }
+  // And it is the SAME object the serve returns under the same key, from one
+  // `mirrorChartView`. Two shapes for one thing is how the card and the reading
+  // came to disagree about her archetype's name; the client merges rather than
+  // reconciles precisely because this holds.
+  const servedBody = await (await serve(body.token)).json();
+  assert.deepEqual(body.chart, servedBody.chart, 'create and serve disagree about the chart');
 
   const row = readingMem().get(body.token);
   assert.equal(row.birth_date, CHART_A.birthDate);
