@@ -163,6 +163,67 @@ test('THE FLOOR SAYS WHERE A RELATION SITS, on every chart that has one', () => 
   assert.ok(relations >= 17, `expected the fixture to exercise relations, saw ${relations}`);
 });
 
+test('THE FLOOR NEVER REPEATS ITS HEADING AS A BARE SENTENCE IN THE BODY', () => {
+  // RULED BY REYNER 2026-08-26: a heading directly above a meaning paragraph
+  // fully satisfies rule 21's "same breath" - visually and cognitively they are
+  // coupled. `kekuatan._note` says the label must co-occur with its meaning "in
+  // rendered text" and never said whether a heading counts as rendered text. It
+  // does. Two different implementations were built on the two readings of that
+  // sentence before it was written down.
+  //
+  // So the heading NAMES the fact and the bare label sentence that used to sit in
+  // front of the meaning is deleted - unconditionally, every cell. This is the
+  // assertion for that, and it is deliberately about the BARE SENTENCE rather
+  // than about the word appearing anywhere: the archetype block's identity clause
+  // ("Kamu adalah Matahari (The Sun) dengan unsur Api.") legitimately contains the
+  // heading word and is a Reyner-ruled sentence, not a repeat.
+  let checked = 0;
+  for (const tc of VALIDATION_CHARTS) {
+    const json = jsonFor(tc);
+    const out = assembleFallback(json);
+    for (const fact of json.facts) {
+      if (!fact.label) continue;
+      const block = out.blocks.find((b) => b.fact_ids[0] === fact.id);
+      if (!block) continue;
+      checked += 1;
+      // WHOLE SENTENCES, NOT SUBSTRINGS. `includes()` matched the TAIL of the
+      // archetype's identity clause - "Kamu adalah Matahari (The Sun) dengan
+      // unsur Api." ends in "Api." - and failed a Reyner-ruled sentence as a
+      // repeat. Split with the gate's own splitter so this counts sentences the
+      // way every other check in the pipeline counts them.
+      const bare = new Set([fact.label]);
+      if (fact.label_bracket) bare.add(`${fact.label} (${fact.label_bracket})`);
+      for (const s of sentences(block.text)) {
+        const stripped = s.trim().replace(/[.!?]+$/, '');
+        assert.ok(
+          !bare.has(stripped),
+          `chart ${tc.id}: ${fact.id} repeats its heading as the bare sentence "${s.trim()}"`,
+        );
+      }
+    }
+  }
+  assert.ok(checked > 0, 'no fixture chart exercised a labelled fact');
+});
+
+test('EVERY FACT IS NAMED SOMEWHERE THE READER SEES, heading or body', () => {
+  // The other half of the ruling, and the one that stops "delete the sentence"
+  // from quietly un-naming a fact. A labelled fact must be named in its heading
+  // or in its body - a badge is something the person HAS and is named on purpose,
+  // and rule 21 requires lemah/kuat to be visible beside its meaning.
+  for (const tc of VALIDATION_CHARTS) {
+    const json = jsonFor(tc);
+    const out = assembleFallback(json);
+    for (const fact of json.facts) {
+      if (!fact.label) continue;
+      const block = out.blocks.find((b) => b.fact_ids[0] === fact.id);
+      if (!block) continue;
+      const named = (block.heading || '').trim() === fact.label || block.text.includes(fact.label);
+      assert.ok(named, `chart ${tc.id}: ${fact.id} ("${fact.label}") is named nowhere the reader sees`);
+      assert.ok(block.text.trim().length > 0, `chart ${tc.id}: ${fact.id} left an empty body`);
+    }
+  }
+});
+
 test('THE FLOOR DOES NOT SAY THE LABEL TWICE, where the meaning already says it', () => {
   // ── THIS TEST EXISTS BECAUSE ITS ABSENCE SHIPPED A LIE ──
   //
@@ -221,8 +282,16 @@ test('the floor never leaves a strength label bare (rule 21, same breath)', () =
     const block = assembleFallback(json).blocks.find((b) => b.fact_ids[0] === strength.id);
     if (!block) continue; // below the coverage floor on this chart
     seen += 1;
-    const labelAt = block.text.indexOf(strength.label);
-    assert.ok(labelAt >= 0, `chart ${tc.id}: strength label absent`);
+    // ── WHERE THE LABEL LIVES, AFTER THE 2026-08-26 RULING ──
+    // Reyner ruled that a heading directly above a meaning paragraph fully
+    // satisfies "same breath" - visually and cognitively they are coupled. So the
+    // verdict is spoken in the HEADING and the meaning is the body beneath it.
+    // This used to require the label inside `text`, which is the assumption the
+    // ruling overturns; requiring it now would fail a correct floor.
+    assert.equal(
+      (block.heading || '').trim(), strength.label,
+      `chart ${tc.id}: the strength verdict is not the block's heading`,
+    );
     assert.ok(
       block.text.includes(strength.label_meaning),
       `chart ${tc.id}: strength label rendered without its meaning`,
@@ -242,17 +311,20 @@ test('the floor never leaves a strength label bare (rule 21, same breath)', () =
     // check is now the rule itself, from `kekuatan._note`: *"lemah/kuat in rendered
     // text co-occurs with its meaning sentence (rule 21, same breath)."* Both
     // shapes satisfy it and a third sentence wedged between them satisfies neither.
+    // NOTHING MAY SIT BETWEEN THE HEADING AND THE MEANING. The heading is the
+    // label, so "same breath" now means the body OPENS on the meaning - a
+    // sentence in front of it would put the verdict and its resolution a
+    // paragraph apart, which is the failure the rule is for.
+    //
+    // The one thing allowed in front is the palace, which is provenance rather
+    // than a claim and is the prompt's own beat order. Strength facts carry no
+    // palace today, so this is stated rather than exercised.
     const meaningAt = block.text.indexOf(strength.label_meaning);
-    assert.ok(meaningAt >= labelAt, `chart ${tc.id}: the meaning precedes the label`);
-    const between = block.text.slice(labelAt, meaningAt);
-    const allowed = [
-      '', // the meaning opens by naming itself; nothing separates them
-      `${strength.label}. `,
-      `${strength.label} (${strength.label_bracket}). `,
-    ];
+    const between = block.text.slice(0, meaningAt);
+    const allowed = ['', strength.palace ? `${strength.palace}. ` : null].filter((x) => x !== null);
     assert.ok(
       allowed.includes(between),
-      `chart ${tc.id}: "${between}" sits between the label and its meaning - `
+      `chart ${tc.id}: "${between}" sits between the heading and its meaning - `
       + 'rule 21 requires them in the same breath, with nothing in between',
     );
   }
@@ -266,7 +338,18 @@ test('the floor names a badge and never names a null-label condition', () => {
   // The palace leads, then the name. Added when Stage 6 caught the floor
   // dropping the palace its own required_point demands.
   const badge = out.blocks.find((b) => b.fact_ids[0] === 'badge_桃花');
-  assert.match(badge.text, /^Pilar Kerja\. Bunga Persik \(Peach Blossom\)\./);
+  // A BADGE IS STILL NAMED - IN ITS HEADING, since the 2026-08-26 ruling that a
+  // heading directly above a meaning satisfies "same breath". The body used to
+  // open "Pilar Kerja. Bunga Persik (Peach Blossom)." and the second sentence was
+  // the heading again, one line down. The palace still leads the body: it is
+  // provenance the required_point demands, and Stage 6 caught the floor dropping
+  // it once already.
+  assert.equal(badge.heading, 'Bunga Persik', 'the badge is not named in its heading');
+  assert.match(badge.text, /^Pilar Kerja\. /, 'the palace no longer leads the badge body');
+  assert.ok(
+    !badge.text.includes('Bunga Persik (Peach Blossom).'),
+    'the badge body still repeats its own heading',
+  );
 
   const missing = out.blocks.find((b) => b.fact_ids[0] === 'element_missing_Wood');
   const fact = CHART_1.facts.find((f) => f.id === 'element_missing_Wood');

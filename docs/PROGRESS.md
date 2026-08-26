@@ -867,6 +867,61 @@ also said the move would be *"expected, NOT
 the re-coupling tripwire firing"*, which would have authorised dismissing a genuine alarm. **A
 prediction that tells a reader what to disregard must carry its grep.**
 
+## RULED 2026-08-26 — A HEADING SATISFIES RULE 21'S "SAME BREATH"
+
+> **A heading directly above a meaning paragraph fully satisfies the same-breath requirement.
+> Visually and cognitively they are coupled.** — Reyner, 2026-08-26
+
+**THIS RESOLVES AN AMBIGUITY, NOT A DISAGREEMENT.** `glossary.json`'s `kekuatan._note` has said
+since 2026-08-02 that the label must co-occur with its meaning sentence **"in rendered text"**. It
+never said whether a HEADING is rendered text. Both readings are defensible, and inside one day the
+floor was built both ways:
+
+| | what it did | what it assumed |
+|---|---|---|
+| first | repeated the label inside the body, in front of the meaning | a heading does not count |
+| second | deleted the heading, because the body already named the fact | a heading does count, so it is the duplicate |
+
+Neither implementation was wrong about rule 21. Both were guessing at one clause, and each guess
+produced a defect the other did not have: the first stuttered (`LEMAH` / "Lemah (Weak). Lemah di
+sini..."), the second removed the document's structure and left a five-section reading with nothing
+to scan on a phone.
+
+**THE RULING, APPLIED:** the heading NAMES the fact and the body opens on the meaning. The bare
+label sentence is deleted for every cell.
+
+**Why this direction and not the other**, since both remove the stutter:
+
+- **The headings are the document's structure.** A floor reading is five to seven sections; on a
+  phone the headings are the only thing that makes it scannable. Deleting them made the floor a
+  wall of paragraphs, which is a worse product than the stutter it fixed.
+- **It names every badge.** A badge is something the person HAS and naming it is deliberate. The
+  heading does that, so nothing had to be carved out.
+- **It holds rule 21 for `kekuatan.strong` and `kekuatan.balanced`**, whose meanings never restated
+  the label. Under the earlier conditional rule those two kept an inline label sentence purely to
+  satisfy the note; under this ruling the heading carries the verdict and the exception disappears.
+
+**IT SUPERSEDES THE CONDITIONAL SUPPRESSION of the same day.** That condition — suppress the label
+sentence only where `label_meaning` already opens by naming itself, which was true of exactly 2 of
+36 cells — existed *only* because the heading was assumed not to count. It does count, so the
+condition and its helper are gone.
+
+**MEASURED**, `lib/render/fallback.js` against `main`, over the 13 fixture charts:
+
+| | |
+|---|---|
+| blocks | 87 |
+| **bodies changed** | **68** (28 distinct facts) |
+| left empty | **0** |
+| labelled facts named nowhere the reader sees | **0** |
+| blocks still carrying a heading | **81** (the 6 without are label-null conditions, which are described and never named — unchanged) |
+
+The ruling is also recorded beside `kekuatan._note` itself, because that is the sentence a future
+session will read when it next has to decide what "rendered text" means, and it is the file that
+did not answer the question.
+
+---
+
 ## RULED 2026-08-22 (evening) — THE DEPTH PAIR, AND A COLLISION THAT IS NOT RESOLVED
 
 **Reyner's evening rulings, recorded together because two of them contradict each other and the
