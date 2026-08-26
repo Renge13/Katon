@@ -181,9 +181,33 @@ test('the floor never leaves a strength label bare (rule 21, same breath)', () =
       block.text.includes(strength.label_meaning),
       `chart ${tc.id}: strength label rendered without its meaning`,
     );
+    // ── WHAT SITS BETWEEN THE LABEL AND ITS MEANING: NOTHING ELSE ──
+    //
+    // This used to assert `indexOf(meaning) > labelAt`, i.e. that a separate label
+    // sentence came FIRST. That mechanism stopped being the only correct shape on
+    // 2026-08-26, when the duplicate label sentence was suppressed for cells whose
+    // `label_meaning` already opens by naming itself. `kekuatan.weak` is one:
+    //
+    //   before   "Lemah (Weak). Lemah di sini bukan berarti tidak mampu. ..."
+    //   after    "Lemah di sini bukan berarti tidak mampu. ..."
+    //
+    // The old assertion fails on the second, where the label and the meaning start
+    // at the same index - and the RULE is better served there, not worse. So the
+    // check is now the rule itself, from `kekuatan._note`: *"lemah/kuat in rendered
+    // text co-occurs with its meaning sentence (rule 21, same breath)."* Both
+    // shapes satisfy it and a third sentence wedged between them satisfies neither.
+    const meaningAt = block.text.indexOf(strength.label_meaning);
+    assert.ok(meaningAt >= labelAt, `chart ${tc.id}: the meaning precedes the label`);
+    const between = block.text.slice(labelAt, meaningAt);
+    const allowed = [
+      '', // the meaning opens by naming itself; nothing separates them
+      `${strength.label}. `,
+      `${strength.label} (${strength.label_bracket}). `,
+    ];
     assert.ok(
-      block.text.indexOf(strength.label_meaning) > labelAt,
-      `chart ${tc.id}: the meaning must follow the label, not precede it`,
+      allowed.includes(between),
+      `chart ${tc.id}: "${between}" sits between the label and its meaning - `
+      + 'rule 21 requires them in the same breath, with nothing in between',
     );
   }
   assert.ok(seen > 0, 'no chart exercised the strength block');
