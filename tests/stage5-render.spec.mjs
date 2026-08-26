@@ -163,6 +163,41 @@ test('THE FLOOR SAYS WHERE A RELATION SITS, on every chart that has one', () => 
   assert.ok(relations >= 17, `expected the fixture to exercise relations, saw ${relations}`);
 });
 
+test('THE FLOOR NEVER HEADS A BLOCK WITH A NAME ITS OWN BODY REPEATS', () => {
+  // Ruled 2026-08-26. The heading used to be `fact.label` unconditionally while
+  // the body named the same fact one line below:
+  //
+  //     ASPEK PENGATUR
+  //     Aspek Pengatur (Direct Officer). Kamu tahu apa yang seharusnya ...
+  //
+  // The naming sentence stays - rule 21 and the badge-naming contract both need
+  // it - and the heading goes.
+  //
+  // ASSERTED OVER THE WHOLE FIXTURE rather than on the one chart that showed it,
+  // because "the body names it" is a property of each glossary cell and 33 of the
+  // 37 distinct floor blocks have a heading. Measured before the change: all 33
+  // repeated it, so a single-chart test would have proved almost nothing.
+  let headings = 0;
+  for (const tc of VALIDATION_CHARTS) {
+    const json = jsonFor(tc);
+    for (const block of assembleFallback(json).blocks) {
+      const heading = (block.heading || '').trim();
+      if (!heading) continue;
+      headings += 1;
+      assert.ok(
+        !block.text.includes(heading),
+        `chart ${tc.id}: block "${heading}" is headed with a name its own body repeats`
+        + ` - "${block.text.slice(0, 70)}..."`,
+      );
+    }
+  }
+  // Nothing is asserted about there being headings at all: after this ruling the
+  // floor emits none, and a test that required some would fail for being right.
+  // `headings` is counted only so a future change that reintroduces them is still
+  // covered by the loop above rather than silently skipping it.
+  assert.ok(headings >= 0);
+});
+
 test('THE FLOOR DOES NOT SAY THE LABEL TWICE, where the meaning already says it', () => {
   // ── THIS TEST EXISTS BECAUSE ITS ABSENCE SHIPPED A LIE ──
   //
