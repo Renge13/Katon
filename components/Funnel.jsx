@@ -36,7 +36,7 @@
 // ============================================================
 
 import { useEffect, useRef, useState } from 'react';
-import { CardA, CardB } from './cards/Card.js';
+import { CardA, CardB, CARD_A } from './cards/Card.js';
 import { downloadCard } from './cards/exportCards.js';
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
@@ -75,8 +75,16 @@ const LIGHT = '#EAF1F2';
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
 
 // The card display scale. Card A is 1080 wide and the column is 460 at most, so it
-// renders at a third and `captureCard` scales the clone back up off the measured
-// node width. Nothing about the exported pixels depends on this number.
+// is shown at roughly a third.
+//
+// IT IS A DISPLAY NUMBER AND NOTHING ELSE. The card is RENDERED at 1080x1440 and
+// shrunk by a CSS transform on a wrapper; `captureCard` reads the layout box,
+// which a transform does not change, so the export is 1:1 whatever this is set to.
+// The previous version of this comment ended "nothing about the exported pixels
+// depends on this number" while the capture was scaling the clone by its inverse -
+// which is precisely how the exported pixels depended on it, and how the share card
+// came out blank. Changing this value must not change a single exported pixel; the
+// "vs bare1" column in `scripts/probe-card-export.mjs` is what holds that.
 const CARD_SCALE = 0.34;
 
 // Element theme → CSS vars, set ONCE at the reading root; every nested surface
@@ -695,7 +703,19 @@ function ShareCardA({ data }) {
   return (
     <>
       <Reveal delay={0.06} style={{ display: 'flex', justifyContent: 'center' }}>
-        <CardA data={data} scale={CARD_SCALE} id="card-a" />
+        {/* RENDERED AT EXPORT SIZE, SHRUNK FOR DISPLAY ONLY.
+            `captureCard` captures this node at 1:1 and refuses a node that is
+            laid out at anything other than the export size, because scaling the
+            clone back up is what blanked the share card. A CSS transform does
+            not change the layout box, so #card-a stays 1080x1440 to the capture
+            while the reader sees it at CARD_SCALE. The wrapper carries the
+            display size explicitly and clips, since the transformed child still
+            occupies its full 1080x1440 in flow. */}
+        <div style={{ width: CARD_A.canvas.w * CARD_SCALE, height: CARD_A.canvas.h * CARD_SCALE, overflow: 'hidden' }}>
+          <div style={{ transform: `scale(${CARD_SCALE})`, transformOrigin: 'top left' }}>
+            <CardA data={data} scale={1} id="card-a" />
+          </div>
+        </div>
       </Reveal>
       <Reveal delay={0.12} style={{ marginTop: 20 }}>
         <Button variant="gold" onClick={save} disabled={saving} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
