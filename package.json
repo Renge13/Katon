@@ -37,6 +37,7 @@
     "apply:rulings": "node scripts/apply-rulings.mjs",
     "test:rulings": "node --test tests/apply-rulings.spec.mjs",
     "render:reading": "node --conditions=react-server scripts/render-reading.mjs",
+    "diagnose:reading": "node --env-file-if-exists=.env.local --conditions=react-server scripts/diagnose-reading.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:birth-time-input": "node --test tests/birth-time-input.spec.mjs",
     "test:card": "node --test tests/card.spec.mjs",
