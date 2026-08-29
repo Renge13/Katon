@@ -615,12 +615,69 @@ information density; footer and `KATON.APP` placement; the relationship between 
 and the text; overall balance within 4:5; and **how the composition reads at a glance in a feed.**
 The result should feel intentional at 1080x1350, not like a crop of the previous card.
 
-**ONE DESIGN INPUT THIS RE-RULE FORCES, flagged for the pass rather than decided here: the corner
-radius.** `RADIUS` is 40 and it exists so an OBJECT reads as floating on a canvas. With the canvas
-gone there is nothing to float on, and a 40px radius at the frame edge exports four transparent
-corners that a feed composites against its own background. **Cowork's proposal, for Reyner:
-Card A goes square-cornered and full-bleed; Card B keeps its radius because it still floats.** Not
-ruled. It is a design call and it belongs to the pass.
+### THE FINAL DESIGN RULING — Reyner, 2026-08-29, later the same day
+
+The three design inputs this re-rule forced are now RULED. **Do not re-open the ratio, the corners,
+the gradient, the rim or the shadow.**
+
+**Card A is:**
+
+| | |
+|---|---|
+| Frame | **1080x1350, 4:5** |
+| Bleed | **full-bleed** - no mat, no canvas, no surrounding field |
+| Opacity | **fully opaque.** No transparent outer corners, anywhere |
+| Corners | **square** |
+| Rim | **none** |
+| Shadow | **none** |
+| Surface | **the archetype gradient is RETAINED**, with a new job |
+| Card B | **completely untouched** |
+
+**THE GRADIENT KEEPS ITS PLACE AND LOSES ITS OLD REASON.** The 2026-08-13 ruling (`Card.js:925`)
+gave it the job of *separating the object from the canvas* - *"the two separate by surface rather
+than by a drawn border, which needs no fourth colour token per archetype."* **There is no canvas, so
+that job no longer exists.** The gradient stays because it now does a different one: **surface,
+materiality, depth.** The design pass refines it to read as subtle material rather than as an object
+floating on something. This is a re-statement of purpose, not a licence to re-derive the stops.
+
+**AND CARD A DOES NOT GET A RIM, DELIBERATELY.** The 2026-08-13 objection to a Card A border was
+COST - it needed a fourth colour token per archetype - and Card B's rim mechanism (the token's own
+ink at four alphas) removes that objection, so a rim for Card A is now cheap and available. **It is
+still refused**, and the reason is product rather than cost:
+
+> **Card A = identity, shareability, the immediate artifact. Card B = premium, keepsake, richer
+> physicality.** Card A stays visually cleaner and lighter than Card B. **Do not add a rim to Card A
+> merely to make it feel more finished** - Card B's stronger physical-object treatment is part of
+> what is being paid for, and spending it on the free card spends the differentiation.
+
+**THE IMPLEMENTATION CONSEQUENCE, stated so prompt R does not rediscover it:** `exportCards.js`
+point 1 - *"PNG WITH ALPHA, NEVER JPEG"* - exists because a 40px radius leaves four transparent
+corners. **That rationale is now CARD B ONLY.** Card A is opaque and square, so its export carries no
+transparency at all. PNG stays for pipeline consistency; the reason it was mandatory does not apply
+to Card A any more, and the docblock must say which card it is talking about.
+
+### THE DESIGN PASS RUNS IN THIS ORDER
+
+1. **OUTER GEOMETRY** - 1080x1350, square opaque edges, no mat, no rim, no shadow.
+2. **SURFACE** - retain the gradient concept; refine it to read as subtle materiality and depth
+   rather than an object floating on a canvas.
+3. **COMPOSITION** - reflow headline, illustration, seal, information hierarchy, whitespace, footer
+   and `KATON.APP`, and the overall focal point. **Do not mechanically stretch the old composition.**
+
+The measured budget for step 3, from `npm run preview:cards` (`ace69cc`): **+19.1% width, +6.6%
+height, +26.9% area, ratio 0.716 -> 0.800. The horizontal gain is 2.9x the vertical**, so a reflow
+that spends the new room on vertical rhythm is spending room that is not there.
+
+### THE IMPLEMENTATION SEQUENCE
+
+```
+#80 merge  ->  #81 after Reyner's copy approval  ->  Card A design pass
+           ->  Card A implementation and export  ->  validation on the real social surfaces
+           ->  September traffic
+```
+
+`docs/prompts/Q-demand-test.md` proceeds independently. **Meaningful acquisition traffic does not
+start until the final Card A share asset works correctly.**
 
 ### Export behaviour
 
