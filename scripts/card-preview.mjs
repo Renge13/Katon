@@ -43,12 +43,84 @@ import { accentAudit } from '../lib/card/contrast.js';
 import { inkIsDark } from '../lib/card/tokens.js';
 import {
   CardA, CardB, TEXT_ROLES, MIN_CONTRAST, AA_EXEMPT, DIM_EXEMPT, MAX_LABEL_MEANING,
-  brassTextFallbacks,
+  brassTextFallbacks, CARD_A, RADIUS,
 } from '../components/cards/Card.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'reports', 'card-preview.html');
 const STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+
+// ── CARD A's 4:5 RECOMPOSITION — the INPUT to the design pass, not the pass ──
+//
+// Ruled 2026-08-29, `docs/content/card-polish-spec.md` §10: Card A loses its
+// canvas and its mat and becomes a 1080x1350 card that IS the exported asset.
+// §10 forbids implementing against the old geometry, so NOTHING here touches
+// `components/cards/Card.js`. This section renders the CURRENT card three ways so
+// Reyner can see what has to re-flow before any production code moves.
+//
+// The only literal in the section. Everything else is derived from CARD_A, because
+// a second hand-typed copy of a ruled size is how two sizes end up disagreeing.
+const TARGET_A = { w: 1080, h: 1350 };
+
+// Shared scale for the three panels, so they are comparable by eye. Panels are
+// rendered at TRUE export size and shrunk by a CSS transform - the same technique
+// as `scripts/audit-card-budget.mjs:232-234` (.cell / .clip / .shrink), followed
+// rather than reinvented so there is one crop idiom in the repo.
+const GEO_SCALE = 0.30;
+const GEO_THUMB = 0.093; // matches the existing shelf's Card A treatment
+const GEO_CORNER = 0.22;  // corner strip: big enough that a 40px radius is judgeable
+
+/**
+ * Every number the recomposition section draws, derived from CARD_A and TARGET_A.
+ *
+ * THE GUARD IS THE POINT OF THIS FUNCTION. The whole section works by cropping the
+ * canvas away: the object is centred at a uniform margin, so an overflow:hidden box
+ * of card.w x card.h with the child offset by -margin is an EXACT crop. That
+ * identity is the premise. If the margin is 0 or gone, the offset is a no-op and
+ * every panel below silently shows a differently-wrong picture that still looks
+ * like a card - which is precisely the failure this repo keeps paying for. So it
+ * throws instead, loudly, naming the ruling that will cause it.
+ */
+function geometryA() {
+  const m = CARD_A.margin;
+  if (typeof m !== 'number' || !Number.isFinite(m) || m <= 0) {
+    throw new Error(
+      `card-preview: CARD_A.margin is ${JSON.stringify(m)}, so the Card A ` +
+      'recomposition section cannot crop. That section offsets the canvas by ' +
+      '-CARD_A.margin to lift the object out of it; with no margin the offset is a ' +
+      'no-op and all three panels render a mis-crop that still looks like a card.\n\n' +
+      `THIS IS THE EXPECTED FAILURE ONCE §10 IS IMPLEMENTED. docs/content/card-polish-spec.md ` +
+      `§10 (ruled 2026-08-29) makes Card A ${TARGET_A.w}x${TARGET_A.h} with NO canvas and NO ` +
+      'mat. When prompt R lands it, DELETE this section rather than repairing it: its ' +
+      'entire subject is the frame §10 removes, so a repaired version would be a ' +
+      'picture of nothing.'
+    );
+  }
+
+  const { canvas, card } = CARD_A;
+
+  // Instagram's portrait maximum is 4:5, which is TARGET_A's ratio. Cropping a
+  // 1080-wide canvas to it removes (canvas.h - TARGET_A.h) split evenly.
+  const crop = (canvas.h - TARGET_A.h) / 2;
+  const reachesObject = crop > m;
+  const marginAfter = m - crop;
+
+  const dw = (TARGET_A.w - card.w) / card.w;
+  const dh = (TARGET_A.h - card.h) / card.h;
+  const da = (TARGET_A.w * TARGET_A.h) / (card.w * card.h) - 1;
+
+  return {
+    m, canvas, card, crop, reachesObject, marginAfter,
+    dw, dh, da,
+    ratioNow: card.w / card.h,
+    ratioTarget: TARGET_A.w / TARGET_A.h,
+    // Where the old object sits if it is dropped, unchanged, into the new frame.
+    insetX: (TARGET_A.w - card.w) / 2,
+    insetY: (TARGET_A.h - card.h) / 2,
+  };
+}
+
+const pct = (n) => `${n >= 0 ? '+' : ''}${(n * 100).toFixed(1)}%`;
 
 /** One real birthdate per Day Master, found by walking days from a fixed start. */
 function chartsPerStem() {
@@ -80,8 +152,23 @@ function main() {
       b: renderToStaticMarkup(React.createElement(CardB, { data, scale: 0.28 })),
       thumbA: renderToStaticMarkup(React.createElement(CardA, { data, scale: 0.093 })),
       thumbB: renderToStaticMarkup(React.createElement(CardB, { data, scale: 0.07 })),
+      // §10 recomposition panels. Rendered at TRUE export size and shrunk by CSS
+      // transform, so every number in the markup stays an export pixel. Distinct
+      // ids because the same card appears seven times on the page and duplicate
+      // ids are how a later DOM query silently measures the wrong copy.
+      geoCanvas: renderToStaticMarkup(React.createElement(CardA, { data, scale: 1, id: `geo-canvas-${i}` })),
+      geoObject: renderToStaticMarkup(React.createElement(CardA, { data, scale: 1, id: `geo-object-${i}` })),
+      geoTarget: renderToStaticMarkup(React.createElement(CardA, { data, scale: 1, id: `geo-target-${i}` })),
+      geoThumb: renderToStaticMarkup(React.createElement(CardA, { data, scale: 1, id: `geo-thumb-${i}` })),
+      geoCornW: renderToStaticMarkup(React.createElement(CardA, { data, scale: 1, id: `geo-cw-${i}` })),
+      geoCornB: renderToStaticMarkup(React.createElement(CardA, { data, scale: 1, id: `geo-cb-${i}` })),
+      geoCornSq: renderToStaticMarkup(React.createElement(CardA, { data, scale: 1, id: `geo-cs-${i}` })),
     };
   });
+
+  // BEFORE anything is written. A guard that fires after the file lands is a
+  // guard that ships the broken page and complains about it.
+  const G = geometryA();
 
   const unapproved = rows.filter((r) => !r.approved).map((r) => r.data.nameId);
 
@@ -101,6 +188,123 @@ function main() {
   const brassFallbackA = new Set(brassTextFallbacks(CARD_TOKENS, 'A').map((f) => f.stem));
   const brassFallbackB = new Set(brassTextFallbacks(CARD_TOKENS, 'B').map((f) => f.stem));
 
+  // ── §10 RECOMPOSITION SECTION ────────────────────────────────────────────
+  // Built here rather than inline in the template so the nesting stays readable.
+  // Panels crop the canvas away in CSS; no card prop and no component change.
+  const S = GEO_SCALE;
+  const dpx = (n) => `${(n * S).toFixed(1)}px`;
+
+  // The object lifted out of its canvas: an EXACT crop, because the object is
+  // centred at a uniform margin. `translate` sits inside the same transform as
+  // `scale`, so its argument stays an export pixel and reads directly against
+  // CARD_A.margin instead of being a pre-multiplied number nobody can check.
+  const objectCrop = (markup, scale, extra = '') => `
+<div class="geoclip ${extra}" style="width:${(G.card.w * scale).toFixed(1)}px;height:${(G.card.h * scale).toFixed(1)}px">
+  <div class="geoshrink geoalpha" style="transform:scale(${scale}) translate(${-G.m}px, ${-G.m}px)">${markup}</div>
+</div>`;
+
+  const panelCanvas = (r) => `
+<figure class="geopanel" style="margin:0">
+  <div class="geoclip" style="width:${dpx(G.canvas.w)};height:${dpx(G.canvas.h)}">
+    <div class="geoshrink" style="transform:scale(${S})">${r.geoCanvas}</div>
+    <div class="geocrop-band" style="top:0;height:${dpx(G.crop)}"></div>
+    <div class="geocrop-band" style="bottom:0;height:${dpx(G.crop)}"></div>
+    <div class="geocrop-line" style="top:${dpx(G.crop)}"></div>
+    <div class="geocrop-line" style="bottom:${dpx(G.crop)}"></div>
+  </div>
+  <figcaption>1 &middot; today, as posted<br>${G.canvas.w}x${G.canvas.h} canvas. Dimmed bands are what
+  a 4:5 feed crop removes: <em>${G.crop}px</em> top and bottom.</figcaption>
+</figure>`;
+
+  const panelObject = (r) => `
+<figure class="geopanel" style="margin:0">
+  ${objectCrop(r.geoObject, S, 'geocheck')}
+  <figcaption>2 &middot; the object alone<br>${G.card.w}x${G.card.h}, cropped out of the canvas.
+  Checkerboard shows through the <em>RADIUS ${RADIUS}</em> corners - that is alpha, not white.</figcaption>
+</figure>`;
+
+  const panelTarget = (r) => `
+<figure class="geopanel" style="margin:0">
+  <div class="geohatch" style="position:relative;width:${dpx(TARGET_A.w)};height:${dpx(TARGET_A.h)}">
+    <div style="position:absolute;left:${dpx(G.insetX)};top:${dpx(G.insetY)}">${objectCrop(r.geoTarget, S)}</div>
+  </div>
+  <figcaption>3 &middot; the ${TARGET_A.w}x${TARGET_A.h} target<br>Old object dropped in at TRUE scale.
+  Hatched area is the room the recomposition has to spend: <em>${G.insetX.toFixed(1)}px</em> each side,
+  <em>${G.insetY.toFixed(1)}px</em> top and bottom.</figcaption>
+</figure>`;
+
+  const cornerStrip = (r) => `
+<div class="geopanels" style="gap:18px;margin-bottom:30px;align-items:center">
+  <p class="cap" style="max-width:16ch;margin:0">${esc(r.data.nameId)}</p>
+  <figure class="geopanel" style="margin:0">
+    <div style="background:#ffffff;padding:14px">${objectCrop(r.geoCornW, GEO_CORNER)}</div>
+    <figcaption>radius ${RADIUS}, on white</figcaption></figure>
+  <figure class="geopanel" style="margin:0">
+    <div style="background:#000000;padding:14px">${objectCrop(r.geoCornB, GEO_CORNER)}</div>
+    <figcaption>radius ${RADIUS}, on black</figcaption></figure>
+  <figure class="geopanel" style="margin:0">
+    <div style="background:linear-gradient(90deg,#ffffff 50%,#000000 50%);padding:14px">${objectCrop(r.geoCornSq, GEO_CORNER, 'geosq')}</div>
+    <figcaption>square-cornered<br>ground irrelevant: <em>no alpha corners</em></figcaption></figure>
+</div>`;
+
+  const geoSection = `
+<h2>Card A at 4:5 &mdash; what has to re-flow (ruled 2026-08-29, card-polish-spec &sect;10)</h2>
+
+<div class="geohead">
+<b>THE GAIN IS OVERWHELMINGLY HORIZONTAL.</b> Width grows <b class="geonum">${pct(G.dw)}</b> while
+height grows only <b class="geonum">${pct(G.dh)}</b> - the horizontal gain is
+<b class="geonum">${(G.dw / G.dh).toFixed(1)}x</b> the vertical. A reflow that spends the new room on
+vertical rhythm is spending room that is not there. The headline measure, the hook and the badge
+rows are where ${pct(G.dw)} of width actually lands.
+<table>
+<tr><td>object today</td><td><b class="geonum">${G.card.w} x ${G.card.h}</b></td>
+    <td>ratio <b class="geonum">${G.ratioNow.toFixed(3)}</b> (63:88)</td></tr>
+<tr><td>target</td><td><b class="geonum">${TARGET_A.w} x ${TARGET_A.h}</b></td>
+    <td>ratio <b class="geonum">${G.ratioTarget.toFixed(3)}</b> (4:5)</td></tr>
+<tr><td>delta</td><td><b class="geonum">${pct(G.dw)} w &middot; ${pct(G.dh)} h</b></td>
+    <td>area <b class="geonum">${pct(G.da)}</b></td></tr>
+</table>
+</div>
+
+<p><b>What panel 1 answers, and it is a finding either way.</b> &sect;10 says the current export
+depends on platform behaviour. The arithmetic says <b>it does not depend on it for the object</b>: a
+4:5 centre crop of the ${G.canvas.w}x${G.canvas.h} canvas removes <b>${G.crop}px</b> top and bottom,
+the mat is <b>${G.m}px</b>, and ${G.crop} &lt; ${G.m} - so the crop
+<b>${G.reachesObject ? 'REACHES THE OBJECT and clips the card itself' : 'never reaches the object. The card survives a feed crop intact.'}</b>
+<br><br><b>What it destroys instead is the uniform margin</b>, which is the whole premise of the
+${G.m} value - <code>tests/card.spec.mjs:67</code> derives it as the only number satisfying both
+ratios at once. After the crop the mat is <b>${G.m}px</b> left and right against
+<b>${G.marginAfter.toFixed(1)}px</b> top and bottom, a
+<b class="geonum">${(G.m / G.marginAfter).toFixed(2)}:1</b> asymmetry. So the posted card is not a
+clipped card, it is a card in a frame that no longer means anything. That is a WEAKER claim than
+"the object gets cropped" and a BETTER argument for &sect;10: the mat is not protecting the object,
+it is just failing to be uniform.</p>
+
+<div class="geopanels">${rows.map((r) => panelCanvas(r) + panelObject(r) + panelTarget(r)).join('')}</div>
+
+<p class="cap">All three panels share one scale (${S}), so they are comparable by eye. Every
+dimension is derived from <code>CARD_A</code>; the only literal is <code>TARGET_A</code>, which is
+&sect;10's ruled size. Panels crop the canvas away in preview CSS - <b>no card prop, no component
+change</b>. &sect;10 forbids implementing against the old geometry, so this page is the INPUT to the
+design pass, not the pass.</p>
+
+<h2>Panel 3 at feed scale &mdash; glanceability of the target frame</h2>
+<div class="shelf">
+${rows.map((r) => `<figure style="margin:0"><div class="geohatch" style="position:relative;width:${(TARGET_A.w * GEO_THUMB).toFixed(1)}px;height:${(TARGET_A.h * GEO_THUMB).toFixed(1)}px"><div style="position:absolute;left:${(G.insetX * GEO_THUMB).toFixed(1)}px;top:${(G.insetY * GEO_THUMB).toFixed(1)}px">${objectCrop(r.geoThumb, GEO_THUMB)}</div></div><figcaption>${esc(r.data.nameId)}</figcaption></figure>`).join('\n')}
+</div>
+<p class="cap">Same feed scale as the shelf above. The hatched band is dead space the recomposition
+has to absorb - judge whether the card still reads at a glance once it is spent, not whether the
+hatching looks empty.</p>
+
+<h2>The corner question &mdash; open design input, NOT ruled</h2>
+<p>&sect;10 flags this and does not decide it. <code>RADIUS</code> is <b>${RADIUS}</b> and it exists
+so an OBJECT reads as floating on a canvas. With the canvas gone the radius sits at the frame edge
+and exports four transparent corners, which a feed composites against its own background - the same
+flatten-to-black hazard <code>docs/prompts/P-card-frame.md</code> recorded for a transparent mat,
+arriving through the corners instead. Cowork's proposal in &sect;10 is square and full-bleed for Card
+A, radius kept for Card B because it still floats. <b>Reyner's call.</b></p>
+${rows.map(cornerStrip).join('\n')}
+`;
   const html = `<!doctype html>
 <meta charset="utf-8">
 <title>Katon card preview</title>
@@ -132,6 +336,37 @@ function main() {
   .shelf { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
   .shelf figcaption { font-size:9.5px; letter-spacing:.08em; color:#5f5d58;
                       text-transform:uppercase; margin-top:6px; text-align:center; }
+
+  /* ── §10 recomposition section ──────────────────────────────
+     The crop idiom, copied from scripts/audit-card-budget.mjs:232-234: render at
+     true export size, size the clip box in DISPLAY px, shrink the child with a
+     transform. The translate rides INSIDE the same transform, so its argument
+     stays an export pixel and can be read against CARD_A.margin directly. */
+  .geoclip { overflow:hidden; position:relative; }
+  .geoshrink { transform-origin:top left; }
+  .geopanels { display:flex; gap:30px; align-items:flex-start; flex-wrap:wrap; }
+  .geopanel figcaption { font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+                         color:#84817a; margin:8px 0 0; max-width:34ch; line-height:1.6; }
+  .geopanel figcaption em { color:#e0a05f; font-style:normal; }
+  /* The alpha corners only exist if nothing paints behind them. The canvas field
+     is an INLINE style, so this needs !important to win. */
+  .geoalpha > div { background:transparent !important; }
+  .geocheck { background-image:
+      linear-gradient(45deg,#8a8a8a 25%,transparent 25%,transparent 75%,#8a8a8a 75%),
+      linear-gradient(45deg,#8a8a8a 25%,transparent 25%,transparent 75%,#8a8a8a 75%);
+    background-size:24px 24px; background-position:0 0,12px 12px; background-color:#f0f0f0; }
+  .geohatch { background-image:repeating-linear-gradient(45deg,
+      rgba(224,160,95,.22) 0 6px, transparent 6px 14px); background-color:#1a1a1d;
+    outline:1px dashed #4a4a52; }
+  .geocrop-band { position:absolute; left:0; right:0; background:rgba(10,10,12,.62); }
+  .geocrop-line { position:absolute; left:0; right:0; height:0;
+                  border-top:2px dashed #e0a05f; }
+  .geohead { background:#141a16; border:1px solid #2c4436; border-radius:10px;
+             padding:18px 22px; max-width:92ch; margin:16px 0 26px; }
+  .geohead table { border-collapse:collapse; font-size:13px; margin:10px 0 0; }
+  .geohead td { padding:3px 20px 3px 0; color:#bab7b0; }
+  .geohead td b { color:#8fc0a0; }
+  .geonum { font-variant-numeric:tabular-nums; }
 </style>
 
 <h1>Katon cards, all ten archetypes</h1>
@@ -276,6 +511,7 @@ is not a layout.</p>
   });
 })();
 </script>
+${geoSection}
 `;
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
