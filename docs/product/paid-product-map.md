@@ -154,6 +154,21 @@ product is cheaper than the last.
 
 ## THE PRICING QUESTION THIS RAISES
 
+> **PARTLY SUPERSEDED 2026-08-29 by `## RULED 2026-08-29 — THE LADDER, THE LAUNCH PRICES, AND THE
+> ONE-CTA PRINCIPLE` at the bottom of this file. READ THE SCOPE LINE BEFORE DISCARDING ANYTHING HERE.**
+>
+> **SUPERSEDED:** the bands for the **Artifact** (Impulse), **Compatibility** (the Compat half of
+> Considered) and the **Annual reading** (Ritual). Those three are ruled below and the ruling wins.
+>
+> **NOT SUPERSEDED, and these are the ONLY figures on record for them:** the **Household 3-way**
+> band (99-149k) and the **parent -> child** band (the "child" half of Considered, 25-45k). The
+> RULED section prices four products - Mirror, Artifact, Compatibility, Annual - and says nothing
+> about either of these, both of which are still on the roadmap above (v1.2 and `later`). They
+> remain **proposals, untested**, exactly as they were; they are not ruled and they are not dead.
+>
+> **ALSO NOT SUPERSEDED:** the imajidiri **Rp15,000** datapoint below. It is the only real market
+> observation in this file and it is the evidence the ruling was reasoned from, not a casualty of it.
+
 You have one real market datapoint: imajidiri charges **Rp15,000** for a self artifact.
 
 That suggests the impulse ceiling is low and your 80–99k instinct was aimed at the wrong product.
@@ -168,3 +183,143 @@ Reconsider the ladder:
 
 **Test the compat band before committing.** 25–45k with a real cohort beats 80–99k chosen by
 intuition. The annual reading is where the higher number probably lives.
+
+---
+
+## RULED 2026-08-29 — THE LADDER, THE LAUNCH PRICES, AND THE ONE-CTA PRINCIPLE
+
+**Reyner, 2026-08-29. This section is the authority on price and on the post-mirror funnel order.**
+It supersedes "THE PRICING QUESTION THIS RAISES" above, which proposed bands rather than deciding
+them. The RANKING and the product analysis in the rest of this file stand unchanged.
+
+### The four psychological jobs
+
+The ladder is not free -> deeper reading -> premium reading. It is four different desires, and only
+one of them is about depth.
+
+| Product | Job | The sentence in her head |
+|---|---|---|
+| **Mirror** | **Recognition** | "Show me who I am." |
+| **Artifact** | **Ownership** | "I like this enough that I want to keep it." |
+| **Compatibility** | **Curiosity** | "What does this say about me and this person?" |
+| **Annual** | **Orientation** | "What kind of year am I entering, and how do I navigate it?" |
+
+**The Artifact is NOT a deeper reading.** It is the Complete Edition card, the PDF and the glossary.
+She pays to preserve the experience, not to unlock hidden analysis. Nothing is withheld from the free
+mirror to create it, and nothing ever may be.
+
+**The free Mirror is not a cheap teaser. It is the proof engine.** Its job is to produce the thought
+*"how did this know that"*, and that belief is what creates willingness to pay for everything above
+it. **Mirror quality is therefore a revenue input, even though the Mirror is free** - which is the
+argument for content work on it, and is not an argument for doing that work before there are readers.
+
+### The prices
+
+| Product | Launch | Mature | `lib/pricing.js` |
+|---|---|---|---|
+| Mirror | free | free | not a SKU |
+| Artifact | **Rp 19.000** | **Rp 29.000** | `artifact: { list: 29000, launch: 19000 }` |
+| Compatibility | **Rp 39.000** | **Rp 49.000** | `compat: { list: 49000, launch: 39000 }` |
+| Annual | **Rp 79.000** | **Rp 99.000** | `annual: { list: 99000, launch: 79000 }` |
+
+Launch ladder **19 -> 39 -> 79**. Mature ladder **29 -> 49 -> 99**. `LAUNCH_PRICING = true` is the
+single lever between them and it does not move in September.
+
+**Why the Artifact stays at 19k.** Its job is not ARPU. Its job is to convert free user into paying
+customer, and 19k is an impulse "why not". At 29k she begins to justify the purchase consciously,
+which is the wrong mental motion for a keepsake. **The first payment is strategically valuable in
+itself**, because it proves Katon can move a stranger past free curiosity.
+
+**Why Compatibility is 39k and not 29k.** 29k reads as a cheap digital curiosity. 39k is still
+frictionless in Indonesia and communicates *this is an actual product*, which it must, because another
+person is involved and the emotional stake is higher than a keepsake's.
+
+**Why Annual is 79k and not 49k.** At 49k it reads as an inexpensive digital reading. 79k reads as
+*my personal reading for the year*, while staying comfortably under the psychologically loaded
+Rp 100.000 line. **The presentation carries this price, not the page count.** It is sold as
+orientation, not as a long PDF - the working frame is *a personal map for the year ahead: what may
+ask for your attention, where momentum comes more easily, and how you can respond deliberately*.
+Indonesian wording is Reyner's and is not set here.
+
+**Compatibility's repeat-purchase logic, which is why it is not merely the cheaper product.** One
+reader buys exactly one Annual reading per year. One reader can buy Compatibility for a partner, a
+crush, an ex, a parent, a child, a friend, a boss - **so LTV per acquired user may be higher for
+Compat than for Annual even at the lower price**, and Compat carries a sharing loop Annual does not:
+A reads about A and B, A shows B, B discovers Katon. Compat is plausibly an acquisition product and a
+revenue product at once. **It is not to be filed as "the growth product".**
+
+**And Annual is NOT assumed to be the money product.** September decides that. Nothing in this repo
+may encode the assumption in either direction.
+
+### The test band, amended
+
+`CLAUDE.md` said *price band to be TESTED at 25-45k*. **Amended 2026-08-29 to 25-49k**, because the
+mature Compat price is deliberately 49.000 while its launch price stays 39.000. **Do not "correct"
+49.000 back to 45.000 later** - a session that finds 49k in `pricing.js` has found this ruling, not a
+defect.
+
+### The funnel order, and it is a principle rather than a layout preference
+
+```
+Mirror  ->  Artifact decision  ->  Compat / Annual interest
+```
+
+**ONE LIVE PURCHASE CTA PER MOMENT. Upcoming products are secondary signals, never competing CTAs.**
+
+The instant after the mirror lands is the highest-intent moment in the product and it does not divide.
+The Artifact is the only purchasable thing shown there. Compat and Annual are surfaced **one step
+further down, after the Artifact decision has been made either way**, as upcoming products with prices
+shown and an interest capture.
+
+Two reasons, and the second is why this is not cosmetic:
+
+1. Three offers competing for one glance flattens all three, and the one that loses is the only one
+   that can actually take money today.
+2. **It makes the denominators clean.** Artifact conversion is measured among completed Mirror
+   readers; Compat and Annual interest is measured among readers who have already passed the Artifact
+   decision. Stacked offers would leave every rate measured on the same muddled base.
+
+### Demand risk and buildability risk are separate, and both must be retired
+
+**Demand risk** - which product people want - is answered by the September test (`docs/prompts/Q-demand-test.md`).
+
+**Buildability risk** - whether Compat can be built responsibly - is answered by the oracle probe, and
+no number of waitlist clicks touches it. `grep -rn "甲己\|乙庚\|丙辛\|丁壬\|戊癸" lib/ tests/` returns
+**zero** (2026-08-29), and Joey's plotter is single-chart (probed 2026-08-12), so there is no existing
+oracle for a pair claim. **The gate is not "find a published reading that matches our prose."** It is:
+
+**PASS** if the pair mechanics we intend to use can be independently verified; if deterministic pair
+facts exist that the engine can calculate; if those facts map to defensible interpretations without
+inventing unsupported claims; and if an hour-less Person B has an explicitly defined degraded mode.
+
+**FAIL** if core pair mechanics cannot be independently verified, if important claims rest on
+unsupported rules, or if the reading would need vague intuitive invention rather than deterministic
+inputs.
+
+**Hour-less Person B is an intentional product state, not an edge case:** it produces a
+lower-confidence reading from the available birth-date information. It is not a broken product and
+not an automatic refund. The UX must not overstate precision. The mirror already has ruled prose for
+the hour-less shape (`docs/content/_STATIC-STRINGS.md`, `lib/validate/fact.js:350`); Compat reuses
+that posture rather than inventing a new one.
+
+### The October decision rule
+
+- **Compat wins on demand AND the oracle gate passes** -> build Compat.
+- **Compat wins on demand AND the oracle gate fails** -> build Annual. Compat is recorded as
+  BLOCKED ON RESEARCH with an owner, never as "queued".
+- **Annual shows compelling demand** -> build Annual.
+
+**Do not call a winner on a small or noisy gap.** Judge whether the difference is materially
+meaningful, not merely present.
+
+**The one date that does not move: Imlek is mid-February.** An Annual reading that is to catch its own
+season must be built in roughly Oct-Nov. That is a deadline, not an argument that Annual should win.
+
+### Consequences in code
+
+- `lib/pricing.js` `SKUS`: artifact list 25000 -> **29000**; compat launch 29000 -> **39000**, list
+  45000 -> **49000**; add **`annual: { list: 99000, launch: 79000 }`**.
+- **`SELLABLE_SKUS` stays `['artifact']`.** Pricing a thing and selling a thing are separate
+  decisions - that file's own docblock rule. Neither Compat nor Annual becomes purchasable here.
+- `LAUNCH_PRICING` stays `true`.
+- `CLAUDE.md` band text 25-45k -> 25-49k.
