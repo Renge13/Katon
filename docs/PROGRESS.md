@@ -64,7 +64,7 @@ to end, in the opposite direction. **What follows is what merging makes true, no
 
 | Surface | What a real user gets | Served by | Gate |
 |---|---|---|---|
-| **The reading. FREE, AND IT IS THE WHOLE THING** | Archetype (Indonesian name, English pair once), day master, the reading's own blocks with their own headings, `penutup`, the four pillars with palace/animal/element, 胎元, five element bars with the engine's own caveat | `POST /api/mirror` -> `GET /api/mirror/[token]`: engine semantic JSON -> Gemini -> Stage 6 -> `render_cache`. **The `contents/*.md` cells are DELETED** | **none, ungated, and nothing in it is withheld.** No teaser, no blurred placeholder, no `LockedLines` |
+| **The reading. FREE, AND IT IS THE WHOLE THING** | Archetype (Indonesian name, English pair once), day master, the reading's own blocks with their own headings, `penutup`, the four pillars with palace/animal/element, 胎元, five element bars with the engine's own caveat. **AMENDED 2026-08-29: SHE DOES NOT GET IT ALL AT ONCE ANY MORE, AND THAT IS AN IMPROVEMENT.** The DETERMINISTIC half - pillars, element bars, 胎元 and her archetype's NAME - is on screen at **4.3s**, against **22.4s** for the prose. Measured, real funnel, one submit, phone width. Where the prose will go she sees a wordless skeleton, deliberately: **no loading copy was authored**, because the ruled order is that those words get written against what is actually on screen | `POST /api/mirror` returns the chart WITH the token (`mirrorChartView`, the same function under the same key the GET returns) -> `GET /api/mirror/[token]`: engine semantic JSON -> Gemini -> Stage 6 -> `render_cache`. **POST STILL DOES NOT RENDER** - a create cannot quietly buy an LLM call, and the handler's header still says so. **The `contents/*.md` cells are DELETED** | **none, ungated, and nothing in it is withheld.** No teaser, no blurred placeholder, no `LockedLines`. The early chart is not a partial serve - it is the engine's own facts arriving when they are ready (rule 14), and none of it was ever the model's to produce |
 | **The shareable. FREE** | Card A as a downloadable PNG, 1080x1440 share capture | `lib/mirror/view.js` -> `buildCardData` minus `appendix` -> `components/cards/Card.js#CardA` | none, ungated |
 | **Complete Edition, Rp 19.000** | Card B at download resolution (907x1747, no shadow, alpha corners) **and** the Complete Edition PDF - cover, reading verbatim from `render_cache`, chart page with `hal. N` cross-references, appendix of every mechanic in her chart, colophon | `lib/deliver/handlers.js` -> `lib/pdf/build.js` (page-map fixed point, ship-blocking) + `lib/card/cardData.js` (full, with `appendix`) | **PAYWALL.** `row.paid === true`, flipped only in the verified Xendit webhook. Offered AFTER the reading, never in front of it |
 | Karier / Uang | **Nothing, and no capture either.** The "Segera" rows and `POST /api/reading/[id]/interest` are deleted with the domain concept - the domain is not a product (`CLAUDE.md` SUPERSEDED), and the pillars are the domains positionally | n/a | n/a. See THE DEFERRED REGISTER for the demand signal this costs |
@@ -125,6 +125,17 @@ failure mode the block exists to prevent, arriving from inside.
 
 **THE RULE FOR THIS BLOCK: it is updated in the SAME COMMIT as any funnel change.** A commit that
 changes what a user gets and does not touch this block is incomplete, and a reviewer should say so.
+
+**Honoured 2026-08-29 by the chart-early commit**, which is the first funnel change since this rule
+was written. It changes WHEN a reader receives the deterministic half of her reading, so the reading
+row above is amended in the same merge rather than after it. **What it does NOT change is what she
+ends up with** - the row's content list is unchanged, and the gate column is unchanged.
+
+**One open question is named here rather than argued in the merge: THE WAITING STATE.** A reader now
+looks at real facts plus a skeleton for ~18s instead of one static line for ~22s. Whether that reads
+as progress or as an unfinished page is a MEASURABLE UX question, not a matter of taste, and it is
+evaluated later on `reading_created` vs `mirror_served` and addressed through COPY if the data shows
+real abandonment. It is not a reason to hold the change.
 
 **Why it exists.** On 2026-08-13 a Cowork session argued a business-model question for two rounds
 without noticing that the model it was arguing against **was already live** — the fact was sitting in

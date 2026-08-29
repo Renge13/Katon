@@ -210,6 +210,28 @@ export default function Funnel() {
       setError(readableError(created)); setSeason(null); setPhase('input'); return;
     }
 
+    // ── THE CHART GOES UP NOW. THE PROSE ARRIVES UNDER IT. ──
+    //
+    // `POST` returns the deterministic block with the token, so her four pillars,
+    // element bars, 胎元 and her archetype's NAME are on screen before the render
+    // starts. None of those are the model's work - rule 14 puts every fact in the
+    // engine - and she used to wait p50 7.6s (up to ~23s at three attempts) with a
+    // single static line of copy for facts that already existed.
+    //
+    // `pending` is what the reading renders a wordless skeleton for. NO COPY:
+    // Reyner ruled 2026-08-26 that the loading words are written against what is
+    // actually on screen, after this ships. The old anticipation lines describe
+    // work she can now watch being already done.
+    setReading({
+      token: created.token, chart: created.chart, blocks: [], penutup: '',
+      pending: true, birthDate, gender: form.gender || null,
+    });
+    // Bookmarkable without remounting: swap the URL via history.pushState, NOT
+    // router.push, which would mount the /r route and discard this state.
+    if (typeof window !== 'undefined') window.history.pushState(null, '', `/r/${created.token}`);
+    setSeason(null);
+    setPhase('result');
+
     const served = await fetch(`/api/mirror/${created.token}`).then((r) => r.json());
     if (served.error || !served.token) {
       setError(readableError(served)); setSeason(null); setPhase('input'); return;
@@ -218,12 +240,11 @@ export default function Funnel() {
     // birthDate is kept CLIENT-SIDE for the card footer. The serve payload does not
     // carry it - lib/mirror/view.js builds the free card with `birthDate: null` so
     // no birth data leaves the server on the free path.
+    //
+    // The full payload carries `chart` under the same key POST did, from the same
+    // `mirrorChartView`, so this merge replaces it with an identical object rather
+    // than reconciling two shapes.
     setReading({ ...served, birthDate, gender: form.gender || null });
-    // Bookmarkable without remounting: swap the URL via history.pushState, NOT
-    // router.push, which would mount the /r route and discard this state.
-    if (typeof window !== 'undefined') window.history.pushState(null, '', `/r/${created.token}`);
-    setSeason(null);
-    setPhase('result');
   }
 
   async function onSubmit(e) {
@@ -609,6 +630,22 @@ function Reading({ reading, onReset, initialStage }) {
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: el.mid }} /> {element}{chart?.day_master?.stem ? ` · ${chart.day_master.stem}` : ''}
         </div>
       </Reveal>
+
+      {/* THE PROSE, OR THE SPACE IT IS ABOUT TO OCCUPY.
+          Wordless on purpose - see .k-skel in globals.css and the ruling behind
+          it. The bar widths are uneven so the block reads as paragraphs rather
+          than as a progress meter, which would imply a completion it cannot
+          know. `aria-hidden` with a polite live region carrying nothing: a screen
+          reader is told the reading is loading by the region appearing, not by a
+          decorative bar it would otherwise read as content. */}
+      {reading.pending && (
+        <div style={{ marginTop: 34 }} aria-busy="true">
+          {[[38, 92], [0, 100], [0, 86], [0, 64]].map(([mt, w], i) => (
+            <div key={i} aria-hidden="true" className="k-skel"
+              style={{ height: 13, width: `${w}%`, marginTop: i ? 12 : mt }} />
+          ))}
+        </div>
+      )}
 
       {/* the reading */}
       {(reading.blocks || []).map((b, i) => (
