@@ -600,7 +600,8 @@ design area while losing the surrounding field.
 
 Card A and Card B **are allowed to have different outer dimensions**, and now do. Family resemblance
 is carried by the DESIGN SYSTEM, not by shared geometry: typography, visual hierarchy, colour
-language, illustration treatment, seal and brand elements, borders and corners, spacing character,
+language, illustration treatment, seal and brand elements (**as shared VOCABULARY - the seal itself
+is Card B's and Card A carries none**), borders and corners, spacing character,
 Katon branding. **Do not distort or constrain Card A to make it geometrically match Card B.**
 
 The 86.4 margin was Card A's ruled value, and §2's own note records that Card B merely CARRIES it for
@@ -610,7 +611,7 @@ relationship that no longer exists.
 
 ### What the design pass must re-evaluate
 
-Headline hierarchy and wrapping; illustration scale and placement; seal placement; whitespace;
+Headline hierarchy and wrapping; illustration scale and placement; whitespace;
 information density; footer and `KATON.APP` placement; the relationship between the visual focal point
 and the text; overall balance within 4:5; and **how the composition reads at a glance in a feed.**
 The result should feel intentional at 1080x1350, not like a crop of the previous card.
@@ -661,8 +662,14 @@ to Card A any more, and the docblock must say which card it is talking about.
 1. **OUTER GEOMETRY** - 1080x1350, square opaque edges, no mat, no rim, no shadow.
 2. **SURFACE** - retain the gradient concept; refine it to read as subtle materiality and depth
    rather than an object floating on a canvas.
-3. **COMPOSITION** - reflow headline, illustration, seal, information hierarchy, whitespace, footer
-   and `KATON.APP`, and the overall focal point. **Do not mechanically stretch the old composition.**
+3. **COMPOSITION** - reflow headline, illustration, information hierarchy, whitespace, footer and
+   `KATON.APP`, and the overall focal point. **Do not mechanically stretch the old composition.**
+
+**THE SEAL IS NOT IN THAT LIST, AND ITS ABSENCE IS RULED.** The foil seal is CARD B's, part of what
+is paid for, exactly like the rim. Two drafts of this section and of `card-a-4x5-worksheet.md`
+listed "seal placement" among the things to re-evaluate; **both were wrong and both are corrected**,
+because a stale line in a worksheet is one careless read away from becoming a specification. Reyner,
+2026-08-29: the no-seal ruling stays binding and Card B keeps its own seal treatment untouched.
 
 The measured budget for step 3, from `npm run preview:cards` (`4bf3ca5`): **+19.1% width, +6.6%
 height, +26.9% area, ratio 0.716 -> 0.800. The horizontal gain is 2.9x the vertical**, so a reflow

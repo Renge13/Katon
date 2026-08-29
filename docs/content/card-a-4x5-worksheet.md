@@ -98,8 +98,10 @@ absorbed all of it. On the new frame the extra width helps here more than anywhe
    materiality and depth. Three stops stepping AWAY from the ink, deliberately shallow, because an
    earlier rule ran the field to near-black and swept one archetype's gradient through another's
    flat field. That constraint still binds whatever intensity you choose.
-3. **COMPOSITION** — headline, illustration, seal placement, hierarchy, whitespace, footer and
-   `KATON.APP`, and the archetype-specific variations above.
+3. **COMPOSITION** — headline, illustration, hierarchy, whitespace, footer and `KATON.APP`, and
+   the archetype-specific variations above. **NOT the seal: Card A has none, and the no-seal ruling
+   is binding.** An earlier draft of this line said "seal placement" and was wrong; it is corrected
+   here so it cannot become an implementation instruction by being read literally.
 
 **Ship the composition as its own change** so all ten can be reviewed together in
 `npm run preview:cards` before the export implementation lands.
