@@ -86,8 +86,10 @@ export async function POST(request, { params }) {
 
   const sku = body?.sku ?? DEFAULT_SKU;
   if (!isSellable(sku)) {
-    // `compat` lands here on purpose until Prompt E ships its pair-layer engine:
-    // it is priced but has nothing to deliver.
+    // `compat` AND `annual` land here on purpose: both are priced (the ladder
+    // ruled 2026-08-29) and neither is built, so neither has anything to deliver.
+    // September's demand test SHOWS both prices and records interest; showing a
+    // price must never create a checkout. See lib/pricing.js SELLABLE_SKUS.
     return badRequest(`sku must be one of: ${SELLABLE_SKUS.join(', ')}`);
   }
 

@@ -41,6 +41,7 @@
     "test:pillars": "node --test tests/time-convention.spec.ts",
     "test:birth-time-input": "node --test tests/birth-time-input.spec.mjs",
     "test:card": "node --test tests/card.spec.mjs",
+    "test:pricing": "node --test tests/pricing.spec.mjs",
     "test:app-fonts": "node --test tests/app-fonts.spec.mjs",
     "preview:cards": "node scripts/card-preview.mjs",
     "measure:card-tags": "node scripts/measure-card-tags.mjs",
