@@ -206,6 +206,30 @@ error 20's gap is closed at the source rather than at the symptom.**
    belongs in `docs/` or `CLAUDE.md` before the turn ends. If it only describes where one conversation
    got to, it is session state and it belongs in the handover, where going stale costs nothing.
 
+### A RULED DECISION IS NOT REOPENED BY A TECHNICAL FACT (Reyner, 2026-08-29)
+
+**Distinguish a ruled product or design decision from a technical implementation fact, and never let
+the second silently overturn the first.**
+
+When technical reality conflicts with a ruling: **surface the conflict once, state the
+implementation consequence, and preserve the ruling** unless implementing it is genuinely impossible
+or unsafe. Then adapt the implementation.
+
+**An existing implementation constraint is not an argument for reversing a product decision.** The
+code preferring the old shape is a cost, not a veto.
+
+The worked example, from the day this was ruled:
+
+| | |
+|---|---|
+| **Rule** | Card A is 1080x1350 |
+| **Fact** | the capture code assumes 1080x1440, and four assertions in `tests/card.spec.mjs` encode the old geometry - one of them written specifically to make a 4:5 reversal fail |
+| **Correct action** | adapt the capture, invert the assertion, record all three dates in its comment |
+| **Wrong action** | reopen 1080x1350 because the current code prefers 1080x1440 |
+
+**Surface it ONCE.** Raising the same constraint a second time, in new words, is reopening the
+ruling by attrition. If it was answered, it is answered.
+
 ---
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
