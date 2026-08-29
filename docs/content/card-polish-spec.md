@@ -578,7 +578,7 @@ reframe.
 
 **AMENDED 2026-08-29, SAME DAY, BECAUSE THE FIRST DRAFT OF THIS SECTION OVERSTATED THE CROP.** This
 section originally argued that the current export depends on the receiving platform preserving it.
-**Measured, `ace69cc`, panel 1 of the recomposition preview: it does not.** A 4:5 centre crop of the
+**Measured, `4bf3ca5`, panel 1 of the recomposition preview: it does not.** A 4:5 centre crop of the
 1080x1440 canvas removes 45px from the top and bottom; the mat is 86.4px; **45 < 86.4, so the crop
 never reaches the object.** The card survives a feed crop intact and it always has.
 
@@ -664,7 +664,7 @@ to Card A any more, and the docblock must say which card it is talking about.
 3. **COMPOSITION** - reflow headline, illustration, seal, information hierarchy, whitespace, footer
    and `KATON.APP`, and the overall focal point. **Do not mechanically stretch the old composition.**
 
-The measured budget for step 3, from `npm run preview:cards` (`ace69cc`): **+19.1% width, +6.6%
+The measured budget for step 3, from `npm run preview:cards` (`4bf3ca5`): **+19.1% width, +6.6%
 height, +26.9% area, ratio 0.716 -> 0.800. The horizontal gain is 2.9x the vertical**, so a reflow
 that spends the new room on vertical rhythm is spending room that is not there.
 
