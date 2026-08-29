@@ -571,10 +571,27 @@ not preserve 907x1267 geometry for historical consistency.
 
 **Card A is a shareable identity artifact, not a document screenshot.** Its distribution surfaces are
 Instagram, Threads, Facebook groups and messaging. The canonical asset is therefore designed natively
-for a social-feed format rather than composed on a taller canvas in the hope the receiving platform
-preserves it.
+for a social-feed format rather than composed on a taller canvas and then handed to a platform to
+reframe.
 
 **The card itself is the exported asset. No mat, no workaround, no dependence on cropping behaviour.**
+
+**AMENDED 2026-08-29, SAME DAY, BECAUSE THE FIRST DRAFT OF THIS SECTION OVERSTATED THE CROP.** This
+section originally argued that the current export depends on the receiving platform preserving it.
+**Measured, `ace69cc`, panel 1 of the recomposition preview: it does not.** A 4:5 centre crop of the
+1080x1440 canvas removes 45px from the top and bottom; the mat is 86.4px; **45 < 86.4, so the crop
+never reaches the object.** The card survives a feed crop intact and it always has.
+
+**What the crop destroys is the UNIFORMITY of the mat, which was the mat's entire justification.**
+86.4 is not a taste value - `tests/card.spec.mjs:67` derives it as the only number satisfying the
+3:4 canvas and the 63:88 object at once. After a feed crop it is 86.4 left and right against 41.4
+top and bottom, **a 2.09:1 asymmetry**. So the posted card is not a clipped card; it is a card in a
+frame that no longer means anything.
+
+**This is a weaker claim than the one it replaces and a better argument for the re-rule.** The mat is
+not protecting the object - it is failing to be uniform, at the exact moment anyone sees it. The
+ruling is unchanged; only the reasoning is corrected, and it is corrected here rather than left to be
+rediscovered by whoever next checks the arithmetic.
 
 1080x1350 is larger in BOTH dimensions than the 907x1267 it replaces, so the recomposition gains
 design area while losing the surrounding field.
