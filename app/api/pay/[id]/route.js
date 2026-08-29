@@ -1,6 +1,7 @@
 import { getReading, setInvoice } from '@/lib/readingStore';
 import { createQrisInvoice } from '@/lib/xendit';
 import { priceFor, isSellable, DEFAULT_SKU, SELLABLE_SKUS } from '@/lib/pricing';
+import { recordEvent } from '@/lib/analytics/events';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
 import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
 import { readingUrl } from '@/lib/site/baseUrl';
@@ -116,6 +117,14 @@ export async function POST(request, { params }) {
     // The sku is stored with the invoice so the webhook can verify the settled
     // amount against THIS product's price rather than against any known price.
     await setInvoice(id, { invoiceId, waNumber, sku });
+
+    // COUNTED AFTER THE INVOICE EXISTS, never before. An attempt that failed to
+    // create an invoice is not a started checkout, and counting one would inflate
+    // the "started but not confirmed" gap with events that never reached Xendit.
+    // `sku` only - no amount, because the amount is derivable from the sku and the
+    // tier, and a second copy of a price is a second thing to keep in sync.
+    await recordEvent(id, 'checkout_started', { sku });
+
     return json({ ok: true, pending: true, invoiceUrl });
   } catch (e) {
     if (e.code === 'not_configured' && devBypassAllowed()) {

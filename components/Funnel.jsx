@@ -38,6 +38,31 @@
 import { useEffect, useRef, useState } from 'react';
 import { CardA, CardB, CARD_A } from './cards/Card.js';
 import { downloadCard } from './cards/exportCards.js';
+
+/**
+ * Fire one funnel counter. FIRE AND FORGET, DELIBERATELY.
+ *
+ * Four of the eight events happen only in the browser, so they need a request of
+ * their own. This one is never awaited for correctness and its failure is
+ * swallowed: a counter may not delay a download, block a render, or surface an
+ * error to a reader. `keepalive` so the card-download event survives the page
+ * being navigated away from immediately after.
+ *
+ * The server refuses any event name outside the client-fireable four - see
+ * `recordMirrorEvent`. This function does not need to know that list; it just
+ * must not be relied upon.
+ */
+function fireEvent(token, event) {
+  if (!token) return;
+  try {
+    fetch(`/api/mirror/${token}/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch { /* a counter never breaks the page */ }
+}
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
 import { formatIdr } from '../lib/site/format.js';
@@ -716,7 +741,7 @@ function Reading({ reading, onReset, initialStage }) {
       {cardData && (
         <Section eyebrow="Simpan sebagai kartu" style={{ marginTop: 52 }}>
           <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>Satu kartu ringkas tentang dirimu, untuk disimpan atau dibagikan.</p></Reveal>
-          <ShareCardA data={cardData} />
+          <ShareCardA data={cardData} token={reading.token} />
         </Section>
       )}
 
@@ -768,13 +793,18 @@ function formatCardDate(iso) {
  * it - and an auto-crop takes the top and bottom of a card whose headline is at the
  * top and whose seal is at the bottom.
  */
-function ShareCardA({ data }) {
+function ShareCardA({ data, token }) {
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   async function save() {
     setSaving(true); setFailed(false);
     try {
       await downloadCard('share', 'A', { id: 'card-a', filename: `katon-${(data.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
+      // COUNTED ONLY ON SUCCESS. A capture that threw produced no file, and the
+      // share-rate denominator must not include downloads that did not happen -
+      // this button shipped BLANK once (#74), which is exactly the failure a
+      // fire-on-click counter would have hidden behind a healthy-looking rate.
+      fireEvent(token, 'card_downloaded');
     } catch {
       setFailed(true);
     }
@@ -819,6 +849,19 @@ function ShareCardA({ data }) {
 function Offer({ reading, initialStage }) {
   // offer | pending | delivered
   const [stage, setStage] = useState(initialStage || 'offer');
+  // `offer_seen` FIRES WHEN THE OFFER IS ACTUALLY OFFERED, not when the component
+  // mounts in some other stage. A reader returning to a delivered reading is not
+  // being shown an offer, and counting her would inflate the denominator that
+  // artifact conversion divides by. The ref keeps a re-render from re-firing;
+  // the unique index would dedupe it anyway, but a counter that spams its own
+  // endpoint is still wrong.
+  const seenRef = useRef(false);
+  useEffect(() => {
+    if (seenRef.current) return;
+    if ((initialStage || 'offer') !== 'offer') return;
+    seenRef.current = true;
+    fireEvent(reading?.token, 'offer_seen');
+  }, [reading?.token, initialStage]);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [busy, setBusy] = useState(false);
   const pollRef = useRef(null);
