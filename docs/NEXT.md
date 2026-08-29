@@ -48,6 +48,14 @@ broken again. One thing is new and belongs here: **a queued prompt is not necess
 one.** Q's commit 0 edits `CLAUDE.md` and needs Reyner's word, so the pointer has to carry the
 release state and not just the name. A pointer that says only "prompt Q is next" invites a session to
 start it. The heading says DO NOT START IT for that reason.
+
+2026-08-29, third entry: prompt Q was RELEASED, and the pointer moved from QUEUED to CURRENT in the
+same pass that started it - the 08-07 rule working as intended for once. Two things are new, and both
+are about what a pointer must carry BEYOND a name. First, RELEASE STATE: "queued" and "released" are
+different, and the previous heading said DO NOT START IT precisely because a name on its own invites
+a start. Second, ORDERING AMONG APPROVED WORK: `M-tranche3.md` is approved, ruled and worthwhile, and
+it is NOT next. An approved prompt with no stated position is exactly what a later session picks up
+by default, so the chain it sits behind is now drawn explicitly rather than left to be inferred.
 -->
 
 # NEXT
@@ -58,8 +66,8 @@ start it. The heading says DO NOT START IT for that reason.
    MEASUREMENTS (**read the 08-11 baseline row FIRST — a stored gate row is not a valid comparator
    for a later change**), and THE INTERIM STATE (Xendit go-live status — read it before touching
    anything near the paid path).
-3. `prompts/Q-demand-test.md` — **the queued build prompt. NOT RELEASED; see THE QUEUED WORK
-   below before touching it.** `prompts/M-tranche3.md` is queued behind it (commits 0 and 1
+3. `prompts/Q-demand-test.md` — **RELEASED and IN PROGRESS; see THE CURRENT WORK below.**
+   `prompts/M-tranche3.md` is behind it AND behind the whole Card A chain (commits 0 and 1
    docs-only, **commits 2 to 4 touch `glossary.json` and `facts.js`**, and those now also have to
    clear `tests/card-budget.spec.mjs` — Card B has 7px of slack and a glossary edit can spend it;
    `spouse_palace` and `kekuatan` do not reach the card, so tranche 3 as scoped is clear).
@@ -110,12 +118,40 @@ Two DEFERRED REGISTER rows were opened by this work and both are Reyner's: the r
 that a key EXISTS and never that it WORKS, and preview verification now costs real renders. Neither
 is a task waiting here.
 
-## THE QUEUED WORK, 2026-08-29 - PROMPT Q. **DO NOT START IT.**
+## THE CURRENT WORK, 2026-08-29 - PROMPT Q, RELEASED AND STARTED
 
-**`docs/prompts/Q-demand-test.md`, committed `cf349ea`. QUEUED, NOT RELEASED.** Reyner has not
-released it, and **its COMMIT 0 EDITS `CLAUDE.md`** - the price band 25-45k -> 25-49k, and rule 15's
-stale status sentence - which needs his word before a line of it runs. A session that reads "queued"
-as "start" has misread this heading.
+**`docs/prompts/Q-demand-test.md` is RELEASED** (Reyner, 2026-08-29) and in progress on
+`feat/demand-test`. Its commit 0 was the authorised `CLAUDE.md` edit - band 25-45k -> **25-49k**,
+and rule 15 trading its stale status sentence for a pointer to the live register.
+
+**It runs IN PARALLEL with the Card A design pass and does not wait on it.**
+
+### THE ORDER OF EVERYTHING ELSE, so nothing is picked up out of turn
+
+```
+prompt Q (instrumentation)  ──┐
+                              ├── both run now, neither blocks the other
+Card A design pass  ──────────┘
+        |
+        v
+   prompt R (Card A implementation + export)   <- DOES NOT EXIST YET
+        |
+        v
+   export validation on the real social surfaces
+        |
+        v
+   September traffic
+```
+
+**`docs/prompts/M-tranche3.md` SITS BEHIND ALL OF IT.** Approved and worthwhile, ruled 2026-08-22,
+and **NOT September critical path.** It must not block, delay or interleave with prompt Q, the Card A
+design pass, prompt R, export validation or traffic. **It is not the next thing** - a session looking
+for work takes it only when the chain above is done or explicitly parked, and this paragraph exists
+because a queued-and-approved prompt is exactly what a later session picks up by default.
+
+**PROMPT R DOES NOT EXIST AND CANNOT BE STARTED.** It is derived from the APPROVED COMPOSITION, which
+does not exist until Reyner's design pass produces it. Its input is
+`docs/content/card-a-4x5-worksheet.md`.
 
 The product authority is `product/paid-product-map.md` `## RULED 2026-08-29`, committed in the same
 `cf349ea`. **That section decides WHETHER; prompt Q is only HOW.** If they disagree, that one wins.
