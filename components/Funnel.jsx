@@ -36,7 +36,7 @@
 // ============================================================
 
 import { useEffect, useRef, useState } from 'react';
-import { CardA, CardB, CARD_A } from './cards/Card.js';
+import { CardA, CardB, CARD_A, exportSize } from './cards/Card.js';
 import { downloadCard } from './cards/exportCards.js';
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
@@ -135,7 +135,7 @@ function ScaledCard({ spec, max = CARD_SCALE, children }) {
   useEffect(() => {
     const el = box.current;
     if (!el) return undefined;
-    const fit = () => setK(Math.min(max, el.clientWidth / spec.canvas.w));
+    const fit = () => setK(Math.min(max, el.clientWidth / exportSize(spec).w));
     fit();
     // Not a window resize listener: the column also changes width when a
     // scrollbar appears, which fires no resize event.
@@ -144,7 +144,7 @@ function ScaledCard({ spec, max = CARD_SCALE, children }) {
     return () => ro.disconnect();
   }, [spec, max]);
   return (
-    <div ref={box} style={{ width: '100%', maxWidth: spec.canvas.w * max, height: spec.canvas.h * k, overflow: 'hidden' }}>
+    <div ref={box} style={{ width: '100%', maxWidth: exportSize(spec).w * max, height: exportSize(spec).h * k, overflow: 'hidden' }}>
       <div style={{ transform: `scale(${k})`, transformOrigin: 'top left' }}>{children}</div>
     </div>
   );

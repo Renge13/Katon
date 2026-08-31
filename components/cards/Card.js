@@ -107,6 +107,31 @@ const E = React.createElement;
 // `PADDING` stays 72, held absolute, so the inner measure goes 763 -> 936. The
 // frame grows 19.1% and the text measure grows 22.7%.
 export const CARD_A = { card: { w: 1080, h: 1350 } };
+
+/**
+ * THE SURFACE A CARD EXPORTS AS, for a spec that may or may not have a canvas.
+ *
+ * ── THIS EXISTS BECAUSE ITS ABSENCE SHIPPED A BROKEN PAGE ──
+ * Prompt R commit 1 removed `CARD_A.canvas`, and R says to find every consumer
+ * before editing the constant because "a grep is cheaper than a runtime surprise".
+ * The prescribed grep - for `CARD_A.canvas` - CANNOT REACH THE CONSUMERS THAT
+ * MATTER, because they take the spec as an argument and read `spec.canvas`:
+ *
+ *   components/cards/exportCards.js  captureSpec(kind, card)   caught by a test
+ *   components/Funnel.jsx            <ScaledCard spec={CARD_A}> CAUGHT IN A BROWSER
+ *
+ * The second threw `TypeError: Cannot read properties of undefined (reading 'w')`
+ * on the FREE READING PAGE while `npm test` reported 30/30, because no test can
+ * render that component - it is JSX behind `'use client'`, and plain `node --test`
+ * cannot parse it.
+ *
+ * So the fix is not another grep. Every consumer asks THIS function instead of
+ * destructuring, `tests/card.spec.mjs` forbids the direct read, and a spec without
+ * a canvas answers with its card rather than with `undefined`.
+ */
+export function exportSize(spec) {
+  return spec.canvas ?? spec.card;
+}
 // `padY` — CARD B ONLY, and it is the largest single item in the 2026-08-26
 // spacing reclaim. See RECLAIMED_B for the whole ledger and the measurement.
 //
@@ -1066,7 +1091,7 @@ function Canvas({ spec, token, scale, stem, foil, rimId, id, watermarkOffset, ch
   // So the two boxes remain and become the same size. The outer one draws no
   // visible pixel of its own: the object covers it exactly, opaquely, with square
   // corners, which is what "full-bleed, no mat" means in a two-box DOM.
-  const canvas = spec.canvas ?? card;
+  const canvas = exportSize(spec);
   const bleeds = !spec.canvas;
   const px = (n) => n * scale;
   const ground = `linear-gradient(168deg, ${GRADIENT_STOPS.map((s, i) =>

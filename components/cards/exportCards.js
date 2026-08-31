@@ -47,7 +47,7 @@
 // ============================================================
 
 import { toPng } from 'html-to-image';
-import { CARD_A, CARD_B, OBJECT_ID_SUFFIX } from './Card.js';
+import { CARD_A, CARD_B, OBJECT_ID_SUFFIX, exportSize } from './Card.js';
 
 /** @typedef {'share'|'download'} CaptureKind */
 
@@ -72,7 +72,7 @@ export function captureSpec(kind, card, id = card === 'A' ? 'card-a' : 'card-b')
   // of `CARD_A.canvas` before editing the constant; this one reads `spec.canvas`
   // through an alias, so no grep for `CARD_A.canvas` reaches it. Recorded because
   // the next session will be told to grep for the same thing.
-  const canvas = spec.canvas ?? spec.card;
+  const canvas = exportSize(spec);
   if (kind === 'share') {
     return {
       kind, card,

@@ -35,7 +35,7 @@ import {
   AA_EXEMPT, DIM_EXEMPT, SHEEN_EXEMPT, sheenCss, sheenGrounds,
   GRADIENT_STOPS, stepAway, CARD_B_BADGE_LIMIT, MAX_LABEL_MEANING,
   RADIUS, PADDING, splitName, brassTextFor, brassTextFallbacks,
-  HEADLINE_SIZE, HEADLINE_OVERFLOW_FACTOR, HEADS_THAT_OVERFLOW,
+  HEADLINE_SIZE, HEADLINE_OVERFLOW_FACTOR, HEADS_THAT_OVERFLOW, exportSize,
   WATERMARK_FILL, OBJECT_ID_SUFFIX,
 } from '../components/cards/Card.js';
 import { HAN_GLYPHS, HAN_FAMILY } from '../lib/card/hanFont.js';
@@ -751,6 +751,41 @@ test('THE KICKER IS A LEADING ARTICLE, not the first word (甲 vs 癸)', () => {
   // stays in the code for a future name that genuinely overflows" is a comment
   // about code that no longer does anything.
   assert.equal(HEADLINE_OVERFLOW_FACTOR, 0.80, 'the reduction itself is unchanged');
+});
+
+test('NOBODY READS `.canvas` OFF A SPEC DIRECTLY - they ask exportSize()', () => {
+  // ── THIS TEST EXISTS BECAUSE ITS ABSENCE SHIPPED A BROKEN PAGE ──
+  // Prompt R commit 1 removed `CARD_A.canvas`. Two consumers read it through an
+  // ALIAS - `spec.canvas` - so no grep for `CARD_A.canvas` reached them.
+  // `exportCards.js` was caught by a test. `components/Funnel.jsx`'s <ScaledCard>
+  // was not, and threw `Cannot read properties of undefined (reading 'w')` on the
+  // FREE READING PAGE while `npm test` reported 30/30 - because that file is JSX
+  // behind 'use client' and plain `node --test` cannot render it.
+  //
+  // So this guards by SOURCE, which is the only instrument that reaches a file the
+  // suite cannot execute. It is a weaker kind of check than a render, and it is
+  // the strongest one available here.
+  const files = ['components/Funnel.jsx', 'components/cards/exportCards.js'];
+  for (const rel of files) {
+    const src = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    const code = src.split('\n')
+      .filter((l) => !l.trim().startsWith('//') && !l.trim().startsWith('*'))
+      .join('\n');
+    assert.ok(!/\bspec\.canvas\b/.test(code),
+      `${rel} reads spec.canvas directly. Card A has no canvas; use exportSize(spec).`);
+    assert.ok(!/\bCARD_A\.canvas\b/.test(code),
+      `${rel} reads CARD_A.canvas, which does not exist.`);
+  }
+});
+
+test('exportSize answers for a spec with a canvas and one without', () => {
+  assert.deepEqual(exportSize(CARD_A), { w: 1080, h: 1350 },
+    'Card A has no canvas: its card IS the export surface');
+  assert.deepEqual(exportSize(CARD_B), CARD_B.canvas,
+    'Card B still exports at its canvas, unchanged');
+  // The failing shape, stated: without the fallback this is `undefined`, and every
+  // caller that reaches for `.w` on it throws.
+  assert.notEqual(exportSize(CARD_A), undefined);
 });
 
 test('§0a THE FIT GATE STILL FIRES, on a head that is pinned as overflowing', () => {
