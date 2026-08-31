@@ -177,16 +177,32 @@ before trusting this line. Its commit 0 was the authorised `CLAUDE.md` edit - ba
 2. **THE MIGRATION.** `supabase/migrations/0009_demand_test.sql` is applied by hand in the SQL editor
    and must run BEFORE the code that reads it deploys (repo convention). Nothing in CI checks this.
 
-### ONE THING IS UNVERIFIED AND IT IS NOT A RULING, IT IS A MEASUREMENT
+### THE UNVERIFIED ITEM IS CLOSED, 2026-08-31 - THE OBSERVER WAS OBSERVED
 
 `upcoming_seen` fires on an IntersectionObserver rather than on mount, because prompt Q section 3
 defines both interest rates as interest / `upcoming_seen` so that a reader who never scrolled to the
-block stays out of the denominator. **The held-back-on-mount half is proven locally** (a fresh mobile
-load fires exactly one event, `offer_seen`, and no `upcoming_seen`). **The fires-when-scrolled half is
-NOT proven:** the browser pane runs with `document.visibilityState === "hidden"`, where an
-IntersectionObserver does not deliver. Confirm it on the preview before any read-out number that
-divides by `upcoming_seen` is treated as evidence. If it is wrong, both interest rates read as
-infinity or as zero, and neither looks like a bug in a table.
+block stays out of the denominator. This entry previously said the firing half was **NOT proven** and
+sent the reader to the preview, because the agent browser pane runs with
+`document.visibilityState === "hidden"` and a hidden tab never delivers an IntersectionObserver
+callback.
+
+**It did not need the preview.** Driven through real headless Chromium over the DevTools Protocol -
+no new dependency, Node 24 has a global `WebSocket` - at a 375x812 phone viewport, both halves land in
+ONE run: absent at load with the block 4551px below the fold, present exactly once after the scroll,
+and not again on re-entry. `offer_seen` firing in the same run is what makes the absence mean the
+observer held back rather than the transport being broken.
+
+- Harness: `scripts/verify-upcoming-seen.mjs` (`npm run verify:upcoming`, needs `npm run dev`)
+- Measurement: `docs/qa/2026-08-31-upcoming-seen-observed.md`
+
+**The harness was shown failing first and it caught a defect in itself:** its "fired exactly once
+after scroll" check counted the total at the end, which is 1 whether the event fires on mount or on
+scroll, so it PASSED on a deliberately mount-firing build. It now snapshots the count immediately
+before the scroll. That is the 2026-08-26 shape appearing inside the very file written to catch it.
+
+**Still not established, and it is smaller but not zero:** production. This ran against a dev server
+on localhost, below a floored reading rather than a rendered one. Neither difference touches the
+observer, and neither has been measured.
 
 **It runs IN PARALLEL with the Card A design pass and does not wait on it.**
 

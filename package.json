@@ -33,6 +33,7 @@
     "test:stage6": "node --conditions=react-server --test tests/stage6-validation.spec.mjs",
     "test:mirror": "node --conditions=react-server --test tests/mirror-route.spec.mjs",
     "test:deliver": "node --conditions=react-server --test tests/deliver-route.spec.mjs",
+    "verify:upcoming": "node scripts/verify-upcoming-seen.mjs",
     "readout:demand": "node --env-file-if-exists=.env.local --conditions=react-server scripts/demand-readout.mjs",
     "test:readout": "node --test tests/demand-readout.spec.mjs",
     "test:interest": "node --conditions=react-server --test tests/interest-route.spec.mjs",
