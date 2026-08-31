@@ -40,6 +40,12 @@ import { mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+// THE BANK, NOT A COPY OF IT. This harness originally hard-coded the placeholder
+// text it searched for, and the moment Reyner ruled the eleven strings it stopped
+// finding the block - a verification script that silently stops verifying. Reading
+// the same object the component renders makes that drift impossible.
+import { UPCOMING_COPY } from '../lib/site/copy.js';
+
 const argv = process.argv.slice(2);
 const flag = (n, d = null) => { const i = argv.indexOf(`--${n}`); return i === -1 ? d : argv[i + 1]; };
 const BASE = flag('base', 'http://localhost:3000');
@@ -183,7 +189,7 @@ try {
   let ready = false;
   for (let i = 0; i < 80 && !ready; i += 1) {
     ready = await cdp.eval(`!!document.body.innerText && !![...document.querySelectorAll('button')]
-      .find(b => b.textContent.includes('ajakan untuk diberi tahu'))`);
+      .find(b => b.textContent.includes(${JSON.stringify(UPCOMING_COPY.interestCta)}))`);
     if (!ready) await sleep(250);
   }
   if (!ready) throw new Error('the upcoming block never rendered');
@@ -198,7 +204,7 @@ try {
   await sleep(1200);
 
   const geom = await cdp.eval(`(() => {
-    const el = [...document.querySelectorAll('div')].find(d => d.textContent.startsWith('@@UNRULED: eyebrow'));
+    const el = [...document.querySelectorAll('div')].find(d => d.textContent.startsWith(${JSON.stringify(UPCOMING_COPY.eyebrow)}));
     const b = el.getBoundingClientRect();
     return JSON.stringify({ top: Math.round(b.top), h: Math.round(b.height), vh: window.innerHeight, scrollY: Math.round(window.scrollY) });
   })()`);
@@ -221,7 +227,7 @@ try {
   // before-and-after makes this check discriminate on its own.
   const beforeScroll = fired.filter((f) => f.event === 'upcoming_seen').length;
   await cdp.eval(`(() => {
-    const el = [...document.querySelectorAll('div')].find(d => d.textContent.startsWith('@@UNRULED: eyebrow'));
+    const el = [...document.querySelectorAll('div')].find(d => d.textContent.startsWith(${JSON.stringify(UPCOMING_COPY.eyebrow)}));
     el.scrollIntoView({ block: 'center' });
     return true;
   })()`);
@@ -239,7 +245,7 @@ try {
   await cdp.eval('window.scrollTo(0, 0); true');
   await sleep(400);
   await cdp.eval(`(() => {
-    const el = [...document.querySelectorAll('div')].find(d => d.textContent.startsWith('@@UNRULED: eyebrow'));
+    const el = [...document.querySelectorAll('div')].find(d => d.textContent.startsWith(${JSON.stringify(UPCOMING_COPY.eyebrow)}));
     el.scrollIntoView({ block: 'center' });
     return true;
   })()`);

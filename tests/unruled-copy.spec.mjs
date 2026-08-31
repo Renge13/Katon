@@ -1,9 +1,15 @@
 // ============================================================
 // tests/unruled-copy.spec.mjs — the stub is allowed to exist, not to ship
 // ============================================================
-// Prompt Q commit 4. `UPCOMING_COPY` ships with every value stubbed because
+// Prompt Q commit 4 shipped `UPCOMING_COPY` with every value stubbed, because
 // Reyner rules Indonesian register and had not ruled this block, and holding the
 // commit would have blocked commits 5 and 6 behind a wording decision.
+//
+// HE RULED ALL ELEVEN ON 2026-08-31 AND EVERY ASSERTION HERE STAYED GREEN, which
+// is what the section below predicted and the reason it was built that way. The
+// file did not need editing to survive the event it exists for; one test was ADDED
+// (PENDING still stamps a catchable sentinel), because passing is exactly the
+// state in which a gate gets deleted as dead scaffolding.
 //
 // ── WHAT THIS FILE IS ACTUALLY ASSERTING ──
 // NOT "the copy is correct" - nobody can assert that until Reyner rules it. It
@@ -36,7 +42,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { UPCOMING_COPY } from '../lib/site/copy.js';
+import { UPCOMING_COPY, PENDING } from '../lib/site/copy.js';
 import { scanUnruled, SENTINEL } from '../scripts/check-unruled-copy.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -60,6 +66,19 @@ test('the detector finds a sentinel at any depth', () => {
   }, 'X');
   assert.equal(found.length, 2, 'should find both, including the one inside the array');
   assert.deepEqual(found.map((f) => f.path).sort(), ['X.a', 'X.d[1]']);
+});
+
+test('PENDING still produces a sentinel the detector catches', () => {
+  // THE GATE MUST SURVIVE ITS OWN SUCCESS. With all eleven slots ruled, nothing
+  // calls PENDING and the strict gate passes - which is exactly the state in which
+  // someone deletes both as dead scaffolding. The ruling's step 5 forbids that:
+  // they are the gate for the NEXT unruled string. A green gate that no longer
+  // works is indistinguishable from a green gate that does, so this asserts the
+  // mechanism end to end rather than trusting the silence.
+  const stub = PENDING('a future unruled slot');
+  assert.ok(stub.includes(SENTINEL), 'PENDING must still stamp the sentinel');
+  const found = scanUnruled({ someFutureBank: { slot: stub } }, 'X');
+  assert.deepEqual(found.map((f) => f.path), ['X.someFutureBank.slot']);
 });
 
 test('the detector is silent on copy that carries no sentinel', () => {
