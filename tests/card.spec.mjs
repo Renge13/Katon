@@ -771,8 +771,12 @@ test('NOBODY READS `.canvas` OFF A SPEC DIRECTLY - they ask exportSize()', () =>
     const code = src.split('\n')
       .filter((l) => !l.trim().startsWith('//') && !l.trim().startsWith('*'))
       .join('\n');
-    assert.ok(!/\bspec\.canvas\b/.test(code),
-      `${rel} reads spec.canvas directly. Card A has no canvas; use exportSize(spec).`);
+    // PROPERTY READS ONLY. `!spec.canvas` and `spec.canvas ? ... :` are EXISTENCE
+    // checks - they are how a consumer asks "does this card have a mat", which is
+    // a legitimate question and cannot throw. What throws is reaching THROUGH the
+    // undefined for a dimension, so that is what is forbidden.
+    assert.ok(!/\bspec\.canvas\s*\./.test(code),
+      `${rel} reads a property off spec.canvas. Card A has no canvas; use exportSize(spec).`);
     assert.ok(!/\bCARD_A\.canvas\b/.test(code),
       `${rel} reads CARD_A.canvas, which does not exist.`);
   }
@@ -1148,13 +1152,27 @@ test('§8.11 TWO EXPORT TARGETS: share is the canvas, download is the object', (
     // THIS TEST WAS NOT IN R'S LIST OF DYING ASSERTIONS. It broke at runtime, via
     // `exportCards.js` reading `spec.canvas` through an alias, which no grep for
     // `CARD_A.canvas` reaches.
-    const canvasDims = spec.canvas ?? spec.card;
+    const canvasDims = exportSize(spec);
     assert.equal(share.width, canvasDims.w);
     assert.equal(share.height, canvasDims.h);
-    assert.ok(!share.nodeId.endsWith(OBJECT_ID_SUFFIX), 'share must capture the canvas');
-    if (!spec.canvas) {
-      assert.equal(share.width, dl.width, 'Card A: share and download are one surface now');
-      assert.equal(share.height, dl.height);
+
+    if (spec.canvas) {
+      // CARD B keeps two genuinely different targets: the canvas with its field
+      // for sharing, the object stopping at the rim for keeping.
+      assert.ok(!share.nodeId.endsWith(OBJECT_ID_SUFFIX), 'share must capture the canvas');
+      assert.notEqual(share.height, dl.height, 'Card B: the two targets differ in size');
+    } else {
+      // ── CARD A: ONE ASSET, BOTH PATHS (prompt R commit 3) ──
+      // It has no field to keep and nothing to crop away, so the two kinds are the
+      // SAME descriptor rather than two that happen to agree. Asserted as deep
+      // equality: a difference that exists only in the code is one somebody later
+      // "fixes" in the wrong direction.
+      // `kind` still echoes which path asked, and is the ONLY field that may
+      // differ - it is a label on the request, not a property of the asset.
+      const asset = ({ kind: _kind, ...rest }) => rest;
+      assert.deepEqual(asset(share), asset(dl), 'Card A: share and download are one asset');
+      assert.ok(share.nodeId.endsWith(OBJECT_ID_SUFFIX),
+        'Card A captures the object - the canvas node only ever held a mat');
     }
 
     // DOWNLOAD: the object node, at the object's own size, and no field.
@@ -1162,17 +1180,25 @@ test('§8.11 TWO EXPORT TARGETS: share is the canvas, download is the object', (
     assert.equal(dl.height, spec.card.h);
     assert.ok(dl.nodeId.endsWith(OBJECT_ID_SUFFIX), 'download must capture the object');
 
-    // PNG WITH ALPHA, never JPEG: the object's 40px radius leaves four
-    // transparent corners and a JPEG would fill them with solid triangles.
+    // PNG on both, but for DIFFERENT REASONS since prompt R commit 3: Card B's
+    // 40px radius leaves four transparent corners that a JPEG would fill with
+    // solid triangles; Card A is square and fully opaque and has no alpha to
+    // preserve, so PNG there is pipeline consistency rather than a requirement.
     for (const s of [share, dl]) assert.equal(s.type, 'png');
-    // And nothing may set a background colour, which would fill those corners.
+    // And nothing may set a background colour, which would fill Card B's corners.
     for (const s of [share, dl]) assert.equal(s.style.backgroundColor, undefined);
 
     // CARD B'S DROP SHADOW is drawn outside the object bounds and would be
-    // clipped to a hard band. Dropped from the download, on both cards, so the
-    // contract is a property of the capture rather than of which card it got.
+    // clipped to a hard band, so it is dropped from the download.
     assert.equal(dl.style.boxShadow, 'none');
-    assert.equal(share.style.boxShadow, undefined, 'the share keeps the shadow - it has a canvas to sit on');
+    if (spec.canvas) {
+      assert.equal(share.style.boxShadow, undefined, 'the share keeps the shadow - it has a canvas to sit on');
+    } else {
+      // Card A has no canvas for a shadow to sit on and never had a shadow, so
+      // its single asset carries the same suppression on both paths. "The share
+      // keeps the shadow" was a statement about a mat, not about sharing.
+      assert.equal(share.style.boxShadow, 'none');
+    }
   }
   assert.throws(() => captureSpec('nope', 'A'), /Unknown capture kind/);
 
