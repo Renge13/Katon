@@ -198,7 +198,7 @@ prompt Q (instrumentation)  ──┐
 Card A design pass  ──────────┘
         |
         v
-   prompt R (Card A implementation + export)   <- DOES NOT EXIST YET
+   prompt R (Card A implementation + export)   <- RELEASED 2026-08-31, main 473aeb5
         |
         v
    export validation on the real social surfaces
@@ -213,9 +213,24 @@ design pass, prompt R, export validation or traffic. **It is not the next thing*
 for work takes it only when the chain above is done or explicitly parked, and this paragraph exists
 because a queued-and-approved prompt is exactly what a later session picks up by default.
 
-**PROMPT R DOES NOT EXIST AND CANNOT BE STARTED.** It is derived from the APPROVED COMPOSITION, which
-does not exist until Reyner's design pass produces it. Its input is
-`docs/content/card-a-4x5-worksheet.md`.
+**PROMPT R IS RELEASED, 2026-08-31.** ~~It does not exist and cannot be started; it is derived from the
+APPROVED COMPOSITION, which does not exist until Reyner's design pass produces it.~~ The design pass
+produced it. Reyner approved the composition and ruled section 0 in full on 2026-08-31, and
+`docs/prompts/R-card-a-4x5.md` is on `main` alone in `473aeb5`, landed before its own commit 1 per its
+header. **Nothing is owed on it.** Its input was `docs/content/card-a-4x5-worksheet.md`; its design
+authority is `card-polish-spec.md` §10.
+
+The struck sentence is kept because it was TRUE while it stood, and this file's whole design note is a
+record of pointers going stale without anyone noticing. It went stale here in a SEVENTH way, and it is
+a new one: **the pointer was right about the world and the world changed underneath it.** No rule was
+broken - no prompt was amended, no current work moved, nobody forgot a pass. A prohibition whose
+condition was "until Reyner produces X" simply had its condition met, and nothing in a repo fires when
+a person finishes a design. Rule, extended: **a prohibition written against a condition carries the
+condition in its own text**, so the next reader can check whether it still holds instead of obeying it
+on faith. This one did carry it, which is exactly why it could be checked and flipped rather than
+believed.
+
+**R IS RELEASED, NOT STARTED.** Its commit 1 is a gate change on what the card IS and lands alone.
 
 The product authority is `product/paid-product-map.md` `## RULED 2026-08-29`, committed in the same
 `cf349ea`. **That section decides WHETHER; prompt Q is only HOW.** If they disagree, that one wins.
