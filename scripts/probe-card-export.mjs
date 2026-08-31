@@ -129,9 +129,52 @@ const ARRANGEMENTS = [
   { key: 'scaled', render: CARD_SCALE, wrap: null, expect: 'refused', note: 'the pre-fix arrangement' },
 ];
 
+// ── THIS PROBE'S CARD A ROWS ENCODE THE MAT, WHICH NO LONGER EXISTS ──
+// Prompt R (2026-08-31) made Card A 1080x1350, full-bleed, opaque and square, and
+// collapsed its two export targets into one asset. Four of this file's assertions
+// are statements about the frame that removed:
+//
+//   4. "the share capture is the canvas, and 5px in from its corner is deep inside
+//      the 86.4px field margin"     - there is no field and no margin
+//   6. "the share's ink is the object, AT THE RULED MARGIN", inset by 86.4
+//                                    - the object is not inset from anything
+//      §7.3's "corners transparent, edge is rim not field"
+//                                    - Card A is opaque and square, and has no rim
+//   plus `SPEC.A.canvas` and `SPEC.A.margin`, which are now `undefined` and would
+//   throw on the first row rather than fail an assertion.
+//
+// IT REFUSES CARD A RATHER THAN GUESSING. A probe that runs against a superseded
+// model produces confident findings about a card nobody ships, which is worse than
+// no probe - and this repo has the precedent: `scripts/card-preview.mjs` threw with
+// a message naming the ruling, and that is how its §10 section got correctly
+// deleted instead of repaired into a picture of nothing.
+//
+// CARD B IS UNAFFECTED and every assertion here still holds for it. Reworking the
+// Card A rows against the new model is real work with a real question behind it -
+// what the raster claims even ARE for an opaque square card - and it is not
+// prompt R commit 4's subject.
+if (!CARD_A.canvas || typeof CARD_A.margin !== 'number') {
+  console.error(`
+probe:card-export REFUSES CARD A. Its Card A assertions describe the 63:88 object
+on a 3:4 mat, and prompt R replaced that with a 1080x1350 full-bleed opaque card:
+
+    CARD_A.canvas  ${JSON.stringify(CARD_A.canvas)}
+    CARD_A.margin  ${JSON.stringify(CARD_A.margin)}
+
+Assertions 4 and 6 test the field margin and the object inset; §7.3's raster claims
+test alpha corners and a rim. None of those is true of Card A any more.
+
+CARD B IS STILL PROBED and this run continues for it. To bring Card A back, rework
+its rows against the new model - one asset, opaque, square, ink from (0,0) - and
+say so in the header. Do not repair the old assertions.
+`);
+}
+/** Card B only while Card A's raster model is superseded. See the banner above. */
+const PROBED_CARDS = (!CARD_A.canvas || typeof CARD_A.margin !== 'number') ? ['B'] : ['A', 'B'];
+
 const cards = [];
 for (const stem of STEMS) {
-  for (const card of ['A', 'B']) {
+  for (const card of PROBED_CARDS) {
     for (const arr of ARRANGEMENTS) {
       const id = `probe-${card}-${arr.key}-${stem === '甲' ? 'jati' : 'permata'}`;
       const inner = renderToStaticMarkup(React.createElement(card === 'A' ? CardA : CardB,

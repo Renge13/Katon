@@ -40,6 +40,19 @@ elements, and a foil seal — so "paid" is legible at 100px tall.
 
 ## 2. Card A — 1a
 
+> **§10 IS NOW BUILT, 2026-08-31, by prompt R. This banner is no longer a warning about a coming
+> change; it describes the code as it stands.** `CARD_A` is `{ card: { w: 1080, h: 1350 } }` with no
+> canvas and no margin, the corners are square, the export is one asset, and the word-count headline
+> reduction is a measured real-fit gate. Two things this section could not know, both measured on the
+> new frame and recorded in `docs/qa/2026-08-31-head-fit.md` and `-watermark-fit.md`:
+>
+> - the inner measure is **936**, and the `0.815` factor must NOT come back. 936 is now
+>   `1080 - 2 x PADDING`; it was previously the denominator of a ratio off a different card. Same
+>   number, no relationship.
+> - `MOUNTAIN` measures **793.48px** and **overflowed the old 763 measure by 30.48px**, clipped by
+>   `overflow: hidden` on the live free card, while `MORNING` fit with 46px to spare and was the one
+>   being reduced. The old word-count rule was backwards in both directions.
+>
 > **PARTLY SUPERSEDED 2026-08-29 by `## 10. RULED 2026-08-29 — CARD A IS 1080x1350, AND THE CARD IS
 > THE EXPORT` at the bottom of this file. READ THE SCOPE BEFORE DISCARDING ANYTHING HERE.**
 >
@@ -489,6 +502,24 @@ that is still one of the five outstanding token decisions.
 ---
 
 ## 7. Export targets — two, not one
+
+> **SUPERSEDED FOR CARD A, 2026-08-31, by prompt R commit 3. STILL TRUE FOR CARD B.**
+>
+> **Card A has ONE export target now, not two.** This section's whole argument rests on the MAT: the
+> field is what makes a shared file feed-safe, and the download has to stop at the card edge to be
+> worth keeping. §10 removed the mat. Card A is 1080x1350, full-bleed and opaque, so there is no field
+> to include and nothing to crop away, and `captureSpec` returns **the same descriptor for both
+> kinds** — same node, same size, same options.
+>
+> **Two claims below are Card B's only and must not be read as general:**
+> - *"PNG with alpha, never JPEG"* — that reason is the 40px radius leaving four transparent corners.
+>   **Card A is square and fully opaque and has no alpha to preserve.** PNG stays for both, for
+>   pipeline consistency rather than for alpha.
+> - *"corners transparent, edge is rim not field"* (§7.3's raster claims) — Card A has no rim, no
+>   transparent corners and no field. `scripts/probe-card-export.mjs` now REFUSES Card A rather than
+>   testing it against this model, and says so when run.
+>
+> The 08-14 ruling is not reversed; its subject stopped existing on one of the two cards.
 
 The capture currently takes the **canvas** node, so the downloaded file carries the 86.4px field
 around the object. Ruled 2026-08-14: the download should stop at the card edge. That needs two
