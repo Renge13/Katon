@@ -24,6 +24,7 @@
     "test:pdf-appendix": "node --conditions=react-server --test tests/pdf-appendix.spec.mjs",
     "test:pdf-han-font": "node --test tests/pdf-han-font.spec.mjs",
     "test:badges": "node --test tests/badge-anchors.spec.mjs",
+    "test:engine-copy": "node --test tests/engine-copy-language.spec.mjs",
     "test:stage3": "node --test tests/stage3-facts.spec.mjs",
     "test:stage3-hierarchy": "node --test tests/stage3-hierarchy.spec.mjs",
     "test:stage3-contract": "node --test tests/stage3-contract.spec.mjs",

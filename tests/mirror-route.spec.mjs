@@ -25,7 +25,7 @@ import { STAGE6_VERSION } from '../lib/render/fence.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { semanticFromRow } from '../lib/mirror/reading.js';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
-import { buildSemanticJson } from '../lib/semantic/index.js';
+import { buildSemanticJson, ELEMENT_PRESENCE_NOTE } from '../lib/semantic/index.js';
 import { RATE_LIMITS, __clearMemRateLimit } from '../lib/ratelimit.js';
 import { SESSION_COOKIE } from '../lib/mirror/session.js';
 
@@ -313,7 +313,10 @@ test('the chart is cross-checkable: hanzi kept, never bare (rule 23)', async () 
   assert.ok(!names.has('Bumi'), 'element name did not come from the glossary');
 
   assert.ok(chart.archetype.name_id);
-  assert.equal(chart.element_presence_note, 'display distribution only, never a strength score');
+    // ASSERTED AGAINST THE CONSTANT, not a third hand-typed copy of the caveat.
+  // Two copies is what let the page and the PDF drift apart; a test holding a
+  // third would have pinned whichever one it happened to be written from.
+  assert.equal(chart.element_presence_note, ELEMENT_PRESENCE_NOTE);
 });
 
 test('no heading, palace or archetype name is a Chinese character (rule 23, REMOVE side)', async () => {

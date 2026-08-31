@@ -98,6 +98,12 @@ test('chart 1 reproduces the target file field for field, where the two can agre
     assert.equal(json.chart.palaces[field], PROVECELL.chart.palaces[field], `palaces.${field}`);
   }
   assert.equal(json.chart.missing_element, PROVECELL.chart.missing_element);
+  // THE TARGET FILE WAS CORRECTED AGAIN, 2026-08-31, for the same reason as the
+  // strength line above: a RULED value changed. `element_presence_note` shipped in
+  // ENGLISH on the free reading page until Reyner ruled it
+  // `Sebaran visual, bukan ukuran kekuatan.` The target file is the CONTRACT SHAPE
+  // reference, not astronomical evidence - correcting a ruled string in it is not
+  // rule 5's forbidden regeneration, and the precedent is three lines up.
   assert.equal(json.chart.element_presence_note, PROVECELL.chart.element_presence_note);
   for (const [element, pct] of Object.entries(PROVECELL.chart.element_presence)) {
     assert.equal(json.chart.element_presence[element], pct, `element_presence.${element}`);
