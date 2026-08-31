@@ -56,6 +56,23 @@ different, and the previous heading said DO NOT START IT precisely because a nam
 a start. Second, ORDERING AMONG APPROVED WORK: `M-tranche3.md` is approved, ruled and worthwhile, and
 it is NOT next. An approved prompt with no stated position is exactly what a later session picks up
 by default, so the chain it sits behind is now drawn explicitly rather than left to be inferred.
+2026-08-31: prompt Q's commits 4, 5 and 6 landed on the branch, and this pointer moved in the SAME
+pass as commit 6 rather than after it - the 08-07 rule applied on purpose again. LIVE STATE was read
+in the same pass, per the 08-29 rule, and it was STALE IN A WAY THAT MATTERED: its Compatibility row
+still read `priced (45.000/29.000)`, which was the pre-ruling ladder that commit 1 replaced on 08-29.
+So the two live pointers disagreed about a PRICE for two days. It was corrected in commit 4, in the
+same commit that changed what a reader sees, per LIVE STATE's own rule.
+
+What is new and belongs here: **a pointer must carry what is OWED, not only what is DONE.** Q's six
+commits are all written, which a reader could easily take as "Q is finished". It is not: eleven
+Indonesian strings are unruled, a migration is unapplied, and one behaviour is unverified. A pointer
+that says "all six commits landed" and stops is the exact shape that sends the next session to open a
+PR on work that cannot ship. The three are listed under THE CURRENT WORK, separated by WHO owns each.
+
+A second thing, smaller: a DANGLING CODE CITATION was corrected in the "Read, in order" block. It
+named `tests/card-budget.spec.mjs`, which exists only on unmerged #77. The repo convention is that a
+code-fact in a doc carries the command that produced it; a citation to a file that does not exist is
+that rule failing quietly, and it survived because nothing in CI reads this file.
 -->
 
 # NEXT
@@ -69,8 +86,19 @@ by default, so the chain it sits behind is now drawn explicitly rather than left
 3. `prompts/Q-demand-test.md` — **RELEASED and IN PROGRESS; see THE CURRENT WORK below.**
    `prompts/M-tranche3.md` is behind it AND behind the whole Card A chain (commits 0 and 1
    docs-only, **commits 2 to 4 touch `glossary.json` and `facts.js`**, and those now also have to
-   clear `tests/card-budget.spec.mjs` — Card B has 7px of slack and a glossary edit can spend it;
+   clear the card budget gate — Card B has 7px of slack and a glossary edit can spend it;
    `spouse_palace` and `kekuatan` do not reach the card, so tranche 3 as scoped is clear).
+   **CITATION CORRECTED 2026-08-31:** this line named `tests/card-budget.spec.mjs`, which does not
+   exist on `main` — it lives only on the unmerged `fix/card-budget-tripwire` (#77, PARKED), so the
+   reference was dangling and would have sent a session looking for a file it could not find. The
+   gate that DOES exist and does run is `scripts/audit-card-budget.mjs`, wired as `audit:card-budget`
+   and inside `npm test`:
+
+   ```
+   $ ls tests/card-budget*            -> no such file
+   $ grep -n audit:card-budget package.json
+   56:    "audit:card-budget": "node scripts/audit-card-budget.mjs",
+   ```
    (`prompts/P-card-frame.md` is CLOSED, not queued — it returns with the 1080x1350 design pass.)
 
 # THE PROMOTION LANDED, 2026-08-23. THE PRODUCT IS LIVE.
@@ -118,11 +146,47 @@ Two DEFERRED REGISTER rows were opened by this work and both are Reyner's: the r
 that a key EXISTS and never that it WORKS, and preview verification now costs real renders. Neither
 is a task waiting here.
 
-## THE CURRENT WORK, 2026-08-29 - PROMPT Q, RELEASED AND STARTED
+## THE CURRENT WORK, 2026-08-31 - PROMPT Q, ALL SIX COMMITS WRITTEN, NOT MERGED
 
-**`docs/prompts/Q-demand-test.md` is RELEASED** (Reyner, 2026-08-29) and in progress on
-`feat/demand-test`. Its commit 0 was the authorised `CLAUDE.md` edit - band 25-45k -> **25-49k**,
-and rule 15 trading its stale status sentence for a pointer to the live register.
+**`docs/prompts/Q-demand-test.md` is RELEASED** (Reyner, 2026-08-29) and all six commits are on
+`feat/demand-test`, **unmerged and unreviewed**. Check with `git log --oneline main..feat/demand-test`
+before trusting this line. Its commit 0 was the authorised `CLAUDE.md` edit - band 25-45k ->
+**25-49k**, and rule 15 trading its stale status sentence for a pointer to the live register.
+
+| | |
+|---|---|
+| `122bee9` | 0 - `CLAUDE.md`: band 25-49k, rule 15 -> register pointer |
+| `cf9be7f` | 1 - the ladder; `annual` priced, **not** sellable |
+| `e06c90e` | 2 - migration `0009` + `lib/analytics/events.js` |
+| `9229da7` | 3 - the eight events fire |
+| `7cec498` | 4 - the upcoming block, every string a visible placeholder |
+| `f0f8b30` | 5 - the read-out, with the ruled fixture door |
+
+`npm test` 35/35 (was 32 when the branch was picked up; +`test:unruled-copy`, +`test:interest`,
++`test:readout`).
+
+### TWO THINGS ARE OWED BY REYNER BEFORE THIS SHIPS, and neither is a task waiting for a session
+
+1. **THE ELEVEN INDONESIAN STRINGS IN THE UPCOMING BLOCK.** Every one is a visible
+   `@@UNRULED: ...@@` placeholder in `lib/site/copy.js#UPCOMING_COPY`, in one named object so it is
+   one file to fill. **A PRODUCTION BUILD IS REFUSED WHILE ANY OF THEM SURVIVES**
+   (`scripts/check-unruled-copy.mjs`, wired as `prebuild`); preview and local builds pass on purpose,
+   because the block has to be SEEN to be ruled. Cowork proposed seven of the eleven on 2026-08-29
+   and those proposals are in the PR body, deliberately NOT in the slots they would occupy. Four
+   slots - `eyebrow`, `lead`, `thanks`, `contactSubmit` - have no proposal at all.
+2. **THE MIGRATION.** `supabase/migrations/0009_demand_test.sql` is applied by hand in the SQL editor
+   and must run BEFORE the code that reads it deploys (repo convention). Nothing in CI checks this.
+
+### ONE THING IS UNVERIFIED AND IT IS NOT A RULING, IT IS A MEASUREMENT
+
+`upcoming_seen` fires on an IntersectionObserver rather than on mount, because prompt Q section 3
+defines both interest rates as interest / `upcoming_seen` so that a reader who never scrolled to the
+block stays out of the denominator. **The held-back-on-mount half is proven locally** (a fresh mobile
+load fires exactly one event, `offer_seen`, and no `upcoming_seen`). **The fires-when-scrolled half is
+NOT proven:** the browser pane runs with `document.visibilityState === "hidden"`, where an
+IntersectionObserver does not deliver. Confirm it on the preview before any read-out number that
+divides by `upcoming_seen` is treated as evidence. If it is wrong, both interest rates read as
+infinity or as zero, and neither looks like a bug in a table.
 
 **It runs IN PARALLEL with the Card A design pass and does not wait on it.**
 
