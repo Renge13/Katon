@@ -649,6 +649,50 @@ const SCALE_A = { ...SCALE, badgeLabel: 30 };
 const SCALE_B = { ...SCALE, badgeLabel: 29 };
 
 /**
+ * ── THE HEADLINE'S THREE TYPE FACTS, EXPORTED SO THEY HAVE ONE SOURCE ──
+ *
+ * `scripts/measure-head-fit.mjs` renders these words in a real browser with real
+ * Archivo to decide whether any head overflows the measure. It has to declare the
+ * SAME size, weight and tracking that <Headline> declares, or it measures
+ * something the card does not draw - which is the characteristic failure of a
+ * measurement harness: being precisely wrong.
+ *
+ * So they are named here and read by both. A drift between the card and its own
+ * ruler is now impossible rather than merely unlikely.
+ */
+export const HEADLINE_SIZE = SCALE.headline;
+export const HEADLINE_WEIGHT = 800;
+export const HEADLINE_TRACKING = -0.7;
+
+/**
+ * Heads that genuinely overflow the measure at full size. MEASURED, NOT GUESSED.
+ *
+ * ── EMPTY, AND THAT IS THE 2026-08-31 RULING ──
+ * Reyner, prompt R section 0a: "Embun remains at 139 on the new 936px measure
+ * unless the rendered text actually fails to fit." Measured over all ten with
+ * `npm run measure:head-fit`: the widest head word is MOUNTAIN and it uses well
+ * under the measure, so nothing reduces. The numbers and their date live in
+ * `docs/qa/2026-08-31-head-fit.md`; they are not repeated here, because a
+ * measurement in a source file is rule 8's mistake one layer down.
+ *
+ * ── THE BRANCH STAYS. THAT IS ALSO THE RULING ──
+ * It is not scaffolding to delete now that the set is empty; it is the gate for
+ * the eleventh archetype name, or for a rename. What CHANGED is what fires it: a
+ * measured overflow instead of a word count.
+ *
+ * ── WHY A PINNED SET AND NOT A METRICS CALL AT RENDER TIME ──
+ * §0a: "Implement it as a measured fit, resolved once over all ten, and pinned -
+ * in `npm run preview:cards` or the card-budget harness, not as a metrics call
+ * during render." Card.js renders to markup that is captured later; there is no
+ * measurement pass at render time, and inventing one to answer a question about
+ * ten fixed strings is the expensive way round. Rule 24 fixes the set at ten.
+ */
+export const HEADS_THAT_OVERFLOW = Object.freeze(new Set([]));
+
+/** How much a head that overflows comes down by. Unchanged; only its trigger moved. */
+export const HEADLINE_OVERFLOW_FACTOR = 0.80;
+
+/**
  * ── CARD B'S VERTICAL RECLAIM, 2026-08-26. RULED BY REYNER ──
  *
  * WHAT WENT WRONG. Card B's object is a fixed-height column flex with
@@ -771,13 +815,46 @@ const YANG = new Set(['甲', '丙', '戊', '庚', '壬']);
  */
 export const WATERMARK_FILL = { yang: 0.18, yin: 0.14 };
 
-function Watermark({ stem, token, spec, px, foil }) {
+/**
+ * ── THE TWO PLACEMENTS, NAMED (prompt R commit 2, section 0b) ──
+ *
+ * CARD B IS UNTOUCHED at its 2026-08-14 values. CARD A's were RE-DERIVED on the
+ * 1080x1350 frame and are NOT the old numbers scaled: the worksheet's §2 banner
+ * forbids scaling old-frame export pixels into the new one, and the constraint in
+ * `card-polish-spec.md:153` is a RELATIONSHIP to the headline and the tag row -
+ * both of which moved, and neither proportionally to the card.
+ *
+ * Derived and checked with `npm run measure:watermark`, which renders each card
+ * twice - once with this node suppressed - and takes the bounding box of the
+ * differing pixels as the glyph's INK. The div box is not the ink box: at 864px
+ * with line-height 0.8 the box is 864x691 and the strokes sit inset from it by an
+ * amount that differs per stem, so measuring the div would answer a question
+ * nobody asked.
+ *
+ * The per-stem table lives in `docs/qa/2026-08-31-watermark-fit.md`.
+ *
+ * THE SIZE IS NOT HERE and is not re-derived: §0b approves it, and
+ * `spec.card.w * 0.80` follows the frame on its own (907 -> 1080 gives 864).
+ */
+export const WATERMARK_A = { top: -128, right: -144 };
+export const WATERMARK_B = { top: -105, right: -133 };
+
+function Watermark({ stem, token, spec, px, foil, offset }) {
   if (!stem) return null;
   const isYang = YANG.has(stem);
   const lightField = inkIsDark(token);
   const size = foil ? 0.69 : 0.80;
+  // `offset` is the measurement harness trying a candidate. Nothing in the app
+  // passes it, so the shipped cards always use the two constants above.
+  const off = offset ?? (foil ? WATERMARK_B : WATERMARK_A);
   return E('div', {
     'aria-hidden': 'true',
+    // A HANDLE FOR THE RULER, not for the reader. scripts/measure-watermark-fit.mjs
+    // renders the card twice - once with this node suppressed - and diffs the two
+    // to get the GLYPH INK bounding box, which is not the div box: at font-size 864
+    // with line-height 0.8 the box is 864x691 and the strokes sit inset from it by
+    // an amount that differs per stem. §10's constraint is about the ink.
+    'data-role': 'watermark',
     style: {
       position: 'absolute', pointerEvents: 'none', userSelect: 'none',
       fontFamily: HAN,
@@ -796,8 +873,8 @@ function Watermark({ stem, token, spec, px, foil }) {
       ...(foil && !lightField
         ? { textShadow: `0 ${px(2)}px 0 ${alpha(token.ink, 0.07)}, 0 -${px(2)}px 0 rgba(0,0,0,0.10)` }
         : null),
-      top: px(foil ? -105 : -128),
-      right: px(foil ? -133 : -144),
+      top: px(off.top),
+      right: px(off.right),
     },
   }, stem);
 }
@@ -976,7 +1053,7 @@ function Sheen({ token }) {
  * PER ARCHETYPE; the rim is the token's OWN INK at four alphas, so it costs no
  * new colour and the original objection does not reach it.
  */
-function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
+function Canvas({ spec, token, scale, stem, foil, rimId, id, watermarkOffset, children }) {
   const { card } = spec;
   // ── FULL-BLEED WHEN THE SPEC HAS NO CANVAS (prompt R commit 1) ──
   // Card A lost its mat, so the object IS the export surface. The outer box
@@ -1046,7 +1123,7 @@ function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
       // defect this replaced. Inside, both export targets carry it.
       E('style', { key: 'hanfont', dangerouslySetInnerHTML: { __html: hanFontFaceCss() } }),
       // Under everything, clipped by the object's own overflow.
-      E(Watermark, { key: 'wm', stem, token, spec, px, foil }),
+      E(Watermark, { key: 'wm', stem, token, spec, px, foil, offset: watermarkOffset }),
       foil && E(Sheen, { key: 'sheen', token }),
       children,
       // LAST, so the edge is over the content: a long line may not sit on top of
@@ -1100,7 +1177,17 @@ export function splitName(nameEn) {
 
 function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, kickerGap = 14, aspekGap = 25 }) {
   const { kicker, head } = splitName(data.nameEn);
-  const headSize = head.length > 1 ? sc.headline * 0.80 : sc.headline;
+  // ── A REAL-FIT GATE, NOT A WORD COUNT (ruled 2026-08-31, prompt R §0a) ──
+  // This read `head.length > 1 ? sc.headline * 0.80 : sc.headline` - a proxy for
+  // "this might be too wide" that is not even monotonic in width. MOUNTAIN is 8
+  // characters and rendered at FULL size; MORNING is 7 and was the one reduced.
+  // The proxy shrank the shorter word and left the longer one alone.
+  //
+  // Each head word gets its own block below, so a multi-word head never has to
+  // fit on one line and only the LONGEST WORD is ever constrained. That is why
+  // the set is keyed on words.
+  const overflows = head.some((w) => HEADS_THAT_OVERFLOW.has(String(w).toUpperCase()));
+  const headSize = overflows ? sc.headline * HEADLINE_OVERFLOW_FACTOR : sc.headline;
   return E('div', { style: { position: 'relative', display: 'flex', flexDirection: 'column' } },
     // Card A prints name_en ALONE — no Indonesian name, no ID eyebrow (08-03).
     // Card B may carry the Indonesian name; it is a document, not a share, and on
@@ -1124,9 +1211,10 @@ function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, 
     }, kicker),
     E('div', {
       key: 'en',
+      'data-role': 'headline',
       style: {
-        ...roleStyle('headline', palette), fontFamily: FONT, fontWeight: 800,
-        fontSize: px(headSize), lineHeight: 0.90, letterSpacing: px(-0.7),
+        ...roleStyle('headline', palette), fontFamily: FONT, fontWeight: HEADLINE_WEIGHT,
+        fontSize: px(headSize), lineHeight: 0.90, letterSpacing: px(HEADLINE_TRACKING),
         textTransform: 'uppercase',
       },
     }, head.map((w, i) => E('div', { key: i }, w))),
@@ -1151,6 +1239,7 @@ function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, 
 function Tags({ data, palette, px, sc, showDynamic, top = 31, rowGap = 14 }) {
   const base = { fontFamily: FONT, fontWeight: 650, fontSize: px(sc.tag), letterSpacing: px(3.4), textTransform: 'uppercase' };
   return E('div', {
+    'data-role': 'tags',
     style: { display: 'flex', flexWrap: 'wrap', gap: `${px(rowGap)}px ${px(32)}px`, marginTop: px(top), position: 'relative', ...base },
   },
     data.tags.fixed.map((t) => E('span', { key: `f-${t}`, style: roleStyle('tagFixed', palette) }, t)),
@@ -1378,7 +1467,7 @@ function PillarCells({ data, palette, token, px, sc, brass }) {
  * differentiating axis and giving Card A any of it puts the two cards back where
  * 08-14 found them.
  */
-export function CardA({ data, scale = 1, id = 'card-a' }) {
+export function CardA({ data, scale = 1, id = 'card-a', watermarkOffset }) {
   const token = tokenFor(data.stem);
   // 'A' — the flat field is the only ground here, so brass text is judged on it
   // and 甲 丁 戊 壬 keep their brass name. See brassTextFor.
@@ -1386,7 +1475,7 @@ export function CardA({ data, scale = 1, id = 'card-a' }) {
   const px = (n) => n * scale;
   const sc = SCALE_A;
 
-  return E(Canvas, { spec: CARD_A, token, scale, stem: data.stem, id },
+  return E(Canvas, { spec: CARD_A, token, scale, stem: data.stem, id, watermarkOffset },
     E(Headline, { key: 'h', data, palette, px, sc }),
     E(Hair, { key: 'r1', token, px, top: 47 }),
     // Three fixed trait words only. No dynamic Aspek — see <Tags>.

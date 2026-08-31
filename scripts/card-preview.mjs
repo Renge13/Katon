@@ -85,6 +85,38 @@ function main() {
   });
 
 
+  // ── THE TWO NON-ARCHETYPE CASES (prompt R commit 2) ──
+  // R: "Render these six, not four." Four of the six are archetypes and are in
+  // `rows` already. These two are NOT archetype-driven and appear on no card in
+  // that list, so a composition reviewed only on `rows` never sees them:
+  //
+  //   hour-less chart      no fourth pillar, and NO SPACE RESERVED for one
+  //   null-gender footer   date only, and buildFooter emits no placeholder
+  //
+  // Approval of the composition is CONTINGENT on these two rendering with zero
+  // placeholder artifacts and no footer imbalance, so they get their own section
+  // at review scale rather than being folded into the ten.
+  //
+  // All three use ONE chart and ONE archetype, so any difference visible between
+  // them is the variant and nothing else.
+  const variants = (() => {
+    const iso = '1989-09-13';
+    const withHour = calculateBaziChart({ birthDate: iso, birthTime: '09:00' });
+    const noHour = calculateBaziChart({ birthDate: iso, birthTime: null });
+    const mk = (chart, gender, label, note) => {
+      const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart), birthDate: iso, gender });
+      return {
+        label, note, data, hour: chart.hour,
+        a: renderToStaticMarkup(React.createElement(CardA, { data, scale: 0.36 })),
+      };
+    };
+    return [
+      mk(withHour, 'female', 'baseline', 'hour known, gender set - what the other two are read against'),
+      mk(noHour, 'female', 'hour-less chart', 'chart.hour is null: no fourth pillar anywhere, no reserved space'),
+      mk(withHour, null, 'null-gender footer', 'buildFooter drops the label: date only, no placeholder, no separator'),
+    ];
+  })();
+
   const unapproved = rows.filter((r) => !r.approved).map((r) => r.data.nameId);
 
   // Worst RENDERED text run per token, measured on the same markup this page
@@ -185,6 +217,21 @@ exemption with a pinned list (<code>DIM_EXEMPT</code>), every role off that list
 ${MIN_CONTRAST} on all ${Object.keys(CARD_TOKENS).length} tokens, and the audit keeps reporting the
 exempt roles' real ratios rather than skipping them. Run
 <code>npm run audit:card-contrast</code> for the grid.</p>
+
+<h2>The two non-archetype cases &mdash; hour-less chart, null-gender footer</h2>
+<p>Prompt R commit 2. Neither is archetype-driven, so neither appears on any of the ten cards below.
+<b>Approval of the composition is contingent on these rendering with zero placeholder artifacts and
+no footer imbalance.</b> All three are the same chart and the same archetype, so any difference you
+see is the variant and nothing else.</p>
+<div class="shelf" style="align-items:flex-start">
+${variants.map((v) => `<figure style="margin:0;max-width:420px">
+  <div>${v.a}</div>
+  <figcaption style="text-transform:none;letter-spacing:0;font-size:11.5px;line-height:1.55;text-align:left">
+    <b>${esc(v.label)}</b><br>${esc(v.note)}<br>
+    footer left: <code>${esc(v.data.footer.left || '(empty)')}</code><br>
+    hour pillar: <code>${v.hour ? esc(v.hour.hanzi || JSON.stringify(v.hour)) : 'null'}</code>
+  </figcaption></figure>`).join('\n')}
+</div>
 
 <h2>Thumbnail shelf — the only test that matters for questions 2 and 3</h2>
 <div class="shelf">

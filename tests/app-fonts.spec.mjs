@@ -29,6 +29,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// The one value this file asserts that is a CONSTANT rather than a literal in the
+// source it greps. See the weight test below for why it cannot stay a grep.
+import { HEADLINE_WEIGHT } from '../components/cards/Card.js';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const layout = fs.readFileSync(path.join(ROOT, 'app/layout.js'), 'utf8');
 const card = fs.readFileSync(path.join(ROOT, 'components/cards/Card.js'), 'utf8');
@@ -89,5 +93,18 @@ test('the card asks for weights and a style the loaded font actually carries', (
   // And the card really does use them, so this stays tied to the card rather
   // than becoming a wish list.
   assert.match(card, /fontStyle:\s*'italic'/);
-  assert.match(card, /fontWeight:\s*800/);
+
+  // ── THE 800 IS A CONSTANT NOW, SO THIS RESOLVES IT INSTEAD OF GREPPING ──
+  // It read `assert.match(card, /fontWeight:\s*800/)` and went red when prompt R
+  // commit 2 replaced the literal in <Headline> with `HEADLINE_WEIGHT`, exported
+  // so that `scripts/measure-head-fit.mjs` measures the SAME weight the card
+  // draws. A source grep cannot follow an indirection, and the indirection is the
+  // point: the harness and the component must not be able to disagree.
+  //
+  // So the VALUE is asserted, and separately that the card actually reaches for
+  // the constant. Both halves are needed - the first keeps this tied to what
+  // `app/layout.js` loads, the second keeps it tied to the card.
+  assert.equal(HEADLINE_WEIGHT, 800, 'the headline weight the app loads');
+  assert.match(card, /fontWeight:\s*HEADLINE_WEIGHT/,
+    'the headline must read the exported constant, not a re-typed literal');
 });

@@ -43,6 +43,8 @@
     "test:card": "node --test tests/card.spec.mjs",
     "test:app-fonts": "node --test tests/app-fonts.spec.mjs",
     "preview:cards": "node scripts/card-preview.mjs",
+    "measure:watermark": "node scripts/measure-watermark-fit.mjs",
+    "measure:head-fit": "node scripts/measure-head-fit.mjs",
     "measure:card-tags": "node scripts/measure-card-tags.mjs",
     "audit:card-contrast": "node scripts/audit-card-contrast.mjs",
     "gate:card-b": "node scripts/gate-card-b-identity.mjs",

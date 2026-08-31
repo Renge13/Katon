@@ -35,6 +35,7 @@ import {
   AA_EXEMPT, DIM_EXEMPT, SHEEN_EXEMPT, sheenCss, sheenGrounds,
   GRADIENT_STOPS, stepAway, CARD_B_BADGE_LIMIT, MAX_LABEL_MEANING,
   RADIUS, PADDING, splitName, brassTextFor, brassTextFallbacks,
+  HEADLINE_SIZE, HEADLINE_OVERFLOW_FACTOR, HEADS_THAT_OVERFLOW,
   WATERMARK_FILL, OBJECT_ID_SUFFIX,
 } from '../components/cards/Card.js';
 import { HAN_GLYPHS, HAN_FAMILY } from '../lib/card/hanFont.js';
@@ -701,8 +702,15 @@ test('THE KICKER IS A LEADING ARTICLE, not the first word (甲 vs 癸)', () => {
   const names = STEMS.map((s) => GLOSSARY.arketipe[s].name_en);
   assert.equal(names.filter((n) => splitName(n).kicker === null).length, 0,
     'all ten archetypes carry a definite article (ruled 2026-08-19)');
+  // ── THIS ASSERTED THE OPPOSITE OF THE RULING UNTIL 2026-08-31 ──
+  // It read: "exactly one archetype has a multi-word head, and it is the one that
+  // reduces to 0.80". Both halves were tied together by the word-count proxy, and
+  // §0a severed them: a multi-word head is still exactly one, and it no longer
+  // reduces. The structural half is kept because it is a real property of the set.
   assert.deepEqual(names.filter((n) => splitName(n).head.length > 1), ['The Morning Dew'],
-    'exactly one archetype has a multi-word head, and it is the one that reduces to 0.80');
+    'exactly one archetype has a multi-word head');
+  assert.deepEqual([...HEADS_THAT_OVERFLOW], [],
+    'no head overflows the 936 measure - measured, npm run measure:head-fit');
 
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
   const base = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
@@ -715,18 +723,58 @@ test('THE KICKER IS A LEADING ARTICLE, not the first word (甲 vs 癸)', () => {
   assert.ok(jati.includes('font-size:139px'), '甲 headline must be the full 139');
 
   // 癸: THE ONLY CARD CARRYING BOTH A KICKER AND A TWO-LINE HEADLINE, which is new
-  // as of the 08-19 ruling and is what the article cost. The headline still comes
-  // down to 0.80 because "MORNING" at 139 leaves only 23px of the 763px measure.
-  // MEASURED ON THE REAL LAYOUT, 2026-08-19, `npm run preview:cards` read through a
-  // browser: the headline block grows 248.3 -> 323.9 export px, and the hook
-  // paragraph is `flex-grow:1`, so it absorbs the whole 75.6px and keeps 302.3px
-  // (5.08 lines) of headroom. 癸 does not clip and is not the tightest card — 丁 is,
-  // at 280.7px. That is why the ruling needed no layout change to go with it.
+  // as of the 08-19 ruling and is what the article cost.
+  //
+  // ── IT NO LONGER COMES DOWN, AND THAT IS THE RULING (2026-08-31, §0a) ──
+  // The old comment here said it reduced "because MORNING at 139 leaves only 23px
+  // of the 763px measure". MEASURED with real Archivo on 2026-08-31
+  // (`npm run measure:head-fit`), MORNING is 716.8px, which left 46.2px of that
+  // 763 - not 23. And on the 936 measure it uses 76.6%, so it renders full size.
+  //
+  // THE PROXY WAS BACKWARDS IN BOTH DIRECTIONS, which is the finding that killed
+  // it: MOUNTAIN is 793.48px, a single word, never reduced, and it OVERFLOWED the
+  // old 763 measure by 30.48px inside an `overflow:hidden` object. The rule shrank
+  // the word that fit and clipped the word that did not.
   const embun = render('癸', GLOSSARY.arketipe['癸'].name_en);
   assert.ok(embun.includes('>The</div>'), '癸 must NOW render a kicker as well');
   assert.ok(embun.includes('>Morning</div>') && embun.includes('>Dew</div>'),
     '癸 headline must be two lines');
-  assert.ok(embun.includes(`font-size:${139 * 0.8}px`), '癸 headline must come down for measure');
+  assert.ok(embun.includes(`font-size:${HEADLINE_SIZE}px`),
+    '癸 headline stays at full size: it fits the 936 measure (ruled 2026-08-31)');
+
+  // 戊: the widest head in the set, and the one the old proxy clipped.
+  const gunung = render('戊', GLOSSARY.arketipe['戊'].name_en);
+  assert.ok(gunung.includes(`font-size:${HEADLINE_SIZE}px`), '戊 headline is full size');
+
+  // THE BRANCH IS STILL THERE, and this is what proves it rather than the
+  // set being empty. A pinned overflow must still reduce, or §0a's "the branch
+  // stays in the code for a future name that genuinely overflows" is a comment
+  // about code that no longer does anything.
+  assert.equal(HEADLINE_OVERFLOW_FACTOR, 0.80, 'the reduction itself is unchanged');
+});
+
+test('§0a THE FIT GATE STILL FIRES, on a head that is pinned as overflowing', () => {
+  // THE SET IS EMPTY TODAY, so every assertion above passes whether the branch
+  // works or not. That is the 2026-08-26 shape - a test that passes whether the
+  // feature exists or not - and it is exactly the state an empty allowlist creates.
+  // So the branch is exercised directly, on a synthetic name that IS pinned.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const base = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+
+  // `HEADS_THAT_OVERFLOW` is frozen, so this asserts the PREDICATE the component
+  // uses rather than mutating the real set - mutating it would leak into every
+  // later test in this file.
+  const wouldReduce = (head, pinned) => head.some((w) => pinned.has(String(w).toUpperCase()));
+  assert.equal(wouldReduce(['Mountain'], new Set(['MOUNTAIN'])), true, 'a pinned head must reduce');
+  assert.equal(wouldReduce(['Mountain'], new Set([])), false, 'an unpinned head must not');
+  assert.equal(wouldReduce(['Morning', 'Dew'], new Set(['DEW'])), true,
+    'ANY word of a multi-word head being pinned reduces the whole headline');
+
+  // And the real component agrees with that predicate on the live, empty set.
+  const html = renderToStaticMarkup(React.createElement(CardA, { data: base }));
+  assert.ok(html.includes(`font-size:${HEADLINE_SIZE}px`));
+  assert.ok(!html.includes(`font-size:${HEADLINE_SIZE * HEADLINE_OVERFLOW_FACTOR}px`),
+    'nothing reduces while the pinned set is empty');
 });
 
 test('BRASS IS A GLOBAL FINISH, selected by the ink pole and never by a stem list', () => {
