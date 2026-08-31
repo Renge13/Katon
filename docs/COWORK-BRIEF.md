@@ -110,7 +110,7 @@ a prompt names the check Code should run rather than trusting Code to pick one.
 Claude Code is a good reviewer and has caught real spec errors. When it pushes back, **assume it is
 right until you have checked.** It has been right every time so far.
 
-### Working-style rules. 1-5 Reyner-ratified 2026-08-11. 6-8 added 2026-08-13. THE FOLD IS COMPLETE.
+### Working-style rules. 1-5 Reyner-ratified 2026-08-11. 6-8 added 2026-08-13. 9 added 2026-08-31. THE FOLD IS COMPLETE, AND IT COVERS 1-9.
 
 **These are rules, not history.** 1 to 5 were ratified in a Cowork session and then lived only in that
 session's handover file, which no Claude Code session can read — and the git rule below was then broken
@@ -205,6 +205,16 @@ error 20's gap is closed at the source rather than at the symptom.**
    **The test: could a Claude Code session break this by not knowing it?** If yes, it is a rule and it
    belongs in `docs/` or `CLAUDE.md` before the turn ends. If it only describes where one conversation
    got to, it is session state and it belongs in the handover, where going stale costs nothing.
+
+9. **THE SPLIT: REYNER RULES UX, COWORK RULES TECHNICALITY.** (Reyner, 2026-08-31.) A choice a
+   reader can SEE - wording, register, case, crop, hierarchy, what a card looks like in a feed - is
+   his and must not be decided for him. A choice a reader cannot see - which command gates a build,
+   which offset satisfies a ruled constraint, how an instrument is falsified, which assertion to
+   rewrite - is Cowork's to settle and Code's to execute, and bringing it to him is the waste this
+   rule was made to stop. **The test is not difficulty, it is visibility.** Rule 2 already said ask
+   only for permission and never for legwork; this narrows what "permission" covers. **When a
+   technical fact and a ruled UX decision collide, §3's other rule governs: surface once, state the
+   consequence, preserve the ruling, adapt the implementation.**
 
 ### A RULED DECISION IS NOT REOPENED BY A TECHNICAL FACT (Reyner, 2026-08-29)
 
