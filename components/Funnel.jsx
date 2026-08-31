@@ -1049,7 +1049,17 @@ function Upcoming({ reading }) {
   return (
     <Reveal>
       <div ref={blockRef} style={{ borderTop: '1px solid var(--divider)', paddingTop: 28 }}>
-        <Eyebrow style={{ marginBottom: 10 }}>{UPCOMING_COPY.eyebrow}</Eyebrow>
+        {/* SENTENCE CASE, RULED 2026-08-31 (upcoming-copy-rulings.md, AMENDED section).
+            `Eyebrow` is SHARED - 3 other call sites - and is NOT edited: it spreads
+            `...style` last, so overriding here wins with no component change and no
+            effect on any other eyebrow on the site.
+
+            THE TRACKING GOES WITH THE CASE. `.16em` is tuned for capitals; sentence
+            case at caps tracking is spaced-out lowercase, which reads worse than
+            either end state and looks like a bug rather than a decision. `normal` is
+            the neutral default rather than a new tracking value chosen here - the
+            ruling is sentence case, and picking a bespoke number would be composing. */}
+        <Eyebrow style={{ marginBottom: 10, textTransform: 'none', letterSpacing: 'normal' }}>{UPCOMING_COPY.eyebrow}</Eyebrow>
         <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--muted-warm)', margin: '0 0 18px' }}>{UPCOMING_COPY.lead}</p>
 
         <div style={{ display: 'grid', gap: 12 }}>
@@ -1065,7 +1075,12 @@ function Upcoming({ reading }) {
               <p style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '8px 0 0' }}>{copy.sub}</p>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', border: '1px solid var(--divider)', borderRadius: 999, padding: '4px 10px' }}>{UPCOMING_COPY.availability}</span>
+                {/* SENTENCE CASE, same ruling. This `textTransform` was mine, added in
+                    `7cec498` while the content was still an `@@UNRULED@@` placeholder -
+                    a styling choice made before the words existed, which is exactly the
+                    kind that survives unexamined. Reyner ruled it out. Tracking relaxed
+                    with it, for the reason above. */}
+                <span style={{ fontSize: 11, letterSpacing: 'normal', color: 'var(--muted-warm)', border: '1px solid var(--divider)', borderRadius: 999, padding: '4px 10px' }}>{UPCOMING_COPY.availability}</span>
                 {/* A TEXT BUTTON, NOT A <Button>. Equal visual weight with the
                     Artifact CTA is the thing the ruled order forbids. */}
                 <button
