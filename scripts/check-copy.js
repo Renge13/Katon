@@ -41,7 +41,7 @@ import { RENDER_COPY } from '../lib/render/copy.js'
 // legal prose is the longest body of user-facing copy in the repo and is exactly
 // where a pasted em-dash or a smart quote survives review. Grepping the diff
 // catches it once; walking the bank catches it forever.
-import { SITE_COPY } from '../lib/site/copy.js'
+import { SITE_COPY, UPCOMING_COPY } from '../lib/site/copy.js'
 import { ENTITY } from '../lib/site/entity.js'
 
 // Rule 20 bans typographic characters in user-facing strings, keyboard keys only.
@@ -110,6 +110,11 @@ walk(RENDER_COPY,                   'RENDER_COPY')
 // and address are rendered to the user, so a typographic character pasted from
 // the NIB PDF would ship.
 walk(SITE_COPY,                     'SITE_COPY')
+// The upcoming-products bank (prompt Q commit 4). Walked even though every value
+// is still a placeholder: rule 20 applies to a stub too, and a banned character
+// pasted into a slot now would survive the moment Reyner replaces the words
+// around it.
+walk(UPCOMING_COPY,                 'UPCOMING_COPY')
 walk(ENTITY,                        'ENTITY')
 
 if (issues.length > 0) {
@@ -122,4 +127,4 @@ if (issues.length > 0) {
   process.exit(1)
 }
 
-console.log(`✓ No banned typography in copy banks. Checked: DAY_MASTERS, DAY_BRANCHES, DOMINANT_ELEMENT, MISSING_ELEMENT, PAID_HOOK_TEMPLATE, PILLAR_STEM_MEANINGS, 7 REPORT passage banks, REPORT.PROMPTS, RENDER_COPY, SITE_COPY, ENTITY.`)
+console.log(`✓ No banned typography in copy banks. Checked: DAY_MASTERS, DAY_BRANCHES, DOMINANT_ELEMENT, MISSING_ELEMENT, PAID_HOOK_TEMPLATE, PILLAR_STEM_MEANINGS, 7 REPORT passage banks, REPORT.PROMPTS, RENDER_COPY, SITE_COPY, UPCOMING_COPY, ENTITY.`)
