@@ -64,21 +64,38 @@ const cardFor = (birthDate, opts = {}) => {
 
 // ── GEOMETRY (2026-08-03, sizes LOCKED) ────────────────────
 
-test('Card A is a 63:88 object on a 3:4 canvas at ONE uniform margin', () => {
-  assert.equal(CARD_A.canvas.w, 1080);
-  assert.equal(CARD_A.canvas.h, 1440);
-  assert.equal(CARD_A.canvas.w / CARD_A.canvas.h, 3 / 4);
+test('Card A IS the export: 1080x1350, 4:5, no canvas and no margin', () => {
+  // REPLACES 'Card A is a 63:88 object on a 3:4 canvas at ONE uniform margin'
+  // (2026-08-03), reversed by prompt R commit 1 on Reyner's 2026-08-31 ruling.
+  // The old test derived the margin from the two ratios and asserted the object
+  // followed from it. There is no mat and no object-on-a-mat any more.
+  assert.equal(CARD_A.card.w, 1080);
+  assert.equal(CARD_A.card.h, 1350);
+  assert.equal(CARD_A.card.w / CARD_A.card.h, 4 / 5);
 
-  // The margin is not a taste call, it is the only value that satisfies both
-  // ratios: solve (1080-2m)/(1440-2m) = 63/88.
-  const m = (1080 * 88 - 1440 * 63) / (2 * (88 - 63));
-  assert.equal(m, 86.4);
-  assert.equal(CARD_A.margin, m);
+  // THE ABSENCE IS THE RULING, so it is asserted rather than left implied. A
+  // reintroduced canvas would restore the mat §10 removes, and every geometry
+  // consumer reads these keys.
+  assert.equal(CARD_A.canvas, undefined, 'Card A has no canvas: it IS the export');
+  assert.equal(CARD_A.margin, undefined, 'Card A has no margin: nothing to be inset from');
+});
 
-  // ...and the object follows from it, to the pixel we round to.
-  assert.equal(Math.round(1080 - 2 * m), CARD_A.card.w);
-  assert.equal(Math.round(1440 - 2 * m), CARD_A.card.h);
-  assert.ok(Math.abs(CARD_A.card.w / CARD_A.card.h - 63 / 88) < 0.0005);
+test('the inner measure is 936, and PADDING is what holds it there', () => {
+  // PAD was ruled 100% to MEASURE and 0% to added side padding, so `PADDING`
+  // stays absolute at 72 while the frame grows. This is the number every
+  // recomposition decision in commit 2 is taken against, and the gain is the
+  // reason a real-fit gate replaces the word-count reduction (R section 0a).
+  assert.equal(PADDING, 72, 'PADDING is held absolute by the PAD ruling');
+  const measure = CARD_A.card.w - 2 * PADDING;
+  assert.equal(measure, 936);
+
+  // Frame +19.1%, measure +22.7%. The measure grows FASTER than the card, which
+  // is the whole point of holding the padding rather than scaling it.
+  const oldFrame = 907;
+  const oldMeasure = oldFrame - 2 * PADDING;
+  assert.equal(oldMeasure, 763);
+  assert.ok(measure / oldMeasure > CARD_A.card.w / oldFrame,
+    'the measure must grow faster than the frame, or PADDING was scaled');
 });
 
 test('the ruled size is the BORDER box, declared by the card and not borrowed', () => {
@@ -99,19 +116,43 @@ test('the ruled size is the BORDER box, declared by the card and not borrowed', 
   }
 });
 
-test('the superseded 4:5 proposal is not what we build', () => {
-  // 1080x1350 was the 08-02 proposal and the 08-03 ruling replaced it. Named here
-  // so a session that finds 4:5 in an older doc sees the reversal fail a test.
-  assert.notEqual(CARD_A.canvas.h, 1350);
+test('THE 3:4 CANVAS IS SUPERSEDED, and this is the guard running in reverse', () => {
+  // ── THIS TEST IS THE MIRROR OF THE ONE IT REPLACES, NOT ITS DELETION ──
+  // It read: `assert.notEqual(CARD_A.canvas.h, 1350)`, with the comment "1080x1350
+  // was the 08-02 proposal and the 08-03 ruling replaced it. Named here so a
+  // session that finds 4:5 in an older doc sees the reversal fail a test."
+  //
+  // It was correct for four weeks and it caught nothing, because nothing tried.
+  // On 2026-08-31 Reyner ruled 4:5 deliberately, so the guard's own subject
+  // reversed. DELETING it would have left the direction unprotected: a session
+  // finding 3:4 in `sharecard-spec.md` or in the 08-03 mocks could restore the mat
+  // and no test would object. So it points the other way now, and the older docs
+  // are the stale ones.
+  assert.equal(CARD_A.card.h, 1350, '4:5 is the ruling as of 2026-08-31');
+  assert.equal(CARD_A.card.w, 1080);
+  assert.ok(!('canvas' in CARD_A), 'a canvas on Card A is the superseded 3:4 frame returning');
+  assert.ok(!('margin' in CARD_A), 'a margin on Card A is the mat returning');
 });
 
 test('Card B is 9:16, and taller than Card A', () => {
   assert.equal(CARD_B.canvas.w, 1080);
   assert.equal(CARD_B.canvas.h, 1920);
   assert.equal(CARD_B.canvas.w / CARD_B.canvas.h, 9 / 16);
-  assert.ok(CARD_B.canvas.h > CARD_A.canvas.h, 'taller IS the exclusivity signal');
-  // Card B's object ratio is NOT ruled; only that it keeps Card A's margin.
-  assert.equal(CARD_B.margin, CARD_A.margin);
+  assert.ok(CARD_B.canvas.h > CARD_A.card.h, 'taller IS the exclusivity signal');
+
+  // ── THE INHERITANCE INVERTED (prompt R commit 1, §10) ──
+  // This read `assert.equal(CARD_B.margin, CARD_A.margin)` - Card B's object ratio
+  // is not ruled, only that it kept Card A's margin. Card A has no margin to keep
+  // any more, so the assertion could not be repaired, only re-sourced: 86.4 is now
+  // Card B's own literal and is asserted as such.
+  //
+  // THE VALUE IS UNCHANGED TO THE DIGIT. Card B is untouched by prompt R, and the
+  // proof of that is not this line - it is `scripts/gate-card-b-identity.mjs`,
+  // which compares rendered PIXELS against a committed baseline. This asserts the
+  // constant; that asserts the card.
+  assert.equal(CARD_B.margin, 86.4, "Card B's margin is its own, not borrowed from Card A");
+  assert.ok(Math.abs((CARD_B.canvas.w - CARD_B.card.w) / 2 - CARD_B.margin) < 0.5,
+    "Card B's object still sits at its own uniform margin");
 });
 
 // ── COLOUR TOKENS (open — five of ten unapproved as of 2026-08-13) ──
@@ -578,14 +619,27 @@ test('THE OBJECT DIMENSIONS ARE UNCHANGED BY THE POLISH PASS', () => {
   const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
   for (const [name, C, spec] of [['CardA', CardA, CARD_A], ['CardB', CardB, CARD_B]]) {
     const html = renderToStaticMarkup(React.createElement(C, { data }));
-    // The canvas is the first element; the object is the next one that declares
-    // border-box. Both sizes have to appear, in that order.
-    const canvas = `width:${spec.canvas.w}px;height:${spec.canvas.h}px`;
+    // ── CARD A HAS NO CANVAS, SO THE TWO BOXES ARE THE SAME SIZE ──
+    // The outer box collapses onto the object rather than disappearing: both
+    // export targets are still addressed by id and the DOM collapse is commit 3.
+    // A degenerate mat draws no visible pixel, which is what this asserts.
+    const canvasDims = spec.canvas ?? spec.card;
+    const canvas = `width:${canvasDims.w}px;height:${canvasDims.h}px`;
     const object = `width:${spec.card.w}px;height:${spec.card.h}px`;
-    assert.ok(html.includes(canvas), `${name} canvas is not ${spec.canvas.w}x${spec.canvas.h}`);
+    assert.ok(html.includes(canvas), `${name} canvas is not ${canvasDims.w}x${canvasDims.h}`);
     assert.ok(html.includes(object), `${name} object is not ${spec.card.w}x${spec.card.h}`);
-    assert.ok(html.indexOf(canvas) < html.indexOf(object), `${name} draws the object outside the canvas`);
-    assert.ok(html.includes(`border-radius:${RADIUS}px`), `${name} radius moved`);
+    assert.ok(html.indexOf(canvas) <= html.indexOf(object), `${name} draws the object outside the canvas`);
+
+    // SQUARE ON CARD A, ROUNDED ON CARD B, and the radius is what makes an object
+    // read as sitting ON something. With the mat gone there is nothing to sit on,
+    // and a rounded corner would expose the field behind it - the mat returning
+    // four corners at a time.
+    if (spec.canvas) {
+      assert.ok(html.includes(`border-radius:${RADIUS}px`), `${name} radius moved`);
+    } else {
+      assert.ok(html.includes('border-radius:0'), `${name} must be square: it is the export surface`);
+      assert.ok(!html.includes(`border-radius:${RADIUS}px`), `${name} must not carry the mat-era radius`);
+    }
     // PADDING IS PER-CARD ON THE VERTICAL AXIS ONLY (2026-08-26). Card B buys
     // frame space back to fit its prose; the HORIZONTAL padding is identical on
     // both cards and must stay so, because it sets the text measure and a
@@ -600,12 +654,13 @@ test('THE OBJECT DIMENSIONS ARE UNCHANGED BY THE POLISH PASS', () => {
     const declared = html.match(/box-sizing:\s*border-box/g) || [];
     assert.ok(declared.length >= 2, `${name} must declare border-box on canvas AND object, found ${declared.length}`);
   }
-  // And the margin the geometry implies is still uniform on both. Compared with a
-  // tolerance rather than rounded: the object width is ITSELF a rounding of
-  // 1080 - 2*86.4 = 907.2, so re-deriving the margin from it lands on 86.5.
-  for (const spec of [CARD_A, CARD_B]) {
-    assert.ok(Math.abs((spec.canvas.w - spec.card.w) / 2 - spec.margin) < 0.5);
-  }
+  // ── THE UNIFORM-MARGIN LOOP IS NOW CARD B ONLY ──
+  // It ran over both cards and asserted the margin the geometry implies is uniform
+  // on each. Card A has no margin and no canvas to derive one from, so including
+  // it would be asserting a property of a frame that no longer exists.
+  // Compared with a tolerance rather than rounded: the object width is ITSELF a
+  // rounding of 1080 - 2*86.4 = 907.2, so re-deriving lands on 86.5.
+  assert.ok(Math.abs((CARD_B.canvas.w - CARD_B.card.w) / 2 - CARD_B.margin) < 0.5);
 });
 
 test("CARD B'S SPACING RECLAIM DOES NOT REACH CARD A", () => {
@@ -1001,10 +1056,23 @@ test('§8.11 TWO EXPORT TARGETS: share is the canvas, download is the object', (
     const share = captureSpec('share', card);
     const dl = captureSpec('download', card);
 
-    // SHARE: the canvas node, at the ruled feed-native canvas size.
-    assert.equal(share.width, spec.canvas.w);
-    assert.equal(share.height, spec.canvas.h);
+    // ── CARD A'S TWO TARGETS NOW COINCIDE, AND THAT IS THE RULING ──
+    // With no canvas, the share capture and the download capture are the same
+    // 1080x1350 surface. THE TWO TARGETS STILL EXIST as separate node ids, because
+    // collapsing them into one asset is prompt R's COMMIT 3; this commit changes
+    // geometry only. Card B is unaffected and keeps two genuinely different sizes.
+    //
+    // THIS TEST WAS NOT IN R'S LIST OF DYING ASSERTIONS. It broke at runtime, via
+    // `exportCards.js` reading `spec.canvas` through an alias, which no grep for
+    // `CARD_A.canvas` reaches.
+    const canvasDims = spec.canvas ?? spec.card;
+    assert.equal(share.width, canvasDims.w);
+    assert.equal(share.height, canvasDims.h);
     assert.ok(!share.nodeId.endsWith(OBJECT_ID_SUFFIX), 'share must capture the canvas');
+    if (!spec.canvas) {
+      assert.equal(share.width, dl.width, 'Card A: share and download are one surface now');
+      assert.equal(share.height, dl.height);
+    }
 
     // DOWNLOAD: the object node, at the object's own size, and no field.
     assert.equal(dl.width, spec.card.w);
@@ -1032,10 +1100,20 @@ test('§8.11 TWO EXPORT TARGETS: share is the canvas, download is the object', (
     const html = renderToStaticMarkup(React.createElement(C, { data, id: 'probe' }));
     assert.ok(html.includes('id="probe"'), `Card ${card} canvas has no id`);
     assert.ok(html.includes(`id="probe${OBJECT_ID_SUFFIX}"`), `Card ${card} object has no id`);
-    // The object must be the one carrying the radius, or the crop has no corners
-    // to make transparent.
+    // ── THE RADIUS CLAIM IS CARD B'S NOW ──
+    // It read: the object must be the one carrying the radius, or the crop has no
+    // corners to make transparent. That reasoning is entirely about a rounded
+    // object cropped out of a mat, which is Card B. Card A is square and fully
+    // opaque by the 2026-08-31 ruling, so it HAS no transparent corners to
+    // preserve - asserting it carried a radius would be asserting the mat.
     const obj = html.slice(html.indexOf(`id="probe${OBJECT_ID_SUFFIX}"`));
-    assert.match(obj.slice(0, obj.indexOf('>')), new RegExp(`border-radius:${RADIUS}px`));
+    const decl = obj.slice(0, obj.indexOf('>'));
+    const spec = card === 'A' ? CARD_A : CARD_B;
+    if (spec.canvas) {
+      assert.match(decl, new RegExp(`border-radius:${RADIUS}px`));
+    } else {
+      assert.match(decl, /border-radius:0/, 'Card A is square: it is the export surface');
+    }
   }
 });
 

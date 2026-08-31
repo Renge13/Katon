@@ -45,6 +45,7 @@
     "preview:cards": "node scripts/card-preview.mjs",
     "measure:card-tags": "node scripts/measure-card-tags.mjs",
     "audit:card-contrast": "node scripts/audit-card-contrast.mjs",
+    "gate:card-b": "node scripts/gate-card-b-identity.mjs",
     "audit:card-budget": "node scripts/audit-card-budget.mjs",
     "probe:card-export": "node scripts/probe-card-export.mjs",
     "serve:reports": "node scripts/serve-reports.mjs",

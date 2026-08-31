@@ -9,8 +9,15 @@
 // needs two targets rather than one changed target, because the field is not
 // decoration — it is what makes the shared file feed-safe.
 //
-//   SHARE     the canvas.  A 1080x1440 (3:4), B 1080x1920 (9:16).  For posting.
-//   DOWNLOAD  the object.  A 907x1267,        B 907x1747.          For keeping.
+//   SHARE     the canvas.  A 1080x1350 (4:5), B 1080x1920 (9:16).  For posting.
+//   DOWNLOAD  the object.  A 1080x1350,       B 907x1747.          For keeping.
+//
+// CARD A'S TWO ROWS ARE NOW THE SAME SURFACE (prompt R commit 1). It has no mat,
+// so there is no field to keep and nothing to crop away - the share and the
+// download are the same 1080x1350 pixels reached through two different node ids.
+// COLLAPSING THEM INTO ONE ASSET IS COMMIT 3, not this commit; the ids and the
+// two-target contract are untouched here so the export path keeps working while
+// the geometry moves.
 //
 // ── WHY BOTH, AND WHY THE DOWNLOAD CANNOT REPLACE THE SHARE ──
 // The object alone is 63:88 = 0.716, which is neither 3:4 nor 4:5. Post that and
@@ -53,13 +60,26 @@ import { CARD_A, CARD_B, OBJECT_ID_SUFFIX } from './Card.js';
  */
 export function captureSpec(kind, card, id = card === 'A' ? 'card-a' : 'card-b') {
   const spec = card === 'A' ? CARD_A : CARD_B;
+  // ── CARD A HAS NO CANVAS SINCE PROMPT R COMMIT 1 ──
+  // The share capture still addresses the outer node, which now collapses onto the
+  // object at the same size, so a share export of Card A is 1080x1350 and is the
+  // same pixels as its download. THE TWO TARGETS STILL EXIST AND STILL DIFFER FOR
+  // CARD B, which is why this is a fallback rather than a rewrite: collapsing the
+  // two into one asset is prompt R's COMMIT 3, and doing it here would put an
+  // export-format change inside a commit whose subject is geometry.
+  //
+  // FOUND AT RUNTIME, NOT BY THE GREP R PRESCRIBED. R says to find every consumer
+  // of `CARD_A.canvas` before editing the constant; this one reads `spec.canvas`
+  // through an alias, so no grep for `CARD_A.canvas` reaches it. Recorded because
+  // the next session will be told to grep for the same thing.
+  const canvas = spec.canvas ?? spec.card;
   if (kind === 'share') {
     return {
       kind, card,
       // The canvas node itself: the field is the point.
       nodeId: id,
-      width: spec.canvas.w,
-      height: spec.canvas.h,
+      width: canvas.w,
+      height: canvas.h,
       // PNG throughout. The share export has no transparency to preserve, but one
       // format for both keeps the pipeline single-purpose.
       type: 'png',

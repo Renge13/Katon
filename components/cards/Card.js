@@ -23,12 +23,20 @@
 //                unchanged — the boxed pillar cells, the bars and the type scale
 //                all already matched the reference.
 //
-// ── GEOMETRY, LOCKED, AND NOT TOUCHED BY THIS PASS ─────────
-// Card A is a 63:88 card OBJECT floating on a 3:4 feed-safe canvas. A 3:4 canvas
-// and a 63:88 card admit exactly ONE uniform margin: solve
-// (1080-2m)/(1440-2m) = 63/88 and m = 86.4, card 907 x 1267. Card B is 1080x1920
-// (9:16) — taller is the exclusivity signal. Radius 40, padding 72, border-box on
-// both boxes. Asserted in tests/card.spec.mjs against the rendered markup.
+// ── GEOMETRY: THE TWO CARDS NO LONGER SHARE A FRAME (2026-08-31) ──
+// CARD A IS THE EXPORT: 1080x1350 (4:5), full-bleed, opaque, SQUARE corners, no
+// mat, no rim, no shadow.
+// CARD B IS UNCHANGED: a 907x1747 object floating on its own 1080x1920 (9:16)
+// canvas at a uniform 86.4 margin - taller is the exclusivity signal.
+// Padding 72 and border-box on both. RADIUS 40 is CARD B ONLY now.
+//
+// Until prompt R commit 1 this described ONE shared frame: Card A was a 63:88
+// object on a 3:4 canvas, and the margin was the single value satisfying both
+// ratios ((1080-2m)/(1440-2m) = 63/88, m = 86.4). Card B inherited that margin.
+// Card A's half of that is gone and the inheritance inverts (see CARD_B below).
+//
+// Asserted in tests/card.spec.mjs against the rendered markup; Card B's pixels
+// are held against a committed baseline by scripts/gate-card-b-identity.mjs.
 //
 // THE GRADIENT SYSTEM IS ALSO UNCHANGED: flat canvas, gradient object, three
 // stops stepping AWAY from the ink by GRADIENT_STOPS. The finish sits ON that,
@@ -74,16 +82,40 @@ import { HAN_FAMILY, hanFontFaceCss } from '../../lib/card/hanFont.js';
 const E = React.createElement;
 
 // ── Canvas and object, in export pixels ────────────────────
-// CARD_A's three numbers are all ruled: the canvas, the margin the 63:88 ratio
-// forces, and the object that follows from them.
+// CARD_A HAS ONE NUMBER PAIR NOW and it is ruled: 1080x1350. It used to have
+// three - a canvas, the margin the 63:88 ratio forced, and the object that
+// followed - and all three went with the mat.
 //
 // CARD_B's CANVAS is ruled (1080x1920) and its OBJECT IS NOT. The 08-03 ruling
-// sizes Card B and says nothing about a floating object, so the same uniform
-// 86.4 margin is carried over for family resemblance and the resulting 907x1747
-// is a CONSEQUENCE, not a second ratio ruling.
-export const CARD_A = { canvas: { w: 1080, h: 1440 }, margin: 86.4, card: { w: 907, h: 1267 } };
+// sizes Card B and says nothing about a floating object, so a uniform 86.4 margin
+// gives 907x1747 as a CONSEQUENCE, not as a second ratio ruling. That margin was
+// borrowed from Card A; it is Card B's own literal from 2026-08-31.
+// ── CARD A IS THE EXPORT, 1080x1350, RULED 2026-08-31 (prompt R commit 1) ──
+// It has NO CANVAS AND NO MARGIN any more. The 63:88 object floating on a 3:4 mat
+// is gone: full-bleed, fully opaque, square corners, no mat, no rim, no shadow.
+// `docs/content/card-polish-spec.md` §10 is the authority and
+// `docs/prompts/R-card-a-4x5.md` is the build.
+//
+// THE THREE NUMBERS THAT USED TO BE HERE WERE ALL RULED TOO, and this reverses
+// the 2026-08-03 ruling rather than drifting from it. `tests/card.spec.mjs` used
+// to carry `assert.notEqual(CARD_A.canvas.h, 1350)`, written so "a session that
+// finds 4:5 in an older doc sees the reversal fail a test". That guard did its job
+// for four weeks; it is now replaced by its mirror rather than deleted, so the
+// same protection runs in the new direction.
+//
+// WHAT THE MEASURE GAINS, and it is the reason PAD was ruled at 0% added padding:
+// `PADDING` stays 72, held absolute, so the inner measure goes 763 -> 936. The
+// frame grows 19.1% and the text measure grows 22.7%.
+export const CARD_A = { card: { w: 1080, h: 1350 } };
 // `padY` — CARD B ONLY, and it is the largest single item in the 2026-08-26
 // spacing reclaim. See RECLAIMED_B for the whole ledger and the measurement.
+//
+// ── 86.4 IS NOW CARD B'S OWN LITERAL, NOT A BORROWED ONE ──
+// It was carried over from Card A for family resemblance, and §10 states the
+// consequence plainly: "that inheritance direction now has to invert." Card A has
+// no margin to inherit FROM. The value is unchanged to the digit - Card B is
+// untouched by prompt R, and `scripts/gate-card-b-identity.mjs` proves it in
+// pixels rather than in prose - but it is now sourced here, where it is used.
 export const CARD_B = { canvas: { w: 1080, h: 1920 }, margin: 86.4, card: { w: 907, h: 1747 }, padY: 56 };
 
 export const RADIUS = 40;
@@ -945,7 +977,20 @@ function Sheen({ token }) {
  * new colour and the original objection does not reach it.
  */
 function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
-  const { canvas, card } = spec;
+  const { card } = spec;
+  // ── FULL-BLEED WHEN THE SPEC HAS NO CANVAS (prompt R commit 1) ──
+  // Card A lost its mat, so the object IS the export surface. The outer box
+  // COLLAPSES ONTO the object rather than being deleted here: both export targets
+  // are addressed by id (`id` for the canvas, `id-object` for the object) and
+  // `components/cards/exportCards.js` queries both. Collapsing the DOM is prompt
+  // R's COMMIT 3, "the export collapse", and doing it here would break the export
+  // path inside a commit whose subject is geometry.
+  //
+  // So the two boxes remain and become the same size. The outer one draws no
+  // visible pixel of its own: the object covers it exactly, opaquely, with square
+  // corners, which is what "full-bleed, no mat" means in a two-box DOM.
+  const canvas = spec.canvas ?? card;
+  const bleeds = !spec.canvas;
   const px = (n) => n * scale;
   const ground = `linear-gradient(168deg, ${GRADIENT_STOPS.map((s, i) =>
     `${stepAway(token.field, token.ink, s)} ${[0, 55, 100][i]}%`).join(', ')})`;
@@ -976,7 +1021,11 @@ function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
       style: {
         boxSizing: 'border-box',
         width: px(card.w), height: px(card.h), background: ground,
-        borderRadius: px(RADIUS), position: 'relative', overflow: 'hidden',
+        // SQUARE ON CARD A, ruled. A radius is what makes an object read as a card
+        // sitting ON something; with the mat gone there is nothing for it to sit
+        // on, and a rounded corner would show the canvas behind it - the exact mat
+        // §10 removes, reintroduced four corners at a time.
+        borderRadius: bleeds ? 0 : px(RADIUS), position: 'relative', overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
         // VERTICAL PADDING IS PER-SPEC; HORIZONTAL IS NOT. `spec.padY` lets Card B
         // buy back frame space without narrowing the text measure - a narrower
