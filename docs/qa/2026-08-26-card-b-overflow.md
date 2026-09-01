@@ -167,6 +167,53 @@ durable answer is a layout that absorbs length, not a tighter fit.** The probe n
 flags any chart under 60px of slack in orange so the margin is visible rather than
 rediscovered.
 
+### WHAT CAN SPEND THE 7px - SEVEN SURFACES, NOT THREE
+
+**The list of three is the one `lib/card/cardData.js` names directly, and it is
+incomplete. Three more reach the card indirectly, and one of them produced the
+tightest case in the whole sweep.** A content tranche needs the full list, because
+the three that are easy to find are not the three most dangerous.
+
+| surface | where it lands on Card B | how it spends slack |
+|---|---|---|
+| `bintang.label_meaning` (`cardData.js:110`) | the badge meanings | the biggest block on the card; 114 to 344 chars across two badges |
+| `bintang.name_id` (`cardData.js:110`) | badge labels, and dynamic tags | a longer label wraps the badge heading |
+| `tag_arketipe` (`cardData.js:144`) | the three fixed tags | a longer tag wraps the tag row |
+| `salah_dikira.line` (`cardData.js:149`) | the hook | one extra wrapped line is ~59px, eight times the slack |
+| **`aspek.name_id`** (`lib/semantic/index.js:233`, `facts.js:367-373`) | **TWO surfaces** - the Aspek line under the headline, AND the dynamic tag row | `dynamicTags` takes `f.label`, and a convergence fact's label is its aspek entry's `name_id` via `contentFrom`. **Nothing in `lib/card/` mentions `GLOSSARY.aspek`, so a grep of the card layer misses it entirely** |
+| **`arketipe.name_en`** (`lib/semantic/index.js:231`) | **the headline** | **by WORD COUNT, not length.** `splitName` sends a leading article to the kicker and wraps the rest, so "The Morning Dew" draws MORNING / DEW on two lines where "The Sun" draws one - about 100px. 癸 is the only two-word head today and it is the 7px case. Renaming "The Sun" to "The Rising Sun" would clip the paid card, and no length ceiling anywhere would notice |
+| `arketipe.name_id` (`lib/semantic/index.js:230`) | Card B's kicker (EMBUN, MATAHARI) | one line, low risk, frozen for completeness |
+
+**`spouse_palace` and `kekuatan` do NOT reach either card.** Verified by grep over
+`lib/card/` and `components/cards/` - zero hits - which is what makes prompt M's
+tranche safe against this budget. It is now asserted in a test rather than
+remembered.
+
+### AND SOMETHING FAILS AUTOMATICALLY WHEN IT IS SPENT
+
+7px only protects the card if spending it breaks the build. The layout sweep
+cannot run in `npm test` - it needs a real layout engine and the real font,
+because line breaking is the whole question, and adding a headless browser to CI
+for one check was considered and not taken.
+
+**But the RISK is checkable in node.** The sweep measures the worst card the
+current glossary can produce, so if no string that reaches Card B grows past what
+was measured, the worst case cannot get worse. `tests/card-budget.spec.mjs`
+freezes all seven surfaces at their measured values and runs in `npm test`. It
+fails the moment a content tranche spends the slack, and its message names the
+re-calibration command rather than reading as a bug.
+
+It was shown to fail before it was trusted, on both shapes of failure:
+
+```
+bintang.桃花.label_meaning is 315 chars, over the measured 186.
+arketipe.丙.name_en now splits to 2 headline word(s), over the measured 1.
+```
+
+The second is the one a length gate could never catch. It also carries a
+completeness tripwire: if `cardData.js` starts reading a glossary section that is
+not budgeted, that test fails until the section is added deliberately.
+
 ## 7. THE TWO TIGHTEST CARDS, DRAWN
 
 Captured through the real capture path and read, not inferred from numbers.
