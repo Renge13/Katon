@@ -73,7 +73,24 @@ A second thing, smaller: a DANGLING CODE CITATION was corrected in the "Read, in
 named `tests/card-budget.spec.mjs`, which exists only on unmerged #77. The repo convention is that a
 code-fact in a doc carries the command that produced it; a citation to a file that does not exist is
 that rule failing quietly, and it survived because nothing in CI reads this file.
--->
+
+2026-08-31: prompt R landed commits 1 to 4 and this pointer moved in the SAME PASS as commit 4 - the
+08-07 rule applied on purpose, following prompt Q's commit 6 precedent. LIVE STATE was read in the
+same pass per the 08-29 rule, and it was stale in exactly the way that rule predicts: its shareable
+row still read "1080x1440 share capture", which commit 3 made false. It was corrected in commit 3
+itself rather than here, because that is the commit that changed what a reader gets.
+
+What is new and belongs here: **a pointer must say what a later session must NOT redo.** R's own
+handover had to spend a paragraph telling this session not to re-sweep a settled watermark offset and
+not to invent replacement spacing values - both already measured and ruled, and neither written
+anywhere a session would look. So THE CURRENT WORK now carries an explicit "must not redo" block. A
+pointer that lists only what is DONE invites the next session to re-derive what is SETTLED, which
+costs a round and can quietly move a ruled number.
+
+A second thing, smaller: the dangling citation corrected in "Read, in order" was corrected ON THIS REF
+and says so. It names line 51 of `package.json` on `feat/card-a-4x5`; the same entry is line 56 on
+`feat/demand-test`. That is ledger row 44 in one line - a repo claim carries its ref, and a line
+number without one is a claim about a file that may not be the file being read.-->
 
 # NEXT
 
@@ -83,23 +100,33 @@ that rule failing quietly, and it survived because nothing in CI reads this file
    MEASUREMENTS (**read the 08-11 baseline row FIRST — a stored gate row is not a valid comparator
    for a later change**), and THE INTERIM STATE (Xendit go-live status — read it before touching
    anything near the paid path).
-3. `prompts/Q-demand-test.md` — **RELEASED and IN PROGRESS; see THE CURRENT WORK below.**
-   `prompts/M-tranche3.md` is behind it AND behind the whole Card A chain (commits 0 and 1
-   docs-only, **commits 2 to 4 touch `glossary.json` and `facts.js`**, and those now also have to
-   clear the card budget gate — Card B has 7px of slack and a glossary edit can spend it;
-   `spouse_palace` and `kekuatan` do not reach the card, so tranche 3 as scoped is clear).
-   **CITATION CORRECTED 2026-08-31:** this line named `tests/card-budget.spec.mjs`, which does not
-   exist on `main` — it lives only on the unmerged `fix/card-budget-tripwire` (#77, PARKED), so the
-   reference was dangling and would have sent a session looking for a file it could not find. The
-   gate that DOES exist and does run is `scripts/audit-card-budget.mjs`, wired as `audit:card-budget`
-   and inside `npm test`:
+3. `prompts/R-card-a-4x5.md` — **THE CURRENT WORK. RELEASED 2026-08-31, commits 1 to 4 landed;
+   see THE CURRENT WORK below.**
+4. `prompts/Q-demand-test.md` — **DONE. Merged as #84.** All six commits plus the ruled copy. What it
+   still OWES is not code: migration `0009` is applied by hand in the Supabase SQL editor BEFORE the
+   deploy that reads it, and `upcoming_seen` firing on scroll is proven on localhost and not yet on
+   production.
+   `prompts/M-tranche3.md` is queued behind BOTH (commits 0 and 1 docs-only, **commits 2 to 4 touch
+   `glossary.json` and `facts.js`**, and those now also have to clear the card budget gate — Card B
+   has 7px of slack and a glossary edit can spend it; `spouse_palace` and `kekuatan` do not reach the
+   card, so tranche 3 as scoped is clear).
+   **THE CITATION RESOLVES AGAIN, 2026-09-01.** This line named `tests/card-budget.spec.mjs`, which
+   existed only on the unmerged `fix/card-budget-tripwire`, so it was dangling and was corrected on
+   2026-08-31 to point at `audit:card-budget` instead. **#77 merged as `96bfca6` and the file is now
+   on `main`**, so the original citation is live and BOTH gates exist:
 
    ```
-   $ ls tests/card-budget*            -> no such file
-   $ grep -n audit:card-budget package.json
-   56:    "audit:card-budget": "node scripts/audit-card-budget.mjs",
+   $ ls tests/card-budget.spec.mjs                    # ref main, post-#77
+   tests/card-budget.spec.mjs
+   $ grep -n '"test:card-budget"\|"audit:card-budget"' package.json
+   54:    "test:card-budget": "node --test tests/card-budget.spec.mjs",
+   62:    "audit:card-budget": "node scripts/audit-card-budget.mjs",
    ```
-   (`prompts/P-card-frame.md` is CLOSED, not queued — it returns with the 1080x1350 design pass.)
+
+   The 08-31 correction is kept in this file's design note rather than deleted: it was true for six
+   days, and a citation that was dangling and is now live is exactly the state a later reader needs
+   to be able to tell from one that was never checked.
+   (`prompts/P-card-frame.md` is CLOSED, not queued — it returned WITH the design pass, as prompt R.)
 
 # THE PROMOTION LANDED, 2026-08-23. THE PRODUCT IS LIVE.
 
@@ -126,7 +153,55 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
-## THE CURRENT WORK, 2026-08-29 - THE FLOOR'S HEADINGS, ON A BRANCH
+## THE CURRENT WORK, 2026-08-31 - PROMPT R, COMMITS 1 TO 4, ON A BRANCH
+
+**`feat/card-a-4x5`, NOT MERGED.** Check with `git log --oneline main..feat/card-a-4x5` before
+trusting this line. `docs/prompts/R-card-a-4x5.md` is the build and is on `main` at `473aeb5`.
+
+**CARD A IS THE EXPORT.** 1080x1350 (4:5), full-bleed, fully opaque, square corners, no mat, no rim,
+no shadow, one export asset instead of two. `PADDING` held absolute at 72, so the inner measure went
+763 -> 936: frame +19.1%, measure +22.7%.
+
+| | |
+|---|---|
+| `892f5e0` | 1 - geometry; seven dying assertions, not the five R listed |
+| `7100f1a` | 2 - recomposition; the real-fit gate and the watermark re-derived |
+| `99482f2` | a defect from commit 1: the free reading page threw. See below |
+| `a4dc5e7` | 3 - the export collapses to one asset; LIVE STATE corrected |
+| *this one* | 4 - instruments, doc banners, this pointer |
+
+**TWO MEASUREMENTS BACK IT AND BOTH ARE ARTIFACTS**, not numbers in a commit message:
+`docs/qa/2026-08-31-head-fit.md` and `docs/qa/2026-08-31-watermark-fit.md`.
+
+### WHAT A LATER SESSION MUST NOT REDO
+
+- **The watermark offset is SETTLED at `{ top: -128, right: -144 }`.** Re-derived across all ten
+  glyphs on the new frame; the legal band is `(-186, -128]` and the bound is set by 癸 alone, whose
+  tag row moved 404 -> 529 in commit 2 itself. **Do not sweep it again.** If the crop reads weak on a
+  real social surface after export validation, that is a UX observation for Reyner.
+- **The kicker (14) and Aspek (25) gaps stay.** They are relative spacing between adjacent elements,
+  the approved composition supplies no replacements, and inventing numbers there is composing.
+- **`0.815` must not come back.** The measure is 936 because it is `1080 - 2 x 72`. It was previously
+  the denominator of a ratio off a different card. Same number, no relationship.
+
+### THE DEFECT WORTH READING, because the instrument that missed it is still the instrument
+
+Commit 1 removed `CARD_A.canvas`. `components/Funnel.jsx`'s `<ScaledCard>` read `spec.canvas.w`
+through an alias, so **no grep for `CARD_A.canvas` reached it**, and it threw on the FREE READING PAGE
+while `npm test` reported 30/30 - that file is JSX behind `'use client'` and the suite cannot render
+it. Fixed in `99482f2` by routing every consumer through `exportSize(spec)` and guarding the direct
+read in `tests/card.spec.mjs`. **The lesson is that the prescribed grep could not have worked**, not
+that someone forgot to run it.
+
+### STILL OPEN AFTER R
+
+- **`scripts/probe-card-export.mjs` REFUSES CARD A** and says so when run. Its Card A assertions test
+  the field margin, the object inset and alpha corners - all statements about the mat. Card B is
+  still probed. Reworking Card A's rows against the new model is real work and is not R's.
+- **Export validation on the REAL social surfaces** is the next thing, and it is what the chain below
+  says it is.
+
+## SUPERSEDED - THE CURRENT WORK, 2026-08-29 - THE FLOOR'S HEADINGS, ON A BRANCH
 
 **`fix/floor-heading-stutter`, head `d19ba69`, NOT MERGED.** Check with `git log --oneline main..`
 before trusting this line; if it returns nothing the branch has landed and this pointer is stale.

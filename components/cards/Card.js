@@ -23,12 +23,20 @@
 //                unchanged — the boxed pillar cells, the bars and the type scale
 //                all already matched the reference.
 //
-// ── GEOMETRY, LOCKED, AND NOT TOUCHED BY THIS PASS ─────────
-// Card A is a 63:88 card OBJECT floating on a 3:4 feed-safe canvas. A 3:4 canvas
-// and a 63:88 card admit exactly ONE uniform margin: solve
-// (1080-2m)/(1440-2m) = 63/88 and m = 86.4, card 907 x 1267. Card B is 1080x1920
-// (9:16) — taller is the exclusivity signal. Radius 40, padding 72, border-box on
-// both boxes. Asserted in tests/card.spec.mjs against the rendered markup.
+// ── GEOMETRY: THE TWO CARDS NO LONGER SHARE A FRAME (2026-08-31) ──
+// CARD A IS THE EXPORT: 1080x1350 (4:5), full-bleed, opaque, SQUARE corners, no
+// mat, no rim, no shadow.
+// CARD B IS UNCHANGED: a 907x1747 object floating on its own 1080x1920 (9:16)
+// canvas at a uniform 86.4 margin - taller is the exclusivity signal.
+// Padding 72 and border-box on both. RADIUS 40 is CARD B ONLY now.
+//
+// Until prompt R commit 1 this described ONE shared frame: Card A was a 63:88
+// object on a 3:4 canvas, and the margin was the single value satisfying both
+// ratios ((1080-2m)/(1440-2m) = 63/88, m = 86.4). Card B inherited that margin.
+// Card A's half of that is gone and the inheritance inverts (see CARD_B below).
+//
+// Asserted in tests/card.spec.mjs against the rendered markup; Card B's pixels
+// are held against a committed baseline by scripts/gate-card-b-identity.mjs.
 //
 // THE GRADIENT SYSTEM IS ALSO UNCHANGED: flat canvas, gradient object, three
 // stops stepping AWAY from the ink by GRADIENT_STOPS. The finish sits ON that,
@@ -74,16 +82,65 @@ import { HAN_FAMILY, hanFontFaceCss } from '../../lib/card/hanFont.js';
 const E = React.createElement;
 
 // ── Canvas and object, in export pixels ────────────────────
-// CARD_A's three numbers are all ruled: the canvas, the margin the 63:88 ratio
-// forces, and the object that follows from them.
+// CARD_A HAS ONE NUMBER PAIR NOW and it is ruled: 1080x1350. It used to have
+// three - a canvas, the margin the 63:88 ratio forced, and the object that
+// followed - and all three went with the mat.
 //
 // CARD_B's CANVAS is ruled (1080x1920) and its OBJECT IS NOT. The 08-03 ruling
-// sizes Card B and says nothing about a floating object, so the same uniform
-// 86.4 margin is carried over for family resemblance and the resulting 907x1747
-// is a CONSEQUENCE, not a second ratio ruling.
-export const CARD_A = { canvas: { w: 1080, h: 1440 }, margin: 86.4, card: { w: 907, h: 1267 } };
+// sizes Card B and says nothing about a floating object, so a uniform 86.4 margin
+// gives 907x1747 as a CONSEQUENCE, not as a second ratio ruling. That margin was
+// borrowed from Card A; it is Card B's own literal from 2026-08-31.
+// ── CARD A IS THE EXPORT, 1080x1350, RULED 2026-08-31 (prompt R commit 1) ──
+// It has NO CANVAS AND NO MARGIN any more. The 63:88 object floating on a 3:4 mat
+// is gone: full-bleed, fully opaque, square corners, no mat, no rim, no shadow.
+// `docs/content/card-polish-spec.md` §10 is the authority and
+// `docs/prompts/R-card-a-4x5.md` is the build.
+//
+// THE THREE NUMBERS THAT USED TO BE HERE WERE ALL RULED TOO, and this reverses
+// the 2026-08-03 ruling rather than drifting from it. `tests/card.spec.mjs` used
+// to carry `assert.notEqual(CARD_A.canvas.h, 1350)`, written so "a session that
+// finds 4:5 in an older doc sees the reversal fail a test". That guard did its job
+// for four weeks; it is now replaced by its mirror rather than deleted, so the
+// same protection runs in the new direction.
+//
+// WHAT THE MEASURE GAINS, and it is the reason PAD was ruled at 0% added padding:
+// `PADDING` stays 72, held absolute, so the inner measure goes 763 -> 936. The
+// frame grows 19.1% and the text measure grows 22.7%.
+export const CARD_A = { card: { w: 1080, h: 1350 } };
+
+/**
+ * THE SURFACE A CARD EXPORTS AS, for a spec that may or may not have a canvas.
+ *
+ * ── THIS EXISTS BECAUSE ITS ABSENCE SHIPPED A BROKEN PAGE ──
+ * Prompt R commit 1 removed `CARD_A.canvas`, and R says to find every consumer
+ * before editing the constant because "a grep is cheaper than a runtime surprise".
+ * The prescribed grep - for `CARD_A.canvas` - CANNOT REACH THE CONSUMERS THAT
+ * MATTER, because they take the spec as an argument and read `spec.canvas`:
+ *
+ *   components/cards/exportCards.js  captureSpec(kind, card)   caught by a test
+ *   components/Funnel.jsx            <ScaledCard spec={CARD_A}> CAUGHT IN A BROWSER
+ *
+ * The second threw `TypeError: Cannot read properties of undefined (reading 'w')`
+ * on the FREE READING PAGE while `npm test` reported 30/30, because no test can
+ * render that component - it is JSX behind `'use client'`, and plain `node --test`
+ * cannot parse it.
+ *
+ * So the fix is not another grep. Every consumer asks THIS function instead of
+ * destructuring, `tests/card.spec.mjs` forbids the direct read, and a spec without
+ * a canvas answers with its card rather than with `undefined`.
+ */
+export function exportSize(spec) {
+  return spec.canvas ?? spec.card;
+}
 // `padY` — CARD B ONLY, and it is the largest single item in the 2026-08-26
 // spacing reclaim. See RECLAIMED_B for the whole ledger and the measurement.
+//
+// ── 86.4 IS NOW CARD B'S OWN LITERAL, NOT A BORROWED ONE ──
+// It was carried over from Card A for family resemblance, and §10 states the
+// consequence plainly: "that inheritance direction now has to invert." Card A has
+// no margin to inherit FROM. The value is unchanged to the digit - Card B is
+// untouched by prompt R, and `scripts/gate-card-b-identity.mjs` proves it in
+// pixels rather than in prose - but it is now sourced here, where it is used.
 export const CARD_B = { canvas: { w: 1080, h: 1920 }, margin: 86.4, card: { w: 907, h: 1747 }, padY: 56 };
 
 export const RADIUS = 40;
@@ -617,6 +674,50 @@ const SCALE_A = { ...SCALE, badgeLabel: 30 };
 const SCALE_B = { ...SCALE, badgeLabel: 29 };
 
 /**
+ * ── THE HEADLINE'S THREE TYPE FACTS, EXPORTED SO THEY HAVE ONE SOURCE ──
+ *
+ * `scripts/measure-head-fit.mjs` renders these words in a real browser with real
+ * Archivo to decide whether any head overflows the measure. It has to declare the
+ * SAME size, weight and tracking that <Headline> declares, or it measures
+ * something the card does not draw - which is the characteristic failure of a
+ * measurement harness: being precisely wrong.
+ *
+ * So they are named here and read by both. A drift between the card and its own
+ * ruler is now impossible rather than merely unlikely.
+ */
+export const HEADLINE_SIZE = SCALE.headline;
+export const HEADLINE_WEIGHT = 800;
+export const HEADLINE_TRACKING = -0.7;
+
+/**
+ * Heads that genuinely overflow the measure at full size. MEASURED, NOT GUESSED.
+ *
+ * ── EMPTY, AND THAT IS THE 2026-08-31 RULING ──
+ * Reyner, prompt R section 0a: "Embun remains at 139 on the new 936px measure
+ * unless the rendered text actually fails to fit." Measured over all ten with
+ * `npm run measure:head-fit`: the widest head word is MOUNTAIN and it uses well
+ * under the measure, so nothing reduces. The numbers and their date live in
+ * `docs/qa/2026-08-31-head-fit.md`; they are not repeated here, because a
+ * measurement in a source file is rule 8's mistake one layer down.
+ *
+ * ── THE BRANCH STAYS. THAT IS ALSO THE RULING ──
+ * It is not scaffolding to delete now that the set is empty; it is the gate for
+ * the eleventh archetype name, or for a rename. What CHANGED is what fires it: a
+ * measured overflow instead of a word count.
+ *
+ * ── WHY A PINNED SET AND NOT A METRICS CALL AT RENDER TIME ──
+ * §0a: "Implement it as a measured fit, resolved once over all ten, and pinned -
+ * in `npm run preview:cards` or the card-budget harness, not as a metrics call
+ * during render." Card.js renders to markup that is captured later; there is no
+ * measurement pass at render time, and inventing one to answer a question about
+ * ten fixed strings is the expensive way round. Rule 24 fixes the set at ten.
+ */
+export const HEADS_THAT_OVERFLOW = Object.freeze(new Set([]));
+
+/** How much a head that overflows comes down by. Unchanged; only its trigger moved. */
+export const HEADLINE_OVERFLOW_FACTOR = 0.80;
+
+/**
  * ── CARD B'S VERTICAL RECLAIM, 2026-08-26. RULED BY REYNER ──
  *
  * WHAT WENT WRONG. Card B's object is a fixed-height column flex with
@@ -754,13 +855,46 @@ const YANG = new Set(['甲', '丙', '戊', '庚', '壬']);
  */
 export const WATERMARK_FILL = { yang: 0.18, yin: 0.14 };
 
-function Watermark({ stem, token, spec, px, foil }) {
+/**
+ * ── THE TWO PLACEMENTS, NAMED (prompt R commit 2, section 0b) ──
+ *
+ * CARD B IS UNTOUCHED at its 2026-08-14 values. CARD A's were RE-DERIVED on the
+ * 1080x1350 frame and are NOT the old numbers scaled: the worksheet's §2 banner
+ * forbids scaling old-frame export pixels into the new one, and the constraint in
+ * `card-polish-spec.md:153` is a RELATIONSHIP to the headline and the tag row -
+ * both of which moved, and neither proportionally to the card.
+ *
+ * Derived and checked with `npm run measure:watermark`, which renders each card
+ * twice - once with this node suppressed - and takes the bounding box of the
+ * differing pixels as the glyph's INK. The div box is not the ink box: at 864px
+ * with line-height 0.8 the box is 864x691 and the strokes sit inset from it by an
+ * amount that differs per stem, so measuring the div would answer a question
+ * nobody asked.
+ *
+ * The per-stem table lives in `docs/qa/2026-08-31-watermark-fit.md`.
+ *
+ * THE SIZE IS NOT HERE and is not re-derived: §0b approves it, and
+ * `spec.card.w * 0.80` follows the frame on its own (907 -> 1080 gives 864).
+ */
+export const WATERMARK_A = { top: -128, right: -144 };
+export const WATERMARK_B = { top: -105, right: -133 };
+
+function Watermark({ stem, token, spec, px, foil, offset }) {
   if (!stem) return null;
   const isYang = YANG.has(stem);
   const lightField = inkIsDark(token);
   const size = foil ? 0.69 : 0.80;
+  // `offset` is the measurement harness trying a candidate. Nothing in the app
+  // passes it, so the shipped cards always use the two constants above.
+  const off = offset ?? (foil ? WATERMARK_B : WATERMARK_A);
   return E('div', {
     'aria-hidden': 'true',
+    // A HANDLE FOR THE RULER, not for the reader. scripts/measure-watermark-fit.mjs
+    // renders the card twice - once with this node suppressed - and diffs the two
+    // to get the GLYPH INK bounding box, which is not the div box: at font-size 864
+    // with line-height 0.8 the box is 864x691 and the strokes sit inset from it by
+    // an amount that differs per stem. §10's constraint is about the ink.
+    'data-role': 'watermark',
     style: {
       position: 'absolute', pointerEvents: 'none', userSelect: 'none',
       fontFamily: HAN,
@@ -779,8 +913,8 @@ function Watermark({ stem, token, spec, px, foil }) {
       ...(foil && !lightField
         ? { textShadow: `0 ${px(2)}px 0 ${alpha(token.ink, 0.07)}, 0 -${px(2)}px 0 rgba(0,0,0,0.10)` }
         : null),
-      top: px(foil ? -105 : -128),
-      right: px(foil ? -133 : -144),
+      top: px(off.top),
+      right: px(off.right),
     },
   }, stem);
 }
@@ -959,8 +1093,21 @@ function Sheen({ token }) {
  * PER ARCHETYPE; the rim is the token's OWN INK at four alphas, so it costs no
  * new colour and the original objection does not reach it.
  */
-function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
-  const { canvas, card } = spec;
+function Canvas({ spec, token, scale, stem, foil, rimId, id, watermarkOffset, children }) {
+  const { card } = spec;
+  // ── FULL-BLEED WHEN THE SPEC HAS NO CANVAS (prompt R commit 1) ──
+  // Card A lost its mat, so the object IS the export surface. The outer box
+  // COLLAPSES ONTO the object rather than being deleted here: both export targets
+  // are addressed by id (`id` for the canvas, `id-object` for the object) and
+  // `components/cards/exportCards.js` queries both. Collapsing the DOM is prompt
+  // R's COMMIT 3, "the export collapse", and doing it here would break the export
+  // path inside a commit whose subject is geometry.
+  //
+  // So the two boxes remain and become the same size. The outer one draws no
+  // visible pixel of its own: the object covers it exactly, opaquely, with square
+  // corners, which is what "full-bleed, no mat" means in a two-box DOM.
+  const canvas = exportSize(spec);
+  const bleeds = !spec.canvas;
   const px = (n) => n * scale;
   const ground = `linear-gradient(168deg, ${GRADIENT_STOPS.map((s, i) =>
     `${stepAway(token.field, token.ink, s)} ${[0, 55, 100][i]}%`).join(', ')})`;
@@ -991,7 +1138,11 @@ function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
       style: {
         boxSizing: 'border-box',
         width: px(card.w), height: px(card.h), background: ground,
-        borderRadius: px(RADIUS), position: 'relative', overflow: 'hidden',
+        // SQUARE ON CARD A, ruled. A radius is what makes an object read as a card
+        // sitting ON something; with the mat gone there is nothing for it to sit
+        // on, and a rounded corner would show the canvas behind it - the exact mat
+        // §10 removes, reintroduced four corners at a time.
+        borderRadius: bleeds ? 0 : px(RADIUS), position: 'relative', overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
         // VERTICAL PADDING IS PER-SPEC; HORIZONTAL IS NOT. `spec.padY` lets Card B
         // buy back frame space without narrowing the text measure - a narrower
@@ -1012,7 +1163,7 @@ function Canvas({ spec, token, scale, stem, foil, rimId, id, children }) {
       // defect this replaced. Inside, both export targets carry it.
       E('style', { key: 'hanfont', dangerouslySetInnerHTML: { __html: hanFontFaceCss() } }),
       // Under everything, clipped by the object's own overflow.
-      E(Watermark, { key: 'wm', stem, token, spec, px, foil }),
+      E(Watermark, { key: 'wm', stem, token, spec, px, foil, offset: watermarkOffset }),
       foil && E(Sheen, { key: 'sheen', token }),
       children,
       // LAST, so the edge is over the content: a long line may not sit on top of
@@ -1066,7 +1217,17 @@ export function splitName(nameEn) {
 
 function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, kickerGap = 14, aspekGap = 25 }) {
   const { kicker, head } = splitName(data.nameEn);
-  const headSize = head.length > 1 ? sc.headline * 0.80 : sc.headline;
+  // ── A REAL-FIT GATE, NOT A WORD COUNT (ruled 2026-08-31, prompt R §0a) ──
+  // This read `head.length > 1 ? sc.headline * 0.80 : sc.headline` - a proxy for
+  // "this might be too wide" that is not even monotonic in width. MOUNTAIN is 8
+  // characters and rendered at FULL size; MORNING is 7 and was the one reduced.
+  // The proxy shrank the shorter word and left the longer one alone.
+  //
+  // Each head word gets its own block below, so a multi-word head never has to
+  // fit on one line and only the LONGEST WORD is ever constrained. That is why
+  // the set is keyed on words.
+  const overflows = head.some((w) => HEADS_THAT_OVERFLOW.has(String(w).toUpperCase()));
+  const headSize = overflows ? sc.headline * HEADLINE_OVERFLOW_FACTOR : sc.headline;
   return E('div', { style: { position: 'relative', display: 'flex', flexDirection: 'column' } },
     // Card A prints name_en ALONE — no Indonesian name, no ID eyebrow (08-03).
     // Card B may carry the Indonesian name; it is a document, not a share, and on
@@ -1090,9 +1251,10 @@ function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, 
     }, kicker),
     E('div', {
       key: 'en',
+      'data-role': 'headline',
       style: {
-        ...roleStyle('headline', palette), fontFamily: FONT, fontWeight: 800,
-        fontSize: px(headSize), lineHeight: 0.90, letterSpacing: px(-0.7),
+        ...roleStyle('headline', palette), fontFamily: FONT, fontWeight: HEADLINE_WEIGHT,
+        fontSize: px(headSize), lineHeight: 0.90, letterSpacing: px(HEADLINE_TRACKING),
         textTransform: 'uppercase',
       },
     }, head.map((w, i) => E('div', { key: i }, w))),
@@ -1117,6 +1279,7 @@ function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, 
 function Tags({ data, palette, px, sc, showDynamic, top = 31, rowGap = 14 }) {
   const base = { fontFamily: FONT, fontWeight: 650, fontSize: px(sc.tag), letterSpacing: px(3.4), textTransform: 'uppercase' };
   return E('div', {
+    'data-role': 'tags',
     style: { display: 'flex', flexWrap: 'wrap', gap: `${px(rowGap)}px ${px(32)}px`, marginTop: px(top), position: 'relative', ...base },
   },
     data.tags.fixed.map((t) => E('span', { key: `f-${t}`, style: roleStyle('tagFixed', palette) }, t)),
@@ -1344,7 +1507,7 @@ function PillarCells({ data, palette, token, px, sc, brass }) {
  * differentiating axis and giving Card A any of it puts the two cards back where
  * 08-14 found them.
  */
-export function CardA({ data, scale = 1, id = 'card-a' }) {
+export function CardA({ data, scale = 1, id = 'card-a', watermarkOffset }) {
   const token = tokenFor(data.stem);
   // 'A' — the flat field is the only ground here, so brass text is judged on it
   // and 甲 丁 戊 壬 keep their brass name. See brassTextFor.
@@ -1352,7 +1515,7 @@ export function CardA({ data, scale = 1, id = 'card-a' }) {
   const px = (n) => n * scale;
   const sc = SCALE_A;
 
-  return E(Canvas, { spec: CARD_A, token, scale, stem: data.stem, id },
+  return E(Canvas, { spec: CARD_A, token, scale, stem: data.stem, id, watermarkOffset },
     E(Headline, { key: 'h', data, palette, px, sc }),
     E(Hair, { key: 'r1', token, px, top: 47 }),
     // Three fixed trait words only. No dynamic Aspek — see <Tags>.
