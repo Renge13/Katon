@@ -21,7 +21,10 @@ a shareable card out. Target: Indonesian women, mid-20s to 40s.
 - **PAID, impulse (~19k)** = hi-res card + packaged PDF. An upsell offered AFTER the free reading
   lands. **Never a gate.**
 - **PAID, core** = COMPATIBILITY (you + one other person). The money engine. Price band to be
-  TESTED at 25–45k, not assumed at 80–99k.
+  TESTED at 25–49k, not assumed at 80–99k. (**25–45k until 2026-08-29**, widened by Reyner to match
+  the ruled ladder: mature Compat is 49.000 while its LAUNCH price is 39.000. A session that finds
+  49.000 in `lib/pricing.js` has found this ruling, not a defect. The ladder itself lives in
+  `docs/product/paid-product-map.md` `## RULED 2026-08-29`, never here — rule 8.)
 - Later: annual reading, parent→child, luck-pillar map. See `docs/product/paid-product-map.md`.
 
 ## STACK
@@ -113,10 +116,17 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     **THE CONSEQUENCE IS OPERATIONAL AND IT IS NOT SOFTENED.** With no second provider, a Gemini
     outage or an exhausted balance means a **100% floor rate** - every reader served module
     assembly. The floor IS the availability budget now. The 2026-08-12 credit-depletion incident
-    has no architectural mitigation any more; the replacement is a balance alert on the Gemini
-    account, which **does not exist yet** and sits in the deferred register with an owner and an
-    end condition. The transport retry inside Gemini stays: retrying a 503 against the same
-    provider is not failover and was kept deliberately.
+    has no architectural mitigation any more; the replacement is OPERATIONAL, and **its status lives
+    in `docs/PROGRESS.md`'s INTERIM REGISTER, never here.** The transport retry inside Gemini stays:
+    retrying a 503 against the same provider is not failover and was kept deliberately.
+
+    **WHY THE STATUS IS A POINTER (amended 2026-08-29, rule 8's principle applied to this rule).**
+    This paragraph used to assert that a balance alert *"does not exist yet and sits in the deferred
+    register"*. **Both halves went stale:** Reyner turned Gemini auto-reload ON on 2026-08-26, which
+    mitigates the depletion case, and the row was in the INTERIM register, not the deferred one. A
+    locked rule carries the DURABLE claim - one provider, so an outage is a 100% floor rate, and the
+    floor is the availability budget. It must not carry a status that a billing setting can falsify,
+    because nothing in CI reads this file and the staleness is invisible until someone acts on it.
 16. Every reading is **result-cached** on `hash(semantic_JSON + engine_version)` - deterministic
     after the first generation THAT PASSES STAGE 6. **Module-assembly floor results serve but are
     never persisted; the next request retries the render.** (Amended 2026-08-07, ratified by Reyner.

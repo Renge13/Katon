@@ -38,8 +38,37 @@
 import { useEffect, useRef, useState } from 'react';
 import { CardA, CardB, CARD_A } from './cards/Card.js';
 import { downloadCard } from './cards/exportCards.js';
+
+/**
+ * Fire one funnel counter. FIRE AND FORGET, DELIBERATELY.
+ *
+ * Four of the eight events happen only in the browser, so they need a request of
+ * their own. This one is never awaited for correctness and its failure is
+ * swallowed: a counter may not delay a download, block a render, or surface an
+ * error to a reader. `keepalive` so the card-download event survives the page
+ * being navigated away from immediately after.
+ *
+ * The server refuses any event name outside the client-fireable four - see
+ * `recordMirrorEvent`. This function does not need to know that list; it just
+ * must not be relied upon.
+ */
+function fireEvent(token, event, extra = null) {
+  if (!token) return;
+  try {
+    fetch(`/api/mirror/${token}/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // `extra` carries the ONE payload any client event has: the product on
+      // `interest_registered`. The server validates it against INTEREST_PRODUCTS
+      // and refuses anything else, so this is a convenience, not a trust boundary.
+      body: JSON.stringify({ event, ...(extra || {}) }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch { /* a counter never breaks the page */ }
+}
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
+import { UPCOMING_COPY } from '../lib/site/copy.js';
 import { formatIdr } from '../lib/site/format.js';
 
 const ANTICIPATION = ['Membaca tanggal lahirmu', 'Menyusun empat pilarmu', 'Menghitung keseimbangan energimu'];
@@ -716,12 +745,18 @@ function Reading({ reading, onReset, initialStage }) {
       {cardData && (
         <Section eyebrow="Simpan sebagai kartu" style={{ marginTop: 52 }}>
           <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>Satu kartu ringkas tentang dirimu, untuk disimpan atau dibagikan.</p></Reveal>
-          <ShareCardA data={cardData} />
+          <ShareCardA data={cardData} token={reading.token} />
         </Section>
       )}
 
       {/* the offer. AFTER the reading, never in front of it. */}
       <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
+
+      {/* THE UPCOMING BLOCK, AND IT SITS BELOW THE ARTIFACT DECISION ON PURPOSE.
+          Ruled order: Mirror -> Artifact decision -> Compat / Annual interest.
+          One live purchase CTA per moment; these two are secondary signals and
+          must never read as a second thing to buy. */}
+      <div style={{ marginTop: 44 }}><Upcoming reading={reading} /></div>
     </div>
   );
 }
@@ -768,13 +803,18 @@ function formatCardDate(iso) {
  * it - and an auto-crop takes the top and bottom of a card whose headline is at the
  * top and whose seal is at the bottom.
  */
-function ShareCardA({ data }) {
+function ShareCardA({ data, token }) {
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   async function save() {
     setSaving(true); setFailed(false);
     try {
       await downloadCard('share', 'A', { id: 'card-a', filename: `katon-${(data.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
+      // COUNTED ONLY ON SUCCESS. A capture that threw produced no file, and the
+      // share-rate denominator must not include downloads that did not happen -
+      // this button shipped BLANK once (#74), which is exactly the failure a
+      // fire-on-click counter would have hidden behind a healthy-looking rate.
+      fireEvent(token, 'card_downloaded');
     } catch {
       setFailed(true);
     }
@@ -819,6 +859,19 @@ function ShareCardA({ data }) {
 function Offer({ reading, initialStage }) {
   // offer | pending | delivered
   const [stage, setStage] = useState(initialStage || 'offer');
+  // `offer_seen` FIRES WHEN THE OFFER IS ACTUALLY OFFERED, not when the component
+  // mounts in some other stage. A reader returning to a delivered reading is not
+  // being shown an offer, and counting her would inflate the denominator that
+  // artifact conversion divides by. The ref keeps a re-render from re-firing;
+  // the unique index would dedupe it anyway, but a counter that spams its own
+  // endpoint is still wrong.
+  const seenRef = useRef(false);
+  useEffect(() => {
+    if (seenRef.current) return;
+    if ((initialStage || 'offer') !== 'offer') return;
+    seenRef.current = true;
+    fireEvent(reading?.token, 'offer_seen');
+  }, [reading?.token, initialStage]);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [busy, setBusy] = useState(false);
   const pollRef = useRef(null);
@@ -886,6 +939,184 @@ function Offer({ reading, initialStage }) {
               SITE_COPY.harga.artifact.noteAfter, which is where it already carries
               Reyner's approval. */}
           <div style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(234,241,242,.7)', marginTop: 14, textAlign: 'center' }}>Melewatinya tidak mengurangi apa pun dari bacaan gratismu.</div>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+/* ---------------- Upcoming: two products, no checkout ---------------- */
+/**
+ * THE SECOND DENOMINATOR, AND IT IS NOT A STORE.
+ *
+ * Prompt Q commit 4. Compat and Annual are priced (lib/pricing.js) and NOT
+ * sellable (SELLABLE_SKUS is ['artifact']). Nothing here calls /api/pay, and if a
+ * future edit makes either product reachable by that route, that edit is wrong -
+ * taking money for an unbuilt product is the failure the sellable list exists to
+ * prevent.
+ *
+ * ── EVERY STRING HERE IS UNRULED ──
+ * They come from UPCOMING_COPY and each one is currently a visible
+ * `@@UNRULED: ...@@` placeholder. Reyner is the sole authority on Indonesian
+ * register and had not ruled this block; the structure ships so commits 5 and 6
+ * are not blocked, and scripts/check-unruled-copy.mjs refuses a PRODUCTION build
+ * while a placeholder survives. Preview builds pass, because he has to see it to
+ * rule it.
+ *
+ * ── THE TAP IS THE METRIC ──
+ * `interest_registered` fires on the tap itself, BEFORE any contact field
+ * appears. Requiring a contact first would measure willingness to hand over a
+ * phone number, which is a different question from wanting the product, and it is
+ * not the question September is asking. The contact box is optional, appears
+ * after the signal is already recorded, and skipping it costs nothing.
+ *
+ * ── VISUALLY SECONDARY, DELIBERATELY ──
+ * A flat bordered surface on the page background, not the Artifact offer's dark
+ * panel, and no primary Button. Ruled: one live purchase CTA per moment. Two
+ * buttons of equal weight would make the free reading feel like a shop.
+ */
+function Upcoming({ reading }) {
+  // Which product the reader has already tapped, if any. One at a time: the
+  // contact box belongs to the product she just tapped, and two open boxes would
+  // ask her to answer the same question twice.
+  const [tapped, setTapped] = useState(null);
+  const [contact, setContact] = useState('');
+  const [sent, setSent] = useState(false);
+
+  // `upcoming_seen` IS THE SECOND DENOMINATOR, AND IT IS GATED ON VISIBILITY -
+  // not on mount, which is what `offer_seen` does one component above.
+  //
+  // THE DIFFERENCE IS NOT COSMETIC AND IT IS THE WHOLE POINT OF THE METRIC.
+  // Prompt Q defines compat and annual interest as interest / `upcoming_seen`
+  // rather than interest / completed readers, precisely so that "a reader who
+  // never scrolled to the block never had the chance and must not sit in the
+  // denominator". Firing on mount would count every completed reader, which
+  // makes `upcoming_seen` a slower spelling of "completed" and silently deletes
+  // the distinction the second denominator exists to draw. Both rates would then
+  // read LOW for a reason that has nothing to do with either product.
+  //
+  // Threshold 0.5 rather than a single pixel: half the block on screen is the
+  // cheapest honest reading of "she had the chance to see it".
+  const seenRef = useRef(false);
+  const blockRef = useRef(null);
+  useEffect(() => {
+    if (seenRef.current) return undefined;
+    const node = blockRef.current;
+    if (!node) return undefined;
+
+    // No IntersectionObserver (old browser, jsdom): fall back to firing, because
+    // undercounting the DENOMINATOR inflates every rate divided by it. An
+    // over-counted denominator is conservative; an under-counted one flatters.
+    if (typeof IntersectionObserver !== 'function') {
+      seenRef.current = true;
+      fireEvent(reading?.token, 'upcoming_seen');
+      return undefined;
+    }
+
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting || seenRef.current) continue;
+        seenRef.current = true;
+        fireEvent(reading?.token, 'upcoming_seen');
+        io.disconnect();
+      }
+    }, { threshold: 0.5 });
+    io.observe(node);
+    return () => io.disconnect();
+  }, [reading?.token]);
+
+  function tap(product) {
+    // Recorded FIRST, with no contact. See the header: the tap is the metric.
+    if (tapped !== product) fireEvent(reading?.token, 'interest_registered', { product });
+    setTapped(product);
+    setSent(false);
+    setContact('');
+  }
+
+  function submitContact() {
+    // A SECOND CALL FOR THE SAME PRODUCT, on purpose. `product_interest` is
+    // unique on (reading_id, product) and upserts, so this attaches the contact
+    // to the signal already recorded rather than creating a second one.
+    if (contact.trim()) fireEvent(reading?.token, 'interest_registered', { product: tapped, contact: contact.trim() });
+    setSent(true);
+  }
+
+  const products = [
+    { key: 'compat', copy: UPCOMING_COPY.compat },
+    { key: 'annual', copy: UPCOMING_COPY.annual },
+  ];
+
+  return (
+    <Reveal>
+      <div ref={blockRef} style={{ borderTop: '1px solid var(--divider)', paddingTop: 28 }}>
+        {/* SENTENCE CASE, RULED 2026-08-31 (upcoming-copy-rulings.md, AMENDED section).
+            `Eyebrow` is SHARED - 3 other call sites - and is NOT edited: it spreads
+            `...style` last, so overriding here wins with no component change and no
+            effect on any other eyebrow on the site.
+
+            THE TRACKING GOES WITH THE CASE. `.16em` is tuned for capitals; sentence
+            case at caps tracking is spaced-out lowercase, which reads worse than
+            either end state and looks like a bug rather than a decision. `normal` is
+            the neutral default rather than a new tracking value chosen here - the
+            ruling is sentence case, and picking a bespoke number would be composing. */}
+        <Eyebrow style={{ marginBottom: 10, textTransform: 'none', letterSpacing: 'normal' }}>{UPCOMING_COPY.eyebrow}</Eyebrow>
+        <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--muted-warm)', margin: '0 0 18px' }}>{UPCOMING_COPY.lead}</p>
+
+        <div style={{ display: 'grid', gap: 12 }}>
+          {products.map(({ key, copy }) => (
+            <div key={key} style={{ border: '1px solid var(--divider)', borderRadius: 16, padding: '16px 16px 14px', background: 'var(--surface-quiet, transparent)' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: 'var(--tinta)' }}>{copy.label}</div>
+                {/* Resolved from lib/pricing.js, never hardcoded - same rule the
+                    Artifact offer follows. A price typed here would be a second
+                    source of truth for what a thing costs. */}
+                <div style={{ fontSize: 14, color: 'var(--muted-warm)', whiteSpace: 'nowrap' }}>{formatIdr(priceFor(key))}</div>
+              </div>
+              <p style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '8px 0 0' }}>{copy.sub}</p>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
+                {/* SENTENCE CASE, same ruling. This `textTransform` was mine, added in
+                    `7cec498` while the content was still an `@@UNRULED@@` placeholder -
+                    a styling choice made before the words existed, which is exactly the
+                    kind that survives unexamined. Reyner ruled it out. Tracking relaxed
+                    with it, for the reason above. */}
+                <span style={{ fontSize: 11, letterSpacing: 'normal', color: 'var(--muted-warm)', border: '1px solid var(--divider)', borderRadius: 999, padding: '4px 10px' }}>{UPCOMING_COPY.availability}</span>
+                {/* A TEXT BUTTON, NOT A <Button>. Equal visual weight with the
+                    Artifact CTA is the thing the ruled order forbids. */}
+                <button
+                  type="button"
+                  onClick={() => tap(key)}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', fontSize: 13.5, fontWeight: 600, color: 'var(--el-glow-ink, var(--tinta))', textDecoration: 'underline', textUnderlineOffset: 3 }}
+                >
+                  {UPCOMING_COPY.interestCta}
+                </button>
+              </div>
+
+              {tapped === key && (
+                <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--divider)' }}>
+                  <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '0 0 10px' }}>{UPCOMING_COPY.thanks}</p>
+                  {!sent && (
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <input
+                        type="text"
+                        value={contact}
+                        onChange={(e) => setContact(e.target.value)}
+                        placeholder={UPCOMING_COPY.contactLabel}
+                        style={{ flex: '1 1 200px', minWidth: 0, font: 'inherit', fontSize: 13.5, padding: '9px 11px', borderRadius: 10, border: '1px solid var(--divider)', background: 'transparent', color: 'var(--tinta)' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={submitContact}
+                        style={{ font: 'inherit', fontSize: 13.5, fontWeight: 600, padding: '9px 14px', borderRadius: 10, border: '1px solid var(--divider)', background: 'transparent', cursor: 'pointer', color: 'var(--tinta)' }}
+                      >
+                        {UPCOMING_COPY.contactSubmit}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </Reveal>

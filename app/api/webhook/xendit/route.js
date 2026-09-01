@@ -1,4 +1,5 @@
 import { getReading, markReadingPaid, claimWaSend, releaseWaSend } from '@/lib/readingStore';
+import { recordEvent } from '@/lib/analytics/events';
 import { verifyCallbackToken, getInvoice, PAID_STATUSES } from '@/lib/xendit';
 import { amountMatchesSku } from '@/lib/pricing';
 import { sendReadingLink, decideWaOutcome } from '@/lib/wa';
@@ -90,6 +91,19 @@ export async function POST(request) {
     );
   }
   const paidConfirmed = statusPaid && amountOk;
+
+  // ── THE ONLY PLACE A PURCHASE IS COUNTED ──────────────────
+  // Rule 18's shape, applied to the counter: `paid` flips only here, so the
+  // RECORD of it flips only here too. `POST /api/mirror/[token]/event` refuses
+  // this event name for the same reason - a client that could assert a purchase
+  // could forge the conversion rate, which is the one number September exists to
+  // produce.
+  //
+  // Gated on `paidConfirmed`, which is status AND the RE-FETCHED amount, so a
+  // forged callback that never satisfies both is never counted either.
+  if (paidConfirmed) {
+    await recordEvent(readingId, 'purchase_confirmed', { sku: row?.sku ?? null });
+  }
 
   if (paidConfirmed) {
     // 3. Idempotent flip (false→true only). 4. WA-send guarded by a claim that acts

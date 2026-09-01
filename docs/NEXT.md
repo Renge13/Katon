@@ -48,6 +48,31 @@ broken again. One thing is new and belongs here: **a queued prompt is not necess
 one.** Q's commit 0 edits `CLAUDE.md` and needs Reyner's word, so the pointer has to carry the
 release state and not just the name. A pointer that says only "prompt Q is next" invites a session to
 start it. The heading says DO NOT START IT for that reason.
+
+2026-08-29, third entry: prompt Q was RELEASED, and the pointer moved from QUEUED to CURRENT in the
+same pass that started it - the 08-07 rule working as intended for once. Two things are new, and both
+are about what a pointer must carry BEYOND a name. First, RELEASE STATE: "queued" and "released" are
+different, and the previous heading said DO NOT START IT precisely because a name on its own invites
+a start. Second, ORDERING AMONG APPROVED WORK: `M-tranche3.md` is approved, ruled and worthwhile, and
+it is NOT next. An approved prompt with no stated position is exactly what a later session picks up
+by default, so the chain it sits behind is now drawn explicitly rather than left to be inferred.
+2026-08-31: prompt Q's commits 4, 5 and 6 landed on the branch, and this pointer moved in the SAME
+pass as commit 6 rather than after it - the 08-07 rule applied on purpose again. LIVE STATE was read
+in the same pass, per the 08-29 rule, and it was STALE IN A WAY THAT MATTERED: its Compatibility row
+still read `priced (45.000/29.000)`, which was the pre-ruling ladder that commit 1 replaced on 08-29.
+So the two live pointers disagreed about a PRICE for two days. It was corrected in commit 4, in the
+same commit that changed what a reader sees, per LIVE STATE's own rule.
+
+What is new and belongs here: **a pointer must carry what is OWED, not only what is DONE.** Q's six
+commits are all written, which a reader could easily take as "Q is finished". It is not: eleven
+Indonesian strings are unruled, a migration is unapplied, and one behaviour is unverified. A pointer
+that says "all six commits landed" and stops is the exact shape that sends the next session to open a
+PR on work that cannot ship. The three are listed under THE CURRENT WORK, separated by WHO owns each.
+
+A second thing, smaller: a DANGLING CODE CITATION was corrected in the "Read, in order" block. It
+named `tests/card-budget.spec.mjs`, which exists only on unmerged #77. The repo convention is that a
+code-fact in a doc carries the command that produced it; a citation to a file that does not exist is
+that rule failing quietly, and it survived because nothing in CI reads this file.
 -->
 
 # NEXT
@@ -58,11 +83,22 @@ start it. The heading says DO NOT START IT for that reason.
    MEASUREMENTS (**read the 08-11 baseline row FIRST — a stored gate row is not a valid comparator
    for a later change**), and THE INTERIM STATE (Xendit go-live status — read it before touching
    anything near the paid path).
-3. `prompts/Q-demand-test.md` — **the queued build prompt. NOT RELEASED; see THE QUEUED WORK
-   below before touching it.** `prompts/M-tranche3.md` is queued behind it (commits 0 and 1
+3. `prompts/Q-demand-test.md` — **RELEASED and IN PROGRESS; see THE CURRENT WORK below.**
+   `prompts/M-tranche3.md` is behind it AND behind the whole Card A chain (commits 0 and 1
    docs-only, **commits 2 to 4 touch `glossary.json` and `facts.js`**, and those now also have to
-   clear `tests/card-budget.spec.mjs` — Card B has 7px of slack and a glossary edit can spend it;
+   clear the card budget gate — Card B has 7px of slack and a glossary edit can spend it;
    `spouse_palace` and `kekuatan` do not reach the card, so tranche 3 as scoped is clear).
+   **CITATION CORRECTED 2026-08-31:** this line named `tests/card-budget.spec.mjs`, which does not
+   exist on `main` — it lives only on the unmerged `fix/card-budget-tripwire` (#77, PARKED), so the
+   reference was dangling and would have sent a session looking for a file it could not find. The
+   gate that DOES exist and does run is `scripts/audit-card-budget.mjs`, wired as `audit:card-budget`
+   and inside `npm test`:
+
+   ```
+   $ ls tests/card-budget*            -> no such file
+   $ grep -n audit:card-budget package.json
+   56:    "audit:card-budget": "node scripts/audit-card-budget.mjs",
+   ```
    (`prompts/P-card-frame.md` is CLOSED, not queued — it returns with the 1080x1350 design pass.)
 
 # THE PROMOTION LANDED, 2026-08-23. THE PRODUCT IS LIVE.
@@ -110,12 +146,107 @@ Two DEFERRED REGISTER rows were opened by this work and both are Reyner's: the r
 that a key EXISTS and never that it WORKS, and preview verification now costs real renders. Neither
 is a task waiting here.
 
-## THE QUEUED WORK, 2026-08-29 - PROMPT Q. **DO NOT START IT.**
+## THE CURRENT WORK, 2026-08-31 - PROMPT Q, ALL SIX COMMITS WRITTEN, NOT MERGED
 
-**`docs/prompts/Q-demand-test.md`, committed `cf349ea`. QUEUED, NOT RELEASED.** Reyner has not
-released it, and **its COMMIT 0 EDITS `CLAUDE.md`** - the price band 25-45k -> 25-49k, and rule 15's
-stale status sentence - which needs his word before a line of it runs. A session that reads "queued"
-as "start" has misread this heading.
+**`docs/prompts/Q-demand-test.md` is RELEASED** (Reyner, 2026-08-29) and all six commits are on
+`feat/demand-test`, **unmerged and unreviewed**. Check with `git log --oneline main..feat/demand-test`
+before trusting this line. Its commit 0 was the authorised `CLAUDE.md` edit - band 25-45k ->
+**25-49k**, and rule 15 trading its stale status sentence for a pointer to the live register.
+
+| | |
+|---|---|
+| `122bee9` | 0 - `CLAUDE.md`: band 25-49k, rule 15 -> register pointer |
+| `cf9be7f` | 1 - the ladder; `annual` priced, **not** sellable |
+| `e06c90e` | 2 - migration `0009` + `lib/analytics/events.js` |
+| `9229da7` | 3 - the eight events fire |
+| `7cec498` | 4 - the upcoming block, every string a visible placeholder |
+| `f0f8b30` | 5 - the read-out, with the ruled fixture door |
+
+`npm test` 35/35 (was 32 when the branch was picked up; +`test:unruled-copy`, +`test:interest`,
++`test:readout`).
+
+### TWO THINGS ARE OWED BY REYNER BEFORE THIS SHIPS, and neither is a task waiting for a session
+
+1. **THE ELEVEN INDONESIAN STRINGS IN THE UPCOMING BLOCK.** Every one is a visible
+   `@@UNRULED: ...@@` placeholder in `lib/site/copy.js#UPCOMING_COPY`, in one named object so it is
+   one file to fill. **A PRODUCTION BUILD IS REFUSED WHILE ANY OF THEM SURVIVES**
+   (`scripts/check-unruled-copy.mjs`, wired as `prebuild`); preview and local builds pass on purpose,
+   because the block has to be SEEN to be ruled. Cowork proposed seven of the eleven on 2026-08-29
+   and those proposals are in the PR body, deliberately NOT in the slots they would occupy. Four
+   slots - `eyebrow`, `lead`, `thanks`, `contactSubmit` - have no proposal at all.
+2. **THE MIGRATION.** `supabase/migrations/0009_demand_test.sql` is applied by hand in the SQL editor
+   and must run BEFORE the code that reads it deploys (repo convention). Nothing in CI checks this.
+
+### THE UNVERIFIED ITEM IS CLOSED, 2026-08-31 - THE OBSERVER WAS OBSERVED
+
+`upcoming_seen` fires on an IntersectionObserver rather than on mount, because prompt Q section 3
+defines both interest rates as interest / `upcoming_seen` so that a reader who never scrolled to the
+block stays out of the denominator. This entry previously said the firing half was **NOT proven** and
+sent the reader to the preview, because the agent browser pane runs with
+`document.visibilityState === "hidden"` and a hidden tab never delivers an IntersectionObserver
+callback.
+
+**It did not need the preview.** Driven through real headless Chromium over the DevTools Protocol -
+no new dependency, Node 24 has a global `WebSocket` - at a 375x812 phone viewport, both halves land in
+ONE run: absent at load with the block 4551px below the fold, present exactly once after the scroll,
+and not again on re-entry. `offer_seen` firing in the same run is what makes the absence mean the
+observer held back rather than the transport being broken.
+
+- Harness: `scripts/verify-upcoming-seen.mjs` (`npm run verify:upcoming`, needs `npm run dev`)
+- Measurement: `docs/qa/2026-08-31-upcoming-seen-observed.md`
+
+**The harness was shown failing first and it caught a defect in itself:** its "fired exactly once
+after scroll" check counted the total at the end, which is 1 whether the event fires on mount or on
+scroll, so it PASSED on a deliberately mount-firing build. It now snapshots the count immediately
+before the scroll. That is the 2026-08-26 shape appearing inside the very file written to catch it.
+
+**Still not established, and it is smaller but not zero:** production. This ran against a dev server
+on localhost, below a floored reading rather than a rendered one. Neither difference touches the
+observer, and neither has been measured.
+
+**It runs IN PARALLEL with the Card A design pass and does not wait on it.**
+
+### THE ORDER OF EVERYTHING ELSE, so nothing is picked up out of turn
+
+```
+prompt Q (instrumentation)  ──┐
+                              ├── both run now, neither blocks the other
+Card A design pass  ──────────┘
+        |
+        v
+   prompt R (Card A implementation + export)   <- RELEASED 2026-08-31, main 473aeb5
+        |
+        v
+   export validation on the real social surfaces
+        |
+        v
+   September traffic
+```
+
+**`docs/prompts/M-tranche3.md` SITS BEHIND ALL OF IT.** Approved and worthwhile, ruled 2026-08-22,
+and **NOT September critical path.** It must not block, delay or interleave with prompt Q, the Card A
+design pass, prompt R, export validation or traffic. **It is not the next thing** - a session looking
+for work takes it only when the chain above is done or explicitly parked, and this paragraph exists
+because a queued-and-approved prompt is exactly what a later session picks up by default.
+
+**PROMPT R IS RELEASED, 2026-08-31.** ~~It does not exist and cannot be started; it is derived from the
+APPROVED COMPOSITION, which does not exist until Reyner's design pass produces it.~~ The design pass
+produced it. Reyner approved the composition and ruled section 0 in full on 2026-08-31, and
+`docs/prompts/R-card-a-4x5.md` is on `main` alone in `473aeb5`, landed before its own commit 1 per its
+header. **Nothing is owed on it.** Its input was `docs/content/card-a-4x5-worksheet.md`; its design
+authority is `card-polish-spec.md` §10.
+
+The struck sentence is kept because it was TRUE while it stood, and this file's whole design note is a
+record of pointers going stale without anyone noticing. It went stale here in a SEVENTH way, and it is
+a new one: **the pointer was right about the world and the world changed underneath it.** No rule was
+broken - no prompt was amended, no current work moved, nobody forgot a pass. A prohibition whose
+condition was "until Reyner produces X" simply had its condition met, and nothing in a repo fires when
+a person finishes a design. Rule, extended: **a prohibition written against a condition carries the
+condition in its own text**, so the next reader can check whether it still holds instead of obeying it
+on faith. This one did carry it, which is exactly why it could be checked and flipped rather than
+believed.
+
+**R IS RELEASED, NOT STARTED.** Its commit 1 is a gate change on what the card IS and lands alone.
 
 The product authority is `product/paid-product-map.md` `## RULED 2026-08-29`, committed in the same
 `cf349ea`. **That section decides WHETHER; prompt Q is only HOW.** If they disagree, that one wins.
