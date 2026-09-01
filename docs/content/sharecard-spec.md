@@ -9,14 +9,15 @@ Reyner decides the register and the visual system. This doc decides WHAT informa
 **If you are speccing, building or reviewing anything card-shaped, `card-polish-spec.md` wins.**
 This file is the 2026-08-01 information architecture — WHAT appears and WHY — and the reasoning in
 it is still good. Its PICTURES ARE NOT. Card A and Card B were built as 1a and 1e on 2026-08-14/15
-and the built cards diverge from the sketch below in at least seven places.
+and the built cards diverge from the sketch below in at least eight places.
 
 **Why this banner exists at all.** On 2026-08-13 a session cost real time because the obvious
 filename was the wrong file. One line at the top prevents that permanently, and it is cheaper than
 reconciling two specs.
 
-**The divergences, each with the command that found it** (verified 2026-08-17, working tree at
-`21d690a`):
+**The divergences, each with the command that found it** (rows 1-7 verified 2026-08-17, working tree
+at `21d690a`; **row 8 added and verified 2026-08-29** - it is a RULING that diverges from this file,
+not a build that drifted from it, which is why its date differs):
 
 | This file says | The built card does | Check |
 |---|---|---|
@@ -27,6 +28,7 @@ reconciling two specs.
 | Card B carries 胎元 | **Not rendered**, ruled 2026-08-13. The engine still computes it and the reading still shows it; the card drops it | `components/cards/Card.js:1107`, `lib/card/cardData.js:176` |
 | Card B has **no URL watermark** | The footer carries **`katon.app`**, stacked above the seal | `lib/card/cardData.js#buildFooter` returns `right: 'katon.app'`; `#FoilFooter` renders it |
 | Bintang badges average **2.5** per person (§WHAT'S NEW) | **2.15**, range 1-4. Re-measured 2026-08-02 when 華蓋 left the set | `PROGRESS.md` MEASUREMENTS, "Badge frequency (avg per chart)" |
+| Card A is drawn as an **object floating on a surrounding field**, and every sketch in this file assumes that frame | **RULED AWAY 2026-08-29 for Card A: no canvas, no mat, no margin.** Card A becomes **1080x1350 (4:5)** and the card itself is the exported asset, one output for both share and download. **Not a resize - a recomposition**, so nothing in the sketch may be proportionally scaled into it. **Card B is untouched** and keeps its 1080x1920 canvas, 907x1747 object, rim, shadow and `padY`. **NOT YET BUILT:** the ruling is 2026-08-29, the design pass has not run, and the code below still holds the old geometry - so this row records a divergence between this file and the RULING, while the code still matches this file | `docs/content/card-polish-spec.md` §10. Code as of 2026-08-29: `grep -n "CARD_As*=" components/cards/Card.js` -> `components/cards/Card.js:84:export const CARD_A = { canvas: { w: 1080, h: 1440 }, margin: 86.4, card: { w: 907, h: 1267 } };` |
 
 **What in here is still authoritative:** the four 2026-08-01 decisions and their 08-13 amendments —
 Bintang Penolong is kept but never headlined, the tag hybrid is Card B only, the headline carries two

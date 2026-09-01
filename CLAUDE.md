@@ -213,6 +213,21 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   `overflow: hidden`, the captured node is off-screen in a 1px box, and a wrong card looks like a
   card. Nothing on screen ever shows it. So: no card check counts as evidence until it has produced
   a red on purpose, and the run that proves it belongs in the commit message.
+- **WHEN A COMMIT CHANGES BEHAVIOUR, AT LEAST ONE ASSERTION MUST FAIL WITHOUT THE CHANGE.** Not
+  "the suite is green" — a specific assertion that goes red when the change is removed, and the run
+  that shows it belongs in the commit message. **This is a DIFFERENT failure from the entry above and
+  both are needed.** That one is about a check with no failing input at all; this one is about a check
+  whose failing input is a *different proposition* than the change you made.
+  **The worked example is `2026-08-26`:** a commit landed the floor's label suppression and merged its
+  COMMENTS AND NOT ITS CODE — a `git checkout --` reverted the implementation while it was
+  uncommitted, and the comment edit re-applied cleanly on top. The suite stayed green because the
+  assertion had been rewritten *in that same commit* to accept **both** shapes, suppressed and not,
+  since both satisfy rule 21. It was a correct test of the RULE and it could not see a reverted
+  implementation. **A rule that permits two shapes cannot tell you which one you shipped**, and the
+  defect reached production. The replacement — `tests/stage5-render.spec.mjs`, "THE FLOOR DOES NOT SAY
+  THE LABEL TWICE" — asserts the BEHAVIOUR, was shown failing on the merged build first, and is the
+  shape to copy. **A test that passes whether the feature exists or not is worse than no test**,
+  because it supplies confidence that stops anyone looking.
 - **A code-fact written into any doc carries the command that produced it, and its date.** A claim
   about the code without its grep is a memory, not a fact. Error 13 (COWORK-BRIEF §4) entered this
   locked file exactly that way and every session inherited it as truth. Re-run the command before

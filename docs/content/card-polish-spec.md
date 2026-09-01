@@ -40,6 +40,34 @@ elements, and a foil seal — so "paid" is legible at 100px tall.
 
 ## 2. Card A — 1a
 
+> **PARTLY SUPERSEDED 2026-08-29 by `## 10. RULED 2026-08-29 — CARD A IS 1080x1350, AND THE CARD IS
+> THE EXPORT` at the bottom of this file. READ THE SCOPE BEFORE DISCARDING ANYTHING HERE.**
+>
+> **SUPERSEDED: Card A's GEOMETRY and every EXPORT-PIXEL POSITION derived from it.** §10 replaces the
+> 907x1267 object on a 1080x1440 canvas with a **1080x1350 card and no canvas**, and rules that the
+> recomposition is **not a proportional scale**. So the numbers below that are anchored to the old
+> frame do not carry over and must not be scaled into the new one: the **763px inner width** and the
+> `0.815` factor derived from it (`763/936`), the measured headroom figures
+> (`248.3 -> 323.9 export px`, "302.3px of headroom", "23px to spare"), the hairline `marginTop`
+> values, the **86.4 margin** (which §10 makes **Card B's own number** rather than an inheritance),
+> and the export-px conversions throughout. **Re-derive them from the design pass; do not recompute
+> them from these.**
+>
+> **NOT SUPERSEDED, and this is most of the section's actual content:**
+> - **The TYPE HIERARCHY REASONING of §2.1** — that a leading `"The"` becomes a kicker above the
+>   headline, and *why* the 0.815 measure-derivation is walked back for a one-word headline. The
+>   RATIO argument survives its numbers. **The "do not write the kicker rule as first word" warning
+>   stands in full**, including its deliberate survival of its own premise, and `splitName`'s
+>   article-less branch is still pinned by two unit cases.
+> - **The TOKEN AND INK WORK** — §2.5, §2.6, §2.7's four ink levels, and the §6.1 exemption
+>   mechanism they point at. Opacity is not geometry.
+> - **§2.2's ruling that the hairlines are INSIDE the object** and are not the inset edge hairline
+>   rejected on 2026-08-13. That rejection stands (§6.2); only the placement pixels move.
+> - **EVERYTHING ABOUT CARD B**, in this section and every other. §10 touches Card A alone.
+>
+> §10 lists what the design pass must re-evaluate. This section is the reasoning it starts from, not
+> a set of coordinates to preserve.
+
 Six deltas to `CardA` and its helpers. Everything else stays.
 
 ### 2.1 Headline splits into kicker + noun
@@ -516,3 +544,181 @@ Three things the card-only capture must handle:
 `FONT` is `var(--font-archivo)`. **Nothing loads Archivo outside the preview script.** The
 commit that wires either card into a route must add Archivo to `app/layout.js` as
 `--font-archivo`, or the card silently renders in the system sans and no test catches it.
+
+---
+
+## 10. RULED 2026-08-29 — CARD A IS 1080x1350, AND THE CARD IS THE EXPORT
+
+**Reyner, 2026-08-29. This section is the authority on Card A's geometry.** It re-rules the
+2026-08-03 sizes FOR CARD A ONLY and supersedes §7's two-target rationale for Card A only.
+**Card B is untouched: 1080x1920 canvas, 907x1747 object, rim, shadow, `padY`, the 7px budget and
+the "tighten spacing, never trim prose, never change outer dimensions" rule all stand unchanged.**
+
+### The decision
+
+| | Before (ruled 2026-08-03) | After (ruled 2026-08-29) |
+|---|---|---|
+| Canvas | 1080x1440 (3:4) | **none** |
+| Mat / margin | 86.4px uniform field | **none** |
+| Card object | 907x1267 (63:88, 0.716) | **1080x1350 (4:5, 0.8)** |
+| What is exported | canvas for share, object for download | **the card, one asset, both paths** |
+
+**THIS IS NOT A RESIZE. It is a recomposition.** Card A is re-laid-out inside 1080x1350 using the
+current card as the visual reference. Do not scale the existing composition proportionally, and do
+not preserve 907x1267 geometry for historical consistency.
+
+### The principle
+
+**Card A is a shareable identity artifact, not a document screenshot.** Its distribution surfaces are
+Instagram, Threads, Facebook groups and messaging. The canonical asset is therefore designed natively
+for a social-feed format rather than composed on a taller canvas and then handed to a platform to
+reframe.
+
+**The card itself is the exported asset. No mat, no workaround, no dependence on cropping behaviour.**
+
+**AMENDED 2026-08-29, SAME DAY, BECAUSE THE FIRST DRAFT OF THIS SECTION OVERSTATED THE CROP.** This
+section originally argued that the current export depends on the receiving platform preserving it.
+**Measured, `4bf3ca5`, panel 1 of the recomposition preview: it does not.** A 4:5 centre crop of the
+1080x1440 canvas removes 45px from the top and bottom; the mat is 86.4px; **45 < 86.4, so the crop
+never reaches the object.** The card survives a feed crop intact and it always has.
+
+**What the crop destroys is the UNIFORMITY of the mat, which was the mat's entire justification.**
+86.4 is not a taste value - `tests/card.spec.mjs:67` derives it as the only number satisfying the
+3:4 canvas and the 63:88 object at once. After a feed crop it is 86.4 left and right against 41.4
+top and bottom, **a 2.09:1 asymmetry**. So the posted card is not a clipped card; it is a card in a
+frame that no longer means anything.
+
+**This is a weaker claim than the one it replaces and a better argument for the re-rule.** The mat is
+not protecting the object - it is failing to be uniform, at the exact moment anyone sees it. The
+ruling is unchanged; only the reasoning is corrected, and it is corrected here rather than left to be
+rediscovered by whoever next checks the arithmetic.
+
+1080x1350 is larger in BOTH dimensions than the 907x1267 it replaces, so the recomposition gains
+design area while losing the surrounding field.
+
+### The A/B relationship
+
+Card A and Card B **are allowed to have different outer dimensions**, and now do. Family resemblance
+is carried by the DESIGN SYSTEM, not by shared geometry: typography, visual hierarchy, colour
+language, illustration treatment, seal and brand elements (**as shared VOCABULARY - the seal itself
+is Card B's and Card A carries none**), borders and corners, spacing character,
+Katon branding. **Do not distort or constrain Card A to make it geometrically match Card B.**
+
+The 86.4 margin was Card A's ruled value, and §2's own note records that Card B merely CARRIES it for
+family resemblance. That inheritance direction now has to invert: **86.4 becomes Card B's own number**,
+not "Card A's margin", and any test asserting `CARD_B.margin === CARD_A.margin` is asserting a
+relationship that no longer exists.
+
+### What the design pass must re-evaluate
+
+Headline hierarchy and wrapping; illustration scale and placement; whitespace;
+information density; footer and `KATON.APP` placement; the relationship between the visual focal point
+and the text; overall balance within 4:5; and **how the composition reads at a glance in a feed.**
+The result should feel intentional at 1080x1350, not like a crop of the previous card.
+
+### THE FINAL DESIGN RULING — Reyner, 2026-08-29, later the same day
+
+The three design inputs this re-rule forced are now RULED. **Do not re-open the ratio, the corners,
+the gradient, the rim or the shadow.**
+
+**Card A is:**
+
+| | |
+|---|---|
+| Frame | **1080x1350, 4:5** |
+| Bleed | **full-bleed** - no mat, no canvas, no surrounding field |
+| Opacity | **fully opaque.** No transparent outer corners, anywhere |
+| Corners | **square** |
+| Rim | **none** |
+| Shadow | **none** |
+| Surface | **the archetype gradient is RETAINED**, with a new job |
+| Card B | **completely untouched** |
+
+**THE GRADIENT KEEPS ITS PLACE AND LOSES ITS OLD REASON.** The 2026-08-13 ruling (`Card.js:925`)
+gave it the job of *separating the object from the canvas* - *"the two separate by surface rather
+than by a drawn border, which needs no fourth colour token per archetype."* **There is no canvas, so
+that job no longer exists.** The gradient stays because it now does a different one: **surface,
+materiality, depth.** The design pass refines it to read as subtle material rather than as an object
+floating on something. This is a re-statement of purpose, not a licence to re-derive the stops.
+
+**AND CARD A DOES NOT GET A RIM, DELIBERATELY.** The 2026-08-13 objection to a Card A border was
+COST - it needed a fourth colour token per archetype - and Card B's rim mechanism (the token's own
+ink at four alphas) removes that objection, so a rim for Card A is now cheap and available. **It is
+still refused**, and the reason is product rather than cost:
+
+> **Card A = identity, shareability, the immediate artifact. Card B = premium, keepsake, richer
+> physicality.** Card A stays visually cleaner and lighter than Card B. **Do not add a rim to Card A
+> merely to make it feel more finished** - Card B's stronger physical-object treatment is part of
+> what is being paid for, and spending it on the free card spends the differentiation.
+
+**THE IMPLEMENTATION CONSEQUENCE, stated so prompt R does not rediscover it:** `exportCards.js`
+point 1 - *"PNG WITH ALPHA, NEVER JPEG"* - exists because a 40px radius leaves four transparent
+corners. **That rationale is now CARD B ONLY.** Card A is opaque and square, so its export carries no
+transparency at all. PNG stays for pipeline consistency; the reason it was mandatory does not apply
+to Card A any more, and the docblock must say which card it is talking about.
+
+### THE DESIGN PASS RUNS IN THIS ORDER
+
+1. **OUTER GEOMETRY** - 1080x1350, square opaque edges, no mat, no rim, no shadow.
+2. **SURFACE** - retain the gradient concept; refine it to read as subtle materiality and depth
+   rather than an object floating on a canvas.
+3. **COMPOSITION** - reflow headline, illustration, information hierarchy, whitespace, footer and
+   `KATON.APP`, and the overall focal point. **Do not mechanically stretch the old composition.**
+
+**THE SEAL IS NOT IN THAT LIST, AND ITS ABSENCE IS RULED.** The foil seal is CARD B's, part of what
+is paid for, exactly like the rim. Two drafts of this section and of `card-a-4x5-worksheet.md`
+listed "seal placement" among the things to re-evaluate; **both were wrong and both are corrected**,
+because a stale line in a worksheet is one careless read away from becoming a specification. Reyner,
+2026-08-29: the no-seal ruling stays binding and Card B keeps its own seal treatment untouched.
+
+The measured budget for step 3, from `npm run preview:cards` (`4bf3ca5`): **+19.1% width, +6.6%
+height, +26.9% area, ratio 0.716 -> 0.800. The horizontal gain is 2.9x the vertical**, so a reflow
+that spends the new room on vertical rhythm is spending room that is not there.
+
+### THE IMPLEMENTATION SEQUENCE
+
+```
+#80 merge  ->  #81 after Reyner's copy approval  ->  Card A design pass
+           ->  Card A implementation and export  ->  validation on the real social surfaces
+           ->  September traffic
+```
+
+`docs/prompts/Q-demand-test.md` proceeds independently. **Meaningful acquisition traffic does not
+start until the final Card A share asset works correctly.**
+
+### Export behaviour
+
+Once the recomposed card exists, the implementation exports the 1080x1350 card DIRECTLY:
+
+- no mat, no surrounding field;
+- no reliance on post-download cropping;
+- **no second layout transformation between the designed card and the exported card.**
+
+The downloaded and shared image must look exactly like the canonical composition. For Card A the two
+export targets of §7 collapse into one output; Card B keeps both, unchanged.
+
+### Sequence — and prompt P does not run first
+
+1. Re-rule (this section).
+2. Recompose Card A in the design tool.
+3. Implement and export the final frame directly.
+4. Validate on the real sharing surfaces.
+5. Only then, the September traffic test.
+
+**`docs/prompts/P-card-frame.md` must NOT be implemented against the old geometry.** Its commit 1
+pointed Card A's button at a 907x1267 object; that object ceases to exist. P is superseded by this
+section and its ruling is absorbed into it - the mat is gone, which is what P was for.
+
+### Critical path
+
+Katon uses the share card as part of its acquisition loop. **The card must work as a real social
+asset before traffic is spent on the September experiment.** The instrumentation of
+`docs/prompts/Q-demand-test.md` may proceed independently; the meaningful traffic test does not start
+until Card A is in final form and the export is correct.
+
+### Documentation drift, corrected without reopening anything
+
+The deferred-register row saying gender should be "re-added to the funnel when the card ships" is
+**stale**. The funnel already renders the input (`components/Funnel.jsx:400`) and it already reaches
+the footer (`mergeFooter`, `components/Funnel.jsx:693`; `buildFooter`, `lib/card/cardData.js:47`).
+Correct the row in the next documentation sweep. **The gender decision is not reopened.**

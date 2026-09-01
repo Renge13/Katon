@@ -22,6 +22,32 @@ had become commit 0. Claude Code caught it, not Cowork. The 08-07 rule already c
 pointer is PART of writing or queueing a build prompt, and AMENDING a prompt is writing one. No new rule
 is needed. What is recorded here is that the rule was insufficient to make Cowork obey it, which is worth
 more than another clause.
+
+2026-08-26: refreshed after #74, #75, #76 and #77. Two items under OPEN AND OWNED BY REYNER were
+still listed as open and were both closed - MIRROR_PREVIEW_TOKEN (deleted from Vercel that day) and the
+Xendit LIVE keys (swapped 08-07, first self-purchase 08-13). Neither had a commit that could close it,
+which is exactly why they sat: this file is where an owner-held item goes stale, because nothing in CI
+ever reads it. The 08-19 rule already covers it - the pointer is updated when the CURRENT WORK changes -
+and what is added here is that OWNER-HELD items need the same sweep, since a closed one still reading as
+open sends the next session to do work that is already done.
+
+2026-08-29: STALE A SIXTH TIME, and it is the 08-19 rule broken rather than a new way. CURRENT WORK
+still read "2026-08-26 - THE CARD" three days after the card work merged and the work had moved to
+`fix/floor-heading-stutter` (`4325051`..`d19ba69`). No prompt was involved, so the 08-07 rule never
+fired; the 08-19 rule covers it exactly and was simply not applied. What is new is that this time the
+staleness had a PAIR: `PROGRESS.md`'s LIVE STATE opened "THE PROMOTION IS WRITTEN AND NOT LANDED"
+while this file's own heading said the promotion landed on 08-23, so the two live pointers
+contradicted each other on the same branch and neither one was checked against the other. Rule,
+extended once more: **when this pointer is refreshed, read LIVE STATE in the same pass.** They answer
+the same question - what is true now - and a session that trusts whichever it opens first is reading
+a coin flip.
+
+2026-08-29, later the same day: prompt Q was written and queued, and this pointer was updated IN THE
+SAME PASS rather than after it - the 08-07 rule applied on purpose for once, instead of recorded as
+broken again. One thing is new and belongs here: **a queued prompt is not necessarily a RELEASED
+one.** Q's commit 0 edits `CLAUDE.md` and needs Reyner's word, so the pointer has to carry the
+release state and not just the name. A pointer that says only "prompt Q is next" invites a session to
+start it. The heading says DO NOT START IT for that reason.
 -->
 
 # NEXT
@@ -32,9 +58,136 @@ more than another clause.
    MEASUREMENTS (**read the 08-11 baseline row FIRST — a stored gate row is not a valid comparator
    for a later change**), and THE INTERIM STATE (Xendit go-live status — read it before touching
    anything near the paid path).
-3. `prompts/L-opening-gate.md` — the active build prompt. FOUR ordered commits, 0 to 3.
+3. `prompts/Q-demand-test.md` — **the queued build prompt. NOT RELEASED; see THE QUEUED WORK
+   below before touching it.** `prompts/M-tranche3.md` is queued behind it (commits 0 and 1
+   docs-only, **commits 2 to 4 touch `glossary.json` and `facts.js`**, and those now also have to
+   clear `tests/card-budget.spec.mjs` — Card B has 7px of slack and a glossary edit can spend it;
+   `spouse_palace` and `kekuatan` do not reach the card, so tranche 3 as scoped is clear).
+   (`prompts/P-card-frame.md` is CLOSED, not queued — it returns with the 1080x1350 design pass.)
 
-**THE READ IS DONE. The current work is `docs/prompts/L-opening-gate.md`.**
+# THE PROMOTION LANDED, 2026-08-23. THE PRODUCT IS LIVE.
+
+`#71` and `#72` merged (`f9c1c83`, `a27053f`). **Free is the full mirror, served from the new
+pipeline, and Rp 19.000 buys the hi-res Card B plus the Complete Edition PDF.** `contents/*.md`,
+`lib/content/`, `lib/readingView.js`, every `/api/reading/*` route and `lib/mirror/fence.js` are
+deleted. Smoke-tested on production the same day: the mirror serves ungated, the offer sits after the
+reading, the delivery endpoints 402 unpaid, and all five static pages render.
+
+**ALL FOUR PRECONDITIONS WERE MET.** 1 MET 08-07 · 2 MET 08-23 · 3a CLEARED 08-23 · 3b MET 08-23
+(fresh-1996 SHIPS, chart 5 PROSE PASS) · 4 MET 08-12.
+
+**3a WAS RULED OUT OF THE GATE. IT WAS NOT MEASURED INTO COMPLIANCE AND IT WAS NOT WIDENED.**
+Reyner, 2026-08-23, verbatim:
+
+> **Rule 3a Clearance:** The 10% floor rate threshold is officially removed as a launch blocker. The
+> deterministic fallback floor (module assembly) renders ruled, production-grade glossary prose, is
+> never cached, and self-heals on a simple reload. A 20% floor rate represents a safe, graceful
+> degradation rather than a broken customer state. Precondition 3a is cleared for promotion.
+
+**No number was edited. 10% was not changed to 20% anywhere in the codebase**, and a session that
+finds it changed has found a defect rather than the ruling. The floor rate is still measured
+(PROGRESS MEASUREMENTS, 08-23, ~20% at `REGENERATION_BUDGET 2`) and it is still the availability
+budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
+or no-ship.
+
+## THE CURRENT WORK, 2026-08-29 - THE FLOOR'S HEADINGS, ON A BRANCH
+
+**`fix/floor-heading-stutter`, head `d19ba69`, NOT MERGED.** Check with `git log --oneline main..`
+before trusting this line; if it returns nothing the branch has landed and this pointer is stale.
+
+What it is, in one sentence: Reyner ruled on 2026-08-26 that **a heading directly above a meaning
+paragraph satisfies rule 21's "same breath"**, and the floor was rebuilt on that reading - headings
+stay, the bare label sentence goes from every cell. Read, in order:
+
+- `PROGRESS.md` - the section headed `RULED 2026-08-26 — A HEADING SATISFIES RULE 21'S
+  "SAME BREATH"`: the ruling, the ambiguity it closes, and the measurement against main
+- `docs/qa/2026-08-27-floor-after-heading-ruling.md` - a real floor reading as a file, served
+  through the real routes for zero dollars by using an invalid key
+- `../CLAUDE.md` REPO CONVENTIONS - the new assertion-must-fail rule, whose worked example is the
+  08-26 commit that merged `lib/render/fallback.js`'s comments and not its code (`4325051` restored it)
+
+Two DEFERRED REGISTER rows were opened by this work and both are Reyner's: the render fence tests
+that a key EXISTS and never that it WORKS, and preview verification now costs real renders. Neither
+is a task waiting here.
+
+## THE QUEUED WORK, 2026-08-29 - PROMPT Q. **DO NOT START IT.**
+
+**`docs/prompts/Q-demand-test.md`, committed `cf349ea`. QUEUED, NOT RELEASED.** Reyner has not
+released it, and **its COMMIT 0 EDITS `CLAUDE.md`** - the price band 25-45k -> 25-49k, and rule 15's
+stale status sentence - which needs his word before a line of it runs. A session that reads "queued"
+as "start" has misread this heading.
+
+The product authority is `product/paid-product-map.md` `## RULED 2026-08-29`, committed in the same
+`cf349ea`. **That section decides WHETHER; prompt Q is only HOW.** If they disagree, that one wins.
+
+What Q is, in one sentence: the smallest thing that answers **which product people want** - Compat or
+Annual - on September traffic that is about to be acquired anyway, **without building either
+candidate**. Six commits: the `CLAUDE.md` band amendment, pricing data, storage, instrumentation,
+the funnel order, the read-out, and its own pointer update.
+
+Two things it deliberately does NOT do, recorded here because they are the ones a session invents:
+
+- **The Compat build, the Annual build and 天干五合 are out of scope.** So is the ORACLE PROBE, which
+  is Reyner's research task and runs in parallel. Demand risk and buildability risk are separate
+  questions and no number of waitlist clicks retires the second one.
+- **It does not decide the roadmap.** It produces five numbers with clean denominators; the October
+  decision rule they feed is in the RULED section and restated in Q's own section 7.
+
+## DONE 2026-08-26 - THE CARD, AND IT IS LIVE
+
+**The free share button had been producing a blank rectangle since the promotion.** Fixed and on
+production (`#74`), with the paid card's prose and its overflow fixed behind it (`#76`). Four
+artifacts:
+
+- `docs/qa/2026-08-26-card-capture-cause.md` ......... why the share card was blank
+- `docs/qa/2026-08-26-card-capture-verification.md` .. the un-fix, and the page at both widths
+- `docs/qa/2026-08-26-card-b-overflow.md` ............ the paid card's prose, 9 of 13 charts
+- `docs/prompts/P-card-frame.md` .................... **CLOSED 2026-08-26, NOT PENDING.** Ruled: Card
+  A keeps the mat, and the frame change batches with the 1080x1350 design pass so a reader
+  experiences ONE layout shift instead of two. Commit 1 is not a small win to be picked up early -
+  shipping it alone is what creates the second shift. It returns WITH the design pass or not at all,
+  so it is not tracked here as work waiting to start. (When it does return: its `sed -n '689p'` is
+  stale, the line is 740 after the card commits.)
+
+`docs/prompts/M-tranche3.md` - the tranche-3 repetition variants, option C with B as the fallback
+(ruled 08-22) - is queued behind prompt Q. Neither is the critical path; the critical path is done.
+
+## OPEN AND OWNED BY REYNER, not by a commit
+
+- ~~**UNSET `MIRROR_PREVIEW_TOKEN` in Vercel.**~~ **CLOSED 2026-08-26.** Reyner deleted the variable
+  and redeployed before `#74` merged. `lib/mirror/fence.js` was already gone with the promotion, so
+  nothing reads it in either direction now.
+- ~~**Confirm the Xendit keys in Vercel are LIVE, not test.**~~ **CLOSED.** Swapped 2026-08-07;
+  the interim register records QRIS activated 08-11 and Reyner's first self-purchase completed
+  08-13, which is a live key exercised end to end rather than a dashboard read.
+- **The Gemini balance alert. STILL OPEN, but it is NO LONGER "the only unmitigated single point of
+  failure" - that phrase was true until 2026-08-26 and is not now.** Reyner turned Gemini
+  **auto-reload ON** on 08-26. That is a MITIGATION, not a detector: it covers credit DEPLETION, the
+  2026-08-12 incident and the case this row was opened for, and it does **nothing** for an invalid,
+  revoked, expired or refused key - which produces the same silent 100% floor through the same
+  passing fence, because presence is all the fence tests. **So the unmitigated failure moved rather
+  than closed**, and the deferred register's fence-validity row is now the more important of the two.
+  The trade Reyner accepted: auto-reload spends without asking, bounded by the billing tier cap
+  (**IDR 4,518,125**) and the three 2026-08-22 spend guards (`dd25a97`, `4ae6e1a`, `3ed7b0c`).
+  Interim register for both rows.
+- **Whether a Gemini key may be reachable from PREVIEW deployments.** Added to the deferred register
+  2026-08-26. `GEMINI_API_KEY` is Production-only, so a preview cannot render a reading at all - the
+  fail-closed fence refuses first, correctly. **Until it is ruled, every pre-merge check of the
+  reading, the card or the paid path is local and then production AFTER the merge, with no stage in
+  between.** A verification plan that says "check it on the preview" cannot run.
+
+## STILL UNRULED
+
+- **Whether BREADTH becomes an explicit gate requirement.** Only 7 of 13 facts on chart 5 are
+  required points, so a reading's fullness is a side effect of how much the model writes rather than
+  something the gate guarantees. PROGRESS, RULED 2026-08-22 (evening), section 3.
+
+---
+
+## The prompt-L history below is kept as the record of how the read was closed
+
+**Prompt L is DONE.** Its four commits landed and the read it answered is in
+`docs/qa/2026-08-19-READ-VERDICT.md`.
 
 Reyner read five readings across four charts on 2026-08-19 and ruled five items. The verdict, the
 rulings and the measurements are in `docs/qa/2026-08-19-READ-VERDICT.md`. **That file lands on main,
