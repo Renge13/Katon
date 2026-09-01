@@ -1,0 +1,53 @@
+{
+  "_README": [
+    "DELIBERATELY BROKEN. This is not a sample of a healthy funnel and must never be",
+    "copied as one. Prompt Q commit 5: 'seed a deliberately wrong fixture and show the",
+    "script reporting the anomaly rather than smoothing it.'",
+    "",
+    "r-ok-1 and r-ok-2 are the only clean readers. Everything else is a planted defect:",
+    "  r-dupe    two mirror_served ROWS for one reading  -> the unique index is not holding",
+    "  r-ghost   interest registered, no upcoming_seen   -> numerator outside its denominator",
+    "  r-money   purchase_confirmed, no checkout_started -> money with no step before it",
+    "  r-orphan  card_downloaded, no mirror_served       -> missing from the primary denominator",
+    "  r-typo    event name 'mirror_serve'               -> a ninth event created by a typo",
+    "",
+    "A high `count` is NOT a defect - that is a refresh, recorded on purpose. r-ok-1",
+    "carries count 5 precisely so the read-out is shown NOT flagging it."
+  ],
+
+  "events": [
+    { "reading_id": "r-ok-1", "event": "reading_created",    "detail": { "has_hour": true },            "count": 1, "created_at": "2026-09-02T01:00:00.000Z" },
+    { "reading_id": "r-ok-1", "event": "mirror_served",      "detail": { "source": "rendered" },        "count": 5, "created_at": "2026-09-02T01:00:10.000Z" },
+    { "reading_id": "r-ok-1", "event": "card_downloaded",    "detail": null,                            "count": 1, "created_at": "2026-09-02T01:01:00.000Z" },
+    { "reading_id": "r-ok-1", "event": "offer_seen",         "detail": null,                            "count": 1, "created_at": "2026-09-02T01:01:30.000Z" },
+    { "reading_id": "r-ok-1", "event": "upcoming_seen",      "detail": null,                            "count": 1, "created_at": "2026-09-02T01:02:00.000Z" },
+    { "reading_id": "r-ok-1", "event": "interest_registered","detail": { "product": "compat" },         "count": 1, "created_at": "2026-09-02T01:02:10.000Z" },
+    { "reading_id": "r-ok-1", "event": "checkout_started",   "detail": { "sku": "artifact" },           "count": 1, "created_at": "2026-09-02T01:03:00.000Z" },
+    { "reading_id": "r-ok-1", "event": "purchase_confirmed", "detail": { "sku": "artifact" },           "count": 1, "created_at": "2026-09-02T01:04:00.000Z" },
+
+    { "reading_id": "r-ok-2", "event": "reading_created",    "detail": { "has_hour": false },           "count": 1, "created_at": "2026-09-03T02:00:00.000Z" },
+    { "reading_id": "r-ok-2", "event": "mirror_served",      "detail": { "source": "module_assembly" }, "count": 1, "created_at": "2026-09-03T02:00:10.000Z" },
+    { "reading_id": "r-ok-2", "event": "offer_seen",         "detail": null,                            "count": 1, "created_at": "2026-09-03T02:01:00.000Z" },
+    { "reading_id": "r-ok-2", "event": "upcoming_seen",      "detail": null,                            "count": 1, "created_at": "2026-09-03T02:02:00.000Z" },
+
+    { "reading_id": "r-dupe", "event": "reading_created",    "detail": { "has_hour": true },            "count": 1, "created_at": "2026-09-04T03:00:00.000Z" },
+    { "reading_id": "r-dupe", "event": "mirror_served",      "detail": { "source": "rendered" },        "count": 1, "created_at": "2026-09-04T03:00:10.000Z" },
+    { "reading_id": "r-dupe", "event": "mirror_served",      "detail": { "source": "rendered" },        "count": 1, "created_at": "2026-09-04T03:00:11.000Z" },
+
+    { "reading_id": "r-ghost", "event": "reading_created",   "detail": { "has_hour": true },            "count": 1, "created_at": "2026-09-05T04:00:00.000Z" },
+    { "reading_id": "r-ghost", "event": "mirror_served",     "detail": { "source": "rendered" },        "count": 1, "created_at": "2026-09-05T04:00:10.000Z" },
+
+    { "reading_id": "r-money", "event": "reading_created",   "detail": { "has_hour": true },            "count": 1, "created_at": "2026-09-06T05:00:00.000Z" },
+    { "reading_id": "r-money", "event": "mirror_served",     "detail": { "source": "rendered" },        "count": 1, "created_at": "2026-09-06T05:00:10.000Z" },
+    { "reading_id": "r-money", "event": "purchase_confirmed","detail": { "sku": "artifact" },           "count": 1, "created_at": "2026-09-06T05:05:00.000Z" },
+
+    { "reading_id": "r-orphan", "event": "card_downloaded",  "detail": null,                            "count": 1, "created_at": "2026-09-07T06:00:00.000Z" },
+
+    { "reading_id": "r-typo", "event": "mirror_serve",       "detail": { "source": "rendered" },        "count": 1, "created_at": "2026-09-08T07:00:00.000Z" }
+  ],
+
+  "interest": [
+    { "reading_id": "r-ok-1",  "product": "compat", "contact": "someone@example.com", "created_at": "2026-09-02T01:02:10.000Z" },
+    { "reading_id": "r-ghost", "product": "annual", "contact": null,                  "created_at": "2026-09-05T04:09:00.000Z" }
+  ]
+}

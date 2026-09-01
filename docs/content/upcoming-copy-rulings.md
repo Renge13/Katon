@@ -84,3 +84,46 @@ reports CLEAN is only worth what its falsification is worth.**
 
 **Do not apply a partial set.** Any slot left on its sentinel keeps the production build refused,
 which is correct; a slot filled with an unruled guess does not.
+
+---
+
+## AMENDED 2026-08-31 — THE TWO CAPITALISED SLOTS RENDER IN SENTENCE CASE
+
+**Reyner, 2026-08-31.** `eyebrow` and `availability` were rendering UPPERCASE — `YANG SEDANG
+DIKERJAKAN` and `BELUM TERSEDIA`. The stored strings were always verbatim; the case was CSS.
+
+**RULED: both render in sentence case, as written.** The reason is the rulings' own stated intent
+rather than a new preference: slot 1 was ruled *"quiet craft language, free of marketing hype"* and
+slot 2 *"factual status tag"*, in a block whose job is not to rival the live Artifact CTA. Caps read
+as a status chip shouting, which is the register both rulings were written to avoid — arriving
+through CSS instead of through words. **The eleven strings are unchanged.**
+
+### HOW, and the part that is easy to get wrong
+
+**DO NOT EDIT `Eyebrow`.** `components/kit.jsx:57` is shared — 3 call sites on `main` alone — and
+removing its `textTransform` would change every eyebrow on the site. It is not what was ruled.
+
+It already spreads `...style` LAST:
+
+```js
+// components/kit.jsx:57, ref main
+export function Eyebrow({ children, color, style }) {
+  return <div style={{ ...letterSpacing: '.16em', textTransform: 'uppercase', ..., ...style }}>{children}</div>;
+}
+```
+
+So a call-site `style={{ textTransform: 'none' }}` wins with no component edit. Apply it at the
+`UPCOMING_COPY` call site only. Do the equivalent at whatever renders `availability` on
+`feat/demand-test` — a `textTransform` added in `7cec498` while the content was still a placeholder.
+That site is not visible from `main` and is deliberately not named here by line.
+
+### THE CONSEQUENCE, so it is not rediscovered as a defect
+
+**`letterSpacing: '.16em'` is tuned for capitals.** Dropping `textTransform` without relaxing it
+gives spaced-out lowercase, which reads worse than either end state and looks like a bug rather than
+a decision. **Relax the tracking at the same call sites, in the same commit.** This is an
+implementation consequence of the ruling, not a reopening of it: the ruling is sentence case, and
+sentence case at caps tracking is not sentence case done.
+
+Check it rendered, not just changed — the strings reach the DOM through the copy bank and the block
+renders client-side, so a source read is not evidence about what a reader sees.
