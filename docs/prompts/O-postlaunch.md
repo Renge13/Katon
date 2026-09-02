@@ -16,35 +16,62 @@ the handover that asked for this banner:
   COMMIT 4   DONE. $ grep -n '"build:pdf"' package.json
              64:    "build:pdf": "node scripts/build-pdf.mjs",
   COMMIT 3   a record with no code; nothing to verify.
-  COMMIT 5   NOT BUILT, and this is the live remainder:
-             $ grep -rn "navigator.share\|canShare" components/ lib/ app/
-             (nothing)
+  COMMIT 5   SUPERSEDED 2026-09-02 by `docs/prompts/S-share-sheet.md`. Still not
+             built - the grep below is unchanged - but COMMIT 5 is no longer the
+             buildable statement of it and must not be built from:
 
-  COMMIT 1   *** NOT DONE, AND THE HANDOVER SAID IT WAS. ***
-             The English diagnostic is STILL ON THE FREE READING PAGE. Verified in
-             a browser on a running dev server, not by reading source:
+               $ grep -rn "navigator.share\|canShare" components/ lib/ app/
+               (nothing)                                    # re-run 2026-09-02
 
-               SEBARAN UNSUR
-               display distribution only, never a strength score
-               Kayu / tumbuh dan menjangkau ...
+             S carries COMMIT 5 forward VERBATIM except the geometry, and the
+             section below is left unedited as the record of what was ruled on
+             2026-08-23 and why. Read S to build; read COMMIT 5 for the reasoning
+             S inherits.
 
-             $ grep -rn "element_presence_note" lib/ components/
-             lib/semantic/index.js:286   the string
-             lib/mirror/view.js:91       carried into the serve view
-             components/Funnel.jsx:702   RENDERED to the reader
+  COMMIT 1   *** DONE. CORRECTED 2026-09-02. ***
+             The paragraph this replaces said "NOT DONE, AND THE HANDOVER SAID IT
+             WAS", and it was right on 2026-08-31. It is now wrong, and a stale
+             *not-done* is worse than a stale *done*: it sends a session to fix a
+             thing that is already fixed, and the first thing that session finds is
+             three line numbers that no longer point at what the banner claims.
 
-             This is a live rule-20 violation on the acquisition surface: English
-             prose to an Indonesian audience. IT IS NOT FIXED HERE. The replacement
-             is Indonesian wording, which working-style rule 9 puts with Reyner -
-             a choice a reader can SEE - and rule 20 makes him its sole authority.
-             Deleting the line is equally visible and equally his.
+             $ grep -rn "ELEMENT_PRESENCE_NOTE" lib/ components/
+             lib/semantic/index.js:72    export const ELEMENT_PRESENCE_NOTE =
+                                         'Sebaran visual, bukan ukuran kekuatan.'
+             lib/semantic/index.js:317   carried onto the semantic JSON
+             lib/pdf/document.js:56,208  rendered in the PDF
+
+             BOTH SURFACES RENDER IT. The free reading page reads it off the chart
+             at components/Funnel.jsx:745, and the PDF at lib/pdf/document.js:208
+             falls back to the constant. The English diagnostic is gone from both.
+
+             A CAUTION ABOUT LINE NUMBERS, which is why this correction is verbose.
+             The replaced text cited `lib/semantic/index.js:286`, `lib/mirror/view.js:91`
+             and `components/Funnel.jsx:702`. All three were accurate when written on
+             2026-08-31; two now address unrelated code. A banner that cites a line
+             owes its reader a date, and this one did not carry one.
 
 THE 1080x1440 CANVAS THROUGHOUT THIS FILE IS SUPERSEDED by
 `docs/content/card-polish-spec.md` §10 and prompt R: Card A is 1080x1350, has no
-canvas and no mat, and IS the export. Commit 5 references the old geometry in
-several places, so IT NEEDS A REWRITE AGAINST THE NEW FRAME BEFORE IT IS
-BUILDABLE. Do not rewrite it now - it sits BEHIND prompt R, and rewriting it
-against a frame R has not finished landing is how it goes stale twice.
+canvas and no mat, and IS the export.
+
+*** THE REWRITE INSTRUCTION BELOW IS DISCHARGED, 2026-09-02. ***
+It read: "Commit 5 references the old geometry in several places, so IT NEEDS A
+REWRITE AGAINST THE NEW FRAME BEFORE IT IS BUILDABLE. Do not rewrite it now - it
+sits BEHIND prompt R, and rewriting it against a frame R has not finished landing
+is how it goes stale twice."
+
+R LANDED - `#86`, `bd4655a`, 2026-09-02 - so the condition is met and the rewrite
+is done, as `docs/prompts/S-share-sheet.md`. It carries COMMIT 5 forward verbatim
+except the geometry section, which records WHY the old mechanism is gone rather
+than only the new number: the 86.4px field absorbed a 1440->1350 crop and was
+therefore a SAFE AREA, and R deleted the field. The conclusion survives - the
+export is natively 4:5 so no crop is required - but a session reading COMMIT 5
+cold would take it as an argument for adding a mat back. S says so explicitly.
+
+THIS SECTION IS DELIBERATELY NOT EDITED BELOW THE BANNER. The instruction was to
+rewrite it ELSEWHERE, and the reasoning here is the only record of how the
+2026-08-23 ruling was reached.
 ════════════════════════════════════════════════════════════════════════════════
 
 STATUS: BUILD PROMPT. Written by Cowork 2026-08-23, after the promotion landed on production
