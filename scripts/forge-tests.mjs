@@ -144,12 +144,29 @@ t('compat > artifact at BOTH tiers (compat stays clearly the premium product)', 
   assert.ok(SKUS.compat.launch > SKUS.artifact.launch, 'launch ladder');
 });
 
+// THE LADDER IS READ FROM `SKUS`, NEVER RETYPED HERE.
+//
+// This test used to hardcode `artifact` at 25000 and `compat` at 29000/45000, and
+// it went red the moment the RULED ladder landed - docs/product/paid-product-map.md
+// `## RULED 2026-08-29`, applied in cf9be7f, on main from 622d926 (PR #84). The
+// code was right and the test was carrying a superseded second copy.
+//
+// Funnel.jsx already states the rule one layer up: "Resolved from lib/pricing.js,
+// never hardcoded: the offer must show exactly what the invoice charges." A test
+// with its own copy of the ladder is that same defect one layer down, and merely
+// correcting the constants would re-arm it for the next price change.
+//
+// SO THE PROPOSITION CHANGED, NOT JUST THE NUMBERS. What `priceFor` owes anyone is
+// TIER ROUTING - the bare call follows LAUNCH_PRICING, and each override reaches
+// the tier it names. Those are facts about the function; the amounts are facts
+// about the table, and the two tests above already guard the table's shape. This
+// now covers `annual` too, which the hardcoded version silently skipped.
 t('priceFor returns the live tier, and the override reaches the other one', () => {
-  assert.strictEqual(priceFor('artifact'), LAUNCH_PRICING ? 19000 : 25000);
-  assert.strictEqual(priceFor('artifact', { launch: true }), 19000);
-  assert.strictEqual(priceFor('artifact', { launch: false }), 25000);
-  assert.strictEqual(priceFor('compat', { launch: true }), 29000);
-  assert.strictEqual(priceFor('compat', { launch: false }), 45000);
+  for (const [sku, tiers] of Object.entries(SKUS)) {
+    assert.strictEqual(priceFor(sku), LAUNCH_PRICING ? tiers.launch : tiers.list, `${sku}: live tier`);
+    assert.strictEqual(priceFor(sku, { launch: true }), tiers.launch, `${sku}: launch override`);
+    assert.strictEqual(priceFor(sku, { launch: false }), tiers.list, `${sku}: list override`);
+  }
   assert.throws(() => priceFor('nope'), /Unknown SKU/);
 });
 
