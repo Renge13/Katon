@@ -127,3 +127,108 @@ sentence case at caps tracking is not sentence case done.
 
 Check it rendered, not just changed — the strings reach the DOM through the copy bank and the block
 renders client-side, so a source read is not evidence about what a reader sees.
+
+---
+
+## AMENDED 2026-09-01 -- `thanks` SPLITS IN TWO, AND THE ANTICIPATION LINES LOOP
+
+**Reyner, 2026-09-01.** Three rulings. The first replaces a ruled slot, the second explicitly
+declines to change one, and the third is not a copy ruling at all -- it is here because it is the
+only reason the block above it needs re-reading.
+
+### 1. `thanks` IS REPLACED AND SPLIT
+
+Slot 9 of the eleven is retired. One string was doing two jobs at two different moments:
+
+| Was | Becomes | Slot | Shown when |
+|---|---|---|---|
+| `thanks` = `Sudah tercatat, terima kasih.` | `interestNoted` = `Minatmu sudah tercatat.` | the TAP | `interest_registered` has been fired for this product |
+| (same string, same slot) | `contactSent` = `Emailmu sudah masuk.` | the SUBMIT | the contact POST came back `ok` |
+
+**WHY ONE STRING COULD NOT DO BOTH, and it is a correctness problem rather than a wording
+preference.** `Sudah tercatat, terima kasih.` rendered the moment a product was tapped and never
+changed afterwards, so a reader who then typed an email and pressed `Kirim` got no acknowledgement
+that the second, different thing had happened. The block's own header rules that **the tap is the
+metric** and the contact box is optional and arrives after the signal is already recorded. Two
+moments that the design deliberately separates were sharing one confirmation.
+
+**EACH NEW STRING NAMES ITS OWN OBJECT** -- `Minatmu` for the tap, `Emailmu` for the submit -- which
+is what makes them distinguishable a line apart. Neither says `terima kasih`: the block is recording
+a fact, and thanking someone for a tap overstates what happened.
+
+**`Emailmu sudah masuk.` IS A CLAIM ABOUT THE SERVER, so it may only appear when the server said so.**
+This is the half that constrains the code rather than the copy. The string asserts that a thing
+arrived; showing it after an empty box, a rejected POST or a `410 gone` reading is the product
+telling a reader something untrue. The confirmation is therefore tied to a successful submit, and
+that binding is the change's actual subject. **There is no failure string.** `product_interest`
+upserts on `(reading_id, product)`, so a retry is harmless, and leaving the input visible with its
+value intact says "not yet" without inventing a twelfth slot nobody ruled.
+
+### 2. `availability` STAYS `Belum tersedia` -- RULED, NOT OVERLOOKED
+
+Unchanged, and written down because a section that edits its neighbours is exactly where a slot gets
+changed by momentum. **The 2026-08-31 dependency recorded in `lib/site/copy.js` is untouched:**
+`Sedang disiapkan` was the discarded alternative, and it would still force a paraphrase in `eyebrow`
+to avoid reading as a stutter one line above. Nothing in this amendment touches that pair.
+
+### 3. THE ANTICIPATION LINES LOOP INSTEAD OF HOLDING
+
+`components/Funnel.jsx`, the three lines shown while the reading renders. They advanced twice and
+then **held** on `Menghitung keseimbangan energimu` for as long as the render took. **RULED: they
+cycle.** The render behind them has no deadline, and a line frozen for eight seconds reads as a hung
+page, which is the opposite of what the component is for.
+
+**This is not a copy ruling -- the three strings are unchanged** -- and it is recorded here anyway
+because the comment above that effect argues the case for holding, and the argument becomes false
+the moment looping lands. It weighed holding against *blanking*, and looping is neither. A rationale
+left in place after its conclusion is reversed is worse than no rationale: the next reader takes it
+as the reason for what they are looking at.
+
+## THE SWEEP -- BOTH NEW STRINGS, 2026-09-01
+
+Compiled exactly as `lib/validate/style.js:63` does it -- `new RegExp(entry.pattern, entry.flags || 'iu')`.
+Patterns read from `lib/validate/blocklist.json`, never retyped, and never passed through a shell heredoc.
+
+```
+COMPILED 65 checks from lib/validate/blocklist.json
+CONTROLS: 7/7 fired
+CLEAN UPCOMING_COPY.interestNoted: "Minatmu sudah tercatat."
+CLEAN UPCOMING_COPY.contactSent:   "Emailmu sudah masuk."
+RESULT: 0 hit(s) across 2 candidates.
+```
+
+**Falsified before its CLEAN was trusted.** Seven deliberately bad inputs, each required to fire on
+the rule it was aimed at:
+
+| Input | Fired on |
+|---|---|
+| `Ini ramalan nasib dan peruntunganmu.` | `forbidden_content.fatalism.0` |
+| `Sepertinya kamu agak lelah.` | `style.hedging.0` and `.2` |
+| `Minat sudah dicatat di contactSent.` | `style.code_leak.1` (camelCase, flags `u`) |
+| `Nilai product_interest sudah tercatat.` | `style.code_leak.0` (snake_case) |
+| `Minatmu sudah tercatat -- terima kasih.` | `rule20.keyboard U+2014` |
+| `Emailmu sudah masuk ...` | `rule20.keyboard U+2026` |
+| `Aspekmu adalah <hanzi> yang kuat.` | hanzi in prose (rule 23) |
+
+The last three matter most: **they are the candidate strings themselves, altered only by the defect.**
+A control that shares no shape with the real input proves the instrument fires, not that it fires
+*here*.
+
+**AN EIGHTH CONTROL WAS WRONG AND THE SWEEP CAUGHT IT.** `Kamu mungkin akan merasa lebih baik.` was
+written expecting `style.hedging` and returned CLEAN. The sweep was not broken: `mungkin` was
+deliberately MOVED out of this file on 2026-08-17 into `lib/validate/style.js#hedgeAboutReader`,
+which `blocklist.json#_removed` records. Replaced with `sepertinya` and `agak`, which are still here.
+Written down because the 2026-08-31 sweep above records the opposite failure -- an instrument wrong
+about a candidate -- and this is the pair: **a control can be wrong too, and a CLEAN control is a
+claim about the blocklist that has to be checked against the blocklist.**
+
+### APPLYING IT
+
+1. This file lands on `main` in its own commit, before the one that applies it.
+2. `lib/site/copy.js`: rename `thanks` to `interestNoted`, add `contactSent`. One call site.
+3. The confirmation binding in ruling 1 is behaviour, so **an assertion has to go red without it** --
+   press `Kirim` with an empty box, and with a POST that rejects, and assert `Emailmu sudah masuk.`
+   is not shown in either case. A happy-path test passes whether or not the gating exists.
+4. `fireEvent` KEEPS ITS CONTRACT. It is fire-and-forget by design and the other seven events rely on
+   that; the awaited path is added for the contact submit alone.
+5. **No `STAGE6_VERSION` bump.** Nothing here changes what Stage 6 accepts or rejects.

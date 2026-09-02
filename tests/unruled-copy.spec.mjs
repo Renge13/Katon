@@ -55,7 +55,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  */
 const REQUIRED = [
   'eyebrow', 'lead', 'availability', 'interestCta',
-  'thanks', 'contactLabel', 'contactSubmit',
+  // `thanks` was replaced and SPLIT into these two on 2026-09-01 - one receipt for
+  // the tap, one for the contact submit. Both are required: a missing one is a
+  // moment that confirms nothing, which is the defect the split exists to fix.
+  'interestNoted', 'contactSent', 'contactLabel', 'contactSubmit',
 ];
 
 test('the detector finds a sentinel at any depth', () => {

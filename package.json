@@ -39,6 +39,7 @@
     "test:readout": "node --test tests/demand-readout.spec.mjs",
     "test:interest": "node --conditions=react-server --test tests/interest-route.spec.mjs",
     "test:unruled-copy": "node --test tests/unruled-copy.spec.mjs",
+    "test:contact-submit": "node --import ./scripts/jsx-register.mjs --test tests/contact-submit.spec.mjs",
     "test:ratelimit": "node --conditions=react-server --test tests/ratelimit.spec.mjs",
     "measure:stage6": "node --env-file-if-exists=.env.local --conditions=react-server scripts/measure-stage6.mjs",
     "emit:semantic": "node scripts/emit-semantic.mjs",
@@ -100,6 +101,7 @@
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
+    "jsdom": "^30.0.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.65.0"
   }
