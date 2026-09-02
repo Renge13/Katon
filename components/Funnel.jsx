@@ -938,10 +938,33 @@ function Offer({ reading, initialStage }) {
 
         <div style={{ height: 24 }} />
         <div style={{ background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g22)', borderRadius: 16, padding: 18 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          {/* `flexWrap` IS THE LOAD-BEARING HALF. MEASURED IN THE BROWSER 2026-09-02:
+              at 320px the row has 190px and its two children need 226px together
+              (price 135.3 + gap 8 + label 82.7). Without wrapping, the label does not
+              shrink - it OVERFLOWS THE PANEL, right edge 291px against the panel's
+              274px - and the item that gives way instead is the one that can still
+              break internally: the PRICE, orphaning "Rp" above "19.000" at 32px serif.
+              Wrapping moves the break to the gap BETWEEN them, a seam that already
+              exists, and the label drops to its own line under the amount.
+
+              ONLY AT 320. Measured at 375 / 390 / 414 the row is 51.2px tall and the
+              label still sits beside the price, unchanged. */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
             {/* Resolved from lib/pricing.js, never hardcoded: the offer must show
-                exactly what the invoice charges. */}
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff' }}>{formatIdr(priceFor('artifact'))}</div>
+                exactly what the invoice charges.
+
+                `nowrap` IS A GUARD AND NOT THE FIX, and it is written that way because
+                the measurement says so rather than because it reads better. With the
+                flexWrap above in place, removing this changes NOTHING at 320px: the
+                label has already dropped, so the price owns the full 190px and its
+                135.3px fits. It engages below roughly 266px of viewport, where the row
+                is narrower than the price itself - measured at 260px (row 130px), the
+                price is 51.2px tall with it and 102.4px without.
+
+                It stays because `formatIdr` writes "Rp 19.000" with a space, a space is
+                a break opportunity, and an amount is one token. Pinning it is cheaper
+                than trusting the widths nobody tests. */}
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff', whiteSpace: 'nowrap' }}>{formatIdr(priceFor('artifact'))}</div>
             {/* `nowrap`, for the same reason the upcoming-products price below
                 carries it. MEASURED IN THE BROWSER 2026-09-02, not assumed:
 
