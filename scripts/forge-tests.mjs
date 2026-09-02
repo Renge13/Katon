@@ -144,12 +144,23 @@ t('compat > artifact at BOTH tiers (compat stays clearly the premium product)', 
   assert.ok(SKUS.compat.launch > SKUS.artifact.launch, 'launch ladder');
 });
 
+// THE LADDER IS RULED, AND THESE LITERALS ARE THE RULING, NOT A GUESS.
+// Authority: docs/product/paid-product-map.md `## RULED 2026-08-29` (Reyner).
+//   launch  19 -> 39 -> 79     mature  29 -> 49 -> 99
+// These numbers are written out rather than read from SKUS on purpose: a test
+// that asserts SKUS against SKUS cannot see a price edit. If this fails, check
+// the ruling BEFORE changing lib/pricing.js - the 25000/29000/45000 set that
+// used to sit here was the superseded proposal band and it is the reason
+// CLAUDE.md says a session finding 49.000 in lib/pricing.js has found the
+// ruling, not a defect.
 t('priceFor returns the live tier, and the override reaches the other one', () => {
-  assert.strictEqual(priceFor('artifact'), LAUNCH_PRICING ? 19000 : 25000);
+  assert.strictEqual(priceFor('artifact'), LAUNCH_PRICING ? 19000 : 29000);
   assert.strictEqual(priceFor('artifact', { launch: true }), 19000);
-  assert.strictEqual(priceFor('artifact', { launch: false }), 25000);
-  assert.strictEqual(priceFor('compat', { launch: true }), 29000);
-  assert.strictEqual(priceFor('compat', { launch: false }), 45000);
+  assert.strictEqual(priceFor('artifact', { launch: false }), 29000);
+  assert.strictEqual(priceFor('compat', { launch: true }), 39000);
+  assert.strictEqual(priceFor('compat', { launch: false }), 49000);
+  assert.strictEqual(priceFor('annual', { launch: true }), 79000);
+  assert.strictEqual(priceFor('annual', { launch: false }), 99000);
   assert.throws(() => priceFor('nope'), /Unknown SKU/);
 });
 
