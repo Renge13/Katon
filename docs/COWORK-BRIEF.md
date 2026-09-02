@@ -356,6 +356,46 @@ The cheap defence is to make the instrument runnable on its own in a second (`np
 now prints the orphan scan for exactly this reason); a guard nobody can exercise cheaply is a
 guard nobody verifies.
 
+### THE SAME TRAP IN A BROWSER — two instances, 2026-09-02, both cost real rounds
+
+The sibling trap above is *"the run exercised a different version than the one under test."* Both of
+these are that, in the Browser pane, where it is much harder to see because the page LOOKS right.
+Neither is theoretical: both happened while measuring the 320px price wrap on `#86`.
+
+**1. A BROWSER MEASUREMENT CAN BE AGAINST A STALE `.next` BUNDLE.** The dev server was started after
+the edit and still served the previously compiled chunk, so every number in the first measuring round
+described the OLD code. Nothing looked wrong — the page rendered, the element was found, the heights
+were real heights.
+
+> **THE TELL: `getComputedStyle` disagreeing with the JSX on disk.** Read the property off the live
+> node and compare it to the source before trusting any layout number. Here the file said
+> `whiteSpace: 'nowrap'` and `getComputedStyle(price).whiteSpace` said `normal`, which is the whole
+> detection. Then `touch` the file, reload, and re-read the computed value until the two agree.
+
+Corollary: **a Vercel preview is not exposed to this and a local dev server is**, so a local
+measurement carries an extra burden of proof that a preview measurement does not.
+
+**2. `el.style.X = ''` DOES NOT RESTORE A REACT INLINE STYLE — IT STRIPS IT.** React writes these
+components' styles into the element's `style` ATTRIBUTE, so clearing a property does not fall back to
+"what the JSX said"; there is no other layer to fall back to. It leaves the element in a state that
+matches no version of the code.
+
+This matters specifically for **falsifying a CSS fix**, which is now the standard move here: set the
+property away from the shipped value, confirm the control fires, then put it back. The "put it back"
+step is the one that lies. On 2026-09-02 it reported the pre-change geometry as the RESTORED state,
+which would have been recorded as "the fix does nothing" had the numbers not been implausible.
+
+> **RELOAD BETWEEN ROUNDS. Never restore by assignment.** A control run destroys the shipped state,
+> so a reload is the only thing that reproduces it. And treat any "after restoring, X" reading taken
+> by assignment as FABRICATED — not suspect, fabricated: it is a measurement of a state that never
+> shipped.
+
+**WHY THESE TWO SIT UNDER THIS SECTION.** Both produce a confident number about the wrong artifact,
+which is section 4's whole subject, and both pass the "did it fire?" test — the CONTROL genuinely
+fires in each case. Falsification alone does not catch them. **What catches them is asking which
+BUILD the falsification ran against**, which is a different question from whether the instrument
+works.
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
