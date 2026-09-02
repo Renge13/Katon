@@ -46,6 +46,28 @@ globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 globalThis.requestAnimationFrame = (cb) => setTimeout(() => cb(Date.now()), 0);
 globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 
+// ── ResizeObserver: A JSDOM GAP, NOT A BEHAVIOUR ───────────
+// jsdom does not implement it and `ScaledCard` constructs one on mount, so any
+// test that renders a card dies with `ReferenceError: ResizeObserver is not
+// defined` before reaching its own assertion. That is a RED FOR THE WRONG REASON -
+// it looks exactly like the behaviour under test being absent, and it was briefly
+// mistaken for one while writing tests/share-sheet.spec.mjs.
+//
+// IT DELIBERATELY DOES NOTHING BEYOND THE INITIAL CALL. jsdom has no layout, so
+// `clientWidth` is 0 and there is no resize to observe; a stub that invented
+// callbacks would be inventing layout events a browser never sent. Nothing in this
+// repo asserts on the scaled display size, and if something ever does, it needs a
+// real browser rather than a better stub.
+if (typeof globalThis.ResizeObserver !== 'function') {
+  globalThis.ResizeObserver = class ResizeObserver {
+    constructor(cb) { this._cb = cb; }
+    observe() { /* no layout in jsdom: nothing to report */ }
+    unobserve() {}
+    disconnect() {}
+  };
+  dom.window.ResizeObserver = globalThis.ResizeObserver;
+}
+
 // React's `act` environment flag. Without it every act() call warns, and a suite
 // that prints warnings is a suite whose real warnings stop being read.
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;

@@ -35,9 +35,11 @@
 // Nothing here writes a sentence about it.
 // ============================================================
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CardA, CardB, CARD_A, exportSize } from './cards/Card.js';
-import { downloadCard } from './cards/exportCards.js';
+import {
+  downloadCard, captureCard, dataUrlToFile, canSharePngFiles, shareOrSave, SHARE_CANCELLED,
+} from './cards/exportCards.js';
 
 /**
  * Fire one funnel counter. FIRE AND FORGET, DELIBERATELY.
@@ -756,9 +758,12 @@ function Reading({ reading, onReset, initialStage }) {
       {/* the free shareable — Card A. It replaces the retired <Sharecard>, and the
           reason it can sit beside the reading now is that both name her archetype
           from the same glossary. */}
+      {/* EYEBROW AND LEAD, REYNER-APPROVED 2026-08-23 ("SHIP AS PROPOSED").
+          Exact bytes, and not re-swept: prompt S is explicit that a check now
+          rejecting one of these is presumed WRONG until its history is read. */}
       {cardData && (
-        <Section eyebrow="Simpan sebagai kartu" style={{ marginTop: 52 }}>
-          <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>Satu kartu ringkas tentang dirimu, untuk disimpan atau dibagikan.</p></Reveal>
+        <Section eyebrow="Bagikan kartumu" style={{ marginTop: 52 }}>
+          <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>Satu kartu ringkas tentang dirimu, siap kamu simpan atau kirim ke siapa pun.</p></Reveal>
           <ShareCardA data={cardData} token={reading.token} />
         </Section>
       )}
@@ -817,22 +822,109 @@ function formatCardDate(iso) {
  * it - and an auto-crop takes the top and bottom of a card whose headline is at the
  * top and whose seal is at the bottom.
  */
-function ShareCardA({ data, token }) {
-  const [saving, setSaving] = useState(false);
+/**
+ * THE CARD DATA THAT REACHES PIXELS, as one comparable string.
+ *
+ * This is the eager capture's staleness assertion and it is the whole reason the
+ * capture is allowed to be eager. `data` is rebuilt on the client and the FOOTER
+ * MERGES THE BIRTH DATE AFTER MOUNT (measured: `13 SEP 1989` appearing late), so a
+ * capture taken too early ships a card with the wrong footer and nothing looks
+ * wrong. Prompt S: "a silently stale File is worse than a slow one."
+ *
+ * A whole-object stringify rather than a field list, deliberately: a field list is
+ * a second copy of "what the card draws" that goes stale the first time the card
+ * draws something new, silently, in the direction of sharing a wrong card.
+ */
+function cardStamp(data) {
+  try { return JSON.stringify(data); } catch { return null; }
+}
+
+export function ShareCardA({ data, token, capture = captureCard }) {
+  const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  async function save() {
-    setSaving(true); setFailed(false);
+  // { dataUrl, file, stamp } from the eager capture, or null.
+  const [ready, setReady] = useState(null);
+
+  const stamp = useMemo(() => cardStamp(data), [data]);
+  const filename = `katon-${(data.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png`;
+
+  // THE LABEL IS RIGHT FROM FIRST PAINT, which needs a detection that does not
+  // wait on the capture. Keying this off the eager File made the button read
+  // `Simpan Gambar` and then flip to `Bagikan Kartu` a second later, changing
+  // under the reader's eyes - seen in a browser, not predicted. `canSharePngFiles`
+  // asks the same question with a one-byte probe, because `canShare` is about the
+  // payload's TYPE rather than its bytes. The real file is still checked inside
+  // `shareOrSave` before anything is handed over.
+  //
+  // RESOLVED DURING RENDER, NOT IN AN EFFECT. There is no hydration hazard here:
+  // `reading` starts null and arrives from a client fetch, so the first render that
+  // contains this component is already on the client. An effect that setState'd the
+  // answer was written first and `react-hooks` refused it, correctly - it was a
+  // cascading render for a value that was available all along.
+  const shareSupported = useMemo(() => canSharePngFiles(), []);
+
+  // ── THE EAGER CAPTURE. APPROVED BY REYNER 2026-08-23. ──
+  // `navigator.share` needs an active user activation, and the capture is not
+  // instant (61 font requests measured for one card). On iOS Safari an await of
+  // that length between the tap and `share()` consumes the activation: the sheet
+  // never opens and nothing says why. So the File is in hand before she taps.
+  //
+  // CONDITION 1 - IT MUST NOT BLOCK OR DELAY THE READING. It is kicked off the
+  // critical path in a timeout, and a failure here is swallowed: a reader who has
+  // tapped nothing must never see an error about a capture she did not ask for.
+  // The tap path re-captures, so a failed eager capture costs latency, not the card.
+  //
+  // CONDITION 2 - IT MUST BE INVALIDATED IF THE CARD DATA CHANGES. Keyed on
+  // `stamp`, so a late footer merge re-runs it, and `share()` re-checks the stamp
+  // before using what this stored.
+  useEffect(() => {
+    if (!stamp) return undefined;
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      try {
+        const dataUrl = await capture('share', 'A', { id: 'card-a' });
+        if (cancelled) return;
+        setReady({ dataUrl, file: dataUrlToFile(dataUrl, filename), stamp });
+      } catch { /* never surfaced: she has not asked for anything yet */ }
+    }, 0);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [stamp, filename, capture]);
+
+  async function share() {
+    setFailed(false);
+    // THE STALENESS ASSERTION, and it is the reason `ready` carries its stamp at
+    // all. A File captured against different data is DISCARDED here rather than
+    // shared - the cost is one re-capture, and the alternative is a card in her
+    // feed with somebody else's footer.
+    const fresh = ready && ready.stamp === stamp ? ready : null;
+
+    if (fresh) {
+      // NOTHING IS AWAITED BEFORE `share()` ON THIS PATH. That is the entire point
+      // of the eager capture; adding an await here would restore the iOS bug it
+      // was approved to prevent.
+      const result = await shareOrSave({ file: fresh.file, dataUrl: fresh.dataUrl, filename });
+      if (result !== SHARE_CANCELLED) fireEvent(token, 'card_downloaded');
+      return;
+    }
+
+    // NO FRESH FILE: capture now. Slower, and on iOS this is the path that can
+    // lose the activation - `shareOrSave` then saves instead of sharing, which is
+    // the degrade this whole change is landed behind.
+    setBusy(true);
     try {
-      await downloadCard('share', 'A', { id: 'card-a', filename: `katon-${(data.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
-      // COUNTED ONLY ON SUCCESS. A capture that threw produced no file, and the
-      // share-rate denominator must not include downloads that did not happen -
-      // this button shipped BLANK once (#74), which is exactly the failure a
-      // fire-on-click counter would have hidden behind a healthy-looking rate.
-      fireEvent(token, 'card_downloaded');
+      const dataUrl = await capture('share', 'A', { id: 'card-a' });
+      setReady({ dataUrl, file: dataUrlToFile(dataUrl, filename), stamp });
+      const result = await shareOrSave({ file: dataUrlToFile(dataUrl, filename), dataUrl, filename });
+      // COUNTED ONLY ON SUCCESS, and cancelling is not success. A capture that
+      // threw produced no file, and the share-rate denominator must not include
+      // deliveries that did not happen - this button shipped BLANK once (#74),
+      // which is exactly the failure a fire-on-click counter would have hidden
+      // behind a healthy-looking rate.
+      if (result !== SHARE_CANCELLED) fireEvent(token, 'card_downloaded');
     } catch {
       setFailed(true);
     }
-    setSaving(false);
+    setBusy(false);
   }
   return (
     <>
@@ -841,16 +933,33 @@ function ShareCardA({ data, token }) {
             `captureCard` captures this node at 1:1 and refuses a node laid out
             at anything else, because scaling the clone back up is what blanked
             the share card. A CSS transform does not change the layout box, so
-            #card-a stays 1080x1440 to the capture while the reader sees it at
-            whatever fits her column. See ScaledCard. */}
+            #card-a stays at EXPORT SIZE to the capture while the reader sees it
+            at whatever fits her column. See ScaledCard.
+
+            CORRECTED 2026-09-02: this said "stays 1080x1440", which prompt R
+            retired. Card A is 1080x1350, full-bleed, with no canvas and no mat -
+            `CARD_A` in components/cards/Card.js:109 has no `canvas` key at all,
+            and card-polish-spec.md §10 is the authority. The number is not
+            restated here on purpose: a size written in a comment beside a
+            component that reads `spec` is a second source of truth, and this one
+            had already gone stale once. */}
         <ScaledCard spec={CARD_A}>
           <CardA data={data} scale={1} id="card-a" />
         </ScaledCard>
       </Reveal>
       <Reveal delay={0.12} style={{ marginTop: 20 }}>
-        <Button variant="gold" onClick={save} disabled={saving} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <Icon.save size={17} /> {saving ? 'Menyimpan...' : 'Simpan Gambar'}
+        {/* COPY RULED BY REYNER 2026-08-23, "SHIP AS PROPOSED". Exact bytes.
+            REYNER-APPROVED 2026-08-23: `Bagikan Kartu`, `Menyiapkan...`.
+            The label says what the button does; on the fallback path it genuinely
+            is a save, so that path keeps `Simpan Gambar` - one capture, two
+            destinations, two honest labels. `shareSupported` is resolved from the
+            EAGER FILE rather than from `navigator.share`, for the same reason the
+            detection is: a browser that has `share` and refuses files must read
+            the save label, not the share one. */}
+        <Button variant="gold" onClick={share} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Icon.save size={17} /> {busy ? 'Menyiapkan...' : (shareSupported ? 'Bagikan Kartu' : 'Simpan Gambar')}
         </Button>
+        {/* REYNER-APPROVED, unchanged. A cancelled share sheet never reaches this. */}
         {failed && <div style={{ color: 'var(--red)', fontSize: 13, marginTop: 10 }}>Gambarnya gagal dibuat. Coba lagi.</div>}
       </Reveal>
     </>

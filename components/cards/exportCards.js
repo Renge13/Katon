@@ -218,12 +218,129 @@ export async function captureCard(kind, card, { id } = {}) {
   });
 }
 
-/** Capture and hand the file to the browser's download. */
-export async function downloadCard(kind, card, { id, filename = 'katon.png' } = {}) {
-  const dataUrl = await captureCard(kind, card, { id });
+/**
+ * Hand a captured data URL to the browser's download. TODAY'S PATH, EXTRACTED.
+ *
+ * Pulled out of `downloadCard` unchanged so the share path can fall back to the
+ * EXACT bytes of behaviour that ship now (prompt S: "fall back to exactly the
+ * downloadCard path that exists today, unchanged"). A fallback that is a
+ * re-implementation of the old path is not a fallback, it is a second path.
+ */
+export function saveDataUrl(dataUrl, filename = 'katon.png') {
   const link = document.createElement('a');
   link.download = filename;
   link.href = dataUrl;
   link.click();
+}
+
+/** Capture and hand the file to the browser's download. */
+export async function downloadCard(kind, card, { id, filename = 'katon.png' } = {}) {
+  const dataUrl = await captureCard(kind, card, { id });
+  saveDataUrl(dataUrl, filename);
   return dataUrl;
+}
+
+/* ============================================================
+   THE NATIVE SHARE SHEET — prompt S
+   ============================================================ */
+
+/** What `shareOrSave` did, so a caller can tell the three apart. */
+export const SHARE_SHARED = 'shared';
+export const SHARE_CANCELLED = 'cancelled';
+export const SHARE_SAVED = 'saved';
+
+/**
+ * FEATURE-DETECT ON THE FILES, NEVER ON `navigator.share` ALONE.
+ *
+ * Prompt S, carrying prompt O's own reason forward: several browsers expose
+ * `share` and refuse file payloads, so a bare `share` check is "a check that
+ * cannot fail in the way it needs to" - it returns true on browsers where the
+ * share will throw.
+ *
+ * `canShare` is called inside a try because passing it a payload some
+ * implementations dislike throws rather than returning false, and a thrown
+ * feature detection must read as "not supported", never as a broken card.
+ */
+export function canShareFile(file) {
+  if (typeof navigator === 'undefined' || !file) return false;
+  if (typeof navigator.share !== 'function') return false;
+  if (typeof navigator.canShare !== 'function') return false;
+  try {
+    return navigator.canShare({ files: [file] }) === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Can this browser share a PNG AT ALL, asked without a captured card in hand.
+ *
+ * ── WHY A PROBE FILE RATHER THAN THE REAL ONE ──────────────
+ * The button's label has to be right from first paint. Keying it off the eagerly
+ * captured File made it read `Simpan Gambar` until the capture landed and then
+ * flip to `Bagikan Kartu` a second later, changing under the reader's eyes -
+ * caught in a browser, not reasoned about. `canShare` is a question about the
+ * TYPE of payload, not its bytes, so a one-byte PNG answers the same question the
+ * real card would.
+ *
+ * IT IS NOT A SUBSTITUTE FOR `canShareFile`. `shareOrSave` still asks about the
+ * ACTUAL file before sharing it, because that is the payload being handed over
+ * and this one is not.
+ */
+export function canSharePngFiles() {
+  try {
+    return canShareFile(new File([new Uint8Array([0])], 'probe.png', { type: 'image/png' }));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * A captured PNG data URL as a `File`, which is the only shape `share` accepts.
+ *
+ * Kept synchronous ON PURPOSE. The whole reason the capture is eager (prompt S,
+ * approved by Reyner 2026-08-23) is that an `await` between the tap and
+ * `share()` can consume the user activation on iOS Safari. `fetch(dataUrl)` would
+ * be tidier and would reintroduce exactly that await, so this decodes by hand.
+ */
+export function dataUrlToFile(dataUrl, filename = 'katon.png') {
+  const comma = dataUrl.indexOf(',');
+  const meta = dataUrl.slice(0, comma);
+  const type = /:(.*?);/.exec(meta)?.[1] || 'image/png';
+  const binary = atob(dataUrl.slice(comma + 1));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new File([bytes], filename, { type });
+}
+
+/**
+ * Share the file if this browser can, otherwise save it. ONE CAPTURE, TWO
+ * DESTINATIONS.
+ *
+ * ── EVERY FAILURE DEGRADES TO TODAY'S BEHAVIOUR, NOT TO NOTHING ──
+ * Prompt S's landing condition. Unsupported browsers save; a share that throws
+ * for any reason other than cancellation saves. That last branch is not
+ * defensive padding - `NotAllowedError` from a consumed user activation is the
+ * exact iOS failure the eager capture exists to avoid, and a reader who hits it
+ * should still get her card rather than an error.
+ *
+ * ── CANCELLING IS NOT A FAILURE ──
+ * `AbortError` is what a share sheet throws when the reader dismisses it, which
+ * is the single most likely outcome of opening one. It must not reach
+ * `Gambarnya gagal dibuat. Coba lagi.`, and it must not save either: she closed
+ * the sheet, so putting a file in her downloads folder is not what she asked for.
+ */
+export async function shareOrSave({ file, dataUrl, filename, title, text }) {
+  if (!canShareFile(file)) {
+    saveDataUrl(dataUrl, filename);
+    return SHARE_SAVED;
+  }
+  try {
+    await navigator.share({ files: [file], ...(title ? { title } : {}), ...(text ? { text } : {}) });
+    return SHARE_SHARED;
+  } catch (err) {
+    if (err?.name === 'AbortError') return SHARE_CANCELLED;
+    saveDataUrl(dataUrl, filename);
+    return SHARE_SAVED;
+  }
 }
