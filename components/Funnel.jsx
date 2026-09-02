@@ -329,6 +329,11 @@ export default function Funnel() {
   // Answer from the season gate. `resolution` is { termSide } | { birthTime } | {}.
   async function onSeasonAnswer(resolution) {
     setError(null);
+    // Restart the lines at the first one, exactly as onSubmit does. `step` survives
+    // the season gate, so without this the second calculating phase resumes wherever
+    // the first one stopped - which the two timeouts also did, and which reads as
+    // the sequence starting in the middle.
+    setStep(0);
     setPhase('calculating');
     try {
       await createReading(season.birthDate, null, resolution);
@@ -338,14 +343,23 @@ export default function Funnel() {
     }
   }
 
-  // The three lines cycle and then HOLD on the last one, because the render behind
-  // them has no deadline. A fourth timer that advanced past the list would leave a
-  // blank where a line had been.
+  // The three lines LOOP for as long as the render takes. Ruled 2026-09-01.
+  //
+  // They used to advance twice and then HOLD on the last one, and the comment here
+  // argued that a fourth timer "would leave a blank where a line had been". That
+  // weighed holding against BLANKING and never considered CYCLING, which is neither:
+  // the interval wraps with `% ANTICIPATION.length`, so there is always a line.
+  //
+  // The render behind this has no deadline, which was the reason given for holding
+  // and is actually the reason against it: a line frozen for eight seconds reads as
+  // a hung page, which is the opposite of what this component is for.
+  //
+  // ONE INTERVAL, NOT N TIMEOUTS. The old pair had to know the list length; this
+  // does not, so adding a fourth line is a change to `ANTICIPATION` alone.
   useEffect(() => {
     if (phase !== 'calculating') return;
-    const t1 = setTimeout(() => setStep(1), 850);
-    const t2 = setTimeout(() => setStep(2), 1700);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const id = setInterval(() => setStep((s) => (s + 1) % ANTICIPATION.length), 850);
+    return () => clearInterval(id);
   }, [phase]);
 
   if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} />;
@@ -928,7 +942,18 @@ function Offer({ reading, initialStage }) {
             {/* Resolved from lib/pricing.js, never hardcoded: the offer must show
                 exactly what the invoice charges. */}
             <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: '#fff' }}>{formatIdr(priceFor('artifact'))}</div>
-            <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW }}>sekali bayar</div>
+            {/* `nowrap`, for the same reason the upcoming-products price below
+                carries it. MEASURED IN THE BROWSER 2026-09-02, not assumed:
+
+                  375px (iPhone-class)  label needs 82.7px, has 101.7px - 19px spare
+                  320px (iPhone SE)     height 17.6px -> 35.2px, i.e. two lines
+
+                So it does NOT wrap at 375 and DOES at 320, where it reads as two
+                stacked labels beside a 32px price. The headroom at 375 is 19px,
+                which a longer price string eats on its own - `formatIdr(priceFor())`
+                resolves at render time and Rp 149.000 is wider than Rp 19.000. Two
+                words at .1em tracking cost nothing to pin. */}
+            <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW, whiteSpace: 'nowrap' }}>sekali bayar</div>
           </div>
           <div style={{ marginTop: 16 }}>
             <Button onClick={startCheckout} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -974,8 +999,16 @@ function Offer({ reading, initialStage }) {
  * A flat bordered surface on the page background, not the Artifact offer's dark
  * panel, and no primary Button. Ruled: one live purchase CTA per moment. Two
  * buttons of equal weight would make the free reading feel like a shop.
+ *
+ * ── EXPORTED FOR `tests/contact-submit.spec.mjs`, AND ONLY FOR IT ──
+ * Nothing else imports it; `Reading` renders it directly one scope away. The
+ * confirmation below is a claim about the server (see `UPCOMING_COPY.contactSent`),
+ * so the assertion that guards it has to press the real button and read the real
+ * DOM. A test of an extracted helper would keep passing if this component went back
+ * to confirming unconditionally, which is the failure CLAUDE.md's 2026-08-26 entry
+ * describes: a test that passes whether the feature exists or not.
  */
-function Upcoming({ reading }) {
+export function Upcoming({ reading }) {
   // Which product the reader has already tapped, if any. One at a time: the
   // contact box belongs to the product she just tapped, and two open boxes would
   // ask her to answer the same question twice.
@@ -1033,12 +1066,55 @@ function Upcoming({ reading }) {
     setContact('');
   }
 
-  function submitContact() {
-    // A SECOND CALL FOR THE SAME PRODUCT, on purpose. `product_interest` is
-    // unique on (reading_id, product) and upserts, so this attaches the contact
-    // to the signal already recorded rather than creating a second one.
-    if (contact.trim()) fireEvent(reading?.token, 'interest_registered', { product: tapped, contact: contact.trim() });
-    setSent(true);
+  /**
+   * THE ONE AWAITED EVENT ON THIS PAGE, and the exception is deliberate.
+   *
+   * ── WHY IT CANNOT USE `fireEvent` ──────────────────────────
+   * `fireEvent` is fire-and-forget BY DESIGN - "a counter never breaks the page" -
+   * and the other seven events keep that contract exactly as it is. This one is
+   * not a counter. `UPCOMING_COPY.contactSent` says "Emailmu sudah masuk.", which
+   * is a claim that the server RECEIVED something, and `fireEvent` swallows every
+   * failure. `setSent(true)` also sat outside the `if (contact.trim())` guard, so
+   * the confirmation appeared on an empty box, on a failed POST, and on a 410-gone
+   * reading. A wrong confirmation looks exactly like a right one, which is why
+   * nothing on screen ever showed this.
+   *
+   * ── `res.ok` AND THE BODY, NOT EITHER ALONE ────────────────
+   * `recordMirrorEvent` answers `{ ok: true }` at 200 and an `{ error }` shape at
+   * 400/404/410/429. A 200 whose body does not say ok is not a success, so the
+   * status by itself is not enough to make the claim true.
+   *
+   * ── ON FAILURE, NOTHING VISIBLE CHANGES, AND THERE IS NO ERROR STRING ──
+   * Ruled 2026-09-01. `product_interest` is unique on (reading_id, product) and
+   * upserts, so pressing Kirim again is harmless - the input stays visible with
+   * its value intact, which says "not yet" without a twelfth slot nobody ruled.
+   * That same upsert is why posting the contact as a SECOND `interest_registered`
+   * for the same product attaches it to the signal already recorded rather than
+   * creating a second one.
+   */
+  async function submitContact() {
+    const value = contact.trim();
+    // An empty box sends nothing and confirms nothing. The tap is already
+    // recorded and is the metric; there is no second signal here to lose.
+    if (!value) return;
+
+    const token = reading?.token;
+    if (!token) return;
+
+    try {
+      const res = await fetch(`/api/mirror/${token}/event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'interest_registered', product: tapped, contact: value }),
+      });
+      if (!res.ok) return;
+      const body = await res.json().catch(() => null);
+      if (body?.ok !== true) return;
+      setSent(true);
+    } catch {
+      // Offline, aborted, or a body that would not parse. Leave the input and its
+      // value exactly where they are; she can press Kirim again at no cost.
+    }
   }
 
   const products = [
@@ -1094,7 +1170,15 @@ function Upcoming({ reading }) {
 
               {tapped === key && (
                 <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--divider)' }}>
-                  <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '0 0 10px' }}>{UPCOMING_COPY.thanks}</p>
+                  {/* TWO RECEIPTS FOR TWO MOMENTS, ruled 2026-09-01. The tap and
+                      the optional contact submit are things this block keeps
+                      apart on purpose, and one string confirming both meant the
+                      submit was never acknowledged at all. `contactSent` is a
+                      claim that the POST landed, so it renders off `sent`, which
+                      submitContact only sets on a verified success. */}
+                  <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '0 0 10px' }}>
+                    {sent ? UPCOMING_COPY.contactSent : UPCOMING_COPY.interestNoted}
+                  </p>
                   {!sent && (
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       <input
