@@ -173,6 +173,18 @@ to avoid reading as a stutter one line above. Nothing in this amendment touches 
 
 ### 3. THE ANTICIPATION LINES LOOP INSTEAD OF HOLDING
 
+> **SUPERSEDED 2026-09-02, ONE DAY LATER. THE LINES ARE DELETED, NOT RE-RULED.** Reyner walked the
+> funnel himself and ruled the whole anticipation screen out: during `calculating` the reader now
+> stays on the form and the submit button carries the state. `ANTICIPATION`, the `step` state, the
+> interval below and `<Anticipation>` are gone from `components/Funnel.jsx`, and `.k-ring`/`kRipple`
+> went with them.
+>
+> **The ruling below was correct and it is kept for exactly the reason it gives about itself.** It
+> exists because a rationale left standing after its conclusion is reversed gets taken as the reason
+> for what the next reader is looking at - and a one-day-old ruling for copy that no longer renders
+> is the sharpest version of that. What replaced it is not different words; it is the finding that
+> the screen stopped earning its place when chart-early cut the wait from p50 7.6s to roughly 2.5s.
+
 `components/Funnel.jsx`, the three lines shown while the reading renders. They advanced twice and
 then **held** on `Menghitung keseimbangan energimu` for as long as the render took. **RULED: they
 cycle.** The render behind them has no deadline, and a line frozen for eight seconds reads as a hung
