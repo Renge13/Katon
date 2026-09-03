@@ -71,7 +71,10 @@ import { act } from 'react';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
-import { Reading, PROSE_HANDOFF_MS } from '../components/Funnel.jsx';
+import {
+  Reading, PROSE_HANDOFF_MS, PROSE_FADE_MS, PROSE_REVEAL_BUDGET_MS,
+  PROSE_STEP_MAX_MS, proseDelayMs,
+} from '../components/Funnel.jsx';
 
 const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '04:00' });
 const CHART_VIEW = mirrorChartView(chart, buildSemanticJson(chart));
@@ -122,6 +125,11 @@ function mount(reading) {
   return {
     host, render,
     skeletonBars, proseNodes,
+    /** Each prose wrapper's inline animationDelay, in ms, in DOM order. */
+    proseDelays: () => proseNodes().map((p) => {
+      const d = p.parentElement.style.animationDelay || '0ms';
+      return d.endsWith('ms') ? parseFloat(d) : parseFloat(d) * 1000;
+    }),
     skeletonBox: () => host.querySelector('[data-prose-skeleton]'),
     /**
      * What is VISIBLE in the prose region on this paint.
@@ -255,17 +263,68 @@ test('the unmount timer and the fade-out last exactly as long as each other', as
 
 // ── THE STAGGER ────────────────────────────────────────────
 
-test('the stagger is perceptible, not serial', () => {
+test('the stagger runs down the page in DOM order, and it is not flat', () => {
   const restore = stubMotion(false);
   const ui = mount(PENDING);
   try {
     ui.render(SERVED);
-    const delays = ui.proseNodes()
-      .map((p) => parseFloat(p.parentElement.style.animationDelay) || 0);
-    assert.ok(delays.some((d) => d > 0), 'the reveal is still staggered, not a snap');
-    // Paragraphs trickling in over a quarter-second read as "still loading" after
-    // loading has finished, which is the thing being fixed one line up.
-    assert.ok(Math.max(...delays) <= 0.06,
-      `the whole stagger must stay under 60ms, got ${Math.max(...delays)}s`);
+    const delays = ui.proseDelays();
+
+    // STRICTLY INCREASING, ACROSS BLOCK BOUNDARIES. The previous version keyed the
+    // delay on the index WITHIN a block, so it reset at every heading and the
+    // first paragraph of all nine blocks started at zero. That is the sequence
+    // reading as one snap, and a test that only checked "some delay is non-zero"
+    // passed on it - BLOCKS has two blocks, so this list crosses one boundary.
+    assert.equal(delays.length, 5);
+    for (let i = 1; i < delays.length; i += 1) {
+      assert.ok(delays[i] > delays[i - 1],
+        `paragraph ${i} must start after ${i - 1}, got ${delays.join(', ')}`);
+    }
+    assert.equal(delays[0], 0, 'the first paragraph waits for nothing');
   } finally { ui.unmount(); restore(); }
+});
+
+// ── THE BUDGET, WHICH IS THE ONLY REAL CONSTRAINT HERE ─────
+//
+// Reyner: "the whole reveal must complete within a fixed budget REGARDLESS of
+// paragraph count. Derive the per-paragraph delay from the count; do not hardcode
+// a per-item delay."
+//
+// A hardcoded step is not a smaller version of this - it is the defect this whole
+// branch started from, one layer down. At 90ms across the seventeen paragraphs a
+// real reading carries, the last one begins 1.4s after the first and the page
+// trickles after loading has finished.
+
+test('the whole reveal fits the budget however many paragraphs arrive', () => {
+  const restore = stubMotion(false);
+  // Well past anything the renderer produces. A real reading measured 17.
+  for (const count of [1, 2, 5, 17, 40, 120]) {
+    const ui = mount(PENDING);
+    try {
+      ui.render({ ...SERVED, penutup: '', blocks: [{
+        heading: 'Panjang', paragraphs: Array.from({ length: count }, (_, i) => `Paragraf ${i}.`),
+      }] });
+      const delays = ui.proseDelays();
+      assert.equal(delays.length, count, `all ${count} paragraphs render`);
+
+      const last = Math.max(...delays);
+      assert.ok(last + PROSE_FADE_MS <= PROSE_REVEAL_BUDGET_MS + 0.5,
+        `${count} paragraphs: the last one ends at ${last + PROSE_FADE_MS}ms, over the `
+        + `${PROSE_REVEAL_BUDGET_MS}ms budget`);
+    } finally { ui.unmount(); }
+  }
+  restore();
+});
+
+test('a short reading still gets a real rhythm, not a budget-wide crawl', () => {
+  // The mirror of the test above, and the reason the step is a MINIMUM of two
+  // terms rather than just `room / (total - 1)`. With two paragraphs that formula
+  // alone would put 750ms between them - inside the budget, and two lonely beats
+  // rather than a sequence.
+  assert.equal(proseDelayMs(0, 2), 0);
+  assert.equal(proseDelayMs(1, 2), PROSE_STEP_MAX_MS);
+  assert.equal(proseDelayMs(1, 120) < PROSE_STEP_MAX_MS, true,
+    'a long reading compresses below the ceiling');
+  assert.equal(proseDelayMs(0, 1), 0, 'a single paragraph has nothing to stagger against');
+  assert.equal(proseDelayMs(0, 0), 0, 'and an empty reading does not divide by zero');
 });

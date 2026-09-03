@@ -674,12 +674,55 @@ function SeasonGate({ season, onAnswer }) {
  * or with animations disabled, and a skeleton pinned over the reading forever is
  * a worse bug than the one being fixed. A timer always ends.
  */
-export const PROSE_HANDOFF_MS = 360;
+export const PROSE_HANDOFF_MS = 450;
+
+/**
+ * THE PROSE REVEAL. Three numbers, and the third is the only one that is a
+ * DESIGN CONSTRAINT rather than a taste setting.
+ *
+ * Reyner judged the previous version on his own machine: it read as INSTANT
+ * rather than smooth. Two causes, both measured rather than guessed:
+ *
+ *   1. `--ease-quiet` is cubic-bezier(0.22, 1, 0.36, 1) - an ease-out-quint that
+ *      spends almost nothing in its second half. Seeked on the real element it
+ *      was 96% complete at t=180ms of a 360ms animation, so the duration was
+ *      effectively half what it said. `--ease-prose` replaces it HERE ONLY;
+ *      `--ease-quiet` is untouched and the rest of the site still uses it.
+ *   2. The stagger was `Math.min(j, 2) * 0.03` where `j` is the index WITHIN a
+ *      block, so it reset every block and all nine blocks started their first
+ *      paragraph at zero. Not literally no stagger, but the whole reading moved
+ *      as one, which is what "instant" was describing.
+ *
+ * THE STEP IS DERIVED FROM THE PARAGRAPH COUNT, NEVER HARDCODED, and that is the
+ * point of `PROSE_REVEAL_BUDGET_MS`. A fixed per-item delay is what produced the
+ * defect this whole branch started from: at 90ms across the ~17 paragraphs a real
+ * reading carries, the last one would begin 1.4s after the first and the page
+ * would trickle for seconds after loading had finished. The budget bounds the
+ * WHOLE reveal - first paragraph's start to last paragraph's end - regardless of
+ * how many arrive. Retune the feel here, in one place.
+ */
+export const PROSE_FADE_MS = 450;          // one paragraph's own fade
+export const PROSE_REVEAL_BUDGET_MS = 1200; // first start -> last end, ALWAYS
+export const PROSE_STEP_MAX_MS = 90;        // the step a short reading gets to use
+
+/**
+ * The delay for the `i`th paragraph of `total`, in seconds, in DOM order.
+ *
+ * `STEP_MAX` is a CEILING, not the step: a two-paragraph reading would otherwise
+ * spread itself across the entire budget and read as two lonely beats. Short
+ * readings get the natural rhythm; long ones compress to fit. Either way the last
+ * paragraph has finished by `PROSE_REVEAL_BUDGET_MS`.
+ */
+export function proseDelayMs(i, total) {
+  if (total <= 1) return 0;
+  const room = PROSE_REVEAL_BUDGET_MS - PROSE_FADE_MS;
+  return i * Math.min(PROSE_STEP_MAX_MS, room / (total - 1));
+}
 
 /**
  * Does this reader want no motion? Read at the moment the handoff starts rather
  * than subscribed to: a media query flipped mid-transition is not a scenario a
- * reader can produce, and the listener would outlive the 360ms it governs.
+ * reader can produce, and the listener would outlive the reveal it governs.
  */
 function prefersReducedMotion() {
   if (typeof window === 'undefined' || !window.matchMedia) return false;
@@ -732,6 +775,17 @@ export function Reading({ reading, onReset, initialStage }) {
     const id = setTimeout(() => setArmed(false), PROSE_HANDOFF_MS);
     return () => clearTimeout(id);
   }, [pending, armed]);
+
+  // The reveal's running index, computed once per render rather than by mutating
+  // a counter inside the JSX - `proseOffsets[i]` is how many paragraphs precede
+  // block `i` down the page, so block-local `j` still keys the map while the
+  // DELAY comes from the global position. `penutup` is one more item at the end.
+  const { proseOffsets, proseTotal } = useMemo(() => {
+    const offsets = [];
+    let n = 0;
+    for (const b of (reading.blocks || [])) { offsets.push(n); n += (b.paragraphs || []).length; }
+    return { proseOffsets: offsets, proseTotal: n + (reading.penutup ? 1 : 0) };
+  }, [reading.blocks, reading.penutup]);
 
   const element = chart?.day_master?.element;
   const el = elColor(element);
@@ -814,21 +868,27 @@ export function Reading({ reading, onReset, initialStage }) {
 
         {/* the reading. `.k-prose` RATHER THAN <Reveal>, which is `.k-rise`: that
             one is 0.8s from opacity 0 and is used all over the site, so it is
-            left alone and a shorter reveal is used here. The stagger is CAPPED at
-            the third paragraph - paragraphs trickling in over a quarter-second
-            read as "still loading" after loading has finished, which is the thing
-            this commit exists to stop. */}
+            left alone and a slower, differently eased reveal is used here.
+
+            THE INDEX IS GLOBAL AND IN DOM ORDER - `proseIndex`, not `j`. It used
+            to be the index within a block, which reset at every heading and
+            started nine first paragraphs simultaneously. The reveal has to read
+            as ONE sequence down the page, so the counter has to run down the
+            page too. `penutup` is the last item in that sequence and takes the
+            last delay rather than a hardcoded one. */}
         {(reading.blocks || []).map((b, i) => (
           <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
             {(b.paragraphs || []).map((p, j) => (
-              <div key={j} className="k-prose" style={{ animationDelay: `${Math.min(j, 2) * 0.03}s` }}>
+              <div key={j} className="k-prose"
+                style={{ animationDelay: `${proseDelayMs(proseOffsets[i] + j, proseTotal)}ms` }}>
                 <Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para>
               </div>
             ))}
           </Section>
         ))}
         {reading.penutup && (
-          <div className="k-prose" style={{ animationDelay: '0.06s', marginTop: 34 }}>
+          <div className="k-prose"
+            style={{ animationDelay: `${proseDelayMs(proseTotal - 1, proseTotal)}ms`, marginTop: 34 }}>
             <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
           </div>
         )}

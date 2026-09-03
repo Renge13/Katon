@@ -50,6 +50,25 @@
   /* ── Motion ────────────────────────────────────────────── */
   --ease-out:   cubic-bezier(0.4, 0, 0.2, 1);
   --ease-quiet: cubic-bezier(0.22, 1, 0.36, 1);
+  /* THE PROSE REVEAL'S OWN CURVE, and it exists because --ease-quiet could not do
+     this job. That one is an ease-out-quint, and seeking the real animation is
+     what showed why the reveal read as instant: it was 96% complete at t=180ms of
+     a 360ms fade, so the duration was effectively half what it said.
+
+     This is the standard ease-in-out, and it was CHOSEN BY MEASUREMENT rather
+     than by name. Two candidates were seeked on real elements at 0/25/50/75/100%
+     of the duration:
+
+       cubic-bezier(0.33, 0, 0.25, 1)   0  .284  .765  .955  1   <- still front-loaded
+       cubic-bezier(0.42, 0, 0.58, 1)   0  .129  .500  .871  1   <- symmetric
+
+     The first was tried first and rejected on its own numbers: 76.5% done at the
+     halfway point is the same complaint as --ease-quiet, milder. The second
+     spends its second half on the second half, which is the whole point.
+
+     --ease-quiet IS UNCHANGED and every other animation on the site still uses
+     it. This token exists so retuning the prose cannot touch them. */
+  --ease-prose: cubic-bezier(0.42, 0, 0.58, 1);
 
   /* ── Watercolor page bloom ─────────────────────────────── */
   --bloom-page:
@@ -217,11 +236,22 @@ input[type="number"]:focus {
    screenshot.
 
    `.k-prose` is a SEPARATE, SHORTER REVEAL and not a change to `.k-rise`, which is
-   used all over the site and stays exactly as it was. */
-.k-skel-exit { animation: kSkelOut .36s var(--ease-quiet) forwards; }
+   used all over the site and stays exactly as it was.
+
+   THE SKELETON'S FADE-OUT AND THE FIRST PARAGRAPH'S FADE-IN ARE EXACT
+   COMPLEMENTS - same duration, same curve, one 1->0 and the other 0->1 - so
+   their opacities sum to 1 at every instant of the handoff. That is what makes
+   "no blank frame" a property of the pair rather than a hope about two
+   independently tuned animations, and it is why both moved to .45s and
+   --ease-prose together when the reveal was retuned. Change one, change both. */
+.k-skel-exit { animation: kSkelOut .45s var(--ease-prose) forwards; }
 @keyframes kSkelOut { from { opacity: 1; } to { opacity: 0; } }
 
-.k-prose { animation: kProse .36s var(--ease-quiet) both; }
+/* The per-paragraph fade. Its DELAY is inline and computed from the paragraph
+   count (see `proseDelayMs` in components/Funnel.jsx) so the whole reveal fits a
+   fixed budget however many paragraphs arrive. `both` is load-bearing with a
+   delay: it holds each paragraph at opacity 0 until its own turn. */
+.k-prose { animation: kProse .45s var(--ease-prose) both; }
 @keyframes kProse { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* Reduced motion gets an INSTANT, GAPLESS SWAP - the one path that never had the
