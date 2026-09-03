@@ -485,7 +485,17 @@ function Home({ form, setForm, error, onSubmit, busy }) {
                   where a word would be. That is the same 08-03 ruling. */}
               <FieldLabel>Jenis kelamin · opsional</FieldLabel>
               <select value={form.gender} onChange={set('gender')} aria-label="Jenis kelamin">
-                <option value="">Tidak diisi</option>
+                {/* THE EMPTY OPTION CARRIES NO LABEL, AND THE BLANK ROW IS THE POINT.
+                    Ruled 2026-09-03. The date and time fields above are native
+                    pickers with no placeholder, and `Tidak diisi` made this the one
+                    control in the card that narrated its own empty state. Blank
+                    matches its neighbours.
+
+                    `value=""` IS UNCHANGED, so `form.gender || null` at both call
+                    sites still resolves an unanswered field to null and the card
+                    footer's first-class no-gender case (the 08-03 ruling above) is
+                    untouched. This is a label edit; nothing downstream can tell. */}
+                <option value=""></option>
                 <option value="female">Perempuan</option>
                 <option value="male">Laki-laki</option>
               </select>
