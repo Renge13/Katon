@@ -90,7 +90,38 @@ costs a round and can quietly move a ruled number.
 A second thing, smaller: the dangling citation corrected in "Read, in order" was corrected ON THIS REF
 and says so. It names line 51 of `package.json` on `feat/card-a-4x5`; the same entry is line 56 on
 `feat/demand-test`. That is ledger row 44 in one line - a repo claim carries its ref, and a line
-number without one is a claim about a file that may not be the file being read.-->
+number without one is a claim about a file that may not be the file being read.
+
+2026-09-03: STALE A SEVENTH TIME, and this is the 08-19 rule broken rather than a new way. TWO
+headings both read "THE CURRENT WORK" and both said their branch was unmerged: prompt R for three
+days after `c8cee93`, prompt Q for three days after `622d926`. Reyner caught R. Q was found while
+fixing R and has the sharper shape: **this file already said "Q - DONE. Merged as #84." forty lines
+above the heading that said "unmerged and unreviewed", so the document contradicted itself about one
+branch.** That is the 08-29 failure - two live pointers disagreeing, neither checked against the
+other - reproduced INSIDE a single file, where it is even easier to miss because a reader who has
+read the top feels no need to re-check the middle.
+
+What is new and belongs here, and it is uncomfortable: **both stale headings carried their own
+verification command.** R's said "Check with `git log --oneline main..feat/card-a-4x5` before trusting
+this line", and running it returns nothing. The command was correct, sitting directly under the false
+sentence, for three days. **A pointer that carries its own check still goes stale, because the reader
+who believes the sentence never runs the command.** The conclusion is NOT to drop the commands - they
+turned this into a thirty-second correction - but that a command is a remedy for the session that
+already doubts the line, and nothing in a document creates that doubt. Only a heading being wrong
+often enough does, which is what this design note is now for.
+
+A third thing: **an owner-held row was NOT closed, on purpose.** Q's migration `0009` is applied by
+hand in the Supabase editor and nothing in the repo can report whether it has been. The other owed
+row was closed with its grep. Recording the asymmetry because the 08-26 entry above predicts exactly
+this - an owner-held item nothing will ever mark done - and the temptation is to tidy it away on the
+strength of the migration FILE existing, which says nothing about whether it ran.
+
+A fourth, about scope: **LIVE STATE was read in the same pass, per the 08-29 rule, and deliberately
+NOT edited.** PR #91 changes what a reader sees while a reading loads, and LIVE STATE describes what
+SHIPS. Writing #91's behaviour into it while #91 is open would recreate the exact 2026-08-23 trap
+that block spends four paragraphs on: a description written on a branch, merged with it, false from
+the moment it lands. LIVE STATE moves when #91 does, in the commit that changes what a reader gets.-->
+
 
 # NEXT
 
@@ -100,8 +131,9 @@ number without one is a claim about a file that may not be the file being read.-
    MEASUREMENTS (**read the 08-11 baseline row FIRST — a stored gate row is not a valid comparator
    for a later change**), and THE INTERIM STATE (Xendit go-live status — read it before touching
    anything near the paid path).
-3. `prompts/R-card-a-4x5.md` — **THE CURRENT WORK. RELEASED 2026-08-31, commits 1 to 4 landed;
-   see THE CURRENT WORK below.**
+3. `prompts/R-card-a-4x5.md` — **DONE. Merged as #85 (`c8cee93`).** It said "THE CURRENT WORK" here
+   for three days after it landed; the section below carries the correction and what must not be
+   redone. **The current work is PR #91, the loading transitions, and it has no prompt file.**
 4. `prompts/Q-demand-test.md` — **DONE. Merged as #84.** All six commits plus the ruled copy. What it
    still OWES is not code: migration `0009` is applied by hand in the Supabase SQL editor BEFORE the
    deploy that reads it, and `upcoming_seen` firing on scroll is proven on localhost and not yet on
@@ -153,10 +185,60 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
-## THE CURRENT WORK, 2026-08-31 - PROMPT R, COMMITS 1 TO 4, ON A BRANCH
+## THE CURRENT WORK, 2026-09-03 - THE LOADING TRANSITIONS, PR #91, OPEN
 
-**`feat/card-a-4x5`, NOT MERGED.** Check with `git log --oneline main..feat/card-a-4x5` before
-trusting this line. `docs/prompts/R-card-a-4x5.md` is the build and is on `main` at `473aeb5`.
+**`fix/loading-transitions`, THREE COMMITS, OPEN AND NOT MERGED.** Check with
+`gh pr view 91 --json state` before trusting this line. No prompt file: Reyner ruled these directly
+on 2026-09-02 and 2026-09-03 after walking the funnel himself.
+
+| | |
+|---|---|
+| `0f26a11` | 1 - the anticipation takeover becomes a busy submit button |
+| `307686c` | 2 - the prose skeleton cross-fades into the prose |
+| `b708641` | 3 - `delay(2500)` deleted; submit-to-chart measured for the first time |
+
+**TWO MEASUREMENTS BACK IT AND BOTH ARE ARTIFACTS**, not numbers in a commit message:
+`docs/qa/2026-09-03-skeleton-to-prose-gap.md` and `docs/qa/2026-09-03-submit-to-chart.md`.
+
+**IT IS WAITING ON REYNER, AND ON SOMETHING NO SESSION CAN DO.** The pane the agent browses in
+freezes CSS animation timelines, so motion cannot be filmed or judged from it - every screenshot of
+an in-flight state sits at its first frame. **The feel is a phone test on the Vercel preview.** A
+session that finds this PR open should not assume it stalled.
+
+### WHAT A LATER SESSION MUST NOT REDO
+
+- **`delay(2500)` IS DELETED AND MUST NOT COME BACK AS A PROCESSING DELAY.** It was never work; two
+  places in this repo say so in their own words and both are quoted in `b708641`. Reyner's ruling
+  carries the replacement principle: if the result feels too immediate, the answer is a new
+  anticipation treatment that EARNS the time, not a silent pause restored.
+- **The skeleton-to-prose gap is DIAGNOSED.** The cause is `.k-rise`'s `fill: both`; the magnitude is
+  one blank paint and ~100ms under half opacity, NOT the "close to a second" the brief assumed. Do
+  not re-derive it.
+
+## PROMPT R IS MERGED, 2026-08-31. NOT CURRENT WORK ANY MORE.
+
+**`feat/card-a-4x5` MERGED as `c8cee93` (PR #85).** This heading read *"COMMITS 1 TO 4, ON A BRANCH"*
+and *"`feat/card-a-4x5`, NOT MERGED"* for three days after it landed. It is corrected here with the
+commit that ends it, per LIVE STATE's own rule that a not-yet-live warning must cite the thing that
+closes it rather than leaving a reader to infer it.
+
+**The check this section already named is what settles it, and it was run rather than remembered:**
+
+```
+$ git log --oneline main..feat/card-a-4x5     # ref main, f24242d
+                                              # (empty: nothing on the branch is missing from main)
+$ git log --oneline -1 c8cee93
+c8cee93 Merge pull request #85 from Renge13/feat/card-a-4x5
+```
+
+**The line telling you to run it was there the whole time.** Nobody did, which is the durable point:
+a pointer that carries its own verification command still goes stale, because the reader who trusts
+the sentence never reaches the command. That is an argument for the command, not against it - it is
+what made this a thirty-second correction instead of an investigation.
+
+`docs/prompts/R-card-a-4x5.md` is the build and is on `main` at `473aeb5`. **The WHAT A LATER SESSION
+MUST NOT REDO block below still stands** - merging the work did not settle the watermark offset any
+less.
 
 **CARD A IS THE EXPORT.** 1080x1350 (4:5), full-bleed, fully opaque, square corners, no mat, no rim,
 no shadow, one export asset instead of two. `PADDING` held absolute at 72, so the inner measure went
@@ -203,8 +285,18 @@ that someone forgot to run it.
 
 ## SUPERSEDED - THE CURRENT WORK, 2026-08-29 - THE FLOOR'S HEADINGS, ON A BRANCH
 
-**`fix/floor-heading-stutter`, head `d19ba69`, NOT MERGED.** Check with `git log --oneline main..`
-before trusting this line; if it returns nothing the branch has landed and this pointer is stale.
+**~~`fix/floor-heading-stutter`, head `d19ba69`, NOT MERGED.~~ IT LANDED - `d19ba69` IS ON `main`**
+(`git merge-base --is-ancestor d19ba69 main` succeeds, ref `f24242d`). Corrected 2026-09-03 in the
+same sweep as the R and Q headings; already under a SUPERSEDED banner, so nothing should have acted
+on it, but a false fact left inside a history section is still a false fact.
+
+**AND ITS PRESCRIBED CHECK NOW RETURNS THE WRONG ANSWER, which is the part worth keeping.** The line
+said to run `git log --oneline main..` and treat an empty result as "landed". Run today it returns
+**three commits** - `e08f1bc`, `768653f`, `ace69cc`, all card docs - because the local branch was
+reused after its merge and drifted past it. A reader following the instruction would conclude the
+floor work is unlanded. **`main..<branch>` answers "is this branch fully merged", not "did this
+commit land"**; only the second question was ever being asked, and `git merge-base --is-ancestor
+<sha> main` is what asks it. A branch name is not a stable handle for a commit.
 
 What it is, in one sentence: Reyner ruled on 2026-08-26 that **a heading directly above a meaning
 paragraph satisfies rule 21's "same breath"**, and the floor was rebuilt on that reading - headings
@@ -221,12 +313,25 @@ Two DEFERRED REGISTER rows were opened by this work and both are Reyner's: the r
 that a key EXISTS and never that it WORKS, and preview verification now costs real renders. Neither
 is a task waiting here.
 
-## THE CURRENT WORK, 2026-08-31 - PROMPT Q, ALL SIX COMMITS WRITTEN, NOT MERGED
+## PROMPT Q IS MERGED, 2026-08-31. NOT CURRENT WORK ANY MORE.
 
-**`docs/prompts/Q-demand-test.md` is RELEASED** (Reyner, 2026-08-29) and all six commits are on
-`feat/demand-test`, **unmerged and unreviewed**. Check with `git log --oneline main..feat/demand-test`
-before trusting this line. Its commit 0 was the authorised `CLAUDE.md` edit - band 25-45k ->
-**25-49k**, and rule 15 trading its stale status sentence for a pointer to the live register.
+**`docs/prompts/Q-demand-test.md` is RELEASED** (Reyner, 2026-08-29) and **`feat/demand-test` MERGED
+as `622d926` (PR #84)**. Its commit 0 was the authorised `CLAUDE.md` edit - band 25-45k -> **25-49k**,
+and rule 15 trading its stale status sentence for a pointer to the live register.
+
+**FOUND WHILE CORRECTING THE R HEADING ABOVE, AND IT IS THE SAME DEFECT.** This heading said *"ALL
+SIX COMMITS WRITTEN, NOT MERGED"* and *"unmerged and unreviewed"*, while the `Read, in order` block
+forty lines up already said **"DONE. Merged as #84."** So the same file contradicted itself about the
+same branch, which is the failure the 2026-08-29 entry recorded between this file and LIVE STATE -
+one layer smaller, and inside a single document. Corrected in the same pass because a sweep that
+fixes the heading it was sent to fix and walks past its neighbour is how the next one survives.
+
+```
+$ git log --oneline main..feat/demand-test    # ref main, f24242d
+                                              # (empty)
+$ git log --oneline -1 622d926
+622d926 Merge pull request #84 from Renge13/feat/demand-test
+```
 
 | | |
 |---|---|
@@ -240,17 +345,38 @@ before trusting this line. Its commit 0 was the authorised `CLAUDE.md` edit - ba
 `npm test` 35/35 (was 32 when the branch was picked up; +`test:unruled-copy`, +`test:interest`,
 +`test:readout`).
 
-### TWO THINGS ARE OWED BY REYNER BEFORE THIS SHIPS, and neither is a task waiting for a session
+### TWO THINGS WERE OWED BY REYNER. ONE IS CLOSED; ONE CANNOT BE CLOSED FROM THE REPO.
 
-1. **THE ELEVEN INDONESIAN STRINGS IN THE UPCOMING BLOCK.** Every one is a visible
-   `@@UNRULED: ...@@` placeholder in `lib/site/copy.js#UPCOMING_COPY`, in one named object so it is
-   one file to fill. **A PRODUCTION BUILD IS REFUSED WHILE ANY OF THEM SURVIVES**
-   (`scripts/check-unruled-copy.mjs`, wired as `prebuild`); preview and local builds pass on purpose,
-   because the block has to be SEEN to be ruled. Cowork proposed seven of the eleven on 2026-08-29
-   and those proposals are in the PR body, deliberately NOT in the slots they would occupy. Four
-   slots - `eyebrow`, `lead`, `thanks`, `contactSubmit` - have no proposal at all.
-2. **THE MIGRATION.** `supabase/migrations/0009_demand_test.sql` is applied by hand in the SQL editor
-   and must run BEFORE the code that reads it deploys (repo convention). Nothing in CI checks this.
+1. **~~THE ELEVEN INDONESIAN STRINGS IN THE UPCOMING BLOCK.~~ CLOSED.** Reyner ruled all eleven
+   (`docs/content/upcoming-copy-rulings.md`, plus its two amendments) and they are applied. The
+   sentinels are gone:
+
+   ```
+   $ grep -n "@@UNRULED" lib/site/copy.js          # ref main, f24242d
+   588:// `PENDING()` wraps an unruled value in `@@UNRULED: ...@@`, deliberately
+   649:export const PENDING = (slot) => `@@UNRULED: ${slot}@@`;
+   ```
+
+   **Both hits are the MECHANISM, not a live sentinel** - the explanatory comment and the helper
+   itself. That distinction is why the grep is quoted in full rather than as a count: a bare
+   `grep -c` returns `2` here and reads as two unruled slots. `PENDING` and
+   `scripts/check-unruled-copy.mjs` stay on purpose, as the rulings file instructs - they are the
+   gate for the next unruled string, not scaffolding for this one.
+
+2. **~~THE MIGRATION.~~ CLOSED 2026-09-02 BY REYNER, ON THE PRODUCTION PROJECT.**
+   `supabase/migrations/0009_demand_test.sql` was applied by hand in the Supabase SQL editor.
+
+   **AND IT WAS VERIFIED BY A REAL SUBMIT, NOT BY THE TABLES EXISTING** - which is the whole reason
+   this row could not be closed from the repo. He walked the funnel on production and watched the
+   WRITE PATH run: `funnel_event` took `reading_created`, `offer_seen`, `mirror_served`,
+   `upcoming_seen` and `interest_registered`, and `product_interest` stored a contact.
+
+   **The distinction is the point and it is why this row was left open on 2026-09-03 rather than
+   tidied away.** A migration file in the repo, a table present in the dashboard, and a schema that
+   accepts the app's writes are three different claims, and only the third is what the demand test
+   depends on. A session that had closed this on the file existing would have been right by accident;
+   a session that closed it on the tables existing would still not have known whether
+   `recordMirrorEvent` could write. Five event names and one contact row landing is the evidence.
 
 ### THE UNVERIFIED ITEM IS CLOSED, 2026-08-31 - THE OBSERVER WAS OBSERVED
 

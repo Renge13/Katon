@@ -396,6 +396,41 @@ fires in each case. Falsification alone does not catch them. **What catches them
 BUILD the falsification ran against**, which is a different question from whether the instrument
 works.
 
+### TWO ABOUT STALE POINTERS, 2026-09-03. Both found while correcting `docs/NEXT.md`.
+
+Neither is a wrong measurement. Both are about the machinery meant to CATCH a wrong claim failing
+quietly, which is why they sit here rather than in the ledger table.
+
+**1. A VERIFICATION COMMAND DOES NOT CREATE THE DOUBT IT ANSWERS.** Two `NEXT.md` headings said
+their branch was unmerged for three days after it merged. Both carried their own check, correct, one
+line under the false sentence — prompt R's read *"Check with `git log --oneline main..feat/card-a-4x5`
+before trusting this line"*, and running it returns nothing.
+
+> The command was never wrong and was never run. **A reader who believes the sentence has no reason
+> to reach for the command underneath it**, and a sentence stating a fact plainly is exactly the kind
+> a reader believes.
+
+The conclusion is NOT to drop the commands — they turned a three-day staleness into a thirty-second
+correction once someone did doubt the line. It is that **a self-verifying pointer is not
+self-correcting**, and nothing in a document generates the suspicion that fires its own check. What
+generates it is an external event: someone acting on the claim, or a periodic sweep. So the freshness
+of a pointer is a function of how often it is CHALLENGED, not of how well it is instrumented.
+
+**2. A BRANCH NAME IS NOT A STABLE HANDLE FOR A COMMIT.** The same sweep found a third stale pointer
+whose prescribed check now returns the WRONG ANSWER rather than no answer. It said to run
+`git log --oneline main..<branch>` and read an empty result as "landed". Today it returns three
+commits — the branch was reused after its merge and drifted past it — so a reader obeying the
+instruction concludes the work is unlanded when `d19ba69` has been on `main` for days.
+
+> `main..<branch>` answers **"is this branch fully merged"**. The question being asked was **"did
+> this commit land"**. They agree only while nobody touches the branch again.
+> **`git merge-base --is-ancestor <sha> main` is the one that asks the real question.**
+
+**WHY THIS IS WORSE THAN A STALE SENTENCE.** A false sentence with no check is inert; a reader who
+doubts it goes and looks. A false sentence with a check that CONFIRMS it actively defends the error,
+and the reader who did the right thing ends up more confident than the one who did nothing. Same
+family as the 2026-08-23 LIVE STATE paragraph, whose escape instruction was a loop back into itself.
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
