@@ -41,6 +41,7 @@
     "test:unruled-copy": "node --test tests/unruled-copy.spec.mjs",
     "test:contact-submit": "node --import ./scripts/jsx-register.mjs --test tests/contact-submit.spec.mjs",
     "test:share-sheet": "node --import ./scripts/jsx-register.mjs --test tests/share-sheet.spec.mjs",
+    "test:submit-guard": "node --import ./scripts/jsx-register.mjs --test tests/funnel-submit-guard.spec.mjs",
     "test:ratelimit": "node --conditions=react-server --test tests/ratelimit.spec.mjs",
     "measure:stage6": "node --env-file-if-exists=.env.local --conditions=react-server scripts/measure-stage6.mjs",
     "emit:semantic": "node scripts/emit-semantic.mjs",

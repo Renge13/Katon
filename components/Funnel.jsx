@@ -73,7 +73,6 @@ import { priceFor } from '../lib/pricing.js';
 import { UPCOMING_COPY } from '../lib/site/copy.js';
 import { formatIdr } from '../lib/site/format.js';
 
-const ANTICIPATION = ['Membaca tanggal lahirmu', 'Menyusun empat pilarmu', 'Menghitung keseimbangan energimu'];
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
 //
 // KEYED ON THE GLOSSARY'S NAMES, which is a change: this map used to say `Bumi`
@@ -202,20 +201,29 @@ function presenceBars(presence) {
 }
 
 export default function Funnel() {
-  const [phase, setPhase] = useState('input'); // input | calculating | season | result
+  // THE PHASE IS THE SCREEN. `calculating` used to be one of these values and it
+  // was never a screen of its own - it was a full-screen TAKEOVER that replaced
+  // whichever screen the reader was on, which is exactly what commit 1 deletes.
+  // Being in flight is now orthogonal to where she is, so it is `busy` below.
+  const [phase, setPhase] = useState('input'); // input | season | result
   // `date` is an <input type="date"> value (YYYY-MM-DD) and `time` an
   // <input type="time"> value snapped to the hour (HH:00). MINUTES ARE NOT ASKED
   // HERE ON PURPOSE - see <Home> and the season branch in onSubmit.
   const [form, setForm] = useState({ date: '', time: '', gender: '' });
   const [error, setError] = useState(null);
   const [reading, setReading] = useState(null);
-  const [step, setStep] = useState(0);
+  // A create is in flight. It DISABLES THE CONTROL RATHER THAN HIDING IT, and the
+  // disabling is not cosmetic: without it a reader who sees no feedback taps
+  // again, fires a second POST and gets a SECOND reading - a second row and a
+  // second `reading_created` event under a different reading_id, which inflates
+  // the denominator of the demand test during the week it is being measured.
+  const [busy, setBusy] = useState(false);
   // Set only on the ~12 days a year a season turns inside the birth date and that
   // turn is actually unresolved: { birthDate, term, at, birthHour }.
   const [season, setSeason] = useState(null);
 
   function reset() {
-    setReading(null); setError(null); setSeason(null); setPhase('input');
+    setReading(null); setError(null); setSeason(null); setBusy(false); setPhase('input');
     if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
   }
 
@@ -280,6 +288,11 @@ export default function Funnel() {
 
   async function onSubmit(e) {
     e.preventDefault();
+    // THE GUARD, AND IT IS NOT THE `disabled` ATTRIBUTE. A disabled button cannot
+    // be clicked, but this handler is on the FORM: implicit submission, a stray
+    // Enter, and a second tap that lands before React has re-rendered all reach
+    // it anyway. `disabled` is the feedback; this line is the guarantee.
+    if (busy) return;
     setError(null);
     const birthDate = form.date;
     if (!birthDate) { setError('Isi tanggal lahirmu dulu.'); return; }
@@ -292,8 +305,9 @@ export default function Funnel() {
     // would be false precision. It cannot change a single pillar off a solar-term
     // day, and on one it is asked for properly, below.
     const birthTime = form.time ? `${form.time.slice(0, 2)}:00` : null;
-    setStep(0);
-    setPhase('calculating');
+    // SHE STAYS ON THE FORM. Nothing replaces the screen; the submit button below
+    // carries the state.
+    setBusy(true);
     try {
       // Ask whether a season turns inside this date BEFORE creating the reading, so
       // the row is written once, already resolved, rather than written and mutated.
@@ -325,47 +339,47 @@ export default function Funnel() {
     } catch {
       setError('Ada yang salah. Coba lagi sebentar.');
       setPhase('input');
+    } finally {
+      // Cleared on EVERY exit, including the season branch's early return - the
+      // gate's answer handler checks this same flag, so a `busy` left standing
+      // there would wedge the gate shut on the ~12 days a year it appears.
+      setBusy(false);
     }
   }
 
   // Answer from the season gate. `resolution` is { termSide } | { birthTime } | {}.
+  //
+  // THE GATE STAYS ON SCREEN, AND THIS IS THE EDGE THE TAKEOVER WAS HIDING. This
+  // is the SECOND entry into an in-flight create, and unlike the first there is no
+  // form behind it to return to. Falling back to <Home> would throw her backwards
+  // past a question she has just answered, so `phase` is left at 'season' and
+  // <SeasonGate> holds its own busy state - which it already had, for its own
+  // double-answer guard, from before the takeover was deleted.
   async function onSeasonAnswer(resolution) {
+    if (busy) return;
     setError(null);
-    // Restart the lines at the first one, exactly as onSubmit does. `step` survives
-    // the season gate, so without this the second calculating phase resumes wherever
-    // the first one stopped - which the two timeouts also did, and which reads as
-    // the sequence starting in the middle.
-    setStep(0);
-    setPhase('calculating');
+    setBusy(true);
     try {
       await createReading(season.birthDate, null, resolution);
     } catch {
       setError('Ada yang salah. Coba lagi sebentar.');
       setPhase('input');
+    } finally {
+      setBusy(false);
     }
   }
 
-  // The three lines LOOP for as long as the render takes. Ruled 2026-09-01.
-  //
-  // They used to advance twice and then HOLD on the last one, and the comment here
-  // argued that a fourth timer "would leave a blank where a line had been". That
-  // weighed holding against BLANKING and never considered CYCLING, which is neither:
-  // the interval wraps with `% ANTICIPATION.length`, so there is always a line.
-  //
-  // The render behind this has no deadline, which was the reason given for holding
-  // and is actually the reason against it: a line frozen for eight seconds reads as
-  // a hung page, which is the opposite of what this component is for.
-  //
-  // ONE INTERVAL, NOT N TIMEOUTS. The old pair had to know the list length; this
-  // does not, so adding a fourth line is a change to `ANTICIPATION` alone.
-  useEffect(() => {
-    if (phase !== 'calculating') return;
-    const id = setInterval(() => setStep((s) => (s + 1) % ANTICIPATION.length), 850);
-    return () => clearInterval(id);
-  }, [phase]);
+  // THE CYCLING ANTICIPATION LINES ARE DELETED, AND THEY WERE HOURS OLD. #86's
+  // commit C replaced a holding pair of timeouts with one wrapping interval, and
+  // it was a real improvement to a screen that no longer earns its place: the
+  // takeover was built when a reader waited the WHOLE render on an empty page
+  // (p50 7.6s, up to ~23s), and chart-early cut that window to roughly 2.5s.
+  // Ripple rings and cycling copy are ceremony for 2.5 seconds, and running them
+  // in front of the prose skeleton put TWO loading treatments back to back in one
+  // 22s funnel. Removing this is the ruling, not an accident, and it is recorded
+  // here because a deletion this fresh reads like a botched merge otherwise.
 
-  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} />;
-  if (phase === 'calculating') return <Anticipation step={step} />;
+  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} />;
   if (phase === 'season') return <SeasonGate season={season} onAnswer={onSeasonAnswer} />;
   return <Reading reading={reading} onReset={reset} />;
 }
@@ -404,7 +418,7 @@ function Para({ children, style }) {
 }
 
 /* ---------------- Home (input) ---------------- */
-function Home({ form, setForm, error, onSubmit }) {
+function Home({ form, setForm, error, onSubmit, busy }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target ? e.target.value : e }));
   return (
     <div style={wrap}>
@@ -473,27 +487,18 @@ function Home({ form, setForm, error, onSubmit }) {
 
           <Reveal delay={0.3} style={{ marginTop: 22 }}>
             {error && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{error}</div>}
-            <Button type="submit">Lihat Refleksiku</Button>
+            {/* THE BUTTON CARRIES THE STATE, because nothing replaces the screen
+                any more. `Menyiapkan...` is REUSED from the checkout button
+                below rather than newly ruled - Reyner approved that string on
+                2026-08-23 and rule 20 is one voice everywhere, so a second word
+                for the same moment would be a second register. */}
+            <Button type="submit" disabled={busy}>{busy ? 'Menyiapkan...' : 'Lihat Refleksiku'}</Button>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 12.5, color: 'var(--muted-warm)', marginTop: 14 }}>
               <Icon.lock size={13} /> Bersifat pribadi. Hanya untukmu.
             </div>
           </Reveal>
         </form>
       </div>
-    </div>
-  );
-}
-
-/* ---------------- Anticipation ---------------- */
-function Anticipation({ step }) {
-  return (
-    <div className="k-fade" style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ position: 'relative', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span className="k-ring" style={{ animationDelay: '0s' }} />
-        <span className="k-ring" style={{ animationDelay: '1s' }} />
-        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--clay)' }} />
-      </div>
-      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, color: 'var(--muted-warm)', marginTop: 28, minHeight: 22 }}>{ANTICIPATION[step]}</p>
     </div>
   );
 }
