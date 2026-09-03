@@ -135,7 +135,6 @@ function themeVars(element) {
 }
 
 const pad = (n) => String(n).padStart(2, '0');
-const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * A card RENDERED at export size and shown small. Display only.
@@ -316,13 +315,21 @@ export default function Funnel() {
       // its own unresolved case: a 節 that falls INSIDE the hour she gave. Measured
       // on 1989-02-04 (立春 04:27:09): 04:00 gives 戊辰 乙丑, 04:30 gives 己巳 丙寅 -
       // two pillars different, off the minute alone.
-      const [turn] = await Promise.all([
-        fetch('/api/season-check', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ birthDate }),
-        }).then((r) => r.json()).catch(() => null),
-        delay(2500),
-      ]);
+      // THE 2,500ms PAUSE THAT USED TO SIT IN A Promise.all HERE IS DELETED. It was
+      // never work: `docs/archive/MEMORY.md:64` calls it "a manufactured pause
+      // framed as *reading her*" and `docs/handoff/2026-08-19-branch-pr.md:97` says
+      // "the funnel's 2.5s pause is a designed pause, not a wait on work". The
+      // number was three anticipation lines at 850ms. Commit 1 deleted that screen,
+      // so the pause had nothing left to pace and read as unexplained waiting.
+      //
+      // DO NOT RESTORE IT AS A PROCESSING DELAY. Nothing here needs time. Reyner,
+      // 2026-09-03: "Don't preserve the old ceremony by preserving dead scaffolding.
+      // If the result feels too immediate on the phone, we design a new anticipation
+      // treatment that EARNS the time rather than bringing back a silent 2.5s wait."
+      const turn = await fetch('/api/season-check', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ birthDate }),
+      }).then((r) => r.json()).catch(() => null);
 
       if (turn?.needsHour) {
         const birthHour = birthTime === null ? null : Number(birthTime.slice(0, 2));

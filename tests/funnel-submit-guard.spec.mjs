@@ -150,18 +150,18 @@ function mount() {
 }
 
 /**
- * `onSubmit` races `/api/season-check` against a deliberate 2.5s floor
- * (`Promise.all([...,  delay(2500)])`), so NOTHING past the gate decision happens
- * for two and a half seconds. Real timers, waited out.
+ * THE 2.5s FLOOR IS GONE, AND WITH IT THIS FILE'S ONLY REASON TO BE SLOW.
  *
- * REAL TIMERS AND NOT `mock.timers`, DELIBERATELY. Faking setTimeout globally
- * would also fake whatever React's scheduler and jsdom reach for, and an `act()`
- * that silently stops flushing is the "instrument that cannot fail" shape - the
- * suite would go green because nothing rendered. Three seconds per test is the
- * price of the assertions meaning something.
+ * `onSubmit` used to race `/api/season-check` against `delay(2500)` in a
+ * `Promise.all`, so nothing past the gate decision happened for two and a half
+ * seconds and every test here had to wait it out - about 3s each. Commit 3
+ * deleted the pause (it was scaffolding for the anticipation screen commit 1
+ * removed), so the flow is now bounded by the stubbed fetches alone.
+ *
+ * WHAT KEEPS THE "SECOND SUBMIT" SCENARIO EXPRESSIBLE is not the floor and never
+ * was: `stubFetch` holds `POST /api/mirror` open until the test releases it. That
+ * is the window a real second tap lands in, and it is independent of any timer.
  */
-const FLOOR_MS = 2500;
-const pastFloor = (ui) => ui.settle(FLOOR_MS + 250);
 
 /** Fill the front door with a date the engine accepts, and submit once. */
 async function submitBirthDate(ui, { date = '1989-09-13', time = '04:00' } = {}) {
@@ -197,12 +197,11 @@ test('the form survives `calculating`, and a second submit creates nothing', asy
     ui.submit();
     await ui.settle();
 
-    // The early tell, and the one that does not need the floor waited out:
-    // season-check is issued before it and a second flow would double it.
+    // The early tell: season-check is issued first and a second flow would double
+    // it, so this catches a runaway submit before any create has resolved.
     assert.equal(f.seasonCheck, 1, 'a second submit must not re-run the gate check');
 
     // Now let the first flow finish, and count what actually reached the server.
-    await pastFloor(ui);
     f.release();
     await ui.settle(30);
 
@@ -224,11 +223,10 @@ test('the busy button says `Menyiapkan...`, and says it where she is looking', a
     assert.doesNotMatch(ui.text(), /Membaca tanggal lahirmu|Menyusun empat pilarmu/,
       'the anticipation lines were deleted, not moved');
 
-    // Walked to completion rather than abandoned: unmounting on top of the
-    // pending floor timer left a setState firing into a dead root and the test
-    // hung for 40s. A test that leaves its own flow in flight is measuring the
-    // teardown, not the component.
-    await pastFloor(ui);
+    // Walked to completion rather than abandoned: unmounting on top of an
+    // in-flight create left a setState firing into a dead root and the test hung
+    // for 40s. A test that leaves its own flow running is measuring the teardown,
+    // not the component.
     f.release();
     await ui.settle(30);
 
@@ -253,7 +251,6 @@ test('the season gate stays put while its answer is in flight', async () => {
   try {
     // No hour: the turn is a whole day wide, so the gate is unconditional.
     await submitBirthDate(ui, { date: '1989-02-04', time: null });
-    await pastFloor(ui);
 
     // The gate is up. Its own heading is the marker; `Hari yang jarang` is the
     // eyebrow it has carried since the promotion.
