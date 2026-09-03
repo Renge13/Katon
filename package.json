@@ -41,6 +41,7 @@
     "test:unruled-copy": "node --test tests/unruled-copy.spec.mjs",
     "test:contact-submit": "node --import ./scripts/jsx-register.mjs --test tests/contact-submit.spec.mjs",
     "test:share-sheet": "node --import ./scripts/jsx-register.mjs --test tests/share-sheet.spec.mjs",
+    "test:submit-guard": "node --import ./scripts/jsx-register.mjs --test tests/funnel-submit-guard.spec.mjs",
     "test:ratelimit": "node --conditions=react-server --test tests/ratelimit.spec.mjs",
     "measure:stage6": "node --env-file-if-exists=.env.local --conditions=react-server scripts/measure-stage6.mjs",
     "emit:semantic": "node scripts/emit-semantic.mjs",
@@ -78,7 +79,8 @@
     "probe:retry-erosion": "node scripts/probe-retry-erosion.mjs",
     "qa:depth-pairs": "node --conditions=react-server scripts/qa-depth-pairs.mjs",
     "build:pdf": "node scripts/build-pdf.mjs",
-    "test:pdf-document": "node --test tests/pdf-document.spec.mjs"
+    "test:pdf-document": "node --test tests/pdf-document.spec.mjs",
+    "test:prose-handoff": "node --import ./scripts/jsx-register.mjs --test tests/prose-handoff.spec.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.6.1",

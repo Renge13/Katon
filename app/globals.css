@@ -50,6 +50,25 @@
   /* ── Motion ────────────────────────────────────────────── */
   --ease-out:   cubic-bezier(0.4, 0, 0.2, 1);
   --ease-quiet: cubic-bezier(0.22, 1, 0.36, 1);
+  /* THE PROSE REVEAL'S OWN CURVE, and it exists because --ease-quiet could not do
+     this job. That one is an ease-out-quint, and seeking the real animation is
+     what showed why the reveal read as instant: it was 96% complete at t=180ms of
+     a 360ms fade, so the duration was effectively half what it said.
+
+     This is the standard ease-in-out, and it was CHOSEN BY MEASUREMENT rather
+     than by name. Two candidates were seeked on real elements at 0/25/50/75/100%
+     of the duration:
+
+       cubic-bezier(0.33, 0, 0.25, 1)   0  .284  .765  .955  1   <- still front-loaded
+       cubic-bezier(0.42, 0, 0.58, 1)   0  .129  .500  .871  1   <- symmetric
+
+     The first was tried first and rejected on its own numbers: 76.5% done at the
+     halfway point is the same complaint as --ease-quiet, milder. The second
+     spends its second half on the second half, which is the whole point.
+
+     --ease-quiet IS UNCHANGED and every other animation on the site still uses
+     it. This token exists so retuning the prose cannot touch them. */
+  --ease-prose: cubic-bezier(0.42, 0, 0.58, 1);
 
   /* ── Watercolor page bloom ─────────────────────────────── */
   --bloom-page:
@@ -167,10 +186,6 @@ input[type="number"]:focus {
 .k-bar { animation: kBar .9s var(--ease-quiet) .15s both; }
 @keyframes kBar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-/* anticipation — water ripple rings */
-.k-ring { position: absolute; width: 112px; height: 112px; border-radius: 50%; border: 1px solid rgba(196,98,42,.4); animation: kRipple 3s ease-out infinite; }
-@keyframes kRipple { 0% { transform: scale(.28); opacity: .55; } 80% { opacity: 0; } 100% { transform: scale(1); opacity: 0; } }
-
 /* paywall unlock — gleam sweep + seal */
 .k-gleam { position: absolute; top: 0; left: -45%; width: 45%; height: 100%; background: linear-gradient(100deg, transparent, rgba(174,132,63,.35), var(--el-g30, rgba(111,160,174,.28)), transparent); animation: kGleam 1.7s var(--ease-quiet) forwards; }
 @keyframes kGleam { from { left: -45%; } to { left: 115%; } }
@@ -187,7 +202,6 @@ input[type="number"]:focus {
 .k-dropcap::first-letter { font-family: var(--font-serif); font-size: 50px; line-height: .78; float: left; margin: 6px 10px 0 0; color: var(--el-glow, #6FA0AE); font-weight: 500; }
 
 @media (prefers-reduced-motion: reduce) {
-  .k-ring { animation: none; opacity: .25; }
   .k-gleam { animation: none; opacity: 0; }
   .k-rise, .k-bar, .k-fade, .k-seal, .k-seal-check, .k-spin { animation: none; }
 }
@@ -204,3 +218,46 @@ input[type="number"]:focus {
 .k-skel { background: var(--el-g12, rgba(0,0,0,.06)); border-radius: 5px; animation: kSkel 1.6s var(--ease-quiet) infinite; }
 @keyframes kSkel { 0%, 100% { opacity: .45; } 50% { opacity: .9; } }
 @media (prefers-reduced-motion: reduce) { .k-skel { animation: none; opacity: .6; } }
+
+/* ── THE HANDOFF, 2026-09-03 ───────────────────────────────
+   The skeleton used to unmount on the same React commit that mounted the prose,
+   and `.k-rise` above is `.8s ... both` - `fill: both` pins the prose at opacity 0
+   until its run starts, so that paint was BLANK in a space the skeleton had been
+   holding with something visible. Measured, with the curve and the counterfactual:
+   docs/qa/2026-09-03-skeleton-to-prose-gap.md.
+
+   So they CROSS. The skeleton fades out over the prose fading in, and the ruled
+   property is that no frame of the transition is empty.
+
+   `kSkelOut`'s DURATION MUST MATCH `PROSE_HANDOFF_MS` in components/Funnel.jsx,
+   which owns the unmount timer. tests/prose-handoff.spec.mjs reads this file and
+   asserts the two agree, because a duration written in two places drifts and the
+   symptom - a skeleton that vanishes 40ms early, or lingers - is invisible in a
+   screenshot.
+
+   `.k-prose` is a SEPARATE, SHORTER REVEAL and not a change to `.k-rise`, which is
+   used all over the site and stays exactly as it was.
+
+   THE SKELETON'S FADE-OUT AND THE FIRST PARAGRAPH'S FADE-IN ARE EXACT
+   COMPLEMENTS - same duration, same curve, one 1->0 and the other 0->1 - so
+   their opacities sum to 1 at every instant of the handoff. That is what makes
+   "no blank frame" a property of the pair rather than a hope about two
+   independently tuned animations, and it is why both moved to .45s and
+   --ease-prose together when the reveal was retuned. Change one, change both. */
+.k-skel-exit { animation: kSkelOut .45s var(--ease-prose) forwards; }
+@keyframes kSkelOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* The per-paragraph fade. Its DELAY is inline and computed from the paragraph
+   count (see `proseDelayMs` in components/Funnel.jsx) so the whole reveal fits a
+   fixed budget however many paragraphs arrive. `both` is load-bearing with a
+   delay: it holds each paragraph at opacity 0 until its own turn. */
+.k-prose { animation: kProse .45s var(--ease-prose) both; }
+@keyframes kProse { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Reduced motion gets an INSTANT, GAPLESS SWAP - the one path that never had the
+   defect. `.k-prose` is disabled so the prose is readable on arrival, and the
+   cross-fade is skipped in JS rather than here: a `.k-skel-exit` with no animation
+   would sit at full opacity on top of the reading until its timer fired. */
+@media (prefers-reduced-motion: reduce) {
+  .k-prose, .k-skel-exit { animation: none; }
+}

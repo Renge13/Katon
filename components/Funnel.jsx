@@ -73,7 +73,6 @@ import { priceFor } from '../lib/pricing.js';
 import { UPCOMING_COPY } from '../lib/site/copy.js';
 import { formatIdr } from '../lib/site/format.js';
 
-const ANTICIPATION = ['Membaca tanggal lahirmu', 'Menyusun empat pilarmu', 'Menghitung keseimbangan energimu'];
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
 //
 // KEYED ON THE GLOSSARY'S NAMES, which is a change: this map used to say `Bumi`
@@ -136,7 +135,6 @@ function themeVars(element) {
 }
 
 const pad = (n) => String(n).padStart(2, '0');
-const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * A card RENDERED at export size and shown small. Display only.
@@ -202,20 +200,29 @@ function presenceBars(presence) {
 }
 
 export default function Funnel() {
-  const [phase, setPhase] = useState('input'); // input | calculating | season | result
+  // THE PHASE IS THE SCREEN. `calculating` used to be one of these values and it
+  // was never a screen of its own - it was a full-screen TAKEOVER that replaced
+  // whichever screen the reader was on, which is exactly what commit 1 deletes.
+  // Being in flight is now orthogonal to where she is, so it is `busy` below.
+  const [phase, setPhase] = useState('input'); // input | season | result
   // `date` is an <input type="date"> value (YYYY-MM-DD) and `time` an
   // <input type="time"> value snapped to the hour (HH:00). MINUTES ARE NOT ASKED
   // HERE ON PURPOSE - see <Home> and the season branch in onSubmit.
   const [form, setForm] = useState({ date: '', time: '', gender: '' });
   const [error, setError] = useState(null);
   const [reading, setReading] = useState(null);
-  const [step, setStep] = useState(0);
+  // A create is in flight. It DISABLES THE CONTROL RATHER THAN HIDING IT, and the
+  // disabling is not cosmetic: without it a reader who sees no feedback taps
+  // again, fires a second POST and gets a SECOND reading - a second row and a
+  // second `reading_created` event under a different reading_id, which inflates
+  // the denominator of the demand test during the week it is being measured.
+  const [busy, setBusy] = useState(false);
   // Set only on the ~12 days a year a season turns inside the birth date and that
   // turn is actually unresolved: { birthDate, term, at, birthHour }.
   const [season, setSeason] = useState(null);
 
   function reset() {
-    setReading(null); setError(null); setSeason(null); setPhase('input');
+    setReading(null); setError(null); setSeason(null); setBusy(false); setPhase('input');
     if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
   }
 
@@ -280,6 +287,11 @@ export default function Funnel() {
 
   async function onSubmit(e) {
     e.preventDefault();
+    // THE GUARD, AND IT IS NOT THE `disabled` ATTRIBUTE. A disabled button cannot
+    // be clicked, but this handler is on the FORM: implicit submission, a stray
+    // Enter, and a second tap that lands before React has re-rendered all reach
+    // it anyway. `disabled` is the feedback; this line is the guarantee.
+    if (busy) return;
     setError(null);
     const birthDate = form.date;
     if (!birthDate) { setError('Isi tanggal lahirmu dulu.'); return; }
@@ -292,8 +304,9 @@ export default function Funnel() {
     // would be false precision. It cannot change a single pillar off a solar-term
     // day, and on one it is asked for properly, below.
     const birthTime = form.time ? `${form.time.slice(0, 2)}:00` : null;
-    setStep(0);
-    setPhase('calculating');
+    // SHE STAYS ON THE FORM. Nothing replaces the screen; the submit button below
+    // carries the state.
+    setBusy(true);
     try {
       // Ask whether a season turns inside this date BEFORE creating the reading, so
       // the row is written once, already resolved, rather than written and mutated.
@@ -302,13 +315,21 @@ export default function Funnel() {
       // its own unresolved case: a 節 that falls INSIDE the hour she gave. Measured
       // on 1989-02-04 (立春 04:27:09): 04:00 gives 戊辰 乙丑, 04:30 gives 己巳 丙寅 -
       // two pillars different, off the minute alone.
-      const [turn] = await Promise.all([
-        fetch('/api/season-check', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ birthDate }),
-        }).then((r) => r.json()).catch(() => null),
-        delay(2500),
-      ]);
+      // THE 2,500ms PAUSE THAT USED TO SIT IN A Promise.all HERE IS DELETED. It was
+      // never work: `docs/archive/MEMORY.md:64` calls it "a manufactured pause
+      // framed as *reading her*" and `docs/handoff/2026-08-19-branch-pr.md:97` says
+      // "the funnel's 2.5s pause is a designed pause, not a wait on work". The
+      // number was three anticipation lines at 850ms. Commit 1 deleted that screen,
+      // so the pause had nothing left to pace and read as unexplained waiting.
+      //
+      // DO NOT RESTORE IT AS A PROCESSING DELAY. Nothing here needs time. Reyner,
+      // 2026-09-03: "Don't preserve the old ceremony by preserving dead scaffolding.
+      // If the result feels too immediate on the phone, we design a new anticipation
+      // treatment that EARNS the time rather than bringing back a silent 2.5s wait."
+      const turn = await fetch('/api/season-check', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ birthDate }),
+      }).then((r) => r.json()).catch(() => null);
 
       if (turn?.needsHour) {
         const birthHour = birthTime === null ? null : Number(birthTime.slice(0, 2));
@@ -325,47 +346,47 @@ export default function Funnel() {
     } catch {
       setError('Ada yang salah. Coba lagi sebentar.');
       setPhase('input');
+    } finally {
+      // Cleared on EVERY exit, including the season branch's early return - the
+      // gate's answer handler checks this same flag, so a `busy` left standing
+      // there would wedge the gate shut on the ~12 days a year it appears.
+      setBusy(false);
     }
   }
 
   // Answer from the season gate. `resolution` is { termSide } | { birthTime } | {}.
+  //
+  // THE GATE STAYS ON SCREEN, AND THIS IS THE EDGE THE TAKEOVER WAS HIDING. This
+  // is the SECOND entry into an in-flight create, and unlike the first there is no
+  // form behind it to return to. Falling back to <Home> would throw her backwards
+  // past a question she has just answered, so `phase` is left at 'season' and
+  // <SeasonGate> holds its own busy state - which it already had, for its own
+  // double-answer guard, from before the takeover was deleted.
   async function onSeasonAnswer(resolution) {
+    if (busy) return;
     setError(null);
-    // Restart the lines at the first one, exactly as onSubmit does. `step` survives
-    // the season gate, so without this the second calculating phase resumes wherever
-    // the first one stopped - which the two timeouts also did, and which reads as
-    // the sequence starting in the middle.
-    setStep(0);
-    setPhase('calculating');
+    setBusy(true);
     try {
       await createReading(season.birthDate, null, resolution);
     } catch {
       setError('Ada yang salah. Coba lagi sebentar.');
       setPhase('input');
+    } finally {
+      setBusy(false);
     }
   }
 
-  // The three lines LOOP for as long as the render takes. Ruled 2026-09-01.
-  //
-  // They used to advance twice and then HOLD on the last one, and the comment here
-  // argued that a fourth timer "would leave a blank where a line had been". That
-  // weighed holding against BLANKING and never considered CYCLING, which is neither:
-  // the interval wraps with `% ANTICIPATION.length`, so there is always a line.
-  //
-  // The render behind this has no deadline, which was the reason given for holding
-  // and is actually the reason against it: a line frozen for eight seconds reads as
-  // a hung page, which is the opposite of what this component is for.
-  //
-  // ONE INTERVAL, NOT N TIMEOUTS. The old pair had to know the list length; this
-  // does not, so adding a fourth line is a change to `ANTICIPATION` alone.
-  useEffect(() => {
-    if (phase !== 'calculating') return;
-    const id = setInterval(() => setStep((s) => (s + 1) % ANTICIPATION.length), 850);
-    return () => clearInterval(id);
-  }, [phase]);
+  // THE CYCLING ANTICIPATION LINES ARE DELETED, AND THEY WERE HOURS OLD. #86's
+  // commit C replaced a holding pair of timeouts with one wrapping interval, and
+  // it was a real improvement to a screen that no longer earns its place: the
+  // takeover was built when a reader waited the WHOLE render on an empty page
+  // (p50 7.6s, up to ~23s), and chart-early cut that window to roughly 2.5s.
+  // Ripple rings and cycling copy are ceremony for 2.5 seconds, and running them
+  // in front of the prose skeleton put TWO loading treatments back to back in one
+  // 22s funnel. Removing this is the ruling, not an accident, and it is recorded
+  // here because a deletion this fresh reads like a botched merge otherwise.
 
-  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} />;
-  if (phase === 'calculating') return <Anticipation step={step} />;
+  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} />;
   if (phase === 'season') return <SeasonGate season={season} onAnswer={onSeasonAnswer} />;
   return <Reading reading={reading} onReset={reset} />;
 }
@@ -404,7 +425,7 @@ function Para({ children, style }) {
 }
 
 /* ---------------- Home (input) ---------------- */
-function Home({ form, setForm, error, onSubmit }) {
+function Home({ form, setForm, error, onSubmit, busy }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target ? e.target.value : e }));
   return (
     <div style={wrap}>
@@ -464,7 +485,17 @@ function Home({ form, setForm, error, onSubmit }) {
                   where a word would be. That is the same 08-03 ruling. */}
               <FieldLabel>Jenis kelamin · opsional</FieldLabel>
               <select value={form.gender} onChange={set('gender')} aria-label="Jenis kelamin">
-                <option value="">Tidak diisi</option>
+                {/* THE EMPTY OPTION CARRIES NO LABEL, AND THE BLANK ROW IS THE POINT.
+                    Ruled 2026-09-03. The date and time fields above are native
+                    pickers with no placeholder, and `Tidak diisi` made this the one
+                    control in the card that narrated its own empty state. Blank
+                    matches its neighbours.
+
+                    `value=""` IS UNCHANGED, so `form.gender || null` at both call
+                    sites still resolves an unanswered field to null and the card
+                    footer's first-class no-gender case (the 08-03 ruling above) is
+                    untouched. This is a label edit; nothing downstream can tell. */}
+                <option value=""></option>
                 <option value="female">Perempuan</option>
                 <option value="male">Laki-laki</option>
               </select>
@@ -473,27 +504,18 @@ function Home({ form, setForm, error, onSubmit }) {
 
           <Reveal delay={0.3} style={{ marginTop: 22 }}>
             {error && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{error}</div>}
-            <Button type="submit">Lihat Refleksiku</Button>
+            {/* THE BUTTON CARRIES THE STATE, because nothing replaces the screen
+                any more. `Menyiapkan...` is REUSED from the checkout button
+                below rather than newly ruled - Reyner approved that string on
+                2026-08-23 and rule 20 is one voice everywhere, so a second word
+                for the same moment would be a second register. */}
+            <Button type="submit" disabled={busy}>{busy ? 'Menyiapkan...' : 'Lihat Refleksiku'}</Button>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 12.5, color: 'var(--muted-warm)', marginTop: 14 }}>
               <Icon.lock size={13} /> Bersifat pribadi. Hanya untukmu.
             </div>
           </Reveal>
         </form>
       </div>
-    </div>
-  );
-}
-
-/* ---------------- Anticipation ---------------- */
-function Anticipation({ step }) {
-  return (
-    <div className="k-fade" style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ position: 'relative', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span className="k-ring" style={{ animationDelay: '0s' }} />
-        <span className="k-ring" style={{ animationDelay: '1s' }} />
-        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--clay)' }} />
-      </div>
-      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, color: 'var(--muted-warm)', marginTop: 28, minHeight: 22 }}>{ANTICIPATION[step]}</p>
     </div>
   );
 }
@@ -641,8 +663,130 @@ function SeasonGate({ season, onAnswer }) {
  * client that dropped the raw string into one element would lose every break
  * SILENTLY and the reading would still read, just as a wall.
  */
-function Reading({ reading, onReset, initialStage }) {
+/**
+ * How long the skeleton and the prose overlap.
+ *
+ * IT MUST EQUAL `kSkelOut`'s DURATION in app/globals.css, and that is asserted
+ * rather than trusted - two sources of truth for one duration is exactly the
+ * shape that drifts silently, so tests/prose-handoff.spec.mjs reads the
+ * stylesheet and compares. `animationend` would remove the second source
+ * entirely and was rejected: it never fires for an element in a background tab
+ * or with animations disabled, and a skeleton pinned over the reading forever is
+ * a worse bug than the one being fixed. A timer always ends.
+ */
+export const PROSE_HANDOFF_MS = 450;
+
+/**
+ * THE PROSE REVEAL. Three numbers, and the third is the only one that is a
+ * DESIGN CONSTRAINT rather than a taste setting.
+ *
+ * Reyner judged the previous version on his own machine: it read as INSTANT
+ * rather than smooth. Two causes, both measured rather than guessed:
+ *
+ *   1. `--ease-quiet` is cubic-bezier(0.22, 1, 0.36, 1) - an ease-out-quint that
+ *      spends almost nothing in its second half. Seeked on the real element it
+ *      was 96% complete at t=180ms of a 360ms animation, so the duration was
+ *      effectively half what it said. `--ease-prose` replaces it HERE ONLY;
+ *      `--ease-quiet` is untouched and the rest of the site still uses it.
+ *   2. The stagger was `Math.min(j, 2) * 0.03` where `j` is the index WITHIN a
+ *      block, so it reset every block and all nine blocks started their first
+ *      paragraph at zero. Not literally no stagger, but the whole reading moved
+ *      as one, which is what "instant" was describing.
+ *
+ * THE STEP IS DERIVED FROM THE PARAGRAPH COUNT, NEVER HARDCODED, and that is the
+ * point of `PROSE_REVEAL_BUDGET_MS`. A fixed per-item delay is what produced the
+ * defect this whole branch started from: at 90ms across the ~17 paragraphs a real
+ * reading carries, the last one would begin 1.4s after the first and the page
+ * would trickle for seconds after loading had finished. The budget bounds the
+ * WHOLE reveal - first paragraph's start to last paragraph's end - regardless of
+ * how many arrive. Retune the feel here, in one place.
+ */
+export const PROSE_FADE_MS = 450;          // one paragraph's own fade
+export const PROSE_REVEAL_BUDGET_MS = 1200; // first start -> last end, ALWAYS
+export const PROSE_STEP_MAX_MS = 90;        // the step a short reading gets to use
+
+/**
+ * The delay for the `i`th paragraph of `total`, in seconds, in DOM order.
+ *
+ * `STEP_MAX` is a CEILING, not the step: a two-paragraph reading would otherwise
+ * spread itself across the entire budget and read as two lonely beats. Short
+ * readings get the natural rhythm; long ones compress to fit. Either way the last
+ * paragraph has finished by `PROSE_REVEAL_BUDGET_MS`.
+ */
+export function proseDelayMs(i, total) {
+  if (total <= 1) return 0;
+  const room = PROSE_REVEAL_BUDGET_MS - PROSE_FADE_MS;
+  return i * Math.min(PROSE_STEP_MAX_MS, room / (total - 1));
+}
+
+/**
+ * Does this reader want no motion? Read at the moment the handoff starts rather
+ * than subscribed to: a media query flipped mid-transition is not a scenario a
+ * reader can produce, and the listener would outlive the reveal it governs.
+ */
+function prefersReducedMotion() {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  catch { return false; }
+}
+
+export function Reading({ reading, onReset, initialStage }) {
   const chart = reading.chart;
+  // ── THE PROSE HANDOFF ──────────────────────────────────
+  //
+  // 'gone' | 'holding' | 'crossing'. The skeleton does not unmount when `pending`
+  // flips; it CROSSES OVER the prose and leaves once the prose is visibly taking
+  // its place. The property Reyner ruled is that at no frame is this region
+  // blank, and the old code broke it in one React commit: skeleton out and prose
+  // in together, with `.k-rise`'s `fill: both` holding the prose at opacity 0.
+  // Measured: docs/qa/2026-09-03-skeleton-to-prose-gap.md.
+  const pending = !!reading.pending;
+  // Read ONCE, not subscribed to: a media query flipped mid-transition is not a
+  // scenario a reader can produce, and a listener would outlive the 360ms it
+  // governs. The lazy initialiser is what keeps it out of the render body.
+  const [reduceMotion] = useState(prefersReducedMotion);
+  // STARTS false EVEN WHEN `pending` IS TRUE. Seeding it from `pending` armed the
+  // cross-fade before `reduceMotion` had been consulted, so a reader who asked for
+  // no motion got one anyway - caught by the reduced-motion assertion below. The
+  // render-time line further down is the ONLY thing that arms it, and it checks.
+  const [armed, setArmed] = useState(false);
+
+  // DERIVED DURING RENDER, NOT IN AN EFFECT, AND THAT IS THE WHOLE CORRECTNESS
+  // ARGUMENT. An effect runs AFTER the browser paints, so a version of this that
+  // set 'crossing' from useEffect produced a real intermediate frame with the
+  // skeleton still IN FLOW beside the prose. Measured in a browser, not reasoned
+  // about: the first paragraph sat at y=430 on that paint and at y=304 on the
+  // next one, a 126px jump - the exact thing the overlap exists to prevent, and
+  // invisible to a jsdom test because act() collapses the two renders into one.
+  // REDUCED MOTION NEVER ARMS IT AT ALL, rather than arming and then undoing it.
+  // Same instant swap either way, but nothing has to be cleaned up afterwards.
+  if (pending && !armed && !reduceMotion) setArmed(true);
+  const crossing = armed && !pending;
+  const showSkeleton = pending || crossing;
+
+  // REDUCED MOTION KEEPS ITS INSTANT, GAPLESS SWAP, and it gets it from never
+  // being armed rather than from a timer - the skeleton is gone in the SAME render
+  // that mounts the prose. It is the one path that never had this defect
+  // (globals.css disables .k-rise under it, so the prose is readable on arrival),
+  // and crossing a non-fading skeleton over it would be a NEW defect: opaque bars
+  // sitting on top of readable text.
+  useEffect(() => {
+    if (pending || !armed) return undefined;
+    const id = setTimeout(() => setArmed(false), PROSE_HANDOFF_MS);
+    return () => clearTimeout(id);
+  }, [pending, armed]);
+
+  // The reveal's running index, computed once per render rather than by mutating
+  // a counter inside the JSX - `proseOffsets[i]` is how many paragraphs precede
+  // block `i` down the page, so block-local `j` still keys the map while the
+  // DELAY comes from the global position. `penutup` is one more item at the end.
+  const { proseOffsets, proseTotal } = useMemo(() => {
+    const offsets = [];
+    let n = 0;
+    for (const b of (reading.blocks || [])) { offsets.push(n); n += (b.paragraphs || []).length; }
+    return { proseOffsets: offsets, proseTotal: n + (reading.penutup ? 1 : 0) };
+  }, [reading.blocks, reading.penutup]);
+
   const element = chart?.day_master?.element;
   const el = elColor(element);
   const bars = presenceBars(chart?.element_presence);
@@ -676,35 +820,79 @@ function Reading({ reading, onReset, initialStage }) {
         </div>
       </Reveal>
 
-      {/* THE PROSE, OR THE SPACE IT IS ABOUT TO OCCUPY.
+      {/* THE PROSE, AND THE SKELETON THAT HANDS THE SPACE OVER TO IT.
           Wordless on purpose - see .k-skel in globals.css and the ruling behind
           it. The bar widths are uneven so the block reads as paragraphs rather
           than as a progress meter, which would imply a completion it cannot
           know. `aria-hidden` with a polite live region carrying nothing: a screen
           reader is told the reading is loading by the region appearing, not by a
-          decorative bar it would otherwise read as content. */}
-      {reading.pending && (
-        <div style={{ marginTop: 34 }} aria-busy="true">
-          {[[38, 92], [0, 100], [0, 86], [0, 64]].map(([mt, w], i) => (
-            <div key={i} aria-hidden="true" className="k-skel"
-              style={{ height: 13, width: `${w}%`, marginTop: i ? 12 : mt }} />
-          ))}
-        </div>
-      )}
+          decorative bar it would otherwise read as content.
 
-      {/* the reading */}
-      {(reading.blocks || []).map((b, i) => (
-        <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
-          {(b.paragraphs || []).map((p, j) => (
-            <Reveal key={j} delay={j * 0.04}><Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para></Reveal>
-          ))}
-        </Section>
-      ))}
-      {reading.penutup && (
-        <Reveal delay={0.06} style={{ marginTop: 34 }}>
-          <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
-        </Reveal>
-      )}
+          `display: flow-root` IS LOAD-BEARING AND NOT A TIDY-UP. It stops the
+          children's top margins collapsing THROUGH this wrapper, which is what
+          makes `top: 0` on the departing skeleton land in exactly the same place
+          as its in-flow position: both the skeleton and the first Section carry
+          marginTop 34 inside the same block formatting context. Without it the
+          wrapper's edge moves with its first child and the overlay jumps 34px on
+          the frame it goes absolute. */}
+      <div style={{ position: 'relative', display: 'flow-root' }}>
+        {showSkeleton && (
+          // WHILE CROSSING IT IS OUT OF FLOW. The prose is far taller than four
+          // 13px bars; a departing skeleton still taking layout would push the
+          // whole reading down and let it snap back on unmount - a jump in the
+          // middle of the cross-fade. `aria-busy` is dropped the moment the prose
+          // is real, so a screen reader is not told a finished reading is loading.
+          //
+          // NO marginTop ON THIS BOX, IN EITHER STATE, AND IT IS NOT AN OVERSIGHT.
+          // The 38 lives on the first bar and is the only offset in play. When this
+          // box is static that margin collapses out through it (no border, no
+          // padding) and the bar lands 38px below the wrapper; when it is absolute
+          // the box establishes a block formatting context, the margin STOPS
+          // collapsing, and it lands 38px below `top: 0` - the same place. A
+          // marginTop of 34 here read identically in the source and moved the bars
+          // 34px on the frame they went absolute, because only one of the two
+          // states collapsed it away.
+          <div data-prose-skeleton
+            className={crossing ? 'k-skel-exit' : undefined}
+            aria-busy={pending ? 'true' : undefined}
+            aria-hidden={crossing ? 'true' : undefined}
+            style={crossing
+              ? { position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none' }
+              : undefined}>
+            {[[38, 92], [0, 100], [0, 86], [0, 64]].map(([mt, w], i) => (
+              <div key={i} aria-hidden="true" className="k-skel"
+                style={{ height: 13, width: `${w}%`, marginTop: i ? 12 : mt }} />
+            ))}
+          </div>
+        )}
+
+        {/* the reading. `.k-prose` RATHER THAN <Reveal>, which is `.k-rise`: that
+            one is 0.8s from opacity 0 and is used all over the site, so it is
+            left alone and a slower, differently eased reveal is used here.
+
+            THE INDEX IS GLOBAL AND IN DOM ORDER - `proseIndex`, not `j`. It used
+            to be the index within a block, which reset at every heading and
+            started nine first paragraphs simultaneously. The reveal has to read
+            as ONE sequence down the page, so the counter has to run down the
+            page too. `penutup` is the last item in that sequence and takes the
+            last delay rather than a hardcoded one. */}
+        {(reading.blocks || []).map((b, i) => (
+          <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
+            {(b.paragraphs || []).map((p, j) => (
+              <div key={j} className="k-prose"
+                style={{ animationDelay: `${proseDelayMs(proseOffsets[i] + j, proseTotal)}ms` }}>
+                <Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para>
+              </div>
+            ))}
+          </Section>
+        ))}
+        {reading.penutup && (
+          <div className="k-prose"
+            style={{ animationDelay: `${proseDelayMs(proseTotal - 1, proseTotal)}ms`, marginTop: 34 }}>
+            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
+          </div>
+        )}
+      </div>
 
       {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
           characters ARE the chart and they are what lets a reader cross-check Katon
