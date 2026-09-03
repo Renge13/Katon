@@ -116,6 +116,25 @@ row was closed with its grep. Recording the asymmetry because the 08-26 entry ab
 this - an owner-held item nothing will ever mark done - and the temptation is to tidy it away on the
 strength of the migration FILE existing, which says nothing about whether it ran.
 
+> **AMENDED. THE ROW CLOSED LATER THE SAME DAY, and this note went stale inside the very PR that
+> documented that shape.** Reyner had applied `0009` against the production project on 2026-09-02 and
+> verified it with a REAL SUBMIT rather than by the tables existing - `funnel_event` took all five
+> event names and `product_interest` stored a contact. The closure is under **TWO THINGS WERE OWED BY
+> REYNER**, item 2, below.
+>
+> **THE REASONING ABOVE STANDS AND IS NOT STRUCK:** nothing in the repo could report whether a
+> hand-run migration had run, which is exactly why the row was owner-held and why closing it on the
+> file existing would have been wrong. What went stale is the STATUS, not the argument - and the
+> status was only ever closable by evidence from outside the repo, which is the argument's own point.
+>
+> **THE GENERAL RULE, and it is the reason this recurred here of all places: A NOTE THAT RECORDS AN
+> ITEM'S STATUS BECOMES A SECOND SOURCE OF TRUTH FOR THAT STATUS.** This entry existed to explain a
+> DECISION - why an owner-held row is left open - and it carried the row's state along for
+> illustration. The decision cannot go stale; the state did, within hours, and nothing pointed back
+> here when it moved. **A design note may record what was decided and why. The moment it also records
+> where something STANDS, it has to be swept every time that thing moves** - which is the failure this
+> file already logs seven times, arriving one level up, in the notes about the failure.
+
 A fourth, about scope: **LIVE STATE was read in the same pass, per the 08-29 rule, and deliberately
 NOT edited.** PR #91 changes what a reader sees while a reading loads, and LIVE STATE describes what
 SHIPS. Writing #91's behaviour into it while #91 is open would recreate the exact 2026-08-23 trap
@@ -134,10 +153,12 @@ the moment it lands. LIVE STATE moves when #91 does, in the commit that changes 
 3. `prompts/R-card-a-4x5.md` — **DONE. Merged as #85 (`c8cee93`).** It said "THE CURRENT WORK" here
    for three days after it landed; the section below carries the correction and what must not be
    redone. **The current work is PR #91, the loading transitions, and it has no prompt file.**
-4. `prompts/Q-demand-test.md` — **DONE. Merged as #84.** All six commits plus the ruled copy. What it
-   still OWES is not code: migration `0009` is applied by hand in the Supabase SQL editor BEFORE the
-   deploy that reads it, and `upcoming_seen` firing on scroll is proven on localhost and not yet on
-   production.
+4. `prompts/Q-demand-test.md` — **DONE. Merged as #84, AND IT OWES NOTHING ANY MORE.** All six commits
+   plus the ruled copy. Both open items closed on Reyner's production walk of 2026-09-02: migration
+   `0009` is applied, and `upcoming_seen` fired there alongside the other four events. This entry read
+   *"still OWES ... `upcoming_seen` proven on localhost and not yet on production"* until 2026-09-03 -
+   the same stale-status shape the design note at the top now generalises, in the block a new session
+   reads FIRST.
    `prompts/M-tranche3.md` is queued behind BOTH (commits 0 and 1 docs-only, **commits 2 to 4 touch
    `glossary.json` and `facts.js`**, and those now also have to clear the card budget gate — Card B
    has 7px of slack and a glossary edit can spend it; `spouse_palace` and `kekuatan` do not reach the
@@ -345,7 +366,12 @@ $ git log --oneline -1 622d926
 `npm test` 35/35 (was 32 when the branch was picked up; +`test:unruled-copy`, +`test:interest`,
 +`test:readout`).
 
-### TWO THINGS WERE OWED BY REYNER. ONE IS CLOSED; ONE CANNOT BE CLOSED FROM THE REPO.
+### TWO THINGS WERE OWED BY REYNER. BOTH ARE NOW CLOSED - ONE FROM THE REPO, ONE ONLY FROM OUTSIDE IT.
+
+**This heading said "ONE IS CLOSED; ONE CANNOT BE CLOSED FROM THE REPO" while item 2 beneath it read
+CLOSED.** Same defect as the two it was written to correct, one line above its own subject. The true
+half is kept because it is the useful half: item 1 was closable by a grep, item 2 never was, and that
+difference is why one sat open for days.
 
 1. **~~THE ELEVEN INDONESIAN STRINGS IN THE UPCOMING BLOCK.~~ CLOSED.** Reyner ruled all eleven
    (`docs/content/upcoming-copy-rulings.md`, plus its two amendments) and they are applied. The
