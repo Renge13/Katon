@@ -363,12 +363,20 @@ $ git log --oneline -1 622d926
    `scripts/check-unruled-copy.mjs` stay on purpose, as the rulings file instructs - they are the
    gate for the next unruled string, not scaffolding for this one.
 
-2. **THE MIGRATION - STILL OPEN, AND IT IS OWNER-HELD.**
-   `supabase/migrations/0009_demand_test.sql` is applied by hand in the SQL editor and must run
-   BEFORE the code that reads it deploys (repo convention). **Nothing in CI checks this and nothing
-   in the repo can tell you whether it has been run**, so no session should record it as closed on
-   the strength of a file existing. Only Reyner can close this row. It is exactly the shape the
-   2026-08-26 entry above warns about: an owner-held item that nothing will ever mark done.
+2. **~~THE MIGRATION.~~ CLOSED 2026-09-02 BY REYNER, ON THE PRODUCTION PROJECT.**
+   `supabase/migrations/0009_demand_test.sql` was applied by hand in the Supabase SQL editor.
+
+   **AND IT WAS VERIFIED BY A REAL SUBMIT, NOT BY THE TABLES EXISTING** - which is the whole reason
+   this row could not be closed from the repo. He walked the funnel on production and watched the
+   WRITE PATH run: `funnel_event` took `reading_created`, `offer_seen`, `mirror_served`,
+   `upcoming_seen` and `interest_registered`, and `product_interest` stored a contact.
+
+   **The distinction is the point and it is why this row was left open on 2026-09-03 rather than
+   tidied away.** A migration file in the repo, a table present in the dashboard, and a schema that
+   accepts the app's writes are three different claims, and only the third is what the demand test
+   depends on. A session that had closed this on the file existing would have been right by accident;
+   a session that closed it on the tables existing would still not have known whether
+   `recordMirrorEvent` could write. Five event names and one contact row landing is the evidence.
 
 ### THE UNVERIFIED ITEM IS CLOSED, 2026-08-31 - THE OBSERVER WAS OBSERVED
 
