@@ -646,8 +646,76 @@ function SeasonGate({ season, onAnswer }) {
  * client that dropped the raw string into one element would lose every break
  * SILENTLY and the reading would still read, just as a wall.
  */
-function Reading({ reading, onReset, initialStage }) {
+/**
+ * How long the skeleton and the prose overlap.
+ *
+ * IT MUST EQUAL `kSkelOut`'s DURATION in app/globals.css, and that is asserted
+ * rather than trusted - two sources of truth for one duration is exactly the
+ * shape that drifts silently, so tests/prose-handoff.spec.mjs reads the
+ * stylesheet and compares. `animationend` would remove the second source
+ * entirely and was rejected: it never fires for an element in a background tab
+ * or with animations disabled, and a skeleton pinned over the reading forever is
+ * a worse bug than the one being fixed. A timer always ends.
+ */
+export const PROSE_HANDOFF_MS = 360;
+
+/**
+ * Does this reader want no motion? Read at the moment the handoff starts rather
+ * than subscribed to: a media query flipped mid-transition is not a scenario a
+ * reader can produce, and the listener would outlive the 360ms it governs.
+ */
+function prefersReducedMotion() {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  catch { return false; }
+}
+
+export function Reading({ reading, onReset, initialStage }) {
   const chart = reading.chart;
+  // ── THE PROSE HANDOFF ──────────────────────────────────
+  //
+  // 'gone' | 'holding' | 'crossing'. The skeleton does not unmount when `pending`
+  // flips; it CROSSES OVER the prose and leaves once the prose is visibly taking
+  // its place. The property Reyner ruled is that at no frame is this region
+  // blank, and the old code broke it in one React commit: skeleton out and prose
+  // in together, with `.k-rise`'s `fill: both` holding the prose at opacity 0.
+  // Measured: docs/qa/2026-09-03-skeleton-to-prose-gap.md.
+  const pending = !!reading.pending;
+  // Read ONCE, not subscribed to: a media query flipped mid-transition is not a
+  // scenario a reader can produce, and a listener would outlive the 360ms it
+  // governs. The lazy initialiser is what keeps it out of the render body.
+  const [reduceMotion] = useState(prefersReducedMotion);
+  // STARTS false EVEN WHEN `pending` IS TRUE. Seeding it from `pending` armed the
+  // cross-fade before `reduceMotion` had been consulted, so a reader who asked for
+  // no motion got one anyway - caught by the reduced-motion assertion below. The
+  // render-time line further down is the ONLY thing that arms it, and it checks.
+  const [armed, setArmed] = useState(false);
+
+  // DERIVED DURING RENDER, NOT IN AN EFFECT, AND THAT IS THE WHOLE CORRECTNESS
+  // ARGUMENT. An effect runs AFTER the browser paints, so a version of this that
+  // set 'crossing' from useEffect produced a real intermediate frame with the
+  // skeleton still IN FLOW beside the prose. Measured in a browser, not reasoned
+  // about: the first paragraph sat at y=430 on that paint and at y=304 on the
+  // next one, a 126px jump - the exact thing the overlap exists to prevent, and
+  // invisible to a jsdom test because act() collapses the two renders into one.
+  // REDUCED MOTION NEVER ARMS IT AT ALL, rather than arming and then undoing it.
+  // Same instant swap either way, but nothing has to be cleaned up afterwards.
+  if (pending && !armed && !reduceMotion) setArmed(true);
+  const crossing = armed && !pending;
+  const showSkeleton = pending || crossing;
+
+  // REDUCED MOTION KEEPS ITS INSTANT, GAPLESS SWAP, and it gets it from never
+  // being armed rather than from a timer - the skeleton is gone in the SAME render
+  // that mounts the prose. It is the one path that never had this defect
+  // (globals.css disables .k-rise under it, so the prose is readable on arrival),
+  // and crossing a non-fading skeleton over it would be a NEW defect: opaque bars
+  // sitting on top of readable text.
+  useEffect(() => {
+    if (pending || !armed) return undefined;
+    const id = setTimeout(() => setArmed(false), PROSE_HANDOFF_MS);
+    return () => clearTimeout(id);
+  }, [pending, armed]);
+
   const element = chart?.day_master?.element;
   const el = elColor(element);
   const bars = presenceBars(chart?.element_presence);
@@ -681,35 +749,73 @@ function Reading({ reading, onReset, initialStage }) {
         </div>
       </Reveal>
 
-      {/* THE PROSE, OR THE SPACE IT IS ABOUT TO OCCUPY.
+      {/* THE PROSE, AND THE SKELETON THAT HANDS THE SPACE OVER TO IT.
           Wordless on purpose - see .k-skel in globals.css and the ruling behind
           it. The bar widths are uneven so the block reads as paragraphs rather
           than as a progress meter, which would imply a completion it cannot
           know. `aria-hidden` with a polite live region carrying nothing: a screen
           reader is told the reading is loading by the region appearing, not by a
-          decorative bar it would otherwise read as content. */}
-      {reading.pending && (
-        <div style={{ marginTop: 34 }} aria-busy="true">
-          {[[38, 92], [0, 100], [0, 86], [0, 64]].map(([mt, w], i) => (
-            <div key={i} aria-hidden="true" className="k-skel"
-              style={{ height: 13, width: `${w}%`, marginTop: i ? 12 : mt }} />
-          ))}
-        </div>
-      )}
+          decorative bar it would otherwise read as content.
 
-      {/* the reading */}
-      {(reading.blocks || []).map((b, i) => (
-        <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
-          {(b.paragraphs || []).map((p, j) => (
-            <Reveal key={j} delay={j * 0.04}><Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para></Reveal>
-          ))}
-        </Section>
-      ))}
-      {reading.penutup && (
-        <Reveal delay={0.06} style={{ marginTop: 34 }}>
-          <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
-        </Reveal>
-      )}
+          `display: flow-root` IS LOAD-BEARING AND NOT A TIDY-UP. It stops the
+          children's top margins collapsing THROUGH this wrapper, which is what
+          makes `top: 0` on the departing skeleton land in exactly the same place
+          as its in-flow position: both the skeleton and the first Section carry
+          marginTop 34 inside the same block formatting context. Without it the
+          wrapper's edge moves with its first child and the overlay jumps 34px on
+          the frame it goes absolute. */}
+      <div style={{ position: 'relative', display: 'flow-root' }}>
+        {showSkeleton && (
+          // WHILE CROSSING IT IS OUT OF FLOW. The prose is far taller than four
+          // 13px bars; a departing skeleton still taking layout would push the
+          // whole reading down and let it snap back on unmount - a jump in the
+          // middle of the cross-fade. `aria-busy` is dropped the moment the prose
+          // is real, so a screen reader is not told a finished reading is loading.
+          //
+          // NO marginTop ON THIS BOX, IN EITHER STATE, AND IT IS NOT AN OVERSIGHT.
+          // The 38 lives on the first bar and is the only offset in play. When this
+          // box is static that margin collapses out through it (no border, no
+          // padding) and the bar lands 38px below the wrapper; when it is absolute
+          // the box establishes a block formatting context, the margin STOPS
+          // collapsing, and it lands 38px below `top: 0` - the same place. A
+          // marginTop of 34 here read identically in the source and moved the bars
+          // 34px on the frame they went absolute, because only one of the two
+          // states collapsed it away.
+          <div data-prose-skeleton
+            className={crossing ? 'k-skel-exit' : undefined}
+            aria-busy={pending ? 'true' : undefined}
+            aria-hidden={crossing ? 'true' : undefined}
+            style={crossing
+              ? { position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none' }
+              : undefined}>
+            {[[38, 92], [0, 100], [0, 86], [0, 64]].map(([mt, w], i) => (
+              <div key={i} aria-hidden="true" className="k-skel"
+                style={{ height: 13, width: `${w}%`, marginTop: i ? 12 : mt }} />
+            ))}
+          </div>
+        )}
+
+        {/* the reading. `.k-prose` RATHER THAN <Reveal>, which is `.k-rise`: that
+            one is 0.8s from opacity 0 and is used all over the site, so it is
+            left alone and a shorter reveal is used here. The stagger is CAPPED at
+            the third paragraph - paragraphs trickling in over a quarter-second
+            read as "still loading" after loading has finished, which is the thing
+            this commit exists to stop. */}
+        {(reading.blocks || []).map((b, i) => (
+          <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
+            {(b.paragraphs || []).map((p, j) => (
+              <div key={j} className="k-prose" style={{ animationDelay: `${Math.min(j, 2) * 0.03}s` }}>
+                <Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para>
+              </div>
+            ))}
+          </Section>
+        ))}
+        {reading.penutup && (
+          <div className="k-prose" style={{ animationDelay: '0.06s', marginTop: 34 }}>
+            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
+          </div>
+        )}
+      </div>
 
       {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
           characters ARE the chart and they are what lets a reader cross-check Katon

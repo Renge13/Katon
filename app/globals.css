@@ -199,3 +199,35 @@ input[type="number"]:focus {
 .k-skel { background: var(--el-g12, rgba(0,0,0,.06)); border-radius: 5px; animation: kSkel 1.6s var(--ease-quiet) infinite; }
 @keyframes kSkel { 0%, 100% { opacity: .45; } 50% { opacity: .9; } }
 @media (prefers-reduced-motion: reduce) { .k-skel { animation: none; opacity: .6; } }
+
+/* ── THE HANDOFF, 2026-09-03 ───────────────────────────────
+   The skeleton used to unmount on the same React commit that mounted the prose,
+   and `.k-rise` above is `.8s ... both` - `fill: both` pins the prose at opacity 0
+   until its run starts, so that paint was BLANK in a space the skeleton had been
+   holding with something visible. Measured, with the curve and the counterfactual:
+   docs/qa/2026-09-03-skeleton-to-prose-gap.md.
+
+   So they CROSS. The skeleton fades out over the prose fading in, and the ruled
+   property is that no frame of the transition is empty.
+
+   `kSkelOut`'s DURATION MUST MATCH `PROSE_HANDOFF_MS` in components/Funnel.jsx,
+   which owns the unmount timer. tests/prose-handoff.spec.mjs reads this file and
+   asserts the two agree, because a duration written in two places drifts and the
+   symptom - a skeleton that vanishes 40ms early, or lingers - is invisible in a
+   screenshot.
+
+   `.k-prose` is a SEPARATE, SHORTER REVEAL and not a change to `.k-rise`, which is
+   used all over the site and stays exactly as it was. */
+.k-skel-exit { animation: kSkelOut .36s var(--ease-quiet) forwards; }
+@keyframes kSkelOut { from { opacity: 1; } to { opacity: 0; } }
+
+.k-prose { animation: kProse .36s var(--ease-quiet) both; }
+@keyframes kProse { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Reduced motion gets an INSTANT, GAPLESS SWAP - the one path that never had the
+   defect. `.k-prose` is disabled so the prose is readable on arrival, and the
+   cross-fade is skipped in JS rather than here: a `.k-skel-exit` with no animation
+   would sit at full opacity on top of the reading until its timer fired. */
+@media (prefers-reduced-motion: reduce) {
+  .k-prose, .k-skel-exit { animation: none; }
+}
