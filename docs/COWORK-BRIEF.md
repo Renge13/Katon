@@ -431,6 +431,29 @@ doubts it goes and looks. A false sentence with a check that CONFIRMS it activel
 and the reader who did the right thing ends up more confident than the one who did nothing. Same
 family as the 2026-08-23 LIVE STATE paragraph, whose escape instruction was a loop back into itself.
 
+**3. A CITED COMMAND PROVES NOTHING IF ITS WINDOW WAS CHOSEN TO MATCH THE EXPECTATION.** The sharpest
+of the three, and it landed one day later, 2026-09-03 - a brief asserted that a `docs/NEXT.md` fix was
+*"still not landed as of `f29fc0e`"* and cited a real command run on the real ref. The command was
+`sed -n '113,118p'`. The amendment starts at line **119**. Six lines, ending one short of the answer.
+
+> Nothing about that run was wrong. The ref was right, the file was right, the output was quoted
+> honestly, and it showed exactly what it was asked to show: the original paragraph, still there,
+> unstruck - because **amending in place leaves the original text intact and adds below it.** A window
+> ending at 118 can only ever return the defect.
+
+**THE RULE: TO CHECK WHETHER SOMETHING WAS FIXED, GREP FOR THE FIX, NOT AT THE DEFECT.** The fix has a
+distinctive string; the defect is still on screen by design. `git show f29fc0e -- docs/NEXT.md | grep
+-c "SECOND SOURCE OF TRUTH FOR THAT STATUS"` returns `1` and settles it in one command, on the ref
+being disputed, with no window to choose.
+
+**WHY IT BELONGS BESIDE THE OTHER TWO.** All three are the checking machinery failing while looking
+like it worked. But this one is not about a stale artifact at all - **the artifact was current and the
+INSTRUMENT'S APERTURE carried the error.** A range is a parameter, and a parameter chosen while
+expecting an answer will tend to frame that answer. It is section 4's oldest shape (an instrument that
+cannot fail) in the least suspicious possible form: a correct command, correctly run, quoted verbatim.
+Same family as row 43 - the command was run and the reading of it was what went wrong - except here
+the misreading is upstream, in the argument, and no amount of care in the retelling would catch it.
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
