@@ -116,6 +116,59 @@ that the region change would partly mask rather than fix. **Stated as an observa
 hypothesis attached, not as a measurement of a cause** - nothing here isolates it, and STEP 2
 should spend one check on it before crediting the region change with the whole delta.
 
+### 5. THE PER-ROUND-TRIP COST IS NOW MEASURED DIRECTLY, AND IT RE-RANKS THE FIX LIST
+
+The body prices a Supabase round trip at **~550-990ms, n=2, explicitly indicative** from a probe
+that had to subtract a floor from a two-call handler. **That estimate is superseded by a direct
+measurement**, and the instrument is `/api/keepalive` (shipped in `f027481`), which is a better
+one for a reason that has nothing to do with luck: **it makes exactly ONE database call and
+reports its own server-side duration in `ms`.** Nothing has to be subtracted, and no client-side
+timing is involved.
+
+Eight consecutive samples against production, `iad1` function, `ap-southeast-1` database:
+
+```
+283   288   289   289   |   522   806   940   1131
+   floor cluster, 4/8       tail, 4/8
+   median 405.5 · min 283 · max 1131
+```
+
+**It is bimodal, and the two modes have a mechanism.**
+
+- **~285ms is ONE round trip on a reused connection.** Singapore to Virginia is roughly a
+  230-250ms RTT, so this is one crossing plus query time and nothing else. Note it is also
+  almost exactly the warm `season-check` figure (269.3ms), which is one client-to-function
+  crossing - the same ocean, measured from the other end.
+- **The 522-1131 tail is 2-4 crossings**, which is the shape of a connection being
+  re-established (TLS handshake) rather than reused.
+
+**This independently confirms the bimodality recorded in section 4** for the warm mirror POST -
+two clusters ~1,161ms apart, about one round trip - and explains it. Same phenomenon, seen once
+through a three-call handler and once through a one-call handler.
+
+#### THE CONSEQUENCE, STATED HERE SO A LATER SESSION DOES NOT RE-DERIVE IT
+
+**MOVING TO `sin1` DOES NOT REDUCE THE NUMBER OF ROUND TRIPS. IT MAKES EACH ONE NEARLY FREE.**
+Function and database land in the same AWS region, so a crossing measured at 283ms at its floor
+and 1,131ms at its tail becomes an intra-region call - on the order of **20ms**. The three
+sequential calls in the mirror POST stay three calls; they stop being three ocean crossings.
+
+**That re-ranks the other two items, and it demotes both:**
+
+| after the move | what it saves | why it moved |
+|---|---|---|
+| ~~2. `Promise.all` the rate-limit dimensions~~ | **~20ms** | It removes one round trip. A round trip now costs ~20ms instead of 285-1,131ms, so the fix keeps its mechanism and loses its magnitude. **Three cheap round trips are approximately one cheap round trip.** |
+| ~~3. Fold `season-check` into the POST~~ | **~50-80ms, projected** | It removes a CLIENT-to-function round trip, and the client is a real device on the internet - that hop shortens but does not vanish, unlike a server-to-database hop. |
+
+**So the two swap order, and both become small.** Folding `season-check` becomes the larger of
+the two remaining items rather than the smaller, because it is the only one whose saving is not
+an intra-region call. Neither is worth doing on latency grounds alone after the move.
+
+**THE ~20ms AND THE ~50-80ms ARE PROJECTIONS, NOT MEASUREMENTS.** They are what an intra-region
+call and a shortened client hop should cost; nothing in this section measures either. The
+after-the-move figures belong in the region change's own before/after artifact, and if they
+disagree with these projections it is these projections that are wrong.
+
 ---
 
 ## THE REF THIS WAS MEASURED ON, CONFIRMED RATHER THAN QUOTED
