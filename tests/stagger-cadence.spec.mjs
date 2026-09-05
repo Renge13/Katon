@@ -32,8 +32,25 @@
 //     --k-rise-dur    (unset)
 //     HOME            0s / 0.08s / 0.14s / 0.22s / 0.3s, all 0.8s
 //
-// GREEN is taken against the deploy preview for this branch and recorded in the
-// commit message, because it needs a build this branch produced.
+// GREEN, against a LOCAL DEV BUILD of this branch (`npm run dev`, real browser,
+// real stylesheet), reading screen:
+//
+//     --k-rise-dur    .45s   (on the reading root)
+//     persona         0s / 0.12s / 0.24s / 0.36s, all 0.45s
+//     Bagan           0s / 0.12s / 0.24s,         all 0.45s
+//     reading         one distinct duration across all 27 nodes: ["0.45s"]
+//     HOME            0s / 0.08s / 0.14s / 0.22s / 0.3s, all 0.8s
+//
+// The block therefore ends at 360 + 450 = 810ms, against today's 940ms.
+//
+// **WHY LOCAL DEV AND NOT THE DEPLOY PREVIEW, which is what this header first
+// claimed:** the branch preview is behind Vercel Authentication and redirects to
+// a login, so it cannot be read from here. Local dev is a different BUILD but the
+// same cascade, which is the only thing these assertions are about. **The
+// production-build confirmation is Reyner's own walk on the preview**, and it is
+// not claimed here. Corrected rather than left standing, because a run cited
+// against the wrong artifact is the citation failure this repo has already paid
+// for once (`docs/qa/2026-09-03-submit-to-chart.md`, quoted as production).
 //
 // ── THE PROPOSITIONS ───────────────────────────────────────
 //   1. The persona block is 0/120/240/360ms.
