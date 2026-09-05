@@ -509,6 +509,33 @@ function Home({ form, setForm, error, onSubmit, busy }) {
                 below rather than newly ruled - Reyner approved that string on
                 2026-08-23 and rule 20 is one voice everywhere, so a second word
                 for the same moment would be a second register. */}
+            {/* ── NO DEAD-LOOKING BUTTON. Ruled by Reyner 2026-09-04. ──────────
+                A control the reader has tapped must never look inert for several
+                seconds. If a path's measured production latency exceeds ~1 second,
+                the UI carries an unmistakably active waiting state - a clear active
+                state with subtle motion and appropriate copy. Never a progress bar,
+                fake progress, a countdown, or a loading narrative. Katon does not
+                dramatize a technical operation.
+
+                CURRENTLY NOT TRIGGERED: tap -> chart is 240.5ms warm (`63d6488`,
+                `docs/qa/2026-09-05-region-move-both-legs.md`). NOT TRIGGERED IS NOT
+                REPEALED - the condition is false today, at that measurement, on that
+                commit. Anything that puts latency back over ~1s re-arms this, and the
+                likeliest candidate is a host migration that lands the service outside
+                Singapore.
+
+                WHY THE RULE LIVES HERE AND NOT ONLY IN THE LEDGER. It was ruled on
+                2026-09-04 and for a day it existed in no code file at all:
+                `grep -rnE "dead-looking|unmistakably active" docs/ components/ lib/`
+                returned three docs and NOTHING under `components/`. Worse, the
+                `docs/PROGRESS.md` mention claimed the rule already "stands at
+                components/Funnel.jsx's disabled={busy} site" - a false statement about
+                this file - and it sat inside a RETIRED-items row, so closing that row
+                would have taken the rule with it. The full statement's only other home
+                was `docs/prompts/T-arrival.md`, which is now marked non-live. Same
+                reasoning CLAUDE.md gives for the STAGE6_VERSION rule sitting on its own
+                constant: the person about to add a spinner here does not open the
+                ledger first. */}
             <Button type="submit" disabled={busy}>{busy ? 'Menyiapkan...' : 'Lihat Refleksiku'}</Button>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 12.5, color: 'var(--muted-warm)', marginTop: 14 }}>
               <Icon.lock size={13} /> Bersifat pribadi. Hanya untukmu.
