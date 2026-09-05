@@ -947,6 +947,21 @@ export function Reading({ reading, onReset, initialStage }) {
       {bars.length > 0 && (
         <Section eyebrow="Sebaran Unsur">
           {chart.element_presence_note && <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 18px', lineHeight: 1.55 }}>{chart.element_presence_note}</p></Reveal>}
+          {/* 40ms, AND IT STAYS 40ms. RULED BY REYNER 2026-09-05, after the persona
+              and Bagan blocks were raised to 120ms increments. Do NOT "fix" this to
+              match them - the inconsistency is the correct answer, not an oversight.
+              WHY: A STAGGER COMMUNICATES HIERARCHY. The persona block has one
+              (eyebrow, then name, then translation, then element) so it reads as a
+              sequence, and 120ms makes that sequence legible. THE FIVE ELEMENT BARS
+              HAVE NO ORDER AMONG THEM. A 120ms stagger would imply an order that
+              does not exist, and would stretch what is one group arriving into
+              600ms of it arriving one at a time.
+              WHY BAGAN WENT TO 120 AND THIS DOES NOT: Bagan sits directly under the
+              persona and reads as a continuation of the same arrival. Sebaran Unsur
+              is a separate section behind its own eyebrow. TWO CADENCES ON THIS PAGE
+              IS CORRECT.
+              These bars DO inherit `--k-rise-dur: .45s` from the reading root, which
+              is the ruled scope of that change. Only the increment is theirs. */}
           <div style={{ display: 'grid', gap: 16 }}>
             {bars.map((b, i) => (
               <Reveal key={b.label} delay={i * 0.04}>
