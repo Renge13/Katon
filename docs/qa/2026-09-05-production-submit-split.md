@@ -17,6 +17,107 @@ into the mirror POST is a real saving and it is not the cause. See THE PRICE OF 
 
 ---
 
+---
+
+## AMENDED SAME DAY - THE REGION IS ANSWERED, AND THE BASELINE IS RE-RUN CLEAN
+
+**APPEND-ONLY. No figure recorded below this section has been altered.** The body of this
+document stands exactly as it was committed in `880e7a9`; this section records what became known
+afterwards. Same practice as `2026-08-26-card-b-overflow.md`, which was amended by `eeef7f2`
+to add a corrected surface list without touching its measurements - and the reason the body is
+not edited in place is the index's own rule: an edited artifact is not evidence.
+
+### 1. THE SUPABASE REGION IS `ap-southeast-1`. THE BODY BELOW CALLS THIS "THE SINGLE
+### HIGHEST-VALUE UNKNOWN" AND THAT SENTENCE IS NOW SUPERSEDED.
+
+Confirmed by Reyner from the Supabase dashboard, 2026-09-05: **Primary Database, Southeast Asia
+(Singapore), `ap-southeast-1`, instance size `t4g.nano`.**
+
+**So `iad1` -> `ap-southeast-1` crosses the Pacific on EVERY database call, and the mirror POST
+makes three of them in series.** That is the measured 88.4% of the warm wait, and it is now a
+distance with a number attached rather than an inference from `x-vercel-id`.
+
+### 2. `sin1` IS `ap-southeast-1`. THE FIX COLLOCATES THEM EXACTLY.
+
+From Vercel's region list (`https://vercel.com/docs/regions`, retrieved 2026-09-05):
+
+| Region Code | Region Name | Reference Location |
+|---|---|---|
+| iad1 | us-east-1 | Washington, D.C., USA |
+| sin1 | **ap-southeast-1** | **Singapore** |
+
+The function's target region and the database's region are **the same AWS region**, not merely
+the same continent. `regions: ["sin1"]` therefore turns three trans-Pacific round trips into
+three intra-region ones.
+
+### 3. IT IS NOT PLAN-BLOCKED. HOBBY GETS A SINGLE REGION, AND ONE IS ALL THIS NEEDS.
+
+The concern was that per-function region selection might be Pro-only. It is not. From
+`https://vercel.com/docs/functions/configuring-functions/region` (retrieved 2026-09-05), the
+Limits table:
+
+| Plan | Function regions |
+|---|---|
+| **Hobby** | **Single region** |
+| Pro | 5 regions |
+| Enterprise | All regions |
+
+*"Additionally, Pro and Enterprise teams can deploy Vercel Functions to multiple regions."* The
+plan gate is on the COUNT, not on the capability, and `regions: ["sin1"]` is one region.
+
+**Two things that follow, and the second is a safety property worth knowing:**
+- `functionFailoverRegions` **is** restricted (Enterprise). Not needed here and not proposed.
+- *"Deploying to more regions than your plan allows causes the deployment to fail before the
+  build step."* So a plan-limit mistake fails loudly at build rather than shipping silently.
+
+**A SEPARATE COMMERCIAL FINDING IS NOT RECORDED HERE ON PURPOSE.** Hobby is restricted to
+non-commercial use and Katon takes payments; that is a product and compliance matter for
+`docs/PROGRESS.md`, not a latency measurement, and putting it in a QA artifact is how a
+commercial decision would come to be cited from the wrong document.
+
+### 4. THE BASELINE WAS RE-RUN ON A HEALTHY DATABASE. IT DID NOT MOVE.
+
+The original runs were taken while the Supabase project was flagged **Unhealthy**, which makes
+them suspect on their face. Status is now healthy; the warm runs were repeated with the same
+method and the same instrument control (with no submit, the delta reader found 0 new API entries
+against a 31-entry buffer).
+
+| warm median | committed body (Unhealthy) | re-run (healthy) | delta |
+|---|---|---|---|
+| season-check | 295.0 | **269.3** | -25.7 |
+| mirror POST | 2,481.5 | **2,507.4** | +25.9 |
+| tap -> chart | 2,807.1 | **2,776.5** | -30.6 |
+
+`n=6` warm both times. Every median moves by under 31ms, roughly 1% on the two that matter.
+
+**THIS IS A LOAD-BEARING NEGATIVE RESULT: THE "UNHEALTHY" FLAG WAS NOT THE CAUSE.** Had the
+figures collapsed on a healthy database, the whole geography argument would have been an artifact
+of a degraded instance and the ranking would have had to be redone. They did not move, so **the
+latency is structural** - distance and serialisation - and the fix ranking in THE PRICE OF STEP 2
+stands unchanged. The artifact stands as written.
+
+**A SECOND COLD SAMPLE, which the body records as deliberately not taken.** The re-run's first
+hit came after a ~50 minute idle and is cold by construction: **5,541.2ms** (season-check 1,529.5
+including 12.2 DNS + 98.1 connect, mirror 4,001.9). With the body's 5,022.6 that is cold n=2,
+both reproducing the recording's 4.9s. Note the non-zero DNS and connect here, where the body's
+cold run had 0/0 - that run followed a page load, so its connection was already open.
+
+**AND A NEW OBSERVATION THE MEDIAN HIDES: the warm mirror POST is BIMODAL.**
+
+```
+1,939.5   1,952.9   1,959.3   |   3,055.4   3,096.7   3,183.5
+        mean 1,950.6          |          mean 3,111.9
+```
+
+Three runs in each cluster, **~1,161ms apart, which is about the cost of one Supabase round
+trip** as this document measures it. That is consistent with a connection to Supabase being
+reused on some invocations and re-established on others, and it is a second, independent saving
+that the region change would partly mask rather than fix. **Stated as an observation with a
+hypothesis attached, not as a measurement of a cause** - nothing here isolates it, and STEP 2
+should spend one check on it before crediting the region change with the whole delta.
+
+---
+
 ## THE REF THIS WAS MEASURED ON, CONFIRMED RATHER THAN QUOTED
 
 ```
