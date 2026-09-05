@@ -806,15 +806,27 @@ export function Reading({ reading, onReset, initialStage }) {
     : null;
 
   return (
-    <div className="k-fade" style={{ ...wrap, ...themeVars(element) }}>
+    // `--k-rise-dur` SCOPED TO THE READING, 2026-09-05. Reyner ruled the persona
+    // stagger lengthened to 0/120/240/360ms because 0/60/100/140 "visually reads as
+    // one fade". At .k-rise's global .8s a 120ms increment still overlaps 85%, and
+    // it would push the block to 1.16s - against his own second constraint that the
+    // page must not feel slow. Shortening the reveal serves both halves: the
+    // sequence becomes legible AND the block finishes sooner than it did (810ms vs
+    // 940ms). The ratio is what matters - 120/450 = 0.27 against 60/800 = 0.075.
+    //
+    // IT IS SET HERE AND NOT ON .k-rise BECAUSE THE CLASS IS GLOBAL. Home
+    // (:418-516) and the season screen (:546-645) use it too and keep .8s by
+    // inheriting the fallback. Everything inside this root gets .45s, which
+    // includes the Sebaran Unsur bars - that is the ruled scope, not an oversight.
+    <div className="k-fade" style={{ ...wrap, ...themeVars(element), '--k-rise-dur': '.45s' }}>
       <button onClick={onReset} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '18px 0 0', fontFamily: 'var(--font-sans)' }}>← Ganti tanggal</button>
 
       {/* persona. RULE 23's BRACKET-ONCE: the Indonesian name leads and the English
           pair appears once, here, and never again in the body. */}
       <Reveal><Eyebrow>Refleksimu</Eyebrow></Reveal>
-      <Reveal delay={0.06}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 44, lineHeight: 1, color: el.deep, margin: '16px 0 0' }}>{arch.name_id}</div></Reveal>
-      {arch.name_en && <Reveal delay={0.1}><p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--kayu)', margin: '12px 0 0' }}>{arch.name_en}</p></Reveal>}
-      <Reveal delay={0.14}>
+      <Reveal delay={0.12}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 44, lineHeight: 1, color: el.deep, margin: '16px 0 0' }}>{arch.name_id}</div></Reveal>
+      {arch.name_en && <Reveal delay={0.24}><p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--kayu)', margin: '12px 0 0' }}>{arch.name_en}</p></Reveal>}
+      <Reveal delay={0.36}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--tinta-soft)' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: el.mid }} /> {element}{chart?.day_master?.stem ? ` · ${chart.day_master.stem}` : ''}
         </div>
@@ -901,7 +913,9 @@ export function Reading({ reading, onReset, initialStage }) {
       {chart?.pillars?.length > 0 && (
         <Section eyebrow="Bagan Kelahiran">
           <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 16px', lineHeight: 1.55 }}>Empat lapisan energi dari tanggal lahirmu. Yang di tengah adalah intinya.</p></Reveal>
-          <Reveal delay={0.06}>
+          {/* 0/120/240 to match the persona block above. Two different stagger
+              rhythms inside one scroll is what this alignment prevents. */}
+          <Reveal delay={0.12}>
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${chart.pillars.length},1fr)`, gap: 9 }}>
               {chart.pillars.map((p) => (
                 <PillarCell key={p.position} label={p.palace} stem={p.stem} branch={p.branch}
@@ -916,7 +930,7 @@ export function Reading({ reading, onReset, initialStage }) {
               4/5 and 3/5 against Joey's own printed values, and in a block whose only
               job is to be checkable a wrong value is worse than a missing one. */}
           {chart.conception_pillar && (
-            <Reveal delay={0.12} style={{ marginTop: 14 }}>
+            <Reveal delay={0.24} style={{ marginTop: 14 }}>
               <div style={{ textAlign: 'center', border: '1px solid var(--divider)', borderRadius: 12, padding: '10px 4px', background: 'var(--kertas-2)', maxWidth: 180, margin: '0 auto' }}>
                 <div style={{ fontSize: 9.5, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>{chart.conception_pillar.label}</div>
                 <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--tinta)', margin: '5px 0 2px' }}>{chart.conception_pillar.hanzi}</div>
