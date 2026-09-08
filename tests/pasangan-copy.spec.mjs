@@ -133,11 +133,27 @@ test('THE FOUR PROMISES ARE STILL PROMISES THE CODE KEEPS', () => {
   // by their claims, not by their wording, so a rephrase does not fail this and a
   // behaviour change does.
   //
-  // `form_email_help` and `link_keep` say nothing is sent to the email. Nothing
-  // sends: there is no mailer in the repo at all.
-  assert.match(PASANGAN_COPY.form_email_help, /[Tt]idak ada yang dikirim/u);
-  assert.match(PASANGAN_COPY.link_keep, /tidak ada yang dikirim ke email/u);
-  assert.match(SITE_COPY.privasi.privasi_email, /tidak mengirim apa pun/u);
+  // ── PINNED ON THE CLAIM, NOT THE PHRASING ─────────────────
+  // The first version matched Reyner's DRAFT wording literally - "tidak ada yang
+  // dikirim" - and his ruling says the same thing differently ("Tidak ada email
+  // yang dikirim", "tanpa kiriman email"). It failed on a reword, which is
+  // exactly what this test's own comment said it must not do. A negation plus a
+  // send-verb is the proposition; the sentence around it is his.
+  //
+  // `ngirim` IS IN THE PATTERN BECAUSE INDONESIAN ASSIMILATES THE STEM. `meN-` +
+  // `kirim` is `mengirim`, which does not contain the substring `kirim` - so a
+  // pattern matching only `kirim` reads "Kami tidak pernah mengirim pesan" as
+  // making no promise at all. Caught by running it against Reyner's ruled string.
+  const promisesNothingSent = (s) => /\b(tidak|tanpa)\b/iu.test(s) && /(kirim|ngirim)/iu.test(s);
+
+  for (const [name, value] of [
+    ['form_email_help', PASANGAN_COPY.form_email_help],
+    ['link_keep', PASANGAN_COPY.link_keep],
+    ['privasi_email', SITE_COPY.privasi.privasi_email],
+  ]) {
+    assert.ok(promisesNothingSent(value), `${name} must still promise nothing is sent: "${value}"`);
+  }
+  // And the promise is true: there is no mailer in the repo at all.
 
   // `privasi_second_person` promises B's data is deleted with the reading.
   // **THAT ONE IS NOT KEPT TODAY** - there is no deletion code for any table, and
