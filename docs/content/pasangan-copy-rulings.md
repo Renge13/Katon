@@ -7,8 +7,12 @@ APPLIES TO: 4 SITE_COPY.home_*, 22 PASANGAN_COPY, 2 SITE_COPY.privasi.* = 28 slo
 NO SCRIPT APPLIES THIS: substitute by hand, verbatim; npm run check:copy and the verbatim verifier
 from #105 are the proof.
 
-ONE AMENDMENT (rule 20, keyboard characters only): link_keep as ruled carried an em-dash. Replaced by
-a colon. Reyner to confirm; every other string is byte-for-byte his.
+TWO AMENDMENTS TO link_keep, AND THE SECOND CLOSES THE FIRST.
+  1. COWORK, on landing (rule 20, keyboard characters only): as ruled it carried an em-dash, replaced
+     by a colon, flagged for Reyner to confirm.
+  2. REYNER, 2026-09-08, confirming and amending: the colon becomes a COMMA. His wording is now the
+     row below verbatim, and nothing in this file is awaiting his confirmation any more.
+Every other string is byte-for-byte his and always was.
 
 SWEEP: compiled as lib/validate/style.js:63, 70 patterns. 0 hits after the amendment (the em-dash was
 the only finding), 0 non-keyboard characters. Falsifiers 4/4 (cenderung, selaras, sangat cocok,
@@ -45,7 +49,7 @@ four change in one commit.
 | PASANGAN_COPY | `pending_title` | `Menunggu Konfirmasi Pembayaran` |
 | PASANGAN_COPY | `pending_body` | `Halaman ini otomatis diperbarui setelah pembayaran diterima. Tidak perlu memuat ulang.` |
 | PASANGAN_COPY | `paid_title` | `Bacaan Kalian Sudah Siap` |
-| PASANGAN_COPY | `link_keep` | `Simpan tautan halaman ini. Ini satu-satunya akses ke bacaan kalian: tanpa akun dan tanpa kiriman email.` |
+| PASANGAN_COPY | `link_keep` | `Simpan tautan halaman ini. Ini satu-satunya akses ke bacaan kalian, tanpa akun dan tanpa kiriman email.` |
 | PASANGAN_COPY | `unpaid_resume` | `Bacaan ini belum dibayar. Selesaikan pembayaran untuk membukanya.` |
 | PASANGAN_COPY | `report_badge_eyebrow` | `Pola Hubungan` |
 | PASANGAN_COPY | `report_quadrant_eyebrow` | `Tarikan & Ritme` |

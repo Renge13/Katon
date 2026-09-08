@@ -888,7 +888,24 @@ artifacts:
   reading, the card or the paid path is local and then production AFTER the merge, with no stage in
   between.** A verification plan that says "check it on the preview" cannot run.
 
-## THE DELETION PATH DOES NOT REACH A PAIR - OPEN, AND OWNED BY REYNER, 2026-09-08
+## ~~THE DELETION PATH DOES NOT REACH A PAIR~~ CLOSED 2026-09-08 by `docs/ops/deletion.md`
+
+**The procedure now covers `pair` rows, and that is what makes `privasi_second_person` true** - the
+ruled string promising person B's birth data is deleted with the reading. Identification is the
+`/kompatibilitas/<id>` link OR the stored email, because a front-door buyer has no reading link at
+all; a birth date is explicitly NOT an identifier, since two people born the same day both match and
+the asker has proved she is neither.
+
+Two traps the SQL had to respect and both are written down: `funnel_event` rows are keyed by the PAIR
+id (`recordEvent` is called with it at checkout) and no cascade removes them; and
+`pair.a_reading_id` is a foreign key, so deleting a reading a pair points at is refused until the
+pair goes first or the reference is nulled.
+
+**Still true, and not a defect this closes:** there is no deletion CODE for any table, by design -
+it is a manual procedure with a 14-working-day commitment. What was broken was that the procedure did
+not know the `pair` table existed.
+
+## SUPERSEDED - THE DELETION PATH DOES NOT REACH A PAIR - OPEN, AND OWNED BY REYNER, 2026-09-08
 
 **Asked and answered on 2026-09-08. Recorded here because it is a DISCLOSURE defect, not a bug: the
 code is doing what it always did and the page now describes it wrongly.**
