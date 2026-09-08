@@ -23,7 +23,8 @@
 
 import { useEffect, useState } from 'react';
 import { BirthFields, FieldLabel } from './BirthFields.jsx';
-import { SeasonGate, readableError } from './Funnel.jsx';
+import { SeasonGate } from './Funnel.jsx';
+import { readableError } from '../lib/site/readableError.js';
 import { Reveal, Eyebrow, Button, Icon } from './kit.jsx';
 import { PASANGAN_COPY } from '../lib/site/copy.js';
 import { compatPairRoute } from '../lib/site/routes.js';

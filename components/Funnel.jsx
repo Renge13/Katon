@@ -72,6 +72,12 @@ import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, a
 import { priceFor } from '../lib/pricing.js';
 import { SITE_COPY, UPCOMING_COPY } from '../lib/site/copy.js';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
+// MOVED OUT 2026-09-08 and re-exported. It is a pure function over an error
+// body, and living in a component made it unreachable from any test running
+// under the react-server condition - React s server build exports no hooks, so
+// importing this file pulls in a tree that cannot load. Callers are unchanged.
+export { readableError } from '../lib/site/readableError.js';
+import { readableError } from '../lib/site/readableError.js';
 import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFields.jsx';
 import { ProseBlocks } from './ProseBlocks.jsx';
 import { formatIdr } from '../lib/site/format.js';
@@ -391,23 +397,6 @@ export default function Funnel() {
   return <Reading reading={reading} onReset={reset} />;
 }
 
-/**
- * EXPORTED 2026-09-08 so the compat surface reads the same sentences.
- *
- * Both strings are Reyner's and both are about the same two moments - a
- * recoverable rate limit, and everything else. Rule 20 is one voice everywhere,
- * so a second wording for "something went wrong" on a second page would be a
- * second register, and the compat page ships every OTHER string as a PENDING()
- * slot precisely to avoid inventing one.
- */
-export function readableError(res) {
-  // The mirror route's 429 is the one refusal worth naming: it is recoverable by
-  // waiting, and "something went wrong" would send her to retry immediately.
-  if (res?.error === 'rate_limited' || res?.error === 'session' || res?.error === 'ip') {
-    return 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.';
-  }
-  return 'Ada yang salah. Coba lagi sebentar.';
-}
 
 /* ---------------- shared bits ---------------- */
 function Wordmark({ light }) {

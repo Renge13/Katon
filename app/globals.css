@@ -97,11 +97,26 @@ body {
 button { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled):active { transform: translateY(1px); }
 
-/* ── Form controls (birth date/time inputs, selects, tel inputs) ── */
+/* ── Form controls (birth date/time inputs, selects, text/email inputs) ── */
+/* THIS LIST ENUMERATES ITS SUBJECTS BY NAME, and on 2026-09-08 that made it
+   blind to the next one: the compat page's email field rendered as a bare
+   browser input beside three styled ones, because `email` had never been a type
+   this site used. Reyner found it on a phone.
+
+   Same shape as COWORK-BRIEF row 47 (a gate enumerating its subjects is blind to
+   the next subject), and the inversion that fixed THAT is not safe here: an
+   `input:not([type=checkbox])...` selector would also capture the Upcoming
+   contact field, whose deliberately smaller transparent styling is inline and
+   would collide with `width: 100%` inside its flex row.
+
+   So the list stays, and the DISCOVERY moves to a test:
+   tests/form-controls.spec.mjs scans every `<input>` in components/ and app/ and
+   fails if a rendered type is missing from this selector. */
 select,
 input[type="date"],
 input[type="time"],
 input[type="text"],
+input[type="email"],
 input[type="tel"],
 input[type="number"] {
   width: 100%;

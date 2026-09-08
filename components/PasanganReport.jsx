@@ -22,7 +22,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { ProseBlocks } from './ProseBlocks.jsx';
-import { readableError } from './Funnel.jsx';
+import { readableError } from '../lib/site/readableError.js';
 import { Reveal, Eyebrow, Button, Icon } from './kit.jsx';
 import { PASANGAN_COPY } from '../lib/site/copy.js';
 import { formatIdr } from '../lib/site/format.js';
