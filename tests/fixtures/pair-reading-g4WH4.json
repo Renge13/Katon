@@ -1,0 +1,79 @@
+{
+ "status": "paid",
+ "served_from": "cache",
+ "facts": {
+  "a": {
+   "day_master": "丙",
+   "element": "Api",
+   "archetype_key": "matahari",
+   "archetype_name_id": "Matahari",
+   "archetype_name_en": "The Sun",
+   "main_profile": "正財",
+   "main_profile_display": "Aspek Pengelola",
+   "main_profile_bracket": "Direct Wealth",
+   "hour_known": true
+  },
+  "b": {
+   "day_master": "己",
+   "element": "Tanah",
+   "archetype_key": "taman",
+   "archetype_name_id": "Taman",
+   "archetype_name_en": "The Garden",
+   "main_profile": "食神",
+   "main_profile_display": "Aspek Perajin",
+   "main_profile_bracket": "Eating God",
+   "hour_known": true
+  },
+  "pattern": "contrasting",
+  "quadrant": "q4"
+ },
+ "reading": {
+  "blocks": [
+   {
+    "text": "Bacaan ini tentang kamu, Matahari, dan Taman.",
+    "heading": "Pertemuan Matahari dan Taman",
+    "fact_ids": [
+     "p0_opening"
+    ]
+   },
+   {
+    "text": "Unsur api milikmu menghidupi unsur tanah miliknya. Ada dinamika pengayom dan yang diayomi dengan alur yang konsisten.",
+    "heading": "Alur Energi yang Mengalir",
+    "fact_ids": [
+     "p1_stem_relation"
+    ]
+   },
+   {
+    "text": "Terjadi gesekan halus antar kursi pasangan. Gesekan ini bekerja perlahan lewat detail kecil yang menumpuk, bukan lewat konflik besar. Ini bukan penentu kegagalan. Gesekan pada kursi pasangan menandakan hubungan yang membutuhkan perhatian ekstra dan kesadaran penuh. Salah satu pilar di bagan dia terhubung langsung dengan kursi pasanganmu. Elemen hidupnya memengaruhi ranah terdekatmu.",
+    "heading": "Navigasi Kursi Pasangan",
+    "fact_ids": [
+     "p2_day_pair",
+     "p2_reframe",
+     "p2_palace_frame"
+    ]
+   },
+   {
+    "text": "Dia membawa elemen air yang tidak dominan di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan.",
+    "heading": "Saling Melengkapi Kebutuhan",
+    "fact_ids": [
+     "p3_supply"
+    ]
+   },
+   {
+    "text": "Karakter dominan kalian berasal dari kelompok berbeda. Kamu membawa Aspek Pengelola, sementara dia membawa Aspek Perajin. Cara pandang yang berbeda bisa memperluas perspektif jika dikomunikasikan terbuka.",
+    "heading": "Pola Kontras",
+    "fact_ids": [
+     "p4_temperament"
+    ]
+   },
+   {
+    "text": "Tarikan alami minim dan ritme harian membutuhkan penyesuaian. Kelangsungan hubungan murni digerakkan oleh komitmen dan keputusan sadar.",
+    "heading": "Tarikan Tenang, Ritme Bergesek",
+    "fact_ids": [
+     "p5_pull_fit"
+    ]
+   }
+  ],
+  "penutup": "Hubungan ini meminta kamu untuk lebih sabar dalam menavigasi detail harian yang sering bergesekan. Dia diminta untuk lebih terbuka dalam menerima pengaruh energimu agar ritme kalian tidak terus menerus terasa asing."
+ }
+}

@@ -17,6 +17,7 @@
 
 import { useMemo } from 'react';
 import { Reveal, Eyebrow } from './kit.jsx';
+import { splitParagraphs } from '../lib/render/paragraphs.js';
 
 /**
  * The reveal cadence, MOVED HERE UNCHANGED with the renderer it governs.
@@ -51,6 +52,28 @@ function Section({ eyebrow, children, style }) {
 }
 
 /**
+ * A block's paragraphs, however the caller shaped it.
+ *
+ * ── THIS IS THE BLANK-REPORT FIX, 2026-09-08 ───────────────
+ * **A paying customer received six headings and no prose.** This component read
+ * `block.paragraphs`; the render contract (`lib/render/schema.js`) is
+ * `{fact_ids, heading, text}`, and `lib/pair/serveReading.js` sends exactly
+ * that. The MIRROR happens to work because `lib/mirror/view.js:206` runs
+ * `splitParagraphs` on its way out - so the adapter existed, on one of the two
+ * paths, and the component believed every caller had already applied it.
+ *
+ * THE ADAPTER MOVES HERE rather than being copied in front of the second caller,
+ * which is the choice the prompt asked for and the right one: a second copy is a
+ * second thing to forget on the third caller. `paragraphs` is still honoured
+ * when present, so the mirror's payload - which carries no `text` at all - is
+ * untouched and its floor-rate fixtures cannot move.
+ */
+function paragraphsOf(block) {
+  if (Array.isArray(block.paragraphs)) return block.paragraphs;
+  return splitParagraphs(block.text || '');
+}
+
+/**
  * @param {Object} reading   `{ blocks, penutup }` as the serve payload carries it
  * @param {Function} [labelFor] block => ({ eyebrow, name }) | null. An extra
  *   label ABOVE the block's own heading. The compat report uses it for the P4
@@ -66,7 +89,7 @@ export function ProseBlocks({ reading, labelFor = null }) {
   const { offsets, total } = useMemo(() => {
     const out = [];
     let n = 0;
-    for (const b of (reading.blocks || [])) { out.push(n); n += (b.paragraphs || []).length; }
+    for (const b of (reading.blocks || [])) { out.push(n); n += paragraphsOf(b).length; }
     return { offsets: out, total: n + (reading.penutup ? 1 : 0) };
   }, [reading.blocks, reading.penutup]);
 
@@ -84,7 +107,7 @@ export function ProseBlocks({ reading, labelFor = null }) {
                 </div>
               </Reveal>
             )}
-            {(b.paragraphs || []).map((p, j) => (
+            {paragraphsOf(b).map((p, j) => (
               <div key={j} className="k-prose" style={{ animationDelay: `${proseDelayMs(offsets[i] + j, total)}ms` }}>
                 <Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para>
               </div>

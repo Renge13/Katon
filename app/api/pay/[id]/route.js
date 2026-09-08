@@ -6,7 +6,7 @@ import { createQrisInvoice } from '@/lib/xendit';
 import { priceFor, isSellable, DEFAULT_SKU, SELLABLE_SKUS } from '@/lib/pricing';
 import { recordEvent } from '@/lib/analytics/events';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
-import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
+import { paymentFenceReason, devBypassAllowed, paymentsProvider } from '@/lib/paymentFence';
 import { readingUrl, pairUrl } from '@/lib/site/baseUrl';
 
 export const runtime = 'nodejs';
@@ -76,8 +76,15 @@ const INVOICE_DESCRIPTION = {
 // so the request body cannot influence what is charged or unlock a product that
 // has no fulfillment yet.
 export async function POST(request, { params }) {
-  // Fail-closed: in production the payment path must be fully configured, or refuse.
+  // ── SALES ARE CLOSED IN PRODUCTION, RULED 2026-09-08 ──────
+  // Katon is exiting Xendit. `payment_closed` is a DELIBERATE state and gets its
+  // own body rather than being dressed as a misconfiguration: the client renders
+  // the sales-closed page from it, and a reader must not be told to try again.
+  //
+  // It is checked before everything, including the body parse, because there is
+  // no request shape that makes a closed shop open.
   const fence = paymentFenceReason();
+  if (fence === 'payment_closed') return notConfigured('payment_closed');
   if (fence) return notConfigured(`payment_not_configured:${fence}`);
 
   const { id } = await params;
@@ -154,6 +161,23 @@ export async function POST(request, { params }) {
     // FAILURE goes to the same reading with NO marker, so the paywall renders
     // normally and the price and the button are already on screen. That is the
     // retry; a failed payment needs no separate state.
+    // ── MOCK: NO PROVIDER, NO MONEY, NO NETWORK ───────────────
+    // Preview and local only - `paymentsProvider()` returns 'closed' for mock
+    // whenever VERCEL_ENV=production, so this branch cannot exist there.
+    //
+    // It returns a LOCAL url in the same field the real adapter uses, so every
+    // caller and every redirect works unchanged: the client opens it, and the
+    // page it lands on flips `paid` through `POST /api/mock-pay/<id>`, which
+    // goes through the SAME `settlePair` / `markReadingPaid` door the verified
+    // webhook uses. Nothing gets a second way to become paid.
+    if (paymentsProvider() === 'mock') {
+      const mockUrl = isCompat ? pairUrl(id, '?bayar=mock') : readingUrl(id, '?bayar=mock');
+      if (isCompat) await setPairInvoice(id, { invoiceId: `mock_${id}`, invoiceUrl: mockUrl, sku, email });
+      else await setInvoice(id, { invoiceId: `mock_${id}`, waNumber, sku });
+      await recordEvent(id, 'checkout_started', { sku, provider: 'mock' });
+      return json({ ok: true, pending: true, invoiceUrl: mockUrl, mock: true });
+    }
+
     const { invoiceId, invoiceUrl } = await createQrisInvoice({
       readingId: id,
       amount: priceFor(sku),

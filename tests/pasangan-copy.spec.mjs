@@ -11,9 +11,30 @@
 // which is the whole reason the rulings-file convention exists.
 //
 // ── THE COUNT IS ENUMERATED, NOT TRUSTED ───────────────────
-// The worksheet's own header claimed "4 + 21 + 2 ... 27 distinct slots" against
-// a 28-row table. Corrected on landing, and the arithmetic is asserted here so
-// the next amendment cannot reintroduce it.
+// A worksheet header once claimed "4 + 21 + 2 ... 27 distinct slots" against a
+// 28-row table. The split is enumerated here so the next amendment cannot
+// reintroduce it. The header's PROSE is not asserted - it is prose, it gets
+// rewritten, and pinning its wording made this file fail on a reword rather than
+// on a defect.
+//
+// ── IT HAS TWO STATES, BECAUSE THE PROCESS DOES ────────────
+// The #28 ruling puts a rulings file on main ALONE, before the PR that applies
+// it. So there is a documented window where the file is landed and the bank
+// still holds the previous values, and a verifier that cannot represent that
+// window mis-models its own process: it goes red on a correct intermediate state
+// and trains people to ignore it.
+//
+// The file's own STATUS line says which state it is in, and the APPLYING commit
+// flips it. That is not a flag for silencing this test:
+//
+//   RULED    every row must be UNAPPLIED. A majority already matching means a
+//            PARTIAL application - which is the real danger here, and is what a
+//            transcription slip or a half-finished pass looks like.
+//   APPLIED  every row must match BYTE FOR BYTE.
+//
+// Every row is read in both states. The previous rulings file used the same
+// convention (STATUS: APPLIED-AS-DRAFTED), so this reads a marker the repo
+// already keeps rather than inventing one.
 // ============================================================
 
 import assert from 'node:assert/strict';
@@ -44,6 +65,13 @@ const bankOf = {
   PASANGAN_COPY: () => PASANGAN_COPY,
 };
 
+/** 'RULED' (landed, not yet applied) or 'APPLIED'. Declared by the file itself. */
+function status() {
+  const m = /^STATUS:\s*([A-Z-]+)/mu.exec(MD);
+  assert.ok(m, 'the rulings file declares no STATUS');
+  return m[1];
+}
+
 test('THE WORKSHEET IS 28 ROWS AND 28 DISTINCT SLOTS', () => {
   const rows = worksheet();
   assert.equal(rows.length, 28, 'the table has 28 rows');
@@ -53,18 +81,40 @@ test('THE WORKSHEET IS 28 ROWS AND 28 DISTINCT SLOTS', () => {
   for (const r of rows) byBank[r.bank] = (byBank[r.bank] || 0) + 1;
   assert.deepEqual(byBank, { SITE_COPY: 4, PASANGAN_COPY: 22, 'SITE_COPY.privasi': 2 });
 
-  // The header states the same numbers. It did not, once.
-  assert.match(MD, /22 PASANGAN_COPY slots/u);
-  assert.match(MD, /28 DISTINCT SLOTS/u);
+  // The file carries a SECOND table - Y-2 chrome, two columns, no bank - which is
+  // deliberately not part of the 28. Asserted so a future parser change that
+  // starts swallowing it fails with a reason instead of quietly counting 40.
+  assert.match(MD, /## Y-2 strings/u);
+  assert.equal(rows.some((r) => r.slot.startsWith('sales_closed')), false,
+    'the Y-2 table must not be parsed as one of the 28');
 });
 
-test('EVERY ROW IS APPLIED, BYTE FOR BYTE', () => {
-  const wrong = [];
+test('EVERY ROW MATCHES THE STATE THE FILE DECLARES', () => {
+  const state = status();
+  assert.ok(['RULED', 'APPLIED'].includes(state), `unknown STATUS "${state}"`);
+
+  const applied = [];
+  const unapplied = [];
   for (const { bank, slot, value } of worksheet()) {
     const live = bankOf[bank]()[slot];
-    if (live !== value) wrong.push(`${bank}.${slot}\n    worksheet: ${value}\n    live:      ${live}`);
+    (live === value ? applied : unapplied).push(
+      `${bank}.${slot}\n    worksheet: ${value}\n    live:      ${live}`,
+    );
   }
-  assert.deepEqual(wrong, [], `not verbatim:\n  ${wrong.join('\n  ')}`);
+
+  if (state === 'APPLIED') {
+    assert.deepEqual(unapplied, [],
+      `STATUS is APPLIED but these are not verbatim:\n  ${unapplied.join('\n  ')}`);
+    return;
+  }
+
+  // RULED: landed, not yet applied. A MAJORITY already matching means the pass
+  // has begun and stopped - the partial state a hand substitution leaves and the
+  // one nobody would notice. A handful of coincidental matches is expected and
+  // fine: two slots are identical between the drafts and the ruling.
+  assert.ok(applied.length < unapplied.length,
+    `STATUS is RULED but ${applied.length} of 28 rows already match, which is a `
+    + 'partial application. Finish it and flip STATUS to APPLIED in the same commit.');
 });
 
 test('NOT ONE SENTINEL SURVIVES IN EITHER BANK', () => {

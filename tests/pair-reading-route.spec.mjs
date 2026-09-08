@@ -30,6 +30,7 @@ import { test, beforeEach, afterEach } from 'node:test';
 import { servePairReading } from '../lib/pair/serveReading.js';
 import { createPair, getPair, markPairPaid } from '../lib/pairStore.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
+import { GLOSSARY } from '../lib/semantic/glossary.js';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { validateRendering } from '../lib/validate/index.js';
@@ -261,4 +262,37 @@ test('NO PROVIDER IS CONFIGURED HERE, and that is why commit 3 is BLOCKED', () =
   delete process.env.GEMINI_API_KEY;
   assert.equal(geminiConfigured(), false,
     'the TEST env never carries a real key; commit 3 loads .env.local explicitly');
+});
+// ── NO RAW ENGINE KEY LEAVES THE SERVER, 2026-09-08 ────────
+// Reyner paid Rp 39.000 and the report printed `contrasting` and `q4` where the
+// pattern badge and the quadrant name belong. The payload sent
+// `semanticJson.core.pattern` / `.quadrant` and the component believed they were
+// glossary names.
+
+test('facts.pattern AND facts.quadrant ARE GLOSSARY NAMES', async () => {
+  const id = `spec-names-${Date.now()}`;
+  await createPair({
+    id,
+    a_reading_id: null,
+    a_birth_date: '1989-09-13', a_birth_time: '09:00', a_gender: null, a_term_side: null,
+    b_birth_date: '1990-06-07', b_birth_time: '12:00', b_gender: null, b_term_side: null,
+    sku: 'compat',
+  });
+  await markPairPaid(id, new Date().toISOString());
+
+  const res = await servePairReading(request(), id);
+  const out = await res.json();
+  assert.equal(out.status, 'paid');
+
+  // THE ASSERTION THE PROMPT ASKED FOR, and it is a negative over the whole
+  // object rather than a check on two fields: any future field that leaks a key
+  // fails here too.
+  const serialised = JSON.stringify(out.facts);
+  assert.equal(/"(matching|related|contrasting|q[1-4])"/u.test(serialised), false,
+    `a raw engine key is in facts: ${serialised.slice(0, 200)}`);
+
+  // And they ARE the glossary's, not merely not-keys.
+  const names = Object.values(GLOSSARY.kompatibilitas).map((c) => c.name_id).filter(Boolean);
+  assert.ok(names.includes(out.facts.pattern), `pattern "${out.facts.pattern}" is a ruled name`);
+  assert.ok(names.includes(out.facts.quadrant), `quadrant "${out.facts.quadrant}" is a ruled name`);
 });
