@@ -42,8 +42,9 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { UPCOMING_COPY, COMPAT_COPY, PENDING } from '../lib/site/copy.js';
-import GLOSSARY from '../docs/content/glossary.json' with { type: 'json' };
+import { UPCOMING_COPY, COMPAT_COPY, PENDING, COPY_BANKS } from '../lib/site/copy.js';
+import * as copyModule from '../lib/site/copy.js';
+import { UNRULED_SOURCES } from '../lib/site/unruledScan.js';
 import { scanUnruled, SENTINEL } from '../scripts/check-unruled-copy.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -204,12 +205,60 @@ function pendingByRawSearch() {
   // The replacer below is written here rather than imported, so this stays an
   // independent count. It shares the RULE with scanUnruled - skip `_` keys - and
   // none of its code, which is the property this function exists for.
+  // ── IT NO LONGER NAMES THE BANKS EITHER, 2026-09-08 ──────
+  // This list was widened twice for exactly the reason the GATE's list was, and
+  // an oracle that has to be remembered is the same defect as a gate that has to
+  // be remembered. It now enumerates `UNRULED_SOURCES` - the same registry the
+  // gate reads - so the two cannot disagree about WHICH banks exist. They still
+  // disagree about HOW to count, which is the whole point of the oracle: the
+  // gate walks with `scanUnruled`, this serialises and substring-searches, and
+  // they share no code.
   const stripped = JSON.stringify(
-    [UPCOMING_COPY, COMPAT_COPY, GLOSSARY.kompatibilitas],
+    Object.values(UNRULED_SOURCES),
     (key, value) => (key.startsWith('_') ? undefined : value),
   );
   return stripped.split(SENTINEL).length - 1;
 }
+
+
+test('EVERY *_COPY EXPORT IS REGISTERED, so the next bank cannot be invisible', () => {
+  // ── THE ASSERTION THAT MAKES THE INVERSION STRUCTURAL ──────
+  // Without it, `COPY_BANKS` is just a fourth hand-written list that happens to
+  // live in a different file. This reflects over the module: anything exported
+  // as `*_COPY` must be in the registry, so a bank added without registering it
+  // fails here rather than being discovered by a placeholder reaching production.
+  //
+  // Three times in three days a new bank was invisible to the gate
+  // (COMPAT_COPY 09-07, GLOSSARY.kompatibilitas 09-08, and the gate itself never
+  // running on Vercel before that - COWORK-BRIEF row 46). This is the check that
+  // ends the sequence.
+  const exported = Object.keys(copyModule).filter((k) => k.endsWith('_COPY'));
+  assert.ok(exported.length >= 3, `found ${exported.length} copy banks`);
+
+  for (const name of exported) {
+    assert.ok(name in COPY_BANKS, `${name} is exported but never register()ed`);
+    assert.equal(COPY_BANKS[name], copyModule[name], `${name} registered the same object`);
+  }
+
+  // And nothing is registered that is not a bank.
+  for (const name of Object.keys(COPY_BANKS)) {
+    assert.ok(exported.includes(name), `${name} is registered but not exported as a bank`);
+  }
+
+  // The gate reads the registry plus the glossary, and nothing else.
+  assert.deepEqual(
+    Object.keys(UNRULED_SOURCES).sort(),
+    [...exported, 'GLOSSARY.kompatibilitas'].sort(),
+  );
+});
+
+test('SITE_COPY IS SCANNED NOW, and it was not before', () => {
+  // A consequence worth asserting rather than discovering: the old hand list
+  // never included the largest bank in the repo. It carries no sentinel today,
+  // and if one is ever added to it the gate now refuses the build.
+  assert.ok('SITE_COPY' in UNRULED_SOURCES);
+  assert.ok(Object.keys(UNRULED_SOURCES).length >= 4);
+});
 
 test('strict mode refuses exactly when placeholders remain', () => {
   const pending = { length: pendingByRawSearch() };
