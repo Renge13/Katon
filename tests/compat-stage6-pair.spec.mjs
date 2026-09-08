@@ -47,10 +47,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // The repo convention: a change to what Stage 6 ACCEPTS OR REJECTS bumps this
   // in the same commit. Two rejecting checks were added, so it moves once - not
   // twice, and not zero times.
-  // 1.22.0: the five ruled verdict patterns (Reyner, 2026-09-08). They FLAG and
-  // reject nothing, but a blocklist pattern ADDED is a version bump either way -
-  // the constant answers "which gate saw this reading", not "which one failed it".
-  assert.equal(STAGE6_VERSION, '1.22.0');
+  // 1.23.0: the tension_collapse negation carve-out (Reyner, 2026-09-08).
+  assert.equal(STAGE6_VERSION, '1.23.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
@@ -556,4 +554,117 @@ test('A BLOCK CARRYING BOTH KEYS IS SCANNED: tension wins', () => {
       : b)),
   };
   assert.equal(tension(merged, sj).length, 1, 'the permitted key does not launder the tension');
+});
+
+// ============================================================
+// THE NEGATION CARVE-OUT (Reyner, 2026-09-08, third ruling)
+// ============================================================
+// `tidak `, `belum ` or `kurang ` IMMEDIATELY before a tension_collapse token
+// exempts the match. hedge_construction's carve-out shape with the direction
+// reversed: its negation FOLLOWS the token (`bukan X tapi Y`, a lookahead), these
+// PRECEDE it (`tidak selaras`, a lookbehind).
+// ============================================================
+
+/** RENDER 12 x 6's penutup, verbatim from docs/qa/2026-09-08-compat-penutup-cause.md. */
+const RENDER_12x6_PENUTUP = 'Hubungan ini meminta kamu untuk melatih kesabaran saat ritme '
+  + 'harian kalian tidak selaras. Bagi dia, hubungan ini meminta keterbukaan untuk '
+  + 'menerima dorongan energi yang kamu berikan agar langkahnya lebih mantap.';
+
+test('RENDER 12x6 PASSES, and it is the sentence the ruling was made on', () => {
+  // ── THE RED THIS COMMIT WAS WRITTEN AGAINST ────────────────
+  // `tidak selaras` is "NOT in harmony". The sentence names the friction and asks
+  // for patience with it - the opposite of a tension collapse, and arguably the
+  // check's own purpose stated out loud. It rejected because `\bselaras\b` bans a
+  // TOKEN where the defect is a CONSTRUCTION.
+  //
+  // Gated through the whole of `validateRendering` on a real pair, not just the
+  // regex, because the penutup's scope is itself conditional (it is scanned when
+  // the reading carries a tension) and 12x6 does carry one - so this asserts the
+  // carve-out where it actually has to work.
+  const sj = buildPairSemantic(c('1990-06-07', '12:00'), c('1984-04-21', '18:45'));
+  assert.ok(sj.facts.flatMap(variantKeysFor).some((k) => TENSION.has(k)),
+    'precondition: 12x6 carries a tension, so its penutup IS scanned');
+
+  const rendered = { ...renderingFor(sj), penutup: RENDER_12x6_PENUTUP };
+  assert.deepEqual(tension(rendered, sj), [], 'a named friction is not a collapsed one');
+});
+
+test('THE COLLAPSE THE CHECK EXISTS FOR STILL REJECTS', () => {
+  // Run 1's own sentence, quoted in the `menyatu` entry's note: "turned the
+  // steward/self-reliant tension into 'menyatu secara selaras'". If this ever
+  // passes, the carve-out has eaten the check.
+  const sj = buildPairSemantic(A, HARD_SEAT);
+  const rendered = { ...renderingFor(sj), penutup: 'Keduanya menyatu secara selaras.' };
+  const found = tension(rendered, sj);
+  assert.equal(found.length, 1);
+  assert.match(found[0].message, /menyatu/u);
+  assert.match(found[0].message, /selaras/u);
+});
+
+test('EVERY NEGATION x EVERY TOKEN, both directions', () => {
+  // The alternation entry is the one worth enumerating: a carve-out written as a
+  // prefix on `\bberpadu\b|\bperpaduan\b` would exempt only the FIRST branch and
+  // leave the second live - a half-applied edit that looks complete in a diff.
+  const NEGATIONS = ['tidak', 'belum', 'kurang'];
+  const TOKENS = ['menyatu', 'selaras', 'saling melengkapi', 'identitas utuh',
+    'membentuk kesatuan', 'membentuk satu kesatuan', 'berpadu', 'perpaduan'];
+
+  const sj = buildPairSemantic(A, HARD_SEAT);
+  const fire = (penutup) => tension({ ...renderingFor(sj), penutup }, sj).length;
+
+  for (const t of TOKENS) {
+    assert.equal(fire(`Mereka ${t} di titik itu.`), 1, `bare "${t}" is still banned`);
+    for (const n of NEGATIONS) {
+      assert.equal(fire(`Mereka ${n} ${t} di titik itu.`), 0, `"${n} ${t}" is exempt`);
+    }
+  }
+});
+
+test('IMMEDIATELY BEFORE, AND NOTHING LOOSER', () => {
+  // `tidak selalu selaras` still rejects. A negation two words away is not
+  // negating the token - it is qualifying a claim that still asserts harmony, and
+  // "not always in harmony" said of a clashed seat is the softening the check was
+  // written for. This is the assertion that keeps the carve-out narrow.
+  const sj = buildPairSemantic(A, HARD_SEAT);
+  const fire = (penutup) => tension({ ...renderingFor(sj), penutup }, sj).length;
+
+  assert.equal(fire('Mereka tidak selalu selaras.'), 1);
+  assert.equal(fire('Mereka belum sepenuhnya menyatu.'), 1);
+  assert.equal(fire('Bukan selaras, tapi cukup.'), 1, 'only the three ruled negations exempt');
+});
+
+test('THE CARVE-OUT IS ON EVERY PATTERN, alternation branches included', () => {
+  // Read off the data rather than off the behaviour above, so a pattern added
+  // later without the prefix fails here with a name rather than silently widening
+  // the ban back out.
+  const NEG = '(?<!\\b(?:tidak|belum|kurang) )';
+  for (const entry of BLOCKLIST.style.tension_collapse) {
+    // The carve-out is punched out FIRST, then the remainder is split. Splitting
+    // the raw pattern on `|` also splits the alternation INSIDE the lookbehind
+    // (`tidak|belum|kurang`) and reports three phantom branches - which is what
+    // the first version of this assertion did.
+    const branches = entry.pattern.replaceAll(NEG, '@').split('|');
+    for (const branch of branches) {
+      assert.ok(branch.startsWith('@'),
+        `every top-level branch of ${entry.pattern} carries the carve-out; "${branch}" does not`);
+    }
+  }
+  assert.ok(BLOCKLIST.style._negation.includes('tidak selalu selaras'),
+    'the data records what the carve-out deliberately does NOT cover');
+});
+
+test('THE MIRROR SEES THE SAME CARVE-OUT, and that is intended', () => {
+  // `tension_collapse` is not pair-scoped as a CATEGORY - only WHERE it is scanned
+  // is. So this changes what a MIRROR reading may say too, and that is correct
+  // rather than incidental: "kamu belum menyatu dengan sisi itu" names a tension
+  // in a mirror reading exactly as it does in a pair one. Stated here because a
+  // mirror floor-rate comparison across this commit has to know.
+  const mirror = buildSemanticJson(A);
+  const bare = renderingFor(mirror, (b, i) => (i === 0 ? { ...b, text: `${b.text} Semua menyatu.` } : b));
+  const negated = renderingFor(mirror, (b, i) => (i === 0 ? { ...b, text: `${b.text} Semua belum menyatu.` } : b));
+
+  assert.equal(styleGuard(bare, renderedText(bare), 'gemini', mirror)
+    .filter((f) => f.check === 'style.tension_collapse').length, 1);
+  assert.equal(styleGuard(negated, renderedText(negated), 'gemini', mirror)
+    .filter((f) => f.check === 'style.tension_collapse').length, 0);
 });
