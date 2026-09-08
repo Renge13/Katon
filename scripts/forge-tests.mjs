@@ -25,6 +25,12 @@ const bad = (name, e) => { fail++; console.log(`  ✗ ${name} — ${e?.message |
 function t(name, fn) { try { fn(); ok(name); } catch (e) { bad(name, e); } }
 
 function withEnv(env, fn) {
+  // PAYMENTS_PROVIDER and VERCEL_ENV are cleared and restored like the rest: a
+  // case that set one and did not name it in the next case's env would leak, and
+  // these two decide the answer before any Xendit key is read.
+  for (const k of ['PAYMENTS_PROVIDER', 'VERCEL_ENV']) {
+    if (!(k in env)) env[k] = undefined;
+  }
   const saved = {};
   for (const k of Object.keys(env)) {
     saved[k] = process.env[k];
@@ -39,30 +45,61 @@ function withEnv(env, fn) {
 
 console.log('\nFENCE (fail-closed) — REQUIRED');
 
+// ── EVERY CASE BELOW NAMES PAYMENTS_PROVIDER=xendit, 2026-09-08 ──
+// These four assert the XENDIT fence, and until today Xendit was the only path
+// so it needed no naming. `PAYMENTS_PROVIDER` now selects the provider and
+// DEFAULTS TO CLOSED, so an unset variable makes `paymentFenceReason()` answer
+// `payment_closed` before any key is consulted - and these tests would have gone
+// on asserting "refuses" while asserting the WRONG REFUSAL.
+//
+// They caught the change, which is what they are for: `npm test` does not run
+// this file, only `npm run report:forge` in the accuracy workflow does, and CI
+// went red on the first push of the hotfix.
+//
+// The closed and mock behaviours have their own file,
+// tests/payments-provider.spec.mjs. This one stays about Xendit.
+
 // THE required forge-test: production with no Xendit secret must REFUSE, and the
 // dev bypass must be off.
 t('prod + no XENDIT_SECRET_KEY → refuses (fence reason set)', () => {
-  withEnv({ NODE_ENV: 'production', XENDIT_SECRET_KEY: undefined, XENDIT_WEBHOOK_TOKEN: 'x' }, () => {
+  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production', XENDIT_SECRET_KEY: undefined, XENDIT_WEBHOOK_TOKEN: 'x' }, () => {
     assert.strictEqual(paymentFenceReason(), 'xendit_secret_key_unset');
     assert.strictEqual(devBypassAllowed(), false, 'dev bypass must be OFF in production');
   });
 });
 
 t('prod + secret but no XENDIT_WEBHOOK_TOKEN → refuses', () => {
-  withEnv({ NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: undefined }, () => {
+  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: undefined }, () => {
     assert.strictEqual(paymentFenceReason(), 'xendit_webhook_token_unset');
   });
 });
 
 t('prod + both secrets set → allowed (fence null), bypass still off', () => {
-  withEnv({ NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: 'x' }, () => {
+  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: 'x' }, () => {
     assert.strictEqual(paymentFenceReason(), null);
     assert.strictEqual(devBypassAllowed(), false);
   });
 });
 
+// ── AND THE DEFAULT, WHICH IS THE ONE THAT PROTECTS REVENUE ──
+// Not a variation on the four above: those ask whether Xendit is configured, and
+// this asks whether anything is SELLING. An unset variable must mean CLOSED, or a
+// lost env var silently reopens a channel Reyner shut on 2026-09-08.
+t('no PAYMENTS_PROVIDER → sales are CLOSED, not xendit', () => {
+  withEnv({ PAYMENTS_PROVIDER: undefined, NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: 'x' }, () => {
+    assert.strictEqual(paymentFenceReason(), 'payment_closed',
+      'fully configured for Xendit and STILL closed');
+  });
+});
+
+t('PAYMENTS_PROVIDER=mock is refused in production', () => {
+  withEnv({ PAYMENTS_PROVIDER: 'mock', VERCEL_ENV: 'production', NODE_ENV: 'production' }, () => {
+    assert.strictEqual(paymentFenceReason(), 'payment_closed', 'a free unlock must not exist in production');
+  });
+});
+
 t('development + no secret → allowed (dev bypass on)', () => {
-  withEnv({ NODE_ENV: 'development', XENDIT_SECRET_KEY: undefined, XENDIT_WEBHOOK_TOKEN: undefined }, () => {
+  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'development', XENDIT_SECRET_KEY: undefined, XENDIT_WEBHOOK_TOKEN: undefined }, () => {
     assert.strictEqual(paymentFenceReason(), null);
     assert.strictEqual(devBypassAllowed(), true);
   });
