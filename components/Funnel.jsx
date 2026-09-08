@@ -70,7 +70,8 @@ function fireEvent(token, event, extra = null) {
 }
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
-import { UPCOMING_COPY } from '../lib/site/copy.js';
+import { SITE_COPY, UPCOMING_COPY } from '../lib/site/copy.js';
+import { COMPAT_ROUTE } from '../lib/site/routes.js';
 import { formatIdr } from '../lib/site/format.js';
 
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
@@ -446,8 +447,46 @@ function Home({ form, setForm, error, onSubmit, busy }) {
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '12px 0 0' }}>Pahami dinamika diri, potensi, dan arah langkah berikutnya lewat bacaan yang objektif.</p>
         </Reveal>
 
+        {/* ── THE TWO FRONT-DOOR PATHS, 2026-09-08 ──────────────────────
+            Ruled 2026-09-07: Mirror (understand yourself, free) and
+            Compatibility (the dynamic between two people, paid). Neither is a
+            prerequisite for the other, so this is a CHOICE and not a funnel step
+            - the compat card is a plain link out, not a stage of this form.
+
+            MIRROR FIRST because the form below IS the mirror path: the first
+            card labels what the reader is already looking at, and the second
+            offers the other door. Reversing them would put a paid product above
+            the free acquisition engine on the front page, which is the shape
+            CLAUDE.md's PRODUCT section rules against ("never a gate").
+
+            The mirror card is deliberately NOT a link - it names the form eight
+            lines down. Making it tappable would give the same destination two
+            controls and a reader no way to tell them apart.
+
+            TECHNICALITY, NOT UX: Cowork chose a two-card row. Reyner judges it
+            on the preview and may reorder or restyle it; the copy slots and the
+            route are what this commit fixes. */}
+        <Reveal delay={0.18} style={{ marginTop: 30 }}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div style={{ border: '1px solid var(--divider)', borderRadius: 16, padding: '14px 16px', background: 'var(--kertas-2)' }}>
+              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, fontWeight: 500, color: 'var(--tinta)' }}>{SITE_COPY.home_mirror_label}</div>
+              <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', marginTop: 4 }}>{SITE_COPY.home_mirror_sub}</div>
+            </div>
+            <a
+              href={COMPAT_ROUTE}
+              style={{ display: 'block', border: '1px solid var(--divider)', borderRadius: 16, padding: '14px 16px', textDecoration: 'none' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, fontWeight: 500, color: 'var(--tinta)' }}>{SITE_COPY.home_compat_label}</div>
+                <Icon.arrow size={13} />
+              </div>
+              <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', marginTop: 4 }}>{SITE_COPY.home_compat_sub}</div>
+            </a>
+          </div>
+        </Reveal>
+
         <form onSubmit={onSubmit}>
-          <Reveal delay={0.22} style={{ marginTop: 28 }}>
+          <Reveal delay={0.22} style={{ marginTop: 22 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
               {/* NATIVE PICKERS. `min` keeps it inside the engine's supported range
                   and `max` stops a birthdate in the future. */}
