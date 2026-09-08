@@ -1493,8 +1493,14 @@ export function Upcoming({ reading }) {
     }
   }
 
+  // ── COMPAT LEFT THIS BLOCK, 2026-09-08 ────────────────────
+  // `Upcoming` advertises what is NOT for sale. Compatibility is for sale now -
+  // it has a route, a price and a checkout - so a row here would tell a reader
+  // the product she can buy is unavailable. The tap that measured demand for it
+  // goes with the row: demand is measured by PURCHASES from here on, which is a
+  // stronger instrument than a tap and is why the DEFERRED REGISTER row citing
+  // the tap is updated in the same commit.
   const products = [
-    { key: 'compat', copy: UPCOMING_COPY.compat },
     { key: 'annual', copy: UPCOMING_COPY.annual },
   ];
 

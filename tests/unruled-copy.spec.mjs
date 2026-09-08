@@ -100,7 +100,11 @@ test('every required slot exists and is a non-empty string', () => {
     assert.equal(typeof UPCOMING_COPY[slot], 'string', `${slot} must be a string`);
     assert.ok(UPCOMING_COPY[slot].trim().length > 0, `${slot} must not be empty`);
   }
-  for (const product of ['compat', 'annual']) {
+  // `compat` LEFT THIS BLOCK 2026-09-08: it is for sale now, and `Upcoming`
+  // advertises what is not. Its two ruled strings were deleted rather than moved
+  // to the front-door card - they were ruled for a not-for-sale teaser, and
+  // whether they fit a card that sells is Reyner's call.
+  for (const product of ['annual']) {
     for (const slot of ['label', 'sub']) {
       const v = UPCOMING_COPY[product]?.[slot];
       assert.equal(typeof v, 'string', `${product}.${slot} must be a string`);
