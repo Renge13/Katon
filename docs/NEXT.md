@@ -779,6 +779,47 @@ artifacts:
   reading, the card or the paid path is local and then production AFTER the merge, with no stage in
   between.** A verification plan that says "check it on the preview" cannot run.
 
+## THE DELETION PATH DOES NOT REACH A PAIR - OPEN, AND OWNED BY REYNER, 2026-09-08
+
+**Asked and answered on 2026-09-08. Recorded here because it is a DISCLOSURE defect, not a bug: the
+code is doing what it always did and the page now describes it wrongly.**
+
+**THERE IS NO DELETION CODE AT ALL, for any table.** Deletion is a manual request:
+
+    $ ls scripts/ | grep -iE 'delete|erase|gdpr|purge'   -> nothing
+    $ grep -rniE 'delete from|\.delete\(' lib/ app/api/ supabase/migrations/
+        -> only 0008_rate_limit.sql's window sweep, and Map#delete in unrelated code
+
+That was fine while every request could be located, and `/privasi` says how:
+*"Sertakan tautan bacaanmu, karena Katon tidak memakai akun dan tautan itulah satu-satunya cara kami
+menemukan datamu."* **Include your reading link, because it is the only way we can find your data.**
+
+**THAT SENTENCE IS NOW FALSE IN TWO DIRECTIONS**, both created by X-b3 shipping the compat surface:
+
+1. **A compat buyer's data is not under a reading link.** It is a `pair` row, a different table
+   (`supabase/migrations/0010_pair.sql`), found by a `/kompatibilitas/<id>` link. A reader who
+   follows the instruction exactly hands over something that does not locate her record.
+2. **She may have no reading link to send.** Mirror and Compatibility are two front-door paths and
+   neither is a prerequisite for the other (ruled 2026-09-07), so a buyer who arrived straight at
+   `/kompatibilitas` has no mirror reading at all.
+
+**AND THE THIRD PERSON HAS NO PATH AT ALL.** `pair.b_birth_date` and `b_birth_time` are person B's,
+and B never visited the site, has no link, and does not know the row exists. `/privasi` addresses
+"kamu" throughout, which is A. This is not solvable by a copy change alone and is the reason it is
+recorded as a ruling rather than as a wording fix.
+
+**WHAT WOULD CLOSE IT.** Three parts, and only the first two are code:
+  1. The instruction says which link to send - reading OR compat - so a request can be located.
+  2. A manual deletion, when one arrives, deletes the `pair` row and not only the `reading` row.
+     Today nothing written down says the second table exists, so a careful person doing it by hand
+     would miss it.
+  3. **Reyner rules what B is owed**, if anything. The product model says B gets nothing; that is
+     about what B RECEIVES and says nothing about B's data.
+
+**NOT FIXED HERE, AND NOT DRAFTED.** Both parts that touch `/privasi` are user-facing Indonesian and
+Reyner's alone (rule 20), and the two `privasi_*` slots already shipped as unruled placeholders in
+the same PR - so the page he is about to rule is the page this belongs on.
+
 ## OWED ON THE n=20 RE-MEASURE, 2026-09-08
 
 **One item, and it is OWED rather than deferred: it has a decider, a trigger and a shape.**
