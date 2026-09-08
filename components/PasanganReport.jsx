@@ -20,7 +20,7 @@
 // is put on. Out of scope until Reyner rules it.
 // ============================================================
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ProseBlocks } from './ProseBlocks.jsx';
 import { readableError } from '../lib/site/readableError.js';
 import { Reveal, Eyebrow, Button, Icon } from './kit.jsx';
@@ -53,15 +53,21 @@ const labelFor = (facts) => (block) => {
   return null;
 };
 
-export default function PasanganReport({ id }) {
+export default function PasanganReport({ id, salesClosed = false }) {
   const [pair, setPair] = useState(null);       // the GET /api/pair body
   const [reading, setReading] = useState(null); // the GET .../reading body
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  const justPaid = typeof window !== 'undefined'
-    && new URLSearchParams(window.location.search).get('bayar') === 'selesai';
+  const bayar = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('bayar')
+    : null;
+  const justPaid = bayar === 'selesai';
+  // `?bayar=mock` is the free walk (PAYMENTS_PROVIDER=mock). It behaves like
+  // `selesai` for the waiting state, and additionally performs the unlock once -
+  // see the effect below.
+  const mockPay = bayar === 'mock';
 
   const load = useCallback(async () => {
     const body = await fetch(`/api/pair/${id}`).then((r) => r.json()).catch(() => null);
@@ -72,6 +78,23 @@ export default function PasanganReport({ id }) {
     else setError(readableError(r));
     return body;
   }, [id]);
+
+  // ── THE MOCK UNLOCK, ONCE ─────────────────────────────────
+  // Fires only for `?bayar=mock`, and the route it calls answers 503 unless
+  // PAYMENTS_PROVIDER=mock - which `paymentsProvider()` refuses in production.
+  // So this effect is inert on production even if the query string is typed by
+  // hand, and the guard is the server's rather than this component's.
+  //
+  // The ref stops React's development double-invoke from posting twice. The
+  // unlock is idempotent anyway (a false->true transition), so the ref is
+  // politeness rather than correctness - said here so nobody removes it thinking
+  // it is load-bearing, or trusts it thinking it is.
+  const unlockedRef = useRef(false);
+  useEffect(() => {
+    if (!mockPay || unlockedRef.current) return;
+    unlockedRef.current = true;
+    fetch(`/api/mock-pay/${id}`, { method: 'POST' }).catch(() => {});
+  }, [mockPay, id]);
 
   useEffect(() => {
     let live = true;
@@ -90,7 +113,7 @@ export default function PasanganReport({ id }) {
   // still says unpaid. A page opened cold on an unpaid pair does not poll - it
   // shows the product block and its button, which is the retry.
   useEffect(() => {
-    if (!justPaid || !loaded) return undefined;
+    if ((!justPaid && !mockPay) || !loaded) return undefined;
     if (pair?.status === 'paid') return undefined;
     let tries = 0;
     const timer = setInterval(async () => {
@@ -99,7 +122,7 @@ export default function PasanganReport({ id }) {
       if (body?.status === 'paid' || tries >= POLL_LIMIT) clearInterval(timer);
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [justPaid, loaded, pair?.status, load]);
+  }, [justPaid, mockPay, loaded, pair?.status, load]);
 
   async function reopenInvoice() {
     if (busy) return;
@@ -129,7 +152,7 @@ export default function PasanganReport({ id }) {
   if (pair?.status !== 'paid') {
     // Waiting on the webhook: the redirect said the payment went through and the
     // server has not caught up yet.
-    if (justPaid) {
+    if (justPaid || mockPay) {
       return (
         <div className="k-fade" style={{ ...wrap, paddingTop: 72 }}>
           <Reveal><Eyebrow>{PASANGAN_COPY.pending_title}</Eyebrow></Reveal>
@@ -161,10 +184,27 @@ export default function PasanganReport({ id }) {
             <div style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--tinta)' }}>{formatIdr(pair.price)}</div>
           </Reveal>
         )}
-        <Reveal delay={0.16} style={{ marginTop: 20 }}>
-          {error && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{error}</div>}
-          <Button onClick={reopenInvoice} disabled={busy}>{busy ? 'Menyiapkan...' : PASANGAN_COPY.form_submit}</Button>
-        </Reveal>
+        {/* ── NO RESUME BUTTON WHILE SALES ARE CLOSED ──────────────
+            An unpaid pair from before the close still has its link, and the
+            honest thing to show is why it cannot be completed - not a button
+            that 503s. The paid ones are unaffected: closing sales is not
+            revoking what somebody already bought, and that is the sentence the
+            body carries. */}
+        {salesClosed ? (
+          <Reveal delay={0.16} style={{ marginTop: 20 }}>
+            <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px' }}>
+              <Eyebrow style={{ marginBottom: 10 }}>{PASANGAN_COPY.sales_closed_title}</Eyebrow>
+              <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, lineHeight: 1.65, color: 'var(--tinta-soft)', margin: 0 }}>
+                {PASANGAN_COPY.sales_closed_body}
+              </p>
+            </div>
+          </Reveal>
+        ) : (
+          <Reveal delay={0.16} style={{ marginTop: 20 }}>
+            {error && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{error}</div>}
+            <Button onClick={reopenInvoice} disabled={busy}>{busy ? 'Menyiapkan...' : PASANGAN_COPY.form_submit}</Button>
+          </Reveal>
+        )}
       </div>
     );
   }

@@ -40,6 +40,7 @@
     "test:compat-stage6-pair": "node --conditions=react-server --test tests/compat-stage6-pair.spec.mjs",
     "test:compat-surface": "node --conditions=react-server --import ./scripts/jsx-register.mjs --test tests/compat-surface.spec.mjs",
     "test:pasangan-copy": "node --test tests/pasangan-copy.spec.mjs",
+    "test:payments-provider": "node --test tests/payments-provider.spec.mjs",
     "test:form-controls": "node --test tests/form-controls.spec.mjs",
     "test:pair-reading-route": "node --conditions=react-server --test tests/pair-reading-route.spec.mjs",
     "test:stage3": "node --test tests/stage3-facts.spec.mjs",

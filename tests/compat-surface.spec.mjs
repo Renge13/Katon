@@ -98,6 +98,8 @@ const PASANGAN_SLOTS = [
   'form_submit', 'season_gate_b_intro',
   'pending_title', 'pending_body', 'paid_title', 'link_keep', 'unpaid_resume',
   'report_badge_eyebrow', 'report_quadrant_eyebrow', 'notfound_title',
+  // Added by Y-1, 2026-09-08: sales are CLOSED and the page has to say so.
+  'sales_closed_title', 'sales_closed_body',
 ];
 
 test('every slot the surface renders EXISTS', () => {
@@ -137,7 +139,8 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
   ].filter(([, v]) => typeof v === 'string' && v.includes(SENTINEL));
 
   assert.deepEqual(holes.map(([k]) => k), [], 'a compat slot is still a sentinel');
-  assert.equal(Object.keys(PASANGAN_COPY).length, 22);
+  // 22 from X-b3 plus the two sales-closed strings Y-1 added.
+  assert.equal(Object.keys(PASANGAN_COPY).length, 24);
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {
@@ -354,10 +357,24 @@ test('IN PRODUCTION WITH NO XENDIT KEY, /api/pay REFUSES - shape and all', async
   // The real response, asserted field by field rather than "it errors": the
   // client showed a generic sentence precisely because it only knew that much,
   // and a test that also only knew that much would not have caught this either.
+  //
+  // ── PAYMENTS_PROVIDER=xendit IS NOW EXPLICIT, 2026-09-08 ───
+  // This test pinned the diagnosis of Reyner's preview failure, and at the time
+  // there was no provider variable - Xendit was the only path. There is one now
+  // and it defaults to CLOSED, so leaving it unset here would make the fence
+  // answer `payment_closed` and this test would assert the wrong refusal while
+  // still passing on the word "refuses". Naming the provider keeps the assertion
+  // about the thing it was written for. `tests/payments-provider.spec.mjs` owns
+  // the closed case.
   const { paymentFenceReason, devBypassAllowed } = await import('../lib/paymentFence.js');
-  const saved = { env: process.env.NODE_ENV, key: process.env.XENDIT_SECRET_KEY };
+  const saved = {
+    env: process.env.NODE_ENV,
+    key: process.env.XENDIT_SECRET_KEY,
+    provider: process.env.PAYMENTS_PROVIDER,
+  };
   try {
     process.env.NODE_ENV = 'production';
+    process.env.PAYMENTS_PROVIDER = 'xendit';
     delete process.env.XENDIT_SECRET_KEY;
 
     assert.equal(paymentFenceReason(), 'xendit_secret_key_unset');
@@ -372,6 +389,25 @@ test('IN PRODUCTION WITH NO XENDIT KEY, /api/pay REFUSES - shape and all', async
     process.env.NODE_ENV = saved.env;
     if (saved.key === undefined) delete process.env.XENDIT_SECRET_KEY;
     else process.env.XENDIT_SECRET_KEY = saved.key;
+    if (saved.provider === undefined) delete process.env.PAYMENTS_PROVIDER;
+    else process.env.PAYMENTS_PROVIDER = saved.provider;
+  }
+});
+
+test('AND THAT SUBMIT IS NOW REFUSED FOR A DIFFERENT REASON ENTIRELY', async () => {
+  // The env var Reyner was told to set for Preview is moot: sales are CLOSED
+  // (2026-09-08, Katon is exiting Xendit), so the same submit now answers
+  // `payment_closed` on every environment where the provider is not explicitly
+  // something else. Recorded here rather than deleting the test above, because
+  // the diagnosis was right and the situation moved.
+  const { paymentFenceReason } = await import('../lib/paymentFence.js');
+  const saved = process.env.PAYMENTS_PROVIDER;
+  try {
+    delete process.env.PAYMENTS_PROVIDER;
+    assert.equal(paymentFenceReason(), 'payment_closed');
+  } finally {
+    if (saved === undefined) delete process.env.PAYMENTS_PROVIDER;
+    else process.env.PAYMENTS_PROVIDER = saved;
   }
 });
 
@@ -384,9 +420,11 @@ test('THE WEBHOOK TOKEN IS THE SECOND GATE, so setting one key is not enough', a
     env: process.env.NODE_ENV,
     key: process.env.XENDIT_SECRET_KEY,
     tok: process.env.XENDIT_WEBHOOK_TOKEN,
+    provider: process.env.PAYMENTS_PROVIDER,
   };
   try {
     process.env.NODE_ENV = 'production';
+    process.env.PAYMENTS_PROVIDER = 'xendit';
     process.env.XENDIT_SECRET_KEY = 'set';
     delete process.env.XENDIT_WEBHOOK_TOKEN;
     assert.equal(paymentFenceReason(), 'xendit_webhook_token_unset');
@@ -396,6 +434,8 @@ test('THE WEBHOOK TOKEN IS THE SECOND GATE, so setting one key is not enough', a
     else process.env.XENDIT_SECRET_KEY = saved.key;
     if (saved.tok === undefined) delete process.env.XENDIT_WEBHOOK_TOKEN;
     else process.env.XENDIT_WEBHOOK_TOKEN = saved.tok;
+    if (saved.provider === undefined) delete process.env.PAYMENTS_PROVIDER;
+    else process.env.PAYMENTS_PROVIDER = saved.provider;
   }
 });
 

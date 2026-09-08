@@ -57,7 +57,7 @@ function birthBody(form, extra = {}) {
   };
 }
 
-export default function Pasangan({ initialA = null }) {
+export default function Pasangan({ initialA = null, salesClosed = false }) {
   const [a, setA] = useState(initialA ? { ...EMPTY, ...initialA } : EMPTY);
   const [b, setB] = useState(EMPTY);
   const [email, setEmail] = useState('');
@@ -135,6 +135,13 @@ export default function Pasangan({ initialA = null }) {
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', compatPairRoute(created.id));
     }
+    // ── MOCK GOES NOWHERE EXTERNAL ────────────────────────────
+    // With PAYMENTS_PROVIDER=mock the "invoice url" is this site's own
+    // `/kompatibilitas/<id>?bayar=mock`, so opening a second tab would be a tab
+    // onto the page this one is already becoming. The report page does the
+    // unlock; here it just navigates.
+    if (paid.mock) { setStage('pending'); return; }
+
     // Opened from the click gesture so it is not popup-blocked; the link is also
     // rendered in the pending state, which is the fallback when it is.
     if (paid.invoiceUrl) {
@@ -181,6 +188,54 @@ export default function Pasangan({ initialA = null }) {
     } finally {
       setBusy(false);
     }
+  }
+
+  // ── SALES CLOSED: THE FORM IS NOT SHOWN AT ALL ────────────
+  // Decided on the server (app/kompatibilitas/page.js) and passed in, because
+  // PAYMENTS_PROVIDER is a server variable. Rendering the form and refusing at
+  // submit is the shape of the defect this hotfix exists to fix, one level up: a
+  // reader must not be invited into a path that cannot complete.
+  //
+  // The product block STAYS - title, lead, inclusions - so the page still says
+  // what the thing is. What goes is the price, the form and the button, because
+  // those are the parts that promise a purchase.
+  if (salesClosed) {
+    return (
+      <div className="k-fade" style={wrap}>
+        <div style={{ paddingTop: 60 }}>
+          <Reveal>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 32, lineHeight: 1.14, letterSpacing: '-.01em', color: 'var(--tinta)', margin: 0 }}>
+              {PASANGAN_COPY.page_title}
+            </h1>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '12px 0 0' }}>
+              {PASANGAN_COPY.page_lead}
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.14} style={{ marginTop: 24 }}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 8 }}>
+              {INCLUDES.map((line) => (
+                <li key={line} style={{ display: 'flex', gap: 9, alignItems: 'baseline', fontSize: 14, lineHeight: 1.55, color: 'var(--tinta-soft)' }}>
+                  <Icon.check size={13} />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          <Reveal delay={0.2} style={{ marginTop: 26 }}>
+            <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px' }}>
+              <Eyebrow style={{ marginBottom: 10 }}>{PASANGAN_COPY.sales_closed_title}</Eyebrow>
+              <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, lineHeight: 1.65, color: 'var(--tinta-soft)', margin: 0 }}>
+                {PASANGAN_COPY.sales_closed_body}
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    );
   }
 
   if (gate) {
@@ -305,7 +360,7 @@ export default function Pasangan({ initialA = null }) {
  * later session can tell where the purchase came from; nothing about the pair is
  * gated on it, and an absent or bogus token simply means an empty form.
  */
-export function PasanganFromQuery() {
+export function PasanganFromQuery({ salesClosed = false }) {
   const [initialA, setInitialA] = useState(null);
   const [ready, setReady] = useState(false);
 
@@ -334,5 +389,5 @@ export function PasanganFromQuery() {
   }, []);
 
   if (!ready) return null;
-  return <Pasangan initialA={initialA} />;
+  return <Pasangan initialA={initialA} salesClosed={salesClosed} />;
 }
