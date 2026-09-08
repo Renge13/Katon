@@ -245,11 +245,12 @@ refuses and a preview build passes.
 
 **WHAT IS OWED, AND BY WHOM**
 
-1. **THE `PASANGAN_COPY` RULINGS - REYNER.** 28 live placeholders: 22 `pasangan_*`, four
-   `home_*`, two `privasi_*`. Cowork writes the worksheet, swept, patterned on
-   `docs/content/upcoming-copy-rulings.md`. Applied BY HAND, verbatim - no script targets a copy
-   bank - with `npm run check:copy` as the proof. **Until then `VERCEL_ENV=production npm run build`
-   exits 1, on purpose.**
+1. ~~**THE `PASANGAN_COPY` RULINGS**~~ **DONE 2026-09-08.** All 28 applied by hand, verbatim, from
+   `docs/content/pasangan-copy-rulings.md`; `tests/pasangan-copy.spec.mjs` compares every row to the
+   live bank because there is no `--expect` for a copy bank. **`VERCEL_ENV=production npm run build`
+   now PASSES.** A PROCESS RULING came with them: Compatibility UI CHROME ships from Cowork's swept
+   drafts and is amended in place by Reyner; the full ruling process stays for READING words - the
+   glossary, the renderer prompt, the floor. Rule 20 is unchanged for readings.
 2. **REYNER WALKS THE PREVIEW ON A PHONE.** The two-card row on Home, the order of the two paths and
    the shape of the pre-payment page are technicalities Cowork settled (rule 9) and he may reorder
    any of them. The preview URL is in the PR.

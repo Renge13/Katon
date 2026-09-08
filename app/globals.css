@@ -163,6 +163,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: .55; cursor: po
   input[type="date"],
   input[type="time"],
   input[type="text"],
+  input[type="email"],
   input[type="tel"],
   input[type="number"] {
     padding-left: 10px;
@@ -179,11 +180,13 @@ select:hover,
 input[type="date"]:hover,
 input[type="time"]:hover,
 input[type="text"]:hover,
+input[type="email"]:hover,
 input[type="tel"]:hover { border-color: var(--muted-warm); }
 select:focus,
 input[type="date"]:focus,
 input[type="time"]:focus,
 input[type="text"]:focus,
+input[type="email"]:focus,
 input[type="tel"]:focus,
 input[type="number"]:focus {
   outline: none;

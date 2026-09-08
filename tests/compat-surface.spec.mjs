@@ -122,25 +122,22 @@ test('THE BANK IS REGISTERED, so the gate can see it', () => {
   assert.ok('PASANGAN_COPY' in UNRULED_SOURCES);
 });
 
-test('EVERY SLOT IS STILL A SENTINEL, and a production build must refuse', () => {
-  // ── THIS TEST INVERTS WHEN REYNER RULES THE COPY ───────────
-  // It is the record that the surface shipped with named holes on purpose. When
-  // the worksheet is applied, this becomes "every slot is ruled" and the sentinel
-  // assertion below is the one to delete - the same way COMPAT_COPY's did.
-  const unruled = [
+test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
+  // ── THIS TEST INVERTED, AS ITS PREVIOUS VERSION SAID IT WOULD ──
+  // It read "EVERY SLOT IS STILL A SENTINEL, and a production build must refuse"
+  // and asserted 26 live placeholders, with a comment naming itself as the
+  // assertion to invert when the worksheet landed. It landed 2026-09-08.
+  //
+  // Byte-identity against the worksheet is tests/pasangan-copy.spec.mjs's job;
+  // this one only asserts that nothing is a hole any more.
+  const holes = [
     ...Object.entries(PASANGAN_COPY),
     ...Object.entries(SITE_COPY).filter(([k]) => k.startsWith('home_')),
+    ...Object.entries(SITE_COPY.privasi).filter(([k]) => k.startsWith('privasi_')),
   ].filter(([, v]) => typeof v === 'string' && v.includes(SENTINEL));
 
-  assert.equal(unruled.length, 26,
-    '22 PASANGAN_COPY slots plus the four home_* slots are unruled');
-
-  // The two /privasi additions are unruled too, and they are DISCLOSURES rather
-  // than product copy - a production build must refuse on them for a stronger
-  // reason than register.
-  for (const slot of ['privasi_email', 'privasi_second_person']) {
-    assert.ok(SITE_COPY.privasi[slot].includes(SENTINEL), slot);
-  }
+  assert.deepEqual(holes.map(([k]) => k), [], 'a compat slot is still a sentinel');
+  assert.equal(Object.keys(PASANGAN_COPY).length, 22);
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {

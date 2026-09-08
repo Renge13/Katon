@@ -41,7 +41,7 @@ import { RENDER_COPY } from '../lib/render/copy.js'
 // legal prose is the longest body of user-facing copy in the repo and is exactly
 // where a pasted em-dash or a smart quote survives review. Grepping the diff
 // catches it once; walking the bank catches it forever.
-import { SITE_COPY, UPCOMING_COPY } from '../lib/site/copy.js'
+import { COPY_BANKS } from '../lib/site/copy.js'
 import { ENTITY } from '../lib/site/entity.js'
 
 // Rule 20 bans typographic characters in user-facing strings, keyboard keys only.
@@ -106,15 +106,26 @@ walk(REPORT_PROMPTS,                'REPORT.PROMPTS')
 // Stage 5 chrome. The loading string is user-facing and rule 20 covers chrome.
 walk(RENDER_COPY,                   'RENDER_COPY')
 
-// Site chrome + the five static pages. ENTITY is walked too: the registered name
-// and address are rendered to the user, so a typographic character pasted from
-// the NIB PDF would ship.
-walk(SITE_COPY,                     'SITE_COPY')
-// The upcoming-products bank (prompt Q commit 4). Walked even though every value
-// is still a placeholder: rule 20 applies to a stub too, and a banned character
-// pasted into a slot now would survive the moment Reyner replaces the words
-// around it.
-walk(UPCOMING_COPY,                 'UPCOMING_COPY')
+// ── EVERY REGISTERED COPY BANK, 2026-09-08 ────────────────
+// This script named two banks by hand - SITE_COPY and UPCOMING_COPY - and so it
+// had never once checked COMPAT_COPY (live since 2026-09-07) or PASANGAN_COPY
+// (28 strings, applied today). **THE THIRD INSTANCE OF COWORK-BRIEF ROW 47 IN
+// FOUR DAYS**, and the first two were in the OTHER copy gate: a rule that
+// enumerates its subjects by name is blind to the next subject, silently, in a
+// way that reads as a pass.
+//
+// It reads `COPY_BANKS` now - the registry banks register into at their
+// definition sites - so a new `*_COPY` export is typography-checked because it
+// EXISTS. `tests/unruled-copy.spec.mjs` already fails if an export is missing
+// from that registry, so both gates inherit one discovery mechanism.
+//
+// Walked even where every value is still a placeholder: rule 20 applies to a
+// stub too, and a banned character pasted into a slot now would survive the
+// moment Reyner replaces the words around it.
+for (const [name, bank] of Object.entries(COPY_BANKS)) walk(bank, name)
+// ENTITY is not a *_COPY bank and is named separately: the registered company
+// name and address are rendered to the user, so a typographic character pasted
+// from the NIB PDF would ship.
 walk(ENTITY,                        'ENTITY')
 
 if (issues.length > 0) {
@@ -127,4 +138,8 @@ if (issues.length > 0) {
   process.exit(1)
 }
 
-console.log(`✓ No banned typography in copy banks. Checked: DAY_MASTERS, DAY_BRANCHES, DOMINANT_ELEMENT, MISSING_ELEMENT, PAID_HOOK_TEMPLATE, PILLAR_STEM_MEANINGS, 7 REPORT passage banks, REPORT.PROMPTS, RENDER_COPY, SITE_COPY, UPCOMING_COPY, ENTITY.`)
+// The banner LISTS WHAT IT WALKED rather than restating a fixed sentence. The
+// old one named SITE_COPY and UPCOMING_COPY and was accurate right up until it
+// was not, and a hardcoded list of what a check covers is the same defect as a
+// hardcoded list of what it checks.
+console.log(`✓ No banned typography in copy banks. Checked: DAY_MASTERS, DAY_BRANCHES, DOMINANT_ELEMENT, MISSING_ELEMENT, PAID_HOOK_TEMPLATE, PILLAR_STEM_MEANINGS, 7 REPORT passage banks, REPORT.PROMPTS, RENDER_COPY, ${Object.keys(COPY_BANKS).join(', ')}, ENTITY.`)
