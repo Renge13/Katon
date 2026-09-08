@@ -95,6 +95,7 @@
         "note": "THE load-bearing regex. renderer-prompt-notes: CONFIRMED UNFIXABLE BY PROMPT ALONE - run 5 emitted it twice against an explicit ban, and gate-check run 2 emitted it a third time, in the penutup. This regex is the only reliable fix. The 140-char window keeps it inside one sentence; the lazy quantifier stops it spanning a whole paragraph. THE `bukan berarti` CARVE-OUT (Reyner, 2026-08-06, ruling A on the rejection gallery): the gallery showed this check's most common trigger was 'Lemah di sini bukan berarti tidak mampu, melainkan sumber tenagamu ada di luar dirimu' - which is the resolve-in-the-same-breath move rule 21 REQUIRES, not the hedge the ban was written for. 'bukan berarti X' NEGATES A MISREADING, which is the job; 'bukan X tapi Y' substitutes one claim for another, which is the hedge. The lookahead separates them, so the ban keeps catching what it was built for."
       }
     ],
+    "_negation": "RULED BY REYNER 2026-09-08 (third ruling of the day, on docs/qa/2026-09-08-compat-penutup-cause.md). A negation immediately before a tension_collapse token EXEMPTS the match: (?<!\\b(?:tidak|belum|kurang) ) on every pattern, which is hedge_construction's carve-out shape with the direction reversed - its negation follows the token (bukan X tapi Y), these precede it (tidak selaras). WHY: the check bans a TOKEN where the defect is a CONSTRUCTION, and it rejected 'ritme harian kalian TIDAK SELARAS' - a sentence that NAMES the friction and asks for patience with it, which is the check's own purpose stated out loud. Measured on render 12x6. IMMEDIATELY before, and nothing looser: 'tidak selalu selaras' is still banned, because a negation two words away is not negating the token, it is qualifying a claim that still asserts harmony.",
     "_pair_scope": {
       "_rule": "RULED BY REYNER 2026-09-08, on docs/qa/2026-09-08-compat-renders-n10.md. Read ONLY for semanticJson.kind === 'pair'; a mirror reading is scanned whole, exactly as before. tension_collapse bans harmony vocabulary because a MIRROR reading that dissolves one person's internal tension into a compliment has deleted the fact. A COMPAT reading states complementarity as a fact - p3_supplies is literally 'what each chart holds that the other needs' - and the ordinary Indonesian for it is the banned vocabulary. Measured: 16 of 18 rejections across n=10, 89%, and the renders put 'Saling Melengkapi' in the P3 block's own HEADING. So the ban is scoped by what the block is ABOUT, per block, not lifted.",
       "_default": "A block matching neither list is scanned, as is the penutup and any block with no pair fact. The permitted list is an EXEMPTION; silence is not one.",
@@ -107,27 +108,27 @@
     },
     "tension_collapse": [
       {
-        "pattern": "\\bmenyatu\\b",
+        "pattern": "(?<!\\b(?:tidak|belum|kurang) )\\bmenyatu\\b",
         "note": "Run 1 turned the steward/self-reliant tension into 'menyatu secara selaras'. A tension resolved into a compliment is the fact destroyed."
       },
       {
-        "pattern": "\\bselaras\\b",
+        "pattern": "(?<!\\b(?:tidak|belum|kurang) )\\bselaras\\b",
         "note": "Run 1, in the same sentence as menyatu. Harmony vocabulary applied to a tension is the tension deleted."
       },
       {
-        "pattern": "\\bsaling melengkapi\\b",
+        "pattern": "(?<!\\b(?:tidak|belum|kurang) )\\bsaling melengkapi\\b",
         "note": "renderer-prompt HOLD THE TENSION."
       },
       {
-        "pattern": "\\bidentitas utuh\\b",
+        "pattern": "(?<!\\b(?:tidak|belum|kurang) )\\bidentitas utuh\\b",
         "note": "Run 1, verbatim."
       },
       {
-        "pattern": "\\bmembentuk (satu )?kesatuan\\b",
+        "pattern": "(?<!\\b(?:tidak|belum|kurang) )\\bmembentuk (satu )?kesatuan\\b",
         "note": "The same move with different words."
       },
       {
-        "pattern": "\\bberpadu\\b|\\bperpaduan\\b",
+        "pattern": "(?<!\\b(?:tidak|belum|kurang) )\\bberpadu\\b|(?<!\\b(?:tidak|belum|kurang) )\\bperpaduan\\b",
         "note": "renderer-prompt bans 'Perpaduan ...' as an essay connective and it collapses tensions too."
       }
     ],
