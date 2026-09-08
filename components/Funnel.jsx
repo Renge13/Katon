@@ -70,7 +70,16 @@ function fireEvent(token, event, extra = null) {
 }
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
-import { UPCOMING_COPY } from '../lib/site/copy.js';
+import { SITE_COPY, UPCOMING_COPY } from '../lib/site/copy.js';
+import { COMPAT_ROUTE } from '../lib/site/routes.js';
+// MOVED OUT 2026-09-08 and re-exported. It is a pure function over an error
+// body, and living in a component made it unreachable from any test running
+// under the react-server condition - React s server build exports no hooks, so
+// importing this file pulls in a tree that cannot load. Callers are unchanged.
+export { readableError } from '../lib/site/readableError.js';
+import { readableError } from '../lib/site/readableError.js';
+import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFields.jsx';
+import { ProseBlocks } from './ProseBlocks.jsx';
 import { formatIdr } from '../lib/site/format.js';
 
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
@@ -90,11 +99,8 @@ const RANGE = (n, from = 0) => Array.from({ length: n }, (_, i) => i + from);
 // Accepted birth dates: 1900-01-01 through today. The engine supports 1900-2030,
 // so today is always inside it. `max` is built from LOCAL time, not toISOString(),
 // which is UTC and would rule out today for the first seven hours of every WIB day.
-const EARLIEST_BIRTH_DATE = '1900-01-01';
-const today = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
+// EARLIEST_BIRTH_DATE and today() now live with the fields they constrain, in
+// components/BirthFields.jsx, and are re-exported nowhere: one definition.
 
 // The paid accent + canvas resolve from the element theme via CSS vars set once at
 // the reading root (see themeVars). GLOW/SANCTUARY are indirections so every
@@ -391,14 +397,6 @@ export default function Funnel() {
   return <Reading reading={reading} onReset={reset} />;
 }
 
-function readableError(res) {
-  // The mirror route's 429 is the one refusal worth naming: it is recoverable by
-  // waiting, and "something went wrong" would send her to retry immediately.
-  if (res?.error === 'rate_limited' || res?.error === 'session' || res?.error === 'ip') {
-    return 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.';
-  }
-  return 'Ada yang salah. Coba lagi sebentar.';
-}
 
 /* ---------------- shared bits ---------------- */
 function Wordmark({ light }) {
@@ -408,9 +406,6 @@ function Wordmark({ light }) {
       <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '.28em', fontSize: 13, color: light ? 'rgba(244,238,227,.9)' : '#3c3226' }}>KATON</span>
     </div>
   );
-}
-function FieldLabel({ children }) {
-  return <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', margin: '0 0 10px' }}>{children}</div>;
 }
 function Section({ eyebrow, children, style }) {
   return (
@@ -426,7 +421,6 @@ function Para({ children, style }) {
 
 /* ---------------- Home (input) ---------------- */
 function Home({ form, setForm, error, onSubmit, busy }) {
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target ? e.target.value : e }));
   return (
     <div style={wrap}>
       <div style={{ paddingTop: 60 }}>
@@ -446,59 +440,58 @@ function Home({ form, setForm, error, onSubmit, busy }) {
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '12px 0 0' }}>Pahami dinamika diri, potensi, dan arah langkah berikutnya lewat bacaan yang objektif.</p>
         </Reveal>
 
+        {/* ── THE TWO FRONT-DOOR PATHS, 2026-09-08 ──────────────────────
+            Ruled 2026-09-07: Mirror (understand yourself, free) and
+            Compatibility (the dynamic between two people, paid). Neither is a
+            prerequisite for the other, so this is a CHOICE and not a funnel step
+            - the compat card is a plain link out, not a stage of this form.
+
+            MIRROR FIRST because the form below IS the mirror path: the first
+            card labels what the reader is already looking at, and the second
+            offers the other door. Reversing them would put a paid product above
+            the free acquisition engine on the front page, which is the shape
+            CLAUDE.md's PRODUCT section rules against ("never a gate").
+
+            The mirror card is deliberately NOT a link - it names the form eight
+            lines down. Making it tappable would give the same destination two
+            controls and a reader no way to tell them apart.
+
+            TECHNICALITY, NOT UX: Cowork chose a two-card row. Reyner judges it
+            on the preview and may reorder or restyle it; the copy slots and the
+            route are what this commit fixes. */}
+        <Reveal delay={0.18} style={{ marginTop: 30 }}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div style={{ border: '1px solid var(--divider)', borderRadius: 16, padding: '14px 16px', background: 'var(--kertas-2)' }}>
+              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, fontWeight: 500, color: 'var(--tinta)' }}>{SITE_COPY.home_mirror_label}</div>
+              <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', marginTop: 4 }}>{SITE_COPY.home_mirror_sub}</div>
+            </div>
+            <a
+              href={COMPAT_ROUTE}
+              style={{ display: 'block', border: '1px solid var(--divider)', borderRadius: 16, padding: '14px 16px', textDecoration: 'none' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, fontWeight: 500, color: 'var(--tinta)' }}>{SITE_COPY.home_compat_label}</div>
+                <Icon.arrow size={13} />
+              </div>
+              <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', marginTop: 4 }}>{SITE_COPY.home_compat_sub}</div>
+            </a>
+          </div>
+        </Reveal>
+
         <form onSubmit={onSubmit}>
-          <Reveal delay={0.22} style={{ marginTop: 28 }}>
+          <Reveal delay={0.22} style={{ marginTop: 22 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
-              {/* NATIVE PICKERS. `min` keeps it inside the engine's supported range
-                  and `max` stops a birthdate in the future. */}
-              <FieldLabel>Tanggal lahir</FieldLabel>
-              <input type="date" value={form.date} onChange={set('date')} min={EARLIEST_BIRTH_DATE} max={today()} aria-label="Tanggal lahir" />
-
-              <div style={{ height: 16 }} />
-              {/* HOUR, NOT HOUR AND MINUTE. Measured 2026-08-12 against
-                  calculateBaziChart: over 5,664 minute values on four ordinary
-                  dates, ZERO changed a pillar. Every 時辰 boundary sits on an exact
-                  odd hour (14:59 and 15:00 differ; 14:00 through 14:59 do not), so a
-                  minute field on the front door collects precision that cannot be
-                  used. The one place it CAN matter is a solar-term day, where the
-                  season gate asks for it and explains why. `step=3600` asks the
-                  browser for whole hours; onSubmit snaps regardless, because a
-                  browser that ignores step must not turn into stored precision. */}
-              <FieldLabel>Jam lahir · opsional</FieldLabel>
-              <input type="time" step="3600" value={form.time} onChange={set('time')} aria-label="Jam lahir" />
-              <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Jamnya saja sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.</div>
-
-              <div style={{ height: 16 }} />
-              {/* GENDER IS BACK, AND THE CONDITION FOR RE-ADDING IT IS THIS COMMIT.
-                  The note that stood here said it plainly: "re-add the field in the
-                  same commit that ships a card, or the card ships with a footer that
-                  can never fill." This commit ships both cards.
-
-                  It still changes NOTHING the reading renders - `computePillars`
-                  `void`s it (lib/bazi/pillars.ts) because it touches luck-pillar
-                  direction only and no luck pillars exist. What it feeds is the CARD
-                  FOOTER, where the 2026-08-03 ruling puts PEREMPUAN / LAKI-LAKI on
-                  both cards.
-
-                  OPTIONAL, and the null case is first-class rather than degraded:
-                  `buildFooter` renders date + source with no placeholder and no gap
-                  where a word would be. That is the same 08-03 ruling. */}
-              <FieldLabel>Jenis kelamin · opsional</FieldLabel>
-              <select value={form.gender} onChange={set('gender')} aria-label="Jenis kelamin">
-                {/* THE EMPTY OPTION CARRIES NO LABEL, AND THE BLANK ROW IS THE POINT.
-                    Ruled 2026-09-03. The date and time fields above are native
-                    pickers with no placeholder, and `Tidak diisi` made this the one
-                    control in the card that narrated its own empty state. Blank
-                    matches its neighbours.
-
-                    `value=""` IS UNCHANGED, so `form.gender || null` at both call
-                    sites still resolves an unanswered field to null and the card
-                    footer's first-class no-gender case (the 08-03 ruling above) is
-                    untouched. This is a label edit; nothing downstream can tell. */}
-                <option value=""></option>
-                <option value="female">Perempuan</option>
-                <option value="male">Laki-laki</option>
-              </select>
+              {/* ── ONE IMPLEMENTATION, SHARED WITH THE COMPAT FORM ──────────
+                  Extracted 2026-09-08. The compat page needs these three fields
+                  TWICE on one screen, and three copies of a date input is three
+                  places for `min`, `max`, `step` or an aria-label to drift. The
+                  reasons those attributes are what they are live in
+                  components/BirthFields.jsx with them. */}
+              <BirthFields
+                value={form}
+                onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
+                idPrefix="mirror"
+              />
             </div>
           </Reveal>
 
@@ -548,7 +541,18 @@ function Home({ form, setForm, error, onSubmit, busy }) {
 }
 
 /* ---------------- Season gate (unchanged by promotion) ---------------- */
-function SeasonGate({ season, onAnswer }) {
+/**
+ * @param {Object} season { birthDate, term, at, birthHour }
+ * @param {Function} onAnswer resolution => void
+ * @param {any} [intro] REPLACES the headline when given. The mirror's asks the
+ *   reader about HER OWN birthday - "Tanggal lahirmu jatuh tepat di hari
+ *   pergantian musim" - and the compat form asks it about the other person too,
+ *   which is a different sentence rather than a pronoun swap. Everything below
+ *   the headline is identical for both, so the component is shared rather than
+ *   forked: one gate, one set of answer semantics, one place a term-side bug
+ *   would have to be fixed.
+ */
+export function SeasonGate({ season, onAnswer, intro = null }) {
   const askMinute = season?.birthHour !== null && season?.birthHour !== undefined;
   const [mode, setMode] = useState(askMinute ? 'minute' : 'choose'); // choose | exact | minute
   const [hour, setHour] = useState('');
@@ -575,7 +579,7 @@ function SeasonGate({ season, onAnswer }) {
 
       <Reveal delay={0.06}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 30, lineHeight: 1.16, letterSpacing: '-.01em', color: 'var(--tinta)', margin: '16px 0 0' }}>
-          Tanggal lahirmu jatuh tepat di hari pergantian musim.
+          {intro ?? 'Tanggal lahirmu jatuh tepat di hari pergantian musim.'}
         </h1>
       </Reveal>
 
@@ -728,23 +732,11 @@ export const PROSE_HANDOFF_MS = 450;
  * WHOLE reveal - first paragraph's start to last paragraph's end - regardless of
  * how many arrive. Retune the feel here, in one place.
  */
-export const PROSE_FADE_MS = 450;          // one paragraph's own fade
-export const PROSE_REVEAL_BUDGET_MS = 1200; // first start -> last end, ALWAYS
-export const PROSE_STEP_MAX_MS = 90;        // the step a short reading gets to use
+// RE-EXPORTED, NOT REDECLARED, 2026-09-08. They moved to
+// components/ProseBlocks.jsx with the renderer they govern; every existing
+// importer reads them from here and neither a value nor the behaviour changed.
+export { PROSE_FADE_MS, PROSE_REVEAL_BUDGET_MS, PROSE_STEP_MAX_MS, proseDelayMs } from './ProseBlocks.jsx';
 
-/**
- * The delay for the `i`th paragraph of `total`, in seconds, in DOM order.
- *
- * `STEP_MAX` is a CEILING, not the step: a two-paragraph reading would otherwise
- * spread itself across the entire budget and read as two lonely beats. Short
- * readings get the natural rhythm; long ones compress to fit. Either way the last
- * paragraph has finished by `PROSE_REVEAL_BUDGET_MS`.
- */
-export function proseDelayMs(i, total) {
-  if (total <= 1) return 0;
-  const room = PROSE_REVEAL_BUDGET_MS - PROSE_FADE_MS;
-  return i * Math.min(PROSE_STEP_MAX_MS, room / (total - 1));
-}
 
 /**
  * Does this reader want no motion? Read at the moment the handoff starts rather
@@ -802,17 +794,6 @@ export function Reading({ reading, onReset, initialStage }) {
     const id = setTimeout(() => setArmed(false), PROSE_HANDOFF_MS);
     return () => clearTimeout(id);
   }, [pending, armed]);
-
-  // The reveal's running index, computed once per render rather than by mutating
-  // a counter inside the JSX - `proseOffsets[i]` is how many paragraphs precede
-  // block `i` down the page, so block-local `j` still keys the map while the
-  // DELAY comes from the global position. `penutup` is one more item at the end.
-  const { proseOffsets, proseTotal } = useMemo(() => {
-    const offsets = [];
-    let n = 0;
-    for (const b of (reading.blocks || [])) { offsets.push(n); n += (b.paragraphs || []).length; }
-    return { proseOffsets: offsets, proseTotal: n + (reading.penutup ? 1 : 0) };
-  }, [reading.blocks, reading.penutup]);
 
   const element = chart?.day_master?.element;
   const el = elColor(element);
@@ -905,32 +886,13 @@ export function Reading({ reading, onReset, initialStage }) {
           </div>
         )}
 
-        {/* the reading. `.k-prose` RATHER THAN <Reveal>, which is `.k-rise`: that
-            one is 0.8s from opacity 0 and is used all over the site, so it is
-            left alone and a slower, differently eased reveal is used here.
-
-            THE INDEX IS GLOBAL AND IN DOM ORDER - `proseIndex`, not `j`. It used
-            to be the index within a block, which reset at every heading and
-            started nine first paragraphs simultaneously. The reveal has to read
-            as ONE sequence down the page, so the counter has to run down the
-            page too. `penutup` is the last item in that sequence and takes the
-            last delay rather than a hardcoded one. */}
-        {(reading.blocks || []).map((b, i) => (
-          <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
-            {(b.paragraphs || []).map((p, j) => (
-              <div key={j} className="k-prose"
-                style={{ animationDelay: `${proseDelayMs(proseOffsets[i] + j, proseTotal)}ms` }}>
-                <Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para>
-              </div>
-            ))}
-          </Section>
-        ))}
-        {reading.penutup && (
-          <div className="k-prose"
-            style={{ animationDelay: `${proseDelayMs(proseTotal - 1, proseTotal)}ms`, marginTop: 34 }}>
-            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
-          </div>
-        )}
+        {/* ── THE PROSE RENDERER IS SHARED WITH THE COMPAT REPORT ──────
+            Extracted 2026-09-08 to components/ProseBlocks.jsx, unchanged. The
+            reveal cadence is a ruled behaviour - a fixed per-item delay was
+            REPLACED by a budget, and the running index was made global after a
+            block-local one started nine first paragraphs at once - and a second
+            copy of that is a second place the ruling can rot. */}
+        <ProseBlocks reading={reading} />
       </div>
 
       {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
@@ -1493,8 +1455,14 @@ export function Upcoming({ reading }) {
     }
   }
 
+  // ── COMPAT LEFT THIS BLOCK, 2026-09-08 ────────────────────
+  // `Upcoming` advertises what is NOT for sale. Compatibility is for sale now -
+  // it has a route, a price and a checkout - so a row here would tell a reader
+  // the product she can buy is unavailable. The tap that measured demand for it
+  // goes with the row: demand is measured by PURCHASES from here on, which is a
+  // stronger instrument than a tap and is why the DEFERRED REGISTER row citing
+  // the tap is updated in the same commit.
   const products = [
-    { key: 'compat', copy: UPCOMING_COPY.compat },
     { key: 'annual', copy: UPCOMING_COPY.annual },
   ];
 

@@ -29,40 +29,23 @@
 // shape, different verdict, so it is a different instrument.
 // ============================================================
 
-import { UPCOMING_COPY, COMPAT_COPY } from '../lib/site/copy.js';
-import GLOSSARY from '../docs/content/glossary.json' with { type: 'json' };
+import { UNRULED_SOURCES } from '../lib/site/unruledScan.js';
 
-// ── EVERY BANK THAT CAN CARRY A SENTINEL, 2026-09-07 ──────
-// This scanned UPCOMING_COPY and nothing else, because that was the only bank
-// with stubbed values when it was written. `COMPAT_COPY` now has one too, and a
-// gate that cannot see the bank it is supposed to guard is not a gate - it is a
-// green check beside a live placeholder, which is this repo's most-repeated
-// failure shape.
+// ── THIS SCRIPT NO LONGER NAMES A SINGLE BANK, 2026-09-08 ──
+// It kept its own hand-written list, and that list was wrong three times in
+// three days: COMPAT_COPY arrived with a sentinel and the gate reported
+// `OK No unruled copy in 1 bank(s)` beside it; GLOSSARY.kompatibilitas arrived
+// with 59 placeholders and it reported `OK ... 2 bank(s)` and exited 0; and
+// before either, the gate had never executed on Vercel at all (COWORK-BRIEF row
+// 46). Every fix widened the list and left the defect: **a gate that enumerates
+// its subjects by name is blind to the next subject**, silently, in a way that
+// reads as a pass.
 //
-// KEYED BY NAME so the report says WHICH bank, and a bank added without a row
-// here is the same hole again. When the next one appears, add it.
-//
-// ── `GLOSSARY.kompatibilitas` ADDED 2026-09-08, AND IT IS THE THIRD TIME ──
-// The pair reading's glossary section landed with 59 placeholders, and this gate
-// reported `OK No unruled copy in 2 bank(s)` against them - blind to the very
-// strings it exists to catch, for the same reason it was blind on 2026-09-07
-// (COMPAT_COPY) and never ran at all until 2026-09-08 (COWORK-BRIEF row 46).
-//
-// THE GLOSSARY IS NOT A COPY BANK AND IT STILL BELONGS HERE. It is engine content
-// rather than site chrome, but `lib/render/fallback.js` assembles the
-// deterministic FLOOR out of these strings - so an unruled glossary cell is
-// literally what a reader receives when the provider refuses. That is a stronger
-// reason to gate it than any string in `lib/site/copy.js`.
-//
-// Only the `kompatibilitas` section is scanned. The rest of the glossary is
-// Reyner-reviewed content with no sentinel in it, and widening the scan to the
-// whole file would make this gate's verdict depend on parts of the document
-// nobody is holding open.
-const BANKS = {
-  UPCOMING_COPY,
-  COMPAT_COPY,
-  'GLOSSARY.kompatibilitas': GLOSSARY.kompatibilitas,
-};
+// INVERTED. The banks register into `COPY_BANKS` at their definition sites and
+// `lib/site/unruledScan.js` is the one place a scannable source is named. A new
+// `*_COPY` export is scanned because it exists, and a spec fails if one is not
+// registered. Adding a bank to this file is no longer possible, which is the
+// point.
 
 /** The marker `lib/site/copy.js`'s PENDING() stamps into every unruled value. */
 export const SENTINEL = '@@UNRULED';
@@ -110,11 +93,11 @@ export function scanUnruled(node, path = 'UPCOMING_COPY', found = []) {
 const invoked = process.argv[1] && process.argv[1].endsWith('check-unruled-copy.mjs');
 if (invoked) {
   const strict = process.argv.includes('--strict') || process.env.VERCEL_ENV === 'production';
-  const pending = Object.entries(BANKS)
+  const pending = Object.entries(UNRULED_SOURCES)
     .flatMap(([name, bank]) => scanUnruled(bank, name));
 
   if (pending.length === 0) {
-    console.log(`OK No unruled copy in ${Object.keys(BANKS).length} bank(s): ${Object.keys(BANKS).join(', ')}.`);
+    console.log(`OK No unruled copy in ${Object.keys(UNRULED_SOURCES).length} bank(s): ${Object.keys(UNRULED_SOURCES).join(', ')}.`);
     process.exit(0);
   }
 

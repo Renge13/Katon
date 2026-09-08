@@ -7,7 +7,7 @@ import { priceFor, isSellable, DEFAULT_SKU, SELLABLE_SKUS } from '@/lib/pricing'
 import { recordEvent } from '@/lib/analytics/events';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
 import { paymentFenceReason, devBypassAllowed } from '@/lib/paymentFence';
-import { readingUrl } from '@/lib/site/baseUrl';
+import { readingUrl, pairUrl } from '@/lib/site/baseUrl';
 
 export const runtime = 'nodejs';
 
@@ -158,21 +158,30 @@ export async function POST(request, { params }) {
       readingId: id,
       amount: priceFor(sku),
       description: INVOICE_DESCRIPTION[sku],
-      // ── COMPAT GETS NO REDIRECT YET, AND THAT IS A STATED GAP ──
-      // `readingUrl` builds `/r/<token>`. Handing it a PAIR id would send the
-      // buyer to a reading URL for an object that is not a reading - a 404 at
-      // best, and at worst the exact confusion the "person B is never a reading"
-      // ruling exists to prevent.
+      // ── THE COMPAT REGRESSION IS CLOSED, 2026-09-08 ───────────
+      // X-b1 shipped compat checkout with NO redirect URLs and said so: the
+      // destination is the report page, the page did not exist, and `readingUrl`
+      // builds `/r/<token>` - handing it a PAIR id would send the buyer to a
+      // reading URL for an object that is not a reading, which is the exact
+      // confusion the "person B is never a reading row" ruling exists to prevent.
+      // Rather than guess a route name Reyner had not chosen, both were omitted
+      // and the buyer's last screen stayed on Xendit.
       //
-      // The right destination is the report page, and it does not exist: X-b3
-      // owns the surface and prompt X-b1's own outline says the route name is
-      // "Reyner's - placeholder". So pointing at a guess would either 404 today
-      // or bake in a route name he has not chosen. Omitting them leaves the
-      // buyer's last screen on Xendit, which is the thing these two parameters
-      // were added to fix - so this is a REGRESSION IN THE COMPAT PATH ONLY,
-      // accepted because there is no UI in this prompt at all and no reader can
-      // reach a compat checkout yet. **X-b3 must set both.** Flagged in the PR.
-      ...(isCompat ? {} : {
+      // He ruled `/kompatibilitas` on 2026-09-08 and X-b3 builds the page, so a
+      // pair now gets the same treatment a reading always had - through
+      // `pairUrl`, which is a different builder rather than `readingUrl` with a
+      // different argument.
+      //
+      // `?bayar=selesai` IS A HINT ABOUT THE UI, NEVER AN ENTITLEMENT, on this
+      // path exactly as on the other: it opens the waiting state instead of the
+      // product block, because the redirect regularly beats the webhook. `paid`
+      // still flips in the verified webhook alone and the page re-reads it from
+      // the server. Failure goes to the same page with no marker, so the product
+      // block and its button are already on screen - that is the retry.
+      ...(isCompat ? {
+        successRedirectUrl: pairUrl(id, '?bayar=selesai'),
+        failureRedirectUrl: pairUrl(id),
+      } : {
         successRedirectUrl: readingUrl(id, '?bayar=selesai'),
         failureRedirectUrl: readingUrl(id),
       }),

@@ -193,8 +193,20 @@ test('PROPOSITION 5: Home is untouched and sets no --k-rise-dur', async () => {
   const ui = mount();
   try {
     // No submit: this is the front door as a reader first sees it.
-    assert.deepEqual(delaysIn(ui.host), ['0s', '0.08s', '0.14s', '0.22s', '0.3s'],
-      'Home\'s stagger is out of scope for this PR and must not have changed');
+    //
+    // ── 0.18s INSERTED 2026-09-08, AND NOTHING WAS RENUMBERED ──
+    // X-b3 gives Home a second path (the compat card) above the form, so the
+    // sequence gains one step. The existing four are UNCHANGED - 0, .08, .14 and
+    // the form still at .22 - because the new Reveal was given a delay that fits
+    // between them rather than pushing the form's along. That is deliberate:
+    // this assertion's job is to catch Home's cadence being altered as a SIDE
+    // EFFECT, and an inserted element renumbering four neighbours is exactly the
+    // drift it is watching for.
+    //
+    // The half of this proposition that has not moved at all is the one below:
+    // Home still sets no `--k-rise-dur` anywhere.
+    assert.deepEqual(delaysIn(ui.host), ['0s', '0.08s', '0.14s', '0.18s', '0.22s', '0.3s'],
+      'Home\'s cadence changes only by the compat card being inserted at .18s');
 
     for (const n of [ui.host, ...ui.host.querySelectorAll('*')]) {
       const v = n.style?.getPropertyValue?.('--k-rise-dur');

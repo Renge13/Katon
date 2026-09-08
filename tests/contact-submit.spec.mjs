@@ -85,8 +85,15 @@ function stubFetch(impl) {
 
 const ok = () => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ ok: true }) });
 
-/** Tap a product and get to the state where the contact box is visible. */
-async function tapCompat(ui) {
+/**
+ * Tap a product and get to the state where the contact box is visible.
+ *
+ * RENAMED FROM `tapCompat` 2026-09-08. It always clicked the FIRST interest CTA
+ * in the block, and the first row was compat; compat left `Upcoming` when it went
+ * on sale, so the name had started describing the wrong row. These tests are about
+ * the tap/submit RECEIPT SPLIT and are indifferent to which product it is.
+ */
+async function tapProduct(ui) {
   ui.click(ui.button(UPCOMING_COPY.interestCta));
   await act(async () => {});
   return ui;
@@ -98,7 +105,7 @@ test('the tap shows interestNoted and NOT contactSent', async () => {
   const f = stubFetch(ok);
   const ui = mount();
   try {
-    await tapCompat(ui);
+    await tapProduct(ui);
     assert.ok(ui.text().includes(UPCOMING_COPY.interestNoted), 'tap receipt must be shown');
     assert.ok(!ui.text().includes(UPCOMING_COPY.contactSent),
       'the tap is not a submit: "Emailmu sudah masuk." must not appear yet');
@@ -111,7 +118,7 @@ test('AN EMPTY BOX CONFIRMS NOTHING - and sends nothing', async () => {
   const f = stubFetch(ok);
   const ui = mount();
   try {
-    await tapCompat(ui);
+    await tapProduct(ui);
     const before = f.calls.length; // the tap's own interest_registered
     ui.click(ui.button(UPCOMING_COPY.contactSubmit));
     await act(async () => {});
@@ -130,7 +137,7 @@ test('A REJECTED POST CONFIRMS NOTHING - and keeps her text', async () => {
     : ok()));
   const ui = mount();
   try {
-    await tapCompat(ui);
+    await tapProduct(ui);
     ui.type(ui.input(), 'reyner@example.com');
     ui.click(ui.button(UPCOMING_COPY.contactSubmit));
     await act(async () => {});
@@ -150,7 +157,7 @@ test('A NON-OK STATUS CONFIRMS NOTHING', async () => {
     : ok()));
   const ui = mount();
   try {
-    await tapCompat(ui);
+    await tapProduct(ui);
     ui.type(ui.input(), 'reyner@example.com');
     ui.click(ui.button(UPCOMING_COPY.contactSubmit));
     await act(async () => {});
@@ -168,7 +175,7 @@ test('AN { ok: false } BODY CONFIRMS NOTHING - status alone is not enough', asyn
     : ok()));
   const ui = mount();
   try {
-    await tapCompat(ui);
+    await tapProduct(ui);
     ui.type(ui.input(), 'reyner@example.com');
     ui.click(ui.button(UPCOMING_COPY.contactSubmit));
     await act(async () => {});
@@ -184,7 +191,7 @@ test('a successful submit DOES confirm, and sends the contact', async () => {
   const f = stubFetch(ok);
   const ui = mount();
   try {
-    await tapCompat(ui);
+    await tapProduct(ui);
     ui.type(ui.input(), 'reyner@example.com');
     ui.click(ui.button(UPCOMING_COPY.contactSubmit));
     await act(async () => {});
@@ -197,7 +204,8 @@ test('a successful submit DOES confirm, and sends the contact', async () => {
     const submit = f.calls.at(-1);
     assert.equal(submit.url, `/api/mirror/${READING.token}/event`);
     assert.equal(submit.body.event, 'interest_registered');
-    assert.equal(submit.body.product, 'compat');
+    // `annual` because it is the first - and now only - row in the block.
+    assert.equal(submit.body.product, 'annual');
     assert.equal(submit.body.contact, 'reyner@example.com');
   } finally { ui.unmount(); f.restore(); }
 });
@@ -206,7 +214,7 @@ test('the contact is trimmed, and whitespace alone counts as empty', async () =>
   const f = stubFetch(ok);
   const ui = mount();
   try {
-    await tapCompat(ui);
+    await tapProduct(ui);
     const before = f.calls.length;
     ui.type(ui.input(), '   ');
     ui.click(ui.button(UPCOMING_COPY.contactSubmit));
@@ -230,7 +238,7 @@ test('the TAP is still fire-and-forget - a throwing fetch does not break it', as
   const f = stubFetch(() => { throw new Error('boom'); });
   const ui = mount();
   try {
-    await tapCompat(ui);
+    await tapProduct(ui);
     assert.ok(ui.text().includes(UPCOMING_COPY.interestNoted),
       'the tap receipt still renders even though its counter threw');
   } finally { ui.unmount(); f.restore(); }

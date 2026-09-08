@@ -22,7 +22,11 @@ export default function PrivasiPage() {
       <P style={{ fontSize: 13, color: 'var(--muted-warm)' }}>{q.updated}</P>
 
       <H2>{q.collectHeading}</H2>
-      <Bullets items={q.collect} />
+      {/* THE TWO COMPAT DISCLOSURES RIDE IN THE SAME LIST, appended rather than
+          given a section of their own: a reader looking for what is stored
+          should find all of it in one place, and a separate heading would read
+          as a footnote about a product she may not have bought. */}
+      <Bullets items={[...q.collect, q.privasi_email, q.privasi_second_person]} />
       <P>{q.collectNote}</P>
 
       <H2>{q.purposeHeading}</H2>
