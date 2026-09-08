@@ -133,6 +133,13 @@ test('EVERY SLOT IS STILL A SENTINEL, and a production build must refuse', () =>
 
   assert.equal(unruled.length, 26,
     '22 PASANGAN_COPY slots plus the four home_* slots are unruled');
+
+  // The two /privasi additions are unruled too, and they are DISCLOSURES rather
+  // than product copy - a production build must refuse on them for a stronger
+  // reason than register.
+  for (const slot of ['privasi_email', 'privasi_second_person']) {
+    assert.ok(SITE_COPY.privasi[slot].includes(SENTINEL), slot);
+  }
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {
@@ -295,4 +302,23 @@ test('THE PROSE RENDERER IS SHARED WITH THE MIRROR, not forked', () => {
   // The whole point of the budget: a long reading finishes in the same window.
   assert.ok(proseDelayMs(29, 30) <= budget + 0.001,
     'the last paragraph still starts inside the budget');
+});
+
+test('THE PRIVACY NOTICE DISCLOSES THE EMAIL AND THE SECOND PERSON', () => {
+  // ── RULING C SAID THIS WOULD COME DUE, AND NAMED THE PR ────
+  // The comment above the block used to read "no email is captured anywhere
+  // today, so none is claimed", with Reyner's ruling C attached: the line goes
+  // false the day the first compat checkout takes one, and **/privasi changes in
+  // the SAME PR that ships it**. Commit 4 shipped it. This is that PR.
+  const src = read('lib/site/copy.js');
+  assert.equal(src.includes('no email is captured anywhere today, so none is claimed'), false,
+    'the line ruling C predicted would go false is gone, not merely annotated');
+
+  // Both slots exist and BOTH ARE RENDERED. A disclosure that exists in the bank
+  // and never reaches the page is not a disclosure.
+  assert.equal(typeof SITE_COPY.privasi.privasi_email, 'string');
+  assert.equal(typeof SITE_COPY.privasi.privasi_second_person, 'string');
+  const page = read('app/privasi/page.js');
+  assert.match(page, /q.privasi_email/u);
+  assert.match(page, /q.privasi_second_person/u);
 });
