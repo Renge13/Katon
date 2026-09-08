@@ -225,7 +225,73 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
-## THE CURRENT WORK, 2026-09-08 - PROMPT X-b2, THE PROSE PIPELINE, `feat/compat-2b2`
+## THE CURRENT WORK, 2026-09-08 - PROMPT X-b3, THE SURFACE, `feat/compat-2b3`
+
+**`docs/prompts/X-compat-2b3.md`, RELEASED 2026-09-08 by Reyner. Eight ordered commits.**
+**A PERSON CAN NOW FIND COMPATIBILITY ON THE FRONT DOOR, ENTER TWO BIRTH DATES, PAY, AND READ THE
+REPORT** - with every reader-facing string a `PENDING()` slot, which is why a production build
+refuses and a preview build passes.
+
+| | |
+|---|---|
+| 0 | the prompt file alone |
+| 1 | the copy gate stops naming its subjects - banks `register()` into `COPY_BANKS` |
+| 2 | `PASANGAN_COPY`, 22 slots, plus four `home_*`; the Upcoming compat row deleted |
+| 3 | Home's two paths; the demand tap deleted |
+| 4 | `/kompatibilitas`, `BirthFields` extracted, and X-b1's redirect regression closed |
+| 5 | `/kompatibilitas/[id]`, and the mirror's prose renderer becomes shared |
+| 6 | `/privasi` discloses the email and the second person (ruling C, come due) |
+| 7 | the ledger |
+
+**WHAT IS OWED, AND BY WHOM**
+
+1. **THE `PASANGAN_COPY` RULINGS - REYNER.** 28 live placeholders: 22 `pasangan_*`, four
+   `home_*`, two `privasi_*`. Cowork writes the worksheet, swept, patterned on
+   `docs/content/upcoming-copy-rulings.md`. Applied BY HAND, verbatim - no script targets a copy
+   bank - with `npm run check:copy` as the proof. **Until then `VERCEL_ENV=production npm run build`
+   exits 1, on purpose.**
+2. **REYNER WALKS THE PREVIEW ON A PHONE.** The two-card row on Home, the order of the two paths and
+   the shape of the pre-payment page are technicalities Cowork settled (rule 9) and he may reorder
+   any of them. The preview URL is in the PR.
+3. **THE n=20 FLOOR RE-MEASURE - REYNER DECIDES WHETHER TO SPEND IT.** Not run. Four pairs were
+   re-rendered after the penutup ruling and first-attempt Stage 6 passes went **0/4 -> 3/4**
+   (`docs/qa/2026-09-08-compat-penutup-cause.md`). That is a cause check, not a rate.
+4. **THE VERDICT CATEGORY BECOMES A REJECT** - see OWED ON THE n=20 RE-MEASURE below.
+
+**FOUR STAGE 6 CHANGES LANDED THE SAME DAY, EACH ISOLATED, EACH WITH ONE VERSION BUMP:**
+
+| | | |
+|---|---|---|
+| `1.19.0` | #101 `32d4bd6` | `tension_collapse` scoped per block by fact kind for a pair |
+| `1.20.0` | #102 `435505e` | `p0_opening` ruled; the floor names both people; `both_named`'s floor exemption removed |
+| `1.21.0` | #103 `e5b0677` | the penutup scoped by whether the READING carries any tension |
+| `1.22.0` | #104 `91a07aa` | the five ruled verdict patterns, at `flag` severity |
+
+`e5b0677` also changed the compat PROMPT (`9109d65d14b74e46` -> `ceb898d80f52471c`): the penutup
+instruction asked for "what this pairing IS ... it describes the dynamic between them", which is a
+request for the summarising sentence that reaches for `saling melengkapi`. **The gate scope alone
+moved nothing on the four measured pairs; removing the cause moved three of four.**
+
+**TWO THINGS THE NEXT SESSION MUST NOT READ AS DEFECTS**
+
+- **`style.tension_collapse` rejects `tidak selaras`** - "NOT in harmony", a sentence that names
+  the friction. A token ban firing on a construction. **Not fixed:** a negation carve-out changes
+  what Stage 6 accepts and is Reyner's. The shape is `hedge_construction`'s `bukan berarti`
+  lookahead, applied to `tidak ` / `belum ` / `kurang `.
+- **The pair guard's finding shape changed** (`code` -> `check`) in `91a07aa`. It fixed real
+  invisibility - a pair rejection was recorded in the QA tape as `undefined` and the regeneration
+  directive said `- [undefined] ...` - and it CHANGES THE DIRECTIVE TEXT for any pair carrying a pair
+  finding. **The n=20 is therefore not comparable to the n=10 on regeneration behaviour.**
+
+### PROMPT X-b2 IS MERGED, 2026-09-08, and is not current work any more
+
+**Merged as #100 (`a5648a6`).** Eight commits: the pair semantic JSON, the compat prompt composed
+from the mirror's own bytes, the paid reading endpoint, the variant-key correction, Reyner's 24
+`kompatibilitas` cells, the first two pair Stage 6 checks, and the n=10 run. Its floor-rate
+precondition for X-b3 was NOT met at the time (2/10 = 20%); Reyner released X-b3 anyway, on the
+three Stage 6 rulings rather than on the rate, and the prompt's own STATUS line says so.
+
+## SUPERSEDED - THE CURRENT WORK, 2026-09-08 - PROMPT X-b2, THE PROSE PIPELINE, `feat/compat-2b2`
 
 **`docs/prompts/X-compat-2b2.md`, RELEASED 2026-09-08 by Reyner. Six commits; FOUR landed.**
 The compat report enters the SAME pipeline the mirror uses, as a second instance of one contract.

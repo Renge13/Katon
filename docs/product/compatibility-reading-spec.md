@@ -13,6 +13,22 @@ ruling C: email IDENTITY, no password-based account], price section
 replaced by the launch-decisions pointer. Names corrected to the 08-02 locked set.
 Voice sweep to the composed register still pending at authoring time.
 
+THE SURFACE SHIPPED 2026-09-08 (X-b3), AND TWO OF THIS DOCUMENT'S DECISIONS ARE SUPERSEDED BY IT:
+
+  - "tease-first funnel (paywall between P0 and P1)" and "P0 free tease = faces + ONE named
+    relational fact" are DEAD. Superseded 2026-09-07 by the product model below and enforced in
+    code on 2026-09-08: pre-payment is STATIC - product block, price, inclusions, the form - and a
+    test enumerates the endpoints the page may call. Nothing computed about either person is shown
+    before payment.
+  - "comparison card shareable pre-payment" is DEAD twice over: there is no pre-payment computation
+    to put on a card, and there is no compat card at all in v1. A card would put two people's
+    archetypes on a shareable image and person B consented to nothing.
+
+  What SHIPPED instead: /kompatibilitas (front-door card, static product page, two births, an
+  email, QRIS) and /kompatibilitas/<id> (pending, then the report). Every reader-facing string is
+  an unruled placeholder and a production build refuses until Reyner rules them. See
+  PROGRESS.md's LIVE STATE Compatibility row for what a reader actually gets.
+
 THE PRODUCT MODEL RULED 2026-09-07 (night), verbatim in docs/prompts/X-compat-2b1.md and in
 PROGRESS.md's RULED 2026-09-07 (night). THREE RULINGS, and the first two change this document's
 shape rather than its wording:
