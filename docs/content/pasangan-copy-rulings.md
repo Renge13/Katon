@@ -1,5 +1,5 @@
 <!--
-STATUS: RULED. Reyner, 2026-09-08 (28 strings). Cowork drafted, Reyner ruled, Cowork swept.
+STATUS: APPLIED. Reyner, 2026-09-08 (28 strings). Cowork drafted, Reyner ruled, Cowork swept.
 Supersedes the APPLIED-AS-DRAFTED version of this file (Code applied the drafts the same day; this
 ruling REPLACES those values). Lands on main ALONE before the PR that applies it (the #28 ruling).
 
