@@ -21,6 +21,7 @@ import { SENTINEL } from '../scripts/check-unruled-copy.mjs';
 import { COMPAT_ROUTE, compatPairRoute } from '../lib/site/routes.js';
 import { pairUrl, readingUrl } from '../lib/site/baseUrl.js';
 import { priceFor, SELLABLE_SKUS } from '../lib/pricing.js';
+import { proseDelayMs, PROSE_FADE_MS, PROSE_REVEAL_BUDGET_MS, PROSE_STEP_MAX_MS } from '../components/ProseBlocks.jsx';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const read = (p) => readFileSync(path.join(ROOT, p), 'utf8');
@@ -51,7 +52,7 @@ test('the route is RULED and written down once', () => {
   assert.ok(read('app/kompatibilitas/page.js').includes('Pasangan'));
 
   // And nothing hardcodes it. A literal here is the drift the module prevents.
-  for (const file of ['components/Funnel.jsx', 'components/Pasangan.jsx', 'lib/site/baseUrl.js']) {
+  for (const file of ['components/Funnel.jsx', 'components/Pasangan.jsx', 'components/PasanganReport.jsx', 'lib/site/baseUrl.js']) {
     const src = read(file);
     const literals = src.split("'/kompatibilitas").length - 1;
     assert.equal(literals, 0, `${file} hardcodes the route instead of importing it`);
@@ -204,4 +205,94 @@ test('THE SERVER 409 IS HANDLED, not just the client-side gate', () => {
   const src = read('components/Pasangan.jsx');
   assert.match(src, /needs_term_side/u);
   assert.match(src, /created\.terms/u, 'it uses the terms the server returned');
+});
+
+// ── THE REPORT PAGE ────────────────────────────────────────
+
+test('B\'s BIRTH DATA NEVER APPEARS IN ANYTHING THE PAGE CONSUMES', async () => {
+  // ── THE RULING THIS PROTECTS ───────────────────────────────
+  // Person B gets nothing and is never a reading row. The other half of that is
+  // what the BUYER receives: she paid for a reading of the dynamic, not for a
+  // copy of somebody else's birth record. A page that renders B's birth date has
+  // published it to whoever holds the link.
+  //
+  // ASSERTED ON THE REAL SERVE PAYLOADS, not on the component: the component can
+  // only render what it is given, so the guarantee belongs where the bytes are
+  // produced. Both endpoints the page reads are checked.
+  const { createPair, markPairPaid } = await import('../lib/pairStore.js');
+  const { servePairFacts } = await import('../lib/pair/serve.js');
+
+  const id = `spec-b-privacy-${Date.now()}`;
+  const B_DATE = '1990-06-07';
+  const B_TIME = '12:00';
+  await createPair({
+    id,
+    a_reading_id: null,
+    a_birth_date: '1989-09-13',
+    a_birth_time: '09:00',
+    a_gender: null,
+    a_term_side: null,
+    b_birth_date: B_DATE,
+    b_birth_time: B_TIME,
+    b_gender: null,
+    b_term_side: null,
+    sku: 'compat',
+  });
+
+  // UNPAID first: the pre-payment body must carry nothing about either chart.
+  const unpaid = await (await servePairFacts(id)).json();
+  assert.equal(unpaid.status, 'not_paid');
+  assert.equal(JSON.stringify(unpaid).includes(B_DATE), false, 'no B date while unpaid');
+
+  await markPairPaid(id, {});
+  const paid = await (await servePairFacts(id)).json();
+  assert.equal(paid.status, 'paid');
+
+  const body = JSON.stringify(paid);
+  assert.equal(body.includes(B_DATE), false, 'B\'s birth DATE is not in the facts payload');
+  assert.equal(body.includes(B_TIME), false, 'nor her birth TIME');
+  // And the same for A, whose data the buyer does own but which the page has no
+  // reason to be handed back.
+  assert.equal(body.includes('1989-09-13'), false, 'nor A\'s');
+});
+
+test('THE REPORT DOES NOT BRANCH ON served_from', () => {
+  // The floor is Reyner's own ruled glossary prose (rule 15: it is the second
+  // half of the design, not a degraded mode), so marking it would tell a reader
+  // she got something lesser when she got the sentences he wrote. `served_from`
+  // stays in the payload as the passive detector of a dead provider - an
+  // operator's question, not a reader's.
+  const src = code('components/PasanganReport.jsx');
+  assert.equal(src.includes('served_from'), false,
+    'the report must render a floor identically to a render');
+});
+
+test('NO CARD, NO PDF, NO SHARE ON THE COMPAT REPORT', () => {
+  // Out of scope for v1 and not an oversight: a compat card would put two
+  // people's archetypes on a shareable image, and person B consented to nothing.
+  const src = code('components/PasanganReport.jsx');
+  for (const forbidden of ['CardA', 'CardB', 'captureCard', 'Sharecard', '/api/deliver', 'pdf']) {
+    assert.equal(src.includes(forbidden), false, `${forbidden} must not be on the compat report`);
+  }
+});
+
+test('THE PROSE RENDERER IS SHARED WITH THE MIRROR, not forked', () => {
+  // The reveal cadence is ruled behaviour - a fixed per-item delay was replaced
+  // by a budget (PROSE_REVEAL_BUDGET_MS), and the running index was made global
+  // after a block-local one started every block's first paragraph at once. A
+  // second copy is a second place that can rot.
+  //
+  // A first draft of the extraction RE-WROTE `proseDelayMs` from memory as a
+  // fixed step, which is exactly the shape the budget replaced. Caught by reading
+  // the original. This asserts the arithmetic, not the import.
+  assert.match(code('components/Funnel.jsx'), /<ProseBlocks reading=\{reading\} \/>/u);
+  assert.match(code('components/PasanganReport.jsx'), /<ProseBlocks/u);
+
+  const budget = PROSE_REVEAL_BUDGET_MS - PROSE_FADE_MS;
+  assert.equal(proseDelayMs(0, 5), 0);
+  assert.equal(proseDelayMs(1, 1), 0, 'a single paragraph has no delay');
+  assert.equal(proseDelayMs(1, 3), Math.min(PROSE_STEP_MAX_MS, budget / 2));
+  // The whole point of the budget: a long reading finishes in the same window.
+  assert.ok(proseDelayMs(29, 30) <= budget + 0.001,
+    'the last paragraph still starts inside the budget');
 });

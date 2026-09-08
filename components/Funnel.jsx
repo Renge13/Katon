@@ -73,6 +73,7 @@ import { priceFor } from '../lib/pricing.js';
 import { SITE_COPY, UPCOMING_COPY } from '../lib/site/copy.js';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
 import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFields.jsx';
+import { ProseBlocks } from './ProseBlocks.jsx';
 import { formatIdr } from '../lib/site/format.js';
 
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
@@ -742,23 +743,11 @@ export const PROSE_HANDOFF_MS = 450;
  * WHOLE reveal - first paragraph's start to last paragraph's end - regardless of
  * how many arrive. Retune the feel here, in one place.
  */
-export const PROSE_FADE_MS = 450;          // one paragraph's own fade
-export const PROSE_REVEAL_BUDGET_MS = 1200; // first start -> last end, ALWAYS
-export const PROSE_STEP_MAX_MS = 90;        // the step a short reading gets to use
+// RE-EXPORTED, NOT REDECLARED, 2026-09-08. They moved to
+// components/ProseBlocks.jsx with the renderer they govern; every existing
+// importer reads them from here and neither a value nor the behaviour changed.
+export { PROSE_FADE_MS, PROSE_REVEAL_BUDGET_MS, PROSE_STEP_MAX_MS, proseDelayMs } from './ProseBlocks.jsx';
 
-/**
- * The delay for the `i`th paragraph of `total`, in seconds, in DOM order.
- *
- * `STEP_MAX` is a CEILING, not the step: a two-paragraph reading would otherwise
- * spread itself across the entire budget and read as two lonely beats. Short
- * readings get the natural rhythm; long ones compress to fit. Either way the last
- * paragraph has finished by `PROSE_REVEAL_BUDGET_MS`.
- */
-export function proseDelayMs(i, total) {
-  if (total <= 1) return 0;
-  const room = PROSE_REVEAL_BUDGET_MS - PROSE_FADE_MS;
-  return i * Math.min(PROSE_STEP_MAX_MS, room / (total - 1));
-}
 
 /**
  * Does this reader want no motion? Read at the moment the handoff starts rather
@@ -816,17 +805,6 @@ export function Reading({ reading, onReset, initialStage }) {
     const id = setTimeout(() => setArmed(false), PROSE_HANDOFF_MS);
     return () => clearTimeout(id);
   }, [pending, armed]);
-
-  // The reveal's running index, computed once per render rather than by mutating
-  // a counter inside the JSX - `proseOffsets[i]` is how many paragraphs precede
-  // block `i` down the page, so block-local `j` still keys the map while the
-  // DELAY comes from the global position. `penutup` is one more item at the end.
-  const { proseOffsets, proseTotal } = useMemo(() => {
-    const offsets = [];
-    let n = 0;
-    for (const b of (reading.blocks || [])) { offsets.push(n); n += (b.paragraphs || []).length; }
-    return { proseOffsets: offsets, proseTotal: n + (reading.penutup ? 1 : 0) };
-  }, [reading.blocks, reading.penutup]);
 
   const element = chart?.day_master?.element;
   const el = elColor(element);
@@ -919,32 +897,13 @@ export function Reading({ reading, onReset, initialStage }) {
           </div>
         )}
 
-        {/* the reading. `.k-prose` RATHER THAN <Reveal>, which is `.k-rise`: that
-            one is 0.8s from opacity 0 and is used all over the site, so it is
-            left alone and a slower, differently eased reveal is used here.
-
-            THE INDEX IS GLOBAL AND IN DOM ORDER - `proseIndex`, not `j`. It used
-            to be the index within a block, which reset at every heading and
-            started nine first paragraphs simultaneously. The reveal has to read
-            as ONE sequence down the page, so the counter has to run down the
-            page too. `penutup` is the last item in that sequence and takes the
-            last delay rather than a hardcoded one. */}
-        {(reading.blocks || []).map((b, i) => (
-          <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
-            {(b.paragraphs || []).map((p, j) => (
-              <div key={j} className="k-prose"
-                style={{ animationDelay: `${proseDelayMs(proseOffsets[i] + j, proseTotal)}ms` }}>
-                <Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para>
-              </div>
-            ))}
-          </Section>
-        ))}
-        {reading.penutup && (
-          <div className="k-prose"
-            style={{ animationDelay: `${proseDelayMs(proseTotal - 1, proseTotal)}ms`, marginTop: 34 }}>
-            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
-          </div>
-        )}
+        {/* ── THE PROSE RENDERER IS SHARED WITH THE COMPAT REPORT ──────
+            Extracted 2026-09-08 to components/ProseBlocks.jsx, unchanged. The
+            reveal cadence is a ruled behaviour - a fixed per-item delay was
+            REPLACED by a budget, and the running index was made global after a
+            block-local one started nine first paragraphs at once - and a second
+            copy of that is a second place the ruling can rot. */}
+        <ProseBlocks reading={reading} />
       </div>
 
       {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
