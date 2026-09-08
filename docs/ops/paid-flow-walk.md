@@ -34,11 +34,26 @@ if the variable is set by mistake. `tests/payments-provider.spec.mjs` asserts it
    `paid` through the SAME `settlePair` the verified webhook uses, then shows the
    skeleton and swaps in the reading when it arrives.
 
-**Preview cannot render prose.** `GEMINI_API_KEY` is Production-only, so the fence
-refuses the render and the report serves the module-assembly FLOOR - Reyner's own
-ruled glossary text. That is the correct product on that surface and it is what
-the page shows; it is not a defect to report. What a preview walk verifies is the
-FLOW, the layout and the copy, not the model's prose.
+**PREVIEW NEEDS ITS OWN `GEMINI_API_KEY` OR THE WALK SERVES THE FLOOR.** The
+variable is scoped per environment in Vercel, so a key set for Production does
+nothing on Preview: the render fence refuses, and the report shows the
+module-assembly floor - Reyner's own ruled glossary text, correct on that surface
+and not a defect, but NOT the model's prose.
+
+That distinction decides what a walk can tell you:
+
+| `GEMINI_API_KEY` on Preview | what the walk verifies |
+|---|---|
+| not set | the FLOW, the layout and the copy. The report is the floor |
+| set | all of the above, plus the prose the model actually writes |
+
+**Set for Preview 2026-09-08**, alongside `PAYMENTS_PROVIDER=mock`, so a preview
+walk now renders real prose - and spends real Gemini money, once per pair, which
+is the accepted cost. The floor is still what a preview shows if the key is ever
+removed, and the page cannot tell you which it served: `served_from` is in the
+payload and deliberately not on screen (rule 15 - the floor is the second half of
+the design, not a degraded mode). To check, read `served_from` from
+`GET /api/pair/<id>/reading`.
 
 ## Locally
 
