@@ -134,3 +134,46 @@ test('THE SALES-CLOSED STATE IS DECIDED ON THE SERVER', () => {
   assert.match(read('components/Pasangan.jsx'), /sales_closed_title/u);
   assert.match(read('components/PasanganReport.jsx'), /sales_closed_body/u);
 });
+
+// ── THE WAIT AFTER PAYMENT (Y-1 section 3) ─────────────────
+
+test('THE WEBHOOK WARMS THE CACHE, so the GET is not where the render happens', () => {
+  // Reyner's pending page sat for MINUTES: the GET renders Gemini synchronously,
+  // regeneration attempts included, so the first request after payment carried
+  // the whole cost while a person watched. Measured locally 2026-09-08 at 2.7-5.4s
+  // for one or two attempts, and the n=20 run saw draws needing six.
+  const src = read('lib/pair/settle.js');
+  assert.ok(src.includes('if (transitioned) await warmPairReading(pairId)'),
+    'the warm render is awaited - a fire-and-forget would be frozen with the invocation');
+  assert.ok(src.includes('catch (err)'), 'and a failed render must not fail the payment');
+
+  // ONLY ON THE TRANSITION. A webhook retry must not start a second render.
+  assert.ok(src.indexOf('if (transitioned) await warmPairReading') > src.indexOf('const transitioned'),
+    'the warm follows the transition it is conditioned on');
+});
+
+test('THE POLL DOES NOT STACK REQUESTS', () => {
+  // setInterval fires on the clock whether or not the last tick returned, and a
+  // tick can call the reading endpoint, which renders synchronously. At 3s that
+  // stacks request on request - and the production spend guard (three renders per
+  // cache key per hour) then refuses them into the floor.
+  // COMMENTS STRIPPED. The first version of this assertion failed on the comment
+  // three lines above it, which explains why `setInterval` is wrong - the fourth
+  // time in this repo that a detector has matched its own documentation.
+  const src = read('components/PasanganReport.jsx')
+    .replace(/\/\*[\s\S]*?\*\//gu, '')
+    .replace(/^\s*\/\/.*$/gmu, '');
+  assert.equal(src.includes('setInterval'), false,
+    'a self-scheduling timeout waits for the work; an interval does not');
+  assert.ok(src.includes('timer = setTimeout(tick, POLL_MS)'));
+});
+
+test('EVERY WAITING STATE SHOWS THE REPORT SHAPE, never a blank page', () => {
+  // "never a blank page or a dead end; a refresh during rendering lands on the
+  // same skeleton" - the prompt's own words. Both waiting branches render it.
+  const src = read('components/PasanganReport.jsx');
+  assert.match(src, /function ReportSkeleton/u);
+  assert.equal(src.split('<ReportSkeleton />').length - 1, 2,
+    'both the just-paid branch and the paid-but-not-rendered branch show it');
+  assert.match(src, /k-skel/u, 'and it reuses the mirror bars rather than inventing a spinner');
+});

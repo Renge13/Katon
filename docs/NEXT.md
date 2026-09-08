@@ -225,7 +225,49 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
-## THE CURRENT WORK, 2026-09-08 - PROMPT X-b3, THE SURFACE, `feat/compat-2b3`
+## THE CURRENT WORK, 2026-09-08 - PROMPT Y-1, THE COMPAT REPORT HOTFIX
+
+**`docs/prompts/Y-compat-hotfix-1.md`, RELEASED 2026-09-08. A HOTFIX: a paying customer received a
+blank report.** Reyner paid Rp 39.000 on production for pair `g4WH4_9QbCrCj3Gha934q`.
+
+| | |
+|---|---|
+| 0 | `PAYMENTS_PROVIDER` = xendit / mock / closed. Production CLOSED |
+| 1 | the blank report - `ProseBlocks` derives paragraphs from `text` |
+| 2 | the raw keys - names resolved on the server from the glossary |
+| 3 | the wait - the webhook warms the render, and every wait shows a skeleton |
+| 4 | `docs/ops/paid-flow-walk.md` - the free walk |
+| 5 | the ledger |
+
+**SALES ARE CLOSED AND STAY CLOSED UNTIL DOKU.** No reopen step, and **no real Xendit transaction by
+anyone, including for testing.** An unset `PAYMENTS_PROVIDER` means `closed`, so a lost env var
+cannot reopen a channel Reyner shut.
+
+**WHAT IS OWED, AND BY WHOM**
+
+1. **REYNER SETS `PAYMENTS_PROVIDER=mock` FOR THE PREVIEW SCOPE** in Vercel, then walks the paid path.
+   Production stays `closed`; unset is already `closed`. `docs/ops/paid-flow-walk.md` has the steps.
+   **Y-2 does not start until that walk is done.**
+2. **THE 28 RULED COPY STRINGS - ITS OWN PR, after Y-1 merges.** The file is on main; the bank still
+   holds the drafts. `tests/pasangan-copy.spec.mjs` reads the file's STATUS, so the applying commit
+   flips `RULED` to `APPLIED` and the byte-identity check arms itself.
+3. **THE VERCEL FUNCTION DURATION FOR THE PRODUCTION INVOCATION - REYNER, from the dashboard.** I could
+   not read it: no Vercel CLI or token here, and a preview answers 302 to an SSO login. Measured
+   LOCALLY instead, 2026-09-08: a cold pair render is **2.7-5.4s** at one or two attempts, and the n=20
+   run saw draws needing six. **So a plain platform timeout is NOT the obvious cause and I did not
+   assume it was.** The fixes shipped are the ones that hold either way - warm on settle, a skeleton in
+   every wait, and a poll that no longer stacks requests. If the dashboard shows a timeout, the
+   remaining move is `maxDuration` or a status-based render, and that is a decision with the number in
+   hand.
+4. **THE DELETION PATH STILL DOES NOT REACH A PAIR** - see its own section below. `privasi_second_person`
+   in the ruled copy promises B's data is deleted with the reading, which the code cannot keep today.
+
+### PROMPT X-b3 IS MERGED, 2026-09-08, and is not current work any more
+
+**Merged as #105 (`e2bfc3f`).** The surface shipped and **two of its defects reached a paying
+customer within the hour** - COWORK-BRIEF row 48. The suite was 58 green at the time.
+
+## SUPERSEDED - THE CURRENT WORK, 2026-09-08 - PROMPT X-b3, THE SURFACE, `feat/compat-2b3`
 
 **`docs/prompts/X-compat-2b3.md`, RELEASED 2026-09-08 by Reyner. Eight ordered commits.**
 **A PERSON CAN NOW FIND COMPATIBILITY ON THE FRONT DOOR, ENTER TWO BIRTH DATES, PAY, AND READ THE

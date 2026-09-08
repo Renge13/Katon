@@ -30,6 +30,34 @@ import { compatPairRoute } from '../lib/site/routes.js';
 
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
 
+/**
+ * The report's own shape, greyed.
+ *
+ * ── A BLANK PAGE IS NOT A WAITING STATE ────────────────────
+ * Reyner's pending page sat for minutes with an eyebrow on it and nothing else,
+ * so there was no way to tell "still working" from "broken". Six blocks, because
+ * a compat reading has six; mirror-styled, using the same `.k-skel` bars the
+ * mirror's prose skeleton uses, so the two waits look like one product.
+ *
+ * It renders whenever the reading has not arrived yet - the first load, a poll
+ * after payment, or a refresh mid-render - which is what "a refresh during
+ * rendering lands on the same skeleton" means.
+ */
+function ReportSkeleton() {
+  return (
+    <div aria-busy="true">
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <div key={i} style={{ marginTop: i ? 34 : 28, paddingTop: i ? 28 : 0, borderTop: i ? '1px solid var(--divider)' : 'none' }}>
+          <div aria-hidden="true" className="k-skel" style={{ height: 10, width: '38%', marginBottom: 14 }} />
+          {[92, 100, 76].map((w, j) => (
+            <div key={j} aria-hidden="true" className="k-skel" style={{ height: 13, width: `${w}%`, marginTop: j ? 12 : 0 }} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** Same cadence as the mirror's `Pending`: 3s, and it gives up rather than spin. */
 const POLL_MS = 3000;
 const POLL_LIMIT = 100;
@@ -113,16 +141,37 @@ export default function PasanganReport({ id, salesClosed = false }) {
   // still says unpaid. A page opened cold on an unpaid pair does not poll - it
   // shows the product block and its button, which is the retry.
   useEffect(() => {
-    if ((!justPaid && !mockPay) || !loaded) return undefined;
-    if (pair?.status === 'paid') return undefined;
+    // KEEP POLLING WHILE THE PROSE IS MISSING, not only while unpaid. The old
+    // condition stopped the moment the row flipped to paid - which is exactly
+    // when the render begins - so a reader whose first reading fetch failed or
+    // timed out sat on a skeleton forever with nothing coming back for it.
+    if (!loaded) return undefined;
+    if (!justPaid && !mockPay && reading) return undefined;
+    if (pair?.status === 'paid' && reading) return undefined;
+    // ── A CHAIN OF TIMEOUTS, NOT AN INTERVAL ──────────────────
+    // `setInterval` fires on the clock regardless of whether the last tick has
+    // returned, and `load()` can call the reading endpoint - which renders
+    // Gemini synchronously and takes seconds. At a 3s interval that stacks
+    // request on request, each one starting work the previous one is still
+    // doing, and the production spend guard (three renders per cache key per
+    // hour) then starts refusing them into the floor.
+    //
+    // A self-scheduling timeout waits for the work before counting the next
+    // tick, so there is never more than one request in flight.
     let tries = 0;
-    const timer = setInterval(async () => {
+    let stopped = false;
+    let timer = null;
+    const tick = async () => {
+      if (stopped) return;
       tries += 1;
       const body = await load();
-      if (body?.status === 'paid' || tries >= POLL_LIMIT) clearInterval(timer);
-    }, POLL_MS);
-    return () => clearInterval(timer);
-  }, [justPaid, mockPay, loaded, pair?.status, load]);
+      if (stopped) return;
+      if (body?.status === 'paid' || tries >= POLL_LIMIT) return;
+      timer = setTimeout(tick, POLL_MS);
+    };
+    timer = setTimeout(tick, POLL_MS);
+    return () => { stopped = true; if (timer) clearTimeout(timer); };
+  }, [justPaid, mockPay, loaded, pair?.status, reading, load]);
 
   async function reopenInvoice() {
     if (busy) return;
@@ -161,6 +210,7 @@ export default function PasanganReport({ id, salesClosed = false }) {
               {PASANGAN_COPY.pending_body}
             </p>
           </Reveal>
+          <div style={{ marginTop: 30 }}><ReportSkeleton /></div>
         </div>
       );
     }
@@ -209,12 +259,19 @@ export default function PasanganReport({ id, salesClosed = false }) {
     );
   }
 
-  // ── PAID ─────────────────────────────────────────────────
+  // ── PAID, STILL RENDERING ────────────────────────────────
+  // The row says paid and the prose has not arrived. This is the state Reyner
+  // sat in for minutes with nothing but an eyebrow on screen, and the state a
+  // REFRESH mid-render lands in - so it shows the report's own shape rather than
+  // a blank page, and it is never a dead end.
   if (!reading) {
     return (
-      <div className="k-fade" style={{ ...wrap, paddingTop: 72 }}>
-        <Reveal><Eyebrow>{PASANGAN_COPY.pending_title}</Eyebrow></Reveal>
-        {error && <div style={{ color: 'var(--red)', fontSize: 13, marginTop: 12 }}>{error}</div>}
+      <div className="k-fade" style={wrap}>
+        <div style={{ paddingTop: 60 }}>
+          <Reveal><Eyebrow>{PASANGAN_COPY.pending_title}</Eyebrow></Reveal>
+          {error && <div style={{ color: 'var(--red)', fontSize: 13, marginTop: 12 }}>{error}</div>}
+          <ReportSkeleton />
+        </div>
       </div>
     );
   }
