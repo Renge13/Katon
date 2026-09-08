@@ -38,6 +38,7 @@
     "test:pair-semantic": "node --test tests/pair-semantic.spec.mjs",
     "test:compat-prompt": "node --test tests/compat-prompt.spec.mjs",
     "test:compat-stage6-pair": "node --conditions=react-server --test tests/compat-stage6-pair.spec.mjs",
+    "test:compat-surface": "node --test tests/compat-surface.spec.mjs",
     "test:pair-reading-route": "node --conditions=react-server --test tests/pair-reading-route.spec.mjs",
     "test:stage3": "node --test tests/stage3-facts.spec.mjs",
     "test:stage3-hierarchy": "node --test tests/stage3-hierarchy.spec.mjs",

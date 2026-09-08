@@ -72,6 +72,7 @@ import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, a
 import { priceFor } from '../lib/pricing.js';
 import { SITE_COPY, UPCOMING_COPY } from '../lib/site/copy.js';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
+import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFields.jsx';
 import { formatIdr } from '../lib/site/format.js';
 
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
@@ -91,11 +92,8 @@ const RANGE = (n, from = 0) => Array.from({ length: n }, (_, i) => i + from);
 // Accepted birth dates: 1900-01-01 through today. The engine supports 1900-2030,
 // so today is always inside it. `max` is built from LOCAL time, not toISOString(),
 // which is UTC and would rule out today for the first seven hours of every WIB day.
-const EARLIEST_BIRTH_DATE = '1900-01-01';
-const today = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
+// EARLIEST_BIRTH_DATE and today() now live with the fields they constrain, in
+// components/BirthFields.jsx, and are re-exported nowhere: one definition.
 
 // The paid accent + canvas resolve from the element theme via CSS vars set once at
 // the reading root (see themeVars). GLOW/SANCTUARY are indirections so every
@@ -392,7 +390,16 @@ export default function Funnel() {
   return <Reading reading={reading} onReset={reset} />;
 }
 
-function readableError(res) {
+/**
+ * EXPORTED 2026-09-08 so the compat surface reads the same sentences.
+ *
+ * Both strings are Reyner's and both are about the same two moments - a
+ * recoverable rate limit, and everything else. Rule 20 is one voice everywhere,
+ * so a second wording for "something went wrong" on a second page would be a
+ * second register, and the compat page ships every OTHER string as a PENDING()
+ * slot precisely to avoid inventing one.
+ */
+export function readableError(res) {
   // The mirror route's 429 is the one refusal worth naming: it is recoverable by
   // waiting, and "something went wrong" would send her to retry immediately.
   if (res?.error === 'rate_limited' || res?.error === 'session' || res?.error === 'ip') {
@@ -410,9 +417,6 @@ function Wordmark({ light }) {
     </div>
   );
 }
-function FieldLabel({ children }) {
-  return <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', margin: '0 0 10px' }}>{children}</div>;
-}
 function Section({ eyebrow, children, style }) {
   return (
     <div style={{ marginTop: 40, paddingTop: 34, borderTop: '1px solid var(--divider)', ...style }}>
@@ -427,7 +431,6 @@ function Para({ children, style }) {
 
 /* ---------------- Home (input) ---------------- */
 function Home({ form, setForm, error, onSubmit, busy }) {
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target ? e.target.value : e }));
   return (
     <div style={wrap}>
       <div style={{ paddingTop: 60 }}>
@@ -488,56 +491,17 @@ function Home({ form, setForm, error, onSubmit, busy }) {
         <form onSubmit={onSubmit}>
           <Reveal delay={0.22} style={{ marginTop: 22 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
-              {/* NATIVE PICKERS. `min` keeps it inside the engine's supported range
-                  and `max` stops a birthdate in the future. */}
-              <FieldLabel>Tanggal lahir</FieldLabel>
-              <input type="date" value={form.date} onChange={set('date')} min={EARLIEST_BIRTH_DATE} max={today()} aria-label="Tanggal lahir" />
-
-              <div style={{ height: 16 }} />
-              {/* HOUR, NOT HOUR AND MINUTE. Measured 2026-08-12 against
-                  calculateBaziChart: over 5,664 minute values on four ordinary
-                  dates, ZERO changed a pillar. Every 時辰 boundary sits on an exact
-                  odd hour (14:59 and 15:00 differ; 14:00 through 14:59 do not), so a
-                  minute field on the front door collects precision that cannot be
-                  used. The one place it CAN matter is a solar-term day, where the
-                  season gate asks for it and explains why. `step=3600` asks the
-                  browser for whole hours; onSubmit snaps regardless, because a
-                  browser that ignores step must not turn into stored precision. */}
-              <FieldLabel>Jam lahir · opsional</FieldLabel>
-              <input type="time" step="3600" value={form.time} onChange={set('time')} aria-label="Jam lahir" />
-              <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Jamnya saja sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.</div>
-
-              <div style={{ height: 16 }} />
-              {/* GENDER IS BACK, AND THE CONDITION FOR RE-ADDING IT IS THIS COMMIT.
-                  The note that stood here said it plainly: "re-add the field in the
-                  same commit that ships a card, or the card ships with a footer that
-                  can never fill." This commit ships both cards.
-
-                  It still changes NOTHING the reading renders - `computePillars`
-                  `void`s it (lib/bazi/pillars.ts) because it touches luck-pillar
-                  direction only and no luck pillars exist. What it feeds is the CARD
-                  FOOTER, where the 2026-08-03 ruling puts PEREMPUAN / LAKI-LAKI on
-                  both cards.
-
-                  OPTIONAL, and the null case is first-class rather than degraded:
-                  `buildFooter` renders date + source with no placeholder and no gap
-                  where a word would be. That is the same 08-03 ruling. */}
-              <FieldLabel>Jenis kelamin · opsional</FieldLabel>
-              <select value={form.gender} onChange={set('gender')} aria-label="Jenis kelamin">
-                {/* THE EMPTY OPTION CARRIES NO LABEL, AND THE BLANK ROW IS THE POINT.
-                    Ruled 2026-09-03. The date and time fields above are native
-                    pickers with no placeholder, and `Tidak diisi` made this the one
-                    control in the card that narrated its own empty state. Blank
-                    matches its neighbours.
-
-                    `value=""` IS UNCHANGED, so `form.gender || null` at both call
-                    sites still resolves an unanswered field to null and the card
-                    footer's first-class no-gender case (the 08-03 ruling above) is
-                    untouched. This is a label edit; nothing downstream can tell. */}
-                <option value=""></option>
-                <option value="female">Perempuan</option>
-                <option value="male">Laki-laki</option>
-              </select>
+              {/* ── ONE IMPLEMENTATION, SHARED WITH THE COMPAT FORM ──────────
+                  Extracted 2026-09-08. The compat page needs these three fields
+                  TWICE on one screen, and three copies of a date input is three
+                  places for `min`, `max`, `step` or an aria-label to drift. The
+                  reasons those attributes are what they are live in
+                  components/BirthFields.jsx with them. */}
+              <BirthFields
+                value={form}
+                onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
+                idPrefix="mirror"
+              />
             </div>
           </Reveal>
 
@@ -587,7 +551,18 @@ function Home({ form, setForm, error, onSubmit, busy }) {
 }
 
 /* ---------------- Season gate (unchanged by promotion) ---------------- */
-function SeasonGate({ season, onAnswer }) {
+/**
+ * @param {Object} season { birthDate, term, at, birthHour }
+ * @param {Function} onAnswer resolution => void
+ * @param {any} [intro] REPLACES the headline when given. The mirror's asks the
+ *   reader about HER OWN birthday - "Tanggal lahirmu jatuh tepat di hari
+ *   pergantian musim" - and the compat form asks it about the other person too,
+ *   which is a different sentence rather than a pronoun swap. Everything below
+ *   the headline is identical for both, so the component is shared rather than
+ *   forked: one gate, one set of answer semantics, one place a term-side bug
+ *   would have to be fixed.
+ */
+export function SeasonGate({ season, onAnswer, intro = null }) {
   const askMinute = season?.birthHour !== null && season?.birthHour !== undefined;
   const [mode, setMode] = useState(askMinute ? 'minute' : 'choose'); // choose | exact | minute
   const [hour, setHour] = useState('');
@@ -614,7 +589,7 @@ function SeasonGate({ season, onAnswer }) {
 
       <Reveal delay={0.06}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 30, lineHeight: 1.16, letterSpacing: '-.01em', color: 'var(--tinta)', margin: '16px 0 0' }}>
-          Tanggal lahirmu jatuh tepat di hari pergantian musim.
+          {intro ?? 'Tanggal lahirmu jatuh tepat di hari pergantian musim.'}
         </h1>
       </Reveal>
 
