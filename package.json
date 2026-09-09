@@ -38,6 +38,7 @@
     "test:pair-semantic": "node --test tests/pair-semantic.spec.mjs",
     "test:compat-prompt": "node --test tests/compat-prompt.spec.mjs",
     "test:compat-stage6-pair": "node --conditions=react-server --test tests/compat-stage6-pair.spec.mjs",
+    "test:ci-parity": "node --test tests/ci-parity.spec.mjs",
     "test:compat-surface": "node --conditions=react-server --import ./scripts/jsx-register.mjs --test tests/compat-surface.spec.mjs",
     "test:pasangan-copy": "node --test tests/pasangan-copy.spec.mjs",
     "test:payments-provider": "node --test tests/payments-provider.spec.mjs",

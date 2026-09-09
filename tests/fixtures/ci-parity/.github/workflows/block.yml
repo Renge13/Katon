@@ -1,0 +1,13 @@
+# FIXTURE, not a workflow. Feeds tests/ci-parity.spec.mjs a `run:` block scalar,
+# which the parser in scripts/gate-plan.mjs must REFUSE rather than read as
+# "this workflow runs no npm scripts". Lives under tests/fixtures so no CI
+# runner ever discovers it.
+name: fixture-block-scalar
+on: push
+jobs:
+  x:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          npm run test:pillars
+          npm run report:forge

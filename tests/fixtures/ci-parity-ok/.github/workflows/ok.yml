@@ -1,0 +1,11 @@
+# FIXTURE, not a workflow. The single-line shape the parser DOES read, so the
+# refusal next door is shown to be about the block scalar and not about the
+# fixture directory being malformed in general.
+name: fixture-single-line
+on: push
+jobs:
+  x:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run test:pillars
+      - run: npx eslint .
