@@ -81,7 +81,7 @@ const labelFor = (facts) => (block) => {
   return null;
 };
 
-export default function PasanganReport({ id, salesClosed = false }) {
+export default function PasanganReport({ id, salesClosed = false, mockPayments = false }) {
   const [pair, setPair] = useState(null);       // the GET /api/pair body
   const [reading, setReading] = useState(null); // the GET .../reading body
   const [error, setError] = useState(null);
@@ -173,6 +173,24 @@ export default function PasanganReport({ id, salesClosed = false }) {
     return () => { stopped = true; if (timer) clearTimeout(timer); };
   }, [justPaid, mockPay, loaded, pair?.status, reading, load]);
 
+  /**
+   * Flip `paid` through the mock door, then re-read.
+   *
+   * The route is fenced server-side (`mockPaymentsAllowed()`), so this is inert
+   * anywhere mock is not the provider - the button simply is not rendered there,
+   * and if it somehow were, the POST would answer 503.
+   */
+  async function unlockMock() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    const res = await fetch(`/api/mock-pay/${id}`, { method: 'POST' })
+      .then((r) => r.json()).catch(() => null);
+    if (!res?.ok) setError(readableError(res));
+    await load();
+    setBusy(false);
+  }
+
   async function reopenInvoice() {
     if (busy) return;
     setBusy(true);
@@ -186,6 +204,41 @@ export default function PasanganReport({ id, salesClosed = false }) {
     else setError(readableError(paid));
     setBusy(false);
   }
+
+  /**
+   * The free unlock, as a CONTROL rather than a side effect of a query string.
+   *
+   * ── WHY IT IS A BUTTON AND NOT ONLY AN EFFECT ──────────────
+   * It was only an effect, firing on `?bayar=mock`. Reyner clicked through on
+   * the preview and landed on a BARE `/kompatibilitas/<id>` - no query, unpaid,
+   * nothing on screen but a pending title. The walk stopped there. A refresh
+   * would have done the same thing to anyone who reached the page correctly,
+   * because a refresh keeps the URL but there was nothing on the page to act on
+   * if the effect had already run and failed.
+   *
+   * So: whenever the provider is mock and the pair is unpaid, the unlock is
+   * reachable FROM THE VIEW. The query is an accelerator, never the only way in.
+   *
+   * ── THE LABEL IS ENGLISH, DELIBERATELY ────────────────────
+   * This control cannot exist in production - `paymentsProvider()` downgrades
+   * mock to closed whenever VERCEL_ENV is production, and the route it calls
+   * answers 503 there. It is a test affordance for whoever is walking the flow,
+   * so it is written in the language of the person walking it and is
+   * unmistakably not product copy. Rule 20 governs what a READER sees; no reader
+   * can see this.
+   */
+  const mockUnlock = mockPayments && pair?.status !== 'paid' ? (
+    <Reveal delay={0.2} style={{ marginTop: 20 }}>
+      <div style={{ border: '1px dashed var(--muted-warm)', borderRadius: 14, padding: '14px 16px' }}>
+        <div style={{ fontSize: 12, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)', marginBottom: 10 }}>
+          Preview only
+        </div>
+        <Button onClick={unlockMock} disabled={busy}>
+          {busy ? 'Working...' : 'Simulate payment (mock)'}
+        </Button>
+      </div>
+    </Reveal>
+  ) : null;
 
   if (!loaded) return null;
 
@@ -210,6 +263,7 @@ export default function PasanganReport({ id, salesClosed = false }) {
               {PASANGAN_COPY.pending_body}
             </p>
           </Reveal>
+          {mockUnlock}
           <div style={{ marginTop: 30 }}><ReportSkeleton /></div>
         </div>
       );
@@ -255,6 +309,7 @@ export default function PasanganReport({ id, salesClosed = false }) {
             <Button onClick={reopenInvoice} disabled={busy}>{busy ? 'Menyiapkan...' : PASANGAN_COPY.form_submit}</Button>
           </Reveal>
         )}
+        {mockUnlock}
       </div>
     );
   }

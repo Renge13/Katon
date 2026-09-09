@@ -28,11 +28,25 @@ if the variable is set by mistake. `tests/payments-provider.spec.mjs` asserts it
    and an unset variable is already `closed`.
 2. Redeploy the preview, or push once, so the new value is picked up.
 3. Open the preview's `/kompatibilitas`, fill both births and an email, submit.
-4. The button leads straight to `/kompatibilitas/<id>?bayar=mock` - no Xendit tab,
-   because the "invoice url" is this site's own page.
+4. The button NAVIGATES to `/kompatibilitas/<id>?bayar=mock` - same origin, no
+   Xendit tab, because the "invoice url" is a path on this site.
 5. That page unlocks the pair through `POST /api/mock-pay/<id>`, which flips
    `paid` through the SAME `settlePair` the verified webhook uses, then shows the
    skeleton and swaps in the reading when it arrives.
+6. **If you ever land on `/kompatibilitas/<id>` with no query and it is unpaid,
+   there is a "Simulate payment (mock)" button under a PREVIEW ONLY eyebrow.**
+   The query is an accelerator; the control is always there while the provider is
+   mock. A refresh cannot strand you.
+
+**HOW THIS WENT WRONG ONCE, so the next walk is not debugged from scratch
+(2026-09-09).** The first walk stopped dead on that bare URL. Three causes, all
+client-side and all now covered by `tests/mock-walk.spec.mjs`: the checkout
+called `history.pushState` under a comment claiming it navigated (it does not,
+so the report route never mounted); the unlock existed only as an effect keyed to
+`?bayar=mock`; and the mock "invoice url" was ABSOLUTE, built from
+NEXT_PUBLIC_BASE_URL, so it pointed at a different preview alias than the one
+being walked. **The env vars were never the problem** - the pay call answered
+`{"mock":true}` throughout.
 
 **PREVIEW NEEDS ITS OWN `GEMINI_API_KEY` OR THE WALK SERVES THE FLOOR.** The
 variable is scoped per environment in Vercel, so a key set for Production does

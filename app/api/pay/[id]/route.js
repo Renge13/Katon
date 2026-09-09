@@ -8,6 +8,7 @@ import { recordEvent } from '@/lib/analytics/events';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
 import { paymentFenceReason, devBypassAllowed, paymentsProvider } from '@/lib/paymentFence';
 import { readingUrl, pairUrl } from '@/lib/site/baseUrl';
+import { compatPairRoute } from '@/lib/site/routes';
 
 export const runtime = 'nodejs';
 
@@ -171,7 +172,14 @@ export async function POST(request, { params }) {
     // goes through the SAME `settlePair` / `markReadingPaid` door the verified
     // webhook uses. Nothing gets a second way to become paid.
     if (paymentsProvider() === 'mock') {
-      const mockUrl = isCompat ? pairUrl(id, '?bayar=mock') : readingUrl(id, '?bayar=mock');
+      // RELATIVE, NOT ABSOLUTE, and the difference stranded a walk. `pairUrl`
+      // builds from NEXT_PUBLIC_BASE_URL, and on a preview that pointed at a
+      // DIFFERENT alias - a request to katon-git-fix-... was answered
+      // `https://katon-eta.vercel.app/...`. A real provider NEEDS the absolute
+      // form, because Xendit redirects a browser to it from its own domain. Mock
+      // is a link back to the page the walker is already on, so an absolute URL
+      // only hops hosts mid-flow.
+      const mockUrl = `${isCompat ? compatPairRoute(id) : `/r/${id}`}?bayar=mock`;
       if (isCompat) await setPairInvoice(id, { invoiceId: `mock_${id}`, invoiceUrl: mockUrl, sku, email });
       else await setInvoice(id, { invoiceId: `mock_${id}`, waNumber, sku });
       await recordEvent(id, 'checkout_started', { sku, provider: 'mock' });

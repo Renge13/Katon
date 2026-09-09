@@ -126,9 +126,12 @@ test('THE SALES-CLOSED STATE IS DECIDED ON THE SERVER', () => {
   // 503s on submit is the shape of the defect this whole hotfix is about. Both
   // pages resolve it in their server component and pass a boolean down.
   for (const page of ['app/kompatibilitas/page.js', 'app/kompatibilitas/[id]/page.js']) {
+    // The PROPOSITION, not the expression: the report page hoists the call into
+    // a local now that it derives two flags from it, and a test that fails on
+    // that refactor is teaching people to stop reading it.
     const src = read(page);
-    assert.match(src, /paymentsProvider\(\) === 'closed'/u, `${page} decides on the server`);
-    assert.match(src, /salesClosed=/u, `${page} passes it down`);
+    assert.match(src, /paymentsProvider\(\)/u, `${page} asks the server-side provider`);
+    assert.match(src, /salesClosed=\{[^}]*'closed'/u, `${page} passes it down`);
   }
   // And the components render the ruled strings rather than composing a sentence.
   assert.match(read('components/Pasangan.jsx'), /sales_closed_title/u);

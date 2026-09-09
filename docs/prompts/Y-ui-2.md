@@ -78,3 +78,14 @@ Render before promotion), COWORK-BRIEF row if anything in this prompt was found 
 No PDF. No pricing or payment-provider work beyond reading `PAYMENTS_PROVIDER`. No Stage 6 change. No
 new visual language, no new fonts or colours. No Indonesian outside the rulings file. Open the PR with the
 Preview URL; Reyner walks it on a phone with `PAYMENTS_PROVIDER=mock` set for Preview.
+
+## Addendum 2026-09-09 (Cowork, from Code's Y-1 walk)
+- The P4/P5 stutter: the model titles the block after the badge, so `Pola Kontras` appears as the
+  eyebrow, the glossary name AND the block heading within three lines. Rule 14: the engine owns
+  structure. For the two blocks that carry a glossary name (`p4_*`, `p5_pull_fit`), the eyebrow +
+  name IS the heading: render no model heading there (component-side, not a prompt change), and
+  assert it on the Y-1 production fixture. Reyner may reorder eyebrow/name on the preview.
+- `npm test` must run the same set CI runs, or fail loudly when it cannot (second bite in two days).
+  One commit, in this prompt, before commit 1.
+- Y-2 starts only after Reyner's walk of the mock-payment preview. His amendments to the 28 strings
+  and to the Y-2 drafts land as a separate copy PR first (rulings file -> main alone -> apply).
