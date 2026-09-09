@@ -1,6 +1,7 @@
 import { Spectral, Hanken_Grotesk, Archivo } from 'next/font/google';
 import './globals.css';
 import SiteFooter from '@/components/SiteFooter.jsx';
+import SiteHeader from '@/components/SiteHeader.jsx';
 
 // Root layout for the Katon Next.js App Router app.
 // Fonts: Spectral (display/serif) + Hanken Grotesk (sans/UI), self-hosted via
@@ -63,6 +64,12 @@ export default function RootLayout({ children }) {
           Flex column with the children flexed keeps it at the bottom of short
           pages without position: fixed. */}
       <body style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+        {/* THE HEADER IS MOUNTED HERE FOR THE SAME REASON THE FOOTER IS: so no
+            page can omit it (Y-2 ruling 5, chrome applies to the whole site).
+            `app/` has exactly one layout.js, so this covers every route - there
+            is no nested layout that could shadow it, and a test walks the route
+            table rather than a list to keep that true. */}
+        <SiteHeader />
         <div style={{ flex: '1 0 auto' }}>{children}</div>
         <SiteFooter />
       </body>
