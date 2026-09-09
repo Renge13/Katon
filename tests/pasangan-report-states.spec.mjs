@@ -299,3 +299,44 @@ test('THE UNPAID STATES SHOW NO BIRTH DATE AT ALL', async () => {
     } finally { ui.unmount(); restore(); }
   }
 });
+
+// ── THE FIRST FRAME (Addendum 2 item 3) ────────────────────
+
+test('THE SKELETON IS UP BEFORE THE FIRST FETCH RESOLVES, NOT A BLANK PAGE', async () => {
+  // ── THE DEFECT, IN THE PROMPT'S OWN WORDS ──────────────────
+  // "the report route mounts with the skeleton immediately. 5-8 s of blank page
+  // is a defect, assert against it (a rendered skeleton within one frame of
+  // navigation)." It rendered `null` until both fetches came back, so after a
+  // checkout redirect - the worst possible moment - she looked at an empty
+  // screen with a footer under it.
+  //
+  // THE FETCH IS HELD OPEN, which is what makes "before it resolves" a real
+  // moment rather than a race this test happens to win.
+  let release;
+  const held = new Promise((r) => { release = r; });
+  const prev = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    await held;
+    return { ok: true, status: 200, json: async () => ({ status: 'unpaid' }) };
+  };
+
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  try {
+    // ONE act, no timers: this is the mount frame and nothing has resolved.
+    await act(async () => { root.render(React.createElement(PasanganReport, { id: 'p1' })); });
+
+    assert.ok(host.querySelector('[aria-busy="true"]'),
+      'the first frame must carry the skeleton, not an empty page');
+    assert.ok((host.textContent || '').trim().length === 0,
+      'and no copy: nothing is known yet, so the page must not guess which state it is in');
+
+    release();
+    await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+    // And it does resolve into a real state rather than sitting on the skeleton.
+    assert.ok((host.textContent || '').includes(PASANGAN_COPY.unpaid_resume));
+  } finally {
+    act(() => root.unmount()); host.remove(); globalThis.fetch = prev;
+  }
+});

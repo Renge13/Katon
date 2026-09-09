@@ -375,7 +375,25 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
     </Reveal>
   ) : null;
 
-  if (!loaded) return null;
+  // ── FIRST PAINT IS THE SKELETON, NEVER NOTHING (Addendum 2 item 3) ──
+  // This was `if (!loaded) return null`, and that null WAS the blank page Reyner
+  // asked to be rid of: the route mounts, two fetches go out, and for as long as
+  // they take the reader looks at an empty screen with a footer under it. After a
+  // checkout redirect that is the worst possible moment for the page to look
+  // broken - she has just paid.
+  //
+  // NO COPY HERE ON PURPOSE. It is not an eighth state, it is the first frame of
+  // whichever state is about to arrive, and nothing is known yet: she may be
+  // unpaid, she may be a 404. Saying "Menyusun Bacaan Kalian" before the server
+  // has confirmed she paid would be the product guessing. The shape is honest and
+  // the words wait.
+  if (!loaded) {
+    return (
+      <div className="k-fade" style={wrap}>
+        <div style={{ paddingTop: 60 }}><ReportSkeleton /></div>
+      </div>
+    );
+  }
 
   const view = viewFor({ pair, reading, failed, justPaid, mockPay, exhausted });
   // Engine facts, formatted. Null when either date is missing, and the header
