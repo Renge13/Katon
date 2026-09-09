@@ -129,18 +129,29 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
 
     if (!paid?.ok) { setError(readableError(paid)); return; }
 
+    // ── MOCK REALLY NAVIGATES, AND THE OLD COMMENT LIED ───────
+    // This block used to `pushState` and then `setStage('pending')`, under a
+    // comment reading "the report page does the unlock; here it just navigates".
+    // **pushState does not navigate.** It swaps the URL and mounts nothing, so
+    // the report route never loaded and this component rendered its OWN pending
+    // view - whose only affordance is an invoice link that mock never sets.
+    // Reyner's walk stopped on that screen: bare URL, no query, nothing to do.
+    //
+    // `location.assign` is a real navigation, so `/kompatibilitas/<id>` mounts
+    // and does the unlock. It is deliberately NOT the pushState below: that one
+    // exists for the Xendit path, where the invoice link lives in this
+    // component's state and must survive.
+    if (paid.mock) {
+      window.location.assign(`${compatPairRoute(created.id)}?bayar=mock`);
+      return;
+    }
+
     // Bookmarkable without remounting, exactly as the mirror does it: pushState
     // swaps the URL and keeps this component's state, where router.push would
     // mount the report route and discard the invoice link she may still need.
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', compatPairRoute(created.id));
     }
-    // ── MOCK GOES NOWHERE EXTERNAL ────────────────────────────
-    // With PAYMENTS_PROVIDER=mock the "invoice url" is this site's own
-    // `/kompatibilitas/<id>?bayar=mock`, so opening a second tab would be a tab
-    // onto the page this one is already becoming. The report page does the
-    // unlock; here it just navigates.
-    if (paid.mock) { setStage('pending'); return; }
 
     // Opened from the click gesture so it is not popup-blocked; the link is also
     // rendered in the pending state, which is the fallback when it is.
