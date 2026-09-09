@@ -89,3 +89,38 @@ Preview URL; Reyner walks it on a phone with `PAYMENTS_PROVIDER=mock` set for Pr
   One commit, in this prompt, before commit 1.
 - Y-2 starts only after Reyner's walk of the mock-payment preview. His amendments to the 28 strings
   and to the Y-2 drafts land as a separate copy PR first (rulings file -> main alone -> apply).
+
+## Addendum 2 (2026-09-09, Reyner's preview walk) - these AMEND the commits above
+Ruled by Reyner after walking the mock-payment preview; Cowork restated. Where a point below conflicts
+with the original commit text, this addendum wins.
+1. **Report header.** Drop `paid_title` ("Bacaan Kalian Sudah Siap": one reader, and it looked like
+   every other eyebrow). The report opens with the page's H1 `page_title` and one line naming the
+   pair from engine facts, not prose: "<Gender A>, <tanggal A> dan <Gender B>, <tanggal B>" (dates
+   in Indonesian long form, gender words as the form shows them; omit gender when not given). Engine
+   facts only - rule 14. A's own birth date is A's; B's date was typed by A. No archetype names here
+   (p0_opening already does that inside the reading).
+2. **Every block gets the same two-level heading.** Small eyebrow = SECTION label (chrome strings:
+   `section_core`, `section_seat`, `section_element`, `section_pattern`, `section_rhythm`,
+   `section_close`); big serif headline = the glossary `name_id` of the block's primary fact (Inti
+   Menekan, Kursi Berbenturan, Penyeimbang Unsur, Pola Cermin, Tarikan Kuat, Ritme Bergesek). No
+   model-written heading anywhere (this supersedes Addendum 1's "no heading on badge blocks only").
+   The P2 reframe and palace sentences stay inside the P2 block.
+3. **Busy state on the CTA and no blank page.** After `Lanjut ke Pembayaran`: button shows the
+   reused `Menyiapkan...` (Reyner-approved 2026-08-23) and is disabled; the report route mounts with
+   the skeleton immediately. 5-8 s of blank page is a defect, assert against it (a rendered skeleton
+   within one frame of navigation).
+4. **Hour, not minute.** `BirthFields` time input becomes an hour picker (00-23, Indonesian label
+   "Jam lahir"), shared by mirror and compat. The engine's hour pillar is a two-hour branch; the
+   minute never changes it. Keep `step=3600` semantics; the stored value is HH:00. Confirm with the
+   engine tests that no fixture depends on minutes (grep before asserting).
+5. **Static strings on the compat surface are under review.** Reyner rules from
+   `docs/content/pasangan-copy-rulings.md` (28) + the shared BirthFields strings listed in
+   `docs/content/compat-surface-strings-review.md`. Apply his amendments as a copy PR before commit 1.
+6. **Link box.** Y-2 commit 3 already: proper box, URL, copy button. Confirmed as required.
+7. **Email field: pending Reyner's decision** (keep for payment + support recovery, or drop for v1).
+   Do not build around it until ruled; the field stays as is meanwhile.
+8. **PDF** stays Y-3 but is a RELEASE precondition (Reyner, 2026-09-09).
+9. **Reading voice** ("reads like the floor") is NOT Y-2. It becomes Prompt Z (Cowork to write): a
+   measured comparison of floor vs render for the same pairs, then prompt changes that give the model
+   room (specifics from the chart, second person, concrete daily examples) under the same gate, with
+   the floor rate re-measured. Rule 14 unchanged.
