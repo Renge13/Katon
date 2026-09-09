@@ -225,7 +225,62 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
-## THE CURRENT WORK, 2026-09-08 - PROMPT Y-1, THE COMPAT REPORT HOTFIX
+## THE CURRENT WORK, 2026-09-09 - PROMPT Y-2, SITE CHROME AND THE COMPAT FLOW
+
+**`docs/prompts/Y-ui-2.md`, RELEASED 2026-09-08, plus both addenda.** Reyner's brief: "UX,
+navigations, must be professional, doesn't need to be beautiful, but makes sense and modern." It adds
+STRUCTURE and removes dead ends; no new visual language.
+
+| | |
+|---|---|
+| A1 | `npm test` runs everything CI runs, or refuses (Addendum 1) |
+| 1 | `SiteHeader` on every route, and the `CHROME_COPY` bank |
+| A2.4 | the hour picker, and the season-gate sentence ruled with it |
+| 2 | `PasanganSteps` - 1 Kamu, 2 Dia, 3 Email, with the gate inside its step |
+| 3 | the report's seven states, one heading system, a way out of each (A2.1, A2.2) |
+| 4 | the mirror gets the same copy-link control |
+| A2.3 | the report's first frame is the skeleton, not a blank page |
+| 5 | the ledger |
+
+**THE COPY PR LANDED FIRST AND SEPARATELY, as Addendum 2 item 5 required.** #112, merged
+2026-09-09 (`a66d735`): `page_lead`, `form_email_help` and `privasi_email` amended, `paid_title`
+dropped, the two report eyebrows renamed to `section_pattern`/`section_rhythm`, four new section
+slots added, and two shared JSX strings changed in both products. Y-2 therefore contains no copy
+ruling of its own except the one Reyner made after it (below).
+
+**WHAT IS OWED, AND BY WHOM**
+
+1. **REYNER WALKS THE PREVIEW ON A PHONE** with `PAYMENTS_PROVIDER=mock` set for the Preview scope.
+   That is the only place the stepper, the report header and the section headings can be judged;
+   jsdom has no layout, so nothing in the suite says any of it LOOKS right.
+2. **THREE COPY QUESTIONS, all in the PR body and none of them blocking a merge.**
+   - `section_element` and `kompatibilitas.p3_supplies.name_id` are BOTH "Penyeimbang Unsur". The
+     duplicate is suppressed in code, which is a technicality; whether they should be DIFFERENT words
+     is Reyner's.
+   - the mirror's copy-link box carries NO sentence, because `link_keep` says "bacaan **kalian**" -
+     the couple's - and the mirror's reading is hers alone. A singular version is his to write.
+   - the hour picker's label stayed `Jam lahir · opsional`. Addendum 2 item 4 says "Jam lahir"; the
+     rulings file confirms the longer form UNCHANGED on the same walk, and dropping "· opsional"
+     removes the only signal that the field can be skipped.
+3. **`?dari=<token>` CANNOT PREFILL, and the prompt's sentence saying it does is wrong.**
+   `GET /api/mirror/<token>` returns no birth data by design. The stepper starts on step 1 and a test
+   pins that, so the sentence cannot be implemented later without meeting it.
+4. **THE DELETION PATH STILL DOES NOT REACH A PAIR** - unchanged by Y-2, see its own section below.
+   `privasi_second_person` promises B's data is deleted with the reading, which the code cannot keep.
+5. **PROMPT Z, THE READING VOICE, IS AFTER Y-2 MERGES** (Addendum 2 item 9). Not started.
+6. **THE PDF FOR COMPAT IS Y-3 and is a RELEASE precondition** (Addendum 2 item 8).
+
+**SALES REMAIN CLOSED UNTIL DOKU.** Y-2 changes nothing about that: no reopen step, and no real
+Xendit transaction by anyone.
+
+### PROMPT Y-1 IS MERGED, 2026-09-08, and is not current work any more
+
+**The compat report hotfix.** A paying customer received a blank report; the two defects that caused
+it shipped in #105 and are fixed. Sales closed the same day. Its "what is owed" list is superseded by
+the one above, except items 3 (the Vercel function duration, still Reyner's to read from the
+dashboard) and 4 (the deletion path), which are unchanged and still open.
+
+## SUPERSEDED - THE CURRENT WORK, 2026-09-08 - PROMPT Y-1, THE COMPAT REPORT HOTFIX
 
 **`docs/prompts/Y-compat-hotfix-1.md`, RELEASED 2026-09-08. A HOTFIX: a paying customer received a
 blank report.** Reyner paid Rp 39.000 on production for pair `g4WH4_9QbCrCj3Gha934q`.
