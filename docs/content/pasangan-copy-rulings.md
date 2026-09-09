@@ -1,7 +1,8 @@
 <!--
-STATUS: RULED, AWAITING APPLY. Reyner, 2026-09-08 (28 strings) + 2026-09-09 amendments (below).
-Cowork drafted, Reyner ruled, Cowork swept. The 28 of 2026-09-08 are APPLIED. The 2026-09-09
-amendments are NOT yet applied: they land as the copy PR before Y-2 commit 1 (Addendum 2 item 5).
+STATUS: APPLIED. Reyner, 2026-09-08 (28 strings) + 2026-09-09 amendments (below).
+Cowork drafted, Reyner ruled, Cowork swept. The 28 of 2026-09-08 were applied on the day; the
+2026-09-09 amendments were applied by the second commit of the copy PR that lands before Y-2
+commit 1 (Addendum 2 item 5), which is the commit that flipped this line.
 
 APPLIES TO: 4 SITE_COPY.home_*, 22 PASANGAN_COPY, 2 SITE_COPY.privasi.* = 28 slots, all ids pasangan_*
 + 2026-09-09: 2 PASANGAN_COPY amendments (page_lead, form_email_help), 1 SITE_COPY.privasi amendment

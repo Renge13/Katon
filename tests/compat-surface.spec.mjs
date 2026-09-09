@@ -96,8 +96,15 @@ const PASANGAN_SLOTS = [
   'price_note',
   'form_a_legend', 'form_b_legend', 'form_email_label', 'form_email_help',
   'form_submit', 'season_gate_b_intro',
-  'pending_title', 'pending_body', 'paid_title', 'link_keep', 'unpaid_resume',
-  'report_badge_eyebrow', 'report_quadrant_eyebrow', 'notfound_title',
+  'pending_title', 'pending_body', 'link_keep', 'unpaid_resume',
+  // Ruled 2026-09-09. `paid_title` is GONE, and `report_badge_eyebrow` /
+  // `report_quadrant_eyebrow` are RENAMED (not joined) to `section_pattern` /
+  // `section_rhythm` - same ruled words, one slot each. The other four section
+  // eyebrows are wired in Y-2; the `deepEqual` below is what makes "the bank has
+  // exactly the slots the surface renders" cover them from the day they land.
+  'section_core', 'section_seat', 'section_element',
+  'section_pattern', 'section_rhythm', 'section_close',
+  'notfound_title',
   // Added by Y-1, 2026-09-08: sales are CLOSED and the page has to say so.
   'sales_closed_title', 'sales_closed_body',
 ];
@@ -139,8 +146,15 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
   ].filter(([, v]) => typeof v === 'string' && v.includes(SENTINEL));
 
   assert.deepEqual(holes.map(([k]) => k), [], 'a compat slot is still a sentinel');
-  // 22 from X-b3 plus the two sales-closed strings Y-1 added.
-  assert.equal(Object.keys(PASANGAN_COPY).length, 24);
+  // 22 from X-b3, plus the two sales-closed strings Y-1 added, MINUS `paid_title`
+  // and PLUS the four new section eyebrows ruled 2026-09-09: 22 + 2 - 1 + 4 = 27.
+  //
+  // IT IS STILL A LITERAL ON PURPOSE. Deriving it from `PASANGAN_SLOTS` would
+  // make it tautological - the `deepEqual` above already pins the bank to that
+  // list - and this number is the tripwire on the list itself. It went red on
+  // the 2026-09-09 amendment and forced the count to be accounted for, which is
+  // the whole job. Whoever changes it should be able to write the arithmetic.
+  assert.equal(Object.keys(PASANGAN_COPY).length, 27);
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {

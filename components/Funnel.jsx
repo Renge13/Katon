@@ -531,7 +531,7 @@ function Home({ form, setForm, error, onSubmit, busy }) {
                 ledger first. */}
             <Button type="submit" disabled={busy}>{busy ? 'Menyiapkan...' : 'Lihat Refleksiku'}</Button>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 12.5, color: 'var(--muted-warm)', marginTop: 14 }}>
-              <Icon.lock size={13} /> Bersifat pribadi. Hanya untukmu.
+              <Icon.lock size={13} /> Privat. Hanya bisa diakses via tautanmu.
             </div>
           </Reveal>
         </form>
