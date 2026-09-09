@@ -75,7 +75,7 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
         onChange={set('time')}
         aria-label={aria('Jam lahir')}
       />
-      <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Jamnya saja sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.</div>
+      <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Tanpa jam tetap akurat, pakai jam jauh lebih presisi.</div>
 
       <div style={{ height: 16 }} />
       {/* GENDER CHANGES NOTHING THE READING RENDERS - `computePillars` `void`s it

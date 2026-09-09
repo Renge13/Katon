@@ -17,6 +17,30 @@
 // rewritten, and pinning its wording made this file fail on a reword rather than
 // on a defect.
 //
+// ── 28 BECAME 31 ON 2026-09-09, AND THE PARSER MOVED WITH IT ──
+// The amendment did three things a single flat regex could not see, and the
+// visible symptom was a count of 25 that looked like rows going missing:
+//
+//   `paid_title` is DROPPED, and its row stays as `~~`paid_title`~~ | DROPPED`
+//   so the deletion has a record. It is read as a DROP and asserted ABSENT from
+//   the bank - a struck row that silently stopped parsing would let the slot
+//   come back with nobody noticing.
+//
+//   `report_badge_eyebrow` / `report_quadrant_eyebrow` were RENAMED, and their
+//   rows carry a "(was `...`)" note in the slot cell. The note is parsed and
+//   discarded: the old name is history, not a second slot.
+//
+//   Four NEW section eyebrows live in the file's SECOND table, which has three
+//   columns and no bank column. It is read as PASANGAN_COPY, scoped BY HEADING
+//   rather than by shape - the file now holds two other three-column tables
+//   (the shared-JSX one and the email was/now record) and a shape-matching
+//   parser would compare the bank against a superseded value from one of them.
+//   There is an assertion below that neither is being read.
+//
+// `section_pattern` and `section_rhythm` appear in BOTH tables. That is the one
+// ruled value in two places this file is meant to catch, so it is not merely
+// deduped: the two copies must agree, byte for byte, or this goes red.
+//
 // ── IT HAS TWO STATES, BECAUSE THE PROCESS DOES ────────────
 // The #28 ruling puts a rulings file on main ALONE, before the PR that applies
 // it. So there is a documented window where the file is landed and the bank
@@ -48,13 +72,56 @@ import { SENTINEL } from '../scripts/check-unruled-copy.mjs';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const MD = readFileSync(path.join(ROOT, 'docs', 'content', 'pasangan-copy-rulings.md'), 'utf8');
 
-/** Every `| bank | `slot` | `string` |` row, in file order. */
+/** The text under a `## ` heading, up to the next one. '' selects the preamble. */
+function section(heading) {
+  const parts = MD.split(/^## /mu);
+  if (heading === '') return parts[0];
+  const hit = parts.find((p) => p.startsWith(heading));
+  assert.ok(hit, `the rulings file has no "## ${heading}" section`);
+  return hit;
+}
+
+const BANK_ROW =
+  /^\|\s*(SITE_COPY(?:\.privasi)?|PASANGAN_COPY)\s*\|\s*`([a-z0-9_]+)`(?:\s*\(was `[a-z0-9_]+`\))?\s*\|\s*`(.*)`\s*\|$/u;
+const DROP_ROW =
+  /^\|\s*(?:SITE_COPY(?:\.privasi)?|PASANGAN_COPY)\s*\|\s*~~`([a-z0-9_]+)`~~\s*\|\s*DROPPED\b/u;
+/** The section-eyebrow table: `| `slot` | `string` | over |`. No bank column. */
+const SECTION_ROW = /^\|\s*`([a-z0-9_]+)`\s*\|\s*`(.*?)`\s*\|/u;
+
+/** Slots the file records as deleted. They must be absent from their bank. */
+function dropped() {
+  return section('').split(/\r?\n/u)
+    .map((line) => DROP_ROW.exec(line)).filter(Boolean).map((m) => m[1]);
+}
+
+/**
+ * Every ruled slot, from BOTH tables, in file order.
+ *
+ * A slot in both tables is returned once and its two copies are asserted equal
+ * on the way through - one ruled value must not be able to become two.
+ */
 function worksheet() {
+  const raw = [];
+  for (const line of section('').split(/\r?\n/u)) {
+    const m = BANK_ROW.exec(line);
+    if (m) raw.push({ bank: m[1], slot: m[2], value: m[3] });
+  }
+  for (const line of section('Report section eyebrows').split(/\r?\n/u)) {
+    const m = SECTION_ROW.exec(line);
+    if (m) raw.push({ bank: 'PASANGAN_COPY', slot: m[1], value: m[2] });
+  }
+
   const rows = [];
-  for (const line of MD.split(/\r?\n/u)) {
-    const m = /^\|\s*(SITE_COPY(?:\.privasi)?|PASANGAN_COPY)\s*\|\s*`([a-z0-9_]+)`\s*\|\s*`(.*)`\s*\|$/u
-      .exec(line);
-    if (m) rows.push({ bank: m[1], slot: m[2], value: m[3] });
+  const seen = new Map();
+  for (const row of raw) {
+    const key = `${row.bank}.${row.slot}`;
+    if (seen.has(key)) {
+      assert.equal(seen.get(key), row.value,
+        `${key} is ruled twice in this file and the two copies disagree`);
+      continue;
+    }
+    seen.set(key, row.value);
+    rows.push(row);
   }
   return rows;
 }
@@ -72,21 +139,36 @@ function status() {
   return m[1];
 }
 
-test('THE WORKSHEET IS 28 ROWS AND 28 DISTINCT SLOTS', () => {
+test('THE WORKSHEET IS 31 RULED SLOTS AND ONE DROPPED ONE', () => {
   const rows = worksheet();
-  assert.equal(rows.length, 28, 'the table has 28 rows');
-  assert.equal(new Set(rows.map((r) => `${r.bank}.${r.slot}`)).size, 28, 'and no slot twice');
+  assert.equal(rows.length, 31, 'the two ruled tables carry 31 slots between them');
+  assert.equal(new Set(rows.map((r) => `${r.bank}.${r.slot}`)).size, 31, 'and no slot twice');
 
   const byBank = {};
   for (const r of rows) byBank[r.bank] = (byBank[r.bank] || 0) + 1;
-  assert.deepEqual(byBank, { SITE_COPY: 4, PASANGAN_COPY: 22, 'SITE_COPY.privasi': 2 });
+  assert.deepEqual(byBank, { SITE_COPY: 4, PASANGAN_COPY: 25, 'SITE_COPY.privasi': 2 });
 
-  // The file carries a SECOND table - Y-2 chrome, two columns, no bank - which is
-  // deliberately not part of the 28. Asserted so a future parser change that
-  // starts swallowing it fails with a reason instead of quietly counting 40.
+  // THE DROP IS AN ASSERTION, NOT A GAP. `paid_title` is recorded as deleted, so
+  // the bank must not still carry it - otherwise the row reads as history while
+  // the slot is live, which is the exact pair of states a file like this exists
+  // to keep from drifting apart.
+  assert.deepEqual(dropped(), ['paid_title'], 'one slot is recorded as dropped');
+  for (const slot of dropped()) {
+    assert.equal(slot in PASANGAN_COPY, false, `${slot} is recorded DROPPED but still in the bank`);
+  }
+
+  // THREE OTHER TABLES IN THIS FILE ARE NOT RULED VALUES, and each would do
+  // real damage if the parser started reading it. Y-2 chrome is a draft set;
+  // the shared-JSX table is hard-coded strings that are in no bank; the email
+  // table is a was/now RECORD whose first value column holds the SUPERSEDED
+  // string, so reading it would assert the bank against what was just replaced.
   assert.match(MD, /## Y-2 strings/u);
+  assert.match(MD, /## Shared with the mirror/u);
+  assert.match(MD, /## Email strings/u);
   assert.equal(rows.some((r) => r.slot.startsWith('sales_closed')), false,
-    'the Y-2 table must not be parsed as one of the 28');
+    'the Y-2 table must not be parsed as a ruled row');
+  assert.equal(rows.some((r) => r.value.includes('Hanya dipakai untuk membuka kembali')), false,
+    'the email was/now record must not be parsed as a ruled row');
 });
 
 test('EVERY ROW MATCHES THE STATE THE FILE DECLARES', () => {
@@ -112,9 +194,22 @@ test('EVERY ROW MATCHES THE STATE THE FILE DECLARES', () => {
   // has begun and stopped - the partial state a hand substitution leaves and the
   // one nobody would notice. A handful of coincidental matches is expected and
   // fine: two slots are identical between the drafts and the ruling.
+  //
+  // ── THIS BRANCH MODELS A TRANCHE AND NOT AN AMENDMENT (2026-09-09) ──
+  // Recorded because the next person to land one will hit it, and rediscovering
+  // it as a defect costs a morning. The 2026-09-09 amendment moved FOUR strings
+  // in an already-applied set of 28, so the honest RULED state was 22 matching
+  // and 3 not - and this assertion called that a partial application. It is
+  // correct for a fresh tranche, where nothing should match yet, and wrong for
+  // an amendment, where almost everything should. It was not rewritten then:
+  // that commit APPLIED the strings and flipped STATUS, so it never exercised
+  // this branch, and loosening a guard you are not running is how a guard stops
+  // guarding. Whoever lands the next amendment should key it on WHICH rows the
+  // file marks as amended, not on how many match.
   assert.ok(applied.length < unapplied.length,
-    `STATUS is RULED but ${applied.length} of 28 rows already match, which is a `
-    + 'partial application. Finish it and flip STATUS to APPLIED in the same commit.');
+    `STATUS is RULED but ${applied.length} of ${applied.length + unapplied.length} rows already `
+    + 'match, which is a partial application. Finish it and flip STATUS to APPLIED in the same '
+    + 'commit. (If this is an AMENDMENT to an applied set, see the note above this assertion.)');
 });
 
 test('NOT ONE SENTINEL SURVIVES IN EITHER BANK', () => {
@@ -161,6 +256,47 @@ test('THE FOUR PROMISES ARE STILL PROMISES THE CODE KEEPS', () => {
   // Recorded in NEXT.md under "THE DELETION PATH DOES NOT REACH A PAIR"; this
   // assertion exists so the string and the gap are findable from each other.
   assert.match(SITE_COPY.privasi.privasi_second_person, /ikut terhapus/u);
+});
+
+test('THE TWO SHARED JSX STRINGS ARE THE RULED ONES, IN EVERY FILE THAT CARRIES THEM', () => {
+  // ── WHY THIS EXISTS AT ALL ─────────────────────────────────
+  // These two are ruled copy that is NOT in a copy bank - they are hard-coded in
+  // JSX, deliberately, because a bank for two strings is more machinery than the
+  // strings are worth. That put them outside every check in this repo: on
+  // 2026-09-09 all three could have been reverted and the full suite stayed
+  // green. CLAUDE.md's rule is that a commit changing behaviour must have an
+  // assertion that fails without it, so here it is.
+  //
+  // ── THE RULED WORDS ARE READ, NOT RETYPED ──────────────────
+  // The values come out of the rulings table itself. A test holding its own copy
+  // of a ruled value IS the cause of the next stale-test day - that is the
+  // lesson the forge price ladder taught - and it would be a particularly silly
+  // one to repeat inside the file whose entire job is byte-identity.
+  //
+  // LINE NUMBERS IN THE TABLE ARE NOT ASSERTED. They drift on any edit above
+  // them, and a test that goes red because a string moved down four lines is a
+  // test people learn to ignore.
+  const rows = [];
+  for (const line of section('Shared with the mirror').split(/\r?\n/u)) {
+    const m = /^\|\s*(.+?)\s*\|\s*`(.+?)`\s*\|\s*`(.+?)`\s*\|$/u.exec(line);
+    if (!m || m[1].startsWith('---') || m[1] === 'Where') continue;
+    const files = [...m[1].matchAll(/`([\w/.]+\.jsx):\d+`/gu)].map((f) => f[1]);
+    if (files.length) rows.push({ files, was: m[2], now: m[3] });
+  }
+
+  assert.equal(rows.length, 2, 'the shared table has two ruled strings');
+  assert.deepEqual(rows.flatMap((r) => r.files),
+    ['components/BirthFields.jsx', 'components/Funnel.jsx', 'components/Pasangan.jsx'],
+    'and they land in three files - the under-CTA line is in BOTH products');
+
+  for (const { files, was, now } of rows) {
+    for (const file of files) {
+      const src = readFileSync(path.join(ROOT, file), 'utf8');
+      assert.ok(src.includes(now), `${file} must carry the ruled string: "${now}"`);
+      assert.equal(src.includes(was), false,
+        `${file} still carries the superseded string: "${was}"`);
+    }
+  }
 });
 
 test('THE PRICE IS STILL NOT A STRING', () => {

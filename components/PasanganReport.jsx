@@ -73,10 +73,10 @@ const POLL_LIMIT = 100;
 const labelFor = (facts) => (block) => {
   const ids = block.fact_ids || [];
   if (ids.includes('p4_temperament') && facts?.pattern) {
-    return { eyebrow: PASANGAN_COPY.report_badge_eyebrow, name: facts.pattern };
+    return { eyebrow: PASANGAN_COPY.section_pattern, name: facts.pattern };
   }
   if (ids.includes('p5_pull_fit') && facts?.quadrant) {
-    return { eyebrow: PASANGAN_COPY.report_quadrant_eyebrow, name: facts.quadrant };
+    return { eyebrow: PASANGAN_COPY.section_rhythm, name: facts.quadrant };
   }
   return null;
 };
@@ -334,7 +334,13 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
   return (
     <div className="k-fade" style={wrap}>
       <div style={{ paddingTop: 60 }}>
-        <Reveal><Eyebrow>{PASANGAN_COPY.paid_title}</Eyebrow></Reveal>
+        {/* ── NOTHING OPENS THE REPORT, AND THAT IS TEMPORARY ───────
+            `paid_title` was here and is dropped with its slot (2026-09-09). Its
+            replacement - `page_title` over the engine's own pair line - is Y-2
+            Addendum 2 item 1 and is deliberately NOT built here, because a copy
+            PR that also builds a header is no longer revertable as copy. For the
+            hours between this merge and Y-2 the report opens straight into the
+            reading. */}
 
         {/* ── THE FLOOR RENDERS IDENTICALLY, AND THAT IS THE DESIGN ──
             `served_from` is 'render', 'cache' or 'floor', and this page does not
