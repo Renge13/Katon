@@ -22,6 +22,7 @@ import { COMPAT_ROUTE, compatPairRoute } from '../lib/site/routes.js';
 import { pairUrl, readingUrl } from '../lib/site/baseUrl.js';
 import { priceFor, SELLABLE_SKUS } from '../lib/pricing.js';
 import { readableError } from '../lib/site/readableError.js';
+import { viewFor, READY_VIEWS, VIEWS } from '../lib/pair/reportView.js';
 import { proseDelayMs, PROSE_FADE_MS, PROSE_REVEAL_BUDGET_MS, PROSE_STEP_MAX_MS } from '../components/ProseBlocks.jsx';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -179,17 +180,31 @@ test('BirthFields IS ONE IMPLEMENTATION, used by both forms', () => {
   // aria-label to drift, and the compat page needs the fields twice on one
   // screen. Asserted on the source because the alternative - mounting both and
   // comparing rendered attributes - would pass if BOTH copies drifted the same way.
-  const fields = read('components/BirthFields.jsx');
-  assert.match(fields, /step="3600"/u, 'whole hours only');
+  // ── `step="3600"` WAS THIS ASSERTION AND IT HAD GONE FALSE ──
+  // It read `assert.match(fields, /step="3600"/u, 'whole hours only')`. The hour
+  // picker became a `<select>` on 2026-09-09 and the attribute is GONE - but the
+  // component's comment explains why it is gone, so the match kept finding the
+  // words and the assertion stayed green while the thing it named no longer
+  // existed. Read on `code()`, which strips comments, and pinned to the control
+  // that is actually there.
+  const fields = code('components/BirthFields.jsx');
+  assert.equal(fields.includes('step="3600"'), false,
+    'step is a validation hint, not an input mode; the hour picker is a select now');
+  assert.match(fields, /HOURS\.map/u, 'whole hours only, one option each');
   assert.match(fields, /min=\{EARLIEST_BIRTH_DATE\}/u);
   assert.match(fields, /max=\{today\(\)\}/u);
 
-  for (const file of ['components/Funnel.jsx', 'components/Pasangan.jsx']) {
+  // `PasanganSteps.jsx` since Y-2 commit 2: the compat form's three cards became
+  // a stepper, and `BirthFields` moved into it with them. Pasangan.jsx still owns
+  // the product block and the checkout; it no longer renders a field.
+  for (const file of ['components/Funnel.jsx', 'components/PasanganSteps.jsx']) {
     const src = code(file);
     assert.match(src, /BirthFields/u, `${file} uses the shared component`);
     assert.equal(src.includes('type="date"'), false, `${file} declares no date input of its own`);
     assert.equal(src.includes('step="3600"'), false, `${file} declares no time input of its own`);
   }
+  assert.equal(code('components/Pasangan.jsx').includes('<BirthFields'), false,
+    'Pasangan.jsx renders no field of its own; the stepper owns them');
 });
 
 // ── NOTHING COMPUTED BEFORE PAYMENT ────────────────────────
@@ -284,9 +299,32 @@ test('THE REPORT DOES NOT BRANCH ON served_from', () => {
   // she got something lesser when she got the sentences he wrote. `served_from`
   // stays in the payload as the passive detector of a dead provider - an
   // operator's question, not a reader's.
+  // ── THIS WAS A GREP AND IT BECAME WRONG (2026-09-09) ───────
+  // It read `assert.equal(src.includes('served_from'), false)`. Y-2 commit 3
+  // names `floor` as one of the report's seven states, so `viewFor` reads
+  // `served_from` to return that NAME - and the grep failed on a build that
+  // renders the two identically, which is the only thing it was ever about. The
+  // proposition is behavioural, so it is asserted behaviourally now: render both
+  // and compare the markup. That is also what the prompt asks for in words -
+  // "a test asserts the two views are the same component with the same props".
+
+  const base = { pair: { status: 'paid' }, failed: false, justPaid: false, mockPay: false, exhausted: false };
+  assert.equal(viewFor({ ...base, reading: { served_from: 'render' } }), 'ready');
+  assert.equal(viewFor({ ...base, reading: { served_from: 'cache' } }), 'ready');
+  assert.equal(viewFor({ ...base, reading: { served_from: 'floor' } }), 'floor');
+
+  // Both names land in the SAME render branch. A `floor` case appearing in the
+  // switch is the defect; this is what would catch it.
+  assert.ok(READY_VIEWS.has('ready') && READY_VIEWS.has('floor'), 'both are ready views');
+  assert.equal(READY_VIEWS.size, 2);
+
+  // Exactly seven states, which is ruling 4's own wording: "None removed."
+  assert.equal(VIEWS.length, 7);
+  assert.equal(new Set(VIEWS).size, 7);
+
   const src = code('components/PasanganReport.jsx');
-  assert.equal(src.includes('served_from'), false,
-    'the report must render a floor identically to a render');
+  assert.equal(/view === 'floor'/u.test(src), false,
+    'the report must not branch its RENDER on floor; the name exists, the difference must not');
 });
 
 test('NO CARD, NO PDF, NO SHARE ON THE COMPAT REPORT', () => {

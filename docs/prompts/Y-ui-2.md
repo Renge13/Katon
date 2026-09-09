@@ -113,12 +113,23 @@ with the original commit text, this addendum wins.
    "Jam lahir"), shared by mirror and compat. The engine's hour pillar is a two-hour branch; the
    minute never changes it. Keep `step=3600` semantics; the stored value is HH:00. Confirm with the
    engine tests that no fixture depends on minutes (grep before asserting).
-5. **Static strings on the compat surface are under review.** Reyner rules from
-   `docs/content/pasangan-copy-rulings.md` (28) + the shared BirthFields strings listed in
-   `docs/content/compat-surface-strings-review.md`. Apply his amendments as a copy PR before commit 1.
+   **RULED 2026-09-09 (Reyner, after #112), same commit as the picker:** the hour-upgrade step's
+   sentence `components/Funnel.jsx:664` "Jamnya saja sudah cukup. Dengan ini kamu juga mendapat
+   pilar keempat." becomes `Jam lahir membuka pilar keempat.` (verbatim; swept 0/70, falsifiers
+   4/4). Reason: with an hour-only picker, "jamnya saja sudah cukup" describes a constraint the
+   field already enforces. Add the row to the "Shared with the mirror" table in
+   `docs/content/pasangan-copy-rulings.md` and extend the #112 JSX-string test to cover it, in the
+   SAME commit as the JSX change, so CI never sits red between a docs commit and its apply.
+5. **Static strings on the compat surface: RULED and APPLIED in #112 (2026-09-09).** Source
+   `docs/content/pasangan-copy-rulings.md`, amendments a-e. Nothing open there.
 6. **Link box.** Y-2 commit 3 already: proper box, URL, copy button. Confirmed as required.
-7. **Email field: pending Reyner's decision** (keep for payment + support recovery, or drop for v1).
-   Do not build around it until ruled; the field stays as is meanwhile.
+7. **Email field: RULED AND CLOSED in #112 (2026-09-09). KEEP.** This read "pending Reyner's
+   decision (keep for payment + support recovery, or drop for v1)" and was already false when
+   item 5 above was being closed in the same pass - the same ruling settled both. Reyner ruled KEEP,
+   and BOTH its promise strings moved with it: `form_email_help` now says the address is required
+   for payment as well as recovery, and `SITE_COPY.privasi.privasi_email` moved in the same commit
+   under the four-promise rule. Source `docs/content/pasangan-copy-rulings.md`, amendment e.
+   Y-2 builds around a field that stays exactly as it is; only its words changed.
 8. **PDF** stays Y-3 but is a RELEASE precondition (Reyner, 2026-09-09).
 9. **Reading voice** ("reads like the floor") is NOT Y-2. It becomes Prompt Z (Cowork to write): a
    measured comparison of floor vs render for the same pairs, then prompt changes that give the model

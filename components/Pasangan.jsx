@@ -22,10 +22,9 @@
 // ============================================================
 
 import { useEffect, useState } from 'react';
-import { BirthFields, FieldLabel } from './BirthFields.jsx';
-import { SeasonGate } from './Funnel.jsx';
 import { readableError } from '../lib/site/readableError.js';
-import { Reveal, Eyebrow, Button, Icon } from './kit.jsx';
+import { Reveal, Eyebrow, Icon } from './kit.jsx';
+import PasanganSteps from './PasanganSteps.jsx';
 import { PASANGAN_COPY } from '../lib/site/copy.js';
 import { compatPairRoute } from '../lib/site/routes.js';
 import { priceFor } from '../lib/pricing.js';
@@ -71,6 +70,20 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
   const [gate, setGate] = useState(null);
   const [stage, setStage] = useState('form');
   const [invoiceUrl, setInvoiceUrl] = useState(null);
+  /**
+   * Which step is open: 1 Kamu, 2 Dia, 3 Email.
+   *
+   * IT STARTS AT 1 EVEN WITH `?dari`, and that is a correction to the prompt
+   * rather than a shortcut. Y-2 commit 2 says "`?dari=<token>` prefills step 1
+   * and starts on step 2" - but the mirror's serve payload carries NO birth
+   * data at all (the free card is built with `birthDate: null` so nothing about
+   * a birth leaves the server on that path), which `PasanganFromQuery` below
+   * says in its own comment. There is nothing to prefill. Starting on step 2
+   * would show a COMPLETED step 1 summarising an empty birth, which is worse
+   * than starting at the beginning. `?dari` keeps its only real effect: the
+   * `a_reading_id` reference on the pair.
+   */
+  const [step, setStep] = useState(1);
 
   /**
    * Does this side still need the gate? Same predicate the mirror uses at
@@ -110,6 +123,11 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
       const side = created.needs_term_side[0];
       const term = created.terms?.[side] || {};
       const form = side === 'a' ? a : b;
+      // REOPEN THAT SIDE'S STEP, not just the gate. Since Y-2 commit 2 the gate
+      // renders inside a step, so setting it while step 3 is open would render
+      // nothing at all - the reader would sit on the email card with a silent
+      // failed checkout. `a` is step 1 and `b` is step 2.
+      setStep(side === 'a' ? 1 : 2);
       setGate({
         side,
         birthDate: form.date,
@@ -162,16 +180,26 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
     setStage('pending');
   }
 
-  async function onSubmit(e) {
-    e.preventDefault();
+  /**
+   * The last step's submit. It no longer runs the gates.
+   *
+   * ── THE GATES MOVED, AND WITH THEM A REAL DEFECT ───────────
+   * This used to ask `/api/season-check` for A and then for B at CHECKOUT, and
+   * whichever one needed answering took over the whole page. So a reader could
+   * fill six fields, tap Lanjut ke Pembayaran, and be shown an unfamiliar
+   * question about a solar term with her form nowhere in sight - and if BOTH
+   * births were boundary births she answered two of them back to back, with no
+   * way to tell which person each was about beyond one intro sentence.
+   *
+   * The stepper asks each side's gate when THAT side's step advances, so the
+   * question arrives beside the birth it is about, and it can only ever be one
+   * at a time by construction rather than by sequencing.
+   */
+  async function onSubmit() {
     if (busy) return;
     setError(null);
     setBusy(true);
     try {
-      // A before B, one at a time: two gates on one screen would ask the reader
-      // two versions of the same unfamiliar question at once.
-      const next = (await gateFor('a', a)) || (await gateFor('b', b));
-      if (next) { setGate(next); return; }
       await checkout(resolved);
     } catch {
       setError(readableError(null));
@@ -180,25 +208,15 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
     }
   }
 
-  async function onGateAnswer(resolution) {
-    const side = gate.side;
-    const answers = { ...resolved, [side]: resolution };
-    setResolved(answers);
+  /**
+   * A gate answered inside a step. Records it and advances that step; it never
+   * goes to checkout, because a gate now belongs to step 1 or step 2 and step 3
+   * is the only thing that buys anything.
+   */
+  function onGateAnswer(side, resolution) {
+    setResolved((prev) => ({ ...prev, [side]: resolution }));
     setGate(null);
-    setBusy(true);
-    setError(null);
-    try {
-      // The OTHER side may still need asking; only then does it go to checkout.
-      const other = side === 'a' ? 'b' : 'a';
-      const form = other === 'a' ? a : b;
-      const next = answers[other] ? null : await gateFor(other, form);
-      if (next) { setGate(next); return; }
-      await checkout(answers);
-    } catch {
-      setError(readableError(null));
-    } finally {
-      setBusy(false);
-    }
+    setStep((n) => n + 1);
   }
 
   // ── SALES CLOSED: THE FORM IS NOT SHOWN AT ALL ────────────
@@ -249,15 +267,8 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
     );
   }
 
-  if (gate) {
-    return (
-      <SeasonGate
-        season={gate}
-        onAnswer={onGateAnswer}
-        intro={gate.side === 'b' ? PASANGAN_COPY.season_gate_b_intro : null}
-      />
-    );
-  }
+  // THE FULL-PAGE GATE IS GONE. It renders inside its own step now
+  // (components/PasanganSteps.jsx); see `onSubmit` above for why.
 
   if (stage === 'pending') {
     return (
@@ -313,52 +324,26 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
           <div style={{ fontSize: 13, color: 'var(--muted-warm)', marginTop: 4, lineHeight: 1.55 }}>{PASANGAN_COPY.price_note}</div>
         </Reveal>
 
-        <form onSubmit={onSubmit}>
-          <Reveal delay={0.24} style={{ marginTop: 26 }}>
-            <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
-              <Eyebrow style={{ marginBottom: 14 }}>{PASANGAN_COPY.form_a_legend}</Eyebrow>
-              <BirthFields value={a} onChange={(k, v) => setA((f) => ({ ...f, [k]: v }))} idPrefix="a" personLabel="A" />
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.28} style={{ marginTop: 14 }}>
-            <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
-              <Eyebrow style={{ marginBottom: 14 }}>{PASANGAN_COPY.form_b_legend}</Eyebrow>
-              <BirthFields value={b} onChange={(k, v) => setB((f) => ({ ...f, [k]: v }))} idPrefix="b" personLabel="B" />
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.32} style={{ marginTop: 14 }}>
-            <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
-              <FieldLabel>{PASANGAN_COPY.form_email_label}</FieldLabel>
-              <input
-                id="pair-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-label={PASANGAN_COPY.form_email_label}
-                required
-              />
-              {/* STORE-ONLY FOR v1, ruled 2026-09-08: the email is kept for access
-                  and recovery and NOTHING is sent. The help slot must stay true to
-                  that - a promise of delivery would be the product saying
-                  something untrue about itself. */}
-              <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>{PASANGAN_COPY.form_email_help}</div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.36} style={{ marginTop: 22 }}>
-            {error && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{error}</div>}
-            {/* `Menyiapkan...` IS REUSED, not newly ruled. Reyner approved it for
-                exactly this moment on the checkout button (2026-08-23) and rule 20
-                is one voice everywhere, so a second word for the same moment would
-                be a second register. See the same reasoning at Funnel.jsx's submit. */}
-            <Button type="submit" disabled={busy}>{busy ? 'Menyiapkan...' : PASANGAN_COPY.form_submit}</Button>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 12.5, color: 'var(--muted-warm)', marginTop: 14 }}>
-              <Icon.lock size={13} /> Privat. Hanya bisa diakses via tautanmu.
-            </div>
-          </Reveal>
-        </form>
+        {/* THE THREE CARDS BECAME A STEPPER (Y-2 commit 2). The product block
+            above is unchanged and still comes first: she reads what the thing is
+            and what it costs before she is asked for anything. */}
+        <PasanganSteps
+          value={{ a, b, email }}
+          onChange={(key, next) => {
+            if (key === 'a') setA(next);
+            else if (key === 'b') setB(next);
+            else setEmail(next);
+          }}
+          onGate={gateFor}
+          onAnswer={onGateAnswer}
+          onSubmit={onSubmit}
+          busy={busy}
+          error={error}
+          step={step}
+          setStep={setStep}
+          gate={gate}
+          setGate={setGate}
+        />
       </div>
     </div>
   );

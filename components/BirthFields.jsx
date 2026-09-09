@@ -17,6 +17,31 @@ const pad = (n) => String(n).padStart(2, '0');
 /** The engine's supported range starts here. */
 export const EARLIEST_BIRTH_DATE = '1900-01-01';
 
+/**
+ * 00 through 23. The hour picker's options, and the ONLY hour values the form
+ * can produce - exported so a test can assert the list rather than count
+ * `<option>` tags in a source grep.
+ *
+ * Displayed as `09.00`, the Indonesian convention, and stored as `09:00`, which
+ * is what `lib/birthInput.js` and both submit handlers already parse with
+ * `slice(0, 2)`. The display form is never stored and the stored form is never
+ * shown; keeping them apart is why this is a list of numbers and not of strings.
+ */
+export const HOURS = Array.from({ length: 24 }, (_, h) => h);
+
+/**
+ * The two gender words, keyed by the value that is stored.
+ *
+ * EXPORTED so the compat stepper's summary line can say back exactly what the
+ * select said, rather than carrying its own copy. Reyner confirmed both words
+ * unchanged on the 2026-09-09 walk; they were literals in the `<option>`s below
+ * and are now read from here, which is the same slot in one place instead of
+ * two. Not a copy BANK: they are the option labels of one control, and a bank
+ * for two words is more machinery than the words are worth (the same call the
+ * rulings file makes for the two shared JSX strings).
+ */
+export const GENDER_WORDS = { female: 'Perempuan', male: 'Laki-laki' };
+
 /** Today, in the browser's own local calendar - the same day the reader means. */
 export const today = () => {
   const d = new Date();
@@ -63,18 +88,47 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
           (14:59 and 15:00 differ; 14:00 through 14:59 do not), so a minute field
           collects precision that cannot be used. The one place it CAN matter is a
           solar-term day, where the season gate asks for it and explains why.
-          `step=3600` asks the browser for whole hours; the submit handler snaps
-          regardless, because a browser that ignores step must not turn into
-          stored precision. */}
+
+          ── IT IS A SELECT NOW, NOT `type="time" step="3600"` (Addendum 2 item 4) ──
+          `step` is a VALIDATION hint, not an input mode: browsers still render a
+          minute field beside it and simply mark 09:30 invalid, so the control
+          offered precision the product then threw away at submit. A reader who
+          types a minute and watches it vanish learns the form is lying to her
+          about what it wants. Twenty-four options say what is actually being
+          asked. The submit handlers in Funnel.jsx and Pasangan.jsx still snap
+          with `slice(0, 2)`, deliberately: this is presentation, and an API
+          caller posting `09:47` must not become stored precision either.
+
+          THE STORED VALUE IS UNCHANGED - `HH:00`, the same shape `type="time"`
+          produced - so nothing downstream of the form moves. Verified against the
+          13-chart Joey fixture: truncating every fixture minute to the hour
+          changes 0 of 13 charts (charts 6 and 7 are the only ones carrying
+          minutes at all, 00:15 and 23:30, and both are IDENTICAL truncated).
+
+          ONE FLAG GOES DEAD FROM THE FUNNEL, and it is recorded rather than
+          mourned: `checkHourEdge` in lib/bazi/pillars.ts is suppressed when
+          `mi === 0 || mi === 30`, so with every input at `:00` it can no longer
+          fire on anything the form submits. That is correct - we no longer know
+          how close to an edge the birth was, so we cannot claim it is near one -
+          and the SOLAR-TERM flag, which is the one that can move a month pillar,
+          is untouched and still fires. */}
       <FieldLabel>Jam lahir · opsional</FieldLabel>
-      <input
+      <select
         id={`${idPrefix}-time`}
-        type="time"
-        step="3600"
         value={value.time}
         onChange={set('time')}
         aria-label={aria('Jam lahir')}
-      />
+      >
+        {/* Empty first, carrying no label, for the same reason the gender select
+            does (ruled 2026-09-03): the fields around it are pickers with no
+            placeholder, and a control that narrates its own empty state is the
+            odd one out. `value=""` keeps `form.time ? ... : null` resolving an
+            unanswered field to null at both submit paths. */}
+        <option value=""></option>
+        {HOURS.map((h) => (
+          <option key={h} value={`${pad(h)}:00`}>{`${pad(h)}.00`}</option>
+        ))}
+      </select>
       <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Tanpa jam tetap akurat, pakai jam jauh lebih presisi.</div>
 
       <div style={{ height: 16 }} />
@@ -100,8 +154,8 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
         aria-label={aria('Jenis kelamin')}
       >
         <option value=""></option>
-        <option value="female">Perempuan</option>
-        <option value="male">Laki-laki</option>
+        <option value="female">{GENDER_WORDS.female}</option>
+        <option value="male">{GENDER_WORDS.male}</option>
       </select>
     </>
   );

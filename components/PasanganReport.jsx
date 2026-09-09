@@ -22,13 +22,48 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ProseBlocks } from './ProseBlocks.jsx';
+import CopyLink from './CopyLink.jsx';
 import { readableError } from '../lib/site/readableError.js';
 import { Reveal, Eyebrow, Button, Icon } from './kit.jsx';
-import { PASANGAN_COPY } from '../lib/site/copy.js';
+import { GENDER_WORDS } from './BirthFields.jsx';
+import { pairLine } from '../lib/site/birthSummary.js';
+import { CHROME_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
 import { formatIdr } from '../lib/site/format.js';
 import { compatPairRoute } from '../lib/site/routes.js';
+import { viewFor } from '../lib/pair/reportView.js';
 
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
+
+/** A sentinel `load()` returns for a transport failure, distinct from a 404 body. */
+const FAILED = Symbol('failed');
+
+/** The page's own URL, which IS the access. */
+function PageUrl({ id, withCopy = false }) {
+  const url = typeof window !== 'undefined'
+    ? `${window.location.origin}${compatPairRoute(id)}` : '';
+  return <CopyLink url={url} withCopy={withCopy} />;
+}
+
+/**
+ * Back to the front door, from any state. A report is not a dead end.
+ *
+ * A PLAIN ANCHOR, NOT `next/link`, and there are two reasons that point the same
+ * way. Leaving a paid report for the funnel should be a real navigation - fresh
+ * state, nothing of the report retained - and a `Link` here would prefetch the
+ * front door from every report view for a link most readers never take. It also
+ * keeps this component mountable under `node --test`, where `next/link` does not
+ * resolve; that is a convenience rather than the reason, and it would not have
+ * been enough on its own.
+ */
+function HomeLink() {
+  return (
+    <div style={{ marginTop: 34 }}>
+      <a href="/" style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--clay)', textDecoration: 'none' }}>
+        {CHROME_COPY.home_link}
+      </a>
+    </div>
+  );
+}
 
 /**
  * The report's own shape, greyed.
@@ -62,6 +97,7 @@ function ReportSkeleton() {
 const POLL_MS = 3000;
 const POLL_LIMIT = 100;
 
+
 /**
  * The extra label above a block, for the two blocks that carry a glossary NAME.
  *
@@ -70,13 +106,65 @@ const POLL_LIMIT = 100;
  * `p5_q*.name_id`. Nothing here composes a label - only the EYEBROW is a copy
  * slot, and the name beside it is engine content (rule 14).
  */
-const labelFor = (facts) => (block) => {
+/**
+ * Which chrome SECTION label sits over a block, by the block's primary fact.
+ *
+ * Keyed on the `pN_` prefix rather than on the full fact id, because the engine
+ * chooses WHICH cell fires within a beat - `p1_produces` or `p1_controls`,
+ * `p2_clash` or `p2_harmony`, one of four `p5_q*` - and a map of full ids here
+ * would have to re-derive that choice and could disagree with it. The beat is
+ * the thing the section label names; the cell is what the headline names.
+ */
+const SECTION_BY_BEAT = {
+  p1: PASANGAN_COPY.section_core,
+  p2: PASANGAN_COPY.section_seat,
+  p3: PASANGAN_COPY.section_element,
+  p4: PASANGAN_COPY.section_pattern,
+  p5: PASANGAN_COPY.section_rhythm,
+};
+
+/**
+ * The block's two-level heading: chrome section label over the glossary name.
+ *
+ * ── EVERY BLOCK, NOT TWO (Y-2 Addendum 2 item 2) ───────────
+ * It used to label the P4 badge and the P5 quadrant only, and every other block
+ * carried the MODEL's heading. That produced the stutter Reyner saw on the walk:
+ * the model titles a block after its badge, so `Pola Kontras` appeared as the
+ * eyebrow, the glossary name AND the heading within three lines. Now the engine
+ * owns every heading on the page and `modelHeadings={false}` closes the door.
+ *
+ * ── THE PRIMARY FACT IS THE FIRST ONE, IN THE BLOCK'S OWN ORDER ──
+ * A braided block lists its lead fact first, so `fact_ids[0]` is the block's
+ * subject. Scanning for the lowest beat number instead would retitle a block
+ * that braids a later beat into an earlier one, which is the model's own
+ * ordering being overridden by an arithmetic accident.
+ */
+const labelFor = (facts, names) => (block) => {
   const ids = block.fact_ids || [];
-  if (ids.includes('p4_temperament') && facts?.pattern) {
-    return { eyebrow: PASANGAN_COPY.section_pattern, name: facts.pattern };
-  }
-  if (ids.includes('p5_pull_fit') && facts?.quadrant) {
-    return { eyebrow: PASANGAN_COPY.section_rhythm, name: facts.quadrant };
+  for (const id of ids) {
+    const eyebrow = SECTION_BY_BEAT[String(id).slice(0, 2)];
+    if (!eyebrow) continue;
+    // `names` is the server's projection of every fact's glossary `name_id`.
+    // `facts.pattern` / `.quadrant` are the same two names by their older route,
+    // kept as the fallback so a payload from before this commit still labels the
+    // two blocks it always labelled rather than losing them.
+    const name = names?.[id]
+      ?? (id === 'p4_temperament' ? facts?.pattern : null)
+      ?? (id === 'p5_pull_fit' ? facts?.quadrant : null)
+      ?? null;
+    // ── THE SAME WORDS TWICE IS THE STUTTER, NOT A LAYOUT ─────
+    // `section_element` is "Penyeimbang Unsur" and so is
+    // `kompatibilitas.p3_supplies.name_id`, so P3 rendered the phrase as its
+    // eyebrow AND as its headline, one line apart - which is a smaller version
+    // of exactly what Addendum 2 item 2 removes. Found by reading the rendered
+    // text out of a failing assertion, not by inspecting the strings.
+    //
+    // Suppressing the duplicate is a TECHNICALITY (rule 9): whichever words are
+    // ruled, saying them twice in two type sizes is a defect. The repo has the
+    // same precedent in `tests/stage5-render.spec.mjs`, "THE FLOOR DOES NOT SAY
+    // THE LABEL TWICE". Whether the two should be DIFFERENT words is Reyner's,
+    // and it is flagged in the PR rather than decided here.
+    return { eyebrow, name: name === eyebrow ? null : name };
   }
   return null;
 };
@@ -87,6 +175,18 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  /** A transport failure or a non-2xx that is not a 404. Drives the `error` view. */
+  const [failed, setFailed] = useState(false);
+  /**
+   * The poll ran out of tries.
+   *
+   * ── "NEVER A FROZEN PAGE" IS THE PROMPT'S OWN WORDING ──────
+   * `POLL_LIMIT` was already here and already stopped the loop, but stopping was
+   * all it did: the skeleton stayed on screen, animating, for as long as the tab
+   * was open. That is worse than an error, because it keeps promising. Running
+   * out is now a visible outcome with a retry in it.
+   */
+  const [exhausted, setExhausted] = useState(false);
 
   const bayar = typeof window !== 'undefined'
     ? new URLSearchParams(window.location.search).get('bayar')
@@ -98,7 +198,25 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
   const mockPay = bayar === 'mock';
 
   const load = useCallback(async () => {
-    const body = await fetch(`/api/pair/${id}`).then((r) => r.json()).catch(() => null);
+    // ── A THROWN FETCH IS A STATE, NOT A NULL ──────────────────
+    // `.catch(() => null)` made a dead network indistinguishable from a 404: the
+    // body came back null, `pair?.error` was undefined, and the page fell
+    // through to the unpaid product block - offering to sell a reading to
+    // someone who already owned one. `failed` is what the `error` view keys on.
+    // `r.ok === false` rather than `!r.ok`, and the difference is deliberate.
+    // A real `Response` always carries a boolean `ok`, so for anything the
+    // network produces these are identical. Test stubs return bare
+    // `{ json }` objects where `ok` is UNDEFINED, and `!r.ok` would read every
+    // one of them as a transport failure - turning five green suites red on a
+    // change that altered nothing about real behaviour. Positive evidence of
+    // failure only.
+    const body = await fetch(`/api/pair/${id}`)
+      .then((r) => (r.ok === false && r.status !== 404
+        ? Promise.reject(new Error(String(r.status)))
+        : r.json()))
+      .catch(() => FAILED);
+    if (body === FAILED) { setFailed(true); return null; }
+    setFailed(false);
     setPair(body);
     if (body?.status !== 'paid') return body;
     const r = await fetch(`/api/pair/${id}/reading`).then((x) => x.json()).catch(() => null);
@@ -166,7 +284,8 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
       tries += 1;
       const body = await load();
       if (stopped) return;
-      if (body?.status === 'paid' || tries >= POLL_LIMIT) return;
+      if (body?.status === 'paid') return;
+      if (tries >= POLL_LIMIT) { setExhausted(true); return; }
       timer = setTimeout(tick, POLL_MS);
     };
     timer = setTimeout(tick, POLL_MS);
@@ -187,6 +306,22 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
     const res = await fetch(`/api/mock-pay/${id}`, { method: 'POST' })
       .then((r) => r.json()).catch(() => null);
     if (!res?.ok) setError(readableError(res));
+    await load();
+    setBusy(false);
+  }
+
+  /**
+   * The error view's way out. Clears BOTH failure flags before re-reading, so a
+   * retry that succeeds actually leaves the error view - clearing only `failed`
+   * would leave an exhausted poll stuck in it forever, which is the frozen page
+   * again wearing an error's clothes.
+   */
+  async function retry() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    setExhausted(false);
+    setFailed(false);
     await load();
     setBusy(false);
   }
@@ -240,21 +375,70 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
     </Reveal>
   ) : null;
 
-  if (!loaded) return null;
+  // ── FIRST PAINT IS THE SKELETON, NEVER NOTHING (Addendum 2 item 3) ──
+  // This was `if (!loaded) return null`, and that null WAS the blank page Reyner
+  // asked to be rid of: the route mounts, two fetches go out, and for as long as
+  // they take the reader looks at an empty screen with a footer under it. After a
+  // checkout redirect that is the worst possible moment for the page to look
+  // broken - she has just paid.
+  //
+  // NO COPY HERE ON PURPOSE. It is not an eighth state, it is the first frame of
+  // whichever state is about to arrive, and nothing is known yet: she may be
+  // unpaid, she may be a 404. Saying "Menyusun Bacaan Kalian" before the server
+  // has confirmed she paid would be the product guessing. The shape is honest and
+  // the words wait.
+  if (!loaded) {
+    return (
+      <div className="k-fade" style={wrap}>
+        <div style={{ paddingTop: 60 }}><ReportSkeleton /></div>
+      </div>
+    );
+  }
 
-  if (pair?.error === 'not_found') {
+  const view = viewFor({ pair, reading, failed, justPaid, mockPay, exhausted });
+  // Engine facts, formatted. Null when either date is missing, and the header
+  // then renders the title alone rather than half a line.
+  const pairNames = reading ? pairLine(reading.pair, { genderWords: GENDER_WORDS }) : null;
+
+  // ── ERROR: NEVER A DEAD END ──────────────────────────────
+  // Any non-2xx that is not a 404, a thrown fetch, or a poll that ran out. It
+  // shows the page URL because that URL is the reader's ONLY access - there is
+  // no account and nothing is emailed - so a reader who has to write to us must
+  // be able to quote the one thing that finds her reading again.
+  if (view === 'error') {
+    return (
+      <div className="k-fade" style={{ ...wrap, paddingTop: 72 }}>
+        <Reveal><Eyebrow>{CHROME_COPY.error_title}</Eyebrow></Reveal>
+        <Reveal delay={0.08}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.65, color: 'var(--tinta-soft)', margin: '14px 0 0' }}>
+            {CHROME_COPY.error_body}
+          </p>
+        </Reveal>
+        <Reveal delay={0.14} style={{ marginTop: 20 }}>
+          <Button onClick={retry} disabled={busy}>{busy ? 'Menyiapkan...' : CHROME_COPY.step_next}</Button>
+        </Reveal>
+        <Reveal delay={0.2} style={{ marginTop: 22 }}>
+          <PageUrl id={id} />
+        </Reveal>
+        <HomeLink />
+      </div>
+    );
+  }
+
+  if (view === 'not_found') {
     return (
       <div className="k-fade" style={{ ...wrap, paddingTop: 72 }}>
         <Reveal><Eyebrow>{PASANGAN_COPY.notfound_title}</Eyebrow></Reveal>
+        <HomeLink />
       </div>
     );
   }
 
   // ── UNPAID ───────────────────────────────────────────────
-  if (pair?.status !== 'paid') {
+  if (view === 'pending_payment' || view === 'unpaid') {
     // Waiting on the webhook: the redirect said the payment went through and the
     // server has not caught up yet.
-    if (justPaid || mockPay) {
+    if (view === 'pending_payment') {
       return (
         <div className="k-fade" style={{ ...wrap, paddingTop: 72 }}>
           <Reveal><Eyebrow>{PASANGAN_COPY.pending_title}</Eyebrow></Reveal>
@@ -319,11 +503,22 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
   // sat in for minutes with nothing but an eyebrow on screen, and the state a
   // REFRESH mid-render lands in - so it shows the report's own shape rather than
   // a blank page, and it is never a dead end.
-  if (!reading) {
+  //
+  // IT HAS ITS OWN WORDS NOW. It used to render `pending_title` ("Menunggu
+  // Konfirmasi Pembayaran"), which is a lie to a reader who has already paid and
+  // whose row already says so: she is waiting on the RENDER, not on the payment.
+  // Two different waits were wearing one label because two branches happened to
+  // reach for the same slot.
+  if (view === 'rendering') {
     return (
       <div className="k-fade" style={wrap}>
         <div style={{ paddingTop: 60 }}>
-          <Reveal><Eyebrow>{PASANGAN_COPY.pending_title}</Eyebrow></Reveal>
+          <Reveal><Eyebrow>{CHROME_COPY.rendering_title}</Eyebrow></Reveal>
+          <Reveal delay={0.08}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.65, color: 'var(--tinta-soft)', margin: '14px 0 0' }}>
+              {CHROME_COPY.rendering_body}
+            </p>
+          </Reveal>
           {error && <div style={{ color: 'var(--red)', fontSize: 13, marginTop: 12 }}>{error}</div>}
           <ReportSkeleton />
         </div>
@@ -334,13 +529,26 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
   return (
     <div className="k-fade" style={wrap}>
       <div style={{ paddingTop: 60 }}>
-        {/* ── NOTHING OPENS THE REPORT, AND THAT IS TEMPORARY ───────
-            `paid_title` was here and is dropped with its slot (2026-09-09). Its
-            replacement - `page_title` over the engine's own pair line - is Y-2
-            Addendum 2 item 1 and is deliberately NOT built here, because a copy
-            PR that also builds a header is no longer revertable as copy. For the
-            hours between this merge and Y-2 the report opens straight into the
-            reading. */}
+        {/* ── THE HEADER: A TITLE AND THE TWO PEOPLE (Addendum 2 item 1) ──
+            `paid_title` ("Bacaan Kalian Sudah Siap") was dropped in #112: it
+            announced the report to the one reader already looking at it. This is
+            its replacement. The line under the title is ENGINE FACTS, never
+            prose - she typed the second birth date herself, possibly days ago,
+            and the top of a paid report is where she confirms it is about the
+            right two people. No archetype names: `p0_opening` already does that
+            inside the reading. */}
+        <Reveal>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 30, lineHeight: 1.16, letterSpacing: '-.01em', color: 'var(--tinta)', margin: 0 }}>
+            {PASANGAN_COPY.page_title}
+          </h1>
+        </Reveal>
+        {pairNames && (
+          <Reveal delay={0.08}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, lineHeight: 1.6, color: 'var(--muted-warm)', margin: '10px 0 0' }}>
+              {pairNames}
+            </p>
+          </Reveal>
+        )}
 
         {/* ── THE FLOOR RENDERS IDENTICALLY, AND THAT IS THE DESIGN ──
             `served_from` is 'render', 'cache' or 'floor', and this page does not
@@ -349,21 +557,31 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
             marking it would tell a reader she got something lesser when she got
             the sentences he wrote. It stays in the payload as the passive
             detector of a dead provider, which is a question for the operator. */}
-        <ProseBlocks reading={reading.reading} labelFor={labelFor(reading.facts)} />
+        {/* EVERY BLOCK GETS THE SAME TWO-LEVEL HEADING, and none of them gets
+            the model's (Addendum 2 item 2). `modelHeadings={false}` is what
+            closes the door: without it a block with no section mapping would
+            fall back to whatever the model titled it. */}
+        <ProseBlocks
+          reading={reading.reading}
+          labelFor={labelFor(reading.facts, reading.names)}
+          modelHeadings={false}
+        />
 
         {/* THE LINK IS THE ACCESS. No account, and nothing is emailed in v1, so
-            the URL on screen is the only way back. */}
+            the URL on screen is the only way back - which is why it now has a
+            COPY button beside it (ruling 2) rather than asking a reader on a
+            phone to select a wrapped URL by hand. */}
         <div style={{ marginTop: 44, paddingTop: 28, borderTop: '1px solid var(--divider)' }}>
           <Reveal>
             <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 13, color: 'var(--muted-warm)', lineHeight: 1.6 }}>
               <Icon.lock size={13} />
               <span>{PASANGAN_COPY.link_keep}</span>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--tinta-soft)', marginTop: 8, wordBreak: 'break-all' }}>
-              {typeof window !== 'undefined' ? `${window.location.origin}${compatPairRoute(id)}` : ''}
-            </div>
+            <PageUrl id={id} withCopy />
           </Reveal>
         </div>
+
+        <HomeLink />
       </div>
     </div>
   );

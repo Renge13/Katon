@@ -75,11 +75,24 @@ function paragraphsOf(block) {
 
 /**
  * @param {Object} reading   `{ blocks, penutup }` as the serve payload carries it
- * @param {Function} [labelFor] block => ({ eyebrow, name }) | null. An extra
- *   label ABOVE the block's own heading. The compat report uses it for the P4
- *   badge and the P5 quadrant; the mirror passes nothing.
+ * @param {Function} [labelFor] block => ({ eyebrow, name }) | null. The block's
+ *   two-level heading: a chrome SECTION label over a glossary name. The compat
+ *   report supplies one per block; the mirror passes nothing.
+ * @param {boolean} [modelHeadings] render `block.heading` (the MODEL's words).
+ *
+ * ── WHY `modelHeadings` IS A PROP AND NOT A DELETION ───────
+ * Y-2 Addendum 2 item 2: the compat report carries NO model-written heading
+ * anywhere - every block is a ruled section label over an engine name, because
+ * the model titling a block after the badge produced `Pola Kontras` three times
+ * in three lines (eyebrow, glossary name, and the model's own heading). Rule 14
+ * says the engine owns structure, so the heading is not the model's to choose.
+ *
+ * The MIRROR still renders its own headings and is untouched here: Y-2 commit 4
+ * is explicit that nothing structural changes in the funnel, and its blocks have
+ * no glossary name to put in a heading's place. So this is a per-caller switch
+ * rather than a removal, and the default is the mirror's existing behaviour.
  */
-export function ProseBlocks({ reading, labelFor = null }) {
+export function ProseBlocks({ reading, labelFor = null, modelHeadings = true }) {
   // The reveal's running index, computed once per render rather than by mutating
   // a counter inside the JSX. `offsets[i]` is how many paragraphs precede block
   // `i` DOWN THE PAGE, so a block-local `j` still keys the map while the delay
@@ -98,12 +111,22 @@ export function ProseBlocks({ reading, labelFor = null }) {
       {(reading.blocks || []).map((b, i) => {
         const label = labelFor ? labelFor(b) : null;
         return (
-          <Section key={i} eyebrow={b.heading || undefined} style={i === 0 ? { marginTop: 34 } : undefined}>
-            {label && (
+          <Section
+            key={i}
+            eyebrow={(modelHeadings && b.heading) || undefined}
+            style={i === 0 ? { marginTop: 34 } : undefined}
+          >
+            {label && (label.eyebrow || label.name) && (
               <Reveal>
                 <div style={{ marginBottom: 14 }}>
-                  <Eyebrow style={{ marginBottom: 4 }}>{label.eyebrow}</Eyebrow>
-                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.2, color: 'var(--tinta)' }}>{label.name}</div>
+                  {label.eyebrow && <Eyebrow style={{ marginBottom: 4 }}>{label.eyebrow}</Eyebrow>}
+                  {/* The big serif line is the GLOSSARY's name for this block's
+                      primary fact. Absent when the cell has none (p0, p7), and
+                      absent means nothing renders - never the key, never the
+                      model's heading standing in for it. */}
+                  {label.name && (
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.2, color: 'var(--tinta)' }}>{label.name}</div>
+                  )}
                 </div>
               </Reveal>
             )}

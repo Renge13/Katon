@@ -79,6 +79,7 @@ import { COMPAT_ROUTE } from '../lib/site/routes.js';
 export { readableError } from '../lib/site/readableError.js';
 import { readableError } from '../lib/site/readableError.js';
 import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFields.jsx';
+import CopyLink from './CopyLink.jsx';
 import { ProseBlocks } from './ProseBlocks.jsx';
 import { formatIdr } from '../lib/site/format.js';
 
@@ -661,7 +662,7 @@ export function SeasonGate({ season, onAnswer, intro = null }) {
               <select value={minute} onChange={(e) => setMinute(e.target.value)} aria-label="Menit"><option value="">Menit</option>{RANGE(60).map((m) => <option key={m} value={m}>{pad(m)}</option>)}</select>
             </div>
             <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>
-              Jamnya saja sudah cukup. Dengan ini kamu juga mendapat pilar keempat.
+              Jam lahir membuka pilar keempat.
             </div>
           </div>
           <div style={{ marginTop: 16 }}>
@@ -982,6 +983,37 @@ export function Reading({ reading, onReset, initialStage }) {
           One live purchase CTA per moment; these two are secondary signals and
           must never read as a second thing to buy. */}
       <div style={{ marginTop: 44 }}><Upcoming reading={reading} /></div>
+
+      {/* ── THE LINK IS THE ACCESS HERE TOO (Y-2 commit 4) ────────
+          Nothing structural changes in the funnel; this is the compat report's
+          own control, the same component, on the surface that makes the same
+          promise. The mirror is ungated and free, but it is still reachable ONLY
+          by this URL - there is no account and nothing is emailed - and a reader
+          who closes the tab without saving it has lost her reading.
+
+          BELOW the card and the offer, deliberately. It is a keepsake
+          instruction, not an action: putting it above either would give it
+          weight over the two things she is actually here to do.
+
+          ── AND IT CARRIES NO SENTENCE, WHICH IS NOT AN OMISSION ──
+          The compat report puts `link_keep` above its URL. That string reads
+          "Ini satu-satunya akses ke bacaan KALIAN" - the couple's - and on the
+          mirror the reading is hers alone. Reusing it here would ship a plural
+          that is simply wrong about the product, and writing a singular version
+          is Reyner's call, not this commit's (rule 20). The prompt asks for "a
+          copy-link button on the /r/<token> page using the same component", and
+          that is exactly what this is: the URL and the button, no new
+          Indonesian. The sentence is in the PR body as a copy question. */}
+      {reading.token && (
+        <div style={{ marginTop: 44, paddingTop: 28, borderTop: '1px solid var(--divider)' }}>
+          <Reveal>
+            <CopyLink
+              url={typeof window !== 'undefined' ? `${window.location.origin}/r/${reading.token}` : ''}
+              withCopy
+            />
+          </Reveal>
+        </div>
+      )}
     </div>
   );
 }

@@ -24,9 +24,11 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { seasonTurnOnDate } from '../lib/bazi/pillars.ts';
+import { HOURS } from '../components/BirthFields.jsx';
 
 const pad = (n) => String(n).padStart(2, '0');
 const pillars = (date, time) => {
@@ -114,4 +116,63 @@ test('only the hour containing the turn is ambiguous', () => {
       );
     }
   }
+});
+
+// ── THE CONTROL, NOT JUST THE CLAIM (added 2026-09-09) ─────
+// Everything above proves what the engine can USE. It said nothing about what
+// the form OFFERS, and for a year those were different: the front door rendered
+// `<input type="time" step="3600">`, which still shows a minute field - `step`
+// marks 09:30 invalid, it does not stop a browser asking for it. So the control
+// asked for precision the submit handler then discarded with `slice(0, 2)`.
+//
+// Y-2 Addendum 2 item 4 makes the control match the claim: 24 options, no minute.
+// Asserted by CALLING the exported list rather than counting `<option>` tags in
+// a source grep, which is why `HOURS` is exported at all.
+
+test('THE FRONT DOOR OFFERS 24 HOURS AND NO MINUTE', () => {
+  assert.equal(HOURS.length, 24, 'one option per hour of the day');
+  assert.deepEqual([HOURS[0], HOURS[23]], [0, 23]);
+  assert.deepEqual(HOURS, [...HOURS].sort((a, b) => a - b), 'in order');
+
+  // Every option's stored value parses to the hour the submit handlers read with
+  // `slice(0, 2)`, and to nothing else. This is the join between the control and
+  // `lib/birthInput.js`, and it is the assertion that would catch a display
+  // format ('09.00', the Indonesian convention) leaking into the stored value.
+  for (const h of HOURS) {
+    const stored = `${pad(h)}:00`;
+    assert.match(stored, /^\d{2}:00$/u);
+    assert.equal(Number(stored.slice(0, 2)), h);
+  }
+});
+
+test('NO MINUTE FIELD ON THE FRONT DOOR, AND ONE INSIDE THE SEASON GATE', () => {
+  // The two halves of this file's claim, as CONTROLS this time.
+  // COMMENTS STRIPPED FIRST, and this is not fussiness. The first version of
+  // this assertion went red against a correct implementation, because the
+  // component's own comment EXPLAINS that it is no longer `type="time"` - so the
+  // grep found the words in the prose describing their absence. A source check
+  // that cannot tell code from the comment about the code is checking the
+  // description, not the artifact.
+  const code = (s) => s.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
+  const fields = code(readFileSync(new URL('../components/BirthFields.jsx', import.meta.url), 'utf8'));
+  assert.equal(/type="time"/u.test(fields), false,
+    'BirthFields is back to a time input, which asks for a minute it cannot use');
+  assert.match(fields, /<select\s+[^>]*id=\{`\$\{idPrefix\}-time`\}/u,
+    'the hour picker is a select whose id is prefixed, so two people can share the form');
+
+  // And the exception survives: the season gate asks for hour AND minute,
+  // because on a 節 day the minute is the only thing that resolves the month
+  // pillar. Deleting that minute select would make half 2 of this file's claim
+  // unreachable from the product while every engine assertion above stayed green.
+  // ── BOTH GATE BRANCHES, COUNTED ────────────────────────────
+  // `SeasonGate` renders a minute select in TWO places: "minute mode", reached
+  // when the hour is already known and only the minute is in question, and the
+  // hour+minute card reached when neither is. A `assert.match` for one
+  // `aria-label="Menit"` passes while EITHER branch has been gutted, which is
+  // the half-done edit this is most likely to meet - verified by deleting one
+  // and watching a match-based version of this assertion stay green.
+  const funnel = readFileSync(new URL('../components/Funnel.jsx', import.meta.url), 'utf8');
+  const minuteSelects = funnel.match(/aria-label="Menit"/gu) || [];
+  assert.equal(minuteSelects.length, 2,
+    'both season-gate branches must ask for a minute; it is the one place one matters');
 });

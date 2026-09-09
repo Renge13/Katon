@@ -62,40 +62,25 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
+import { buildPlan, EXTRA_GATES } from './gate-plan.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pkg = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const scripts = pkg.scripts || {};
 
-/**
- * The non-`test:` gates, named explicitly because there is no prefix that groups
- * them. Each one FAILS on a real defect rather than printing an observation:
- * `lint` and `typecheck` are self-evident, `check:copy` enforces rule 20's
- * keyboard-characters-only line on the copy banks, `check:bytes` rejects stray
- * control bytes in tracked source, and the two audits enforce the card's contrast
- * rulings and its content budget.
- *
- * `check:bytes` is here because lint, typecheck and check:copy all read TEXT and
- * a corrupt byte inside a string literal is invisible to all three - added
- * 2026-08-22 after NUL bytes reached a literal that `PROMPT_VERSION` is hashed
- * from, and after the same scan found a `\b` that had been eaten into a literal
- * 0x08 in PROGRESS.md months earlier.
- */
-const EXTRA_GATES = [
-  'lint', 'typecheck', 'check:copy', 'check:bytes', 'check:qa',
-  'audit:card-contrast', 'audit:card-budget',
-];
-
-// `^test:` and nothing cleverer. `test` itself does not match, so this cannot
-// recurse; `report:*` does not match, which is the whole point of that prefix.
-const suites = Object.keys(scripts).filter((s) => s.startsWith('test:')).sort();
-const missing = EXTRA_GATES.filter((g) => !scripts[g]);
+// ── THE PLAN IS BUILT IN scripts/gate-plan.mjs, NOT HERE (2026-09-09) ──
+// `EXTRA_GATES` and the `^test:` selector moved there so that this runner and
+// `tests/ci-parity.spec.mjs` read ONE definition of what `npm test` runs. While
+// they were two, nothing could notice that CI gates on `report:forge` and this
+// file does not - a local 61/61 with a red merge behind it. The plan now takes
+// the union with whatever CI invokes; gate-plan.mjs's header carries the
+// measurement and why the `report:` prefix does not settle the question.
+const { suites, fromCi, missing, plan } = buildPlan(ROOT, scripts);
 if (missing.length) {
   console.error(`test-all: package.json has no script named ${missing.join(', ')}.`);
   console.error('Either it was renamed and this list was not, or it was deleted. Fix one of the two.');
   process.exit(2);
 }
-
-const plan = [...suites, ...EXTRA_GATES];
 
 if (process.argv.includes('--list')) {
   console.log(`${plan.length} gates:\n${plan.map((s) => `  ${s}`).join('\n')}`);
@@ -204,7 +189,8 @@ function orphanTestFiles() {
   return { orphans, scanned: files.length };
 }
 
-console.log(`Running ${plan.length} gates (${suites.length} suites + ${EXTRA_GATES.length} other).\n`);
+console.log(`Running ${plan.length} gates (${suites.length} suites + ${EXTRA_GATES.length} other`
+  + `${fromCi.length ? ` + ${fromCi.length} CI-only: ${fromCi.join(', ')}` : ''}).\n`);
 
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const results = [];
