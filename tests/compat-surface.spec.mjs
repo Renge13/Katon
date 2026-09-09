@@ -179,17 +179,31 @@ test('BirthFields IS ONE IMPLEMENTATION, used by both forms', () => {
   // aria-label to drift, and the compat page needs the fields twice on one
   // screen. Asserted on the source because the alternative - mounting both and
   // comparing rendered attributes - would pass if BOTH copies drifted the same way.
-  const fields = read('components/BirthFields.jsx');
-  assert.match(fields, /step="3600"/u, 'whole hours only');
+  // ── `step="3600"` WAS THIS ASSERTION AND IT HAD GONE FALSE ──
+  // It read `assert.match(fields, /step="3600"/u, 'whole hours only')`. The hour
+  // picker became a `<select>` on 2026-09-09 and the attribute is GONE - but the
+  // component's comment explains why it is gone, so the match kept finding the
+  // words and the assertion stayed green while the thing it named no longer
+  // existed. Read on `code()`, which strips comments, and pinned to the control
+  // that is actually there.
+  const fields = code('components/BirthFields.jsx');
+  assert.equal(fields.includes('step="3600"'), false,
+    'step is a validation hint, not an input mode; the hour picker is a select now');
+  assert.match(fields, /HOURS\.map/u, 'whole hours only, one option each');
   assert.match(fields, /min=\{EARLIEST_BIRTH_DATE\}/u);
   assert.match(fields, /max=\{today\(\)\}/u);
 
-  for (const file of ['components/Funnel.jsx', 'components/Pasangan.jsx']) {
+  // `PasanganSteps.jsx` since Y-2 commit 2: the compat form's three cards became
+  // a stepper, and `BirthFields` moved into it with them. Pasangan.jsx still owns
+  // the product block and the checkout; it no longer renders a field.
+  for (const file of ['components/Funnel.jsx', 'components/PasanganSteps.jsx']) {
     const src = code(file);
     assert.match(src, /BirthFields/u, `${file} uses the shared component`);
     assert.equal(src.includes('type="date"'), false, `${file} declares no date input of its own`);
     assert.equal(src.includes('step="3600"'), false, `${file} declares no time input of its own`);
   }
+  assert.equal(code('components/Pasangan.jsx').includes('<BirthFields'), false,
+    'Pasangan.jsx renders no field of its own; the stepper owns them');
 });
 
 // ── NOTHING COMPUTED BEFORE PAYMENT ────────────────────────

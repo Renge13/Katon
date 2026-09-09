@@ -41,6 +41,7 @@
     "test:site-header": "node --test tests/site-header.spec.mjs",
     "test:ci-parity": "node --test tests/ci-parity.spec.mjs",
     "test:compat-surface": "node --conditions=react-server --import ./scripts/jsx-register.mjs --test tests/compat-surface.spec.mjs",
+    "test:pasangan-steps": "node --import ./scripts/jsx-register.mjs --test tests/pasangan-steps.spec.mjs",
     "test:pasangan-copy": "node --test tests/pasangan-copy.spec.mjs",
     "test:payments-provider": "node --test tests/payments-provider.spec.mjs",
     "test:mock-walk": "node --import ./scripts/jsx-register.mjs --test tests/mock-walk.spec.mjs",

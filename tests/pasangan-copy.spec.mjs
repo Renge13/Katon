@@ -289,9 +289,9 @@ test('THE SHARED JSX STRINGS ARE THE RULED ONES, IN EVERY FILE THAT CARRIES THEM
   // "Jamnya saja" no ruling covered and left it, which is why it is here now.
   assert.equal(rows.length, 3, 'the shared table has three ruled strings');
   assert.deepEqual(rows.flatMap((r) => r.files),
-    ['components/BirthFields.jsx', 'components/Funnel.jsx', 'components/Pasangan.jsx',
+    ['components/BirthFields.jsx', 'components/Funnel.jsx', 'components/PasanganSteps.jsx',
       'components/Funnel.jsx'],
-    'the under-CTA line is in BOTH products, and Funnel carries a second ruled string of its own');
+    'the under-CTA line is in BOTH products (the compat half lives in the stepper since Y-2 commit 2), and Funnel carries a second ruled string of its own');
 
   for (const { files, was, now } of rows) {
     for (const file of files) {

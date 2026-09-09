@@ -29,6 +29,19 @@ export const EARLIEST_BIRTH_DATE = '1900-01-01';
  */
 export const HOURS = Array.from({ length: 24 }, (_, h) => h);
 
+/**
+ * The two gender words, keyed by the value that is stored.
+ *
+ * EXPORTED so the compat stepper's summary line can say back exactly what the
+ * select said, rather than carrying its own copy. Reyner confirmed both words
+ * unchanged on the 2026-09-09 walk; they were literals in the `<option>`s below
+ * and are now read from here, which is the same slot in one place instead of
+ * two. Not a copy BANK: they are the option labels of one control, and a bank
+ * for two words is more machinery than the words are worth (the same call the
+ * rulings file makes for the two shared JSX strings).
+ */
+export const GENDER_WORDS = { female: 'Perempuan', male: 'Laki-laki' };
+
 /** Today, in the browser's own local calendar - the same day the reader means. */
 export const today = () => {
   const d = new Date();
@@ -141,8 +154,8 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
         aria-label={aria('Jenis kelamin')}
       >
         <option value=""></option>
-        <option value="female">Perempuan</option>
-        <option value="male">Laki-laki</option>
+        <option value="female">{GENDER_WORDS.female}</option>
+        <option value="male">{GENDER_WORDS.male}</option>
       </select>
     </>
   );

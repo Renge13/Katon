@@ -99,7 +99,7 @@ the block's primary fact, never a model heading. Chrome strings, PASANGAN_COPY.
 | Where | Was | Ruled string |
 |---|---|---|
 | `components/BirthFields.jsx:119` helper under Jam lahir | `Jamnya saja sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.` | `Tanpa jam tetap akurat, pakai jam jauh lebih presisi.` |
-| `components/Funnel.jsx:534` AND `components/Pasangan.jsx:358` under CTA | `Bersifat pribadi. Hanya untukmu.` | `Privat. Hanya bisa diakses via tautanmu.` |
+| `components/Funnel.jsx:534` AND `components/PasanganSteps.jsx:224` under CTA | `Bersifat pribadi. Hanya untukmu.` | `Privat. Hanya bisa diakses via tautanmu.` |
 | `components/Funnel.jsx:664` helper under the season gate's hour | `Jamnya saja sudah cukup. Dengan ini kamu juga mendapat pilar keempat.` | `Jam lahir membuka pilar keempat.` |
 
 The third row is RULED 2026-09-09, after #112 flagged it as the one "Jamnya saja" the
