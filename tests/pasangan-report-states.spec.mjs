@@ -315,7 +315,7 @@ test('THE SKELETON IS UP BEFORE THE FIRST FETCH RESOLVES, NOT A BLANK PAGE', asy
   let release;
   const held = new Promise((r) => { release = r; });
   const prev = globalThis.fetch;
-  globalThis.fetch = async (url) => {
+  globalThis.fetch = async () => {
     await held;
     return { ok: true, status: 200, json: async () => ({ status: 'unpaid' }) };
   };

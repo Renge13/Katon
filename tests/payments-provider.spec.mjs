@@ -176,7 +176,12 @@ test('EVERY WAITING STATE SHOWS THE REPORT SHAPE, never a blank page', () => {
   // same skeleton" - the prompt's own words. Both waiting branches render it.
   const src = read('components/PasanganReport.jsx');
   assert.match(src, /function ReportSkeleton/u);
-  assert.equal(src.split('<ReportSkeleton />').length - 1, 2,
-    'both the just-paid branch and the paid-but-not-rendered branch show it');
+  // THREE BRANCHES SINCE Y-2 Addendum 2 item 3, and the third is the one that
+  // made this file's own claim true. It was 2 - the just-paid branch and the
+  // paid-but-not-rendered branch - while the FIRST FRAME still rendered `null`,
+  // so "never a blank page" was false for exactly as long as the two fetches
+  // took, immediately after a checkout redirect. The first frame carries it now.
+  assert.equal(src.split('<ReportSkeleton />').length - 1, 3,
+    'the first frame, the just-paid branch and the paid-but-not-rendered branch all show it');
   assert.match(src, /k-skel/u, 'and it reuses the mirror bars rather than inventing a spinner');
 });
