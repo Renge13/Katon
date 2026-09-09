@@ -72,7 +72,7 @@
     "render:reading": "node --conditions=react-server scripts/render-reading.mjs",
     "diagnose:reading": "node --env-file-if-exists=.env.local --conditions=react-server scripts/diagnose-reading.mjs",
     "test:pillars": "node --test tests/time-convention.spec.ts",
-    "test:birth-time-input": "node --test tests/birth-time-input.spec.mjs",
+    "test:birth-time-input": "node --import ./scripts/jsx-register.mjs --test tests/birth-time-input.spec.mjs",
     "test:card": "node --test tests/card.spec.mjs",
     "test:pricing": "node --test tests/pricing.spec.mjs",
     "test:analytics": "node --conditions=react-server --test tests/analytics-events.spec.mjs",

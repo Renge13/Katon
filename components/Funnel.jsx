@@ -661,7 +661,7 @@ export function SeasonGate({ season, onAnswer, intro = null }) {
               <select value={minute} onChange={(e) => setMinute(e.target.value)} aria-label="Menit"><option value="">Menit</option>{RANGE(60).map((m) => <option key={m} value={m}>{pad(m)}</option>)}</select>
             </div>
             <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>
-              Jamnya saja sudah cukup. Dengan ini kamu juga mendapat pilar keempat.
+              Jam lahir membuka pilar keempat.
             </div>
           </div>
           <div style={{ marginTop: 16 }}>

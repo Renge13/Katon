@@ -258,7 +258,7 @@ test('THE FOUR PROMISES ARE STILL PROMISES THE CODE KEEPS', () => {
   assert.match(SITE_COPY.privasi.privasi_second_person, /ikut terhapus/u);
 });
 
-test('THE TWO SHARED JSX STRINGS ARE THE RULED ONES, IN EVERY FILE THAT CARRIES THEM', () => {
+test('THE SHARED JSX STRINGS ARE THE RULED ONES, IN EVERY FILE THAT CARRIES THEM', () => {
   // ── WHY THIS EXISTS AT ALL ─────────────────────────────────
   // These two are ruled copy that is NOT in a copy bank - they are hard-coded in
   // JSX, deliberately, because a bank for two strings is more machinery than the
@@ -284,10 +284,14 @@ test('THE TWO SHARED JSX STRINGS ARE THE RULED ONES, IN EVERY FILE THAT CARRIES 
     if (files.length) rows.push({ files, was: m[2], now: m[3] });
   }
 
-  assert.equal(rows.length, 2, 'the shared table has two ruled strings');
+  // THREE SINCE 2026-09-09. The third is the season gate's hour helper, ruled
+  // with the hour picker (Y-2 Addendum 2 item 4) - #112 flagged it as the one
+  // "Jamnya saja" no ruling covered and left it, which is why it is here now.
+  assert.equal(rows.length, 3, 'the shared table has three ruled strings');
   assert.deepEqual(rows.flatMap((r) => r.files),
-    ['components/BirthFields.jsx', 'components/Funnel.jsx', 'components/Pasangan.jsx'],
-    'and they land in three files - the under-CTA line is in BOTH products');
+    ['components/BirthFields.jsx', 'components/Funnel.jsx', 'components/Pasangan.jsx',
+      'components/Funnel.jsx'],
+    'the under-CTA line is in BOTH products, and Funnel carries a second ruled string of its own');
 
   for (const { files, was, now } of rows) {
     for (const file of files) {

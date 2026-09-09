@@ -74,6 +74,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react';
 
+import { makeSetField } from './helpers/setField.mjs';
+
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
@@ -106,12 +108,7 @@ function mount() {
   act(() => root.render(React.createElement(Funnel)));
   return {
     host,
-    setField: (sel, value) => act(() => {
-      const el = host.querySelector(sel);
-      const proto = Object.getPrototypeOf(el);
-      Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, value);
-      el.dispatchEvent(new window.Event('input', { bubbles: true }));
-    }),
+    setField: makeSetField(host, act, window),
     submit: () => act(() => {
       host.querySelector('form')?.dispatchEvent(
         new window.Event('submit', { bubbles: true, cancelable: true }));
@@ -130,7 +127,8 @@ async function readingScreen() {
   const restore = stubFetch();
   const ui = mount();
   ui.setField('input[type="date"]', '1989-09-13');
-  ui.setField('input[type="time"]', '04:00');
+  // `#birth-time`: the hour picker is a `<select>` since 2026-09-09.
+  ui.setField('#mirror-time', '04:00');
   ui.submit();
   await ui.settle(20);
   return { ui, restore };

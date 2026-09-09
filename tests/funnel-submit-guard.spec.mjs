@@ -64,6 +64,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react';
 
+import { makeSetField } from './helpers/setField.mjs';
+
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
@@ -127,12 +129,7 @@ function mount() {
     form: () => host.querySelector('form'),
     submitButton: () => host.querySelector('button[type="submit"]'),
     text: () => host.textContent,
-    setField: (sel, value) => act(() => {
-      const el = host.querySelector(sel);
-      const proto = Object.getPrototypeOf(el);
-      Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, value);
-      el.dispatchEvent(new window.Event('input', { bubbles: true }));
-    }),
+    setField: makeSetField(host, act, window),
     // A real submit event, which is what a second tap produces. Dispatched on the
     // FORM rather than clicked on the button on purpose: a click on a disabled
     // button is swallowed by the DOM, so clicking would prove the browser's
@@ -166,7 +163,11 @@ function mount() {
 /** Fill the front door with a date the engine accepts, and submit once. */
 async function submitBirthDate(ui, { date = '1989-09-13', time = '04:00' } = {}) {
   ui.setField('input[type="date"]', date);
-  if (time) ui.setField('input[type="time"]', time);
+  // `#birth-time` rather than `input[type="time"]`: the hour picker is a
+  // `<select>` since 2026-09-09 (Y-2 Addendum 2 item 4). Selecting by ID is also
+  // what the two-person compat form needs, where `idPrefix` is the only thing
+  // telling the two people's fields apart.
+  if (time) ui.setField('#mirror-time', time);
   ui.submit();
   await ui.settle();
 }
