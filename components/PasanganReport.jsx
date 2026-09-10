@@ -569,7 +569,7 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
           <Reveal>
             <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 13, color: 'var(--muted-warm)', lineHeight: 1.6 }}>
               <Icon.lock size={13} />
-              <span>{PASANGAN_COPY.link_keep}</span>
+              <span>{CHROME_COPY.link_keep}</span>
             </div>
             <PageUrl id={id} withCopy />
           </Reveal>

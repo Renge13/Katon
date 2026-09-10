@@ -120,7 +120,7 @@ const ALL_STRINGS = {
   pending: PASANGAN_COPY.pending_title,
   rendering: CHROME_COPY.rendering_title,
   error: CHROME_COPY.error_title,
-  link_keep: PASANGAN_COPY.link_keep,
+  link_keep: CHROME_COPY.link_keep,
 };
 
 function assertOnly(ui, ...keys) {

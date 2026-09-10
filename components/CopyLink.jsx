@@ -32,33 +32,49 @@ export const COPIED_MS = 2000;
  *   copy button beside an apology is an odd offer.
  */
 export default function CopyLink({ url, withCopy = false }) {
-  const [copied, setCopied] = useState(false);
+  const [toast, setToast] = useState(null);
   const textRef = useRef(null);
   const timerRef = useRef(null);
 
   async function copy() {
-    // SELECT FIRST, ALWAYS. It is the fallback AND it is the feedback: on a
-    // browser where the write succeeds the selection is harmless, and on one
-    // where it does not she is left with the URL highlighted and one gesture
-    // from copying it herself.
-    const node = textRef.current;
-    if (node && typeof window !== 'undefined' && window.getSelection) {
-      const range = document.createRange();
-      range.selectNodeContents(node);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
+    // ── COPY FIRST. NO SELECTION ON THE HAPPY PATH. ───────────
+    // This used to select the URL BEFORE calling `writeText`, under a comment
+    // reading "SELECT FIRST, ALWAYS" - the selection was meant as a fallback and
+    // a nudge. On a phone it is the only VISIBLE outcome, so tapping "Salin
+    // tautan" looked like the app had highlighted the link instead of copying
+    // it. Reyner reported exactly that from the #113 walk.
+    //
+    // The fix removes the cause rather than adding a condition around it: the
+    // selection now happens ONLY where it is genuinely the fallback.
     try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setCopied(false), COPIED_MS);
+      show(CHROME_COPY.copy_link_done);
     } catch {
-      // The selection above IS the outcome. Deliberately no error copy: telling
-      // her the copy failed helps less than the highlighted text she can act on,
-      // and `error_body` is for a broken reading, not a broken clipboard.
+      // The clipboard refused - undefined off HTTPS, or a rejected write on an
+      // unfocused document, both live for a reader inside a chat app's browser.
+      // NOW the selection earns its place, and it gets a message: selecting text
+      // silently is the same "nothing happened" complaint one layer down.
+      selectUrl();
+      show(CHROME_COPY.copy_link_fallback);
     }
+  }
+
+  /** Put the URL in the reader's own selection, so she can copy it by hand. */
+  function selectUrl() {
+    const node = textRef.current;
+    if (!node || typeof window === 'undefined' || !window.getSelection) return;
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /** One toast slot, whichever message. Replaces any toast already up. */
+  function show(message) {
+    setToast(message);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setToast(null), COPIED_MS);
   }
 
   return (
@@ -81,8 +97,34 @@ export default function CopyLink({ url, withCopy = false }) {
           }}
         >
           <Icon.lock size={11} />
-          {copied ? CHROME_COPY.copy_link_done : CHROME_COPY.copy_link}
+          {CHROME_COPY.copy_link}
         </button>
+      )}
+
+      {/* ── A TOAST, NOT A RELABELLED BUTTON (Y-2b item 2) ────────
+          Reyner ruled the confirmation as a toast over content. A relabelled
+          button asks her to still be looking at the button; a toast at the
+          bottom is where a phone reader's eye already is after a tap, and it
+          leaves the control saying what it does.
+
+          `role="status"` so it is announced rather than only drawn -
+          `aria-live="polite"` waits for a pause, which is right for a
+          confirmation and wrong for an alert. */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: 'fixed', left: '50%', bottom: 28, transform: 'translateX(-50%)',
+            zIndex: 50, maxWidth: 'calc(100vw - 44px)',
+            background: 'var(--tinta)', color: 'var(--kertas-2)',
+            borderRadius: 999, padding: '10px 18px',
+            fontFamily: 'var(--font-sans)', fontSize: 13, lineHeight: 1.4,
+            boxShadow: 'var(--shadow-card)', textAlign: 'center',
+          }}
+        >
+          {toast}
+        </div>
       )}
     </div>
   );

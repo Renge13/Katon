@@ -1,6 +1,10 @@
 <!--
-STATUS: APPLIED through amendment e; amendments f (section_element), g (link_keep, shared) and h (P0
-opening template) RULED, NOT YET APPLIED - they land with the Y-2 walk fixes (docs/prompts/Y-ui-2b.md). Reyner, 2026-09-08 (28 strings) + 2026-09-09 amendments (below).
+STATUS: APPLIED through amendment g; amendment h (the P0 opening template) is RULED and NOT YET
+APPLIED - it lands later in the same PR (docs/prompts/Y-ui-2b.md item 5). Reyner, 2026-09-08 (28
+strings) + 2026-09-09 amendments a-h (below).
+NOTE ON THIS LINE: the verifier reads the first word only, so it sees APPLIED and holds every table
+row to byte identity - which is correct, because h is described in this header and has NO table row
+of its own. Its string lives in glossary.json, not in a copy bank.
 Cowork drafted, Reyner ruled, Cowork swept. The 28 of 2026-09-08 were applied on the day; the
 2026-09-09 amendments were applied by the second commit of the copy PR that lands before Y-2
 commit 1 (Addendum 2 item 5), which is the commit that flipped this line.

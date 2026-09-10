@@ -66,7 +66,7 @@ import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { SITE_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
+import { SITE_COPY, PASANGAN_COPY, CHROME_COPY } from '../lib/site/copy.js';
 import { SENTINEL } from '../scripts/check-unruled-copy.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -81,12 +81,19 @@ function section(heading) {
   return hit;
 }
 
+// ── THE BANK CELL AND THE VALUE CELL BOTH CARRY NOTES NOW ──
+// Amendments f and g put prose INSIDE two cells: `CHROME_COPY (moved from
+// PASANGAN_COPY, amendment g)` in a bank cell, and `` `Keseimbangan Unsur`
+// (amendment f; was `Penyeimbang Unsur`) `` in a section-table value cell. Both
+// stopped parsing and the count fell 31 -> 29, which is the verifier reporting a
+// partial application exactly as designed. The notes are parsed and DISCARDED:
+// the history belongs in the file, not in the assertion.
 const BANK_ROW =
-  /^\|\s*(SITE_COPY(?:\.privasi)?|PASANGAN_COPY)\s*\|\s*`([a-z0-9_]+)`(?:\s*\(was `[a-z0-9_]+`\))?\s*\|\s*`(.*)`\s*\|$/u;
+  /^\|\s*(SITE_COPY(?:\.privasi)?|PASANGAN_COPY|CHROME_COPY)(?:\s*\([^)]*\))?\s*\|\s*`([a-z0-9_]+)`(?:\s*\(was `[a-z0-9_]+`\))?\s*\|\s*`(.*)`\s*\|$/u;
 const DROP_ROW =
   /^\|\s*(?:SITE_COPY(?:\.privasi)?|PASANGAN_COPY)\s*\|\s*~~`([a-z0-9_]+)`~~\s*\|\s*DROPPED\b/u;
 /** The section-eyebrow table: `| `slot` | `string` | over |`. No bank column. */
-const SECTION_ROW = /^\|\s*`([a-z0-9_]+)`\s*\|\s*`(.*?)`\s*\|/u;
+const SECTION_ROW = /^\|\s*`([a-z0-9_]+)`\s*\|\s*`(.*?)`(?:\s*\([^)]*\))?\s*\|/u;
 
 /** Slots the file records as deleted. They must be absent from their bank. */
 function dropped() {
@@ -130,6 +137,9 @@ const bankOf = {
   SITE_COPY: () => SITE_COPY,
   'SITE_COPY.privasi': () => SITE_COPY.privasi,
   PASANGAN_COPY: () => PASANGAN_COPY,
+  // Reachable since amendment g moved `link_keep` here. Without this entry the
+  // APPLIED check would call `undefined()` and crash rather than report.
+  CHROME_COPY: () => CHROME_COPY,
 };
 
 /** 'RULED' (landed, not yet applied) or 'APPLIED'. Declared by the file itself. */
@@ -146,7 +156,11 @@ test('THE WORKSHEET IS 31 RULED SLOTS AND ONE DROPPED ONE', () => {
 
   const byBank = {};
   for (const r of rows) byBank[r.bank] = (byBank[r.bank] || 0) + 1;
-  assert.deepEqual(byBank, { SITE_COPY: 4, PASANGAN_COPY: 25, 'SITE_COPY.privasi': 2 });
+  // `link_keep` MOVED to CHROME_COPY with amendment g, so the split shifts by one
+  // and the total does not. A slot that changes banks must show up here, because
+  // "moved, not aliased" is the whole point of the amendment.
+  assert.deepEqual(byBank,
+    { SITE_COPY: 4, PASANGAN_COPY: 24, 'SITE_COPY.privasi': 2, CHROME_COPY: 1 });
 
   // THE DROP IS AN ASSERTION, NOT A GAP. `paid_title` is recorded as deleted, so
   // the bank must not still carry it - otherwise the row reads as history while
@@ -241,9 +255,14 @@ test('THE FOUR PROMISES ARE STILL PROMISES THE CODE KEEPS', () => {
   // making no promise at all. Caught by running it against Reyner's ruled string.
   const promisesNothingSent = (s) => /\b(tidak|tanpa)\b/iu.test(s) && /(kirim|ngirim)/iu.test(s);
 
+  // ── link_keep LEFT THE FAMILY WITH AMENDMENT g ─────────────
+  // It used to carry "tanpa akun dan tanpa kiriman email" and is now "Simpan
+  // tautan ini untuk membaca kembali." - which promises nothing about email, so
+  // holding it to a no-send promise would fail a string that makes no claim.
+  // The claim did not disappear; it lives in the three below plus the under-CTA
+  // line, and the rulings file's own promise list says the same.
   for (const [name, value] of [
     ['form_email_help', PASANGAN_COPY.form_email_help],
-    ['link_keep', PASANGAN_COPY.link_keep],
     ['privasi_email', SITE_COPY.privasi.privasi_email],
   ]) {
     assert.ok(promisesNothingSent(value), `${name} must still promise nothing is sent: "${value}"`);

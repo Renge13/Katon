@@ -80,6 +80,7 @@ export { readableError } from '../lib/site/readableError.js';
 import { readableError } from '../lib/site/readableError.js';
 import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFields.jsx';
 import CopyLink from './CopyLink.jsx';
+import { CHROME_COPY } from '../lib/site/copy.js';
 import { ProseBlocks } from './ProseBlocks.jsx';
 import { formatIdr } from '../lib/site/format.js';
 
@@ -1007,6 +1008,15 @@ export function Reading({ reading, onReset, initialStage }) {
       {reading.token && (
         <div style={{ marginTop: 44, paddingTop: 28, borderTop: '1px solid var(--divider)' }}>
           <Reveal>
+            {/* THE SENTENCE THE MIRROR SHIPPED WITHOUT. #113 gave this box the
+                control and no words, because the only ruled sentence said
+                "bacaan kalian" - the couple's - and this reading is hers alone.
+                Amendment g replaced it with one plural-free sentence that serves
+                both surfaces. */}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 13, color: 'var(--muted-warm)', lineHeight: 1.6 }}>
+              <Icon.lock size={13} />
+              <span>{CHROME_COPY.link_keep}</span>
+            </div>
             <CopyLink
               url={typeof window !== 'undefined' ? `${window.location.origin}/r/${reading.token}` : ''}
               withCopy
