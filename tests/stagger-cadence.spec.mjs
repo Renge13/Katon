@@ -203,8 +203,19 @@ test('PROPOSITION 5: Home is untouched and sets no --k-rise-dur', async () => {
     //
     // The half of this proposition that has not moved at all is the one below:
     // Home still sets no `--k-rise-dur` anywhere.
-    assert.deepEqual(delaysIn(ui.host), ['0s', '0.08s', '0.14s', '0.18s', '0.22s', '0.3s'],
-      'Home\'s cadence changes only by the compat card being inserted at .18s');
+    // ── REBASED 2026-09-09 WHEN THE HERO LOGOMARK LEFT ────────
+    // It was ['0s','0.08s','0.14s','0.18s','0.22s','0.3s'] - six Reveals, the
+    // first being the logomark. Y-2b item 1 moved that mark into the site header
+    // ("one logomark on the page"), and simply deleting its Reveal left the
+    // sequence starting at 0.08s: an 80ms beat in which the top of the page is
+    // empty. That is residue from a removal, not a design, so the five survivors
+    // were shifted up one step and the HEADLINE starts the page at 0s.
+    //
+    // The relative shape is unchanged - a tightening step, with the compat card
+    // still slotted between the lead and the form. This assertion's job is
+    // unchanged too: catching Home's cadence altered as a SIDE EFFECT.
+    assert.deepEqual(delaysIn(ui.host), ['0s', '0.06s', '0.1s', '0.14s', '0.22s'],
+      "Home's cadence: the headline starts the page, the compat card sits between lead and form");
 
     for (const n of [ui.host, ...ui.host.querySelectorAll('*')]) {
       const v = n.style?.getPropertyValue?.('--k-rise-dur');
