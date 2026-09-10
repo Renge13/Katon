@@ -209,7 +209,13 @@ test('ERROR is reachable from a dead network, and is never a dead end', async ()
     assertOnly(ui, 'error');
     assert.ok(ui.text().includes(CHROME_COPY.error_body));
     // The page URL is her ONLY access, so an apology she cannot quote is useless.
-    assert.ok(/\/kompatibilitas\/p1/u.test(ui.text()), 'the error view shows the page URL');
+    //
+    // READ FROM THE FIELD, not from text content: Y-2c item 1 put the URL in an
+    // `<input readOnly>`. Left as a text scan this would fail on a page that
+    // shows the URL perfectly well, which is a red for the wrong reason.
+    const urlField = ui.host.querySelector('input');
+    assert.ok(urlField && /\/kompatibilitas\/p1/u.test(urlField.value),
+      'the error view shows the page URL');
     assert.ok(ui.text().includes(CHROME_COPY.home_link));
   } finally { ui.unmount(); restore(); }
 });
