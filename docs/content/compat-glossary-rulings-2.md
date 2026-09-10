@@ -15,4 +15,14 @@ The template itself is never served.
 
 ## kompatibilitas.p0_opening
 
-- label_meaning: "Bacaan ini tentang kamu, {A}, dan {B}."
+- label_meaning: "Ini adalah bacaan tentang dua individu: {A} dan {B}"
+
+**AMENDED 2026-09-09 (amendment h, `docs/content/pasangan-copy-rulings.md`).** It was
+`"Bacaan ini tentang kamu, {A}, dan {B}."` and Reyner saw it rendered on a real paid report:
+"Bacaan ini tentang kamu, Api Unggun, dan Samudra." Three items in a list, for a reading about two
+people - and the reader is one of them, so it reads as her plus two strangers. He ruled the
+replacement and amended the digit "2" to "dua" himself.
+
+The row is corrected HERE as well as in the amendment, because this file is the one a session opens
+when it asks what `p0_opening` was ruled to be. A ruling recorded in one file and superseded in
+another is how a stale value gets re-applied by someone being careful.

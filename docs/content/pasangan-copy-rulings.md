@@ -1,10 +1,12 @@
 <!--
-STATUS: APPLIED through amendment g; amendment h (the P0 opening template) is RULED and NOT YET
-APPLIED - it lands later in the same PR (docs/prompts/Y-ui-2b.md item 5). Reyner, 2026-09-08 (28
-strings) + 2026-09-09 amendments a-h (below).
-NOTE ON THIS LINE: the verifier reads the first word only, so it sees APPLIED and holds every table
-row to byte identity - which is correct, because h is described in this header and has NO table row
-of its own. Its string lives in glossary.json, not in a copy bank.
+STATUS: APPLIED. Reyner, 2026-09-08 (28 strings) + 2026-09-09 amendments a-h (below). Amendments f,
+g and h were applied by the Y-2 walk-fix PR (docs/prompts/Y-ui-2b.md).
+NOTE ON AMENDMENT h: it has NO row in the tables below, and that is not an omission. Its string is a
+TEMPLATE in `docs/content/glossary.json` (`kompatibilitas.p0_opening.label_meaning`), not a copy-bank
+slot, so the verifier here cannot check it - `tests/pair-semantic.spec.mjs` does, against the
+SUBSTITUTED sentence, which is the only form a reader ever sees. The ruling is also corrected in
+`docs/content/compat-glossary-rulings-2.md`, which is the file a session opens to ask what
+`p0_opening` was ruled to be.
 Cowork drafted, Reyner ruled, Cowork swept. The 28 of 2026-09-08 were applied on the day; the
 2026-09-09 amendments were applied by the second commit of the copy PR that lands before Y-2
 commit 1 (Addendum 2 item 5), which is the commit that flipped this line.
