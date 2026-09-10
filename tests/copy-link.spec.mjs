@@ -17,6 +17,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -77,12 +78,19 @@ test('A SUCCESSFUL COPY SAYS SO, AND SAYS IT FOR A WHILE', async () => {
     ui.click(ui.button());
     await ui.settle();
     assert.deepEqual(written, [URL_], 'the URL on screen is the URL copied');
-    assert.equal(ui.button().textContent.trim(), CHROME_COPY.copy_link_done);
 
-    // It reverts, so the button is usable twice. The prompt says 2s.
+    // ── THIS ASSERTED A BUTTON RELABEL UNTIL 2026-09-09 ────────
+    // Reyner ruled the confirmation a TOAST instead, so the assertion moved with
+    // the behaviour rather than being deleted: the button keeps its own label
+    // and the toast carries the message.
+    assert.equal(ui.button().textContent.trim(), CHROME_COPY.copy_link);
+    assert.ok(ui.text().includes(CHROME_COPY.copy_link_done));
+
+    // It clears, so a second tap is a fresh confirmation. The prompt says ~2s.
     assert.equal(COPIED_MS, 2000);
     await ui.settle(COPIED_MS + 50);
-    assert.equal(ui.button().textContent.trim(), CHROME_COPY.copy_link);
+    assert.equal(ui.text().includes(CHROME_COPY.copy_link_done), false,
+      'the toast clears itself');
   } finally { ui.unmount(); restore(); }
 });
 
@@ -130,4 +138,69 @@ test('THE MIRROR RENDERS IT, AND CARRIES NO PLURAL SENTENCE WITH IT', async () =
   assert.match(src, /\/r\/\$\{reading\.token\}/u, 'and it copies the reading URL');
   assert.equal(src.includes('PASANGAN_COPY.link_keep'), false,
     'the compat report\'s plural sentence must not be reused on the mirror');
+});
+
+// ── THE TAP ITSELF (Y-2b item 2) ───────────────────────────
+
+test('A SUCCESSFUL TAP MAKES NO SELECTION, AND TOASTS', async () => {
+  // ── WHAT REYNER SAW, AND WHY THE OLD TEST DID NOT ──────────
+  // Tapping `Salin tautan` HIGHLIGHTED the URL. That was `copy()` doing what its
+  // own comment said - "SELECT FIRST, ALWAYS", a range selection BEFORE
+  // `writeText`. On a phone the selection is the visible outcome, and it reads
+  // as "it blocked the link instead of copying it".
+  //
+  // The existing suite passed throughout, because it asserted the selection on
+  // the REJECTION branch and never checked the happy path for one. A test that
+  // only exercises the fallback cannot see the fallback firing when it should
+  // not.
+  const written = [];
+  const restore = withClipboard({ writeText: async (t) => { written.push(t); } });
+  window.getSelection().removeAllRanges();
+  const ui = mount({ url: URL_, withCopy: true });
+  try {
+    ui.click(ui.button());
+    await ui.settle();
+    assert.deepEqual(written, [URL_], 'it copied');
+    assert.equal(String(window.getSelection()), '',
+      'a successful copy must not highlight the URL; the selection IS the bug');
+
+    // The confirmation is a TOAST over content, not a relabelled button.
+    assert.equal(ui.button().textContent.trim(), CHROME_COPY.copy_link,
+      'the button keeps its label');
+    assert.ok(ui.text().includes(CHROME_COPY.copy_link_done), 'the toast says it copied');
+    assert.ok(ui.host.querySelector('[role="status"]'),
+      'and it is announced, not just drawn');
+  } finally { ui.unmount(); restore(); }
+});
+
+test('A REJECTED TAP SELECTS, AND SAYS SO IN ITS OWN WORDS', async () => {
+  // The fallback survives and gains a voice: selecting text with no message
+  // looks like nothing happened, which is the same complaint one layer down.
+  const restore = withClipboard({ writeText: async () => { throw new Error('not focused'); } });
+  window.getSelection().removeAllRanges();
+  const ui = mount({ url: URL_, withCopy: true });
+  try {
+    ui.click(ui.button());
+    await ui.settle();
+    assert.equal(String(window.getSelection()), URL_, 'the fallback selection');
+    assert.ok(ui.text().includes(CHROME_COPY.copy_link_fallback),
+      'the fallback toast tells her what to do with it');
+    assert.equal(ui.text().includes(CHROME_COPY.copy_link_done), false,
+      'and never claims success');
+  } finally { ui.unmount(); restore(); }
+});
+
+test('link_keep IS ONE SENTENCE IN CHROME_COPY, ON BOTH SURFACES', async () => {
+  // Amendment g. It was PASANGAN_COPY's and said "bacaan kalian", so the mirror
+  // shipped its box wordless in #113. One sentence with no plural now serves
+  // both, and the slot MOVES rather than being aliased.
+  assert.equal(CHROME_COPY.link_keep, 'Simpan tautan ini untuk membaca kembali.');
+  const { PASANGAN_COPY: P } = await import('../lib/site/copy.js');
+  assert.equal('link_keep' in P, false, 'the old slot is removed, not aliased');
+
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
+  for (const f of ['../components/PasanganReport.jsx', '../components/Funnel.jsx']) {
+    const src = strip(readFileSync(new URL(f, import.meta.url), 'utf8'));
+    assert.match(src, /CHROME_COPY\.link_keep/u, `${f} reads the shared sentence`);
+  }
 });

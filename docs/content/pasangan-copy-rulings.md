@@ -1,5 +1,12 @@
 <!--
-STATUS: APPLIED. Reyner, 2026-09-08 (28 strings) + 2026-09-09 amendments (below).
+STATUS: APPLIED. Reyner, 2026-09-08 (28 strings) + 2026-09-09 amendments a-h (below). Amendments f,
+g and h were applied by the Y-2 walk-fix PR (docs/prompts/Y-ui-2b.md).
+NOTE ON AMENDMENT h: it has NO row in the tables below, and that is not an omission. Its string is a
+TEMPLATE in `docs/content/glossary.json` (`kompatibilitas.p0_opening.label_meaning`), not a copy-bank
+slot, so the verifier here cannot check it - `tests/pair-semantic.spec.mjs` does, against the
+SUBSTITUTED sentence, which is the only form a reader ever sees. The ruling is also corrected in
+`docs/content/compat-glossary-rulings-2.md`, which is the file a session opens to ask what
+`p0_opening` was ruled to be.
 Cowork drafted, Reyner ruled, Cowork swept. The 28 of 2026-09-08 were applied on the day; the
 2026-09-09 amendments were applied by the second commit of the copy PR that lands before Y-2
 commit 1 (Addendum 2 item 5), which is the commit that flipped this line.
@@ -34,13 +41,34 @@ AMENDMENTS 2026-09-09 (Reyner, after walking the mock-payment preview; Cowork sw
      "hanya untuk mengakses kembali" had to go). #16 is Cowork's proposal, Reyner YES verbatim.
      #27 is Cowork's, simplified at Reyner's instruction ("simple, not verbose"); he amends in place
      if the register is off. Both swept clean.
+  f. section_element AMENDED after the Y-2 walk (Reyner, 2026-09-09 evening): `Penyeimbang Unsur`
+     -> `Keseimbangan Unsur`. Cause: the ruled eyebrow was the same words as the P3 glossary name
+     `p3_supplies.name_id`, so P3 said it twice; Code suppressed the duplicate in #113. With
+     different words the suppression is dead code and comes OUT in the commit that applies this row
+     (`PasanganReport.jsx` labelFor, `name === eyebrow ? null : name`). Cowork's miss: the eyebrow
+     was swept for the blocklist, not against the block's own name_ids. NOT YET APPLIED.
+  g. link_keep AMENDED (Reyner, 2026-09-09 night): `Simpan tautan halaman ini. Ini satu-satunya akses
+     ke bacaan kalian, tanpa akun dan tanpa kiriman email.` -> `Simpan tautan ini untuk membaca
+     kembali.` No "kalian", so ONE sentence serves the compat report AND the mirror's copy-link box
+     (which shipped wordless in #113). Technicality, Cowork: the slot MOVES to CHROME_COPY.link_keep
+     and both surfaces read it; PASANGAN_COPY.link_keep is removed, not aliased. link_keep leaves the
+     promise family: the "tanpa akun / tanpa kiriman email" promise now lives in form_email_help,
+     privasi_email, privasi_second_person and the under-CTA line only. NOT YET APPLIED.
+  h. P0 opening line RULED (Reyner, 2026-09-09 night), replacing the rendered "Bacaan ini tentang
+     kamu, Api Unggun, dan Samudra." which reads as three people:
+     `Ini adalah bacaan tentang dua individu: <name_id A> dan <name_id B>` - A first, B second, the
+     archetype name_ids from the engine. Whether the current sentence is an engine template or model
+     prose, the ruled line is an ENGINE template from now on (rule 14: structure is the engine's).
+     Reyner amended the digit "2" to "dua" on Cowork's flag, same night. Swept clean.
+     NOT YET APPLIED.
 
 SWEEP 2026-09-09: compiled as lib/validate/style.js:64 (`new RegExp(entry.pattern, entry.flags || 'iu')`,
 only objects carrying `pattern`), 70 patterns. Falsifiers 4/4 fired (cenderung, selaras, sangat cocok,
 Kondisi ini). 11 ruled strings: 0 hits, 0 non-keyboard characters, 0 dash/curly/?, 0 `bukan X tapi Y`,
 0 3-gram overlap with the ruled 28 or the Y-2 drafts.
 
-FOUR STRINGS ARE PROMISES: form_email_help, link_keep, privasi_email, privasi_second_person.
+PROMISE STRINGS (was four; link_keep left the family in amendment g): form_email_help, privasi_email,
+privasi_second_person, and the under-CTA line.
 privasi_second_person promises deletion "jika bacaan dihapus" - true once the manual deletion
 procedure covers pair rows (Y-1 ledger item). If email sending or deletion behaviour changes, all
 four change in one commit. The new under-CTA string ("Hanya bisa diakses via tautanmu") is a FIFTH
@@ -72,7 +100,7 @@ promise of the same family: true while access is token-only and no email is sent
 | PASANGAN_COPY | `pending_title` | `Menunggu Konfirmasi Pembayaran` |
 | PASANGAN_COPY | `pending_body` | `Halaman ini otomatis diperbarui setelah pembayaran diterima. Tidak perlu memuat ulang.` |
 | PASANGAN_COPY | ~~`paid_title`~~ | DROPPED 2026-09-09 (was `Bacaan Kalian Sudah Siap`). Remove slot, render, and spec entry. |
-| PASANGAN_COPY | `link_keep` | `Simpan tautan halaman ini. Ini satu-satunya akses ke bacaan kalian, tanpa akun dan tanpa kiriman email.` |
+| CHROME_COPY (moved from PASANGAN_COPY, amendment g) | `link_keep` | `Simpan tautan ini untuk membaca kembali.` |
 | PASANGAN_COPY | `unpaid_resume` | `Bacaan ini belum dibayar. Selesaikan pembayaran untuk membukanya.` |
 | PASANGAN_COPY | `section_pattern` (was `report_badge_eyebrow`) | `Pola Hubungan` |
 | PASANGAN_COPY | `section_rhythm` (was `report_quadrant_eyebrow`) | `Tarikan & Ritme` |
@@ -89,7 +117,7 @@ the block's primary fact, never a model heading. Chrome strings, PASANGAN_COPY.
 |---|---|---|
 | `section_core` | `Inti Diri` | P1 |
 | `section_seat` | `Kursi Pasangan` | P2 |
-| `section_element` | `Penyeimbang Unsur` | P3 |
+| `section_element` | `Keseimbangan Unsur` (amendment f; was `Penyeimbang Unsur`) | P3 |
 | `section_pattern` | `Pola Hubungan` | P4 (same slot as the badge eyebrow above) |
 | `section_rhythm` | `Tarikan & Ritme` | P5 (same slot as the quadrant eyebrow above) |
 | `section_close` | `Peta Dinamika` | P7 penutup |

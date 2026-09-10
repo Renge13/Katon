@@ -60,19 +60,45 @@ export default function SiteHeader() {
           gap: 16,
         }}
       >
+        {/* ── THE LOGOMARK, RULED 2026-09-09 (Y-2b item 1) ─────────
+            It was `KATON.APP` set as letterspaced type. Reyner ruled the circle
+            logomark here instead - the orange dot beside KATON that the home
+            hero used to carry as its first line - and ONE logomark on the page,
+            in the header. So the hero's copy is gone with it; a mark in a page
+            under a header that already shows one is two marks.
+
+            Moved rather than rebuilt: the dot's size, gap, weight and tracking
+            are the funnel's own `Wordmark` values, so the object a reader has
+            been seeing since launch is the object in the header. The `light`
+            variant it carried is dropped because neither call site ever passed
+            it - a prop kept "for later" is how a second visual language starts.
+
+            Rule 20 governs the text inside it: `KATON` is the product's name,
+            keyboard characters only, and nothing else is written here. */}
         <Link
           href="/"
           aria-label="Katon"
           style={{
-            letterSpacing: '.18em',
-            fontSize: 11.5,
-            fontWeight: 600,
-            color: 'var(--tinta-soft)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 9,
             textDecoration: 'none',
             whiteSpace: 'nowrap',
           }}
         >
-          KATON.APP
+          <span
+            aria-hidden="true"
+            style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--clay)' }}
+          />
+          <span
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontWeight: 600,
+              letterSpacing: '.28em',
+              fontSize: 13,
+              color: '#3c3226',
+            }}
+          >KATON</span>
         </Link>
 
         <nav style={{ display: 'flex', gap: 16 }}>

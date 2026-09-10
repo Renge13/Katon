@@ -25,6 +25,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -33,6 +34,23 @@ import { act } from 'react';
 import PasanganReport from '../components/PasanganReport.jsx';
 import { viewFor, VIEWS, READY_VIEWS } from '../lib/pair/reportView.js';
 import { CHROME_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
+import { projectNames } from '../lib/pair/reportView.js';
+import { calculateBaziChart } from '../lib/bazi/buildChart.js';
+import { buildPairSemantic } from '../lib/semantic/pair.js';
+
+// ── THE NAMES COME FROM A REAL SEMANTIC, NOT FROM THIS FILE ──
+// The first version of this spec hand-wrote its `names` map, and that is why it
+// passed while the server shipped an empty one for every pair: a fixture invented
+// for the shape you expect cannot tell you the shape you get. Built from the
+// engine now, through the same projection the route uses.
+const REAL_SEMANTIC = buildPairSemantic(
+  calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00', gender: 'male' }),
+  calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00', gender: 'female' }),
+);
+const REAL_NAMES = projectNames(REAL_SEMANTIC);
+
+/** The real production response, verbatim (pair g4WH4, Y-1). */
+const PROD = JSON.parse(readFileSync(new URL('./fixtures/pair-reading-g4WH4.json', import.meta.url), 'utf8'));
 
 const A_DATE = '1989-09-13';
 const B_DATE = '1990-03-04';
@@ -43,13 +61,7 @@ const READING = (served_from = 'render') => ({
   served_from,
   pair: { a: { date: A_DATE, gender: 'male' }, b: { date: B_DATE, gender: 'female' } },
   facts: { a: {}, b: {}, pattern: 'Pola Kontras', quadrant: 'Tarikan Tenang, Ritme Bergesek' },
-  names: {
-    p1_stem_relation: 'Inti Menghidupi',
-    p2_day_pair: 'Kursi Berbenturan',
-    p3_supply: 'Penyeimbang Unsur',
-    p4_temperament: 'Pola Kontras',
-    p5_pull_fit: 'Tarikan Tenang, Ritme Bergesek',
-  },
+  names: REAL_NAMES,
   reading: {
     blocks: [
       { fact_ids: ['p0_opening'], heading: 'Model Heading Nol', text: 'Paragraf pembuka.' },
@@ -108,7 +120,7 @@ const ALL_STRINGS = {
   pending: PASANGAN_COPY.pending_title,
   rendering: CHROME_COPY.rendering_title,
   error: CHROME_COPY.error_title,
-  link_keep: PASANGAN_COPY.link_keep,
+  link_keep: CHROME_COPY.link_keep,
 };
 
 function assertOnly(ui, ...keys) {
@@ -236,8 +248,12 @@ test('EVERY BLOCK CARRIES A SECTION LABEL AND A GLOSSARY NAME, AND NO MODEL HEAD
     for (const slot of ['section_core', 'section_seat', 'section_element', 'section_pattern', 'section_rhythm']) {
       assert.ok(text.includes(PASANGAN_COPY[slot]), `${slot} is missing`);
     }
-    for (const name of ['Inti Menghidupi', 'Kursi Berbenturan', 'Penyeimbang Unsur', 'Pola Kontras']) {
-      assert.ok(text.includes(name), `the glossary name "${name}" is missing`);
+    // FROM THE PROJECTION, NOT FROM LITERALS. This list was hand-written and one
+    // of its four names ("Kursi Berbenturan") is not even the name this pair
+    // gets - the engine picks `p2_none` -> "Kursi Independen" here. A literal
+    // expectation is how the empty projection passed review in the first place.
+    for (const [id, name] of Object.entries(REAL_NAMES)) {
+      assert.ok(text.includes(name), `the glossary name "${name}" (${id}) is missing`);
     }
     // NOT ONE model heading, including the P0 block which has no section mapping
     // at all - that is the block `modelHeadings={false}` exists for.
@@ -339,4 +355,136 @@ test('THE SKELETON IS UP BEFORE THE FIRST FETCH RESOLVES, NOT A BLANK PAGE', asy
   } finally {
     act(() => root.unmount()); host.remove(); globalThis.fetch = prev;
   }
+});
+
+// ── ITEM 3: BOTH LEVELS ON EVERY LABELLED BLOCK ────────────
+
+test('THE NAMES PROJECTION IS NOT EMPTY, AND IT COVERS P1, P2 AND P3', () => {
+  // ── THE DEFECT #113 SHIPPED, AND THE ASSERTION THAT MISSED IT ──
+  // `serveReading` projected `f.entry?.name_id`. `lib/semantic/facts.js#fact`
+  // spreads `contentFrom(entry)` and keeps NO `entry` key, so that expression is
+  // undefined for every fact and the projection was `{}` on every pair. P1/P2/P3
+  // rendered an eyebrow with no headline; P4/P5 looked fine only because
+  // `labelFor` falls back to `facts.pattern`/`facts.quadrant`, which know those
+  // two ids and no others.
+  //
+  // Built from the ENGINE here, not from a literal, because a hand-written
+  // fixture is exactly what let the empty projection pass review.
+  assert.ok(Object.keys(REAL_NAMES).length >= 5,
+    `the projection is near-empty: ${JSON.stringify(REAL_NAMES)}`);
+  for (const id of ['p1_stem_relation', 'p2_day_pair', 'p3_supply', 'p4_temperament', 'p5_pull_fit']) {
+    assert.equal(typeof REAL_NAMES[id], 'string', `${id} has no name in the projection`);
+    assert.ok(REAL_NAMES[id].length > 0);
+  }
+  // Nameless facts stay ABSENT rather than null: a missing cell must look like
+  // an absence, never like a key.
+  assert.equal('p0_opening' in REAL_NAMES, false, 'p0 has no name_id and must not be invented one');
+});
+
+test('EVERY LABELLED BLOCK OF THE REAL PRODUCTION READING HAS BOTH LEVELS', async () => {
+  // The Y-1 production response, verbatim, with the projection the route now
+  // sends. Reyner's screenshots of this reading are the evidence for the defect:
+  // "INTI DIRI" then prose, "KURSI PASANGAN" then prose, no headline on either.
+  const restore = stub({
+    pair: { status: 'paid' },
+    reading: { ...PROD, names: REAL_NAMES, pair: READING().pair },
+  });
+  const ui = await mount();
+  try {
+    const text = ui.text();
+    // For each beat that has a section label AND a name, BOTH must be on screen.
+    const BEATS = {
+      p1_stem_relation: PASANGAN_COPY.section_core,
+      p2_day_pair: PASANGAN_COPY.section_seat,
+      p3_supply: PASANGAN_COPY.section_element,
+      p4_temperament: PASANGAN_COPY.section_pattern,
+      p5_pull_fit: PASANGAN_COPY.section_rhythm,
+    };
+    for (const [id, eyebrow] of Object.entries(BEATS)) {
+      assert.ok(text.includes(eyebrow), `${id}: the section eyebrow "${eyebrow}" is missing`);
+      assert.ok(text.includes(REAL_NAMES[id]),
+        `${id}: the eyebrow is there but the HEADLINE "${REAL_NAMES[id]}" is not - `
+        + 'this is the #113 defect, an eyebrow over bare prose');
+    }
+  } finally { ui.unmount(); restore(); }
+});
+
+test('THE CLOSING PARAGRAPH CARRIES section_close, EYEBROW ONLY BY RULING', async () => {
+  // ── THE PROMPT'S PROPOSED FIX WOULD NOT HAVE WORKED ────────
+  // It says to add a P7 entry to `SECTION_BY_BEAT`. Measured first, as it asks:
+  //
+  //   fact_ids across the production blocks:
+  //     p0_opening p1_stem_relation p2_day_pair p2_reframe p2_palace_frame
+  //     p3_supply p4_temperament p5_pull_fit
+  //   any p7? false
+  //
+  // The closing italic paragraph is NOT A BLOCK. It is `reading.penutup`, a
+  // separate string with its own render branch, and `SECTION_BY_BEAT` is only
+  // ever consulted for blocks. A p7 mapping would have changed nothing.
+  //
+  // P7 HAS NO GLOSSARY NAME (`p7_*_lead` cells carry `name_id: null`), so this
+  // block is eyebrow-only BY RULING and is the one exception to "both levels".
+  const restore = stub({
+    pair: { status: 'paid' },
+    reading: { ...PROD, names: REAL_NAMES, pair: READING().pair },
+  });
+  const ui = await mount();
+  try {
+    const text = ui.text();
+    assert.ok(text.includes(PASANGAN_COPY.section_close),
+      `"${PASANGAN_COPY.section_close}" never renders; the closing paragraph has nothing over it`);
+    // And it sits with the penutup, not orphaned somewhere above it.
+    const iEyebrow = text.indexOf(PASANGAN_COPY.section_close);
+    const iPenutup = text.indexOf(PROD.reading.penutup.slice(0, 40));
+    assert.ok(iEyebrow < iPenutup && iPenutup - iEyebrow < 200,
+      'section_close must sit directly above the closing paragraph');
+  } finally { ui.unmount(); restore(); }
+});
+
+test('THE MIRROR PENUTUP STAYS BARE', () => {
+  // `ProseBlocks` is shared. The compat report passes the closing eyebrow; the
+  // mirror passes nothing and its penutup renders exactly as it did, because Y-2
+  // commit 4 is explicit that nothing structural changes in the funnel.
+  const src = readFileSync(new URL('../components/Funnel.jsx', import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
+  assert.equal(src.includes('closeEyebrow'), false,
+    'the mirror must not pass a closing eyebrow');
+});
+
+// ── ITEM 4: THE EYEBROW AND THE NAME ARE DIFFERENT WORDS NOW ──
+
+test('section_element IS `Keseimbangan Unsur`, AND P3 SHOWS BOTH LEVELS', async () => {
+  // ── AMENDMENT f, AND WHY THE SUPPRESSION IS GONE WITH IT ───
+  // The ruled eyebrow used to be "Penyeimbang Unsur", the same words as
+  // `p3_supplies.name_id`, so P3 said it twice one line apart. #113 suppressed
+  // the exact duplicate in `labelFor`. Reyner changed the eyebrow instead, so
+  // the CAUSE is gone - and a suppression with no cause is the next mystery, so
+  // it comes out in this commit.
+  assert.equal(PASANGAN_COPY.section_element, 'Keseimbangan Unsur');
+  assert.notEqual(PASANGAN_COPY.section_element, REAL_NAMES.p3_supply,
+    'the eyebrow and the P3 name must be different words; that is what amendment f is for');
+
+  const restore = stub({
+    pair: { status: 'paid' },
+    reading: { ...PROD, names: REAL_NAMES, pair: READING().pair },
+  });
+  const ui = await mount();
+  try {
+    const text = ui.text();
+    assert.ok(text.includes('Keseimbangan Unsur'), 'the ruled eyebrow');
+    assert.ok(text.includes(REAL_NAMES.p3_supply),
+      `the P3 headline "${REAL_NAMES.p3_supply}" must render beside it, not be suppressed`);
+  } finally { ui.unmount(); restore(); }
+});
+
+test('THE DUPLICATE SUPPRESSION IS GONE FROM labelFor', () => {
+  // Asserted on the source because the behaviour it removed is now unreachable:
+  // with different words there is no duplicate left to suppress, so no rendered
+  // output distinguishes "suppression removed" from "suppression present". That
+  // is exactly when a source assertion is the honest one - and it is why this is
+  // a separate test from the rendering one above rather than a line inside it.
+  const src = readFileSync(new URL('../components/PasanganReport.jsx', import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
+  assert.equal(src.includes('name === eyebrow'), false,
+    'the duplicate suppression outlived its cause (amendment f gave P3 different words)');
 });

@@ -267,7 +267,15 @@ ruling of its own except the one Reyner made after it (below).
    pins that, so the sentence cannot be implemented later without meeting it.
 4. **THE DELETION PATH STILL DOES NOT REACH A PAIR** - unchanged by Y-2, see its own section below.
    `privasi_second_person` promises B's data is deleted with the reading, which the code cannot keep.
-5. **PROMPT Z, THE READING VOICE, IS AFTER Y-2 MERGES** (Addendum 2 item 9). Not started.
+5. **PROMPT Z, THE READING VOICE, IS AFTER Y-2 MERGES** (Addendum 2 item 9). Not started, and it
+   now carries ONE MORE ITEM, ruled onto it by Reyner on 2026-09-09:
+   **THE P0 OPENING IS NOT GUARANTEED VERBATIM.** Y-2b amendment h replaced the template at
+   `glossary.json#kompatibilitas.p0_opening.label_meaning`, and the Y-1 production fixture shows the
+   model emitting that template word for word - so the ruled sentence reaches a reader today. What
+   ONE sample cannot establish is that it always will rather than being paraphrased. Guaranteeing it
+   means emitting the line from the engine AHEAD of the model's paragraph and stopping the prompt
+   from asking the model to name the two archetypes in its first sentence, or they are named twice.
+   That route touches the renderer prompt, which is why it is Z's and not Y-2b's.
 6. **THE PDF FOR COMPAT IS Y-3 and is a RELEASE precondition** (Addendum 2 item 8).
 
 **SALES REMAIN CLOSED UNTIL DOKU.** Y-2 changes nothing about that: no reopen step, and no real

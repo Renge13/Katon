@@ -152,19 +152,12 @@ const labelFor = (facts, names) => (block) => {
       ?? (id === 'p4_temperament' ? facts?.pattern : null)
       ?? (id === 'p5_pull_fit' ? facts?.quadrant : null)
       ?? null;
-    // ── THE SAME WORDS TWICE IS THE STUTTER, NOT A LAYOUT ─────
-    // `section_element` is "Penyeimbang Unsur" and so is
-    // `kompatibilitas.p3_supplies.name_id`, so P3 rendered the phrase as its
-    // eyebrow AND as its headline, one line apart - which is a smaller version
-    // of exactly what Addendum 2 item 2 removes. Found by reading the rendered
-    // text out of a failing assertion, not by inspecting the strings.
-    //
-    // Suppressing the duplicate is a TECHNICALITY (rule 9): whichever words are
-    // ruled, saying them twice in two type sizes is a defect. The repo has the
-    // same precedent in `tests/stage5-render.spec.mjs`, "THE FLOOR DOES NOT SAY
-    // THE LABEL TWICE". Whether the two should be DIFFERENT words is Reyner's,
-    // and it is flagged in the PR rather than decided here.
-    return { eyebrow, name: name === eyebrow ? null : name };
+    // NO DUPLICATE SUPPRESSION HERE ANY MORE. #113 returned
+    // `name === eyebrow ? null : name` because `section_element` and the P3
+    // glossary name were the same words. Amendment f gave the eyebrow different
+    // words, so the cause is gone, and a suppression with no cause is the next
+    // session's mystery - it would silently swallow a legitimately equal pair.
+    return { eyebrow, name };
   }
   return null;
 };
@@ -565,6 +558,7 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
           reading={reading.reading}
           labelFor={labelFor(reading.facts, reading.names)}
           modelHeadings={false}
+          closeEyebrow={PASANGAN_COPY.section_close}
         />
 
         {/* THE LINK IS THE ACCESS. No account, and nothing is emailed in v1, so
@@ -575,7 +569,7 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
           <Reveal>
             <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 13, color: 'var(--muted-warm)', lineHeight: 1.6 }}>
               <Icon.lock size={13} />
-              <span>{PASANGAN_COPY.link_keep}</span>
+              <span>{CHROME_COPY.link_keep}</span>
             </div>
             <PageUrl id={id} withCopy />
           </Reveal>

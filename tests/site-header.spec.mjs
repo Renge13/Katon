@@ -104,3 +104,33 @@ test('THE CURRENT ROUTE IS MARKED, AND / DOES NOT MARK EVERYTHING', () => {
   // Not a prefix of a DIFFERENT segment that merely starts the same way.
   assert.equal(isCurrent('/kompatibilitas-lain', '/kompatibilitas'), false);
 });
+
+// ── THE LOGOMARK (Y-2b item 1) ─────────────────────────────
+
+test('THE HEADER CARRIES THE LOGOMARK, AND THE PAGE CARRIES NO SECOND ONE', () => {
+  // ── REYNER'S RULING ────────────────────────────────────────
+  // "Replace the KATON.APP wordmark top-left of SiteHeader with the circle
+  // logomark (the orange dot + KATON that the home hero currently shows as its
+  // first line). REMOVE that hero logomark line from the home page. One
+  // logomark on the page, in the header."
+  //
+  // Asserted on source rather than by mounting, because `SiteHeader` imports
+  // `next/link`, which the plain node runner cannot resolve. The rendered proof
+  // is a screenshot on the Vercel preview, in the PR body.
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
+  const header = strip(readFileSync(new URL('../components/SiteHeader.jsx', import.meta.url), 'utf8'));
+  const funnel = strip(readFileSync(new URL('../components/Funnel.jsx', import.meta.url), 'utf8'));
+
+  // The mark: an orange dot beside letterspaced KATON. The dot is the logomark;
+  // `KATON.APP` was type alone and is what this replaces.
+  assert.match(header, /borderRadius: '50%'/u, 'the header draws the circle');
+  assert.match(header, /var\(--clay\)/u, 'in the accent it has always been');
+  assert.match(header, />KATON</u, 'beside the name');
+  assert.equal(header.includes('KATON.APP'), false,
+    'the wordmark it replaces must be gone, not sitting beside it');
+
+  // ONE ON THE PAGE. The funnel keeps no logomark of its own: the header is on
+  // every route now, so any mark inside a page is a second one.
+  assert.equal(funnel.includes('Wordmark'), false,
+    'the funnel still renders a logomark; with the header there, that is two');
+});

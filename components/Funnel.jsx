@@ -80,6 +80,7 @@ export { readableError } from '../lib/site/readableError.js';
 import { readableError } from '../lib/site/readableError.js';
 import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFields.jsx';
 import CopyLink from './CopyLink.jsx';
+import { CHROME_COPY } from '../lib/site/copy.js';
 import { ProseBlocks } from './ProseBlocks.jsx';
 import { formatIdr } from '../lib/site/format.js';
 
@@ -400,14 +401,6 @@ export default function Funnel() {
 
 
 /* ---------------- shared bits ---------------- */
-function Wordmark({ light }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-      <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--clay)' }} />
-      <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '.28em', fontSize: 13, color: light ? 'rgba(244,238,227,.9)' : '#3c3226' }}>KATON</span>
-    </div>
-  );
-}
 function Section({ eyebrow, children, style }) {
   return (
     <div style={{ marginTop: 40, paddingTop: 34, borderTop: '1px solid var(--divider)', ...style }}>
@@ -425,7 +418,9 @@ function Home({ form, setForm, error, onSubmit, busy }) {
   return (
     <div style={wrap}>
       <div style={{ paddingTop: 60 }}>
-        <Reveal><Wordmark /></Reveal>
+        {/* THE HERO LOGOMARK IS GONE (Y-2b item 1). It moved into SiteHeader,
+            which renders on every route, so a mark here would be the second one
+            on the page. The content below simply moves up by its height. */}
         {/* THE PROMISE, AND IT COMES BEFORE THE ASK. Reyner's ruled copy, applied
             verbatim 2026-08-13; swept against lib/validate/blocklist.json, the
             typography rule and the slang list on 2026-08-12.
@@ -434,10 +429,10 @@ function Home({ form, setForm, error, onSubmit, busy }) {
             ANYWHERE. The first promises a weekly cadence this product does not
             have; the second is a latency claim nothing measures. Both pass every
             automated gate, which is exactly why they are named in the code. */}
-        <Reveal delay={0.08} style={{ marginTop: 44 }}>
+        <Reveal style={{ marginTop: 44 }}>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 34, lineHeight: 1.12, letterSpacing: '-.01em', color: 'var(--tinta)', margin: 0 }}>Ada pola di balik setiap keputusanmu.</h1>
         </Reveal>
-        <Reveal delay={0.14}>
+        <Reveal delay={0.06}>
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '12px 0 0' }}>Pahami dinamika diri, potensi, dan arah langkah berikutnya lewat bacaan yang objektif.</p>
         </Reveal>
 
@@ -460,7 +455,7 @@ function Home({ form, setForm, error, onSubmit, busy }) {
             TECHNICALITY, NOT UX: Cowork chose a two-card row. Reyner judges it
             on the preview and may reorder or restyle it; the copy slots and the
             route are what this commit fixes. */}
-        <Reveal delay={0.18} style={{ marginTop: 30 }}>
+        <Reveal delay={0.1} style={{ marginTop: 30 }}>
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ border: '1px solid var(--divider)', borderRadius: 16, padding: '14px 16px', background: 'var(--kertas-2)' }}>
               <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, fontWeight: 500, color: 'var(--tinta)' }}>{SITE_COPY.home_mirror_label}</div>
@@ -480,7 +475,7 @@ function Home({ form, setForm, error, onSubmit, busy }) {
         </Reveal>
 
         <form onSubmit={onSubmit}>
-          <Reveal delay={0.22} style={{ marginTop: 22 }}>
+          <Reveal delay={0.14} style={{ marginTop: 22 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
               {/* ── ONE IMPLEMENTATION, SHARED WITH THE COMPAT FORM ──────────
                   Extracted 2026-09-08. The compat page needs these three fields
@@ -496,7 +491,7 @@ function Home({ form, setForm, error, onSubmit, busy }) {
             </div>
           </Reveal>
 
-          <Reveal delay={0.3} style={{ marginTop: 22 }}>
+          <Reveal delay={0.22} style={{ marginTop: 22 }}>
             {error && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{error}</div>}
             {/* THE BUTTON CARRIES THE STATE, because nothing replaces the screen
                 any more. `Menyiapkan...` is REUSED from the checkout button
@@ -1007,6 +1002,15 @@ export function Reading({ reading, onReset, initialStage }) {
       {reading.token && (
         <div style={{ marginTop: 44, paddingTop: 28, borderTop: '1px solid var(--divider)' }}>
           <Reveal>
+            {/* THE SENTENCE THE MIRROR SHIPPED WITHOUT. #113 gave this box the
+                control and no words, because the only ruled sentence said
+                "bacaan kalian" - the couple's - and this reading is hers alone.
+                Amendment g replaced it with one plural-free sentence that serves
+                both surfaces. */}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 13, color: 'var(--muted-warm)', lineHeight: 1.6 }}>
+              <Icon.lock size={13} />
+              <span>{CHROME_COPY.link_keep}</span>
+            </div>
             <CopyLink
               url={typeof window !== 'undefined' ? `${window.location.origin}/r/${reading.token}` : ''}
               withCopy
@@ -1770,7 +1774,10 @@ function ReadingLoading() {
 function ReadingNotFound({ onHome }) {
   return (
     <div style={{ ...wrap, paddingTop: 96, textAlign: 'center' }}>
-      <Reveal><div style={{ display: 'flex', justifyContent: 'center' }}><Wordmark /></div></Reveal>
+      {/* AND THE SAME HERE, which the prompt did not name and the RULING does.
+          "One logomark on the page, in the header" is true of this page too:
+          with the header above it, a centred mark is a second one. Flagged in
+          the PR body as an extension of item 1 rather than done silently. */}
       <Reveal delay={0.08} style={{ marginTop: 40 }}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 28, lineHeight: 1.15, color: 'var(--tinta)', margin: 0 }}>Bacaan tidak ditemukan.</h1>
       </Reveal>

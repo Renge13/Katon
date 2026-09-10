@@ -92,7 +92,7 @@ function paragraphsOf(block) {
  * no glossary name to put in a heading's place. So this is a per-caller switch
  * rather than a removal, and the default is the mirror's existing behaviour.
  */
-export function ProseBlocks({ reading, labelFor = null, modelHeadings = true }) {
+export function ProseBlocks({ reading, labelFor = null, modelHeadings = true, closeEyebrow = null }) {
   // The reveal's running index, computed once per render rather than by mutating
   // a counter inside the JSX. `offsets[i]` is how many paragraphs precede block
   // `i` DOWN THE PAGE, so a block-local `j` still keys the map while the delay
@@ -138,6 +138,35 @@ export function ProseBlocks({ reading, labelFor = null, modelHeadings = true }) 
           </Section>
         );
       })}
+      {/* ── THE CLOSING PARAGRAPH'S EYEBROW (Y-2b item 3) ─────────
+          `section_close` ("Peta Dinamika") was ruled for "P7 penutup" and never
+          rendered, so the closing italic sat under the P5 block with nothing
+          over it. The fix is HERE and not in `SECTION_BY_BEAT`, which is what
+          the prompt proposed: measured first, no block carries a p7 fact_id at
+          all -
+
+            fact_ids across the production blocks: p0_opening p1_stem_relation
+              p2_day_pair p2_reframe p2_palace_frame p3_supply p4_temperament
+              p5_pull_fit
+            any p7? false
+
+          because the penutup is not a block. It is a separate string with its
+          own branch, so a p7 entry in a block-keyed map could never have been
+          consulted.
+
+          EYEBROW ONLY, BY RULING. The `p7_*_lead` cells carry `name_id: null`,
+          so there is no glossary name to put under it - and inventing one would
+          be the component composing a label, which rule 14 gives to the engine.
+          It is the one named exception to "every labelled block has both
+          levels".
+
+          A PROP, so the MIRROR's penutup stays bare: it passes nothing, and Y-2
+          commit 4 is explicit that nothing structural changes in the funnel. */}
+      {reading.penutup && closeEyebrow && (
+        <Reveal>
+          <Eyebrow style={{ marginTop: 40, marginBottom: 14 }}>{closeEyebrow}</Eyebrow>
+        </Reveal>
+      )}
       {reading.penutup && (
         <div className="k-prose" style={{ animationDelay: `${proseDelayMs(total - 1, total)}ms`, marginTop: 34 }}>
           <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>

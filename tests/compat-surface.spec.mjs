@@ -97,7 +97,10 @@ const PASANGAN_SLOTS = [
   'price_note',
   'form_a_legend', 'form_b_legend', 'form_email_label', 'form_email_help',
   'form_submit', 'season_gate_b_intro',
-  'pending_title', 'pending_body', 'link_keep', 'unpaid_resume',
+  // `link_keep` LEFT THIS BANK on 2026-09-09 (amendment g). It said "bacaan
+  // kalian" - the couple's - so the mirror could not reuse it, and one sentence
+  // now serves both surfaces from CHROME_COPY. Moved, not aliased.
+  'pending_title', 'pending_body', 'unpaid_resume',
   // Ruled 2026-09-09. `paid_title` is GONE, and `report_badge_eyebrow` /
   // `report_quadrant_eyebrow` are RENAMED (not joined) to `section_pattern` /
   // `section_rhythm` - same ruled words, one slot each. The other four section
@@ -147,15 +150,16 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
   ].filter(([, v]) => typeof v === 'string' && v.includes(SENTINEL));
 
   assert.deepEqual(holes.map(([k]) => k), [], 'a compat slot is still a sentinel');
-  // 22 from X-b3, plus the two sales-closed strings Y-1 added, MINUS `paid_title`
-  // and PLUS the four new section eyebrows ruled 2026-09-09: 22 + 2 - 1 + 4 = 27.
+  // 22 from X-b3, plus the two sales-closed strings Y-1 added, MINUS `paid_title`,
+  // PLUS the four new section eyebrows ruled 2026-09-09, MINUS `link_keep` which
+  // moved to CHROME_COPY with amendment g: 22 + 2 - 1 + 4 - 1 = 26.
   //
   // IT IS STILL A LITERAL ON PURPOSE. Deriving it from `PASANGAN_SLOTS` would
   // make it tautological - the `deepEqual` above already pins the bank to that
   // list - and this number is the tripwire on the list itself. It went red on
   // the 2026-09-09 amendment and forced the count to be accounted for, which is
   // the whole job. Whoever changes it should be able to write the arithmetic.
-  assert.equal(Object.keys(PASANGAN_COPY).length, 27);
+  assert.equal(Object.keys(PASANGAN_COPY).length, 26);
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {

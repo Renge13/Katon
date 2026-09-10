@@ -398,3 +398,47 @@ test('THE FLOOR TOLERATES A CELL WITH ONLY label_meaning', () => {
     assert.ok(b.text.trim().length > 0, `block ${(b.fact_ids ?? []).join(',')} is not empty`);
   }
 });
+
+// ── THE P0 OPENING (Y-2b item 5, amendment h) ──────────────
+
+test('THE OPENING NAMES TWO PEOPLE, NOT THREE', async () => {
+  // ── WHAT REYNER PHOTOGRAPHED ───────────────────────────────
+  // "Bacaan ini tentang kamu, Api Unggun, dan Samudra." Three items in a list,
+  // for a reading about two people - and the reader is one of them, so it reads
+  // as her plus two strangers.
+  //
+  // IT IS AN ENGINE TEMPLATE, established before anything was changed:
+  //   $ grep -rn "Bacaan ini tentang" docs lib components
+  //   docs/content/glossary.json:712  "label_meaning": "Bacaan ini tentang kamu, {A}, dan {B}."
+  // substituted at lib/semantic/pair.js by `fillPairTemplate`. So rule 14 is
+  // already satisfied - the engine owns the sentence - and the fix is the words.
+  const { calculateBaziChart } = await import('../lib/bazi/buildChart.js');
+  const { buildPairSemantic } = await import('../lib/semantic/pair.js');
+
+  const sj = buildPairSemantic(
+    calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00', gender: 'male' }),
+    calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00', gender: 'female' }),
+  );
+  const p0 = sj.facts.find((f) => f.id === 'p0_opening');
+  const a = sj.core.a.archetype_name_id;
+  const b = sj.core.b.archetype_name_id;
+
+  assert.equal(p0.label_meaning, `Ini adalah bacaan tentang dua individu: ${a} dan ${b}`);
+
+  // A first, B second - she typed her own birth into step 1, and a reading that
+  // reverses them is a reading about the wrong person first.
+  assert.ok(p0.label_meaning.indexOf(a) < p0.label_meaning.indexOf(b));
+
+  // "kamu" is gone: the reader is not a THIRD item in a list of two.
+  assert.equal(/\bkamu\b/u.test(p0.label_meaning), false,
+    'the reader must not be listed alongside the two archetypes');
+
+  // "dua", not the digit. Reyner amended that himself on Cowork's flag.
+  assert.ok(p0.label_meaning.includes('dua individu'));
+  assert.equal(p0.label_meaning.includes('2 individu'), false);
+
+  // AND THE HARD GATE STILL PASSES. `pair.both_named` requires the opening block
+  // to contain both archetype names; the ruled sentence contains both, which is
+  // why this is a data change and not a gate change - no STAGE6_VERSION move.
+  assert.ok(p0.label_meaning.includes(a) && p0.label_meaning.includes(b));
+});
