@@ -152,11 +152,21 @@ function measureRendering(sj, out) {
     const cell = cellTextFor(fact);
     if (!cell) continue;
     const { ratio, hits, total } = stemOverlap(cell, b.text || '');
+    // ── THE UNCONFOUNDED ONE, ADDED AFTER THE FIRST AFTER-RUN ──
+    // `ratio` above is measured against everything the model was GIVEN, which is
+    // right for "did it transcribe its input" and WRONG as a before/after: the
+    // seeds tripled the cell, so the denominator tripled and the ratio falls even
+    // if the prose did not change at all. This one holds the denominator fixed at
+    // `label_meaning`, the only field both runs share, so baseline and after are
+    // the same measurement. The baseline's full-cell number IS its label_meaning
+    // number, because baseline cells had nothing else.
+    const lm = stemOverlap(fact.label_meaning || '', b.text || '');
     rows.push({
       id,
       ratio,
       hits,
       total,
+      lmRatio: lm.ratio,
       blockWords: words(b.text),
       cellWords: words(cell),
       verbatim: String(b.text || '').trim() === cell.trim(),
@@ -314,6 +324,23 @@ for (const r of ratios) {
 }
 for (const [k, v] of Object.entries(buckets)) say(`  ${k.padEnd(10)} ${String(v).padStart(3)}  ${'#'.repeat(v)}`);
 say(`  median ${median(ratios).toFixed(2)} | verbatim blocks ${all.filter((r) => r.verbatim).length}`);
+say();
+say('## cell-stem overlap against `label_meaning` ONLY — the comparable one');
+say('   (the full-cell ratio above changed denominator when the seeds landed; this did not)');
+const lmRatios = all.map((r) => r.lmRatio);
+const lmBuckets = { '1.00': 0, '0.80-0.99': 0, '0.60-0.79': 0, '0.40-0.59': 0, '<0.40': 0 };
+for (const r of lmRatios) {
+  if (r >= 1) lmBuckets['1.00'] += 1;
+  else if (r >= 0.8) lmBuckets['0.80-0.99'] += 1;
+  else if (r >= 0.6) lmBuckets['0.60-0.79'] += 1;
+  else if (r >= 0.4) lmBuckets['0.40-0.59'] += 1;
+  else lmBuckets['<0.40'] += 1;
+}
+for (const [k, v] of Object.entries(lmBuckets)) say(`  ${k.padEnd(10)} ${String(v).padStart(3)}  ${'#'.repeat(v)}`);
+say(`  median ${median(lmRatios).toFixed(2)}`);
+say();
+say('## absolute block words (comparable across runs; the ratio below is not)');
+say(`  median ${median(all.map((r) => r.blockWords)).toFixed(0)} words`);
 say();
 say('## block words / cell words (1.0 = the block is as long as its input)');
 say(`  median ${median(wordRatios).toFixed(2)} | min ${Math.min(...wordRatios).toFixed(2)} | max ${Math.max(...wordRatios).toFixed(2)}`);
