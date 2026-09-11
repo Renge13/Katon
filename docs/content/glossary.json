@@ -714,108 +714,150 @@
   "p1_same": {
    "_note": "stemRelation.cycle === same",
    "name_id": "Inti Sejenis",
-   "label_meaning": "Inti diri kalian dibangun dari unsur yang sama. Sangat mudah saling paham, tapi juga rawan berbenturan di titik yang persis sama."
+   "label_meaning": "Inti diri kalian dibangun dari unsur yang sama. Sangat mudah saling paham, tapi juga rawan berbenturan di titik yang persis sama.",
+   "meaning_seed": "Inti diri yang sama membuat pemahaman datang instan, tapi titik buta dan kelemahan yang sama berlipat ganda karena tidak ada yang berdiri di luar pola.",
+   "daily_seed": "Saat berkonflik, kalian memakai strategi bertahan yang sama sehingga tidak ada yang mendinginkan suasana. Namun saat ada masalah luar, kalian paham perasaan satu sama lain tanpa penjelasan."
   },
   "p1_produces": {
    "_note": "cycle is a_produces_b or b_produces_a. Direction-neutral: the renderer names who.",
    "name_id": "Inti Menghidupi",
-   "label_meaning": "Unsur salah satu dari kalian memberi energi ke yang lain. Ada dinamika pengayom dan yang diayomi dengan alur yang konsisten."
+   "label_meaning": "Unsur salah satu dari kalian memberi energi ke yang lain. Ada dinamika pengayom dan yang diayomi dengan alur yang konsisten.",
+   "meaning_seed": "Alur energi berjalan searah dan stabil dari satu pihak ke pihak lain. Yang memberi menjadi sumber dorongan, yang menerima mendapat rasa aman; peran ini konsisten dan jarang berbalik.",
+   "daily_seed": "Keputusan dan inisiatif baru hampir selalu dipicu oleh orang yang sama. Yang lain menyambut, mengeksekusi, dan merasa aman bergerak dalam alur tersebut."
   },
   "p1_controls": {
    "_note": "cycle is a_controls_b or b_controls_a. Direction-neutral.",
    "name_id": "Inti Menekan",
-   "label_meaning": "Salah satu elemen membatasi atau mengarahkan yang lain. Bisa menghadirkan struktur, tapi juga tekanan, tergantung dinamika kendali di antara kalian."
+   "label_meaning": "Salah satu elemen membatasi atau mengarahkan yang lain. Bisa menghadirkan struktur, tapi juga tekanan, tergantung dinamika kendali di antara kalian.",
+   "meaning_seed": "Yang satu memberi batas dan arah, yang lain menjadi sasaran pembentukan. Terasa menenangkan saat butuh pegangan, tapi terasa menekan jika kendali dipaksakan.",
+   "daily_seed": "Satu orang rutin mengingatkan jadwal atau janji. Di hari baik ini terasa seperti keteraturan, di hari buruk ini memicu perdebatan soal siapa yang berhak mengatur siapa."
   },
   "p1_combination": {
    "_note": "stemRelation.combination present - a 天干五合 pair. Metadata, never a transformation (ruling B, 2026-09-07).",
    "name_id": "Pasangan Inti",
-   "label_meaning": "Inti diri kalian membentuk pasangan klasik dalam BaZi. Hubungan terasa alami sejak awal tanpa hambatan komunikasi yang berarti."
+   "label_meaning": "Inti diri kalian membentuk pasangan klasik dalam BaZi. Hubungan terasa alami sejak awal tanpa hambatan komunikasi yang berarti.",
+   "meaning_seed": "Hubungan terasa akrab dari awal karena pola inti yang saling mengunci secara klasik. Komunikasi mengalir alami tanpa hambatan pemahaman dasar.",
+   "daily_seed": "Obrolan pertama terasa seperti melanjutkan percakapan lama. Setengah kalimat diucapkan, pihak lain sudah tahu ujungnya, meminimalkan salah paham dasar."
   },
   "p2_harmony": {
    "_note": "dayBranchPair carries 六合.",
    "name_id": "Kursi Terikat",
-   "label_meaning": "Kursi pasangan kalian saling mengunci. Tercipta daya tarik alami sejak awal yang bekerja secara spontan."
+   "label_meaning": "Kursi pasangan kalian saling mengunci. Tercipta daya tarik alami sejak awal yang bekerja secara spontan.",
+   "meaning_seed": "Tarikan alami bekerja di ruang paling privat. Ada rasa aman dan tempat pulang yang selalu menarik kalian berdua kembali, terlepas dari dinamika di luar.",
+   "daily_seed": "Setelah pertengkaran atau hari yang berat di luar, kalian secara otomatis mencari keberadaan satu sama lain tanpa perlu dorongan kata-kata."
   },
   "p2_clash": {
    "_note": "dayBranchPair carries 冲. Raises p2_reframe_required.",
    "name_id": "Kursi Berbenturan",
-   "label_meaning": "Kursi pasangan kalian saling bertolak belakang. Dinamika berjalan intens, di mana gesekan kecil bisa terasa jauh lebih tajam."
+   "label_meaning": "Kursi pasangan kalian saling bertolak belakang. Dinamika berjalan intens, di mana gesekan kecil bisa terasa jauh lebih tajam.",
+   "meaning_seed": "Kebutuhan privat kalian berbenturan langsung. Gesekan terasa intens karena menyenggol area paling sensitif, membuat hal kecil cepat membesar.",
+   "daily_seed": "Perbedaan kebiasaan rumah tangga atau ruang pribadi cepat berubah menjadi adu argumen panas yang skalanya terasa berlebihan dibanding topik aslinya."
   },
   "p2_harm": {
    "_note": "dayBranchPair carries 害. Raises p2_reframe_required.",
    "name_id": "Kursi Bergesekan",
-   "label_meaning": "Terjadi gesekan halus antar kursi pasangan. Gesekan ini bekerja perlahan lewat detail kecil yang menumpuk, bukan lewat konflik besar."
+   "label_meaning": "Terjadi gesekan halus antar kursi pasangan. Gesekan ini bekerja perlahan lewat detail kecil yang menumpuk, bukan lewat konflik besar.",
+   "meaning_seed": "Gesekan tidak hadir lewat ledakan besar, melainkan rasa tidak nyaman halus yang menumpuk dari detail kecil yang diabaikan salah satu pihak.",
+   "daily_seed": "Kebiasaan kecil yang dianggap sepele oleh satu orang dicatat diam-diam oleh yang lain, sampai akhirnya keluar menjadi tumpukan kekecewaan."
   },
   "p2_punishment": {
    "_note": "dayBranchPair carries 刑. Raises p2_reframe_required.",
    "name_id": "Kursi Bersimpul",
-   "label_meaning": "Kursi pasangan kalian terikat pada pola masa lalu. Pola lama ini berulang di tahap berbeda jika tidak disadari bersama."
+   "label_meaning": "Kursi pasangan kalian terikat pada pola masa lalu. Pola lama ini berulang di tahap berbeda jika tidak disadari bersama.",
+   "meaning_seed": "Hubungan ini memicu kembali pola emosional lama yang dibawa masing-masing. Reaksi yang muncul sering kali lebih tua dan pekat daripada pemicunya sendiri.",
+   "daily_seed": "Konflik topik baru selalu berujung pada pola argumen dan rasa sakit yang sama persis, seolah mengulang skenario lama yang belum selesai."
   },
   "p2_reframe": {
    "_note": "THE MANDATORY REFRAME. Required whenever p2_clash, p2_harm or p2_punishment fires. The spec's ethical spine: a clash is never a verdict. Rule 25 applies to both people - no advice to leave or to stay.",
-   "label_meaning": "Ini bukan penentu kegagalan. Gesekan pada kursi pasangan menandakan hubungan yang membutuhkan perhatian ekstra dan kesadaran penuh."
+   "label_meaning": "Ini bukan penentu kegagalan. Gesekan pada kursi pasangan menandakan hubungan yang membutuhkan perhatian ekstra dan kesadaran penuh.",
+   "meaning_seed": "Benturan pada kursi pasangan menandakan titik yang menuntut kesadaran ekstra, bukan vonis kelayakan atau ketidakcocokan hubungan.",
+   "daily_seed": "Saat kesadaran tinggi, gesekan langsung dibahas hari itu juga. Saat lelah, gesekan dipendam sampai menjadi percikan yang lebih besar."
   },
   "p2_none": {
    "_note": "dayBranchPair is empty. Not a deficiency; the seats simply do not interact.",
    "name_id": "Kursi Independen",
-   "label_meaning": "Kursi pasangan kalian berjalan terpisah tanpa tarik-menarik khusus. Dinamika utama kalian berasal dari aspek bagan lainnya."
+   "label_meaning": "Kursi pasangan kalian berjalan terpisah tanpa tarik-menarik khusus. Dinamika utama kalian berasal dari aspek bagan lainnya.",
+   "meaning_seed": "Ruang pribadi berjalan independen tanpa daya tarik atau gesekan otomatis dari pilar ini. Kedekatan tidak terjadi spontan, melainkan dibangun dari area lain.",
+   "daily_seed": "Kalian bisa berada di ruang yang sama dalam kesibukan masing-masing tanpa gangguan, namun jarak emosional cepat terasa jika tidak ada kegiatan bersama."
   },
   "p2_palace_frame": {
    "_note": "A FRAME for the palace scans. The renderer names the pillar and reuses the p2_* names above for the relation, so a palace hit needs no cell of its own.",
-   "label_meaning": "Salah satu pilar di bagan dia terhubung langsung dengan kursi pasanganmu. Elemen hidupnya memengaruhi ranah terdekatmu."
+   "label_meaning": "Salah satu pilar di bagan dia terhubung langsung dengan kursi pasanganmu. Elemen hidupnya memengaruhi ranah terdekatmu.",
+   "meaning_seed": "Salah satu pilar kehidupan pasangan menyentuh langsung ruang privatmu, membuat dinamika dari area hidupnya berdampak langsung ke suasana hubungan.",
+   "daily_seed": "Saat area hidup pasangan tersebut mengalami tekanan, suasananya langsung terbawa ke rumah dan kamu merasakannya sebelum dia sempat cerita."
   },
   "p3_supplies": {
    "_note": "aSupplies or bSupplies is non-null. Direction-neutral: the renderer names who supplies whom.",
    "name_id": "Penyeimbang Unsur",
-   "label_meaning": "Dia membawa elemen yang tidak dominan di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan."
+   "label_meaning": "Dia membawa elemen yang tidak dominan di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan.",
+   "meaning_seed": "Salah satu membawa elemen yang absen di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh.",
+   "daily_seed": "Kehadiran pasangan secara alami meredakan kegelisahan di area tertentu, sehingga ketiadaannya langsung membuat area tersebut terasa tidak stabil."
   },
   "p3_same_imbalance": {
    "_note": "An element BOTH charts lack. Not a fault in either person.",
    "name_id": "Tantangan Serupa",
-   "label_meaning": "Bagan kalian sama-sama minim elemen tertentu. Karena tidak ada penyeimbang otomatis di area ini, dukungan perlu dicari dari luar."
+   "label_meaning": "Bagan kalian sama-sama minim elemen tertentu. Karena tidak ada penyeimbang otomatis di area ini, dukungan perlu dicari dari luar.",
+   "meaning_seed": "Keduanya memiliki titik kosong elemen yang sama, sehingga tidak ada penopang otomatis di area tersebut dan butuh kesadaran atau bantuan luar.",
+   "daily_seed": "Keputusan di area tertentu sering tertunda karena kalian berdua sama-sama menghindar, sampai ada dorongan dari keadaan atau pihak luar."
   },
   "p3_no_supply": {
    "_note": "Neither direction supplies. Unreachable from the 13-chart fixture (base-rates run 1: 2.2.a held on 100.0% of 5000 pairs), and cell-ruled anyway so the floor is never silent on P3.",
    "name_id": "Mandiri Elementar",
-   "label_meaning": "Tidak ada aliran elemen khusus yang saling mengisi. Hubungan berjalan mandiri tanpa rasa saling tergantung secara energi."
+   "label_meaning": "Tidak ada aliran elemen khusus yang saling mengisi. Hubungan berjalan mandiri tanpa rasa saling tergantung secara energi.",
+   "meaning_seed": "Masing-masing mempertahankan ruang energinya secara utuh. Hubungan terasa ringan karena tidak ada tuntutan untuk saling mengisi, namun bisa terasa terpisah jika tidak ada area yang sengaja dibangun bersama.",
+   "daily_seed": "Keduanya bisa menjalani kesibukan terpisah tanpa rasa kehilangan penopang, di mana kebersamaan didasari oleh pilihan murni, bukan kebutuhan energi."
   },
   "p4_matching": {
    "_note": "temperament.pattern === matching. Katon's framework, never presented as classical, and it ranks nothing (rule 25).",
    "name_id": "Pola Cermin",
    "name_en": "Matching Pattern",
-   "label_meaning": "Aspek dominan di bagan kalian identik. Saling memahami terjadi cepat, namun hal yang memicu kekesalan biasanya adalah refleksi diri sendiri."
+   "label_meaning": "Aspek dominan di bagan kalian identik. Saling memahami terjadi cepat, namun hal yang memicu kekesalan biasanya adalah refleksi diri sendiri.",
+   "meaning_seed": "Aspek dominan yang identik membuat cara pandang sama, namun hal yang paling mengesalkan dari pasangan biasanya adalah cerminan dari kelemahan diri sendiri.",
+   "daily_seed": "Kalian sepakat menilai pihak luar, tapi saat berkonflik, hal yang paling memicu kekesalan adalah sifat pasangan yang juga kamu miliki."
   },
   "p4_related": {
    "_note": "pattern === related.",
    "name_id": "Pola Serumpun",
    "name_en": "Related Pattern",
-   "label_meaning": "Karakter dominan kalian berakar dari rumpun yang sama dengan pendekatan berbeda. Tujuan akhir serupa, meski dieksekusi lewat cara berbeda."
+   "label_meaning": "Karakter dominan kalian berakar dari rumpun yang sama dengan pendekatan berbeda. Tujuan akhir serupa, meski dieksekusi lewat cara berbeda.",
+   "meaning_seed": "Kalian berada di gelombang yang sama soal hasil akhir, tetapi ritme dan cara mencapainya sering bertolak belakang.",
+   "daily_seed": "Cepat sepakat soal target akhir, tapi menghabiskan waktu berdebat soal urutan langkah dan cara mencapainya."
   },
   "p4_contrasting": {
    "_note": "pattern === contrasting.",
    "name_id": "Pola Kontras",
    "name_en": "Contrasting Pattern",
-   "label_meaning": "Karakter dominan kalian berasal dari kelompok berbeda. Cara pandang yang berbeda bisa memperluas perspektif jika dikomunikasikan terbuka."
+   "label_meaning": "Karakter dominan kalian berasal dari kelompok berbeda. Cara pandang yang berbeda bisa memperluas perspektif jika dikomunikasikan terbuka.",
+   "meaning_seed": "Sudut pandang dasar berbeda memberikan perspektif baru jika dikomunikasikan, namun rawan disalahartikan jika dibiarkan tanpa penjelasan.",
+   "daily_seed": "Merespons kabar atau kejadian yang sama dengan fokus yang berbeda total, menghasilkan dua interpretasi yang berseberangan dari satu peristiwa."
   },
   "p5_q1": {
    "_note": "pullFit.quadrant === q1. No score is ever shown beside these (rule doc 2.4).",
    "name_id": "Tarikan Kuat, Ritme Seirama",
-   "label_meaning": "Chemistry terasa kuat dan rutinitas harian saling menopang. Kuncinya adalah menjaga keterbukaan agar kenyamanan tidak dianggap biasa."
+   "label_meaning": "Chemistry terasa kuat dan rutinitas harian saling menopang. Kuncinya adalah menjaga keterbukaan agar kenyamanan tidak dianggap biasa.",
+   "meaning_seed": "Chemistry tinggi dan ritme harian berjalan seiring, menciptakan hubungan yang terasa ringan sekaligus tetap menarik secara emosional.",
+   "daily_seed": "Rutinitas harian mengalir tanpa hambatan dan waktu berkualitas tercipta alami, membuat hubungan jarang diterpa gejolak."
   },
   "p5_q2": {
    "_note": "quadrant === q2.",
    "name_id": "Tarikan Kuat, Ritme Bergesek",
-   "label_meaning": "Magnet hubungan sangat kuat, namun pola keseharian sering bersimpangan. Dinamika terasa pekat dan menuntut kompromi jelas dalam rutinitas."
+   "label_meaning": "Magnet hubungan sangat kuat, namun pola keseharian sering bersimpangan. Dinamika terasa pekat dan menuntut kompromi jelas dalam rutinitas.",
+   "meaning_seed": "Magnet emosional kuat bertemu dengan ritme harian yang sering bersimpangan, menghasilkan dinamika yang pekat, intens, sekaligus melelahkan.",
+   "daily_seed": "Momen berdua terasa sangat dekat, tapi urusan ritme harian dan kebiasaan kecil berulang kali memicu gesekan teknis."
   },
   "p5_q3": {
    "_note": "quadrant === q3.",
    "name_id": "Tarikan Tenang, Ritme Seirama",
-   "label_meaning": "Rutinitas harian mengalir stabil meski tarikan emosional tumbuh bertahap. Hubungan berjalan tenang tanpa banyak gejolak luar."
+   "label_meaning": "Rutinitas harian mengalir stabil meski tarikan emosional tumbuh bertahap. Hubungan berjalan tenang tanpa banyak gejolak luar.",
+   "meaning_seed": "Ritme harian sangat seirama sementara daya tarik emosional tumbuh bertahap lewat ketenangan dan rasa saling mengandalkan.",
+   "daily_seed": "Hari-hari berjalan stabil dan teratur tanpa cerita dramatis, di mana rasa sayang lebih banyak terwujud dalam tindakan nyata daripada kata-kata."
   },
   "p5_q4": {
    "_note": "quadrant === q4.",
    "name_id": "Tarikan Tenang, Ritme Bergesek",
-   "label_meaning": "Tarikan alami minim dan ritme harian membutuhkan penyesuaian. Kelangsungan hubungan murni digerakkan oleh komitmen dan keputusan sadar."
+   "label_meaning": "Tarikan alami minim dan ritme harian membutuhkan penyesuaian. Kelangsungan hubungan murni digerakkan oleh komitmen dan keputusan sadar.",
+   "meaning_seed": "Ketiadaan dorongan otomatis membuat hubungan tidak berjalan dengan sendirinya; keberlanjutannya murni lahir dari niat dan pilihan sadar yang diperbarui setiap hari.",
+   "daily_seed": "Kebersamaan dan penyesuaian harus dijadwalkan secara sengaja; jika tidak ada inisiatif aktif, hubungan mudah terasa berjarak."
   },
   "p7_strengths_lead": {
    "_note": "Leads the two or three strengths.",
