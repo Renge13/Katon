@@ -272,6 +272,16 @@ const all = [];
 const perPair = [];
 let floors = 0;
 const rejects = {};
+// ── FLAGS, COUNTED SEPARATELY FROM REJECTIONS (round 2) ────
+// `pair.direction_resolved` and `pair.penutup_register` reject nothing, so they
+// never appear in `stage6_detail` - that list is the REJECTING findings, and a
+// counter that cannot reject would have been invisible in this run's output
+// while being the thing the run exists to report. Read off the SERVED result's
+// `findings`, where flags survive a pass. Per served reading, not per attempt:
+// the question is how many readings a reader would have received with the defect.
+const flags = {};
+let flaggedReadings = 0;
+let modelWroteOpening = 0;
 
 for (const row of rows) {
   let out;
@@ -288,10 +298,33 @@ for (const row of rows) {
   if (floored) floors += 1;
   for (const a of out.attempts || []) {
     for (const d of a.stage6_detail || []) rejects[d.check] = (rejects[d.check] || 0) + 1;
+    if (a.p0_model_wrote_anyway) modelWroteOpening += 1;
   }
+  const flagged = (out.findings || []).filter((f) => f.severity === 'flag');
+  for (const f of flagged) flags[f.check] = (flags[f.check] || 0) + 1;
+  if (flagged.length > 0) flaggedReadings += 1;
   const measured = measureRendering(row.sj, out);
   all.push(...measured);
-  perPair.push({ pair: row.pair, q: row.q, pat: row.pat, floored, rows: measured });
+  perPair.push({
+    pair: row.pair,
+    q: row.q,
+    pat: row.pat,
+    floored,
+    rows: measured,
+    // ── PER PAIR, ADDED 2026-09-13, AND IT SHOULD HAVE BEEN HERE ──
+    // Draw 2 of round 2 floored 5 of 10 and this file could say the pooled
+    // rejection tally and NOT which pairs fell or why. A rate without its causes
+    // is the defect this repo has paid for before: the tally cannot tell one pair
+    // rejected six times from six pairs rejected once.
+    //
+    // `qa_flag` separates a Stage 6 floor from a spend-guard or provider floor.
+    // Without it "the prompt made the floor worse" and "the provider wobbled" are
+    // the same row.
+    qaFlag: out.qa_flag ?? null,
+    attempts: (out.attempts || []).length,
+    rejected: (out.attempts || []).flatMap((a) => (a.stage6 || [])),
+    flagged: (out.findings || []).filter((f) => f.severity === 'flag').map((f) => f.check),
+  });
   process.stdout.write(floored ? 'F' : '.');
 }
 process.stdout.write('\n\n');
@@ -356,6 +389,25 @@ say('## Stage 6 findings by check (rejections across all attempts)');
 const sortedRejects = Object.entries(rejects).sort((a, b) => b[1] - a[1]);
 if (!sortedRejects.length) say('  none');
 for (const [k, v] of sortedRejects) say(`  ${k.padEnd(34)} ${v}`);
+
+say();
+say('## per pair: what happened, and why');
+for (const p of perPair) {
+  const head = `  ${p.pair.padEnd(12)} ${p.floored ? 'FLOOR' : 'model'}  attempts ${p.attempts}`;
+  const why = p.floored ? `  [${p.qaFlag ?? 'no qa_flag'}]` : '';
+  say(head + why);
+  if (p.rejected.length) say(`      rejected: ${[...new Set(p.rejected)].join(', ')}`);
+  if (p.flagged.length) say(`      flagged:  ${[...new Set(p.flagged)].join(', ')}`);
+}
+
+say();
+say(`## LOG-ONLY flags on the SERVED reading (denominator ${rows.length} readings)`);
+say('   these reject nothing; a count here is a reading a reader would have received');
+const sortedFlags = Object.entries(flags).sort((a, b) => b[1] - a[1]);
+if (!sortedFlags.length) say('  none');
+for (const [k, v] of sortedFlags) say(`  ${k.padEnd(34)} ${v}`);
+say(`  readings carrying at least one flag  ${flaggedReadings}/${rows.length}`);
+say(`  p0_model_wrote_anyway (attempts)     ${modelWroteOpening}`);
 
 if (OUT) {
   fs.mkdirSync(OUT.replace(/\/[^/]+$/u, ''), { recursive: true });

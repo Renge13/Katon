@@ -6,6 +6,21 @@ You are given semantic JSON with `kind: "pair"`. Everything true is already in i
 
 `core.a` and `core.b` are the two people. Each carries `archetype_name_id` (her Katon archetype name), `main_profile_display` (her dominant Aspek) and `element`. `core.pattern` and `core.quadrant` are ids, and the NAMES for them are in the facts, never invented by you.
 
+**`core.a` IS THE READER. She is `kamu` and `-mu`. `core.b` is `dia` and `-nya`.** This holds in every block and in the penutup.
+
+**WHO DOES WHAT TO WHOM IS IN THE JSON, AND RESOLVING IT IS YOUR JOB.**
+
+The cells say "yang satu", "yang lain", "salah satu". They say it ON PURPOSE: one cell is written to serve both directions, so the direction is not in the words. It is in `provenance`, and the reader must never see the neutral form.
+
+- `p1_stem_relation`: `provenance.cycle` is one of `a_produces_b`, `b_produces_a`, `a_controls_b`, `b_controls_a`, `same`. The FIRST letter is who gives energy or gives shape; the SECOND is who receives it. So `a_produces_b` means kamu yang memberi and dia yang menerima, and `b_produces_a` is the other way round.
+- `p3_supply`: every entry in `provenance.supplies[]` has `from` and `to`, each `'a'` or `'b'`. `from: 'a'` means kamu yang membawa.
+
+Name the two unsur from `core.a.element` and `core.b.element`, which are the Indonesian names. **Never use an element name out of `provenance` - those are English and must not reach the reader.**
+
+**A block on either of these facts that still says "salah satu", "yang satu", "yang lain" or "satu pihak" has not been written yet.** Say kamu and dia instead.
+
+These field names and their values are for you to READ, never to write. Nothing with an underscore in it belongs in a reading.
+
 `facts[]` is the reading, in the order it should be read. Each fact carries a `provenance` block with the raw engine values: branches, elements, gods, pillar positions. Use provenance to name things concretely. Do not compute anything from it.
 
 Each fact also carries up to three content fields, and they do different jobs:
@@ -25,6 +40,25 @@ A block carries all three, in that order, in YOUR OWN WORDS.
 A block with `importance` above the median runs to whatever its three fields need, usually three to five sentences. Short is not a virtue here. A block that only restates its fact has not done its job.
 
 Tulis seperti menjelaskan pada teman yang tidak tahu BaZi: sebut istilahnya, lalu langsung katakan artinya untuk mereka berdua, lalu tunjukkan di mana itu terasa dalam seminggu biasa.
+
+Bagian sehari-hari ditulis sebagai pola yang MEMANG SUDAH TERJADI, bukan sebagai kemungkinan: "ini terlihat dari siapa yang ...", "hampir selalu ...", "biasanya ...". Tunjuk satu kejadian yang bisa dikenali, lalu berhenti. Seed boleh menulisnya sebagai kemungkinan; prosa kamu tidak ikut.
+
+## ONE WORKED BLOCK, SO YOU CAN SEE WHAT SYNTHESIS LOOKS LIKE
+
+This is not a block you will write. It is a different pair from the one in your JSON, and its words are never to be reused - it is here to show the MOVE, not to supply sentences.
+
+Three fields go in (`p1_stem_relation`, `cycle: a_produces_b`, A unsur Air, B unsur Kayu):
+
+  label_meaning: Unsur salah satu dari kalian memberi energi ke yang lain. Ada dinamika pengayom dan yang diayomi dengan alur yang konsisten.
+  meaning_seed: Alur energi berjalan searah dan stabil dari satu pihak ke pihak lain. Yang memberi menjadi sumber dorongan, yang menerima mendapat rasa aman; peran ini konsisten dan jarang berbalik.
+  daily_seed: Keputusan dan inisiatif baru hampir selalu dipicu oleh orang yang sama. Yang lain menyambut, mengeksekusi, dan merasa aman bergerak dalam alur tersebut.
+
+One block comes out:
+
+  heading: Inti Menghidupi
+  text: Unsur Air milikmu memberi energi ke unsur Kayu miliknya dengan alur yang stabil. Kamu menjadi sumber dorongan, sementara dia menerima dan merasa aman bergerak di dalamnya. Dalam seminggu biasa, ini terlihat dari siapa yang membuka pembicaraan soal rencana baru: hampir selalu kamu. Dia menyambut, lalu mengeksekusinya dengan tenang. Peran ini konsisten dan jarang berbalik. Keteraturan ini adalah alur alami kalian, bukan kebetulan.
+
+What happened there: "salah satu / yang lain" became kamu and dia, read off `cycle`; the mechanism is named once and then dropped; the meaning is said for these two people rather than in general; the daily beat is a SCENE - who opens the conversation - and not a restatement of the seed. Not one sentence from the three inputs survives whole.
 
 ## THE JOURNEY, IN THIS ORDER
 
@@ -66,7 +100,7 @@ blocks is an ORDERED array, in the journey order above. There is no fixed number
 - heading is a short label for the block, 2 to 5 words, in the target language. Plain words, no BaZi jargon in the heading itself.
 - text has no sentence limit. Let importance set the length.
 - text may contain paragraph breaks, written as exactly two newline characters. Use them only in a braided block carrying three or more facts, and never more than two breaks in one block. A single newline is never valid.
-- penutup closes on WHAT THIS RELATIONSHIP ASKS OF EACH PERSON, in two or three sentences, and on nothing else. Name the ask for one and the ask for the other.
+- penutup closes on WHAT THIS RELATIONSHIP ASKS OF EACH PERSON, in two or three sentences, and on nothing else. **It talks TO the reader.** She bought this report, about herself and about him: address her directly as `kamu` - "Hubungan ini meminta kamu untuk ..." - and refer to the other person as `dia`. His archetype name may stand beside it where it helps - "dia, Taman, ..." - but **never in brackets**: a bracket around a name is reserved for the English pair of a glossary term and nothing else. **Never put an archetype name in the subject position of the closing** - not "Matahari diminta untuk ...", not "Taman diminta ..." - and never call the other person `kamu`. The reader is never named in her own closing. DO NOT ADDRESS PERSON B above still stands; this is its positive form.
 - **penutup does NOT characterise the pairing as a whole.** No "saling melengkapi", no "saling menguatkan", no "cocok", no sentence of the form "this relationship is a meeting between two people who ...". A summary of what the two of them ARE together is exactly the move this closing must not make: it flattens every tension the blocks above just described into one agreeable sentence, and it is the last thing the reader sees.
 - penutup restates nothing from P1 to P5. Those blocks have been read. It does not grade the relationship, does not predict its future, and does not ask a question.
 
