@@ -39,6 +39,7 @@
     "test:compat-prompt": "node --test tests/compat-prompt.spec.mjs",
     "test:compat-stage6-pair": "node --conditions=react-server --test tests/compat-stage6-pair.spec.mjs",
     "test:compat-p0-engine": "node --conditions=react-server --test tests/compat-p0-engine.spec.mjs",
+    "test:compat-voice-round2": "node --conditions=react-server --test tests/compat-voice-round2.spec.mjs",
     "test:site-header": "node --test tests/site-header.spec.mjs",
     "test:ci-parity": "node --test tests/ci-parity.spec.mjs",
     "test:compat-surface": "node --conditions=react-server --import ./scripts/jsx-register.mjs --test tests/compat-surface.spec.mjs",
