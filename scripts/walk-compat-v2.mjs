@@ -67,9 +67,22 @@ function v1Round1(pairLabel) {
   let taking = false;
   const out = [];
   for (const line of lines) {
-    if (line.startsWith('## ')) inPair = line.slice(3).trim().startsWith(pairLabel);
-    else if (line.startsWith('### ')) taking = inPair && line.slice(4).toLowerCase().startsWith('round 1');
-    else if (taking) out.push(line);
+    if (line.startsWith('## ')) {
+      inPair = line.slice(3).trim().startsWith(pairLabel);
+      // ── AND `taking` IS CLEARED HERE, WHICH IT WAS NOT ─────
+      // The first version set `inPair` on a `##` and left `taking` alone, so the
+      // 1x2 column ran past the end of its own section and swallowed the next
+      // pair's heading and fence. Caught by reading the generated page rather
+      // than the code: a quoted column is exactly the thing no assertion in this
+      // script can judge, so it has to be looked at.
+      taking = false;
+    } else if (line.startsWith('### ')) {
+      taking = inPair && line.slice(4).toLowerCase().startsWith('round 1');
+    } else if (taking && line.trim() !== '```' && line.trim() !== '---') {
+      // The v1 page fences each column. Quoting a fence inside a fence ends the
+      // block early and the rest of the column renders as prose.
+      out.push(line);
+    }
   }
   const text = out.join('\n').trim();
   if (!text) throw new Error(`REFUSING: no "### round 1" for "${pairLabel}" in ${V1}`);
@@ -87,6 +100,35 @@ say(`walk v2 | gate ${STAGE6_VERSION} | round 2 prompt ${promptVersionFor('pair'
 say(`round 1 column is QUOTED from ${V1} (prompt fcdd1dd95968be52), never re-rendered`);
 say(`${PAIRS.length} pairs, up to 2 draws each if the first floors`);
 if (ESTIMATE) { console.log('\n--estimate: nothing spent.'); process.exit(0); }
+
+/**
+ * Re-splice the framing note into an existing page, rendering nothing.
+ *
+ * The note carries the numbers, and a number changes when it is re-measured -
+ * so without this, correcting a figure in the framing costs three renders and
+ * produces a DIFFERENT page, whose prose no longer matches the corrected figure.
+ * That is how a page and its own headline drift apart.
+ */
+if (process.argv.includes('--note-only')) {
+  if (!OUT) throw new Error('REFUSING: --note-only needs --out');
+  const existing = fs.readFileSync(OUT, 'utf8').split('\n');
+  const bodyAt = existing.findIndex((l) => /^## [^R]/u.test(l) && !l.startsWith('## READ')
+    && !l.startsWith('## WHAT') && !l.startsWith('## ONE'));
+  if (bodyAt < 0) throw new Error('REFUSING: no pair section found in the existing page');
+  const notePath = OUT.replace(/\.md$/u, '.note.md');
+  const note = fs.readFileSync(notePath, 'utf8').trim();
+  fs.writeFileSync(
+    OUT,
+    `${existing.slice(0, 5).join('\n')}\n\n${note}\n\n${existing.slice(bodyAt).join('\n')}`,
+    'utf8',
+  );
+  console.log(`re-spliced ${notePath} into ${OUT}; nothing rendered`);
+  process.exit(0);
+}
+
+// AFTER the --note-only exit above: re-splicing the framing spends nothing and
+// must not need a key. It was above it once, and `--note-only` refused on a
+// machine with no key while doing no work that needed one.
 if (!geminiConfigured()) { console.error('REFUSING: no GEMINI_API_KEY'); process.exit(1); }
 
 const results = [];
@@ -139,7 +181,19 @@ for (const r of results) {
 }
 
 if (OUT) {
+  // ── THE FRAMING IS A FILE, NOT A HAND-EDIT ON THE OUTPUT ───
+  // The first version of this page had its "read this first" section pasted on
+  // afterwards, and the next run silently deleted it. A page that cannot be
+  // regenerated is a page nobody dares re-run, and the numbers in the framing
+  // are exactly the ones that move when it is.
+  const notePath = OUT.replace(/\.md$/u, '.note.md');
+  const note = fs.existsSync(notePath) ? `${fs.readFileSync(notePath, 'utf8').trim()}\n\n` : '';
+  if (!note) console.log(`(no framing note at ${notePath})`);
   fs.mkdirSync(OUT.replace(/\/[^/]+$/u, ''), { recursive: true });
-  fs.writeFileSync(OUT, `# Compat reading, three pairs: round 1 / round 2\n\n${lines.join('\n')}\n`, 'utf8');
+  fs.writeFileSync(
+    OUT,
+    `# Compat reading, three pairs: round 1 / round 2\n\n${lines.slice(0, 3).join('\n')}\n\n${note}${lines.slice(3).join('\n')}\n`,
+    'utf8',
+  );
   console.log(`\nwrote ${OUT}`);
 }
