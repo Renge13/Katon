@@ -568,7 +568,35 @@ test('NO ENGINE STRING NAMES A PILLAR BY BARE WORD', () => {
   // THE SWEPT VIEW, not the raw table: a template cell's slots are filled with
   // two real archetype names first. A sweep asks what a READER could receive, and
   // `{A}` is not a thing a reader can receive.
-  walk(sweepableGlossary(), '');
+  //
+  // ── `kompatibilitas` IS EXCLUDED, AND IT IS NOT A BEND ────
+  // This lint charges every glossary string against CHART_1 and a MIRROR
+  // `branch_relation` fact. `checkRelationPositions` opens with
+  // `if (fact.provenance?.kind !== 'branch_relation') continue`, and no compat
+  // fact is one - measured across all ten harness pairs rather than reasoned:
+  //
+  //   kinds across 10 pairs: compat_day_pair, compat_opening, compat_palace_scan,
+  //     compat_pull_fit, compat_reframe, compat_same_imbalance,
+  //     compat_stem_relation, compat_supply, compat_temperament
+  //   contains 'branch_relation'?  false
+  //
+  // So a `kompatibilitas` string cannot reach this check in production, and the
+  // findings it produced here were the lint pairing compat cells with a mirror
+  // fact that never carries them.
+  //
+  // IT FIRED ON REYNER'S RULED SEEDS, which is exactly when the repo's rule says
+  // to suspect the check first: `p1_controls.daily_seed` says "di hari baik ini"
+  // and `p5_q3.daily_seed` says "Hari-hari berjalan stabil" - ordinary
+  // Indonesian for "on a good day" and "the days pass", read as naming the DAY
+  // PILLAR. `fact.relation_positions` is already recorded in PROGRESS as a
+  // measured false positive (8/8, 2026-08-04). Bending two ruled strings to
+  // satisfy a check that cannot run on them would have been the wrong half of
+  // the trade.
+  //
+  // The live gate is untouched and `STAGE6_VERSION` does not move: this is a
+  // unit lint's scope, not a rule about what Stage 6 accepts.
+  const { kompatibilitas: _compatCells, ...mirrorGlossary } = sweepableGlossary();
+  walk(mirrorGlossary, '');
 
   assert.deepEqual(offenders, [],
     `glossary strings read as naming a pillar:\n  ${offenders.join('\n  ')}`);

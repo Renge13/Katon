@@ -173,10 +173,17 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // The authority on the shape is docs/content/compat-glossary-rulings.md, and
   // this test PARSES IT rather than restating its key list - a second copy of
   // the shape is the thing that would drift.
-  // BOTH rulings files, because the section is now the union of two tranches:
-  // the 24-cell tranche of 2026-09-08 (morning) and `p0_opening`, ruled the same
-  // evening once the floor's naming gap was recorded. Parsed, not restated.
-  const md = ['compat-glossary-rulings.md', 'compat-glossary-rulings-2.md']
+  // ALL THREE rulings files, because the section is the union of three tranches:
+  // the 24-cell tranche of 2026-09-08 (morning), `p0_opening` the same evening
+  // once the floor's naming gap was recorded, and the 42 SEEDS of 2026-09-10
+  // (`meaning_seed` + `daily_seed` on each of the 21 FACT cells).
+  //
+  // PARSED, NOT RESTATED, and that is why adding a tranche is a one-line change
+  // here: this test's whole design is that the rulings files are the authority on
+  // the shape and a second copy of the key list is the thing that would drift.
+  // The seeds file adds fields to existing cells rather than new cells, so the
+  // 25-cell count below is unchanged and the per-cell field sets grow.
+  const md = ['compat-glossary-rulings.md', 'compat-glossary-rulings-2.md', 'compat-seeds-rulings.md']
     .map((f) => readFileSync(path.join(ROOT, 'docs', 'content', f), 'utf8'))
     .join('\n');
   const ruled = {};
@@ -184,7 +191,12 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   for (const line of md.split(/\r?\n/u)) {
     if (line.startsWith('## ')) {
       heading = line.slice(3).trim().replace('kompatibilitas.', '');
-      ruled[heading] = [];
+      // ACCUMULATE, never reset. The seeds tranche adds FIELDS to cells the
+      // earlier files already ruled, so the same `## kompatibilitas.p1_same`
+      // heading appears in two files - and `= []` made the last file win,
+      // leaving the expectation holding only the seeds. A cell's ruled shape is
+      // the union of every tranche that touched it.
+      ruled[heading] ||= [];
       continue;
     }
     if (!heading) continue;
@@ -207,10 +219,16 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
     assert.deepEqual(have.slice().sort(), fields.slice().sort(), `${key} has exactly the ruled fields`);
     total += have.length;
   }
-  // 46 from the first tranche plus p0_opening's one, which is what --expect 1
-  // checks on the second. `_template` is metadata and is stripped by the same
-  // `_`-prefix rule as `_note`, so it is not an assignment and does not count.
-  assert.equal(total, 47, '47 assignments across the two tranches');
+  // 46 from the first tranche, plus p0_opening's one (what `--expect 1` checks on
+  // the second), plus the 42 SEEDS of 2026-09-10 - `meaning_seed` and
+  // `daily_seed` on each of the 21 FACT cells. `_template` is metadata and is
+  // stripped by the same `_`-prefix rule as `_note`, so it is not an assignment
+  // and does not count.
+  //
+  // 46 + 1 + 42 = 89, and the arithmetic is written out because this number is
+  // the one a later tranche has to update deliberately rather than by reading a
+  // failure and typing whatever the actual was.
+  assert.equal(total, 89, '89 assignments across the three tranches');
 
   // NO SEEDS. Nothing was ruled for gift/cost/actionable, and a placeholder for a
   // string nobody has ruled is an invitation to invent one.
