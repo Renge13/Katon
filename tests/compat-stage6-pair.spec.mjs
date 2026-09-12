@@ -48,7 +48,11 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // in the same commit. Two rejecting checks were added, so it moves once - not
   // twice, and not zero times.
   // 1.23.0: the tension_collapse negation carve-out (Reyner, 2026-09-08).
-  assert.equal(STAGE6_VERSION, '1.23.0');
+  // 1.24.0: the compat opening is injected by the engine before this gate reads
+  // it (lib/render/pairOpening.js). No predicate here changed; what the gate is
+  // handed did, so the served text's verdict can differ for the same model
+  // output - which is exactly what this constant answers for.
+  assert.equal(STAGE6_VERSION, '1.24.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
