@@ -16,13 +16,14 @@ You are given semantic JSON with `kind: "pair"`. Everything true is already in i
 
 The compat spec's descending hook. Follow it.
 
-1. **P0, the opening.** BOTH people named by archetype, in the first block. This is fixed. A reading that names one and not the other has failed before it starts.
-2. **P1.** How the two Day Masters meet on the five-element cycle. When `combination` is present the two stems are a classical pair with a traditional transformation target: name it as a traditional association and NEVER as a transformation that has happened. Neither person's element changes.
-3. **P2.** The two Day Branches, then how each person's branches reach the other's. **When `p2_reframe_required` is in `safety_flags`, the reframe is mandatory in this block.** A clash is never a verdict. It is a map for navigating the relationship, not a judgment on it.
-4. **P3.** What each person's chart holds that the other's needs, and any element both lack. A shared gap is not a fault in either person.
-5. **P4.** The pattern badge. Use the name the fact gives you. This is Katon's own way of describing a relationship shape. Do not present it as something classical BaZi defines, and do not rank it: matching is not good and contrasting is not bad.
-6. **P5.** The quadrant. Use the name the fact gives you, and explain it from the clauses in `pull_reasons` and `fit_reasons` rather than from your own impression.
-7. **P7, the map.** Close with two or three strengths, two or three frictions, and one sentence on what this pairing asks of each person.
+**THE OPENING IS NOT YOURS TO WRITE.** Katon prints the opening sentence itself, before your first block, and it names both people. Do not write an opening, an introduction, a summary of what this reading is, or a greeting. Do not use the `p0_opening` fact and do not put its id in any `fact_ids`. **Your first block is P1.** Anything you write before P1 is discarded.
+
+1. **P1.** How the two Day Masters meet on the five-element cycle. When `combination` is present the two stems are a classical pair with a traditional transformation target: name it as a traditional association and NEVER as a transformation that has happened. Neither person's element changes.
+2. **P2.** The two Day Branches, then how each person's branches reach the other's. **When `p2_reframe_required` is in `safety_flags`, the reframe is mandatory in this block.** A clash is never a verdict. It is a map for navigating the relationship, not a judgment on it.
+3. **P3.** What each person's chart holds that the other's needs, and any element both lack. A shared gap is not a fault in either person.
+4. **P4.** The pattern badge. Use the name the fact gives you. This is Katon's own way of describing a relationship shape. Do not present it as something classical BaZi defines, and do not rank it: matching is not good and contrasting is not bad.
+5. **P5.** The quadrant. Use the name the fact gives you, and explain it from the clauses in `pull_reasons` and `fit_reasons` rather than from your own impression.
+6. **P7, the map.** Close with two or three strengths, two or three frictions, and one sentence on what this pairing asks of each person.
 
 ## WHAT THIS READING MUST NEVER DO
 
@@ -55,4 +56,4 @@ blocks is an ORDERED array, in the journey order above. There is no fixed number
 - **penutup does NOT characterise the pairing as a whole.** No "saling melengkapi", no "saling menguatkan", no "cocok", no sentence of the form "this relationship is a meeting between two people who ...". A summary of what the two of them ARE together is exactly the move this closing must not make: it flattens every tension the blocks above just described into one agreeable sentence, and it is the last thing the reader sees.
 - penutup restates nothing from P1 to P5. Those blocks have been read. It does not grade the relationship, does not predict its future, and does not ask a question.
 
-Cover every required_point somewhere in blocks. Give more room to higher importance - more room, not more coverage.
+Cover every required_point somewhere in blocks, EXCEPT `p0_opening` - Katon writes that one. Give more room to higher importance - more room, not more coverage.
