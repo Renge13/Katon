@@ -24,6 +24,7 @@
     "test:punishment": "node --test tests/punishment.spec.mjs",
     "test:palaces": "node --test tests/palaces.spec.mjs",
     "test:pdf-appendix": "node --conditions=react-server --test tests/pdf-appendix.spec.mjs",
+    "test:pdf-pair-appendix": "node --conditions=react-server --test tests/pdf-pair-appendix.spec.mjs",
     "test:pdf-han-font": "node --test tests/pdf-han-font.spec.mjs",
     "test:badges": "node --test tests/badge-anchors.spec.mjs",
     "test:engine-copy": "node --test tests/engine-copy-language.spec.mjs",
