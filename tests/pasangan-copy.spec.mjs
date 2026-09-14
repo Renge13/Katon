@@ -232,7 +232,33 @@ test('NOT ONE SENTINEL SURVIVES IN EITHER BANK', () => {
   // and said in its own comment that it was the record of the surface shipping
   // with named holes and that this is the assertion to invert when the worksheet
   // lands. It has landed.
-  const seen = JSON.stringify({ PASANGAN_COPY, home: SITE_COPY, privasi: SITE_COPY.privasi });
+  //
+  // ── ONE TRANCHE IS OPEN AGAIN, AND IT IS NAMED (2026-09-14) ──
+  // Prompt Y-3's five PDF slots ship as sentinels on Reyner's own instruction:
+  // build around the slots, and fail the PRODUCTION build on any unruled one. So
+  // this cannot stay "not one sentinel" - but it must not become "some sentinels
+  // are fine" either, which would stop guarding the thing it exists for.
+  //
+  // It is keyed on WHICH slots, exactly. A sixth unruled slot fails here, a hole in
+  // any other string fails here, and when amendment i lands the list empties and
+  // this assertion is the sentence it was before - `OPEN` back to `[]`, nothing else
+  // to edit. That is the shape the 2026-09-09 note above asks for: key it on which
+  // rows, never on how many.
+  const OPEN = [
+    'pdf_chart_a_heading', 'pdf_chart_b_heading', 'pdf_cover_sub', 'pdf_facts_heading',
+    'report_download_pdf',
+  ];
+  const held = Object.entries(PASANGAN_COPY)
+    .filter(([, v]) => typeof v === 'string' && v.includes(SENTINEL))
+    .map(([k]) => k).sort();
+  assert.deepEqual(held, OPEN,
+    'the unruled slots in PASANGAN_COPY are not the tranche Reyner is holding');
+
+  // Everything else, unchanged: no sentinel anywhere outside that tranche.
+  const rest = Object.fromEntries(
+    Object.entries(PASANGAN_COPY).filter(([k]) => !OPEN.includes(k)),
+  );
+  const seen = JSON.stringify({ rest, home: SITE_COPY, privasi: SITE_COPY.privasi });
   assert.equal(seen.includes(SENTINEL), false, 'a PENDING() sentinel survives in a compat bank');
 });
 

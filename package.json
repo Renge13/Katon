@@ -111,6 +111,7 @@
     "qa:depth-pairs": "node --conditions=react-server scripts/qa-depth-pairs.mjs",
     "build:pdf": "node scripts/build-pdf.mjs",
     "test:pdf-document": "node --test tests/pdf-document.spec.mjs",
+    "test:pdf-pair-document": "node --test tests/pdf-pair-document.spec.mjs",
     "test:prose-handoff": "node --import ./scripts/jsx-register.mjs --test tests/prose-handoff.spec.mjs"
   },
   "dependencies": {

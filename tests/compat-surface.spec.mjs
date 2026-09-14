@@ -17,7 +17,7 @@ import path from 'node:path';
 
 import { PASANGAN_COPY, SITE_COPY, UPCOMING_COPY, COPY_BANKS } from '../lib/site/copy.js';
 import { UNRULED_SOURCES } from '../lib/site/unruledScan.js';
-import { SENTINEL } from '../scripts/check-unruled-copy.mjs';
+import { SENTINEL, scanUnruled } from '../scripts/check-unruled-copy.mjs';
 import { COMPAT_ROUTE, compatPairRoute } from '../lib/site/routes.js';
 import { pairUrl, readingUrl } from '../lib/site/baseUrl.js';
 import { priceFor, SELLABLE_SKUS } from '../lib/pricing.js';
@@ -111,6 +111,13 @@ const PASANGAN_SLOTS = [
   'notfound_title',
   // Added by Y-1, 2026-09-08: sales are CLOSED and the page has to say so.
   'sales_closed_title', 'sales_closed_body',
+  // ── ADDED BY Y-3, 2026-09-14, AND UNRULED ON PURPOSE ──
+  // The compat PDF's four document slots plus the report's download button. They
+  // are in this list because the SURFACE RENDERS THEM - a slot that exists but is
+  // not listed is exactly the orphan the deepEqual below catches. Whether they are
+  // RULED is a different question and lives in the next test.
+  'pdf_cover_sub', 'pdf_chart_a_heading', 'pdf_chart_b_heading', 'pdf_facts_heading',
+  'report_download_pdf',
 ];
 
 test('every slot the surface renders EXISTS', () => {
@@ -149,7 +156,31 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
     ...Object.entries(SITE_COPY.privasi).filter(([k]) => k.startsWith('privasi_')),
   ].filter(([, v]) => typeof v === 'string' && v.includes(SENTINEL));
 
-  assert.deepEqual(holes.map(([k]) => k), [], 'a compat slot is still a sentinel');
+  // ── ONE TRANCHE IS OPEN AGAIN (Y-3, 2026-09-14) ───────────
+  // This test's own history is a test inverting itself when a worksheet landed, so
+  // it is worth being precise about what changed and what did not: the assertion is
+  // still "no compat slot is a hole", with an EXPLICIT, NAMED exception for the five
+  // PDF slots Reyner is holding. It is not "some holes are allowed".
+  //
+  // He ruled the sentinels deliberately on 2026-09-14, in the instruction that
+  // released Y-3: build around the slots and fail the PRODUCTION build on any
+  // unruled one. The production gate is `scripts/check-unruled-copy.mjs --strict`
+  // and it DOES refuse - so this test's title is now half true, which is why the
+  // count and the exception are both asserted rather than the title being trusted.
+  //
+  // When amendment i lands, delete `OPEN`, and both assertions below are the
+  // sentences they were before.
+  const OPEN = [
+    'pdf_chart_a_heading', 'pdf_chart_b_heading', 'pdf_cover_sub', 'pdf_facts_heading',
+    'report_download_pdf',
+  ];
+  assert.deepEqual(holes.map(([k]) => k).sort(), OPEN,
+    'the compat slots still holding a sentinel are not the tranche Reyner is holding');
+  // AND THE PRODUCTION GATE ACTUALLY REFUSES WHILE THEY DO. Asserted here rather
+  // than assumed from the bank's contents: `compat_invoice_desc` is the precedent
+  // for a hole that everyone believed was guarded.
+  assert.ok(scanUnruled(PASANGAN_COPY, 'PASANGAN_COPY').length === OPEN.length,
+    'the unruled-copy scanner does not see the five holes the bank is holding');
   // 22 from X-b3, plus the two sales-closed strings Y-1 added, MINUS `paid_title`,
   // PLUS the four new section eyebrows ruled 2026-09-09, MINUS `link_keep` which
   // moved to CHROME_COPY with amendment g: 22 + 2 - 1 + 4 - 1 = 26.
@@ -159,7 +190,12 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
   // list - and this number is the tripwire on the list itself. It went red on
   // the 2026-09-09 amendment and forced the count to be accounted for, which is
   // the whole job. Whoever changes it should be able to write the arithmetic.
-  assert.equal(Object.keys(PASANGAN_COPY).length, 26);
+  // 26, PLUS the five Y-3 PDF slots = 31. The arithmetic is the tripwire and the
+  // comment above says whoever changes it should be able to write it: 22 (X-b3)
+  // + 2 (sales closed) - 1 (paid_title) + 4 (section eyebrows) - 1 (link_keep,
+  // moved to CHROME_COPY) + 5 (Y-3: four document slots and the download button)
+  // = 31.
+  assert.equal(Object.keys(PASANGAN_COPY).length, 31);
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {
