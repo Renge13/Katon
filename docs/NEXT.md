@@ -225,7 +225,31 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
-## THE CURRENT WORK, 2026-09-14 - PROMPT Y-3, THE COMPAT PDF
+## THE CURRENT WORK, 2026-09-14 (night) - PROMPT Y-4, THE PDF AS A DOCUMENT
+
+**`docs/prompts/Y-pdf-4.md`, RELEASED 2026-09-14** after Reyner read the built compat PDF. R6-R8 are
+in `docs/PROGRESS.md` under `## RULED 2026-09-14`: kill the page-number cross-references, make the
+glossary a two-column "Kamus Ringkas" appendix, print the ruled cells whole. Commits 0-4 are landed on
+`feat/pdf-appendix-card`.
+
+**WHAT IS OWED, AND BY WHOM**
+
+1. **COWORK READS THE REBUILT PDF** (`Claude outputs/katon-Y-1-compat.pdf`) before Reyner does. That
+   is Y-4's own instruction and it is the gate on this PR.
+2. **TWO PAGE-COUNT TARGETS ARE MISSED BY ONE EACH**, flagged not traded off: the mirror's appendix is
+   2 pages against a target of 1, the compat's is 3 against 1-2. Cause is R8 printing every ruled cell
+   whole. Closing it needs shorter cells (Reyner's words) or a smaller type scale (a design pass Y-4
+   excludes).
+3. **ONE STUTTER WAS SETTLED AS A TECHNICALITY AND MAY BE HIS TO REVERSE**: the floor's P5 block
+   heading is the same words as the new title line, so the block heading is suppressed. If he wants it
+   kept and the title worded differently, that is a new string.
+
+**THE CHAIN AFTER THIS.** V (DOKU) -> `?dari` -> real-money walk -> promotion to own network on Vercel
+Hobby -> **U (Render, QUEUED, DO NOT START)** -> promotion beyond own network. `docs/prompts/U-render-move.md`
+is written and HELD; it is committed first and alone on `feat/render-move` when released, and it is
+NOT in this PR. **Prompt V is next.**
+
+## THE PREVIOUS WORK, 2026-09-14 - PROMPT Y-3, THE COMPAT PDF
 
 **`docs/prompts/Y-pdf-3.md`, RELEASED 2026-09-14.** The last content precondition before promotion
 (Addendum 2 item 8). Reyner's two rulings are in PROGRESS under `## RULED 2026-09-14`: the PDF is

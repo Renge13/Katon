@@ -5,7 +5,8 @@
     "2026-09-14 ruling 3 (Reyner): per-style lineHeight so nothing overlaps; the chart page reflows.",
     "2026-09-14 R6 (Reyner): page-number cross-references removed; the reference lists go with them.",
     "2026-09-14 R6 (Reyner): page-number cross-references removed; the reference lists go with them.",
-    "2026-09-14 R7/R8 (Reyner): the appendix becomes a two-column Kamus Ringkas; cells print whole."
+    "2026-09-14 R7/R8 (Reyner): the appendix becomes a two-column Kamus Ringkas; cells print whole.",
+    "2026-09-14 Y-4 (Reyner R6-R8): references removed, appendix is a two-column Kamus Ringkas."
   ],
   "_fixture": {
     "birthDate": "1989-09-13",
