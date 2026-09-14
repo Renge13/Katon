@@ -163,21 +163,36 @@ test("CORRECTION 2's gate passes: every mechanic in the legend carries a meaning
   }
 });
 
-test('the group order is prompt M\'s, with Kompatibilitas first and Relasi Cabang out', () => {
-  // The omission is a RULING (Y-3's enumeration), so it is asserted as one name
-  // rather than left as the absence of a string nobody looks for.
+test('the group order is prompt M\'s ENTIRE list, with Kompatibilitas first', () => {
+  // ── REVERSED 2026-09-14, AND THE TEST WAS SHOWN RED FIRST ──
+  // This asserted `GROUP_ORDER.filter((g) => g !== 'Relasi Cabang')` under Y-3's
+  // enumeration. Reyner ruled the group back IN on 2026-09-14: R2 bounds the
+  // document only by the LOCKED RULES, and "a reader might read a personal 冲 as a
+  // pair one" is a presentation worry, not one of them. Putting the group back
+  // reddened this with `+ 'Relasi Cabang'`, which is the run in the commit message.
+  //
+  // It is still pinned to a LITERAL list rather than to `GROUP_ORDER` itself, so a
+  // group silently added to the mirror's order does not silently enter a paid
+  // compat document - the reason the original was pinned at all survives the
+  // reversal.
   assert.equal(PAIR_GROUP_ORDER[0], PAIR_GROUP);
-  assert.deepEqual(PER_CHART_GROUPS, GROUP_ORDER.filter((g) => g !== 'Relasi Cabang'));
-  assert.ok(GROUP_ORDER.includes('Relasi Cabang'),
-    'precondition: the mirror HAS this group, so excluding it is a decision');
+  assert.deepEqual(PER_CHART_GROUPS, [
+    'Aspek', 'Bintang', 'Elemen dan Kekuatan', 'Relasi Cabang', 'Pilar', 'Shio', 'Pilar Konsepsi',
+  ]);
+  assert.deepEqual(PER_CHART_GROUPS, GROUP_ORDER,
+    'every mirror group is in the compat legend now');
+  assert.notEqual(PER_CHART_GROUPS, GROUP_ORDER,
+    'a COPY, so an edit to one order cannot move the other');
 
   for (const [name, pair] of Object.entries(PAIRS)) {
     const { appendix } = appendixFor(pair);
     const order = appendix.groups.map((g) => g.group);
     assert.deepEqual(order, PAIR_GROUP_ORDER.filter((g) => order.includes(g)),
       `${name}: groups are out of ruled order`);
-    assert.equal(order.includes('Relasi Cabang'), false,
-      `${name}: a single chart's own branch relations must not sit beside the pair's`);
+    // `Relasi Cabang` MAY be here now (ruled 2026-09-14). It is not asserted
+    // PRESENT, because a pair whose two charts happen to carry no internal branch
+    // relation legitimately has none - an empty group is dropped, never rendered
+    // empty, which the loop below still asserts.
     for (const g of appendix.groups) {
       assert.ok(g.entries.length > 0, `${name}: ${g.group} rendered empty`);
     }

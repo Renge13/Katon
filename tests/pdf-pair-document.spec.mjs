@@ -207,28 +207,30 @@ test('RULE 20: no em-dash, no curly quotes, no question mark', async () => {
   }
 });
 
-test('THE ONLY SENTINELS ARE THE FOUR PDF SLOTS, and they are Reyner\'s to close', async () => {
-  // Y-3's proof list says "no `@@UNRULED` in any page text". That becomes true
-  // UNCHANGED the moment commit 4 lands; until then the honest assertion is that the
-  // sentinels present are EXACTLY the slots he is holding - which catches a
-  // hand-typed Indonesian string leaking in (it would not be a sentinel at all) and
-  // catches a fifth slot appearing that nobody has put in front of him.
-  //
-  // THE EXPECTED LIST IS HARD-CODED, not derived from the copy bank. Deriving it
-  // would make this pass for any bank state, which is the assertion-that-cannot-fail
-  // shape. When the four are ruled, delete the list and the `deepEqual` becomes the
-  // prompt's own sentence.
-  const EXPECTED = [
-    'pdf_chart_a_heading', 'pdf_chart_b_heading', 'pdf_cover_sub', 'pdf_facts_heading',
-  ];
+test('NO @@UNRULED REACHES A PAGE - amendment i closed the last four', async () => {
+  // Y-3's proof list said exactly this, and it is the sentence it was always going
+  // to become. While commit 4 was open this asserted the sentinels present were
+  // EXACTLY the four held slots, hard-coded rather than derived from the bank - a
+  // derived list would have passed for any bank state. Reyner ruled all five on
+  // 2026-09-14, so the exception is gone and the check is the flat one.
   for (const name of names) {
     const { texts } = await build(name);
-    // The extractor breaks inside the token, so whitespace is stripped before the
-    // scan - the same reason `verifyReferences` locates pages whitespace-free.
+    // Whitespace is still stripped before the scan: the extractor breaks inside a
+    // long unbroken token, which is how `@@UNRULED: pdf_chart_a_heading@@` came back
+    // as two lines. A sentinel that reappears must not hide in a line break.
     const all = texts.join('\n').replace(/\s+/gu, '');
     const found = [...all.matchAll(/@@UNRULED:([a-z_]+)@@/g)].map((m) => m[1]);
-    assert.deepEqual([...new Set(found)].sort(), EXPECTED,
-      `${name}: the document's unruled slots are not the four being held`);
+    assert.deepEqual([...new Set(found)].sort(), [],
+      `${name}: an unruled sentinel is printed in a paid document`);
+  }
+
+  // AND THE RULED WORDS ARE ACTUALLY ON THE PAGES, which the absence check cannot
+  // say: a document that printed nothing at all would satisfy it.
+  const { texts } = await build('Y-1 fixture');
+  const flatAll = texts.join('\n').replace(/\s+/gu, ' ');
+  for (const slot of ['pdf_cover_sub', 'pdf_chart_a_heading', 'pdf_chart_b_heading', 'pdf_facts_heading']) {
+    assert.ok(flatAll.includes(PASANGAN_COPY[slot].replace(/\s+/gu, ' ')),
+      `${slot} is ruled but not drawn`);
   }
 });
 

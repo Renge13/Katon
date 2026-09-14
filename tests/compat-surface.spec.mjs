@@ -156,31 +156,17 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
     ...Object.entries(SITE_COPY.privasi).filter(([k]) => k.startsWith('privasi_')),
   ].filter(([, v]) => typeof v === 'string' && v.includes(SENTINEL));
 
-  // ── ONE TRANCHE IS OPEN AGAIN (Y-3, 2026-09-14) ───────────
-  // This test's own history is a test inverting itself when a worksheet landed, so
-  // it is worth being precise about what changed and what did not: the assertion is
-  // still "no compat slot is a hole", with an EXPLICIT, NAMED exception for the five
-  // PDF slots Reyner is holding. It is not "some holes are allowed".
-  //
-  // He ruled the sentinels deliberately on 2026-09-14, in the instruction that
-  // released Y-3: build around the slots and fail the PRODUCTION build on any
-  // unruled one. The production gate is `scripts/check-unruled-copy.mjs --strict`
-  // and it DOES refuse - so this test's title is now half true, which is why the
-  // count and the exception are both asserted rather than the title being trusted.
-  //
-  // When amendment i lands, delete `OPEN`, and both assertions below are the
-  // sentences they were before.
-  const OPEN = [
-    'pdf_chart_a_heading', 'pdf_chart_b_heading', 'pdf_cover_sub', 'pdf_facts_heading',
-    'report_download_pdf',
-  ];
-  assert.deepEqual(holes.map(([k]) => k).sort(), OPEN,
-    'the compat slots still holding a sentinel are not the tranche Reyner is holding');
-  // AND THE PRODUCTION GATE ACTUALLY REFUSES WHILE THEY DO. Asserted here rather
-  // than assumed from the bank's contents: `compat_invoice_desc` is the precedent
-  // for a hole that everyone believed was guarded.
-  assert.ok(scanUnruled(PASANGAN_COPY, 'PASANGAN_COPY').length === OPEN.length,
-    'the unruled-copy scanner does not see the five holes the bank is holding');
+  // ── IT OPENED FOR ONE TRANCHE AND IS CLOSED AGAIN (2026-09-14) ──
+  // Y-3's five PDF slots shipped as sentinels on Reyner's instruction and this test
+  // named them exactly, so it never became "some holes are allowed". Amendment i
+  // ruled all five verbatim on 2026-09-14 and the applying commit substituted them,
+  // so the exception is DELETED rather than left as an empty array nobody removes.
+  assert.deepEqual(holes.map(([k]) => k), [], 'a compat slot is still a sentinel');
+  // AND THE SCANNER AGREES, which is not implied by the line above: that one reads
+  // the banks directly, this one asks the instrument the production gate uses.
+  // `compat_invoice_desc` is the precedent for a hole everyone believed was guarded.
+  assert.deepEqual(scanUnruled(PASANGAN_COPY, 'PASANGAN_COPY'), [],
+    'the unruled-copy scanner still sees a hole the bank does not');
   // 22 from X-b3, plus the two sales-closed strings Y-1 added, MINUS `paid_title`,
   // PLUS the four new section eyebrows ruled 2026-09-09, MINUS `link_keep` which
   // moved to CHROME_COPY with amendment g: 22 + 2 - 1 + 4 - 1 = 26.
