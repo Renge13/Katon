@@ -579,3 +579,33 @@ test('THE MIRROR DOCUMENT IS BYTE-FOR-BYTE THE SAME DOCUMENT after the refactor'
   assert.equal(report.referenced, FIXTURE.report.referenced);
   assert.equal(report.rebuilds, FIXTURE.report.rebuilds, 'the fixed point converged differently');
 });
+
+// ── THE COVER (Reyner, 2026-09-14, ruling 2) ───────────────
+
+test('THE COVER LEADS WITH THE ENGLISH NAME, Indonesian underneath', async () => {
+  // Ruled 2026-09-14 on the compat cover and applied HERE TOO in the same ruling -
+  // "same `coverPage` shape". `name_en` is the bigger title; `name_id` sits under
+  // it, smaller, with the element it always carried.
+  //
+  // THIS MOVES THE MIRROR DOCUMENT, which is why `tests/fixtures/pdf-chart1-
+  // pages.json` is re-pinned in the same commit. It is the first intended change to
+  // that document since the fixture was captured, and the fixture's own header says
+  // regenerate only for exactly this: an intended, ruled change.
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const cover = pageTexts(buffer)[0].split('\n').map((l) => l.trim()).filter(Boolean);
+  const core = semanticJson.core;
+
+  assert.equal(cover[0], core.archetype_name_en, 'the first line is not the English name');
+  assert.equal(cover[1], `${core.archetype_name_id} - ${core.element}`,
+    'the Indonesian name and element are not the line under it');
+  // ORDER, not presence: both were on the cover before, the wrong way round.
+  const page = pageTexts(buffer)[0];
+  assert.ok(page.indexOf(core.archetype_name_en) < page.indexOf(core.archetype_name_id),
+    'the Indonesian name still comes first');
+
+  // THE METADATA TITLE IS UNCHANGED, explicitly ruled. It is what a reader sees in
+  // a viewer tab and in her downloads folder, and it stays Indonesian.
+  assert.ok(buffer.includes(Buffer.from(`Katon - ${core.archetype_name_id}`, 'utf8')),
+    'the metadata title moved with the cover');
+});

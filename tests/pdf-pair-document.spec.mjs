@@ -402,3 +402,46 @@ test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () =>
   assert.equal(frameRow.a, '子');
   assert.equal(frameRow.b, '丑');
 });
+
+// ── THE COVER (Reyner, 2026-09-14, ruling 2) ───────────────
+
+test('THE COVER LEADS WITH THE ENGLISH NAMES, Indonesian underneath', async () => {
+  // Ruled 2026-09-14 after Cowork read the Y-1 PDF: `name_en` is the bigger title,
+  // `name_id` sits under it, smaller. Same shape on the mirror's Complete Edition
+  // cover - `tests/pdf-document.spec.mjs` asserts that half.
+  //
+  // THE SEPARATOR STAYS ` - `. Reyner's example wrote "The Sun · The Garden" with a
+  // middle dot; rule 20 is keyboard characters only, and `·` is not one. Read as an
+  // illustration of the CONTENT (both English names, English first) rather than a
+  // ruling on the separator, so the existing keyboard hyphen is kept and the
+  // question is flagged rather than decided silently.
+  for (const name of names) {
+    const { texts, semanticJson } = await build(name);
+    const cover = texts[0].split('\n').map((l) => l.trim()).filter(Boolean);
+    const a = semanticJson.core.a;
+    const b = semanticJson.core.b;
+
+    assert.equal(cover[0], `${a.archetype_name_en} - ${b.archetype_name_en}`,
+      `${name}: the first line of the cover is not the English pair`);
+    assert.equal(cover[1], `${a.archetype_name_id} dan ${b.archetype_name_id}`,
+      `${name}: the Indonesian pair is not the line under it`);
+    // ORDER IS THE ASSERTION, not mere presence: both strings were on the cover
+    // before this ruling too, the wrong way round.
+    assert.ok(texts[0].indexOf(a.archetype_name_en) < texts[0].indexOf(a.archetype_name_id),
+      `${name}: the Indonesian name still comes first`);
+  }
+});
+
+test('THE DOCUMENT METADATA TITLE IS UNCHANGED by the cover ruling', async () => {
+  // Explicitly ruled: the cover flips, the metadata does not. It is the filename a
+  // reader sees in a PDF viewer's tab and in her downloads folder, and it is
+  // Indonesian because the document is.
+  for (const name of names) {
+    const { buffer, semanticJson } = await build(name);
+    const want = `Katon - ${semanticJson.core.a.archetype_name_id} dan ${semanticJson.core.b.archetype_name_id}`;
+    assert.ok(buffer.toString('latin1').includes(want)
+      || buffer.toString('utf16le').includes(want)
+      || buffer.includes(Buffer.from(want, 'utf8')),
+    `${name}: the metadata title is not "${want}"`);
+  }
+});
