@@ -27,7 +27,9 @@ import { anchorId } from '../lib/pdf/appendix.js';
 import { refRow, REF_PREFIX } from '../lib/pdf/document.js';
 import { APPENDIX_HEADING } from '../lib/pdf/build.js';
 import { PASANGAN_COPY } from '../lib/site/copy.js';
-import { drawnCodePoints, pageTexts } from '../lib/pdf/inspect.js';
+import {
+  drawnCodePoints, pageTexts, textBoxes, collisions,
+} from '../lib/pdf/inspect.js';
 import { VALIDATION_CHARTS, HOUR_UNKNOWN_CHARTS } from './bazi-validation.fixture.js';
 import GLOSSARY from '../docs/content/glossary.json' with { type: 'json' };
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
@@ -443,5 +445,26 @@ test('THE DOCUMENT METADATA TITLE IS UNCHANGED by the cover ruling', async () =>
       || buffer.toString('utf16le').includes(want)
       || buffer.includes(Buffer.from(want, 'utf8')),
     `${name}: the metadata title is not "${want}"`);
+  }
+});
+
+// ── NOTHING OVERLAPS (Reyner, 2026-09-14, ruling 3) ────────
+
+test('NO TEXT IS DRAWN ON TOP OF OTHER TEXT, on any page of either pair', async () => {
+  // The compat half of ruling 3; `tests/pdf-document.spec.mjs` carries the mirror's
+  // and the full explanation of the cause and of the instrument that was blind.
+  // Both documents share `PDF_STYLES`, so both showed the same two collisions: a
+  // 34pt cover title with 4.7pt of room, and 26pt pillar characters with 17.4pt -
+  // which is the animal name printed over the hanzi.
+  for (const name of names) {
+    const { buffer } = await build(name);
+    const pages = textBoxes(buffer);
+    assert.ok(pages.some((p) => p.length > 5), `${name}: the parser found no runs to check`);
+    for (const [i, runs] of pages.entries()) {
+      const hits = collisions(runs);
+      assert.deepEqual(hits.map((h) => `"${h.a.text.slice(0, 18)}"(${h.a.size}) over `
+        + `"${h.b.text.slice(0, 18)}"(${h.b.size}) gap ${h.gap}, needs ${h.need}`), [],
+      `${name} page ${i + 1}`);
+    }
   }
 });

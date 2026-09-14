@@ -38,7 +38,7 @@ import {
 } from '../lib/pdf/fonts.js';
 import {
   roundTrip, drawnCodePoints, embeddedFonts, latinText, pageTexts, pageObjectOrder,
-  namedDestinationPages,
+  namedDestinationPages, textBoxes, collisions,
 } from '../lib/pdf/inspect.js';
 
 const CHARTS = {
@@ -608,4 +608,38 @@ test('THE COVER LEADS WITH THE ENGLISH NAME, Indonesian underneath', async () =>
   // a viewer tab and in her downloads folder, and it stays Indonesian.
   assert.ok(buffer.includes(Buffer.from(`Katon - ${core.archetype_name_id}`, 'utf8')),
     'the metadata title moved with the cover');
+});
+
+// ── NOTHING OVERLAPS (Reyner, 2026-09-14, ruling 3) ────────
+
+test('NO TEXT IS DRAWN ON TOP OF OTHER TEXT, on any page', async () => {
+  // Reyner, reading the Y-1 PDF: the cover title sat on its sub-line and the animal
+  // names were printed over the hanzi on every chart page. Both documents, because
+  // both share these styles.
+  //
+  // ── THE CAUSE WAS ONE INHERITED NUMBER ─────────────────────
+  // `page` sets `fontSize: 11, lineHeight: 1.6`. react-pdf resolves that to an
+  // ABSOLUTE 17.6pt and inherits the number, not the ratio - so every element with a
+  // larger font got a 17.6pt line box regardless of its size. A 34pt cover title had
+  // 4.7pt of room; a 26pt pillar character had 17.4pt. The fix is per-style
+  // `lineHeight`, which is line-height and spacing only, as ruled.
+  //
+  // ── THE INSTRUMENT'S FIRST VERSION WAS BLIND AND SAID CLEAN ──
+  // It read `Td`/`Tm`. react-pdf writes `1 0 0 1 0 <pageHeight> Tm` for every run
+  // and carries position in nested `cm` translations, so every run came back at the
+  // same y and the collision scan skipped every pair as "same baseline". Its control
+  // passed because the control fed SYNTHETIC runs and never exercised the parser.
+  // `textBoxes` walks the CTM stack now, and the control below is the real document.
+  for (const which of Object.keys(CHARTS)) {
+    const { chart, semanticJson, rendered } = fixture(which);
+    const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+    const pages = textBoxes(buffer);
+    assert.ok(pages.some((p) => p.length > 5), `${which}: the parser found no runs to check`);
+    for (const [i, runs] of pages.entries()) {
+      const hits = collisions(runs);
+      assert.deepEqual(hits.map((h) => `"${h.a.text.slice(0, 18)}"(${h.a.size}) over `
+        + `"${h.b.text.slice(0, 18)}"(${h.b.size}) gap ${h.gap}, needs ${h.need}`), [],
+      `${which} page ${i + 1}`);
+    }
+  }
 });
