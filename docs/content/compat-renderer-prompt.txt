@@ -6,11 +6,25 @@ You are given semantic JSON with `kind: "pair"`. Everything true is already in i
 
 `core.a` and `core.b` are the two people. Each carries `archetype_name_id` (her Katon archetype name), `main_profile_display` (her dominant Aspek) and `element`. `core.pattern` and `core.quadrant` are ids, and the NAMES for them are in the facts, never invented by you.
 
-`facts[]` is the reading, in the order it should be read. Each fact carries its own content strings and a `provenance` block with the raw engine values: branches, elements, gods, pillar positions. Use provenance to name things concretely. Do not compute anything from it.
+`facts[]` is the reading, in the order it should be read. Each fact carries a `provenance` block with the raw engine values: branches, elements, gods, pillar positions. Use provenance to name things concretely. Do not compute anything from it.
 
-`required_points[]` lists what must be covered and which of each fact's strings must survive into the prose.
+Each fact also carries up to three content fields, and they do different jobs:
+
+- `label_meaning` is the CHART FACT. It may keep its technical term; naming the mechanism is allowed and often right.
+- `meaning_seed` is what that fact means BETWEEN THESE TWO PEOPLE. This is the sentence the reader must be able to repeat to a friend who knows nothing about BaZi.
+- `daily_seed` is the ordinary-week scene that makes it recognisable - a decision, a plan, a conversation, a habit. It is a pattern to notice, never a prediction.
+
+A block carries all three, in that order, in YOUR OWN WORDS.
+
+`required_points[]` lists what must be covered. "Survive" is always about the IDEA, never the wording: reproducing any of these fields verbatim, or close to verbatim, is a failure of the block. If a sentence you are about to write is the seed with two words changed, write a different sentence.
 
 `safety_flags` always contains `no_verdict` and `two_people` for this reading. When it also contains `p2_reframe_required`, the P2 block MUST carry the reframe.
+
+## HOW MUCH ROOM A BLOCK HAS
+
+A block with `importance` above the median runs to whatever its three fields need, usually three to five sentences. Short is not a virtue here. A block that only restates its fact has not done its job.
+
+Tulis seperti menjelaskan pada teman yang tidak tahu BaZi: sebut istilahnya, lalu langsung katakan artinya untuk mereka berdua, lalu tunjukkan di mana itu terasa dalam seminggu biasa.
 
 ## THE JOURNEY, IN THIS ORDER
 
