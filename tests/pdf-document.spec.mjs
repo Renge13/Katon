@@ -24,7 +24,7 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import {
-  buildAppendix, assertEveryMechanicExplained, anchorId, anchorIds,
+  buildAppendix, assertEveryMechanicExplained, anchorId, anchorIds, GROUP_ORDER,
 } from '../lib/pdf/appendix.js';
 import {
   completeEdition, readingOnly, glyphProof, REF_PREFIX,
@@ -702,5 +702,72 @@ test('NOT ONE `hal. N` SURVIVES, and the fixed point converges on pass 1', async
     assert.equal(report.rebuilds, 0, `${which}: the fixed point still spent a rebuild`);
     assert.equal(report.referenced, 0, `${which}: something is still referenced`);
     assert.deepEqual(pageMap, {}, `${which}: a page map was resolved for nothing`);
+  }
+});
+
+// ── THE KAMUS RINGKAS (Reyner, 2026-09-14, R7 and R8) ──────
+
+test('THE APPENDIX IS A TWO-COLUMN TABLE, term beside meaning', async () => {
+  // R7: the glossary stays an appendix, as one compact two-column "Kamus Ringkas"
+  // at the very end, with `GROUP_ORDER` as thin sub-headings. Asserted on the
+  // GEOMETRY rather than on the prose: a term and its meaning share a baseline and
+  // sit at different x, which is what "two columns" means and what a stacked layout
+  // cannot fake.
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const { buffer, report } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const appendix = buildAppendix({ chart, semanticJson });
+  const pages = textBoxes(buffer);
+
+  // `display_only` IS EXCLUDED, and it is a ruling rather than a convenience: 胎元
+  // carries NO `label_meaning` on purpose (Reyner, 2026-08-07) and is exempt from
+  // correction 2's gate for the same reason. It has a name and an empty right
+  // column, so asserting a meaning beside it would be asserting against the ruling.
+  const named = appendix.groups.flatMap((g) => g.entries)
+    .filter((e) => e.name && !e.display_only);
+  assert.ok(named.length > 5, 'precondition: chart 1 has a legend worth tabulating');
+  assert.ok(appendix.groups.flatMap((g) => g.entries).some((e) => e.display_only),
+    'precondition: the exclusion is exercised - chart 1 HAS a display-only entry');
+
+  for (const e of named) {
+    // The run that draws the term, anywhere in the appendix.
+    let found = null;
+    for (const runs of pages.slice(report.appendixStart - 1)) {
+      const term = runs.find((r) => r.text.replace(/\s+/gu, '') === e.name.replace(/\s+/gu, ''));
+      if (!term) continue;
+      // A run on the SAME baseline and to the RIGHT of it is the meaning column.
+      found = runs.find((r) => r.y === term.y && r.x > term.x);
+      if (found) break;
+    }
+    assert.ok(found, `${e.name} has no meaning beside it - the row is still stacked`);
+  }
+
+  // GROUP HEADINGS SURVIVE as thin sub-headings, in prompt M's ruled order.
+  const appendixText = pageTexts(buffer).slice(report.appendixStart - 1).join('\n');
+  const present = GROUP_ORDER.filter((g) => appendix.groups.some((x) => x.group === g));
+  let cursor = -1;
+  for (const g of present) {
+    const at = appendixText.indexOf(g);
+    assert.ok(at > cursor, `${g} is out of GROUP_ORDER in the appendix`);
+    cursor = at;
+  }
+});
+
+test('R8: THE APPENDIX PRINTS EVERY RULED CELL WHOLE, never a first sentence', async () => {
+  // Reyner ruled "no truncation to one sentence". NOTHING IN THE CODE EVER
+  // TRUNCATED - `meaningOf` returns the cell and the page printed it - so this is a
+  // GUARD rather than a fix, and it is worth having precisely because the
+  // two-column table is the change most likely to introduce one: a narrow column
+  // invites a `slice`.
+  for (const which of Object.keys(CHARTS)) {
+    const { chart, semanticJson, rendered } = fixture(which);
+    const { buffer, report } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+    const appendix = buildAppendix({ chart, semanticJson });
+    const tail = pageTexts(buffer).slice(report.appendixStart - 1).join('\n').replace(/\s+/gu, ' ');
+
+    for (const e of appendix.groups.flatMap((g) => g.entries)) {
+      if (!e.meaning) continue;
+      assert.ok(tail.includes(e.meaning.replace(/\s+/gu, ' ')),
+        `${which}: ${e.section}.${e.key} is not printed whole`);
+    }
   }
 });
