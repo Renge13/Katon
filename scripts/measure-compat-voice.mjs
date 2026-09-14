@@ -59,7 +59,7 @@ const { renderReading } = await import('../lib/render/index.js');
 const { geminiConfigured, modelFor, DEFAULT_TIER } = await import('../lib/render/config.js');
 const { promptVersionFor } = await import('../lib/render/prompt.js');
 const { STAGE6_VERSION } = await import('../lib/validate/index.js');
-const { stemOverlap } = await import('../lib/validate/text.js');
+const { stemOverlap, sentences } = await import('../lib/validate/text.js');
 const { VALIDATION_CHARTS, HOUR_UNKNOWN_CHARTS } = await import('../tests/bazi-validation.fixture.js');
 
 const arg = (name, fallback = null) => {
@@ -142,6 +142,68 @@ function cellTextFor(fact) {
     .filter((s) => typeof s === 'string' && s.trim()).join(' ');
 }
 
+// ── DID THE LITERAL COME FROM A SEED? ADDED 2026-09-13 (Z-close section 3) ──
+// The round-2 report said `cenderung` was in the MEANING sentence; Z-close says
+// the walk's three literals are all the p2_reframe DAILY seed. A check NAME
+// cannot settle that and neither can a reader's eye, so this scores the sentence
+// that carried the literal against every seed field of every fact in the pair,
+// by the same `stemOverlap` the gate uses. One instrument, one ruler.
+//
+// ── THIS IS A CONTENT MATCH AND NOT A POSITIONAL ONE, DELIBERATELY ─────────
+// The first version of this mapped the literal to a BLOCK by position: split the
+// attempt prose on blank lines, take the chunk that contains the excerpt, read
+// the block at that index. IT WAS WRONG AND IT WAS CONFIDENT. A single render
+// probed on 2026-09-13 came back with EIGHT prose chunks against SIX served
+// blocks, because the model writes one block as two paragraphs (p2 split across
+// `[2]` and `[3]`) - so the index of a chunk is not the index of a block, and a
+// count that happens to match is not evidence that the order does. It named
+// `p0_opening` as the carrier of `kalian cenderung memakai strategi bertahan`,
+// which is a sentence the engine-injected opening cannot contain.
+//
+// So the block claim is gone rather than patched. What is left is the question
+// actually being asked - is this the model's own word or a transcribed seed -
+// and it is answered by content, which needs no map. A best ratio of 0.00 means
+// the sentence shares no distinctive stem with ANY cell in the reading: the
+// model wrote it. That is a real answer, and it is one the positional version
+// would have hidden behind a confident block name.
+const quoted = (message) => {
+  const at = message.lastIndexOf(' at "');
+  if (at === -1) return null;
+  const end = message.lastIndexOf('"');
+  return end > at ? message.slice(at + 5, end) : null;
+};
+
+const flat = (s) => (s || '').replace(/\s+/gu, ' ').trim();
+
+/** Every (fact, field) pair a compat reading could have transcribed from. */
+const seedFieldsOf = (facts) => (facts || []).flatMap((f) => [
+  ['label_meaning', f.label_meaning],
+  ['meaning_seed', f.meaning_seed],
+  ['daily_seed', f.daily_seed],
+].filter(([, v]) => typeof v === 'string' && v.trim())
+  .map(([name, v]) => ({ fact: f.id, field: name, text: v })));
+
+function attributeLiteral(message, prose, facts) {
+  const excerpt = quoted(message);
+  if (!excerpt) return { excerpt: null, source: 'no literal in the message' };
+
+  // The carrying SENTENCE, so the score is about one claim and not a paragraph.
+  // The excerpt's first 10 characters are the regex's left context and can start
+  // mid-word, so the tail is what is searched for.
+  const needle = excerpt.slice(10);
+  const sentence = sentences(flat(prose || '')).find((s) => s.includes(needle));
+  if (!sentence) return { excerpt, source: 'not found in this attempt' };
+
+  const scored = seedFieldsOf(facts)
+    .map((s) => ({ ...s, ratio: stemOverlap(s.text, sentence).ratio }))
+    .sort((a, b) => b.ratio - a.ratio);
+  if (!scored.length) return { excerpt, source: 'the pair carries no seed' };
+
+  const top = scored[0];
+  if (top.ratio === 0) return { excerpt, source: "THE MODEL'S OWN PROSE (0.00 against every cell)" };
+  return { excerpt, source: `${top.fact}.${top.field} ${top.ratio.toFixed(2)}` };
+}
+
 function measureRendering(sj, out) {
   const byId = new Map((sj.facts || []).map((f) => [f.id, f]));
   const rows = [];
@@ -208,10 +270,34 @@ function falsify() {
     prodRows.push({ id, ratio: stemOverlap(c, b.text).ratio });
   }
 
+  // ── THE ATTRIBUTION CONTROL, ADDED 2026-09-13 ──────────────
+  // `attributeLiteral` is a new instrument and this repo has shipped three card
+  // checks that could not fail. So it is pointed at a literal that IS there, one
+  // that is NOT, and a prose whose chunk count cannot be mapped - and it has to
+  // come back right, absent, and honest-about-not-knowing, in that order.
+  const attrFact = fixSj.facts.find((f) => f.daily_seed && f.meaning_seed);
+  // The literal sits 10 characters in, exactly as `excerpt()` builds it, so the
+  // control exercises the same slicing the real path does.
+  const marker = flat(attrFact.daily_seed).slice(0, 55);
+  const transcribed = attributeLiteral(`/x/ at "${marker}"`, flat(attrFact.daily_seed), fixSj.facts);
+  const absent = attributeLiteral('/x/ at "kucing itu tidur di atas kursi kayu sepanjang sore"',
+    flat(attrFact.daily_seed), fixSj.facts);
+  const ownProse = attributeLiteral(
+    '/x/ at "xx kucing kelabu tidur nyenyak sepanjang sore di beranda kayu"',
+    'Kalimat pembuka. Kucing kelabu tidur nyenyak sepanjang sore di beranda kayu.', fixSj.facts);
+
   console.log('INSTRUMENT CHECKS');
   console.log(`  a cell against itself      ${identical.toFixed(2)}   (expect 1.00)`);
   console.log(`  a cell against an unrelated paragraph  ${unrelated.toFixed(2)}   (expect < 0.20)`);
-  const ok = identical === 1 && unrelated < 0.2;
+  console.log('  attribution, a transcribed seed         ->', transcribed.source);
+  console.log('  attribution, a literal not in the prose ->', absent.source);
+  console.log("  attribution, the model's own sentence   ->", ownProse.source);
+  const attrOk = transcribed.source === `${attrFact.id}.daily_seed 1.00`
+    && absent.source === 'not found in this attempt'
+    && ownProse.source.startsWith("THE MODEL'S OWN PROSE");
+  console.log(`  -> attribution ${attrOk ? 'DISCRIMINATES' : 'IS BLIND; refusing to report literals'}`);
+
+  const ok = identical === 1 && unrelated < 0.2 && attrOk;
   console.log(`  -> the instrument ${ok ? 'DISCRIMINATES' : 'IS BLIND; refusing to report numbers'}`);
   if (prodRows.length) {
     console.log('  the Y-1 fixture under THIS instrument (not hug.mjs):');
@@ -289,7 +375,10 @@ for (const row of rows) {
     // The same options qa-pair-renders.mjs uses, and for its reasons: the spend
     // guard would refuse this batch INTO the floor and report a floor rate for a
     // system that never rendered.
-    out = await renderReading(row.sj, { dedupeInFlight: false, spendGuards: false, captureProse: false });
+    // `captureProse` ON since 2026-09-13: a rejecting literal without the prose
+    // it landed in is a check name, and the prose is gone once the run ends. It
+    // changes nothing that is rendered or gated - only what is recorded.
+    out = await renderReading(row.sj, { dedupeInFlight: false, spendGuards: false, captureProse: true });
   } catch (e) {
     console.log(`  ${row.pair}: THREW ${e.message}`);
     continue;
@@ -324,6 +413,13 @@ for (const row of rows) {
     attempts: (out.attempts || []).length,
     rejected: (out.attempts || []).flatMap((a) => (a.stage6 || [])),
     flagged: (out.findings || []).filter((f) => f.severity === 'flag').map((f) => f.check),
+    // Z-close section 3: the floor rate that R2 is meant to move is the one on
+    // pairs the prompt MANDATES the reframe for, so the denominator has to be
+    // recorded per pair rather than reconstructed afterwards.
+    reframe: (row.sj.safety_flags || []).includes('p2_reframe_required'),
+    p2: row.sj.facts.find((f) => f.id === 'p2_day_pair')?.provenance?.variant ?? null,
+    literals: (out.attempts || []).flatMap((a) => (a.stage6_detail || [])
+      .map((d) => ({ check: d.check, ...attributeLiteral(d.message, a.prose, row.sj.facts) }))),
   });
   process.stdout.write(floored ? 'F' : '.');
 }
@@ -389,6 +485,35 @@ say('## Stage 6 findings by check (rejections across all attempts)');
 const sortedRejects = Object.entries(rejects).sort((a, b) => b[1] - a[1]);
 if (!sortedRejects.length) say('  none');
 for (const [k, v] of sortedRejects) say(`  ${k.padEnd(34)} ${v}`);
+
+say();
+say('## FLOOR RATE, WITH FIXED DENOMINATORS (Z-close section 3)');
+say('   the second row is the number R2 is meant to move: pairs the compat prompt');
+say('   MANDATES the p2_reframe move for (clash / harm / punishment)');
+const reframePairs = perPair.filter((p) => p.reframe);
+const otherPairs = perPair.filter((p) => !p.reframe);
+const rate = (xs) => (xs.length ? `${xs.filter((p) => p.floored).length}/${xs.length}` : '0/0');
+say(`  overall                       ${rate(perPair)}`);
+say(`  pairs carrying p2_reframe     ${rate(reframePairs)}   [${reframePairs.map((p) => `${p.pair}:${p.p2}`).join(' ') || 'none in sample'}]`);
+say(`  pairs without it              ${rate(otherPairs)}`);
+
+say();
+say('## REJECTING LITERALS, and whether the model wrote them or transcribed them');
+say('   the source column is the (fact, seed field) whose text shares the most');
+say('   distinctive stems with the SENTENCE that carried the literal, by the same');
+say('   stemOverlap the gate uses. It is a CONTENT match, not a positional one:');
+say('   the model writes one block as two paragraphs, so a prose chunk index is');
+say('   not a block index (probed 2026-09-13, 8 chunks against 6 served blocks).');
+const allLiterals = perPair.flatMap((p) => p.literals.map((l) => ({ ...l, pair: p.pair })));
+if (!allLiterals.length) say('  none: nothing rejected in this draw');
+for (const check of [...new Set(allLiterals.map((l) => l.check))].sort()) {
+  const mine = allLiterals.filter((l) => l.check === check);
+  say(`  ${check}  (${mine.length})`);
+  for (const l of mine) {
+    say(`      ${l.pair.padEnd(12)} ${l.source}`);
+    say(`          "${l.excerpt ?? '(no literal)'}"`);
+  }
+}
 
 say();
 say('## per pair: what happened, and why');

@@ -52,7 +52,11 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // it (lib/render/pairOpening.js). No predicate here changed; what the gate is
   // handed did, so the served text's verdict can differ for the same model
   // output - which is exactly what this constant answers for.
-  assert.equal(STAGE6_VERSION, '1.24.0');
+  // 1.25.0: `style.hedge_construction` is exempt for `kind === 'pair'` (Reyner,
+  // R2 / R2-SCOPE, 2026-09-13). ONE accept-changing edit and it LOOSENS: the
+  // shape the compat prompt mandates stops being rejected in compat readings,
+  // and stays rejected in mirror ones.
+  assert.equal(STAGE6_VERSION, '1.25.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
@@ -671,4 +675,113 @@ test('THE MIRROR SEES THE SAME CARVE-OUT, and that is intended', () => {
     .filter((f) => f.check === 'style.tension_collapse').length, 1);
   assert.equal(styleGuard(negated, renderedText(negated), 'gemini', mirror)
     .filter((f) => f.check === 'style.tension_collapse').length, 0);
+});
+
+// ============================================================
+// style.hedge_construction, EXEMPT FOR PAIRS ONLY
+// ============================================================
+// Ruled by Reyner 2026-09-13 (R2 and R2-SCOPE, verbatim in
+// `lib/validate/blocklist.json#style._hedge_construction_pair` and in
+// `docs/prompts/Z-close-2026-09-13.md`): `bukan X, melainkan Y` is ordinary
+// precise Indonesian contrast, not a hedge, and the reason clash pairs floor is
+// the validator rather than the sentence.
+//
+// THE CONFLICT THIS CLOSES IS BETWEEN TWO RULED THINGS. The compat prompt
+// MANDATES the p2_reframe move - a clash is a map, not a verdict - and the most
+// natural Indonesian for it is the shape the 2026-08-06 gallery ruling banned
+// on the mirror. So the ban is scoped by reading kind, not lifted: the mirror
+// keeps it, because the AI-copy trope it was written for is a single-person
+// failure.
+//
+// THE RED THAT PRECEDED IT: the two `fires` literals below were run against the
+// 1.24.0 gate and both rejected. The run is in the commit message.
+// ============================================================
+
+// The literals, taken off the walk artifact rather than off the prompt's
+// summary of it, which matters because the two disagree:
+//
+//  - SERVED_2X6 is what 2x6 actually served
+//    (`docs/qa/2026-09-13-compat-three-pair-walk-v2.md:171`). It carries no
+//    `tapi` and no `melainkan`, so it NEVER tripped this check and the
+//    exemption is not what saves it. It is asserted anyway, and asserted to
+//    pass on the MIRROR too, so nobody later reads the served 2x6 text as
+//    evidence for or against the exemption.
+//  - Y1_FIRES is the Y-1 floored draw's literal (`:219`, `:220`, `:248`).
+//  - CLASH_2X6_FIRES is 2x6's REJECTED attempt (`:162`) - the one the prompt's
+//    (a) confused with the served sentence above.
+//
+// Each `_FIRES` string is the artifact's recorded excerpt verbatim up to where
+// the 40-character window cuts, then completed to a sentence. The recorded part
+// is the part the regex matched, so the completion cannot change the verdict.
+const SERVED_2X6 = 'Kursi pasangan kalian saling berbenturan, yang menandakan titik tuntutan kesadaran ekstra, bukan vonis ketidakcocokan.';
+const Y1_FIRES = 'Ini bukan penentu kegagalan, melainkan tanda bahwa hubungan ini menuntut kesadaran ekstra.';
+const CLASH_2X6_FIRES = 'Benturan ini bukan vonis ketidakcocokan, melainkan titik yang menuntut kesadaran ekstra.';
+
+const hedge = (rendering, sj) => styleGuard(rendering, renderedText(rendering), 'gemini', sj)
+  .filter((f) => f.check === 'style.hedge_construction');
+
+test('THE REFRAME SHAPE PASSES IN A PAIR P2 BLOCK, which is where the prompt asks for it', () => {
+  const sj = buildPairSemantic(A, HARD_SEAT);
+  assert.ok(sj.safety_flags.includes('p2_reframe_required'),
+    'precondition: this pair is one the prompt MANDATES the reframe for');
+
+  for (const literal of [SERVED_2X6, Y1_FIRES, CLASH_2X6_FIRES]) {
+    const rendered = into(renderingFor(sj), 'p2_day_pair', literal);
+    assert.deepEqual(hedge(rendered, sj), [], `pair P2: ${literal}`);
+
+    // And through the real door, not just the category function: the finding
+    // must be absent from what the gate actually returns.
+    const gate = validateRendering(rendered, sj, { provider: 'gemini' });
+    assert.equal(codes(gate.findings).includes('style.hedge_construction'), false,
+      `validateRendering, pair: ${literal}`);
+  }
+});
+
+test('THE MIRROR STILL REJECTS THE SAME TWO SENTENCES, which is the whole scope', () => {
+  const mirror = buildSemanticJson(A);
+  assert.equal(mirror.kind, 'mirror');
+
+  for (const literal of [Y1_FIRES, CLASH_2X6_FIRES]) {
+    const rendered = into(renderingFor(mirror), mirror.facts[0].id, literal);
+    assert.equal(hedge(rendered, mirror).length, 1, `mirror rejects: ${literal}`);
+
+    // Byte-identical to the call that passes no semanticJson at all. This is the
+    // assertion that catches the exemption leaking onto the mirror - a `kind`
+    // check that defaulted the wrong way would show up here and nowhere else.
+    const text = renderedText(rendered);
+    assert.deepEqual(
+      styleGuard(rendered, text, 'gemini', mirror),
+      styleGuard(rendered, text, 'gemini'),
+    );
+  }
+
+  // The served 2x6 sentence has no `tapi`/`melainkan`, so it passes on the
+  // mirror too. Asserted so the three literals are not read as one class.
+  const served = into(renderingFor(mirror), mirror.facts[0].id, SERVED_2X6);
+  assert.deepEqual(hedge(served, mirror), []);
+});
+
+test('THE CARVE-OUT AND THE PATTERN ARE UNTOUCHED, only where it is scanned moved', () => {
+  // R2-SCOPE changes the HAYSTACK for one reading kind. It does not edit the
+  // regex and it does not edit the `bukan berarti` carve-out, and a later commit
+  // that quietly did either would pass every assertion above.
+  const [entry, ...rest] = BLOCKLIST.style.hedge_construction;
+  assert.deepEqual(rest, [], 'still exactly one pattern');
+  assert.equal(entry.pattern, '\\bbukan\\b(?!\\s+berarti\\b)[^.!?]{0,140}?\\b(tapi|melainkan)\\b');
+
+  // `bukan berarti ..., melainkan ...` is rule 21's resolve-in-the-same-breath
+  // move and it passed on the mirror before this commit. It still does.
+  const mirror = buildSemanticJson(A);
+  const carved = into(renderingFor(mirror), mirror.facts[0].id,
+    'Lemah di sini bukan berarti tidak mampu, melainkan sumber tenagamu ada di luar dirimu.');
+  assert.deepEqual(hedge(carved, mirror), []);
+});
+
+test('THE EXEMPTION IS RULED DATA, read from blocklist.json and not hardcoded', () => {
+  // Same discipline as the tension_collapse scope one screen up: the accept
+  // decision lives in the data file Reyner rules, so a silent edit to it cannot
+  // land without landing here, next to the STAGE6_VERSION assertion.
+  assert.equal(BLOCKLIST.style._pair_scope.hedge_construction.exempt_for_pair, true);
+  assert.ok(BLOCKLIST.style._hedge_construction_pair.includes('PAIR-ONLY'),
+    'R2-SCOPE is recorded verbatim beside the rule it produced');
 });
