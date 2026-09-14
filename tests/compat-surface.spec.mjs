@@ -17,7 +17,7 @@ import path from 'node:path';
 
 import { PASANGAN_COPY, SITE_COPY, UPCOMING_COPY, COPY_BANKS } from '../lib/site/copy.js';
 import { UNRULED_SOURCES } from '../lib/site/unruledScan.js';
-import { SENTINEL } from '../scripts/check-unruled-copy.mjs';
+import { SENTINEL, scanUnruled } from '../scripts/check-unruled-copy.mjs';
 import { COMPAT_ROUTE, compatPairRoute } from '../lib/site/routes.js';
 import { pairUrl, readingUrl } from '../lib/site/baseUrl.js';
 import { priceFor, SELLABLE_SKUS } from '../lib/pricing.js';
@@ -111,6 +111,13 @@ const PASANGAN_SLOTS = [
   'notfound_title',
   // Added by Y-1, 2026-09-08: sales are CLOSED and the page has to say so.
   'sales_closed_title', 'sales_closed_body',
+  // ── ADDED BY Y-3, 2026-09-14, AND UNRULED ON PURPOSE ──
+  // The compat PDF's four document slots plus the report's download button. They
+  // are in this list because the SURFACE RENDERS THEM - a slot that exists but is
+  // not listed is exactly the orphan the deepEqual below catches. Whether they are
+  // RULED is a different question and lives in the next test.
+  'pdf_cover_sub', 'pdf_chart_a_heading', 'pdf_chart_b_heading', 'pdf_facts_heading',
+  'report_download_pdf',
 ];
 
 test('every slot the surface renders EXISTS', () => {
@@ -149,7 +156,17 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
     ...Object.entries(SITE_COPY.privasi).filter(([k]) => k.startsWith('privasi_')),
   ].filter(([, v]) => typeof v === 'string' && v.includes(SENTINEL));
 
+  // ── IT OPENED FOR ONE TRANCHE AND IS CLOSED AGAIN (2026-09-14) ──
+  // Y-3's five PDF slots shipped as sentinels on Reyner's instruction and this test
+  // named them exactly, so it never became "some holes are allowed". Amendment i
+  // ruled all five verbatim on 2026-09-14 and the applying commit substituted them,
+  // so the exception is DELETED rather than left as an empty array nobody removes.
   assert.deepEqual(holes.map(([k]) => k), [], 'a compat slot is still a sentinel');
+  // AND THE SCANNER AGREES, which is not implied by the line above: that one reads
+  // the banks directly, this one asks the instrument the production gate uses.
+  // `compat_invoice_desc` is the precedent for a hole everyone believed was guarded.
+  assert.deepEqual(scanUnruled(PASANGAN_COPY, 'PASANGAN_COPY'), [],
+    'the unruled-copy scanner still sees a hole the bank does not');
   // 22 from X-b3, plus the two sales-closed strings Y-1 added, MINUS `paid_title`,
   // PLUS the four new section eyebrows ruled 2026-09-09, MINUS `link_keep` which
   // moved to CHROME_COPY with amendment g: 22 + 2 - 1 + 4 - 1 = 26.
@@ -159,7 +176,12 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
   // list - and this number is the tripwire on the list itself. It went red on
   // the 2026-09-09 amendment and forced the count to be accounted for, which is
   // the whole job. Whoever changes it should be able to write the arithmetic.
-  assert.equal(Object.keys(PASANGAN_COPY).length, 26);
+  // 26, PLUS the five Y-3 PDF slots = 31. The arithmetic is the tripwire and the
+  // comment above says whoever changes it should be able to write it: 22 (X-b3)
+  // + 2 (sales closed) - 1 (paid_title) + 4 (section eyebrows) - 1 (link_keep,
+  // moved to CHROME_COPY) + 5 (Y-3: four document slots and the download button)
+  // = 31.
+  assert.equal(Object.keys(PASANGAN_COPY).length, 31);
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {
@@ -331,13 +353,27 @@ test('THE REPORT DOES NOT BRANCH ON served_from', () => {
     'the report must not branch its RENDER on floor; the name exists, the difference must not');
 });
 
-test('NO CARD, NO PDF, NO SHARE ON THE COMPAT REPORT', () => {
-  // Out of scope for v1 and not an oversight: a compat card would put two
-  // people's archetypes on a shareable image, and person B consented to nothing.
+test('NO CARD AND NO SHARE ON THE COMPAT REPORT - and the PDF is now allowed', () => {
+  // ── `pdf` LEFT THIS LIST ON 2026-09-14, AND THE OTHERS DID NOT ──
+  // The list was one sentence covering three things, and Y-3 splits it, because the
+  // three were never forbidden for the same reason.
+  //
+  // The CARD and the SHARE stay out for the reason the old comment gives and it is
+  // person B's: a compat card puts two people's archetypes on a SHAREABLE image and
+  // B consented to nothing. That is unchanged and is still asserted.
+  //
+  // The PDF is the opposite object. Reyner ruled it IN on 2026-09-14 (Y-3 R1: it is
+  // included in the compat price, no new SKU), it is private, it sits behind the
+  // bearer and the paywall, and it is a document the buyer keeps rather than
+  // something she broadcasts. Grouping it with the card was a v1 scope line, not a
+  // consent one.
   const src = code('components/PasanganReport.jsx');
-  for (const forbidden of ['CardA', 'CardB', 'captureCard', 'Sharecard', '/api/deliver', 'pdf']) {
+  for (const forbidden of ['CardA', 'CardB', 'captureCard', 'Sharecard', '/api/deliver']) {
     assert.equal(src.includes(forbidden), false, `${forbidden} must not be on the compat report`);
   }
+  // And the PDF is there, on the pair's own route rather than the mirror's delivery
+  // endpoint - which is what `/api/deliver` above still forbids.
+  assert.match(src, /\/api\/pair\/\$\{id\}\/pdf/u);
 });
 
 test('THE PROSE RENDERER IS SHARED WITH THE MIRROR, not forked', () => {

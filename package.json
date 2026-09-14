@@ -24,6 +24,7 @@
     "test:punishment": "node --test tests/punishment.spec.mjs",
     "test:palaces": "node --test tests/palaces.spec.mjs",
     "test:pdf-appendix": "node --conditions=react-server --test tests/pdf-appendix.spec.mjs",
+    "test:pdf-pair-appendix": "node --conditions=react-server --test tests/pdf-pair-appendix.spec.mjs",
     "test:pdf-han-font": "node --test tests/pdf-han-font.spec.mjs",
     "test:badges": "node --test tests/badge-anchors.spec.mjs",
     "test:engine-copy": "node --test tests/engine-copy-language.spec.mjs",
@@ -52,6 +53,7 @@
     "test:pair-report-render": "node --import ./scripts/jsx-register.mjs --test tests/pair-report-render.spec.mjs",
     "test:form-controls": "node --test tests/form-controls.spec.mjs",
     "test:pair-reading-route": "node --conditions=react-server --test tests/pair-reading-route.spec.mjs",
+    "test:pair-pdf-route": "node --conditions=react-server --test tests/pair-pdf-route.spec.mjs",
     "test:stage3": "node --test tests/stage3-facts.spec.mjs",
     "test:stage3-hierarchy": "node --test tests/stage3-hierarchy.spec.mjs",
     "test:stage3-contract": "node --test tests/stage3-contract.spec.mjs",
@@ -110,6 +112,7 @@
     "qa:depth-pairs": "node --conditions=react-server scripts/qa-depth-pairs.mjs",
     "build:pdf": "node scripts/build-pdf.mjs",
     "test:pdf-document": "node --test tests/pdf-document.spec.mjs",
+    "test:pdf-pair-document": "node --test tests/pdf-pair-document.spec.mjs",
     "test:prose-handoff": "node --import ./scripts/jsx-register.mjs --test tests/prose-handoff.spec.mjs"
   },
   "dependencies": {

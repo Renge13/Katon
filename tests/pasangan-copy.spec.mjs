@@ -117,6 +117,16 @@ function worksheet() {
     const m = SECTION_ROW.exec(line);
     if (m) raw.push({ bank: 'PASANGAN_COPY', slot: m[1], value: m[2] });
   }
+  // ── AMENDMENT i's TABLE, READ FROM 2026-09-14 ──────────────
+  // It landed in the rulings commit UNPARSED, deliberately: that is what let the
+  // file go on its own and GREEN, with no red commit sitting inside the documented
+  // ruled-but-not-applied window. THIS LOOP is what turns byte-identity on for
+  // those five, and it is in the APPLYING commit, where the strings land. Same
+  // three-column shape as the preamble table, so `BANK_ROW` reads it unchanged.
+  for (const line of section('The compat PDF').split(/\r?\n/u)) {
+    const m = BANK_ROW.exec(line);
+    if (m) raw.push({ bank: m[1], slot: m[2], value: m[3] });
+  }
 
   const rows = [];
   const seen = new Map();
@@ -149,10 +159,12 @@ function status() {
   return m[1];
 }
 
-test('THE WORKSHEET IS 31 RULED SLOTS AND ONE DROPPED ONE', () => {
+test('THE WORKSHEET IS 36 RULED SLOTS AND ONE DROPPED ONE', () => {
   const rows = worksheet();
-  assert.equal(rows.length, 31, 'the two ruled tables carry 31 slots between them');
-  assert.equal(new Set(rows.map((r) => `${r.bank}.${r.slot}`)).size, 31, 'and no slot twice');
+  // 31 + amendment i's 5 = 36, and the arithmetic is the tripwire on the parser:
+  // if the compat-PDF section ever stops being read, this is what says so.
+  assert.equal(rows.length, 36, 'the three ruled tables carry 36 slots between them');
+  assert.equal(new Set(rows.map((r) => `${r.bank}.${r.slot}`)).size, 36, 'and no slot twice');
 
   const byBank = {};
   for (const r of rows) byBank[r.bank] = (byBank[r.bank] || 0) + 1;
@@ -160,7 +172,7 @@ test('THE WORKSHEET IS 31 RULED SLOTS AND ONE DROPPED ONE', () => {
   // and the total does not. A slot that changes banks must show up here, because
   // "moved, not aliased" is the whole point of the amendment.
   assert.deepEqual(byBank,
-    { SITE_COPY: 4, PASANGAN_COPY: 24, 'SITE_COPY.privasi': 2, CHROME_COPY: 1 });
+    { SITE_COPY: 4, PASANGAN_COPY: 29, 'SITE_COPY.privasi': 2, CHROME_COPY: 1 });
 
   // THE DROP IS AN ASSERTION, NOT A GAP. `paid_title` is recorded as deleted, so
   // the bank must not still carry it - otherwise the row reads as history while
@@ -232,6 +244,13 @@ test('NOT ONE SENTINEL SURVIVES IN EITHER BANK', () => {
   // and said in its own comment that it was the record of the surface shipping
   // with named holes and that this is the assertion to invert when the worksheet
   // lands. It has landed.
+  //
+  // ── IT OPENED AGAIN FOR ONE TRANCHE AND IS CLOSED AGAIN (2026-09-14) ──
+  // Prompt Y-3's five PDF slots shipped as sentinels on Reyner's instruction, and
+  // this assertion named those five exactly rather than becoming "some sentinels
+  // are fine". Amendment i ruled them on 2026-09-14, the applying commit
+  // substituted them, and the exception list is DELETED rather than emptied - a
+  // named exception nobody needs is the next stale guard.
   const seen = JSON.stringify({ PASANGAN_COPY, home: SITE_COPY, privasi: SITE_COPY.privasi });
   assert.equal(seen.includes(SENTINEL), false, 'a PENDING() sentinel survives in a compat bank');
 });

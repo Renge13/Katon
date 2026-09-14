@@ -283,21 +283,46 @@ test('EVERY BLOCK CARRIES A SECTION LABEL AND A GLOSSARY NAME, AND NO MODEL HEAD
   } finally { ui.unmount(); restore(); }
 });
 
-test('FLOOR RENDERS BYTE-IDENTICALLY TO A RENDER', async () => {
+test('FLOOR RENDERS IDENTICALLY TO A RENDER, EXCEPT THE PDF CONTROL', async () => {
   // Rule 15: the floor is Reyner's own ruled glossary prose, not a degraded
   // mode. The two are the same component with the same props, so the markup is
   // the comparison - a marker, a class, a badge would all show up here.
+  //
+  // ── ONE EXCEPTION SINCE 2026-09-14 (Y-3 commit 6), AND IT IS NOT A MARK ──
+  // This assertion was `byte-identical` and it is now `identical except one
+  // element`, which is a real loosening and so has to carry its reason. The PDF
+  // route answers 409 on a floored pair - rule 16 keeps floors out of
+  // `render_cache`, and the document is only ever the reading that passed the gate.
+  // So the choice is a hidden control or a broken one, and NEITHER of them is
+  // "telling her she got something lesser": the floor's PROSE, headings, labels,
+  // eyebrows and structure are still asserted equal below, which is what rule 15 is
+  // about. A badge, a class or a word would still fail here.
+  //
+  // The narrowing is surgical on purpose: the ONLY difference permitted is the
+  // anchor to `/pdf`. Anything else in the markup diverging still fails.
   const r1 = stub({ pair: { status: 'paid' }, reading: READING('render') });
   const a = await mount();
   const htmlA = a.host.innerHTML;
+  const pdfLinksA = a.host.querySelectorAll('a[href*="/pdf"]').length;
   a.unmount(); r1();
 
   const r2 = stub({ pair: { status: 'paid' }, reading: READING('floor') });
   const b = await mount();
   const htmlB = b.host.innerHTML;
+  const pdfLinksB = b.host.querySelectorAll('a[href*="/pdf"]').length;
   b.unmount(); r2();
 
-  assert.equal(htmlA, htmlB, 'a floor-served report must be indistinguishable from a rendered one');
+  assert.equal(pdfLinksA, 1, 'precondition: the rendered view has exactly one PDF link');
+  assert.equal(pdfLinksB, 0, 'precondition: the floor view has none');
+
+  // Cut the PDF link's own element out of the rendered markup, then require the two
+  // to be equal. `[^<]*` and one closing tag: the control is a single anchor with a
+  // flat body, and a pattern that could swallow a sibling would hide the very
+  // divergence this exists to catch.
+  const withoutPdf = htmlA.replace(/<div[^>]*><a href="\/api\/pair\/[^"]*\/pdf"[\s\S]*?<\/a><\/div>/u, '');
+  assert.notEqual(withoutPdf, htmlA, 'the PDF control was not found to remove - rewrite this pattern');
+  assert.equal(withoutPdf, htmlB,
+    'a floor-served report must be indistinguishable from a rendered one apart from the PDF link');
 });
 
 // ── THE BIRTH-DATA RULE, NARROWED AND PINNED ───────────────
@@ -493,4 +518,57 @@ test('THE DUPLICATE SUPPRESSION IS GONE FROM labelFor', () => {
     .replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
   assert.equal(src.includes('name === eyebrow'), false,
     'the duplicate suppression outlived its cause (amendment f gave P3 different words)');
+});
+
+// ── THE PDF BUTTON (prompt Y-3 commit 6) ───────────────────
+
+test('THE PDF LINK IS ON `ready` AND ABSENT FROM `floor`, and carries the bearer', async () => {
+  // The ONE place the two views differ, and not as a mark on the floor: the route
+  // answers 409 on a floored pair, because rule 16 keeps floors out of
+  // `render_cache` and the document is only ever the reading that passed the gate.
+  // Hiding a control that cannot work beats showing one that fails; a reload
+  // re-renders and brings it back.
+  const ready = stub({ pair: { status: 'paid' }, reading: READING('render') });
+  const onReady = await mount();
+  try {
+    const link = onReady.host.querySelector('a[href*="/pdf"]');
+    assert.ok(link, 'the ready view has no PDF link');
+    // THE BEARER IS THE `id` IN THE HREF. There is no second token, which is what
+    // makes a plain anchor enough - and what this asserts is that the link is
+    // per-pair rather than a bare route anyone could guess.
+    assert.equal(link.getAttribute('href'), '/api/pair/p1/pdf');
+    assert.ok(onReady.text().includes(PASANGAN_COPY.report_download_pdf),
+      'the link renders its ruled label slot');
+  } finally { onReady.unmount(); ready(); }
+
+  const floor = stub({ pair: { status: 'paid' }, reading: READING('floor') });
+  const onFloor = await mount();
+  try {
+    // Floor renders the report identically in every other respect - asserted, so
+    // this test cannot pass by the floor view being broken instead of the link
+    // being hidden.
+    assert.ok(onFloor.text().includes(PASANGAN_COPY.page_title), 'the floor view did not render');
+    assert.equal(onFloor.host.querySelector('a[href*="/pdf"]'), null,
+      'the floor view offers a PDF the route will refuse with 409');
+    assert.equal(onFloor.text().includes(PASANGAN_COPY.report_download_pdf), false);
+  } finally { onFloor.unmount(); floor(); }
+});
+
+test('NO NON-READY VIEW OFFERS THE PDF', async () => {
+  // Every other state, as a set rather than a list to keep in step: an unpaid
+  // caller seeing a download link would be the paywall leaking a control, and the
+  // rendering and pending states would offer a document that does not exist yet.
+  const cases = [
+    ['not_found', { pair: { error: 'not_found' }, pairStatus: 404 }],
+    ['unpaid', { pair: { status: 'unpaid' } }],
+    ['rendering', { pair: { status: 'paid' }, reading: null }],
+    ['error', { pair: null, pairThrows: true }],
+  ];
+  for (const [name, fixture] of cases) {
+    const restore = stub(fixture);
+    const ui = await mount();
+    try {
+      assert.equal(ui.host.querySelector('a[href*="/pdf"]'), null, `${name} offers the PDF`);
+    } finally { ui.unmount(); restore(); }
+  }
 });

@@ -225,7 +225,34 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
-## THE CURRENT WORK, 2026-09-09 - PROMPT Y-2, SITE CHROME AND THE COMPAT FLOW
+## THE CURRENT WORK, 2026-09-14 - PROMPT Y-3, THE COMPAT PDF
+
+**`docs/prompts/Y-pdf-3.md`, RELEASED 2026-09-14.** The last content precondition before promotion
+(Addendum 2 item 8). Reyner's two rulings are in PROGRESS under `## RULED 2026-09-14`: the PDF is
+INCLUDED in the compat price, and its content is "as complete as possible", bounded only by the
+locked rules.
+
+Commits 0-3 and 5-7 are landed on `feat/compat-pdf`. **COMMIT 4 IS OPEN AND IT IS REYNER'S.**
+
+**WHAT IS OWED, AND BY WHOM**
+
+1. **REYNER RULES FIVE COPY SLOTS** in `docs/content/pasangan-copy-rulings.md` (amendment i):
+   `pdf_cover_sub`, `pdf_chart_a_heading`, `pdf_chart_b_heading`, `pdf_facts_heading`,
+   `report_download_pdf`. Cowork's swept proposals are recorded on each slot in
+   `lib/site/copy.js` for him to amend in place. **Until he does, a PRODUCTION build refuses**
+   (`check-unruled-copy --strict`, exit 1) and a preview build passes, so the document can be
+   walked and read on a phone first - which is how he rules copy.
+2. **REYNER READS A Y-1 PDF ON HIS PHONE** before the merge. That read is the founder read the
+   gate cannot give: Stage 6 validated the PROSE, and nothing in the suite says the DOCUMENT is
+   worth keeping.
+3. **A SIXTH SLOT IS A CANDIDATE, NOT A HOLE.** The mirror's appendix prints
+   "N istilah, semuanya dari baganmu sendiri"; that is false of a legend built from two charts, so
+   the compat appendix prints NO sub-line rather than inventing a second sentence. If he wants one,
+   it is a slot.
+
+The chain after this: U (Render) -> V (DOKU) -> `?dari` -> real-money walk -> promotion.
+
+## THE PREVIOUS WORK, 2026-09-09 - PROMPT Y-2, SITE CHROME AND THE COMPAT FLOW
 
 **`docs/prompts/Y-ui-2.md`, RELEASED 2026-09-08, plus both addenda.** Reyner's brief: "UX,
 navigations, must be professional, doesn't need to be beautiful, but makes sense and modern." It adds

@@ -45,6 +45,41 @@ function PageUrl({ id, withCopy = false }) {
 }
 
 /**
+ * The compat PDF, as a link.
+ *
+ * ── A PLAIN ANCHOR, NOT A FETCH ────────────────────────────
+ * The route answers `Content-Disposition: attachment`, so the browser does the
+ * download and the page does not have to hold bytes, show a spinner, or decide what
+ * to do with a 429. The `id` in the href IS the bearer the page already holds -
+ * there is no second token and no header to set, which is what makes an anchor
+ * enough.
+ *
+ * ── THE SAME TREATMENT AS `Salin tautan`, DELIBERATELY ─────
+ * Y-3: no new visual language. The style below is `CopyLink`'s button, and the two
+ * sit in one row. The label is a RULED SLOT and draws a sentinel until Reyner rules
+ * it, which a production build refuses - so this cannot ship with Cowork's words in
+ * it by anyone forgetting.
+ */
+function DownloadPdf({ id }) {
+  return (
+    <div style={{ marginTop: 10 }}>
+      <a
+        href={`/api/pair/${id}/pdf`}
+        style={{
+          background: 'none', border: '1px solid var(--border)', borderRadius: 999,
+          padding: '10px 14px', cursor: 'pointer', whiteSpace: 'nowrap',
+          fontFamily: 'var(--font-sans)', fontSize: 12.5, color: 'var(--tinta-soft)',
+          display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
+        }}
+      >
+        <Icon.lock size={11} />
+        {PASANGAN_COPY.report_download_pdf}
+      </a>
+    </div>
+  );
+}
+
+/**
  * Back to the front door, from any state. A report is not a dead end.
  *
  * A PLAIN ANCHOR, NOT `next/link`, and there are two reasons that point the same
@@ -572,6 +607,20 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
               <span>{CHROME_COPY.link_keep}</span>
             </div>
             <PageUrl id={id} withCopy />
+            {/* ── THE PDF, ON `ready` ONLY AND NOT ON `floor` ──────────
+                The two views render identically everywhere else, by ruling: the
+                floor is Reyner's own glossary prose and marking it would tell a
+                reader she got something lesser. This is the ONE place they differ,
+                and not as a mark - `GET /api/pair/[id]/pdf` answers 409 on a
+                floored pair, because rule 16 keeps floors out of `render_cache`
+                and the document is only ever the reading that passed the gate.
+
+                SO THE CHOICE IS BETWEEN A HIDDEN BUTTON AND A BROKEN ONE. Hidden,
+                and a reload re-renders and brings it back. Cowork's call under rule
+                9: a reader cannot see the floor/ready distinction, so this is a
+                technicality rather than a UX decision. If Reyner would rather show
+                a disabled control with a sentence, that sentence is his. */}
+            {view === 'ready' && <DownloadPdf id={id} />}
           </Reveal>
         </div>
 

@@ -17,6 +17,7 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { readFileSync } from 'node:fs';
 import { renderToBuffer } from '@react-pdf/renderer';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
@@ -37,7 +38,7 @@ import {
 } from '../lib/pdf/fonts.js';
 import {
   roundTrip, drawnCodePoints, embeddedFonts, latinText, pageTexts, pageObjectOrder,
-  namedDestinationPages,
+  namedDestinationPages, textBoxes, collisions,
 } from '../lib/pdf/inspect.js';
 
 const CHARTS = {
@@ -509,6 +510,136 @@ test('anchorId is deterministic, collision-free, and safe for a PDF name', () =>
       assert.match(id, /^[A-Za-z0-9_.-]+$/,
         `${id} carries bytes a PDF name string cannot: Shio keys are hanzi and must `
         + 'be escaped, not passed through');
+    }
+  }
+});
+
+// ============================================================
+// THE REFACTOR FIXTURE — the mirror document did not move
+// ============================================================
+// Prompt Y-3 commit 1 turns `buildCompleteEditionPdf` into a thin wrapper over a
+// builder that takes a COMPOSER, so the compat PDF can be a second composer rather
+// than a second pipeline. The whole risk of that refactor is that it changes the
+// mirror document by accident, and no other assertion in this file would notice:
+// they check properties (a heading is present, the last page is the appendix), and
+// a refactor that moved a paragraph or dropped a row satisfies every one of them.
+//
+// So this compares the ARTIFACT, not properties of it. `tests/fixtures/pdf-chart1-
+// pages.json` was captured on the pre-refactor build and is EVIDENCE, not output:
+// regenerate it only for an intended, ruled change to the MIRROR document, never to
+// make this go green. Same rule as `tests/solar-terms.fixture.json`.
+//
+// SHOWN RED FIRST, and the prompt's suggested break did NOT work - which is worth
+// recording more than the break that did. Y-3 said to show it red by changing one
+// style value (`coverTitle.fontSize` 34 -> 33). It stayed GREEN: `pageTexts`
+// extracts the text a page draws and not how it is drawn, so this assertion is blind
+// to typography BY CONSTRUCTION. That is a real limit and it is stated rather than
+// papered over - if the refactor had changed a font, nothing here would say so.
+//
+// A second probe was also inert: dropping the penutup from `readingPage` changed
+// nothing, because the mirror floor's penutup is the empty string
+// (`assembleFallback(semanticJson).penutup === ''`). An assertion that looks like it
+// covers something the fixture does not contain is exactly the shape this repo has
+// paid for, so the miss is named here rather than left for the next reader to find.
+//
+// THE RED THAT COUNTS is a change in the class this actually guards - reader-visible
+// text and pagination. `'Bagan Kelahiran'` -> `'Bagan Kelahiranx'` in document.js
+// fails it with `page 5 text moved`. All three runs are in the commit message.
+test('THE MIRROR DOCUMENT IS BYTE-FOR-BYTE THE SAME DOCUMENT after the refactor', async () => {
+  const FIXTURE = JSON.parse(
+    readFileSync(new URL('./fixtures/pdf-chart1-pages.json', import.meta.url), 'utf8'),
+  );
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  // The fixture records the inputs it was captured with, so a drifting fallback or a
+  // changed version string fails HERE, naming itself, instead of surfacing as a
+  // mystery text diff forty lines down.
+  assert.equal(rendered.prompt_version, FIXTURE._fixture.prompt_version);
+  assert.equal(rendered.stage6_version, FIXTURE._fixture.stage6_version);
+
+  const { buffer, pageMap, report } = await buildCompleteEditionPdf({
+    chart, semanticJson, rendered,
+  });
+
+  // Page texts first and page by page: a whole-array deepEqual on eight pages of
+  // prose prints a diff nobody can read, and the page number is the first thing
+  // anyone debugging this wants.
+  const texts = pageTexts(buffer);
+  assert.equal(texts.length, FIXTURE.pages.length, 'page COUNT moved');
+  for (const [i, expected] of FIXTURE.pages.entries()) {
+    assert.equal(texts[i], expected, `page ${i + 1} text moved`);
+  }
+  // The map and the counts too. A refactor could preserve every glyph and still
+  // resolve a reference to a different page, and `hal. N` lives inside page text -
+  // so this is not implied by the loop above only because the loop would catch it
+  // as an unattributable text diff rather than as what it is.
+  assert.deepEqual(pageMap, FIXTURE.pageMap, 'the page map moved');
+  assert.equal(report.pages, FIXTURE.report.pages);
+  assert.equal(report.appendixStart, FIXTURE.report.appendixStart);
+  assert.equal(report.anchors, FIXTURE.report.anchors);
+  assert.equal(report.referenced, FIXTURE.report.referenced);
+  assert.equal(report.rebuilds, FIXTURE.report.rebuilds, 'the fixed point converged differently');
+});
+
+// ── THE COVER (Reyner, 2026-09-14, ruling 2) ───────────────
+
+test('THE COVER LEADS WITH THE ENGLISH NAME, Indonesian underneath', async () => {
+  // Ruled 2026-09-14 on the compat cover and applied HERE TOO in the same ruling -
+  // "same `coverPage` shape". `name_en` is the bigger title; `name_id` sits under
+  // it, smaller, with the element it always carried.
+  //
+  // THIS MOVES THE MIRROR DOCUMENT, which is why `tests/fixtures/pdf-chart1-
+  // pages.json` is re-pinned in the same commit. It is the first intended change to
+  // that document since the fixture was captured, and the fixture's own header says
+  // regenerate only for exactly this: an intended, ruled change.
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const cover = pageTexts(buffer)[0].split('\n').map((l) => l.trim()).filter(Boolean);
+  const core = semanticJson.core;
+
+  assert.equal(cover[0], core.archetype_name_en, 'the first line is not the English name');
+  assert.equal(cover[1], `${core.archetype_name_id} - ${core.element}`,
+    'the Indonesian name and element are not the line under it');
+  // ORDER, not presence: both were on the cover before, the wrong way round.
+  const page = pageTexts(buffer)[0];
+  assert.ok(page.indexOf(core.archetype_name_en) < page.indexOf(core.archetype_name_id),
+    'the Indonesian name still comes first');
+
+  // THE METADATA TITLE IS UNCHANGED, explicitly ruled. It is what a reader sees in
+  // a viewer tab and in her downloads folder, and it stays Indonesian.
+  assert.ok(buffer.includes(Buffer.from(`Katon - ${core.archetype_name_id}`, 'utf8')),
+    'the metadata title moved with the cover');
+});
+
+// ── NOTHING OVERLAPS (Reyner, 2026-09-14, ruling 3) ────────
+
+test('NO TEXT IS DRAWN ON TOP OF OTHER TEXT, on any page', async () => {
+  // Reyner, reading the Y-1 PDF: the cover title sat on its sub-line and the animal
+  // names were printed over the hanzi on every chart page. Both documents, because
+  // both share these styles.
+  //
+  // ── THE CAUSE WAS ONE INHERITED NUMBER ─────────────────────
+  // `page` sets `fontSize: 11, lineHeight: 1.6`. react-pdf resolves that to an
+  // ABSOLUTE 17.6pt and inherits the number, not the ratio - so every element with a
+  // larger font got a 17.6pt line box regardless of its size. A 34pt cover title had
+  // 4.7pt of room; a 26pt pillar character had 17.4pt. The fix is per-style
+  // `lineHeight`, which is line-height and spacing only, as ruled.
+  //
+  // ── THE INSTRUMENT'S FIRST VERSION WAS BLIND AND SAID CLEAN ──
+  // It read `Td`/`Tm`. react-pdf writes `1 0 0 1 0 <pageHeight> Tm` for every run
+  // and carries position in nested `cm` translations, so every run came back at the
+  // same y and the collision scan skipped every pair as "same baseline". Its control
+  // passed because the control fed SYNTHETIC runs and never exercised the parser.
+  // `textBoxes` walks the CTM stack now, and the control below is the real document.
+  for (const which of Object.keys(CHARTS)) {
+    const { chart, semanticJson, rendered } = fixture(which);
+    const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+    const pages = textBoxes(buffer);
+    assert.ok(pages.some((p) => p.length > 5), `${which}: the parser found no runs to check`);
+    for (const [i, runs] of pages.entries()) {
+      const hits = collisions(runs);
+      assert.deepEqual(hits.map((h) => `"${h.a.text.slice(0, 18)}"(${h.a.size}) over `
+        + `"${h.b.text.slice(0, 18)}"(${h.b.size}) gap ${h.gap}, needs ${h.need}`), [],
+      `${which} page ${i + 1}`);
     }
   }
 });
