@@ -17,6 +17,7 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { readFileSync } from 'node:fs';
 import { renderToBuffer } from '@react-pdf/renderer';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
@@ -511,4 +512,70 @@ test('anchorId is deterministic, collision-free, and safe for a PDF name', () =>
         + 'be escaped, not passed through');
     }
   }
+});
+
+// ============================================================
+// THE REFACTOR FIXTURE — the mirror document did not move
+// ============================================================
+// Prompt Y-3 commit 1 turns `buildCompleteEditionPdf` into a thin wrapper over a
+// builder that takes a COMPOSER, so the compat PDF can be a second composer rather
+// than a second pipeline. The whole risk of that refactor is that it changes the
+// mirror document by accident, and no other assertion in this file would notice:
+// they check properties (a heading is present, the last page is the appendix), and
+// a refactor that moved a paragraph or dropped a row satisfies every one of them.
+//
+// So this compares the ARTIFACT, not properties of it. `tests/fixtures/pdf-chart1-
+// pages.json` was captured on the pre-refactor build and is EVIDENCE, not output:
+// regenerate it only for an intended, ruled change to the MIRROR document, never to
+// make this go green. Same rule as `tests/solar-terms.fixture.json`.
+//
+// SHOWN RED FIRST, and the prompt's suggested break did NOT work - which is worth
+// recording more than the break that did. Y-3 said to show it red by changing one
+// style value (`coverTitle.fontSize` 34 -> 33). It stayed GREEN: `pageTexts`
+// extracts the text a page draws and not how it is drawn, so this assertion is blind
+// to typography BY CONSTRUCTION. That is a real limit and it is stated rather than
+// papered over - if the refactor had changed a font, nothing here would say so.
+//
+// A second probe was also inert: dropping the penutup from `readingPage` changed
+// nothing, because the mirror floor's penutup is the empty string
+// (`assembleFallback(semanticJson).penutup === ''`). An assertion that looks like it
+// covers something the fixture does not contain is exactly the shape this repo has
+// paid for, so the miss is named here rather than left for the next reader to find.
+//
+// THE RED THAT COUNTS is a change in the class this actually guards - reader-visible
+// text and pagination. `'Bagan Kelahiran'` -> `'Bagan Kelahiranx'` in document.js
+// fails it with `page 5 text moved`. All three runs are in the commit message.
+test('THE MIRROR DOCUMENT IS BYTE-FOR-BYTE THE SAME DOCUMENT after the refactor', async () => {
+  const FIXTURE = JSON.parse(
+    readFileSync(new URL('./fixtures/pdf-chart1-pages.json', import.meta.url), 'utf8'),
+  );
+  const { chart, semanticJson, rendered } = fixture('chart 1');
+  // The fixture records the inputs it was captured with, so a drifting fallback or a
+  // changed version string fails HERE, naming itself, instead of surfacing as a
+  // mystery text diff forty lines down.
+  assert.equal(rendered.prompt_version, FIXTURE._fixture.prompt_version);
+  assert.equal(rendered.stage6_version, FIXTURE._fixture.stage6_version);
+
+  const { buffer, pageMap, report } = await buildCompleteEditionPdf({
+    chart, semanticJson, rendered,
+  });
+
+  // Page texts first and page by page: a whole-array deepEqual on eight pages of
+  // prose prints a diff nobody can read, and the page number is the first thing
+  // anyone debugging this wants.
+  const texts = pageTexts(buffer);
+  assert.equal(texts.length, FIXTURE.pages.length, 'page COUNT moved');
+  for (const [i, expected] of FIXTURE.pages.entries()) {
+    assert.equal(texts[i], expected, `page ${i + 1} text moved`);
+  }
+  // The map and the counts too. A refactor could preserve every glyph and still
+  // resolve a reference to a different page, and `hal. N` lives inside page text -
+  // so this is not implied by the loop above only because the loop would catch it
+  // as an unattributable text diff rather than as what it is.
+  assert.deepEqual(pageMap, FIXTURE.pageMap, 'the page map moved');
+  assert.equal(report.pages, FIXTURE.report.pages);
+  assert.equal(report.appendixStart, FIXTURE.report.appendixStart);
+  assert.equal(report.anchors, FIXTURE.report.anchors);
+  assert.equal(report.referenced, FIXTURE.report.referenced);
+  assert.equal(report.rebuilds, FIXTURE.report.rebuilds, 'the fixed point converged differently');
 });
