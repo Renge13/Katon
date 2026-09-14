@@ -344,3 +344,61 @@ test('the facts table carries every fact the reading does, and no percentages', 
     assert.equal(row.meaning, GLOSSARY.kompatibilitas[p1.provenance.variant].label_meaning);
   }
 });
+
+// ── THE PALACE FRAME (Reyner, 2026-09-14, ruling 1) ────────
+
+test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () => {
+  // Cowork read the Y-1 PDF and found a row headed `Kursi Terikat` carrying
+  // `p2_harmony.label_meaning` - "kursi pasangan kalian saling mengunci" - for a
+  // pair whose seats are HARMED, not locked. The frame is B's YEAR pillar touching
+  // A's spouse palace; the sentence printed was about a day-pair harmony that does
+  // not exist in this chart. Reyner ruled the row's shape on 2026-09-14:
+  //
+  //   term     the P2 relation's `name_id`, unchanged
+  //   columns  the pillar that CREATES the frame, in that person's column; the
+  //            spouse palace it touches (the other person's day branch) in theirs
+  //   meaning  `p2_palace_frame`'s own `label_meaning`, always
+  //
+  // "The day-pair variant's `label_meaning` never appears in a frame row."
+  const { texts, semanticJson } = await build('Y-1 fixture');
+  const frame = semanticJson.facts.find((f) => f.id === 'p2_palace_frame');
+  assert.ok(frame, 'precondition: Y-1 carries a palace frame');
+  assert.ok(frame.provenance.variants.includes('p2_harmony'),
+    'precondition: its frame relation is the 六合 that produced the wrong sentence');
+
+  // ── SCOPED TO THE FACTS PAGE, WHICH IS WHAT THE RULING SAYS ──
+  // My first draft searched the WHOLE document and stayed red after the fix. The
+  // text was on page 9 - the APPENDIX, where `p2_harmony`'s legend entry carries its
+  // own `label_meaning` and is supposed to ("Appendix entry for the variant
+  // unchanged"). A wider assertion than the ruling would have forced me to break the
+  // legend to satisfy the table.
+  const K = GLOSSARY.kompatibilitas;
+  const factsPage = flat(texts.find((t) => t.replace(/\s+/gu, '')
+    .includes(PASANGAN_COPY.pdf_facts_heading.replace(/\s+/gu, ''))) || '');
+  assert.ok(factsPage, 'no facts page');
+
+  assert.equal(factsPage.includes(flat(K.p2_harmony.label_meaning)), false,
+    'the day-pair variant\'s meaning is printed on a frame row');
+  assert.ok(factsPage.includes(flat(K.p2_palace_frame.label_meaning)),
+    'the frame row does not carry the frame\'s own meaning');
+  // The term is still the relation's name, which is what makes the row findable
+  // against the legend entry for it.
+  assert.ok(factsPage.includes(K.p2_harmony.name_id), 'the relation name is gone from the row');
+  // AND THE APPENDIX STILL EXPLAINS THE RELATION. Asserted, not assumed: the fix
+  // must not have closed the table's gap by emptying the legend.
+  assert.ok(flat(texts.join('\n')).includes(flat(K.p2_harmony.label_meaning)),
+    'the variant lost its appendix entry');
+
+  // BOTH COLUMNS CARRY A BRANCH, and the row knows it: the pillar creating the
+  // frame and the spouse palace it touches. Asserted on the row DATA so a layout
+  // change cannot quietly empty one side.
+  const rows = factRows(semanticJson);
+  const frameRow = rows.find((r) => r.anchorKey === 'p2_harmony');
+  assert.ok(frameRow, 'no frame row was emitted at all');
+  assert.equal(frameRow.branches, true, 'a frame row holds branch characters');
+  assert.ok(frameRow.a && frameRow.b, 'a frame row must name both sides');
+  assert.equal(frameRow.meaning, K.p2_palace_frame.label_meaning);
+  // Y-1: B's YEAR 丑 reaches A's spouse palace 子.
+  assert.equal(frameRow.a, '子');
+  assert.equal(frameRow.b, '丑');
+});
