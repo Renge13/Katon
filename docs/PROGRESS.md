@@ -952,6 +952,29 @@ also said the move would be *"expected, NOT
 the re-coupling tripwire firing"*, which would have authorised dismissing a genuine alarm. **A
 prediction that tells a reader what to disregard must carry its grep.**
 
+## RULED 2026-09-14 — the compat PDF: included in the price, and as complete as the engine can make it
+
+Two rulings by Reyner, 2026-09-14, released as `docs/prompts/Y-pdf-3.md`. Verbatim. They settle the
+last content precondition before promotion (Addendum 2 item 8); the chain after it is U (Render) ->
+V (DOKU) -> `?dari` -> real-money walk -> promotion.
+
+| # | Ruling, verbatim | What it forecloses |
+|---|---|---|
+| **R1** | The compat PDF is INCLUDED in the compat price. No new SKU, no new price, no checkout change. | Every version of "charge for the document" - an impulse tier on top of compat, a PDF-only SKU, a price bump justified by the artifact. The PDF is part of what the compat price already buys, so `lib/pricing.js` and the DOKU work are untouched by this prompt. |
+| **R2** | Content: "as complete as possible: data, chart, anything." Everything the engine knows about the pair that is reader-facing goes in - both charts, the pair facts, the reading, the glossary meanings. Bounded only by the locked rules (no verdict, no score, no ramalan; conditions unnamed; names from the glossary only; keyboard characters only). | A curated or abridged document. The default is IN, and the only things that keep something out are the locked rules themselves - which is why the P5 quadrant prints its `name_id` and never its score or axis numbers (rule 25), and why a `label: null` fact prints its meaning and no name (Prompt M correction 1). |
+
+**THE DESIGN CONSEQUENCE, recorded here because it is the thing a later session would get wrong:** the
+compat PDF is the MIRROR PDF with two charts and a facts page. `buildCompleteEditionPdf` already
+carries the reference fixed point, the three verifies, the fonts, the 申 canary and the appendix
+generator, so the compat document is a second COMPOSER fed to the SAME builder - the way
+`buildPairSemantic` is a second producer of the contract `renderReading` consumes. **A second PDF
+pipeline is the defect, not the feature.**
+
+**AND IT NEVER RENDERS.** The PDF reads `render_cache` and refuses when there is no row: a floored pair
+has no row by rule 16, and answers 409 `reading_not_rendered` rather than starting a render. A PDF that
+regenerates its own prose is a second reading wearing the first one's name.
+
+
 ## RULED 2026-09-07 (night) — compat product model: B gets nothing, compat is a front door, nothing is free
 
 Three rulings by Reyner, 2026-09-07 (night), released as `docs/prompts/X-compat-2b1.md`. Verbatim.
