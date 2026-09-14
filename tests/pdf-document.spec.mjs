@@ -27,7 +27,7 @@ import {
   buildAppendix, assertEveryMechanicExplained, anchorId, anchorIds,
 } from '../lib/pdf/appendix.js';
 import {
-  completeEdition, readingOnly, glyphProof, refRow,
+  completeEdition, readingOnly, glyphProof, REF_PREFIX,
 } from '../lib/pdf/document.js';
 import {
   buildCompleteEditionPdf, verifyReferences, APPENDIX_HEADING, CHART_HEADING,
@@ -319,48 +319,64 @@ test('胎元 prints its glossary NAME and no invented meaning', async () => {
 // this repo has already paid for one of those: `openaiConfigured()` returned false
 // for the project's whole life and the failover it guarded never once executed.
 
-test('the fixed point converges, and the report accounts for every anchor', async () => {
+test('THE ANCHORS SURVIVE R6 even though nothing references them', async () => {
+  // ── REWRITTEN 2026-09-14 FOR R6, NOT DELETED ──────────────
+  // This asserted that the fixed point spent a rebuild and that the returned
+  // `pageMap` covered every appendix entry. Reyner ruled the page-number references
+  // out, so the document declares NO references, `buildPdf` resolves no map, and both
+  // of those are now false BY DESIGN - the new test one screen down asserts the
+  // opposite (`rebuilds === 0`, `pageMap` empty) as the ruled behaviour.
+  //
+  // WHAT IS WORTH KEEPING IS THE OTHER HALF: the appendix still writes an `id` on
+  // every entry, so the named destinations are still in the bytes and the machinery
+  // still has something to guard. Read from the ARTIFACT rather than from the
+  // builder's return value, which is the honest source now.
   for (const which of Object.keys(CHARTS)) {
     const { chart, semanticJson, rendered } = fixture(which);
     const { buffer, pageMap, report } = await buildCompleteEditionPdf({
       chart, semanticJson, rendered,
     });
     const appendix = buildAppendix({ chart, semanticJson });
+    const dests = namedDestinationPages(buffer);
 
-    assert.ok(report.rebuilds >= 1,
-      `${which}: converged in 0 rebuilds, which means pass 1 already had the map - `
-      + 'pass 1 prints from {} and cannot');
-    assert.equal(report.anchors, appendix.count, `${which}: an anchor per entry`);
-    assert.equal(Object.keys(pageMap).length, appendix.count,
-      `${which}: the map covers every entry`);
+    assert.equal(report.rebuilds, 0, `${which}: nothing is referenced, so nothing to resolve`);
+    assert.deepEqual(pageMap, {}, `${which}: a map was resolved for nothing`);
+    assert.equal(report.anchors, 0, `${which}: no anchor needs resolving`);
+    assert.equal(dests.size, appendix.count,
+      `${which}: the bytes still carry a destination per entry`);
     assert.equal(report.refsBeforeAppendix, 0, `${which}: no ref points into the reading`);
     assert.ok(report.appendixStart > 1 && report.appendixStart <= report.pages,
       `${which}: appendix start ${report.appendixStart} of ${report.pages}`);
 
-    // THE COUNTS DIFFER BY EXACTLY THE CONDITIONS, which is correction 1 rather
-    // than a shortfall. Asserted as an equation so a future change that started
-    // referencing conditions fails here instead of looking like an improvement.
-    const conditions = appendix.groups.flatMap((g) => g.entries).filter((e) => e.condition);
-    assert.equal(report.anchors - report.referenced, conditions.length,
-      `${which}: every unreferenced anchor is a condition`);
-    assert.deepEqual(
-      [...report.unreferenced].sort(),
-      conditions.map((e) => anchorId(e)).sort(),
-      `${which}: the unreferenced set IS the condition set`,
-    );
-
-    // And the whole point of a fixed point: the emitted bytes' own destinations
-    // agree with the map that was printed into them.
-    const dests = namedDestinationPages(buffer);
-    for (const [id, page] of Object.entries(pageMap)) {
-      assert.equal(dests.get(id), page, `${which}: ${id} drifted`);
+    // ── THE ANCHOR-VS-REFERENCE EQUATION IS GONE WITH THE FEATURE ──
+    // This asserted `report.anchors - report.referenced === conditions.length` and
+    // that `report.unreferenced` IS the condition set - correction 1 expressed as
+    // arithmetic. With nothing referenced both sides are zero, so the equation would
+    // hold vacuously for any appendix and would be exactly the check that cannot
+    // fail. It is deleted rather than kept green. Correction 1 itself is still
+    // asserted, on the artifact, by the condition test directly below.
+    //
+    // WHAT SURVIVES IS THE DESTINATIONS THEMSELVES: every appendix entry still
+    // anchors, which is what keeps the machinery meaningful for a future reference.
+    for (const e of appendix.groups.flatMap((g) => g.entries)) {
+      assert.ok(dests.has(anchorId(e)), `${which}: ${anchorId(e)} lost its destination`);
+      const page = dests.get(anchorId(e));
+      assert.ok(page >= report.appendixStart && page <= report.pages,
+        `${which}: ${anchorId(e)} anchors outside the appendix, on page ${page}`);
     }
   }
 });
 
-test('every reference row is drawn, and points at the page the term is on', async () => {
+test('A CONDITION IS STILL EXPLAINED, on the page its anchor points at', async () => {
+  // ── NARROWED 2026-09-14 FOR R6 ─────────────────────────────
+  // This was "every reference row is drawn, and points at the page the term is on".
+  // There are no reference rows any more, so that half is gone with the feature.
+  // The half that survives is correction 1's, and it is about the APPENDIX rather
+  // than the references: a `label: null` condition is anchored, is explained, and
+  // carries no name. Deleting the whole test would have taken that with it.
   const { chart, semanticJson, rendered } = fixture('chart 1');
-  const { buffer, pageMap } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const pageMap = Object.fromEntries(namedDestinationPages(buffer));
   const texts = pageTexts(buffer);
   const appendix = buildAppendix({ chart, semanticJson });
 
@@ -376,19 +392,28 @@ test('every reference row is drawn, and points at the page the term is on', asyn
         `a condition's meaning is not on its anchored page ${page}`);
       continue;
     }
-    // The row, as drawn, somewhere before the appendix.
-    const before = texts.slice(0, page - 1).join('\n');
-    assert.ok(before.includes(refRow(e.name, page)),
-      `${e.name} has no reference row reading "${refRow(e.name, page)}"`);
-    // And the term really is on the page its reference claims.
+    // A NAMED ENTRY IS ON THE PAGE ITS ANCHOR POINTS AT. The old assertion here was
+    // that a reference row reading `<name>  hal. N` was drawn somewhere before the
+    // appendix; there are no reference rows since R6, so that half is gone. This
+    // half is not about references at all - it is that the anchor written into the
+    // bytes lands on the page the entry is actually printed on, which is what makes
+    // the destination worth keeping.
     assert.ok(texts[page - 1].includes(e.name),
-      `${e.name} is referenced to page ${page} and is not on it`);
+      `${e.name} anchors to page ${page} and is not on it`);
   }
+  // AND NO `hal. ` ANYWHERE, which is the ruling this test was narrowed under.
+  assert.equal(texts.join('\n').includes(REF_PREFIX), false);
 });
 
 test('verify 1 REFUSES a stale map - the drift correction 3 is about', async () => {
   const { chart, semanticJson, rendered } = fixture('chart 1');
-  const { buffer, pageMap } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  // FROM THE ARTIFACT, not from the builder's return: since R6 the document
+  // references nothing, so `buildPdf` resolves no map - but the appendix still
+  // anchors every entry, and this test is about the MACHINERY, which Reyner kept as
+  // code precisely so a future anchor is still guarded. Feeding it the destinations
+  // the bytes actually carry is what keeps that guard exercised.
+  const pageMap = Object.fromEntries(namedDestinationPages(buffer));
   const anchors = Object.keys(pageMap);
   const referenced = anchors.map((id) => ({ id, name: 'x' }));
 
@@ -406,7 +431,13 @@ test('verify 1 REFUSES a stale map - the drift correction 3 is about', async () 
 
 test('verify 2 REFUSES a reference pointing before the appendix', async () => {
   const { chart, semanticJson, rendered } = fixture('chart 1');
-  const { buffer, pageMap } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  // FROM THE ARTIFACT, not from the builder's return: since R6 the document
+  // references nothing, so `buildPdf` resolves no map - but the appendix still
+  // anchors every entry, and this test is about the MACHINERY, which Reyner kept as
+  // code precisely so a future anchor is still guarded. Feeding it the destinations
+  // the bytes actually carry is what keeps that guard exercised.
+  const pageMap = Object.fromEntries(namedDestinationPages(buffer));
   const anchors = Object.keys(pageMap);
   const [first] = anchors;
 
@@ -641,5 +672,35 @@ test('NO TEXT IS DRAWN ON TOP OF OTHER TEXT, on any page', async () => {
         + `"${h.b.text.slice(0, 18)}"(${h.b.size}) gap ${h.gap}, needs ${h.need}`), [],
       `${which} page ${i + 1}`);
     }
+  }
+});
+
+// ── NO CROSS-REFERENCES (Reyner, 2026-09-14, R6) ───────────
+
+test('NOT ONE `hal. N` SURVIVES, and the fixed point converges on pass 1', async () => {
+  // Reyner read the compat PDF and ruled the page-number cross-references OUT: a
+  // reading is a document, not an index. The `Yang ada di baganmu` list and every
+  // `hal. N` row go from both composers.
+  //
+  // THE MACHINERY STAYS AS CODE BY THE SAME RULING - the fixed point, the three
+  // verifies, the /Dests reading. It costs nothing and guards any future anchor. But
+  // with nothing referenced there is nothing to resolve, so the loop must settle on
+  // its FIRST pass rather than spending a rebuild discovering that. `rebuilds === 0`
+  // is the assertion that says the machinery went quiet instead of merely passing.
+  for (const which of Object.keys(CHARTS)) {
+    const { chart, semanticJson, rendered } = fixture(which);
+    const { buffer, pageMap, report } = await buildCompleteEditionPdf({
+      chart, semanticJson, rendered,
+    });
+    const texts = pageTexts(buffer);
+    for (const [i, t] of texts.entries()) {
+      assert.equal(t.includes(REF_PREFIX), false,
+        `${which} page ${i + 1} still prints a "${REF_PREFIX}" reference`);
+    }
+    assert.equal(texts.join('\n').includes('Yang ada di baganmu'), false,
+      `${which}: the reference list heading survives`);
+    assert.equal(report.rebuilds, 0, `${which}: the fixed point still spent a rebuild`);
+    assert.equal(report.referenced, 0, `${which}: something is still referenced`);
+    assert.deepEqual(pageMap, {}, `${which}: a page map was resolved for nothing`);
   }
 });

@@ -21,10 +21,8 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { buildPairPdf } from '../lib/pdf/build.js';
-import { buildPairAppendix } from '../lib/pdf/pairAppendix.js';
 import { factRows } from '../lib/pdf/pairDocument.js';
-import { anchorId } from '../lib/pdf/appendix.js';
-import { refRow, REF_PREFIX } from '../lib/pdf/document.js';
+import { REF_PREFIX } from '../lib/pdf/document.js';
 import { APPENDIX_HEADING } from '../lib/pdf/build.js';
 import { PASANGAN_COPY } from '../lib/site/copy.js';
 import {
@@ -241,50 +239,41 @@ test('the fixed point converges and all three verifies pass, for BOTH pairs', as
     const { report, pageMap, texts } = await build(name);
     // Reaching here at all means `buildPdf` did not throw, which IS the three
     // verifies. What is asserted here is the shape of what it reported.
-    assert.ok(report.rebuilds >= 1, `${name}: a document with references converged in zero passes`);
+    // ── INVERTED FOR R6, 2026-09-14 ────────────────────────────
+    // This asserted `rebuilds >= 1` and `referenced > 0` - a document with
+    // references cannot settle on pass 1, because pass 1 prints from `{}`. Reyner
+    // ruled the references out, so the true statement is the opposite one, and it is
+    // asserted rather than the old line being deleted: the machinery has to go QUIET,
+    // not merely pass.
+    assert.equal(report.rebuilds, 0, `${name}: nothing is referenced, so nothing to resolve`);
+    assert.equal(report.referenced, 0, `${name}: something is still referenced`);
+    assert.deepEqual(pageMap, {}, `${name}: a map was resolved for nothing`);
     assert.ok(report.pages >= 8, `${name}: ${report.pages} pages, fewer than the six sections need`);
     assert.ok(report.appendixStart > 1 && report.appendixStart <= report.pages);
     assert.equal(texts.length, report.pages);
-    assert.ok(report.referenced > 0 && report.referenced <= report.anchors);
-    // BOUNDED, re-stated over the returned map rather than trusted: every reference
-    // lands in the appendix and none before it.
-    for (const [id, page] of Object.entries(pageMap)) {
-      assert.ok(page >= report.appendixStart && page <= report.pages,
-        `${name}: ${id} -> page ${page}, outside the appendix (${report.appendixStart}..${report.pages})`);
-    }
     assert.ok(flat(texts[report.appendixStart - 1]).includes(APPENDIX_HEADING));
   }
 });
 
-test('every reference row is DRAWN, from all three lists, with its page number', async () => {
-  // Verify 3 inside the builder already checks this over one haystack. This checks
-  // it per LIST, which is the thing the pair document adds: chart A's terms on chart
-  // A's page, chart B's on B's, the pair's on the facts page. A bug that put every
-  // term on one page would satisfy the builder and fail here.
+test('NO PAGE CARRIES A REFERENCE LIST, on either pair', () => {
+  // ── REPLACES "every reference row is DRAWN, from all three lists" ──
+  // The compat document had THREE reference lists - chart A's, chart B's and the
+  // facts page's - and that test walked each one asserting every row was drawn on
+  // its own page. R6 removed the feature, so the test inverts: the lists must be
+  // absent from all three pages, not merely absent from the document as a whole.
+  // Kept per-page rather than folded into the document-wide `hal. ` scan above,
+  // because three lists disappearing is three things to check.
+  const HEADING = 'Yang ada di baganmu';
   for (const name of names) {
-    const { a, b, semanticJson, pageMap, texts } = await build(name);
-    const appendix = buildPairAppendix({ chartA: a, chartB: b, semanticJson });
-    const pageWith = (heading) => texts.findIndex(
-      (t) => t.replace(/\s+/gu, '').includes(heading.replace(/\s+/gu, '')));
-
-    for (const [list, heading] of [
-      ['chartA', PASANGAN_COPY.pdf_chart_a_heading],
-      ['chartB', PASANGAN_COPY.pdf_chart_b_heading],
-      ['compat', PASANGAN_COPY.pdf_facts_heading],
-    ]) {
-      const start = pageWith(heading);
-      assert.ok(start >= 0, `${name}: no page carries the ${list} heading`);
-      // A page may overflow onto the next, so the haystack is that page and the one
-      // after it - bounded, never "the whole document", which is the permissive
-      // search prompt M's correction 3 threw out.
-      const haystack = flat(texts.slice(start, start + 2).join('\n'));
-      for (const e of appendix[list]) {
-        const row = flat(refRow(e.name, pageMap[anchorId(e)]));
-        assert.ok(haystack.includes(row),
-          `${name}: ${list} reference "${row}" is not drawn on its own page`);
-      }
+    for (const slot of ['pdf_chart_a_heading', 'pdf_chart_b_heading', 'pdf_facts_heading']) {
+      const { texts } = built.get(name) || {};
+      if (!texts) continue;
+      const page = texts.find((t) => t.replace(/\s+/gu, '')
+        .includes(PASANGAN_COPY[slot].replace(/\s+/gu, '')));
+      assert.ok(page, `${name}: no page carries ${slot}`);
+      assert.equal(page.includes(HEADING), false, `${name}: ${slot} still lists references`);
+      assert.equal(page.includes(REF_PREFIX), false, `${name}: ${slot} still prints a page number`);
     }
-    assert.ok(flat(texts.join('\n')).includes(REF_PREFIX.trim()));
   }
 });
 
@@ -466,5 +455,25 @@ test('NO TEXT IS DRAWN ON TOP OF OTHER TEXT, on any page of either pair', async 
         + `"${h.b.text.slice(0, 18)}"(${h.b.size}) gap ${h.gap}, needs ${h.need}`), [],
       `${name} page ${i + 1}`);
     }
+  }
+});
+
+// ── NO CROSS-REFERENCES (Reyner, 2026-09-14, R6) ───────────
+
+test('NOT ONE `hal. N` SURVIVES on either pair, and the fixed point is quiet', async () => {
+  // The compat half of R6; `tests/pdf-document.spec.mjs` carries the mirror's and
+  // the reasoning. Three reference lists went - chart A's, chart B's and the facts
+  // page's - so this is the document that had the most of them.
+  for (const name of names) {
+    const { texts, pageMap, report } = await build(name);
+    for (const [i, t] of texts.entries()) {
+      assert.equal(t.includes(REF_PREFIX), false,
+        `${name} page ${i + 1} still prints a "${REF_PREFIX}" reference`);
+    }
+    assert.equal(texts.join('\n').includes('Yang ada di baganmu'), false,
+      `${name}: the reference list heading survives`);
+    assert.equal(report.rebuilds, 0, `${name}: the fixed point still spent a rebuild`);
+    assert.equal(report.referenced, 0, `${name}: something is still referenced`);
+    assert.deepEqual(pageMap, {}, `${name}: a page map was resolved for nothing`);
   }
 });
