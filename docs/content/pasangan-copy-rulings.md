@@ -62,6 +62,34 @@ AMENDMENTS 2026-09-09 (Reyner, after walking the mock-payment preview; Cowork sw
      Reyner amended the digit "2" to "dua" on Cowork's flag, same night. Swept clean.
      NOT YET APPLIED.
 
+AMENDMENT i (Reyner, 2026-09-14): FIVE SLOTS FOR THE COMPAT PDF, all five ruled VERBATIM as
+  Cowork proposed them in docs/prompts/Y-pdf-3.md commit 4 - no edit to any of the five. They are
+  the four strings the DOCUMENT prints (cover sub-line, the two chart-page headings, the facts-table
+  heading) and the report's download button. Slots landed unruled with prompt Y-3 commit 3, as
+  PENDING() sentinels, on Reyner's own instruction: build around the slots and fail the PRODUCTION
+  build on any unruled one. That is a departure from the 2026-09-08 chrome process ruling (compat
+  chrome ships as swept literals, Reyner amends in place) and the reason is in lib/site/copy.js:
+  09-08 was about a HOTFIX for a closed shop, where an undeployable build was the larger harm, and
+  there is nothing to hotfix in an unshipped document.
+
+  NOT YET APPLIED WHEN THIS FILE LANDS, AND THE ROWS ARE DELIBERATELY NOT PARSED YET. They live in
+  their own "## The compat PDF" section below, which tests/pasangan-copy.spec.mjs#worksheet() does
+  not read, so this file lands ALONE and GREEN - the #28 convention's documented window, without a
+  red commit in the middle of it. The APPLYING commit adds that section to the parser, which is what
+  turns byte-identity on for these five, and moves the count assertion 31 -> 36. If that commit ever
+  fails to land, this paragraph is the record that five ruled strings are sitting unverified.
+
+  A SIXTH SLOT IS A CANDIDATE AND NOT A HOLE: the mirror's appendix prints "N istilah, semuanya dari
+  baganmu sendiri", which is false of a legend built from TWO charts, so the compat appendix prints
+  no sub-line rather than inventing a sentence. Nothing is waiting on it.
+
+SWEEP 2026-09-14 (amendment i): the five strings compiled against the 70 live style patterns the way
+lib/validate/style.js compiles them (new RegExp(entry.pattern, entry.flags || 'iu'), objects carrying
+`pattern` only). 0 hits, 0 non-keyboard characters, 0 em-dash/curly/question mark, 0 `bukan X tapi Y`.
+Control string ("Kalian sangat cocok dan cenderung selaras, bukan lemah tapi kuat.") fired 4 patterns -
+hedge_construction, tension_collapse on `selaras`, hedging on `cenderung`, and one ranking pattern - so
+the sweep was shown able to fire before its CLEAN was quoted.
+
 SWEEP 2026-09-09: compiled as lib/validate/style.js:64 (`new RegExp(entry.pattern, entry.flags || 'iu')`,
 only objects carrying `pattern`), 70 patterns. Falsifiers 4/4 fired (cenderung, selaras, sangat cocok,
 Kondisi ini). 11 ruled strings: 0 hits, 0 non-keyboard characters, 0 dash/curly/?, 0 `bukan X tapi Y`,
@@ -172,3 +200,26 @@ Why: on the walk Reyner asked "what is the email for?"; the old #16 answered rec
 the reason the field exists (payment providers require a payer email). The old #27 said "hanya" and
 "tidak ... membagikannya", both untrue once the address is passed to the payment provider. Nothing is
 open in this file.
+
+## The compat PDF - RULED 2026-09-14 (amendment i)
+
+Four strings the DOCUMENT prints, and one button on the report. All five are Cowork's proposals from
+`docs/prompts/Y-pdf-3.md` commit 4, ruled VERBATIM by Reyner on 2026-09-14 - no edit to any of them.
+
+**`report_download_pdf` had no existing label to reuse.** Y-3 says to prefer the mirror delivery
+button's if there is one; `grep -rn "Unduh\|download" components/ lib/site/copy.js lib/render/copy.js`
+returns only comments about downloaded PNGs and a `CAPTURE_KINDS` union, so this is a new slot rather
+than a second copy of an old one.
+
+| Bank | Slot | Ruled string |
+|---|---|---|
+| PASANGAN_COPY | `pdf_cover_sub` | `Bacaan kompatibilitas dari dua bagan kelahiran.` |
+| PASANGAN_COPY | `pdf_chart_a_heading` | `Bagan Kelahiranmu` |
+| PASANGAN_COPY | `pdf_chart_b_heading` | `Bagan Kelahiran Dia` |
+| PASANGAN_COPY | `pdf_facts_heading` | `Data di Balik Bacaan Ini` |
+| PASANGAN_COPY | `report_download_pdf` | `Unduh PDF` |
+
+**BIRTH TIMES STAY OFF THE COVER** (Reyner, 2026-09-14, confirming Y-3). The cover carries the two
+dates and the two gender words exactly as the report header shows them, and nothing else. This is
+recorded here rather than only in the prompt because it is a RULING about what a reader sees, and the
+next session to look at a sparse cover will want to know the sparseness was chosen.
