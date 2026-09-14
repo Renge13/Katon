@@ -956,7 +956,8 @@ prediction that tells a reader what to disregard must carry its grep.**
 
 ## RULED 2026-09-14 — the compat PDF: included in the price, and as complete as the engine can make it
 
-Two rulings by Reyner, 2026-09-14, released as `docs/prompts/Y-pdf-3.md`. Verbatim. They settle the
+FIVE rulings by Reyner, 2026-09-14. R1 and R2 released `docs/prompts/Y-pdf-3.md` and are verbatim;
+R3-R5 came the same day, after Cowork read the BUILT Y-1 PDF, and are summarised in one row. They settle the
 last content precondition before promotion (Addendum 2 item 8); the chain after it is U (Render) ->
 V (DOKU) -> `?dari` -> real-money walk -> promotion.
 
@@ -964,8 +965,8 @@ V (DOKU) -> `?dari` -> real-money walk -> promotion.
 |---|---|---|
 | **R1** | The compat PDF is INCLUDED in the compat price. No new SKU, no new price, no checkout change. | Every version of "charge for the document" - an impulse tier on top of compat, a PDF-only SKU, a price bump justified by the artifact. The PDF is part of what the compat price already buys, so `lib/pricing.js` and the DOKU work are untouched by this prompt. |
 | **R2** | Content: "as complete as possible: data, chart, anything." Everything the engine knows about the pair that is reader-facing goes in - both charts, the pair facts, the reading, the glossary meanings. Bounded only by the locked rules (no verdict, no score, no ramalan; conditions unnamed; names from the glossary only; keyboard characters only). | A curated or abridged document. The default is IN, and the only things that keep something out are the locked rules themselves - which is why the P5 quadrant prints its `name_id` and never its score or axis numbers (rule 25), and why a `label: null` fact prints its meaning and no name (Prompt M correction 1). |
+| **R3-R5, after Cowork read the Y-1 PDF (same day)** | **(1) A PALACE-FRAME ROW SAYS WHAT THE FRAME IS.** Term stays the P2 relation's `name_id`; the columns carry the pillar that creates the frame and the spouse palace it touches; the meaning is `p2_palace_frame`'s own. The day-pair variant's `label_meaning` never appears in a frame row; its appendix entry is unchanged. **(2) THE COVER LEADS WITH `name_en`**, `name_id` under it and smaller - on the compat cover AND the mirror's Complete Edition, same `coverPage`. Document metadata title unchanged. **(3) NOTHING OVERLAPS**: line-height and spacing only, no fonts, colours or layout. | Each is a ruling about **what a reader sees**, which is why none of them was Cowork's or Code's to settle. (1) was a real content defect - Y-1 printed "kursi pasangan kalian saling mengunci" for a pair whose seats are HARMED. (3) was too: the cover title had 4.7pt of room where it needed 20.3, and one row's animal label sat 0.2pt from the next row's hanzi. Cause of (3) was one inherited number - `page`'s `lineHeight: 1.6` resolves to an ABSOLUTE 17.6pt, so every style above 11pt overflowed its box. **`tests/fixtures/pdf-chart1-pages.json` was re-pinned twice**, once per ruling, and its `_repinned` log names both. |
 
-**THE DESIGN CONSEQUENCE, recorded here because it is the thing a later session would get wrong:** the
 compat PDF is the MIRROR PDF with two charts and a facts page. `buildCompleteEditionPdf` already
 carries the reference fixed point, the three verifies, the fonts, the 申 canary and the appendix
 generator, so the compat document is a second COMPOSER fed to the SAME builder - the way
