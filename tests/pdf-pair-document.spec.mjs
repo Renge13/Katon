@@ -477,3 +477,51 @@ test('NOT ONE `hal. N` SURVIVES on either pair, and the fixed point is quiet', a
     assert.deepEqual(pageMap, {}, `${name}: a page map was resolved for nothing`);
   }
 });
+
+// ── THE FACTS PAGE AND THE TITLE LINE (R-Y4, 2026-09-14) ───
+
+test('THE TWO SUPPLY ROWS ARE ONE ROW, both columns filled, meaning printed once', async () => {
+  // Y-4 commit 3. P3 emitted one row PER SUPPLY, so a pair where each gives the
+  // other an element got two rows both headed `Penyeimbang Unsur` carrying the same
+  // sentence - the table saying one thing twice. One row, both columns, one meaning.
+  for (const name of names) {
+    const { semanticJson, texts } = await build(name);
+    const supplies = semanticJson.facts
+      .find((f) => f.id === 'p3_supply')?.provenance?.supplies || [];
+    if (supplies.length < 2) continue;
+
+    const rows = factRows(semanticJson).filter((r) => r.anchorKey === 'p3_supplies');
+    assert.equal(rows.length, 1, `${name}: ${rows.length} supply rows, want 1`);
+    assert.ok(rows[0].a && rows[0].b, `${name}: a two-way supply must fill both columns`);
+
+    // AND THE SENTENCE IS PRINTED ONCE. The row count above is the data; this is
+    // the artifact, and it is the half a reader would actually notice.
+    const facts = texts.find((t) => t.replace(/\s+/gu, '')
+      .includes(PASANGAN_COPY.pdf_facts_heading.replace(/\s+/gu, '')));
+    const meaning = rows[0].meaning.replace(/\s+/gu, ' ');
+    const hits = facts.replace(/\s+/gu, ' ').split(meaning).length - 1;
+    assert.equal(hits, 1, `${name}: the supply meaning is printed ${hits} times`);
+  }
+});
+
+test('THE QUADRANT NAME IS THE READING\'S TITLE LINE, after the P0 sentence', async () => {
+  // Y-4 commit 3: the engine already decides the quadrant, so naming it at the top
+  // of the reading is STRUCTURE (rule 14) rather than a new claim - no new string,
+  // no verdict word, just the `name_id` the glossary already rules.
+  for (const name of names) {
+    const { texts, semanticJson } = await build(name);
+    const q = semanticJson.core.quadrant;
+    const title = GLOSSARY.kompatibilitas[`p5_${q}`].name_id;
+    const lines = texts[1].split('\n').map((l) => l.trim()).filter(Boolean);
+
+    const a = semanticJson.core.a.archetype_name_id;
+    const b = semanticJson.core.b.archetype_name_id;
+    assert.equal(lines[0], `Ini adalah bacaan tentang dua individu: ${a} dan ${b}.`,
+      `${name}: the P0 sentence is not the first line`);
+    assert.equal(lines[1], title, `${name}: the quadrant name is not the line after it`);
+    // ONCE on that page: it is a title, and the P5 block names it again lower down
+    // only if the model wrote it, which is not this assertion's business.
+    assert.equal(lines.filter((l) => l === title).length, 1,
+      `${name}: the title line is repeated on the reading page`);
+  }
+});
