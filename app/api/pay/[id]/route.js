@@ -2,19 +2,23 @@ import { getReading, setInvoice } from '@/lib/readingStore';
 import { getPair, setPairInvoice } from '@/lib/pairStore';
 import { COMPAT_COPY } from '@/lib/site/copy';
 import { compatEmail, resolveCheckoutTarget } from '@/lib/pair/checkout';
-import { createQrisInvoice } from '@/lib/xendit';
-import { priceFor, isSellable, DEFAULT_SKU, SELLABLE_SKUS } from '@/lib/pricing';
+import { isSellable, DEFAULT_SKU, SELLABLE_SKUS } from '@/lib/pricing';
 import { recordEvent } from '@/lib/analytics/events';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
-import { paymentFenceReason, devBypassAllowed, paymentsProvider } from '@/lib/paymentFence';
-import { readingUrl, pairUrl } from '@/lib/site/baseUrl';
+import { paymentFenceReason, paymentsProvider } from '@/lib/paymentFence';
 import { compatPairRoute } from '@/lib/site/routes';
 
 export const runtime = 'nodejs';
 
-// REYNER-APPROVED 2026-08-05. This string is on the Xendit checkout page and on
-// the bank/e-wallet statement line, so it is user-facing chrome and rule 20
+// REYNER-APPROVED 2026-08-05. This string is on the provider's checkout page and
+// on the bank/e-wallet statement line, so it is user-facing chrome and rule 20
 // applies: keyboard characters only, one composed voice.
+//
+// IT SURVIVES THE EXIT DELIBERATELY. Prompt V-0 deletes the adapter, not this
+// block: there is no provider to put the string in front of a buyer today, and
+// DOKU's checkout page will carry it unchanged in Prompt V. The `compat`
+// `@@UNRULED@@` sentinel below is part of what survives - the build refusal it
+// arms is about Reyner ruling the words, and that is not a payments question.
 //
 // INTERIM, and it describes what the buyer ACTUALLY RECEIVES. It names the same
 // product the funnel names — `Bacaan Mendalam`, the string already on the paywall
@@ -62,6 +66,17 @@ export const runtime = 'nodejs';
 // Indonesian buyer's bank statement, and borrowing the free product's own word.
 // Guessing here has a measured track record of being wrong, and the alternative
 // to a sentinel was holding the whole payment path on one string.
+// ── IT IS UNREFERENCED TODAY, AND THAT IS THE POINT ───────
+// Its only reader was `createQrisInvoice({ description: ... })`, which V-0 deletes,
+// so `no-unused-vars` fires. The exemption is written here rather than the const
+// being deleted, because the history above is the argument: three supersessions of
+// this exact surface, two for reasons a fresh guess would have repeated. Deleting
+// it would hand Prompt V a blank line where a ruled string used to be, and the
+// block's own sentence is that guessing here has a measured track record of being
+// wrong. `scripts/check-unruled-copy.mjs` does not protect it either - that gate
+// scans the registered COPY_BANKS, so the `compat` sentinel is caught through
+// `COMPAT_COPY`, not through this object.
+// eslint-disable-next-line no-unused-vars -- held for the DOKU adapter, Prompt V
 const INVOICE_DESCRIPTION = {
   artifact: 'Katon - Complete Edition',
   compat: COMPAT_COPY.invoiceDesc,
@@ -69,24 +84,34 @@ const INVOICE_DESCRIPTION = {
 
 
 // POST /api/pay/[id]   body: { sku?, wa_number? }
-// Creates the Xendit QRIS invoice (external_id = reading id).
-// NEVER sets paid=true — only the verified webhook can.
+// Records a checkout intent. There is no provider to create an invoice with:
+// sales are closed and the mock branch is the only path that returns a URL.
+// NEVER sets paid=true — only the verified provider notification can.
 //
 // THE CLIENT MAY NAME A SKU. IT MAY NEVER NAME A PRICE. The name is checked
-// against SELLABLE_SKUS and resolved to a number by priceFor(), both server-side,
-// so the request body cannot influence what is charged or unlock a product that
-// has no fulfillment yet.
+// against SELLABLE_SKUS server-side, so the request body cannot unlock a product
+// that has no fulfillment yet. The route no longer resolves the sku to a NUMBER -
+// `priceFor()` was called to fill the invoice amount and the invoice is gone - but
+// the rule outlives the call: settlement still verifies the amount against the sku
+// stored at intent (`amountMatchesSku`), never against anything a client sent.
 export async function POST(request, { params }) {
   // ── SALES ARE CLOSED IN PRODUCTION, RULED 2026-09-08 ──────
-  // Katon is exiting Xendit. `payment_closed` is a DELIBERATE state and gets its
-  // own body rather than being dressed as a misconfiguration: the client renders
-  // the sales-closed page from it, and a reader must not be told to try again.
+  // `payment_closed` is a DELIBERATE state and gets its own body rather than being
+  // dressed as a misconfiguration: the client renders the sales-closed page from
+  // it, and a reader must not be told to try again.
   //
   // It is checked before everything, including the body parse, because there is
   // no request shape that makes a closed shop open.
+  //
+  // ONE REASON STRING, NOT TWO. A generic `payment_not_configured:${fence}` line
+  // used to follow this one, for the key-presence refusals. Those are deleted with
+  // the adapter, so the fence now answers `payment_closed` or null and nothing
+  // else - and a branch that reads like a mitigation and can never execute is
+  // worse than no branch, because it gets counted in reasoning about this route
+  // (CLAUDE.md rule 15, on the OpenAI secondary that never ran). When Prompt V
+  // gives the fence a third answer, the branch comes back WITH the answer.
   const fence = paymentFenceReason();
   if (fence === 'payment_closed') return notConfigured('payment_closed');
-  if (fence) return notConfigured(`payment_not_configured:${fence}`);
 
   const { id } = await params;
   // The `row.domain` requirement is GONE. It gated checkout on the pre-pivot
@@ -150,35 +175,23 @@ export async function POST(request, { params }) {
   }
 
   try {
-    // WHERE THE XENDIT TAB ENDS UP. Without these the buyer's last screen is a
-    // Xendit page with no link back to the reading she just paid for.
-    //
-    // SUCCESS carries `?bayar=selesai`, and it is a HINT ABOUT THE UI, never an
-    // entitlement: the funnel reads it only to open the paywall in its waiting
-    // state instead of showing the offer again, because the redirect regularly
-    // beats the webhook by a few seconds. `paid` still flips in the verified
-    // webhook alone, and the page it lands on re-reads that from the server.
-    //
-    // FAILURE goes to the same reading with NO marker, so the paywall renders
-    // normally and the price and the button are already on screen. That is the
-    // retry; a failed payment needs no separate state.
     // ── MOCK: NO PROVIDER, NO MONEY, NO NETWORK ───────────────
     // Preview and local only - `paymentsProvider()` returns 'closed' for mock
     // whenever VERCEL_ENV=production, so this branch cannot exist there.
     //
-    // It returns a LOCAL url in the same field the real adapter uses, so every
+    // It returns a LOCAL url in the same field a real adapter would use, so every
     // caller and every redirect works unchanged: the client opens it, and the
     // page it lands on flips `paid` through `POST /api/mock-pay/<id>`, which
     // goes through the SAME `settlePair` / `markReadingPaid` door the verified
-    // webhook uses. Nothing gets a second way to become paid.
+    // provider notification uses. Nothing gets a second way to become paid.
     if (paymentsProvider() === 'mock') {
       // RELATIVE, NOT ABSOLUTE, and the difference stranded a walk. `pairUrl`
       // builds from NEXT_PUBLIC_BASE_URL, and on a preview that pointed at a
       // DIFFERENT alias - a request to katon-git-fix-... was answered
       // `https://katon-eta.vercel.app/...`. A real provider NEEDS the absolute
-      // form, because Xendit redirects a browser to it from its own domain. Mock
-      // is a link back to the page the walker is already on, so an absolute URL
-      // only hops hosts mid-flow.
+      // form, because it redirects a browser back from its own domain. Mock is a
+      // link back to the page the walker is already on, so an absolute URL only
+      // hops hosts mid-flow.
       const mockUrl = `${isCompat ? compatPairRoute(id) : `/r/${id}`}?bayar=mock`;
       if (isCompat) await setPairInvoice(id, { invoiceId: `mock_${id}`, invoiceUrl: mockUrl, sku, email });
       else await setInvoice(id, { invoiceId: `mock_${id}`, waNumber, sku });
@@ -186,61 +199,24 @@ export async function POST(request, { params }) {
       return json({ ok: true, pending: true, invoiceUrl: mockUrl, mock: true });
     }
 
-    const { invoiceId, invoiceUrl } = await createQrisInvoice({
-      readingId: id,
-      amount: priceFor(sku),
-      description: INVOICE_DESCRIPTION[sku],
-      // ── THE COMPAT REGRESSION IS CLOSED, 2026-09-08 ───────────
-      // X-b1 shipped compat checkout with NO redirect URLs and said so: the
-      // destination is the report page, the page did not exist, and `readingUrl`
-      // builds `/r/<token>` - handing it a PAIR id would send the buyer to a
-      // reading URL for an object that is not a reading, which is the exact
-      // confusion the "person B is never a reading row" ruling exists to prevent.
-      // Rather than guess a route name Reyner had not chosen, both were omitted
-      // and the buyer's last screen stayed on Xendit.
-      //
-      // He ruled `/kompatibilitas` on 2026-09-08 and X-b3 builds the page, so a
-      // pair now gets the same treatment a reading always had - through
-      // `pairUrl`, which is a different builder rather than `readingUrl` with a
-      // different argument.
-      //
-      // `?bayar=selesai` IS A HINT ABOUT THE UI, NEVER AN ENTITLEMENT, on this
-      // path exactly as on the other: it opens the waiting state instead of the
-      // product block, because the redirect regularly beats the webhook. `paid`
-      // still flips in the verified webhook alone and the page re-reads it from
-      // the server. Failure goes to the same page with no marker, so the product
-      // block and its button are already on screen - that is the retry.
-      ...(isCompat ? {
-        successRedirectUrl: pairUrl(id, '?bayar=selesai'),
-        failureRedirectUrl: pairUrl(id),
-      } : {
-        successRedirectUrl: readingUrl(id, '?bayar=selesai'),
-        failureRedirectUrl: readingUrl(id),
-      }),
-    });
-    // The sku is stored with the invoice so the webhook can verify the settled
-    // amount against THIS product's price rather than against any known price.
-    if (isCompat) await setPairInvoice(id, { invoiceId, invoiceUrl, sku, email });
-    else await setInvoice(id, { invoiceId, waNumber, sku });
-
-    // COUNTED AFTER THE INVOICE EXISTS, never before. An attempt that failed to
-    // create an invoice is not a started checkout, and counting one would inflate
-    // the "started but not confirmed" gap with events that never reached Xendit.
-    // `sku` only - no amount, because the amount is derivable from the sku and the
-    // tier, and a second copy of a price is a second thing to keep in sync.
-    await recordEvent(id, 'checkout_started', { sku });
-
-    return json({ ok: true, pending: true, invoiceUrl });
-  } catch (e) {
-    if (e.code === 'not_configured' && devBypassAllowed()) {
-      // Dev fallback (no Xendit keys, non-production ONLY): store the WA number and
-      // report pending so the funnel shows the pending state. Unlock still requires
-      // the verified webhook (triggered manually in dev). Structurally unreachable in
-      // production — the fence above already refused before we got here.
-      if (isCompat) await setPairInvoice(id, { sku, email });
-      else await setInvoice(id, { waNumber, sku });
-      return json({ ok: true, pending: true, invoiceUrl: null, dev: true });
-    }
+    // ── THERE IS NO PROVIDER BRANCH ANY MORE ──────────────────
+    // What stood here built a QRIS invoice, stored it, counted `checkout_started`
+    // and returned its URL. The adapter is deleted (Prompt V-0, Reyner's exit
+    // ruling of 2026-09-18) and the branch went with it, along with the
+    // redirect-URL block and the `catch` that fell back to a dev pending state
+    // on `not_configured`.
+    //
+    // DEFENSIVE, AND IT SHOULD BE UNREACHABLE. The fence at the top of this
+    // handler already answered `payment_closed` for every provider except `mock`,
+    // and `mock` returned above. Reaching this line means `paymentsProvider()`
+    // grew a value the fence does not refuse and this route does not serve, which
+    // is a bug - so it refuses rather than falling through to a 200 with no
+    // invoice in it.
+    //
+    // DOKU SLOTS IN ABOVE THIS LINE, not in place of it: Prompt V adds a branch
+    // and leaves the floor.
+    return notConfigured('payment_closed');
+  } catch {
     return json({ error: 'invoice_failed' }, 502);
   }
 }

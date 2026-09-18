@@ -9,10 +9,11 @@ export const runtime = 'nodejs';
 // ============================================================
 // POST /api/mock-pay/[id] — the free unlock, for walking the paid path
 // ============================================================
-// Exists because Katon is exiting Xendit (Reyner, 2026-09-08) and the paid flow
-// still has to be walkable end to end - by Reyner on Preview, and locally - with
-// no provider, no test keys and no money. Sales are CLOSED in production and
-// there is to be no real Xendit transaction by anyone, including for testing.
+// Exists because Katon left its payment provider (Reyner, 2026-09-08; the adapter
+// itself deleted 2026-09-18) and the paid flow still has to be walkable end to end
+// - by Reyner on Preview, and locally - with no provider, no test keys and no
+// money. Sales are CLOSED in production and there is to be no real transaction by
+// anyone, including for testing.
 //
 // ── IT IS A FREE UNLOCK, SO READ THE GUARD FIRST ───────────
 // `mockPaymentsAllowed()` is true only when PAYMENTS_PROVIDER=mock, and

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Forge / fail-closed tests. Light by design (SPEC §7 4a): the core paywall gate
 // (/full gated on paid===true) already holds and prod is not near. The REQUIRED
-// assertion here is that the payment path fails CLOSED in production when the Xendit
-// secrets are unset — so the dev bypass can't silently ship at cutover.
+// assertion here is that the payment path fails CLOSED — an unset or stale
+// PAYMENTS_PROVIDER must never mean "take money".
 //
 //   npm run report:forge                   # fence + store unit tests (no server needed)
 //   npm run report:forge -- --live           # + live checks vs http://localhost:3000
@@ -11,7 +11,7 @@
 // store tests import lib/readingStore.js, whose `server-only` guard resolves to an
 // empty stub under that condition — the same way Next's RSC bundle resolves it.
 import assert from 'node:assert';
-import { paymentFenceReason, devBypassAllowed } from '../lib/paymentFence.js';
+import { paymentFenceReason } from '../lib/paymentFence.js';
 import { createReading, claimWaSend, releaseWaSend } from '../lib/readingStore.js';
 import { decideWaOutcome } from '../lib/wa.js';
 import {
@@ -27,7 +27,7 @@ function t(name, fn) { try { fn(); ok(name); } catch (e) { bad(name, e); } }
 function withEnv(env, fn) {
   // PAYMENTS_PROVIDER and VERCEL_ENV are cleared and restored like the rest: a
   // case that set one and did not name it in the next case's env would leak, and
-  // these two decide the answer before any Xendit key is read.
+  // these two decide the answer on their own now that no keys are consulted.
   for (const k of ['PAYMENTS_PROVIDER', 'VERCEL_ENV']) {
     if (!(k in env)) env[k] = undefined;
   }
@@ -45,50 +45,38 @@ function withEnv(env, fn) {
 
 console.log('\nFENCE (fail-closed) — REQUIRED');
 
-// ── EVERY CASE BELOW NAMES PAYMENTS_PROVIDER=xendit, 2026-09-08 ──
-// These four assert the XENDIT fence, and until today Xendit was the only path
-// so it needed no naming. `PAYMENTS_PROVIDER` now selects the provider and
-// DEFAULTS TO CLOSED, so an unset variable makes `paymentFenceReason()` answer
-// `payment_closed` before any key is consulted - and these tests would have gone
-// on asserting "refuses" while asserting the WRONG REFUSAL.
+// ── THE FOUR KEY-PRESENCE CASES ARE DELETED, 2026-09-18 ──
+// Four cases here asserted the adapter fence: production with no secret,
+// production with no webhook token, production fully configured, and development
+// falling through the dev bypass. All four named `PAYMENTS_PROVIDER=xendit`, and
+// Prompt V-0 deletes the provider, both key checks and the bypass. Their premise
+// is gone by ruling (Reyner, 2026-09-18, TERMINATE), not by refactor.
 //
-// They caught the change, which is what they are for: `npm test` does not run
-// this file, only `npm run report:forge` in the accuracy workflow does, and CI
-// went red on the first push of the hotfix.
+// THEY DID THEIR JOB ON THE WAY OUT, and that is worth recording, because `npm
+// test` does not run this file - only `npm run report:forge` does. They went red
+// on the first run of this PR, naming the exact export that had vanished, and
+// they are the reason `devBypassAllowed` was found to have a fourth caller at all:
+// the prompt's own grep was scoped to `lib app components tests` and missed
+// `scripts/`. A forge file allowed to drift would have said nothing.
 //
-// The closed and mock behaviours have their own file,
-// tests/payments-provider.spec.mjs. This one stays about Xendit.
+// WHAT REPLACES THEM IS NOT A NARROWER VERSION OF THEM. There is no payment
+// configuration left to get wrong, so the only fence question this file can still
+// ask is the one that protects revenue: is anything SELLING.
 
-// THE required forge-test: production with no Xendit secret must REFUSE, and the
-// dev bypass must be off.
-t('prod + no XENDIT_SECRET_KEY → refuses (fence reason set)', () => {
-  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production', XENDIT_SECRET_KEY: undefined, XENDIT_WEBHOOK_TOKEN: 'x' }, () => {
-    assert.strictEqual(paymentFenceReason(), 'xendit_secret_key_unset');
-    assert.strictEqual(devBypassAllowed(), false, 'dev bypass must be OFF in production');
+// THE required forge-test: an unset variable must mean CLOSED. A lost env var must
+// not silently reopen a channel Reyner shut on 2026-09-08 and left on 2026-09-18.
+t('no PAYMENTS_PROVIDER → sales are CLOSED', () => {
+  withEnv({ PAYMENTS_PROVIDER: undefined, NODE_ENV: 'production' }, () => {
+    assert.strictEqual(paymentFenceReason(), 'payment_closed');
   });
 });
 
-t('prod + secret but no XENDIT_WEBHOOK_TOKEN → refuses', () => {
-  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: undefined }, () => {
-    assert.strictEqual(paymentFenceReason(), 'xendit_webhook_token_unset');
-  });
-});
-
-t('prod + both secrets set → allowed (fence null), bypass still off', () => {
-  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: 'x' }, () => {
-    assert.strictEqual(paymentFenceReason(), null);
-    assert.strictEqual(devBypassAllowed(), false);
-  });
-});
-
-// ── AND THE DEFAULT, WHICH IS THE ONE THAT PROTECTS REVENUE ──
-// Not a variation on the four above: those ask whether Xendit is configured, and
-// this asks whether anything is SELLING. An unset variable must mean CLOSED, or a
-// lost env var silently reopens a channel Reyner shut on 2026-09-08.
-t('no PAYMENTS_PROVIDER → sales are CLOSED, not xendit', () => {
-  withEnv({ PAYMENTS_PROVIDER: undefined, NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: 'x' }, () => {
+// A STALE VALUE IS NOT A THIRD STATE. The word is still typed into environments
+// nobody has reopened, and it must land where an unset variable lands.
+t('a stale PAYMENTS_PROVIDER=xendit → still CLOSED', () => {
+  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production' }, () => {
     assert.strictEqual(paymentFenceReason(), 'payment_closed',
-      'fully configured for Xendit and STILL closed');
+      'the deleted adapter buys nothing, whatever the environment still says');
   });
 });
 
@@ -98,10 +86,12 @@ t('PAYMENTS_PROVIDER=mock is refused in production', () => {
   });
 });
 
-t('development + no secret → allowed (dev bypass on)', () => {
-  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'development', XENDIT_SECRET_KEY: undefined, XENDIT_WEBHOOK_TOKEN: undefined }, () => {
-    assert.strictEqual(paymentFenceReason(), null);
-    assert.strictEqual(devBypassAllowed(), true);
+// AND THE DEV BYPASS IS GONE, which is a real behaviour change rather than a
+// tidy-up: development with no provider used to fall through to null. It refuses
+// now, and `mock` is the supported way to walk the flow.
+t('development + no provider → still CLOSED, no bypass survives', () => {
+  withEnv({ PAYMENTS_PROVIDER: undefined, NODE_ENV: 'development' }, () => {
+    assert.strictEqual(paymentFenceReason(), 'payment_closed');
   });
 });
 
@@ -111,7 +101,7 @@ t('development + no secret → allowed (dev bypass on)', () => {
 console.log('\nSTORE (WA claim/release) — REQUIRED');
 const at = async (name, fn) => { try { await fn(); ok(name); } catch (e) { bad(name, e); } };
 
-// (1) mutex: claim transitions once; a second claim (Xendit double-fire) is refused.
+// (1) mutex: claim transitions once; a second claim (provider double-fire) is refused.
 await at('claimWaSend → true first, false second (mutex holds vs double-fire)', async () => {
   const id = 'wa-mutex-' + Date.now();
   await createReading({ id, day_master: '丙', domain: 'hubungan' });
@@ -296,21 +286,21 @@ if (process.argv.includes('--live')) {
     assert.ok(full.teaser, 'teaser present');
   });
 
-  await live('webhook with NO x-callback-token → rejected (401/503)', async () => {
-    const r = await fetch(`${BASE}/api/webhook/xendit`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ external_id: 'forged', status: 'PAID' }),
-    });
-    assert.ok([401, 503].includes(r.status), `expected 401/503, got ${r.status}`);
-  });
-
-  await live('webhook with WRONG token → rejected (401)', async () => {
-    const r = await fetch(`${BASE}/api/webhook/xendit`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-callback-token': 'definitely-wrong' },
-      body: JSON.stringify({ external_id: 'forged', status: 'PAID' }),
-    });
-    assert.strictEqual(r.status, 401, `expected 401, got ${r.status}`);
-  });
+  // ── THE TWO WEBHOOK FORGERY CHECKS ARE DELETED, 2026-09-18 ──
+  // They POSTed a forged `{external_id, status: 'PAID'}` at `/api/webhook/xendit`
+  // with no token and with a wrong one, and asserted 401. The route is deleted, so
+  // both would now get a 404 - and the first would have PASSED it as a `503`-shaped
+  // refusal had the accepted set been one value wider. A check that green-lights a
+  // missing route is not a check that an endpoint rejects forgeries.
+  //
+  // NOTHING IS LEFT UNGUARDED. There is no notification endpoint to forge against
+  // until Prompt V builds one, and when it does the token verification is its
+  // adapter's own first commit. The gate that matters meanwhile is the one above:
+  // an unpaid `/full` leaks no paid content, and that runs on every `--live`.
+  //
+  // PROMPT V RESTORES THEM POINTED AT DOKU, and it must: a notification endpoint
+  // that trusts its body is how a free unlock ships. That requirement is written
+  // into docs/NEXT.md rather than left here as a commented-out fetch.
 }
 
 console.log(`\n${fail === 0 ? 'PASS' : 'FAIL'} — ${pass} passed, ${fail} failed`);

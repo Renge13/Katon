@@ -61,27 +61,36 @@ test('the route is RULED and written down once', () => {
   }
 });
 
-// ── THE XENDIT REDIRECT REGRESSION X-b1 NAMED ──────────────
+// ── THE REDIRECT REGRESSION X-b1, AND WHAT IS LEFT OF IT ───
 
-test('A PAIR GETS BOTH REDIRECT URLS, and they are pair URLs', () => {
-  // X-b1 shipped compat checkout with NO redirect URLs and said so in a comment:
-  // the destination is the report page, the page did not exist, and `readingUrl`
-  // builds `/r/<token>` - handing it a PAIR id would send the buyer to a reading
-  // URL for an object that is not a reading, which is what the "person B is never
-  // a reading row" ruling exists to prevent. The buyer's last screen stayed on
-  // Xendit. That was accepted because no reader could reach a compat checkout.
+test('THE TWO URL BUILDERS STAY DIFFERENT, ready for the provider that needs them', () => {
+  // ── WHAT THIS TEST USED TO ASSERT, AND WHY IT CANNOT ──────
+  // It was `A PAIR GETS BOTH REDIRECT URLS, and they are pair URLs`, and it read
+  // `successRedirectUrl: pairUrl(id, '?bayar=selesai')` out of the pay route.
+  // Prompt V-0 deletes the provider branch, so the route builds no redirect URLs
+  // at all and the assertion has no subject. It is NOT quietly dropped, because
+  // the regression it named is a live risk for Prompt V rather than a closed one:
+  // X-b1 shipped compat checkout with NO redirect URLs, the buyer's last screen
+  // stayed on the provider's page, and DOKU's adapter has to put them back.
   //
-  // This page is that reader. The gap closes here.
-  const route = read('app/api/pay/[id]/route.js');
-  assert.match(route, /successRedirectUrl: pairUrl\(id, '\?bayar=selesai'\)/u);
-  assert.match(route, /failureRedirectUrl: pairUrl\(id\)/u);
-  assert.equal(route.includes('...(isCompat ? {} : {'), false,
-    'the empty-object branch that omitted them is gone');
-
-  // A DIFFERENT BUILDER, not readingUrl with a different argument.
+  // THE REQUIREMENT MOVES TO WHERE IT WILL BE READ: docs/NEXT.md's Prompt V line
+  // and the PROGRESS row for this PR both carry it. A test asserting a string in a
+  // branch that does not exist would be red for the whole of V-0's life and would
+  // teach the next session to delete it rather than satisfy it.
+  //
+  // WHAT SURVIVES IS THE HALF THAT STILL HAS A SUBJECT. The reason X-b1 omitted
+  // the URLs was that `readingUrl` builds `/r/<token>` and a pair is not a
+  // reading - "person B is never a reading row". Two builders that stay distinct
+  // is what makes the fix possible, and it is checkable today.
   assert.equal(pairUrl('abc', '?bayar=selesai').endsWith('/kompatibilitas/abc?bayar=selesai'), true);
   assert.equal(readingUrl('abc').endsWith('/r/abc'), true);
   assert.notEqual(pairUrl('abc'), readingUrl('abc'));
+
+  // And the route still imports NEITHER, so a provider branch added later cannot
+  // reach for the wrong one out of habit - it has to add the import deliberately.
+  const route = read('app/api/pay/[id]/route.js');
+  assert.equal(/import .*from '@\/lib\/site\/baseUrl'/u.test(route), false,
+    'no URL builder is imported while there is no provider to redirect from');
 });
 
 test('compat is sellable, which is what makes the page reachable', () => {

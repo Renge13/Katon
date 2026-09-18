@@ -20,7 +20,7 @@ const read = (p) => readFileSync(path.join(ROOT, p), 'utf8');
 
 /** Run `fn` with exactly this payment env and nothing inherited. */
 function withEnv(env, fn) {
-  const KEYS = ['PAYMENTS_PROVIDER', 'VERCEL_ENV', 'NODE_ENV', 'XENDIT_SECRET_KEY', 'XENDIT_WEBHOOK_TOKEN'];
+  const KEYS = ['PAYMENTS_PROVIDER', 'VERCEL_ENV', 'NODE_ENV'];
   const saved = {};
   for (const k of KEYS) { saved[k] = process.env[k]; delete process.env[k]; }
   Object.assign(process.env, env);
@@ -64,15 +64,22 @@ test('MOCK IS REFUSED IN PRODUCTION, whatever the variable says', () => {
   }
 });
 
-test('CLOSED REFUSES BEFORE THE XENDIT KEYS ARE EVEN CONSULTED', () => {
-  // The keys are about to be unset. Their absence must not then read as a
-  // misconfiguration - `closed` is a deliberate state and says so in its reason
-  // string, which is what the client renders the sales-closed page from.
+test('CLOSED IS A DELIBERATE STATE, never a misconfiguration', () => {
+  // This used to read `CLOSED REFUSES BEFORE THE XENDIT KEYS ARE EVEN CONSULTED`
+  // and it set them, to prove the fence answered before it looked at them. There
+  // are no keys to consult any more, so what survives is the half that still has
+  // content: `closed` says so in its own reason string, which is what the client
+  // renders the sales-closed page from. A reader must not be told to try again.
   withEnv({ PAYMENTS_PROVIDER: 'closed', NODE_ENV: 'production' }, () => {
     assert.equal(paymentFenceReason(), 'payment_closed');
   });
-  withEnv({ PAYMENTS_PROVIDER: 'closed', NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: 't' }, () => {
-    assert.equal(paymentFenceReason(), 'payment_closed', 'fully configured and still closed');
+  // In development too. The `NODE_ENV !== 'production'` dev bypass that used to
+  // return null here is deleted, and that is a real behaviour change: a local run
+  // with no provider now REFUSES instead of quietly permitting. It is the right
+  // way round - the bypass existed to stand in for an absent adapter, and mock is
+  // the supported way to walk the flow.
+  withEnv({ PAYMENTS_PROVIDER: 'closed', NODE_ENV: 'development' }, () => {
+    assert.equal(paymentFenceReason(), 'payment_closed', 'no dev bypass survives');
   });
 });
 
@@ -85,15 +92,15 @@ test('A STALE PAYMENTS_PROVIDER=xendit MEANS CLOSED', () => {
   // some environment somewhere - a Preview project, a restored deploy, a `.env.local`
   // nobody reopened - and an unrecognised value must land in the same place an unset
   // one does. Fully configured with both keys present is the strongest form of the
-  // case: even then the answer is CLOSED, because the account behind those keys is
-  // being terminated and a key that still parses is not an account that still works.
-  withEnv({
-    PAYMENTS_PROVIDER: 'xendit',
-    NODE_ENV: 'production',
-    XENDIT_SECRET_KEY: 'k',
-    XENDIT_WEBHOOK_TOKEN: 't',
-  }, () => {
+  // case. The keys are not set here and deliberately not: nothing reads them any
+  // more, so setting them would be a test dressing up a fact it no longer checks.
+  // What IS checked is that the word `xendit` buys nothing at all.
+  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production' }, () => {
     assert.equal(paymentsProvider(), 'closed');
+    assert.equal(paymentFenceReason(), 'payment_closed');
+  });
+  // And on a preview, where the value is likeliest to still be sitting.
+  withEnv({ PAYMENTS_PROVIDER: 'xendit', VERCEL_ENV: 'preview' }, () => {
     assert.equal(paymentFenceReason(), 'payment_closed');
   });
 });
@@ -188,11 +195,24 @@ test('THE PAY ROUTE ANSWERS payment_closed, not a misconfiguration', () => {
   const src = read('app/api/pay/[id]/route.js');
   assert.match(src, /if \(fence === 'payment_closed'\) return notConfigured\('payment_closed'\)/u);
   assert.match(src, /paymentsProvider\(\) === 'mock'/u, 'the mock branch exists');
+
   // It used to assert that the mock branch came BEFORE `createQrisInvoice({`, so a
   // closed shop would not call out. There is no call to order it against any more:
   // the adapter is deleted and the route's real-provider branch went with it. The
   // proposition that replaces "mock is first" is "there is nothing else to reach".
-  assert.equal(src.includes('createQrisInvoice'), false,
+  //
+  // COMMENTS STRIPPED, AND THIS IS THE FIFTH TIME IN THIS REPO A DETECTOR HAS
+  // MATCHED ITS OWN DOCUMENTATION - see `THE POLL DOES NOT STACK REQUESTS` below,
+  // which counts the fourth. The first version of this assertion read raw source
+  // and went red on the route's own comment explaining why `INVOICE_DESCRIPTION`
+  // is now unreferenced: that comment names `createQrisInvoice({ description: ... })`
+  // as the reader that went away. The comment is CORRECT and worth keeping, which
+  // is exactly the shape of the trap - the fix is on the instrument, never on the
+  // prose it is misreading.
+  const code = src
+    .replace(/\/\*[\s\S]*?\*\//gu, '')
+    .replace(/^\s*\/\/.*$/gmu, '');
+  assert.equal(code.includes('createQrisInvoice'), false,
     'no provider call survives in the route - the mock branch is the only one');
 });
 
