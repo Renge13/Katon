@@ -4,7 +4,7 @@
 // Added 2026-08-29 with prompt Q commit 1. There was NO test file for
 // `lib/pricing.js` before this, which is why `annual` could be added without
 // anything failing: the SKU table is read by the checkout route and by the
-// Xendit webhook, and both of those are security surfaces (rule 18).
+// settlement path, and both of those are security surfaces (rule 18).
 //
 // WHAT THIS FILE IS ACTUALLY GUARDING, and it is not the numbers. The numbers are
 // Reyner's and they will change again - the launch tier is explicitly the test

@@ -5,7 +5,7 @@
 //   1. a compat checkout that takes money without an email (ruling C), and
 //   2. **a compat invoice flipping a `reading.paid`**, or the reverse.
 //
-// Rule 18: `paid` flips only in the verified Xendit webhook, never from a client
+// Rule 18: `paid` flips only in the verified provider notification, never from a client
 // path. Compat adds a SECOND payable object, so the failure mode is new - one
 // product's settled invoice granting access to another's. The amount check is
 // per-SKU for exactly that reason, and the webhook's own header says a 19000
@@ -156,7 +156,7 @@ test('a verified paid callback flips pair.paid, once', async () => {
   assert.equal((await getPair(id)).paid, true);
   assert.ok((await getPair(id)).paid_at, 'stamped');
 
-  // Idempotent: a genuine Xendit double-fire reports false the second time, so a
+  // Idempotent: a genuine provider double-fire reports false the second time, so a
   // once-only side effect could only ever run once.
   const second = await settlePair(id, await getPair(id), true, priceFor('compat'));
   assert.deepEqual(second, { paid: false, reason: 'already_paid' });

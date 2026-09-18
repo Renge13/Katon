@@ -1248,7 +1248,7 @@ function Offer({ reading, initialStage }) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
     }).then((r) => r.json()).catch(() => null);
-    // Open the Xendit checkout (QRIS) in a new tab; this tab keeps polling and
+    // Open the provider's checkout in a new tab; this tab keeps polling and
     // unlocks when the verified webhook flips paid. Triggered from the click gesture
     // so it is not popup-blocked, and a fallback link shows in the pending state.
     if (res?.invoiceUrl) { setInvoiceUrl(res.invoiceUrl); window.open(res.invoiceUrl, '_blank', 'noopener'); }
@@ -1717,7 +1717,7 @@ export function ReadingByToken({ token }) {
   const [status, setStatus] = useState('loading'); // loading | notfound | ready
   const [reading, setReading] = useState(null);
   const [delivered, setDelivered] = useState(false);
-  // Xendit's success_redirect_url lands here with `?bayar=selesai`. It says only
+  // A provider's success redirect lands here with `?bayar=selesai`. It says only
   // "she came back from checkout", never "she paid" - the paid flag comes from the
   // server, and a hand-typed query string must not change what she is shown beyond
   // which waiting state opens first.

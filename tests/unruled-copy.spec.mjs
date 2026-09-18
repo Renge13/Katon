@@ -119,7 +119,7 @@ test('COMPAT_COPY carries its one slot, and it is RULED', () => {
   // ruled it, and said "when he does, this assertion is the one to invert, and
   // the gate tests below will follow it". He ruled it. They did.
   //
-  // The compat invoice description is the Xendit checkout line AND the buyer's
+  // The compat invoice description is the provider's checkout line AND the buyer's
   // bank statement line, so rule 20 makes it chrome: keyboard characters only,
   // one composed voice. Same form as the artifact's approved `Katon - Complete
   // Edition`, so the two read alike on a statement.

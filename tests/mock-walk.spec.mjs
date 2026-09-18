@@ -128,7 +128,7 @@ test('THE CHECKOUT REALLY NAVIGATES FOR MOCK, rather than pushState-and-stay', (
   assert.match(mockBranch, /location\.assign/u,
     'mock must perform a real navigation so the report route mounts');
   assert.ok(src.indexOf('location.assign') < src.indexOf('history.pushState'),
-    'and it must return BEFORE the pushState that is for the Xendit path');
+    'and it must return BEFORE the pushState that is for a real provider path');
 });
 
 test('THE MOCK URL IS SAME-ORIGIN, not an absolute URL on another alias', () => {
@@ -136,7 +136,7 @@ test('THE MOCK URL IS SAME-ORIGIN, not an absolute URL on another alias', () => 
   // preview that pointed at a DIFFERENT alias - the pay call answered
   // `https://katon-eta.vercel.app/...` to a request made against
   // `katon-git-fix-link-keep-...`. For a real provider an absolute URL is
-  // required, because Xendit redirects a browser to it. For mock it is a link
+  // required, because a provider redirects a browser to it. For mock it is a link
   // back to the page the walker is already on, so it must be relative or the
   // walk hops hosts mid-flow.
   const src = code('app/api/pay/[id]/route.js');
