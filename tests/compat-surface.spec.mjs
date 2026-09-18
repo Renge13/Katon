@@ -433,6 +433,20 @@ test('THE PRIVACY NOTICE DISCLOSES THE EMAIL AND THE SECOND PERSON', () => {
 // XENDIT_SECRET_KEY and XENDIT_WEBHOOK_TOKEN are set for the Preview environment
 // too. `/api/pair` is fine - so it is neither the 409 dual-season path nor the
 // store.
+//
+// ── THE TWO KEY-PRESENCE TESTS ARE DELETED, 2026-09-18 ────
+// The paragraph above is KEPT: it is dated history and it records a real
+// diagnosis, so a future session reading a 503 from /api/pay does not re-derive
+// it from scratch. What is deleted is the pair of tests that used to sit below
+// it - `IN PRODUCTION WITH NO XENDIT KEY, /api/pay REFUSES` and `THE WEBHOOK
+// TOKEN IS THE SECOND GATE` - because both asserted `paymentFenceReason()`
+// returning `xendit_secret_key_unset` / `xendit_webhook_token_unset`, and Prompt
+// V-0 deletes the branches that produced those strings. Their premise is gone by
+// ruling (Reyner, 2026-09-18, TERMINATE), not by refactor.
+//
+// Nothing is left unguarded by their removal. The fence's CURRENT answer for the
+// same submit is asserted immediately below, and `tests/payments-provider.spec.mjs`
+// owns every provider case including the stale-variable one.
 
 test('THE PAIR IS CREATED for the exact inputs from the phone walk', async () => {
   // The half that WORKS, pinned so the next failure is not re-diagnosed from
@@ -442,47 +456,6 @@ test('THE PAIR IS CREATED for the exact inputs from the phone walk', async () =>
   for (const birthDate of ['1989-09-13', '1997-09-14']) {
     assert.equal(needsTermSide({ birthDate, birthTime: null }).needed, false,
       `${birthDate} is not a solar-term boundary, so no gate and no 409`);
-  }
-});
-
-test('IN PRODUCTION WITH NO XENDIT KEY, /api/pay REFUSES - shape and all', async () => {
-  // The real response, asserted field by field rather than "it errors": the
-  // client showed a generic sentence precisely because it only knew that much,
-  // and a test that also only knew that much would not have caught this either.
-  //
-  // ── PAYMENTS_PROVIDER=xendit IS NOW EXPLICIT, 2026-09-08 ───
-  // This test pinned the diagnosis of Reyner's preview failure, and at the time
-  // there was no provider variable - Xendit was the only path. There is one now
-  // and it defaults to CLOSED, so leaving it unset here would make the fence
-  // answer `payment_closed` and this test would assert the wrong refusal while
-  // still passing on the word "refuses". Naming the provider keeps the assertion
-  // about the thing it was written for. `tests/payments-provider.spec.mjs` owns
-  // the closed case.
-  const { paymentFenceReason, devBypassAllowed } = await import('../lib/paymentFence.js');
-  const saved = {
-    env: process.env.NODE_ENV,
-    key: process.env.XENDIT_SECRET_KEY,
-    provider: process.env.PAYMENTS_PROVIDER,
-  };
-  try {
-    process.env.NODE_ENV = 'production';
-    process.env.PAYMENTS_PROVIDER = 'xendit';
-    delete process.env.XENDIT_SECRET_KEY;
-
-    assert.equal(paymentFenceReason(), 'xendit_secret_key_unset');
-    assert.equal(devBypassAllowed(), false,
-      'and the dev fallback that hides this locally is OFF - which is why it only showed on preview');
-
-    // The literal body the route builds from that reason. This is the string a
-    // later session will grep for when the same thing happens again.
-    const body = { error: `payment_not_configured:${paymentFenceReason()}` };
-    assert.equal(body.error, 'payment_not_configured:xendit_secret_key_unset');
-  } finally {
-    process.env.NODE_ENV = saved.env;
-    if (saved.key === undefined) delete process.env.XENDIT_SECRET_KEY;
-    else process.env.XENDIT_SECRET_KEY = saved.key;
-    if (saved.provider === undefined) delete process.env.PAYMENTS_PROVIDER;
-    else process.env.PAYMENTS_PROVIDER = saved.provider;
   }
 });
 
@@ -503,34 +476,6 @@ test('AND THAT SUBMIT IS NOW REFUSED FOR A DIFFERENT REASON ENTIRELY', async () 
   }
 });
 
-test('THE WEBHOOK TOKEN IS THE SECOND GATE, so setting one key is not enough', async () => {
-  // Worth its own assertion because it is the next thing to go wrong: with only
-  // XENDIT_SECRET_KEY set for Preview, the fence still refuses and the symptom is
-  // identical from the reader's side.
-  const { paymentFenceReason } = await import('../lib/paymentFence.js');
-  const saved = {
-    env: process.env.NODE_ENV,
-    key: process.env.XENDIT_SECRET_KEY,
-    tok: process.env.XENDIT_WEBHOOK_TOKEN,
-    provider: process.env.PAYMENTS_PROVIDER,
-  };
-  try {
-    process.env.NODE_ENV = 'production';
-    process.env.PAYMENTS_PROVIDER = 'xendit';
-    process.env.XENDIT_SECRET_KEY = 'set';
-    delete process.env.XENDIT_WEBHOOK_TOKEN;
-    assert.equal(paymentFenceReason(), 'xendit_webhook_token_unset');
-  } finally {
-    process.env.NODE_ENV = saved.env;
-    if (saved.key === undefined) delete process.env.XENDIT_SECRET_KEY;
-    else process.env.XENDIT_SECRET_KEY = saved.key;
-    if (saved.tok === undefined) delete process.env.XENDIT_WEBHOOK_TOKEN;
-    else process.env.XENDIT_WEBHOOK_TOKEN = saved.tok;
-    if (saved.provider === undefined) delete process.env.PAYMENTS_PROVIDER;
-    else process.env.PAYMENTS_PROVIDER = saved.provider;
-  }
-});
-
 test('THE PAGE CANNOT TELL A CONFIG REFUSAL FROM A TRANSIENT ONE, and says so', () => {
   // ── THE PART THAT IS STILL A DEFECT, RECORDED NOT FIXED ────
   // `readableError` maps everything except a rate limit to "Ada yang salah. Coba
@@ -547,7 +492,7 @@ test('THE PAGE CANNOT TELL A CONFIG REFUSAL FROM A TRANSIENT ONE, and says so', 
   // the CURRENT behaviour so that changing it is a decision someone makes on
   // purpose, with his wording, rather than a drive-by.
   const RATE = ['rate_limited', 'session', 'ip'];
-  assert.equal(readableError({ error: 'payment_not_configured:xendit_secret_key_unset' }),
+  assert.equal(readableError({ error: 'payment_not_configured:secret_key_unset' }),
     readableError({ error: 'anything_else' }),
     'a config refusal and a transient failure read identically to the reader today');
   for (const e of RATE) {

@@ -10,7 +10,7 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 import { paymentsProvider, paymentFenceReason, mockPaymentsAllowed } from '../lib/paymentFence.js';
@@ -76,18 +76,108 @@ test('CLOSED REFUSES BEFORE THE XENDIT KEYS ARE EVEN CONSULTED', () => {
   });
 });
 
-test('XENDIT IS UNCHANGED, which is what makes this reversible', () => {
-  // Nothing about the adapter is edited by this ruling; the provider simply is
-  // not selected. If `xendit` is chosen the old fence applies exactly as before.
-  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production' }, () => {
-    assert.equal(paymentFenceReason(), 'xendit_secret_key_unset');
+test('A STALE PAYMENTS_PROVIDER=xendit MEANS CLOSED', () => {
+  // REPLACES `XENDIT IS UNCHANGED, which is what makes this reversible`, whose
+  // premise is gone by ruling: Reyner took the TERMINATE branch on 2026-09-18 and
+  // the adapter is deleted, so there is no longer anything to be reversible to.
+  //
+  // WHAT THIS GUARDS IS THE STALE VARIABLE. The value `xendit` is still typed into
+  // some environment somewhere - a Preview project, a restored deploy, a `.env.local`
+  // nobody reopened - and an unrecognised value must land in the same place an unset
+  // one does. Fully configured with both keys present is the strongest form of the
+  // case: even then the answer is CLOSED, because the account behind those keys is
+  // being terminated and a key that still parses is not an account that still works.
+  withEnv({
+    PAYMENTS_PROVIDER: 'xendit',
+    NODE_ENV: 'production',
+    XENDIT_SECRET_KEY: 'k',
+    XENDIT_WEBHOOK_TOKEN: 't',
+  }, () => {
+    assert.equal(paymentsProvider(), 'closed');
+    assert.equal(paymentFenceReason(), 'payment_closed');
   });
-  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k' }, () => {
-    assert.equal(paymentFenceReason(), 'xendit_webhook_token_unset');
-  });
-  withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production', XENDIT_SECRET_KEY: 'k', XENDIT_WEBHOOK_TOKEN: 't' }, () => {
-    assert.equal(paymentFenceReason(), null);
-  });
+});
+
+// ── THE FILE WALKER, shared by the two source assertions ───
+// THE FILE LIST COMES FROM `fs`, NOT FROM A SHELL GREP. A spec that shells out
+// measures the developer's PATH as much as the repo, and this suite runs on
+// Windows and on CI. It is written so it CAN fail: it reports file, line and the
+// offending text, so a red says what to delete rather than only that something is
+// wrong.
+const EXT = new Set(['.js', '.jsx', '.mjs']);
+function scan(roots, re) {
+  const hits = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) { walk(full); continue; }
+      if (!EXT.has(path.extname(entry.name))) continue;
+      readFileSync(full, 'utf8').split('\n').forEach((line, i) => {
+        if (re.test(line)) {
+          hits.push(`${path.relative(ROOT, full).replace(/\\/gu, '/')}:${i + 1}: ${line.trim()}`);
+        }
+      });
+    }
+  };
+  for (const r of roots) walk(path.join(ROOT, r));
+  return hits.sort();
+}
+
+test('NO XENDIT IN THE PAYMENT PATH', () => {
+  // The source assertion that makes the deletion durable rather than a one-time
+  // edit. A later session restoring the adapter to "just test something" reddens
+  // here.
+  //
+  // ── WHY THIS IS SCOPED AND NOT A REPO-WIDE SWEEP ──────────
+  // A repo-wide `xendit` ban would have to carry an exclusion list seven files
+  // long, and a check that is mostly exclusions is a check written from the
+  // requirement it documents rather than from the defect it catches. The mentions
+  // that survive this PR are in two categories, both deliberate and neither on the
+  // payment path: DATED HISTORY (why /tentang exists, why the footer is a server
+  // component, the X-b1 regression record) which records what was true when
+  // written, and READER-VISIBLE INDONESIAN in `lib/site/copy.js` - the privacy
+  // policy and terms naming the processor that actually handled those payments.
+  // Copy is Reyner's alone (rule 20) and its replacement has to name DOKU, which
+  // does not exist yet. Both are Prompt V's business, not this PR's.
+  //
+  // So the proposition here is the one that is unambiguous and worth guarding:
+  // the files that DECIDE OR RECORD A PAYMENT carry no trace of the adapter.
+  const PAYMENT_PATH = [
+    'lib/paymentFence.js',
+    'lib/pricing.js',
+    'lib/pairStore.js',
+    'lib/readingStore.js',
+    'lib/pair/settle.js',
+    'lib/pair/serve.js',
+    'lib/deliver/handlers.js',
+    'app/api/pay/[id]/route.js',
+    'app/api/mock-pay/[id]/route.js',
+  ];
+  const offenders = [];
+  for (const rel of PAYMENT_PATH) {
+    const full = path.join(ROOT, rel);
+    assert.ok(existsSync(full), `${rel} exists - a renamed file must not silently drop out of this list`);
+    readFileSync(full, 'utf8').split('\n').forEach((line, i) => {
+      if (/xendit/iu.test(line)) offenders.push(`${rel}:${i + 1}: ${line.trim()}`);
+    });
+  }
+  assert.deepEqual(offenders, [], 'no file that decides or records a payment may name the adapter');
+});
+
+test('THE ADAPTER AND ITS WEBHOOK ARE GONE, and nothing imports them', () => {
+  // Deletion and de-referencing are two different propositions and both matter: a
+  // deleted file with a surviving import is a build break, and a surviving file
+  // with no imports is a dead adapter someone will wire back up.
+  assert.equal(existsSync(path.join(ROOT, 'lib/xendit.js')), false,
+    'the adapter is deleted, not merely unreferenced');
+  assert.equal(existsSync(path.join(ROOT, 'app/api/webhook')), false,
+    'the whole webhook directory goes - xendit was the only route in it');
+
+  // Any reference to the MODULE, however it is spelled: `@/lib/xendit`,
+  // `../xendit.js`, a dynamic import. Repo-wide, because unlike a prose mention
+  // there is no legitimate reason for one of these to survive anywhere.
+  assert.deepEqual(scan(['lib', 'app', 'components'], /['"][^'"]*\/xendit(\.js)?['"]/u), [],
+    'nothing imports the deleted module');
 });
 
 test('THE PAY ROUTE ANSWERS payment_closed, not a misconfiguration', () => {
@@ -98,9 +188,12 @@ test('THE PAY ROUTE ANSWERS payment_closed, not a misconfiguration', () => {
   const src = read('app/api/pay/[id]/route.js');
   assert.match(src, /if \(fence === 'payment_closed'\) return notConfigured\('payment_closed'\)/u);
   assert.match(src, /paymentsProvider\(\) === 'mock'/u, 'the mock branch exists');
-  // And it is BEFORE the Xendit adapter, or a closed shop would still call out.
-  assert.ok(src.indexOf("paymentsProvider() === 'mock'") < src.indexOf('createQrisInvoice({'),
-    'the mock branch must short-circuit before the provider is called');
+  // It used to assert that the mock branch came BEFORE `createQrisInvoice({`, so a
+  // closed shop would not call out. There is no call to order it against any more:
+  // the adapter is deleted and the route's real-provider branch went with it. The
+  // proposition that replaces "mock is first" is "there is nothing else to reach".
+  assert.equal(src.includes('createQrisInvoice'), false,
+    'no provider call survives in the route - the mock branch is the only one');
 });
 
 test('THE MOCK UNLOCK GOES THROUGH THE WEBHOOK\'S OWN DOOR', () => {
