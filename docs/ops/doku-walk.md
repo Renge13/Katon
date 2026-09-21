@@ -339,6 +339,50 @@ Katon's row simply never flips. Nothing errors. The only symptom is a paid custo
 with no product — which is exactly the shape of failure `npm run doku:status` exists
 for.
 
+### WALK 2, 2026-09-21 — the URL was registered, and DOKU STILL SENT NOTHING
+
+With the Notification URL saved on the **VA BCA** channel, the walk was repeated:
+
+```
+05:26:24Z  pair qvW0XL5L2Zb25p9Xg71Uv created
+05:26:33Z  Checkout session qvW0XL5L2Zb25p9Xg71Uv.muasyrm4, VA 1900800000347916
+05:27:37Z  paid in the simulator -> Payment Success, IDR 39000.00
+05:27:37Z -> 05:32:35Z   polled 14 times -> not_paid throughout
+```
+
+`npm run doku:status` again: `transaction.status: SUCCESS`. And a hand-signed
+notification marked `capture-probe-053325`, sent at `05:33:25Z` against a deliberately
+non-existent row id, returned `200 {"received":true}` without touching the pair.
+
+**Reyner then read the Back Office, and this is the finding that matters:**
+
+> There is **no Checkout-level notification setting** at all, and the **Notification
+> Center shows ZERO attempts for both invoices**.
+
+**So DOKU never tried to send anything.** That clears the verifier completely - "DOKU
+delivered and the route rejected it" was one of the two live hypotheses after walk 1,
+and it is now dead on DOKU's own record rather than on our reasoning. It also means
+the per-channel URL finding above, while true, was not the whole cause: registering it
+on VA BCA changed nothing.
+
+### THE OVERRIDE, AND WHY IT IS WORTH TRYING BEFORE QRIS IS ENABLED
+
+`additional_info.override_notification_url` is a documented, optional field on
+`POST /checkout/v1/payment`:
+
+> "This parameter is intended to override the configured `Notification URL` with
+> another URL."
+> — developers.doku.com/accept-payments/doku-checkout/integration-guide/backend-integration.md,
+>   read 2026-09-21
+
+If DOKU honours it, it is worth more than a workaround for this walk. **It moves the
+notification destination out of a Back Office screen and into the request**, which is
+exactly the class of silent failure this page has now recorded twice: a URL that is set,
+looks set, and is set against the wrong thing. A destination named in the code is one a
+test can assert.
+
+Whether it ships is decided by the sandbox, not by the docs, and not before.
+
 ### HOW THE NEXT WALK CAPTURES THE FIXTURE
 
 The last walk could not have produced one even if DOKU had delivered: nothing put the
