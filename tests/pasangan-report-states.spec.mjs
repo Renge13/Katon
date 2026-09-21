@@ -572,3 +572,26 @@ test('NO NON-READY VIEW OFFERS THE PDF', async () => {
     } finally { ui.unmount(); restore(); }
   }
 });
+
+// ── THE QUADRANT TITLE LINE (Y-4 commit 3, 2026-09-14) ─────
+
+test('THE REPORT NAMES THE QUADRANT AS A TITLE, the same source the PDF uses', async () => {
+  // Y-4 commit 3: "on the web report too, same source, so PDF and page agree". The
+  // engine decides the quadrant; naming it is structure (rule 14), not a new claim.
+  //
+  // THE EXPECTED STRING COMES FROM THE PAYLOAD, not from this file: `facts.quadrant`
+  // is the glossary `name_id` the server already resolves through `namedOr`, and
+  // hard-coding it here would be a second copy of a ruled value - the defect
+  // `serveReading` fixed when `q4` reached a paying reader.
+  const restore = stub({ pair: { status: 'paid' }, reading: READING('render') });
+  const ui = await mount();
+  try {
+    const title = READING('render').facts.quadrant;
+    assert.ok(title, 'precondition: the payload carries a resolved quadrant name');
+    assert.ok(ui.text().includes(title), 'the report does not name the quadrant');
+    // A RAW KEY MUST NEVER BE THE TITLE - the 2026-09-08 defect, in this exact spot.
+    for (const q of ['q1', 'q2', 'q3', 'q4']) {
+      assert.equal(ui.text().includes(q), false, `the raw key ${q} is on the report`);
+    }
+  } finally { ui.unmount(); restore(); }
+});

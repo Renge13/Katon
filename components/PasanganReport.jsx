@@ -589,6 +589,27 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
             the model's (Addendum 2 item 2). `modelHeadings={false}` is what
             closes the door: without it a block with no section mapping would
             fall back to whatever the model titled it. */}
+        {/* ── THE QUADRANT NAMES THE READING (Y-4 commit 3, 2026-09-14) ──
+            The engine already decides the quadrant, so naming it here is STRUCTURE
+            (rule 14) rather than a new claim: no new string, no verdict word, just
+            the glossary `name_id`.
+
+            FROM `facts.quadrant`, WHICH THE SERVER ALREADY RESOLVED through
+            `namedOr`. Not from a key and not from a second lookup here - on
+            2026-09-08 `q4` reached a reader who had paid Rp 39.000 exactly because a
+            surface printed a raw key it believed was a name. The PDF names it from
+            the same resolved source, which is what makes the page and the document
+            agree by construction rather than by two edits staying in step. */}
+        {reading.facts?.quadrant && (
+          <Reveal delay={0.12}>
+            <h2 style={{
+              fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 22, lineHeight: 1.2, color: 'var(--tinta)', margin: '26px 0 0',
+            }}
+            >
+              {reading.facts.quadrant}
+            </h2>
+          </Reveal>
+        )}
         <ProseBlocks
           reading={reading.reading}
           labelFor={labelFor(reading.facts, reading.names)}
