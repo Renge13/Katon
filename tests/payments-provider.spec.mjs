@@ -13,14 +13,23 @@ import { test } from 'node:test';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
-import { paymentsProvider, paymentFenceReason, mockPaymentsAllowed } from '../lib/paymentFence.js';
+import {
+  paymentsProvider, paymentFenceReason, mockPaymentsAllowed, dokuConfigured,
+} from '../lib/paymentFence.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const read = (p) => readFileSync(path.join(ROOT, p), 'utf8');
 
 /** Run `fn` with exactly this payment env and nothing inherited. */
 function withEnv(env, fn) {
-  const KEYS = ['PAYMENTS_PROVIDER', 'VERCEL_ENV', 'NODE_ENV'];
+  // THE DOKU KEYS ARE IN HERE FOR THE SAME REASON THE OTHERS ARE. Round 2 put a
+  // real sandbox pair in `.env.local`, and any runner that loads it would otherwise
+  // make `DOKU WITHOUT KEYS REFUSES` pass on a machine where the keys are present -
+  // a green that measures the developer's dotfile rather than the fence.
+  const KEYS = [
+    'PAYMENTS_PROVIDER', 'VERCEL_ENV', 'NODE_ENV',
+    'DOKU_CLIENT_ID', 'DOKU_SECRET_KEY', 'DOKU_SANDBOX',
+  ];
   const saved = {};
   for (const k of KEYS) { saved[k] = process.env[k]; delete process.env[k]; }
   Object.assign(process.env, env);
@@ -41,8 +50,70 @@ test('AN UNSET VARIABLE MEANS CLOSED, never xendit', () => {
     assert.equal(paymentFenceReason(), 'payment_closed');
   });
   // An unrecognised value is not a third state either.
-  withEnv({ PAYMENTS_PROVIDER: 'doku' }, () => assert.equal(paymentsProvider(), 'closed'));
+  //
+  // THIS LINE USED TO USE `doku` AND IT WAS RIGHT TO, until Prompt V. `doku` is a
+  // recognised value now, by ruling, so the assertion moved to a word that is not -
+  // and the proposition it was making is unchanged. It is written out rather than
+  // quietly swapped because "a value this fence does not know reads as closed" is
+  // the point, and the day the fence learns a fourth value, the same edit is due.
+  withEnv({ PAYMENTS_PROVIDER: 'midtrans' }, () => assert.equal(paymentsProvider(), 'closed'));
   withEnv({ PAYMENTS_PROVIDER: '' }, () => assert.equal(paymentsProvider(), 'closed'));
+});
+
+test('DOKU WITHOUT KEYS REFUSES, and says WHICH key', () => {
+  // The fence's third answer, and V-doku.md §1 asks for it named per key: these are
+  // two different mistakes in two different Vercel fields, and the person reading
+  // the 503 is the person who has to fix one of them. A shared reason makes them
+  // check both.
+  //
+  // `paymentsProvider()` still returns `doku` in all three cases. That is the
+  // separation the route depends on: WHICH provider is selected and WHETHER it is
+  // usable are different questions, and collapsing them would make a missing key
+  // indistinguishable from a closed shop on the page the buyer sees.
+  withEnv({ PAYMENTS_PROVIDER: 'doku' }, () => {
+    assert.equal(paymentsProvider(), 'doku');
+    assert.equal(paymentFenceReason(), 'doku_client_id_unset');
+    assert.equal(dokuConfigured(), false);
+  });
+  withEnv({ PAYMENTS_PROVIDER: 'doku', DOKU_CLIENT_ID: 'BRN-0001' }, () => {
+    assert.equal(paymentFenceReason(), 'doku_secret_key_unset');
+    assert.equal(dokuConfigured(), false);
+  });
+  withEnv({ PAYMENTS_PROVIDER: 'doku', DOKU_CLIENT_ID: 'BRN-0001', DOKU_SECRET_KEY: 'SK-x' }, () => {
+    assert.equal(paymentFenceReason(), null, 'both keys present, the path may proceed');
+    assert.equal(dokuConfigured(), true);
+  });
+});
+
+test('DOKU SANDBOX IS REFUSED IN PRODUCTION, whatever the variable says', () => {
+  // The mirror of `MOCK IS REFUSED IN PRODUCTION`, and the subtler of the two. A
+  // sandbox key in production is not "take money", it is "pretend to": the checkout
+  // page looks real, the buyer pays, DOKU sends a genuine signed notification,
+  // `paid` flips, and no money has moved. Every guard downstream passes, because
+  // every one of them is working correctly on a test transaction. Nothing but this
+  // line can tell the difference.
+  const keys = { DOKU_CLIENT_ID: 'BRN-0001', DOKU_SECRET_KEY: 'SK-x' };
+  withEnv({ PAYMENTS_PROVIDER: 'doku', DOKU_SANDBOX: '1', VERCEL_ENV: 'production', ...keys }, () => {
+    assert.equal(paymentsProvider(), 'closed');
+    assert.equal(paymentFenceReason(), 'payment_closed');
+  });
+  // PRODUCTION KEYS IN PRODUCTION ARE FINE - the guard is on the SANDBOX flag, not
+  // on production itself. Getting this backwards would fence out the only
+  // configuration that is supposed to take money.
+  withEnv({ PAYMENTS_PROVIDER: 'doku', VERCEL_ENV: 'production', ...keys }, () => {
+    assert.equal(paymentsProvider(), 'doku');
+    assert.equal(paymentFenceReason(), null);
+  });
+  // And sandbox is allowed everywhere else, or the walk cannot happen.
+  for (const VERCEL_ENV of ['preview', 'development', undefined]) {
+    withEnv({
+      PAYMENTS_PROVIDER: 'doku', DOKU_SANDBOX: '1', ...keys,
+      ...(VERCEL_ENV ? { VERCEL_ENV } : {}),
+    }, () => {
+      assert.equal(paymentsProvider(), 'doku', `sandbox doku on ${VERCEL_ENV ?? 'no VERCEL_ENV'}`);
+      assert.equal(paymentFenceReason(), null);
+    });
+  }
 });
 
 test('MOCK IS REFUSED IN PRODUCTION, whatever the variable says', () => {

@@ -2,11 +2,13 @@ import { getReading, setInvoice } from '@/lib/readingStore';
 import { getPair, setPairInvoice } from '@/lib/pairStore';
 import { COMPAT_COPY } from '@/lib/site/copy';
 import { compatEmail, resolveCheckoutTarget } from '@/lib/pair/checkout';
-import { isSellable, DEFAULT_SKU, SELLABLE_SKUS } from '@/lib/pricing';
+import { isSellable, DEFAULT_SKU, SELLABLE_SKUS, priceFor } from '@/lib/pricing';
 import { recordEvent } from '@/lib/analytics/events';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
 import { paymentFenceReason, paymentsProvider } from '@/lib/paymentFence';
 import { compatPairRoute } from '@/lib/site/routes';
+import { pairUrl, readingUrl } from '@/lib/site/baseUrl';
+import { createCheckout } from '@/lib/doku/client';
 
 export const runtime = 'nodejs';
 
@@ -66,17 +68,16 @@ export const runtime = 'nodejs';
 // Indonesian buyer's bank statement, and borrowing the free product's own word.
 // Guessing here has a measured track record of being wrong, and the alternative
 // to a sentinel was holding the whole payment path on one string.
-// ── IT IS UNREFERENCED TODAY, AND THAT IS THE POINT ───────
-// Its only reader was `createQrisInvoice({ description: ... })`, which V-0 deletes,
-// so `no-unused-vars` fires. The exemption is written here rather than the const
-// being deleted, because the history above is the argument: three supersessions of
-// this exact surface, two for reasons a fresh guess would have repeated. Deleting
-// it would hand Prompt V a blank line where a ruled string used to be, and the
-// block's own sentence is that guessing here has a measured track record of being
-// wrong. `scripts/check-unruled-copy.mjs` does not protect it either - that gate
-// scans the registered COPY_BANKS, so the `compat` sentinel is caught through
-// `COMPAT_COPY`, not through this object.
-// eslint-disable-next-line no-unused-vars -- held for the DOKU adapter, Prompt V
+// ── IT HAS ITS READER AGAIN, 2026-09-21 ──────────────────
+// Held through V-0 with an eslint exemption for exactly this: the DOKU branch below
+// passes it as `lineItemName`. The exemption goes with the reason for it.
+//
+// WHAT THE BUYER ACTUALLY SEES IS NARROWER THAN THE BLOCK ABOVE ASSUMES. On QRIS
+// the bank or e-wallet statement line shows the MERCHANT NAME - the PT - not this
+// string; this string is the line item on DOKU's checkout page. Reyner's 2026-08-22
+// approval was framed as a statement line, and V-doku.md §8.7 tells him so. No
+// change is proposed here: the words are his either way, and the paragraphs above
+// are why guessing at them has a measured track record of being wrong.
 const INVOICE_DESCRIPTION = {
   artifact: 'Katon - Complete Edition',
   compat: COMPAT_COPY.invoiceDesc,
@@ -199,12 +200,53 @@ export async function POST(request, { params }) {
       return json({ ok: true, pending: true, invoiceUrl: mockUrl, mock: true });
     }
 
-    // ── THERE IS NO PROVIDER BRANCH ANY MORE ──────────────────
-    // What stood here built a QRIS invoice, stored it, counted `checkout_started`
-    // and returned its URL. The adapter is deleted (Prompt V-0, Reyner's exit
-    // ruling of 2026-09-18) and the branch went with it, along with the
-    // redirect-URL block and the `catch` that fell back to a dev pending state
-    // on `not_configured`.
+    // ── DOKU: THE REAL PROVIDER, Prompt V ─────────────────────
+    // It slots in ABOVE the floor below, not in place of it, exactly as that
+    // block's own last line says.
+    if (paymentsProvider() === 'doku') {
+      // ── THE SUFFIX, AND WHY IT IS STILL HERE ──────────────
+      // `invoice_number` is the merchant's unique key, and DOKU's docs make
+      // uniqueness the merchant's obligation rather than promising a behaviour on
+      // a repeat. A buyer who abandons a session and clicks Buy again would
+      // otherwise reuse one. The nanoid alphabet contains no `.`, so the settle
+      // side recovers the row id with `split('.')[0]` and nothing else.
+      //
+      // §3 said to DROP this if the sandbox showed DOKU returns the existing
+      // session on a repeat. The sandbox could not answer - QRIS is inactive on
+      // the account, so all four probe calls failed for an unrelated reason
+      // (docs/ops/doku-walk.md Part 2). Undropped because unanswered, and the
+      // deferred register carries the row.
+      const invoiceNumber = `${id}.${Date.now().toString(36)}`;
+      const amount = priceFor(sku);
+      // ABSOLUTE, because DOKU redirects a browser back from its own domain. The
+      // mock branch above is the exception and its comment explains why.
+      // `?bayar=selesai` is a UI hint and never an entitlement.
+      const back = isCompat ? pairUrl(id, '?bayar=selesai') : readingUrl(id, '?bayar=selesai');
+
+      const { paymentUrl } = await createCheckout({
+        invoiceNumber,
+        amount,
+        callbackUrl: back,
+        callbackUrlResult: back,
+        lineItemName: INVOICE_DESCRIPTION[sku],
+        email,
+      });
+
+      // STORED BEFORE THE EVENT, and the event only AFTER the session exists:
+      // `checkout_started` must mean a buyer really was sent somewhere.
+      if (isCompat) {
+        await setPairInvoice(id, { invoiceId: invoiceNumber, invoiceUrl: paymentUrl, sku, email });
+      } else {
+        await setInvoice(id, { invoiceId: invoiceNumber, waNumber, sku });
+      }
+      await recordEvent(id, 'checkout_started', { sku, provider: 'doku' });
+      return json({ ok: true, pending: true, invoiceUrl: paymentUrl });
+    }
+
+    // ── AND THE FLOOR BELOW IT IS UNCHANGED ───────────────────
+    // What stood here before V-0 built a QRIS invoice through the old adapter.
+    // That adapter is deleted (Reyner's exit ruling of 2026-09-18); the branch
+    // above is DOKU's and is not its restoration.
     //
     // DEFENSIVE, AND IT SHOULD BE UNREACHABLE. The fence at the top of this
     // handler already answered `payment_closed` for every provider except `mock`,
