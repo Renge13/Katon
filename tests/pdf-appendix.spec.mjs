@@ -51,12 +51,24 @@ test('groups appear in the ruled order, and an empty group is dropped rather tha
 
 // ── CORRECTION 1: a `label: null` fact is never named ──────
 
-test('A CONDITION IS NEVER NAMED - not in English, not in Indonesian', () => {
-  // Two of chart 1's facts carry `label: null`. A first draft printed their
-  // `label_bracket`, so a paid Indonesian document said "Missing Wood" and
-  // "Dominant Officer"; a second draft invented "Kayu yang Hilang". Both are the
-  // failure `fact.condition_named` HARD-rejects in the renderer, and that check is
-  // what floored chart 5 at attempt 2 in Reyner's 08-19 read.
+test('A CONDITION IS LABELLED BY ITS ABSENCE, never by an invented noun', () => {
+  // ── WHAT THIS REPLACED, AND WHY IT IS NOT A REVERSAL ─────
+  // Until 2026-09-22 this test was `A CONDITION IS NEVER NAMED - not in English,
+  // not in Indonesian`, and it asserted `entry.name === null`. Its reasoning was
+  // correction 1's: a first draft printed `label_bracket`, so a paid Indonesian
+  // document said "Missing Wood" and "Dominant Officer"; a second invented "Kayu
+  // yang Hilang". Both NAME A THING SHE DOES NOT CARRY, which is what
+  // `fact.condition_named` HARD-rejects in the renderer and what floored chart 5 at
+  // attempt 2 in Reyner's 08-19 read.
+  //
+  // THAT REASONING IS INTACT. What changed is that the rows printed with no label
+  // at all, so three paragraphs hung off the row above them and read as its
+  // continuation (P2 markup A6, read on the real PDF). Reyner ruled the format on
+  // 2026-09-22: `Tanpa [Elemen]` / `Dominan [Elemen]`.
+  //
+  // `Tanpa Kayu` names the ABSENCE. `Kayu yang Hilang` names a missing thing as a
+  // thing. The old test could not tell those apart because it forbade both; this
+  // one requires the first and still forbids the second.
   const conditions = CHART_1.semanticJson.facts.filter((f) => f.label === null);
   assert.ok(conditions.length >= 2, 'fixture assumption: chart 1 carries unnamed conditions');
 
@@ -64,9 +76,20 @@ test('A CONDITION IS NEVER NAMED - not in English, not in Indonesian', () => {
   for (const fact of conditions) {
     const entry = entries.find((e) => e.fact_id === fact.id);
     assert.ok(entry, `${fact.id} is in her chart and must still be EXPLAINED`);
-    assert.equal(entry.name, null, `${fact.id} must carry no name`);
-    assert.equal(entry.condition, true);
+    assert.equal(entry.condition, true, `${fact.id} is still a condition`);
     assert.ok(entry.meaning.length > 0, `${fact.id} must carry its ruled meaning`);
+
+    // THE RULED FORMAT, and the element word must be the glossary's own.
+    assert.match(entry.name, /^(Tanpa|Dominan) \S+$/u,
+      `${fact.id}: "${entry.name}" is not the ruled condition format`);
+    assert.equal(entry.name, `${entry.name.split(' ')[0]} ${fact.provenance.element}`,
+      `${fact.id}: the element word must come from the fact, not be composed`);
+
+    // AND THE TWO OLD DEFECTS STAY BANNED BY NAME, because a format check alone
+    // would accept `Dominant Officer` if someone put it in `provenance.element`.
+    assert.notEqual(entry.name, fact.label_bracket, 'never the English bracket');
+    assert.equal(/hilang|yang Hilang/u.test(entry.name), false,
+      'never the invented noun correction 1 threw out');
   }
 });
 
@@ -159,10 +182,27 @@ test('every printed name and meaning is a glossary string, on every fixture char
       for (const v of Object.values(entry)) if (typeof v === 'string') strings.add(v);
     }
   }
+  // ── ONE COMPOSED FORM IS ALLOWED, AND EXACTLY ONE ────────
+  // WIDENED 2026-09-22, NOT WEAKENED. A condition's label is now `Tanpa [Elemen]` /
+  // `Dominan [Elemen]` (Reyner's ruling, P2 markup A6), which is COMPOSED and so is
+  // not a glossary string - this test went red on `"Tanpa Kayu" is not a glossary
+  // string` and it was right to.
+  //
+  // The guard it exists to be is unchanged: no word invented in this generator
+  // reaches a paid document. So the composition is admitted by SHAPE - one of two
+  // ruled prefixes, then a string that must itself be in the glossary - rather than
+  // by adding `Tanpa Kayu` to an allowlist. An allowlist would have to grow by five
+  // entries per prefix and would accept `Tanpa Officer` on the day someone wired
+  // the wrong field.
+  const RULED_CONDITION = /^(Tanpa|Dominan) (.+)$/u;
   for (const tc of VALIDATION_CHARTS) {
     for (const e of flat(buildAppendix(forChart(tc)))) {
-      if (e.name !== null) {
-        assert.ok(strings.has(e.name), `chart ${tc.id}: "${e.name}" is not a glossary string`);
+      if (e.name !== null && !strings.has(e.name)) {
+        const m = RULED_CONDITION.exec(e.name);
+        assert.ok(m, `chart ${tc.id}: "${e.name}" is not a glossary string`);
+        assert.ok(e.condition, `chart ${tc.id}: "${e.name}" uses the condition format but is not one`);
+        assert.ok(strings.has(m[2]),
+          `chart ${tc.id}: "${m[2]}" in "${e.name}" is not a glossary element name`);
       }
       // A display-only entry carries NO meaning by ruling, so there is nothing to
       // check - and asserting one would be asserting that the ruling is broken.
@@ -198,18 +238,38 @@ test('胎元 SHIPS DISPLAY-ONLY, and no invented meaning travels with it', () =>
   assert.equal(GLOSSARY.pilar.conception.label_meaning, undefined,
     'fixture assumption: the ruling holds and conception carries no label_meaning');
 
-  const a = buildAppendix(CHART_1);
-  const entry = flat(a).find((e) => e.key === 'conception');
-  assert.ok(entry, '胎元 still appears - Joey prints it, so a cross-checking reader looks for it');
-  assert.equal(entry.name, 'Pilar Konsepsi', 'the glossary name, not the replaced one');
-  assert.equal(entry.meaning, '', 'no meaning may be invented for it');
-  assert.equal(entry.display_only, true);
+  // ── 胎元 LEAVES THE APPENDIX, 2026-09-22 (P2 markup A7) ──
+  // This used to assert the entry was PRESENT with an empty meaning. On the real
+  // PDF that printed as a group heading `Pilar Konsepsi`, then a row labelled
+  // `Pilar Konsepsi`, then nothing - an empty cell in a document she paid for.
+  // Reyner ruled it out of the appendix.
+  //
+  // THE 2026-08-07 RULING IS UNTOUCHED AND IS STILL WHAT THIS TEST GUARDS: no
+  // meaning may be invented for 胎元. The old test enforced that by shipping an
+  // empty cell; this one enforces it by shipping no cell. Both refuse the invented
+  // sentence prompt M's correction 4 threw out, and only one of them also refuses
+  // to show a buyer a blank.
+  //
+  // IT STILL REACHES HER. The CHART PAGE prints 胎元 with its animal - Joey prints
+  // it and a cross-checking reader looks for it - so what left is a legend row that
+  // explained nothing, not the fact.
+  const entry = flat(buildAppendix(CHART_1)).find((e) => e.key === 'conception');
+  assert.equal(entry, undefined,
+    'a row with no meaning does not print, and 胎元 is the row that has none');
 
-  // The group carries the ruled name too. "Istana Konsepsi" is the string the
-  // 08-07 ruling replaced, and prompt M's group order still used it.
+  // AND THE GROUP GOES WITH IT rather than printing a heading over nothing.
+  assert.equal(
+    buildAppendix(CHART_1).groups.some((g) => g.group === 'Pilar Konsepsi'),
+    false,
+    'no group heading survives its only row',
+  );
+  // "Istana Konsepsi" is the string the 08-07 ruling replaced, and prompt M's group
+  // order still used it. It must not come back through any route, including this one.
+  const a = buildAppendix(CHART_1);
   assert.ok(!JSON.stringify(a).includes('Istana Konsepsi'),
     'the replaced name must not come back through the PDF');
-  // And it is exempt from the ship gate rather than blocking it.
+  // The ship gate still passes - it always did, by exempting `display_only`. Now
+  // there is no entry for it to exempt, which is a simpler way to be right.
   assert.doesNotThrow(() => assertEveryMechanicExplained(a));
 });
 

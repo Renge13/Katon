@@ -14,6 +14,7 @@ import { test } from 'node:test';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
+import { factRows } from '../lib/pdf/pairDocument.js';
 import {
   assertEveryMechanicExplained, assertAnchorsUnique, anchorIds, anchorId, GROUP_ORDER,
 } from '../lib/pdf/appendix.js';
@@ -69,7 +70,25 @@ test('IT IS THEIR PAIR, NOT THE GLOSSARY: the compat subset is a strict subset',
   }
 });
 
-test('2x6 carries p2_reframe, because its seat is a hard one', () => {
+test('2x6 STILL GETS ITS REFRAME - in the facts table now, not the legend', () => {
+  // ── THIS TEST CAUGHT A REAL DEFECT AND IS KEPT FOR IT ────
+  // It used to assert the reframe was an APPENDIX entry, in the correction 1 shape:
+  // no name, a meaning, `condition: true`. Prompt AB §2 moved both unnamed compat
+  // cells out of the legend on the stated ground that they "already appear in the
+  // table and the reading" - and this assertion went red, correctly, because that
+  // was true of `p2_palace_frame` and FALSE of `p2_reframe`:
+  //
+  //   $ node -e "...factRows(buildPairSemantic(chart2, chart6))..."
+  //     facts-table rows for p2_reframe: 0
+  //
+  // Building AB as written would have deleted the de-catastrophising line from a
+  // paid document, for exactly the readers whose seats are hard. Reyner ruled the
+  // fix on 2026-09-22: print it in the FACTS TABLE under the seat rows, hard seats
+  // only, and drop it from the legend.
+  //
+  // So the proposition is unchanged - "the reframe reaches a reader who needs it" -
+  // and only the surface it is asserted on has moved. The legend half is asserted
+  // NEGATIVELY here so the old home cannot quietly come back and give her two.
   const { semanticJson, appendix } = appendixFor(PAIRS['2x6']);
   // The precondition, from the engine rather than from the pair's name: the prompt
   // picked 2x6 for its seat, and a fixture chart edit could quietly change that.
@@ -77,19 +96,38 @@ test('2x6 carries p2_reframe, because its seat is a hard one', () => {
     'precondition: 2x6 is a pair the prompt MANDATES the reframe for');
 
   const compat = appendix.groups.find((g) => g.group === PAIR_GROUP).entries;
-  const reframe = compat.find((e) => e.key === 'p2_reframe');
-  assert.ok(reframe, 'the reframe cell must be explained in a document that prints it');
-  // And it is the CORRECTION 1 shape, which it gets for free by having no `name_id`.
-  assert.equal(reframe.name, null);
-  assert.equal(reframe.condition, true);
-  assert.ok(reframe.meaning.length > 0);
+  assert.equal(compat.some((e) => e.key === 'p2_reframe'), false,
+    'the legend no longer carries it - a legend lists terms, and this has none');
+
+  const note = factRows(semanticJson).find((r) => r.note);
+  assert.ok(note, 'the facts table carries it, under the seat rows');
+  assert.equal(note.meaning, GLOSSARY.kompatibilitas.p2_reframe.label_meaning,
+    'and it is the ruled sentence, unedited');
 });
 
-test('CORRECTION 1: an unnamed cell carries meaning, no name, and no reference row', () => {
+test('NO CELL REACHES THE LEGEND WITHOUT A TERM, and none leaks into a reference list', () => {
+  // ── WHAT THIS REPLACED ───────────────────────────────────
+  // `CORRECTION 1: an unnamed cell carries meaning, no name, and no reference row`,
+  // which REQUIRED at least one nameless entry per pair (`expected at least one
+  // nameless entry`). That was correct while unnamed cells lived in the legend.
+  //
+  // They no longer do. P2 markup A6 read the real PDF and found what those rows
+  // look like to a buyer: paragraphs with no label, hanging off the row above.
+  // Reyner ruled them out on 2026-09-22 - `p2_palace_frame` became the facts
+  // table's frame-group lead line, `p2_reframe` became a note under the seat rows.
+  //
+  // THE HALF OF THE OLD TEST THAT STILL MATTERS IS KEPT, and it is the sharp half:
+  // a nameless thing must never reach a reference list as a bare KEY. The old
+  // comment says exactly why - "a future `name: e.key` would satisfy every other
+  // check here and put `p2_reframe` in a reader-facing list as a bare key" - and
+  // that hazard did not go away when the rows did. So the loop still runs; what
+  // changed is that the expected count of nameless entries is now ZERO rather than
+  // at least one, and both are asserted.
   for (const [name, pair] of Object.entries(PAIRS)) {
     const { appendix } = appendixFor(pair);
     const unnamed = appendix.groups.flatMap((g) => g.entries).filter((e) => e.name === null);
-    assert.ok(unnamed.length > 0, `${name}: expected at least one nameless entry`);
+    assert.deepEqual(unnamed.map((e) => `${e.section}.${e.key}`), [],
+      `${name}: a legend row with no term`);
 
     for (const e of unnamed) {
       assert.ok(e.meaning.trim().length > 0, `${name}: ${e.key} has neither name nor meaning`);

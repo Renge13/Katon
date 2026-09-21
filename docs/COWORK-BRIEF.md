@@ -459,6 +459,44 @@ cannot fail) in the least suspicious possible form: a correct command, correctly
 Same family as row 43 - the command was run and the reading of it was what went wrong - except here
 the misreading is upstream, in the argument, and no amount of care in the retelling would catch it.
 
+### AB §2 generalised one cell's behaviour to two, 2026-09-22
+
+Prompt AB's §2 is itself a correction: Cowork read the compat PDF, found three identical
+sentences under `Kursi Terikat / Berbenturan / Bergesekan`, and the markup called it a glossary
+entry that had lost its key. §2 corrects that from the composer - they are palace FRAME rows and
+the repeated sentence is `p2_palace_frame.label_meaning`, printed on every frame row by Reyner's
+2026-09-14 ruling. That correction was right.
+
+**The correction then carried a second error of the same kind.** §2 removes BOTH unnamed compat
+cells from the legend - `p2_palace_frame` and `p2_reframe` - on the stated ground that "they
+already appear in the table and the reading". Measured while building it:
+
+    $ node -e "...factRows(buildPairSemantic(chart2, chart6))..."
+      facts-table rows for p2_reframe: 0
+
+True of the frame, which IS the table's frame-group lead line. False of the reframe, which has no
+table row at all. Building §2 as written deleted from a paid document the sentence that tells a
+reader a hard seat is not a verdict - "Ini bukan penentu kegagalan..." - and deleted it for exactly
+the readers whose seats are hard.
+
+**The shape: Cowork read the PDF correctly and then generalised one cell's behaviour to two.** Both
+cells are nameless, both are called frames, and the sentence "they already appear in the table"
+was true of the one that had been looked at. The second was never checked against
+`factRows`; it was assumed to behave like its neighbour because it sat in the same branch of the
+code. Same family as the rows above about asserting from architecture instead of grepping - the
+difference is that here the architecture was Cowork's own correction, written minutes earlier,
+which is the version of this that feels safest to trust.
+
+**What caught it:** `tests/pdf-pair-appendix.spec.mjs`, "the reframe cell must be explained in a
+document that prints it". The check was right and the prompt was wrong, which is the inverse of the
+presumption section 6 sets up for a check that rejects ruled words - and is why that presumption is
+a presumption rather than a rule. Reyner ruled the home for it on 2026-09-22: the facts table,
+under the seat rows, hard seats only.
+
+**The rule already exists and this is a count against it:** a claim about what the code does
+carries the command that produced it. "They already appear in the table" is a claim about two
+cells and one of them was never run.
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was

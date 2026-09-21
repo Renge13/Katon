@@ -114,8 +114,20 @@ test('the engine P0 sentence is on the reading page, ONCE', async () => {
     const sentence = `Ini adalah bacaan tentang dua individu: ${a} dan ${b}.`;
     const hits = texts.filter((t) => flat(t).includes(sentence));
     assert.equal(hits.length, 1, `${name}: the opening appears on ${hits.length} pages, want 1`);
-    // Page 2 is the reading. Page 1 is the cover and names them differently.
-    assert.equal(flat(texts[1]).startsWith(sentence), true, `${name}: it is not the reading's first line`);
+    // ── IT IS THE SUB-LINE NOW, NOT THE FIRST LINE. C1, 2026-09-22. ──
+    // This asserted that the reading page STARTS with the P0 sentence. On the real
+    // PDF that meant a body-size sentence outranked the quadrant headline, so the
+    // page opened with its second-most-important line (P2 markup C1, marked ok).
+    //
+    // WHAT THE 2026-09-14 RULING PROTECTED IS UNCHANGED: the engine's P0 sentence
+    // is still on the page, still engine-owned, and still there exactly ONCE -
+    // which is the assertion above and the one that ever caught anything. Only its
+    // position moved, and the negative below pins that it really did move rather
+    // than the test being loosened.
+    const page = flat(texts[1]);
+    assert.ok(page.includes(sentence), `${name}: the P0 sentence left the reading page`);
+    assert.equal(page.startsWith(sentence), false,
+      `${name}: P0 is the sub-line now - the quadrant title leads (C1)`);
   }
 });
 
@@ -388,7 +400,20 @@ test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () =>
   assert.ok(frameRow, 'no frame row was emitted at all');
   assert.equal(frameRow.branches, true, 'a frame row holds branch characters');
   assert.ok(frameRow.a && frameRow.b, 'a frame row must name both sides');
-  assert.equal(frameRow.meaning, K.p2_palace_frame.label_meaning);
+  // ── THE MEANING MOVED OFF THE ROW. C2, 2026-09-22. ──────
+  // This asserted `frameRow.meaning === K.p2_palace_frame.label_meaning`, which was
+  // right under the 2026-09-14 ruling and printed the same sentence on every frame
+  // row - so a buyer read it three times in her own data table and the product
+  // looked like it was contradicting itself (P2 markup C2, marked ok).
+  //
+  // THE 2026-09-14 RULING IS NOT REVERSED, and that is the distinction this block
+  // exists to keep. It says the DAY-PAIR variant's meaning must never appear on a
+  // frame row; it still does not, and the assertion above still checks it. What
+  // changed is that the frame's own sentence is now printed ONCE as the frame
+  // group's lead line instead of once per row. Same ruled words, one appearance -
+  // asserted on the facts page above, and here as an absence from the row.
+  assert.equal(frameRow.meaning, '',
+    'a frame row carries no meaning cell - the group lead line says it once (C2)');
   // Y-1: B's YEAR 丑 reaches A's spouse palace 子.
   assert.equal(frameRow.a, '子');
   assert.equal(frameRow.b, '丑');
@@ -516,9 +541,14 @@ test('THE QUADRANT NAME IS THE READING\'S TITLE LINE, after the P0 sentence', as
 
     const a = semanticJson.core.a.archetype_name_id;
     const b = semanticJson.core.b.archetype_name_id;
-    assert.equal(lines[0], `Ini adalah bacaan tentang dua individu: ${a} dan ${b}.`,
-      `${name}: the P0 sentence is not the first line`);
-    assert.equal(lines[1], title, `${name}: the quadrant name is not the line after it`);
+    // ── THE ORDER IS REVERSED, RULED 2026-09-22 (P2 markup C1) ──
+    // Was: P0 sentence on line 1, quadrant title on line 2. A body-size sentence
+    // standing above the headline is the defect Reyner marked ok to fix - the
+    // headline leads and the sentence explains it, which is the order every other
+    // page of this document already uses.
+    assert.equal(lines[0], title, `${name}: the quadrant title does not lead the reading`);
+    assert.equal(lines[1], `Ini adalah bacaan tentang dua individu: ${a} dan ${b}.`,
+      `${name}: the P0 sentence is not the line under the title`);
     // ONCE on that page: it is a title, and the P5 block names it again lower down
     // only if the model wrote it, which is not this assertion's business.
     assert.equal(lines.filter((l) => l === title).length, 1,
