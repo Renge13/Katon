@@ -225,6 +225,37 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
+## THE CURRENT WORK, 2026-09-22 - PROMPT AB ("P2"), THE PAID PRODUCT PASSABLE
+
+**`docs/prompts/AB-paid-passable.md`**, input `docs/handoff/p2-markup-2026-09-22.md` (every row
+marked ok by Reyner 2026-09-22). Two PRs.
+
+**PR 1 - §3, the DEFECT rows. MERGED as #126 (`f9473ec`).**
+
+**PR 2 - §4, the LAYOUT rows. IN PROGRESS on `feat/ab-paid-layout`, one commit landed.**
+
+A POINTER, NOT A TASK LIST - this file's own 2026-08-01 rule, and the rows themselves live in AB §4.
+What is below is the STATE a resuming session cannot get from the prompt, because the prompt predates
+the work:
+
+- **Landed: `3859cc9`, the heading face.** Spectral 400/600 fetched by
+  `npm run build:spectral-ttf`, committed under `lib/pdf/fonts/`, registered in
+  `lib/pdf/fonts.js` as `FAMILY_SERIF`, and traced in `next.config.mjs`. Done FIRST and
+  committed ALONE because it is the one §4 item that can 500 a lambda (#123).
+  `FAMILY_SERIF` is exported and already imported into `lib/pdf/document.js` - the layout
+  can draw with it immediately.
+- **Not started: the eight remaining §4 rows** - A1 cover, A8 appendix table, A10 element
+  bars, A11/C5 merged chart pages, A12 measure (~70 characters; the headings half is done),
+  B2 running footer, C3 facts rows, C4 verdict row. Read AB §4 for what each one says; do
+  not work from this list, which names them only so a resuming session knows the count.
+- **THE PROOF STEP IS THE LAST COMMIT AND IS NOT OPTIONAL: fetch BOTH PDF routes on the
+  preview.** A green local build says nothing about tracing - that is exactly what #123
+  was - and `tests/pdf-font-lambda.spec.mjs` checks the CONFIG, not the deploy.
+- **Round 1's review is Reyner reading both rebuilt PDFs and a 390-wide report screenshot
+  on his phone** (AB §5). Cap is two rounds; anything left goes to the DEFERRED REGISTER.
+
+Session state for the handover: `docs/handoff/cowork-state-2026-09-22.md`.
+
 ## THE CURRENT WORK, 2026-09-14 (night) - PROMPT Y-4, THE PDF AS A DOCUMENT
 
 **`docs/prompts/Y-pdf-4.md`, RELEASED 2026-09-14** after Reyner read the built compat PDF. R6-R8 are
