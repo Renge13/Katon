@@ -257,8 +257,20 @@ test('CORRECTION 1: a condition is absent from the "what is in your chart" list'
       .filter((e) => e.condition);
     assert.ok(conditionEntries.length > 0, `${which} should have a condition entry`);
     for (const e of conditionEntries) {
-      assert.equal(e.name, null, `${which}: condition ${e.key} carries a name`);
+      // ── THE NAME ASSERTION MOVED, THE `carried` ONE DID NOT ──
+      // This used to require `e.name === null`. Reyner ruled the condition format
+      // on 2026-09-22 (`Tanpa [Elemen]` / `Dominan [Elemen]`, P2 markup A6),
+      // because a row with no label at all printed as a paragraph hanging off the
+      // row above it. `tests/pdf-appendix.spec.mjs` owns the format now.
+      //
+      // WHAT THIS TEST IS ACTUALLY ABOUT IS UNCHANGED AND IS THE LINE BELOW:
+      // `carried` is the "what is in your chart" list, and a missing element is
+      // not in her chart whatever it is labelled. Naming the absence does not make
+      // it a possession, and that is the distinction correction 1 was drawing.
       assert.ok(!appendix.carried.includes(e.key), `${which}: ${e.key} is in carried[]`);
+      assert.ok(!appendix.carried.includes(e.name),
+        `${which}: the condition's LABEL reached carried[] - naming an absence must `
+        + 'not turn it into something she carries');
     }
   }
 });
@@ -287,15 +299,39 @@ test('CORRECTION 2: the gate runs at the document door, not only in the script',
   assert.ok((await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer);
 });
 
-test('CORRECTION 2: the gate is INDIFFERENT to a missing name', () => {
-  // Demanding a name for every mechanic is what forces correction 1's bug. A
-  // condition has a meaning and no name, and that must pass.
+test('CORRECTION 2: the gate checks MEANINGS and never demands a name', () => {
+  // ── WHY THE FIXTURE CLAUSE CHANGED, AND WHY THE GATE DID NOT ──
+  // This required `nameless.length > 0` - a real precondition while conditions
+  // shipped unlabelled, and impossible since Reyner ruled the `Tanpa [Elemen]` /
+  // `Dominan [Elemen]` format on 2026-09-22. It went red on "the fixture must
+  // exercise a nameless entry", which was the fixture assumption expiring, not the
+  // gate breaking.
+  //
+  // THE GATE ITSELF IS UNCHANGED AND SO IS THE REASON FOR IT. Correction 2:
+  // demanding a name for every mechanic is what forced correction 1's bug, so
+  // `assertEveryMechanicExplained` looks at MEANINGS only. Asserted directly now
+  // rather than through a nameless row that no longer exists - by feeding it an
+  // entry with no name at all, which is a shape the generator does not currently
+  // produce and which the gate must still accept.
   const { chart, semanticJson } = fixture('chart 1');
   const appendix = buildAppendix({ chart, semanticJson });
-  const nameless = appendix.groups.flatMap((g) => g.entries).filter((e) => e.name === null);
-  assert.ok(nameless.length > 0, 'the fixture must exercise a nameless entry');
-  assert.ok(nameless.every((e) => e.meaning && e.meaning.trim()), 'each still has a meaning');
+  assert.ok(
+    appendix.groups.flatMap((g) => g.entries).every((e) => e.meaning && e.meaning.trim()),
+    'every shipped entry has a meaning',
+  );
   assert.doesNotThrow(() => assertEveryMechanicExplained(appendix));
+
+  // A NAMELESS ENTRY STILL PASSES, constructed rather than found. If a later
+  // ruling brings unlabelled rows back, the gate must not be what stops it.
+  assert.doesNotThrow(() => assertEveryMechanicExplained({
+    groups: [{ group: 'Kondisi', entries: [{ key: 'x', section: 'y', name: null, meaning: 'ada.' }] }],
+  }), 'the gate is indifferent to a missing name');
+
+  // And it still REFUSES a missing meaning, which is the half that catches a real
+  // gap. Without this the test above would pass on a gate that checks nothing.
+  assert.throws(() => assertEveryMechanicExplained({
+    groups: [{ group: 'Kondisi', entries: [{ key: 'x', section: 'y', name: 'Ada', meaning: '' }] }],
+  }), /no label_meaning/u, 'and it still refuses an unexplained mechanic');
 });
 
 // ── 胎元 is name-only, by a standing ruling ──
@@ -718,15 +754,25 @@ test('THE APPENDIX IS A TWO-COLUMN TABLE, term beside meaning', async () => {
   const appendix = buildAppendix({ chart, semanticJson });
   const pages = textBoxes(buffer);
 
-  // `display_only` IS EXCLUDED, and it is a ruling rather than a convenience: 胎元
-  // carries NO `label_meaning` on purpose (Reyner, 2026-08-07) and is exempt from
-  // correction 2's gate for the same reason. It has a name and an empty right
-  // column, so asserting a meaning beside it would be asserting against the ruling.
-  const named = appendix.groups.flatMap((g) => g.entries)
-    .filter((e) => e.name && !e.display_only);
+  // ── THE `display_only` EXCLUSION IS NOW UNREACHABLE, AND KEPT ──
+  // It excluded 胎元, which carries NO `label_meaning` on purpose (Reyner,
+  // 2026-08-07): a name with an empty right column, so asserting a meaning beside
+  // it would have been asserting against the ruling.
+  //
+  // Since 2026-09-22 (P2 markup A7) a row with no meaning does not print at all, so
+  // there is no `display_only` entry left to exclude and the precondition that
+  // asserted one - "the exclusion is exercised" - went red. That precondition was
+  // doing real work and its removal is recorded rather than silent: what it
+  // protected against was the filter drifting into a no-op while looking correct.
+  //
+  // THE FILTER STAYS. `buildAppendix` still sets `display_only`, and if a later
+  // ruling gives 胎元 a meaning the row returns with the flag on it. A filter that
+  // currently matches nothing is cheaper than rediscovering why it was needed.
+  const all = appendix.groups.flatMap((g) => g.entries);
+  const named = all.filter((e) => e.name && !e.display_only);
   assert.ok(named.length > 5, 'precondition: chart 1 has a legend worth tabulating');
-  assert.ok(appendix.groups.flatMap((g) => g.entries).some((e) => e.display_only),
-    'precondition: the exclusion is exercised - chart 1 HAS a display-only entry');
+  assert.deepEqual(all.filter((e) => e.display_only), [],
+    'A7: a row with no meaning does not print, so nothing is display-only any more');
 
   for (const e of named) {
     // The run that draws the term, anywhere in the appendix.
