@@ -83,6 +83,7 @@ import CopyLink from './CopyLink.jsx';
 import { CHROME_COPY } from '../lib/site/copy.js';
 import { ProseBlocks } from './ProseBlocks.jsx';
 import { formatIdr } from '../lib/site/format.js';
+import { rememberBirth } from '../lib/site/carryBirth.js';
 
 // Neutral, generic element glosses — describe the ELEMENT, not the person.
 //
@@ -255,6 +256,26 @@ export default function Funnel() {
     if (created.error || !created.token) {
       setError(readableError(created)); setSeason(null); setPhase('input'); return;
     }
+
+    // ── CARRY HER BIRTH TO THE COMPAT FORM, IN THIS TAB ONLY ──
+    // So she does not type her own birth date a second time on the page that
+    // takes her money. `lib/site/carryBirth.js` has the reasoning; what matters
+    // here is WHERE this sits.
+    //
+    // AFTER THE READING EXISTS, not at submit and not on keystroke. A birth that
+    // was typed and abandoned - a failed create, a date she corrected - is not
+    // something to carry forward, and this line runs only once the server has
+    // agreed there is a reading.
+    //
+    // THE RESOLVED TIME, not `form.time`. `resolution.birthTime` is what the
+    // season gate supplied when it asked for an hour, and it is the value that
+    // actually made this chart; carrying the pre-gate one would prefill compat
+    // with a birth that produced a different reading.
+    rememberBirth({
+      date: birthDate,
+      time: resolution.birthTime ?? birthTime,
+      gender: form.gender,
+    });
 
     // ── THE CHART GOES UP NOW. THE PROSE ARRIVES UNDER IT. ──
     //

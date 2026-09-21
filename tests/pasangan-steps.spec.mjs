@@ -260,6 +260,16 @@ test('`?dari` PREFILLS NOTHING, BECAUSE THERE IS NOTHING TO PREFILL', async () =
   // Starting on step 2 would render a COMPLETED step 1 summarising an empty
   // birth. This test pins the honest behaviour so the prompt's sentence cannot
   // be implemented later without meeting it.
+  //
+  // ── STILL TRUE AFTER THE 2026-09-21 CARRY, AND THAT IS THE POINT ──
+  // Step 1 IS prefilled now for a reader who read her mirror in this tab - but
+  // from `sessionStorage`, never from the link. `?dari` still carries a reference
+  // and nothing else, so this assertion is unchanged rather than grandfathered:
+  // a shared link, a new device or a fresh session gets the empty form it always
+  // got. The storage is cleared explicitly below so the file cannot start passing
+  // for the wrong reason if something later in the suite writes one.
+  // The carry itself is `tests/carry-birth.spec.mjs`.
+  try { window.sessionStorage.clear(); } catch { /* nothing to clear */ }
   const f = stubFetch();
   const ui = mount({ initialA: { readingId: 'tok1' } });
   try {

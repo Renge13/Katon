@@ -29,6 +29,7 @@ import { PASANGAN_COPY } from '../lib/site/copy.js';
 import { compatPairRoute } from '../lib/site/routes.js';
 import { priceFor } from '../lib/pricing.js';
 import { formatIdr } from '../lib/site/format.js';
+import { recallBirth } from '../lib/site/carryBirth.js';
 
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
 const EMPTY = { date: '', time: '', gender: '' };
@@ -57,7 +58,25 @@ function birthBody(form, extra = {}) {
 }
 
 export default function Pasangan({ initialA = null, salesClosed = false }) {
-  const [a, setA] = useState(initialA ? { ...EMPTY, ...initialA } : EMPTY);
+  /**
+   * A starts from the birth this tab's mirror reading was made with, if there is
+   * one. Closes the 2026-09-09 deferred row: she was retyping her own birth date
+   * on the page that takes her money.
+   *
+   * ── IN THE INITIALISER, NOT AN EFFECT ─────────────────────
+   * So the fields are correct on their FIRST paint. An effect would render the
+   * form empty and then fill it, which on a slow phone is a visible flicker on
+   * exactly the surface this is meant to smooth - and worse, it would overwrite
+   * anything she had already started typing in the gap.
+   *
+   * SAFE DESPITE READING `window`, because `PasanganFromQuery` renders `null`
+   * until its own effect has run, so this component only ever mounts on the
+   * client. There is no server render of it to mismatch.
+   *
+   * `initialA` WINS, and the order says so: it carries the `?dari` reading id,
+   * which is a reference the carried birth has no business overwriting.
+   */
+  const [a, setA] = useState({ ...EMPTY, ...(recallBirth() || {}), ...(initialA || {}) });
   const [b, setB] = useState(EMPTY);
   const [email, setEmail] = useState('');
   const [error, setError] = useState(null);
