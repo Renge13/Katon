@@ -82,13 +82,13 @@ thing being checked.
 
 ## What a walk does NOT prove
 
-- **Nothing about a real provider.** There is no longer one to exercise: the Xendit
-  adapter is deleted and DOKU arrives in Prompt V, which needs its own walk against
-  its own sandbox. **That walk is the alternative to this one** - not a key swap.
+- **Nothing about a real provider.** DOKU arrived in Prompt V (2026-09-21) and has
+  its own walk: **`docs/ops/doku-walk.md`**. That walk is the alternative to this one,
+  not a key swap, and it is NOT yet complete - QRIS is inactive on the account.
 - **Nothing about a notification signature check.** `mock-pay` is a different door
-  with its own fence. There is no notification endpoint at all right now; DOKU's
-  token verification is its adapter's first commit and its forgery checks belong
-  with it.
+  with its own fence. `/api/doku/notify` exists now and verifies an HMAC over the raw
+  body; its refusals are covered by `tests/doku.spec.mjs` and by the two `--live`
+  forgery checks in `scripts/forge-tests.mjs`. None of that is exercised by THIS walk.
 - **Nothing about production latency.** The render cost measured locally on
   2026-09-08 was 2.7-5.4s for one or two attempts, and the n=20 run saw draws
   needing six. Production adds its own distance to Gemini.

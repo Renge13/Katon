@@ -28,7 +28,7 @@ function withEnv(env, fn) {
   // PAYMENTS_PROVIDER and VERCEL_ENV are cleared and restored like the rest: a
   // case that set one and did not name it in the next case's env would leak, and
   // these two decide the answer on their own now that no keys are consulted.
-  for (const k of ['PAYMENTS_PROVIDER', 'VERCEL_ENV']) {
+  for (const k of ['PAYMENTS_PROVIDER', 'VERCEL_ENV', 'DOKU_CLIENT_ID', 'DOKU_SECRET_KEY', 'DOKU_SANDBOX']) {
     if (!(k in env)) env[k] = undefined;
   }
   const saved = {};
@@ -77,6 +77,29 @@ t('a stale PAYMENTS_PROVIDER=xendit → still CLOSED', () => {
   withEnv({ PAYMENTS_PROVIDER: 'xendit', NODE_ENV: 'production' }, () => {
     assert.strictEqual(paymentFenceReason(), 'payment_closed',
       'the deleted adapter buys nothing, whatever the environment still says');
+  });
+});
+
+// DOKU WITH NO KEYS NAMES THE MISSING ONE. Prompt V's fence case: `doku` is a
+// recognised value now, so "unrecognised reads as closed" no longer covers it, and
+// the failure this guards is a deploy that selects DOKU and forgets a key - which
+// must be a named misconfiguration, never a silent open shop.
+t('PAYMENTS_PROVIDER=doku with no keys → doku_client_id_unset', () => {
+  withEnv({ PAYMENTS_PROVIDER: 'doku', NODE_ENV: 'production' }, () => {
+    assert.strictEqual(paymentFenceReason(), 'doku_client_id_unset');
+  });
+});
+
+// AND A SANDBOX KEY IN PRODUCTION IS CLOSED. The subtler free unlock: the checkout
+// page looks real, the buyer pays, DOKU sends a genuine signed notification, `paid`
+// flips, and no money has moved.
+t('PAYMENTS_PROVIDER=doku + DOKU_SANDBOX in production → CLOSED', () => {
+  withEnv({
+    PAYMENTS_PROVIDER: 'doku', DOKU_SANDBOX: '1', VERCEL_ENV: 'production',
+    NODE_ENV: 'production', DOKU_CLIENT_ID: 'BRN-x', DOKU_SECRET_KEY: 'SK-x',
+  }, () => {
+    assert.strictEqual(paymentFenceReason(), 'payment_closed',
+      'a sandbox key in production is "pretend to take money"');
   });
 });
 
@@ -270,7 +293,12 @@ t('a non-numeric or malformed amount fails closed', () => {
 
 // Light live checks (opt-in): the core gate + webhook rejects unauthenticated POST.
 if (process.argv.includes('--live')) {
-  const BASE = 'http://localhost:3000';
+  // OVERRIDABLE 2026-09-21, because the thing most worth forging against is a
+  // DEPLOYED route. `/api/doku/notify` refuses correctly on localhost and on a
+  // Vercel lambda for different reasons - the keys come from a different place and
+  // the path is served by a different runtime - so a check that can only ever reach
+  // localhost proves the weaker of the two. Default unchanged.
+  const BASE = process.env.FORGE_BASE_URL || 'http://localhost:3000';
   console.log('\nLIVE (vs ' + BASE + ')');
   const live = async (name, fn) => { try { await fn(); ok(name); } catch (e) { bad(name, e); } };
 
@@ -299,8 +327,42 @@ if (process.argv.includes('--live')) {
   // an unpaid `/full` leaks no paid content, and that runs on every `--live`.
   //
   // PROMPT V RESTORES THEM POINTED AT DOKU, and it must: a notification endpoint
-  // that trusts its body is how a free unlock ships. That requirement is written
-  // into docs/NEXT.md rather than left here as a commented-out fetch.
+  // that trusts its body is how a free unlock ships.
+  //
+  // ── RESTORED 2026-09-21, AND THEY ASSERT 401 EXACTLY ──────
+  // The note above is its own instruction, and the lesson in it is the accepted
+  // SET: the deleted check would have passed a 503-shaped refusal, and a check
+  // that green-lights a missing route is not a check that an endpoint rejects
+  // forgeries. So these compare to 401 and to nothing else - a 404 (route gone),
+  // a 503 (keys unset) and a 200 (it believed the body) each fail here, loudly,
+  // and the message says which one came back.
+  await live('a forged DOKU notification with NO headers is rejected', async () => {
+    const res = await fetch(`${BASE}/api/doku/notify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order: { invoice_number: 'forged', amount: 39000 }, transaction: { status: 'SUCCESS' } }),
+    });
+    assert.strictEqual(res.status, 401,
+      `unsigned notification must be 401, got ${res.status}`);
+  });
+
+  await live('a forged DOKU notification with a WRONG signature is rejected', async () => {
+    // Syntactically perfect: every header present, the right shape, a real-looking
+    // base64 MAC. Only the secret is wrong, which is the only thing that can be.
+    const res = await fetch(`${BASE}/api/doku/notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Client-Id': 'BRN-0001-FORGED',
+        'Request-Id': '11111111-2222-3333-4444-555555555555',
+        'Request-Timestamp': `${new Date().toISOString().slice(0, 19)}Z`,
+        Signature: 'HMACSHA256=Juf12uy34E0KEYHfwG6kAR3RVtqSrdGz9KPHvRcsL6M=',
+      },
+      body: JSON.stringify({ order: { invoice_number: 'forged', amount: 39000 }, transaction: { status: 'SUCCESS' } }),
+    });
+    assert.strictEqual(res.status, 401,
+      `wrongly signed notification must be 401, got ${res.status}`);
+  });
 }
 
 console.log(`\n${fail === 0 ? 'PASS' : 'FAIL'} — ${pass} passed, ${fail} failed`);

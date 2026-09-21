@@ -139,11 +139,34 @@ test('THE MOCK URL IS SAME-ORIGIN, not an absolute URL on another alias', () => 
   // required, because a provider redirects a browser to it. For mock it is a link
   // back to the page the walker is already on, so it must be relative or the
   // walk hops hosts mid-flow.
+  // ── THE END ANCHOR WAS DEAD AND THE SLICE WAS THE WHOLE FILE ──
+  // It used to end at `createQrisInvoice({`, which V-0 deleted on 2026-09-18.
+  // `indexOf` then returned -1, `slice(start, -1)` ran to the end of the file, and
+  // this "mock branch" was everything after the mock branch as well. It stayed
+  // green for three days because nothing below it built a URL - and went red the
+  // moment Prompt V's DOKU branch did, correctly, exactly what this test forbids
+  // the MOCK branch from doing. A slice with a missing end anchor does not fail; it
+  // silently widens, which is the worse failure of the two.
+  //
+  // ANCHORED ON THE MOCK BRANCH'S OWN RETURN, so it cannot outlive its subject: if
+  // that return is renamed the slice is empty and the `compatPairRoute` assertion
+  // below goes red, rather than the scope quietly growing again.
   const src = code('app/api/pay/[id]/route.js');
-  const mock = src.slice(src.indexOf("paymentsProvider() === 'mock'"), src.indexOf('createQrisInvoice({'));
+  const from = src.indexOf("paymentsProvider() === 'mock'");
+  const to = src.indexOf('mock: true', from);
+  assert.ok(from > -1 && to > from, 'the mock branch and its return are both found');
+
+  const mock = src.slice(from, to);
   assert.equal(/pairUrl\(|readingUrl\(/u.test(mock), false,
     'the mock branch must not build an absolute URL');
   assert.match(mock, /compatPairRoute\(/u);
+
+  // AND THE PROVIDER BRANCH MUST. The two requirements are opposite and they live
+  // three lines apart, so asserting only one of them leaves the other free to drift
+  // into it - which is how the mock branch got an absolute URL in the first place.
+  const doku = src.slice(src.indexOf("paymentsProvider() === 'doku'"));
+  assert.match(doku, /pairUrl\(/u,
+    'a real provider redirects a browser from its own domain, so it needs absolute URLs');
 });
 
 test('THE REPORT PAGE RESOLVES mockPayments ON THE SERVER', () => {
