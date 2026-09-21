@@ -265,6 +265,64 @@ $ FORGE_BASE_URL=https://katon-git-feat-doku-checkout-renge13s-projects.vercel.a
     checkmark  a forged DOKU notification with a WRONG signature is rejected
 ```
 
+### THE VA WALK, 2026-09-21 — done, and it did NOT produce the fixture
+
+Approved by Reyner as **sandbox transport only; the product stays QRIS**. `lib/doku/client.js`
+is untouched and its `PAYMENT_METHOD_TYPES` is still `['QRIS']`. The VA session was
+built by a one-off script kept OUT of the repo on purpose — a VA-creating script in
+`scripts/` would eventually be read as the product — and it mirrored `createCheckout`'s
+body exactly except `payment_method_types`.
+
+**What happened, in order:**
+
+1. `POST /api/pair` on the preview -> `JoWcjAT0Rc3DlLQlj3JiT` (`sku: compat`, `paid: false`).
+2. Checkout session for `JoWcjAT0Rc3DlLQlj3JiT.muarh2o9`, amount 39000,
+   `VIRTUAL_ACCOUNT_BCA` -> **200**, VA number `1900800000347861`, and
+   `additional_info.origin` = `{"product":"CHECKOUT","api_format":"JOKUL"}` — a genuine
+   Checkout record, not the SNAP adapter the docs' sample came from.
+3. Paid in `sandbox.doku.com/integration/simulator/` (BCA VA) -> **Payment Success,
+   IDR 39000.00**. Note the decimal.
+4. `npm run doku:status -- JoWcjAT0Rc3DlLQlj3JiT.muarh2o9` ->
+   `transaction.status: SUCCESS`. **DOKU has the money.**
+5. **The pair did NOT flip.** Polled for two minutes: `{"status":"not_paid"}`.
+
+**Step 5 has two possible causes with opposite fixes**, so they were separated rather
+than guessed at: either DOKU never delivered the notification, or it delivered one this
+route rejected. A notification signed with the real sandbox secret and POSTed at
+`/api/doku/notify` by hand returned **200 `{"received":true}`** and the pair flipped to
+`paid`, serving its full compat facts.
+
+So the route, the signature verification, the `invoice_number` split, the amount
+coercion (that hand-signed body carried `"39000.00"`, a decimal STRING) and the settle
+path are all **proven on a real Vercel lambda**. What is missing is DOKU's delivery.
+
+**THE PAIR STAYING `not_paid` UNTIL A VERIFIED NOTIFICATION ARRIVED IS RULE 18 WORKING.**
+A real payment completed at DOKU and nothing in Katon flipped: there is no second path
+to `paid`, and the walk demonstrates that rather than asserting it.
+
+**NO FIXTURE WAS CAPTURED, because nothing was delivered to capture.** §4 and Amendment
+B.6 want a captured Checkout notification; a body this session composed is exactly what
+they rule out, and the hand-signed one above is a diagnostic, not a fixture.
+
+What WAS captured is real DOKU bytes of a different kind:
+`tests/fixtures/doku-checkstatus.sandbox.json`, the check-status record for this
+transaction. **It is labelled VA and it is not the notification fixture.** It earns its
+place by pinning a measured surprise: `order.amount` is the NUMBER `39000` there and the
+STRING `"39000"` in the create-checkout response **for the same order**. DOKU is
+inconsistent across its own endpoints, which is why `amountNumber` exists.
+
+**One defect this session shipped and the walk found:** `npm run doku:status` ran plain
+node against a `server-only` module and died on its first invocation, before a line of
+its own code. Fixed with `--conditions=react-server`, and pinned by a test, because no
+behavioural test could see a wrong launch line.
+
+### The remaining question, and it is one line to settle
+
+**Is the sandbox Notification URL registered?** If it is NOT, everything above is
+consistent and the fix is to register it. If it IS, then DOKU delivered something this
+route rejected — a real verifier bug — and the next step is the delivery log, which this
+session cannot read. Reyner can see both in the Back Office.
+
 ### The two blockers
 
 1. **REYNER:** set the sandbox Back Office Notification URL to

@@ -1,0 +1,68 @@
+{
+  "order": {
+    "invoice_number": "JoWcjAT0Rc3DlLQlj3JiT.muarh2o9",
+    "amount": 39000,
+    "status": "ORDER_GENERATED"
+  },
+  "transaction": {
+    "status": "SUCCESS",
+    "type": "PAYMENT",
+    "date": "2026-09-21T04:46:04Z",
+    "original_request_id": "ea7a471e-bba3-4970-94d4-b171dfc5161d"
+  },
+  "service": {
+    "id": "VIRTUAL_ACCOUNT"
+  },
+  "acquirer": {
+    "id": "BCA",
+    "name": "BCA"
+  },
+  "channel": {
+    "id": "VIRTUAL_ACCOUNT_BCA"
+  },
+  "virtual_account_info": {
+    "virtual_account_number": "1900800000347861",
+    "created_date": "20260921114604",
+    "expired_date": "20260921124355",
+    "reusable_status": false
+  },
+  "virtual_account_inquiry": {
+    "status": "SUCCESS",
+    "date": "20260921114548",
+    "channel_code": "6014"
+  },
+  "virtual_account_payment": {
+    "identifier": [
+      {
+        "name": "REQUEST_ID",
+        "value": "815251"
+      },
+      {
+        "name": "REFERENCE",
+        "value": "89480"
+      },
+      {
+        "name": "CHANNEL_TYPE",
+        "value": "6014"
+      }
+    ],
+    "reference_number": "89480",
+    "date": "20260921114604",
+    "status": "SUCCESS"
+  },
+  "additional_info": {
+    "origin": {
+      "product": "CHECKOUT",
+      "system": "mid-jokul-checkout-system",
+      "api_format": "JOKUL",
+      "source": "direct"
+    },
+    "line_items": [
+      {
+        "quantity": 1,
+        "price": "39000",
+        "name": "Katon - Kecocokan"
+      }
+    ]
+  }
+}

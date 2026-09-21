@@ -343,6 +343,79 @@ test('THE DOKU BRANCH SENDS COMPAT THROUGH pairUrl, NEVER readingUrl', async () 
   assert.ok(doneLine.includes('bayar=selesai'), 'the result path does carry the hint');
 });
 
+// ── checkStatus, against DOKU's REAL bytes ──
+
+test('checkStatus READS DOKU\'S OWN RECORDED BYTES, where the amount is a NUMBER', async () => {
+  // `tests/fixtures/doku-checkstatus.sandbox.json` is a REAL sandbox response,
+  // captured 2026-09-21 from the VA walk (docs/ops/doku-walk.md Part 3). It is NOT
+  // the §4 notification fixture and does not pretend to be - §4 wants a captured
+  // NOTIFICATION and DOKU never delivered one. What this pins is the shape of the
+  // one real DOKU payload the walk did obtain.
+  //
+  // THE MEASURED SURPRISE IT EXISTS FOR: `order.amount` is the NUMBER `39000` here,
+  // and the STRING `"39000"` in the create-checkout response for the very same
+  // order. DOKU is inconsistent across its own endpoints, which is exactly why
+  // `amountNumber` exists and why neither call site may assume a type.
+  const { readFileSync } = await import('node:fs');
+  const fixture = JSON.parse(readFileSync(
+    new URL('./fixtures/doku-checkstatus.sandbox.json', import.meta.url), 'utf8',
+  ));
+  assert.equal(typeof fixture.order.amount, 'number', 'check-status sends a number');
+  assert.equal(fixture.additional_info.origin.product, 'CHECKOUT',
+    'a Checkout record, not the SNAP adapter the docs sample came from');
+
+  const { checkStatus } = await import('../lib/doku/client.js');
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify(fixture), { status: 200 });
+  try {
+    process.env.DOKU_SANDBOX = '1';
+    const out = await checkStatus(fixture.order.invoice_number);
+    assert.equal(out.status, 'SUCCESS');
+    assert.equal(out.amount, 39000);
+    assert.equal(out.invoiceNumber, fixture.order.invoice_number);
+
+    // ── AND THE SAME RECORD WITH DOKU'S OTHER SPELLING ────
+    // The assertion above does NOT guard the coercion, and that was shown: deleting
+    // `amountNumber` from `checkStatus` left it green, because this fixture's amount
+    // is already a number. So the same bytes are replayed with the amount as the
+    // STRING DOKU uses on create-checkout for this very order. One endpoint, two
+    // spellings, one answer - and this half goes red without the coercion.
+    globalThis.fetch = async () => new Response(
+      JSON.stringify({ ...fixture, order: { ...fixture.order, amount: '39000.00' } }),
+      { status: 200 },
+    );
+    const asString = await checkStatus(fixture.order.invoice_number);
+    assert.equal(asString.amount, 39000, 'a decimal string is the same money');
+    assert.equal(typeof asString.amount, 'number', 'and it comes back as a number');
+  } finally {
+    globalThis.fetch = realFetch;
+    delete process.env.DOKU_SANDBOX;
+  }
+});
+
+test('THE doku:status SCRIPT CARRIES --conditions=react-server, OR IT CANNOT RUN', async () => {
+  // A DEFECT THIS SESSION SHIPPED AND THEN HIT. `scripts/doku-status.mjs` imports
+  // `lib/doku/client.js`, which is `server-only`; the npm script ran plain node, so
+  // the very first invocation died with "This module cannot be imported from a
+  // Client Component module" before reaching a single line of its own code.
+  //
+  // NO BEHAVIOURAL TEST COULD SEE IT: the script is an ops tool, nothing imports it,
+  // and every unit test of `client.js` already runs under the right condition. The
+  // thing that was wrong was the LAUNCH LINE, so that is what is asserted.
+  const { readFileSync } = await import('node:fs');
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  for (const name of ['doku:status']) {
+    assert.match(pkg.scripts[name], /--conditions=react-server/u,
+      `${name} imports a server-only module and must declare the condition`);
+  }
+  // `probe:doku` deliberately does NOT need it: it imports only
+  // `lib/doku/signature.js`, which is pure and carries no `server-only`. Asserted so
+  // that "why does one have it and not the other" is answered rather than guessed.
+  const signature = readFileSync(new URL('../lib/doku/signature.js', import.meta.url), 'utf8');
+  assert.equal(signature.includes("import 'server-only'"), false,
+    'the signing rule stays importable by a plain node script');
+});
+
 // ── the source assertion §4 names ──
 
 test('THE NOTIFY HANDLER READS RAW BYTES, AND PARSES ONLY AFTER VERIFYING', async () => {
