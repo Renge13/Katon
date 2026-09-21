@@ -28,6 +28,20 @@
 // capture. When the capture lands it goes in `tests/fixtures/` and the three
 // signature tests below re-point at it. THIS FILE SAYS SO RATHER THAN IMPLYING THE
 // QUESTION IS CLOSED.
+//
+// ── WHY THIS MERGED WITHOUT THE CAPTURE, 2026-09-21 ───────
+// Not an exemption quietly taken. THREE sandbox walks produced three payments DOKU
+// recorded as SUCCESS and ZERO notification attempts in its own Notification Center,
+// through a channel-registered URL and then through a documented
+// `additional_info.override_notification_url` that DOKU echoed back and ignored.
+// There was nothing to capture, and holding the adapter unmerged could not make DOKU
+// send one. Cowork moved the fixture from a MERGE gate to a PRODUCTION-FLIP gate and
+// Reyner ruled it; `docs/PROGRESS.md`'s DEFERRED REGISTER carries the row, and it
+// names exactly what is unguarded - the BODY SHAPE, not the signing rule and not the
+// route, both of which are confirmed against the live sandbox and a live lambda.
+//
+// `DOKU_CAPTURE` STAYS SET in Preview so the first notification DOKU ever delivers is
+// captured with no further setup. It is not a loose end; it is the instrument.
 // ============================================================
 
 import assert from 'node:assert/strict';

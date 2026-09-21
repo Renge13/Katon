@@ -383,6 +383,46 @@ test can assert.
 
 Whether it ships is decided by the sandbox, not by the docs, and not before.
 
+### WALK 3, 2026-09-21 — the override is ACCEPTED and changes NOTHING
+
+```
+07:33:38Z  marker capture-probe-073338 posted to /api/doku/notify -> 200
+07:33:47Z  session JE8fscaWVJjsYLl7FGMRR.muaxiei3, VA 1900800000348046
+07:35:02Z  paid in the simulator -> Payment Success, IDR 39000.00
+07:35:03Z -> 07:41:32Z   polled 16 times over 6.5 minutes -> not_paid throughout
+```
+
+DOKU **echoed the override back in the create response**, so the field was read and
+accepted, not ignored as unknown:
+
+```json
+"additional_info": {
+  "override_notification_url": "https://katon-git-feat-doku-checkout-.../api/doku/notify",
+  "origin": { "product": "CHECKOUT", "apiFormat": "JOKUL" }
+}
+```
+
+`doku:status`: `transaction.status: SUCCESS`. Logs for this walk are on deployment
+`4mCyBVybdge8GTkxFLDNfdJs6ojd` (commit `33a9ec5`).
+
+**THE CONCLUSION, AND IT IS WHY THE WALKS STOP HERE.** Three walks, three payments DOKU
+recorded as SUCCESS, **zero notification attempts**. The variables changed across them -
+channel registration, then a documented per-request override DOKU visibly accepted -
+made no difference whatsoever. That is not the shape of a misconfiguration. It is the
+shape of **HTTP Notification not being enabled for this sandbox merchant**, the same
+class of account-level switch as QRIS being inactive.
+
+Ruled 2026-09-21: stop spending walks on it. Each one costs a deployment cycle and
+tests a variable already eliminated. Reyner is asking DOKU directly whether HTTP
+Notification is active on the sandbox merchant, alongside the QRIS request.
+
+**AND THE FIXTURE STOPPED BEING A MERGE GATE.** Cowork moved it to a PRODUCTION-FLIP
+gate: nothing about the notification body shape can be learned until DOKU delivers one,
+and holding the adapter unmerged does not make that happen sooner. The DEFERRED REGISTER
+carries what that leaves unguarded. `DOKU_CAPTURE` STAYS SET - it is the instrument that
+catches the first delivered notification whenever it comes, and removing it now would
+mean rediscovering all of this.
+
 ### HOW THE NEXT WALK CAPTURES THE FIXTURE
 
 The last walk could not have produced one even if DOKU had delivered: nothing put the
