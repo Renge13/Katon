@@ -119,7 +119,8 @@
     "probe:doku": "node --env-file-if-exists=.env.local scripts/doku-probe.mjs",
     "test:doku": "node --conditions=react-server --test tests/doku.spec.mjs",
     "doku:status": "node --conditions=react-server --env-file-if-exists=.env.local scripts/doku-status.mjs",
-    "test:carry-birth": "node --import ./scripts/jsx-register.mjs --test tests/carry-birth.spec.mjs"
+    "test:carry-birth": "node --import ./scripts/jsx-register.mjs --test tests/carry-birth.spec.mjs",
+    "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.6.1",
