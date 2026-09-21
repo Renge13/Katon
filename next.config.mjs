@@ -15,6 +15,13 @@ const nextConfig = {
     '/api/**/*': [
       './docs/content/renderer-prompt.txt',
       './docs/content/compat-renderer-prompt.txt',
+      // THE HANZI FACE, added 2026-09-21. Same fault as the two prompts above and
+      // the same fix, one asset later: `lib/pdf/fonts.js` reads it with
+      // `fs.readFileSync(path.join(...))`, which no bundler can follow, so without
+      // this entry it is absent from the lambda and BOTH PDF routes throw a bodyless
+      // 500 on every deployed request while every local build is perfect. Measured
+      // off `app/api/pair/[id]/pdf/route.js.nft.json`: 238 files traced, 0 fonts.
+      './lib/pdf/fonts/noto-serif-tc-han.ttf',
     ],
   },
 };
