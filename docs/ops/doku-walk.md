@@ -316,12 +316,57 @@ node against a `server-only` module and died on its first invocation, before a l
 its own code. Fixed with `--conditions=react-server`, and pinned by a test, because no
 behavioural test could see a wrong launch line.
 
-### The remaining question, and it is one line to settle
+### WHY NOTHING WAS DELIVERED — NOTIFICATION URLs ARE PER CHANNEL
 
-**Is the sandbox Notification URL registered?** If it is NOT, everything above is
-consistent and the fix is to register it. If it IS, then DOKU delivered something this
-route rejected — a real verifier bug — and the next step is the delivery log, which this
-session cannot read. Reyner can see both in the Back Office.
+Answered by Reyner, 2026-09-21, and it is the kind of thing that is obvious once said
+and expensive until then:
+
+> **DOKU registers a Notification URL against each PAYMENT CHANNEL, not against the
+> merchant account.** The URL had been saved on the **QRIS** channel — which is
+> inactive — and the walk paid through **VA BCA**, whose channel had no URL at all. So
+> DOKU had nowhere to send it and never tried.
+
+**THE PRODUCTION CONSEQUENCE, and it is the reason this is written down here rather
+than left in a chat message.** "Is the Notification URL registered?" is not a
+yes/no question about the account. It is one question **per channel Katon sells
+through**, and the answer can be yes for a channel nobody uses while being no for the
+one taking money. When QRIS is enabled on production, the URL has to be registered
+**on the QRIS channel there**, and checking "the URL is set" in the Back Office without
+checking WHICH CHANNEL it is set against will look correct and be wrong.
+
+The failure is also silent by construction: the buyer pays, DOKU records SUCCESS, and
+Katon's row simply never flips. Nothing errors. The only symptom is a paid customer
+with no product — which is exactly the shape of failure `npm run doku:status` exists
+for.
+
+### HOW THE NEXT WALK CAPTURES THE FIXTURE
+
+The last walk could not have produced one even if DOKU had delivered: nothing put the
+raw notification anywhere readable, and this session cannot read Vercel function logs.
+§5 assumed the log would carry it, so now it does.
+
+`lib/doku/notify.js` gained a **capture**, fenced three ways: an explicit
+`DOKU_CAPTURE` flag, never when `VERCEL_ENV=production`, and **only after the HMAC has
+passed**. That last one is the fence that matters — the rule it sits beside is "the
+reason, never the body", which is about an UNVERIFIED body, since anyone can POST one.
+After verification the bytes are DOKU's own. All three were shown red on purpose,
+including by moving the capture above the verify.
+
+It prints the four headers and the raw body. The Signature is an HMAC of that body
+under the secret and does not reveal it; the Client-Id is an identifier, not a
+credential. **The secret is never touched.**
+
+**To run the next walk:**
+
+1. Reyner sets `DOKU_CAPTURE=1` in Vercel **Preview** scope, and confirms the
+   Notification URL is registered **on the VA BCA channel**.
+2. Code re-runs the walk (new pair, VA session, simulator).
+3. The pair flips, which proves DOKU's own signature verifies against
+   `lib/doku/signature.js` — the deepest thing the fixture is for.
+4. Reyner copies the two `[doku][capture]` lines from the preview's Runtime Logs;
+   they become `tests/fixtures/doku-notification.sandbox.json`, **labelled VA**.
+5. `DOKU_CAPTURE` comes back out. The deferred register carries the row that removes
+   the capture itself.
 
 ### The two blockers
 

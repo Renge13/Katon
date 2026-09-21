@@ -343,6 +343,67 @@ test('THE DOKU BRANCH SENDS COMPAT THROUGH pairUrl, NEVER readingUrl', async () 
   assert.ok(doneLine.includes('bayar=selesai'), 'the result path does carry the hint');
 });
 
+// ── the capture, and its three fences ──
+
+/** Run `fn` with console.log collected rather than printed. */
+async function captured(fn) {
+  const lines = [];
+  const real = console.log;
+  console.log = (...args) => lines.push(args.join(' '));
+  try { await fn(); } finally { console.log = real; }
+  return lines;
+}
+
+test('THE CAPTURE IS OFF UNLESS ASKED FOR, AND NEVER IN PRODUCTION', async () => {
+  // Three fences on a debug path that prints a payment body. Each is checked on its
+  // own, because "it did not print" has three possible causes and only one of them
+  // is the flag.
+  const id = await newPair();
+  const send = () => handleDokuNotification(signedRequest(bodyFor(`${id}.abc123`)));
+
+  // 1. OFF BY DEFAULT.
+  let lines = await captured(send);
+  assert.deepEqual(lines.filter((l) => l.includes('[doku][capture]')), [],
+    'no flag, no capture');
+
+  // 2. REFUSED IN PRODUCTION even with the flag, like every other free-ish path in
+  //    this codebase. A body in a production log is a body in a production log.
+  process.env.DOKU_CAPTURE = '1';
+  process.env.VERCEL_ENV = 'production';
+  try {
+    lines = await captured(send);
+    assert.deepEqual(lines.filter((l) => l.includes('[doku][capture]')), [],
+      'the flag does not open the door in production');
+  } finally { delete process.env.VERCEL_ENV; }
+
+  // 3. AND IT WORKS WHERE IT IS MEANT TO, or the walk cannot capture the fixture.
+  try {
+    lines = await captured(send);
+    const cap = lines.filter((l) => l.includes('[doku][capture]'));
+    assert.equal(cap.length, 2, 'headers and body, one line each');
+    assert.match(cap.join('\n'), /"signature":"HMACSHA256=/u, 'the headers are there');
+    assert.match(cap.join('\n'), /"invoice_number"/u, 'and the raw body');
+  } finally { delete process.env.DOKU_CAPTURE; }
+});
+
+test('AN UNVERIFIED BODY IS NEVER CAPTURED, WHATEVER THE FLAG SAYS', async () => {
+  // THE FENCE THAT MATTERS MOST, and it is about ORDER rather than configuration.
+  // `lib/doku/notify.js` says "the reason, never the body" because an unverified
+  // body is attacker-controlled - anyone can POST one. The capture is the single
+  // exception to that line and it earns it by running AFTER the HMAC passes. A
+  // capture moved above the verify would turn a debug aid into an unauthenticated
+  // write to the log a human reads later and trusts.
+  const id = await newPair();
+  process.env.DOKU_CAPTURE = '1';
+  try {
+    const lines = await captured(() => handleDokuNotification(
+      signedRequest(bodyFor(`${id}.abc123`), { secret: `${SECRET}-WRONG` }),
+    ));
+    assert.deepEqual(lines.filter((l) => l.includes('[doku][capture]')), [],
+      'a body that failed verification must not reach the log');
+  } finally { delete process.env.DOKU_CAPTURE; }
+});
+
 // ── checkStatus, against DOKU's REAL bytes ──
 
 test('checkStatus READS DOKU\'S OWN RECORDED BYTES, where the amount is a NUMBER', async () => {
