@@ -113,7 +113,8 @@
     "build:pdf": "node scripts/build-pdf.mjs",
     "test:pdf-document": "node --test tests/pdf-document.spec.mjs",
     "test:pdf-pair-document": "node --test tests/pdf-pair-document.spec.mjs",
-    "test:prose-handoff": "node --import ./scripts/jsx-register.mjs --test tests/prose-handoff.spec.mjs"
+    "test:prose-handoff": "node --import ./scripts/jsx-register.mjs --test tests/prose-handoff.spec.mjs",
+    "test:pdf-font-lambda": "node --test tests/pdf-font-lambda.spec.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.6.1",

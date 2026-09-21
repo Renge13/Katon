@@ -59,6 +59,25 @@ UPDATED: 2026-09-09 (evening) — REYNER'S PHONE WALK OF Y-2, AND THE FIXES (Y-2
          report - masked on P4/P5 by a fallback that knows only those two ids. The assertion that
          should have caught it hand-wrote its own fixture. It is built from a real
          `buildPairSemantic` now.
+UPDATED: 2026-09-21 — THE HANZI FACE WAS NEVER IN THE LAMBDA, so BOTH PDF routes have returned a
+         bodyless 500 on every deployed request since the PDF shipped. Found from a 500 on
+         `GET /api/pair/rVe4ca-FOhsprfGUucTxA/pdf` on the #122 preview; NOT #122's doing - that PR
+         touches nothing in `lib/pdf/` and the mirror's `/api/deliver/[id]/pdf` carries the identical
+         fault. Two faults in `lib/pdf/fonts.js`, both read off the BUILT artifact:
+           $ grep -roh "file:///D:/claude-projects/katon[^\"']*" .next/server/
+                 1 file:///D:/claude-projects/katon/lib/render/prompt.js
+                 1 file:///D:/claude-projects/katon/lib/pdf/fonts.js
+           $ node -e "...app/api/pair/[id]/pdf/route.js.nft.json..."   238 traced, 0 fonts
+         (1) webpack inlines `import.meta.url` as a literal, so the chunk looked for the face under
+         the BUILD MACHINE's directory; (2) `fs.readFileSync(path.join(...))` is not a reference the
+         tracer can follow, so the file was absent from the bundle anyway. Invisible locally, because
+         there the build machine IS the runtime and the baked path is correct. Fixed with
+         `lib/render/prompt.js`'s own Prompt J mechanism - a cwd-rooted second candidate plus an
+         `outputFileTracingIncludes` entry - rather than a new one; that module carries the renderer
+         prompts in production, so it is proven rather than plausible. After: 241 traced, the TTF on
+         both PDF routes, and `process.cwd()` still in the compiled chunk.
+         NOT YET CONFIRMED AGAINST THE VERCEL FUNCTION LOG - no Vercel credentials in the Code
+         session. The predicted line is `pdf fonts: lib/pdf/fonts/noto-serif-tc-han.ttf is missing.`
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
          For "what SHIPS", read LIVE STATE at the top — it is the only section that answers that, and
          it is the one a product argument needs first.
