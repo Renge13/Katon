@@ -218,16 +218,37 @@ export async function POST(request, { params }) {
       // deferred register carries the row.
       const invoiceNumber = `${id}.${Date.now().toString(36)}`;
       const amount = priceFor(sku);
-      // ABSOLUTE, because DOKU redirects a browser back from its own domain. The
-      // mock branch above is the exception and its comment explains why.
-      // `?bayar=selesai` is a UI hint and never an entitlement.
-      const back = isCompat ? pairUrl(id, '?bayar=selesai') : readingUrl(id, '?bayar=selesai');
+      // ── COMPAT GOES THROUGH pairUrl, NEVER readingUrl ─────
+      // Regression X-b1, which shipped a compat checkout with neither redirect and
+      // left the buyer's last screen on the provider's page. ABSOLUTE, because DOKU
+      // sends a browser back from its own domain; the mock branch above is the
+      // exception and its comment explains why.
+      //
+      // ── THE TWO URLS ARE NOT SUCCESS AND FAILURE ──────────
+      // `docs/NEXT.md` asks for "success carries `?bayar=selesai`, failure carries no
+      // marker", which is the OLD ADAPTER's model. (Its name is not written here on
+      // purpose: `tests/payments-provider.spec.mjs` bans it from every file that
+      // decides or records a payment, and this is one, so the requirement is cited
+      // by where it lives rather than by whose API shaped it.) DOKU's split is
+      // different and was read off its own docs 2026-09-21: `callback_url` is the
+      // "Back to Merchant" button on
+      // the CHECKOUT page - a buyer who walked away WITHOUT PAYING - and
+      // `callback_url_result` is the button on the RESULT page, which is where both a
+      // success and a failure land. There is no success/failure split to honour.
+      //
+      // So the marker goes on the RESULT url only. Putting it on both would tell the
+      // report page "payment done" for someone who abandoned the checkout, which is
+      // the same class of lie X-b1 was about. `?bayar=selesai` remains a UI hint and
+      // never an entitlement - the page polls for the truth either way - so the cost
+      // of getting this backwards is a wrong first frame, not a free unlock.
+      const home = isCompat ? pairUrl(id) : readingUrl(id);
+      const done = isCompat ? pairUrl(id, '?bayar=selesai') : readingUrl(id, '?bayar=selesai');
 
       const { paymentUrl } = await createCheckout({
         invoiceNumber,
         amount,
-        callbackUrl: back,
-        callbackUrlResult: back,
+        callbackUrl: home,
+        callbackUrlResult: done,
         lineItemName: INVOICE_DESCRIPTION[sku],
         email,
       });

@@ -117,7 +117,8 @@
     "test:pdf-font-lambda": "node --test tests/pdf-font-lambda.spec.mjs",
     "test:doku-signature": "node --test tests/doku-signature.spec.mjs",
     "probe:doku": "node --env-file-if-exists=.env.local scripts/doku-probe.mjs",
-    "test:doku": "node --conditions=react-server --test tests/doku.spec.mjs"
+    "test:doku": "node --conditions=react-server --test tests/doku.spec.mjs",
+    "doku:status": "node --env-file-if-exists=.env.local scripts/doku-status.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.6.1",

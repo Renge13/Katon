@@ -86,11 +86,21 @@ test('THE TWO URL BUILDERS STAY DIFFERENT, ready for the provider that needs the
   assert.equal(readingUrl('abc').endsWith('/r/abc'), true);
   assert.notEqual(pairUrl('abc'), readingUrl('abc'));
 
-  // And the route still imports NEITHER, so a provider branch added later cannot
-  // reach for the wrong one out of habit - it has to add the import deliberately.
+  // ── AND THE PROVIDER ARRIVED, 2026-09-21 ─────────────────
+  // This used to assert the route imported NEITHER builder, because there was no
+  // provider to redirect from and an unused import would be a branch reaching for
+  // one out of habit. DOKU is that provider now, so the assertion inverts: the
+  // import must be there, and `docs/NEXT.md`'s "WHAT PROMPT V OWES" item 1 is
+  // satisfied rather than still owed.
+  //
+  // THE X-b1 PROPOSITION ITSELF IS ASSERTED IN `tests/doku.spec.mjs`, line by line
+  // over both redirect URLs - a single match over the whole branch was tried first
+  // and did NOT guard, because one right URL satisfied it while the other was
+  // wrong, which is X-b1's exact shape. What stays here is this file's own half:
+  // the two builders are distinct, and the route reaches for them at all.
   const route = read('app/api/pay/[id]/route.js');
-  assert.equal(/import .*from '@\/lib\/site\/baseUrl'/u.test(route), false,
-    'no URL builder is imported while there is no provider to redirect from');
+  assert.match(route, /import \{[^}]*pairUrl[^}]*\} from '@\/lib\/site\/baseUrl'/u,
+    'the provider branch builds absolute redirect URLs, so it imports the builders');
 });
 
 test('compat is sellable, which is what makes the page reachable', () => {

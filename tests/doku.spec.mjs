@@ -294,6 +294,55 @@ test('A MISSING invoice_number IS A 400', async () => {
   assert.equal(res.status, 400);
 });
 
+// ── the two assertions docs/NEXT.md says Prompt V OWES ──
+
+test('THE DOKU BRANCH SENDS COMPAT THROUGH pairUrl, NEVER readingUrl', async () => {
+  // `docs/NEXT.md` "WHAT PROMPT V OWES THAT V-0 REMOVED THE TESTS FOR", item 1. This
+  // is regression X-b1: a compat checkout shipped with NEITHER redirect url and left
+  // the buyer's last screen on the provider's page. The assertion died with the old
+  // adapter because its subject stopped existing, not because the requirement did.
+  //
+  // ON THE SOURCE, because exercising the route needs Next's whole request pipeline
+  // and `@/` alias, and what can go wrong here is a one-identifier edit.
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../app/api/pay/[id]/route.js', import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//gu, '')
+    .replace(/^\s*\/\/.*$/gmu, '');
+
+  const branch = src.slice(src.indexOf("paymentsProvider() === 'doku'"));
+  assert.ok(branch.length > 0, 'the doku branch exists');
+  assert.match(branch, /createCheckout\(/u);
+
+  // ── EACH URL IS CHECKED ON ITS OWN LINE, AND THAT IS THE POINT ──
+  // A single `assert.match(branch, /isCompat \? pairUrl\(/)` over the whole branch
+  // was the first version and IT DID NOT GUARD: rewriting `home` to a bare
+  // `readingUrl(id)` left it green, because `done` still carried the pattern. That
+  // is X-b1's exact shape - one redirect right and the other wrong - so an
+  // assertion satisfied by one occurrence is satisfied by the bug.
+  const lineFor = (name) => {
+    const at = branch.indexOf(`const ${name} =`);
+    assert.ok(at > -1, `the doku branch declares \`${name}\``);
+    return branch.slice(at, branch.indexOf('\n', at));
+  };
+  const homeLine = lineFor('home');
+  const doneLine = lineFor('done');
+
+  for (const [name, line] of [['home', homeLine], ['done', doneLine]]) {
+    assert.match(line, /isCompat \? pairUrl\(/u,
+      `\`${name}\` must resolve compat through pairUrl, never readingUrl: ${line}`);
+  }
+
+  // AND THE MARKER IS ON THE RESULT URL ONLY. DOKU's `callback_url` is the "Back to
+  // Merchant" button on the CHECKOUT page - a buyer who left WITHOUT PAYING - and
+  // `callback_url_result` is the one on the result page. Marking both would tell the
+  // report page "payment done" for an abandoned checkout.
+  assert.match(branch, /callbackUrl: home/u, 'the checkout-page return carries no marker');
+  assert.match(branch, /callbackUrlResult: done/u, 'the result-page return carries the marker');
+  assert.equal(homeLine.includes('bayar=selesai'), false,
+    'the abandon path must not claim a payment happened');
+  assert.ok(doneLine.includes('bayar=selesai'), 'the result path does carry the hint');
+});
+
 // ── the source assertion §4 names ──
 
 test('THE NOTIFY HANDLER READS RAW BYTES, AND PARSES ONLY AFTER VERIFYING', async () => {
