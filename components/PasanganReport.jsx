@@ -3,7 +3,7 @@
 // ============================================================
 // /kompatibilitas/[id] — pending, and the report
 // ============================================================
-// The page a buyer lands on after Xendit redirects, and the URL that IS her
+// The page a buyer lands on after the provider redirects, and the URL that IS her
 // access: there is no account and, in v1, nothing is emailed (ruled 2026-09-08,
 // email is store-only).
 //

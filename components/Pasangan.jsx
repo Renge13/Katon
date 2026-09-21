@@ -157,7 +157,7 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
     //
     // `location.assign` is a real navigation, so `/kompatibilitas/<id>` mounts
     // and does the unlock. It is deliberately NOT the pushState below: that one
-    // exists for the Xendit path, where the invoice link lives in this
+    // exists for a real provider path, where the invoice link lives in this
     // component's state and must survive.
     if (paid.mock) {
       window.location.assign(`${compatPairRoute(created.id)}?bayar=mock`);

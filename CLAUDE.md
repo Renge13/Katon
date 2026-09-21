@@ -30,7 +30,8 @@ a shareable card out. Target: Indonesian women, mid-20s to 40s.
 
 ## STACK
 
-Next.js 15 (App Router, JS) · React 19 · Supabase (Postgres) · Xendit QRIS · Vercel.
+Next.js 15 (App Router, JS) · React 19 · Supabase (Postgres) · QRIS via DOKU (Prompt V; sales closed
+until it lands) · Vercel.
 Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
 
 ---
@@ -137,8 +138,9 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     cannot reintroduce it by not knowing.)
 17. **Nothing reaches a user without passing Stage-6 post-validation.** LLM output is guilty until
     validated. Module assembly is the always-available floor.
-18. **Paywall is server-gated.** `paid` flips only in the verified Xendit webhook, never from any
-    client path. Paid content is imported only by the `/full` route.
+18. **Paywall is server-gated.** `paid` flips only in the verified provider notification
+    (`settlePair` / `markReadingPaid`, the single door), never from any client path. Paid content is
+    imported only by the `/full` route.
 19. Rate-limit per IP/session. No bulk endpoint. No enumerable reading URLs. The real abuse risk is
     content harvesting, not API cost (the entire mirror space costs ~$115 to cache forever).
 
@@ -282,6 +284,19 @@ docs/archive/                 superseded, kept for history only
 - ~~CR-5, "weak is banned as a consumer word"~~ → lifted. See rule 18.
 - ~~The `NEXT_PUBLIC_FREE_FULL_READING` test flag as the mechanism for a free mirror~~ → the mirror
   is ungated BY DESIGN. Remove the flag; do not let a test flag become the architecture.
+- ~~`lib/xendit.js`, `/api/webhook/xendit`, `PAYMENTS_PROVIDER=xendit`, `XENDIT_SECRET_KEY`,
+  `XENDIT_WEBHOOK_TOKEN`, and `devBypassAllowed()`~~ → **ALL DELETED 2026-09-18** (Prompt V-0), on
+  Reyner's ruling to leave outright rather than wait for the funnel data. The fence is `mock |
+  closed`, a stale `xendit` reads as `closed`, and there is no dev bypass: development with no
+  provider REFUSES. `doku` arrives in Prompt V and is ADDED to the set, not swapped in.
+  **Xendit still appears in two places on purpose and neither is a leftover.** Reader-visible
+  Indonesian in `lib/site/copy.js` (the privacy policy and terms name the processor that actually
+  handled those payments) is Reyner's to rule and its replacement has to name DOKU. Dated history in
+  comments - why `/tentang` exists, why the footer is a server component, the X-b1 record - records
+  what was true when written and rule "ledger rows are not edited" covers it.
+  **UNSET THE TWO KEYS IN VERCEL.** They are inert, and this file already carries two entries about
+  a variable that outlived its code. Closing the ACCOUNT is separate and it is Reyner's: the
+  2026-10-01 fee is on the account, not on whether a key is still typed into a project.
 - ~~`contents/*.md` are the DEPRECATED hand-authored cells... **do not delete them** until the new
   pipeline ships~~ → **THE PIPELINE SHIPPED AND THEY ARE DELETED** (2026-08-23, the promotion). That
   instruction lived in REPO CONVENTIONS above and was correct for as long as it was: those cells fed

@@ -274,7 +274,30 @@ Commits 0-3 and 5-7 are landed on `feat/compat-pdf`. **COMMIT 4 IS OPEN AND IT I
    the compat appendix prints NO sub-line rather than inventing a second sentence. If he wants one,
    it is a slot.
 
-The chain after this: U (Render) -> V (DOKU) -> `?dari` -> real-money walk -> promotion.
+The chain after this: **V-0 (Xendit exit) LANDED 2026-09-18** -> V (DOKU) -> `?dari` -> real-money
+walk -> promotion to own network on Vercel Hobby -> U (Render) -> promotion beyond own network.
+
+**U MOVED DOWN THE CHAIN, and it was never where this line used to put it.** The owning source is the
+INTERIM REGISTER row `KATON RUNS A COMMERCIAL PRODUCT ON A NON-COMMERCIAL PLAN` (2026-09-05): the
+Render trigger is **promotion BEYOND OWN NETWORK**, not promotion. "U before promotion" was a stale
+copy carried forward in session state for five days and it is corrected here, at the source, rather
+than in whichever doc is read next.
+
+### WHAT PROMPT V OWES THAT V-0 REMOVED THE TESTS FOR
+
+Two assertions were deleted with the adapter because their subject stopped existing, NOT because the
+requirement lapsed. They are written here because a test that is red for the whole of V-0's life
+teaches the next session to delete it rather than satisfy it:
+
+1. **THE DOKU ADAPTER MUST SET BOTH COMPAT REDIRECT URLS**, through `pairUrl` and never
+   `readingUrl` - success carries `?bayar=selesai`, failure carries no marker. This is regression
+   **X-b1**, which shipped a compat checkout with neither and left the buyer's last screen on the
+   provider's page. `tests/compat-surface.spec.mjs` still asserts the two builders stay distinct,
+   which is what makes the fix possible; it can no longer assert the route uses them.
+2. **THE NOTIFICATION ENDPOINT MUST VERIFY ITS TOKEN BEFORE TRUSTING ANY BODY**, and the forgery
+   checks belong in the adapter's own first commit. `scripts/forge-tests.mjs` had two `--live` POSTs
+   at the deleted webhook; one of them would have passed a 404. An endpoint that trusts its body is
+   how a free unlock ships.
 
 ## THE PREVIOUS WORK, 2026-09-09 - PROMPT Y-2, SITE CHROME AND THE COMPAT FLOW
 

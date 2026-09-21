@@ -1,8 +1,9 @@
 # Walking the paid flow, for free
 
-**Sales are CLOSED in production (Reyner, 2026-09-08: Katon is exiting Xendit).
-There is to be no real Xendit transaction by anyone, including for testing.
-Xendit test keys are NOT needed and are not set.**
+**Sales are CLOSED in production. Reyner ruled the exit on 2026-09-08 and took the
+TERMINATE branch on 2026-09-18; the adapter is deleted (Prompt V-0). There is to be
+no real transaction by anyone, including for testing, and no provider test keys are
+needed or set.**
 
 The paid path still has to be walkable end to end, so `PAYMENTS_PROVIDER=mock`
 exists. It pays nothing. The Gemini spend of a real render is accepted, and it is
@@ -14,7 +15,7 @@ the only cost of a walk.
 |---|---|---|
 | `closed` | 503 `payment_closed`; the page renders its sales-closed state | production, and the default when the variable is unset or unrecognised |
 | `mock` | returns a LOCAL `/kompatibilitas/<id>?bayar=mock` url; no provider, no money, no network | Preview and local only |
-| `xendit` | the historical adapter, unchanged | nothing, for now |
+| anything else | treated as `closed` | nobody - a stale or mistyped value must never mean "take money" |
 
 **`mock` is refused when `VERCEL_ENV=production`.** `paymentsProvider()` downgrades
 it to `closed` there, so the free unlock cannot be reached on the live site even
@@ -29,7 +30,7 @@ if the variable is set by mistake. `tests/payments-provider.spec.mjs` asserts it
 2. Redeploy the preview, or push once, so the new value is picked up.
 3. Open the preview's `/kompatibilitas`, fill both births and an email, submit.
 4. The button NAVIGATES to `/kompatibilitas/<id>?bayar=mock` - same origin, no
-   Xendit tab, because the "invoice url" is a path on this site.
+   provider tab, because the "invoice url" is a path on this site.
 5. That page unlocks the pair through `POST /api/mock-pay/<id>`, which flips
    `paid` through the SAME `settlePair` the verified webhook uses, then shows the
    skeleton and swaps in the reading when it arrives.
@@ -81,11 +82,13 @@ thing being checked.
 
 ## What a walk does NOT prove
 
-- **Nothing about Xendit.** The adapter is untouched and unexercised. A future
-  provider swap (DOKU) needs its own walk against its own sandbox.
-- **Nothing about the webhook's signature check.** `mock-pay` is a different door
-  with its own fence; the webhook's token verification is exercised only by the
-  webhook.
+- **Nothing about a real provider.** There is no longer one to exercise: the Xendit
+  adapter is deleted and DOKU arrives in Prompt V, which needs its own walk against
+  its own sandbox. **That walk is the alternative to this one** - not a key swap.
+- **Nothing about a notification signature check.** `mock-pay` is a different door
+  with its own fence. There is no notification endpoint at all right now; DOKU's
+  token verification is its adapter's first commit and its forgery checks belong
+  with it.
 - **Nothing about production latency.** The render cost measured locally on
   2026-09-08 was 2.7-5.4s for one or two attempts, and the n=20 run saw draws
   needing six. Production adds its own distance to Gemini.
