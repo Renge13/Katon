@@ -274,7 +274,7 @@ Commits 0-3 and 5-7 are landed on `feat/compat-pdf`. **COMMIT 4 IS OPEN AND IT I
    the compat appendix prints NO sub-line rather than inventing a second sentence. If he wants one,
    it is a slot.
 
-The chain after this: **V-0 (Xendit exit) LANDED 2026-09-18** -> V (DOKU) -> `?dari` -> real-money
+The chain after this: **V-0 (Xendit exit) LANDED 2026-09-18** -> **V (DOKU) BUILT 2026-09-21, BLOCKED ON DOKU ENABLING QRIS** -> `?dari` -> real-money
 walk -> promotion to own network on Vercel Hobby -> U (Render) -> promotion beyond own network.
 
 **U MOVED DOWN THE CHAIN, and it was never where this line used to put it.** The owning source is the
@@ -283,7 +283,7 @@ Render trigger is **promotion BEYOND OWN NETWORK**, not promotion. "U before pro
 copy carried forward in session state for five days and it is corrected here, at the source, rather
 than in whichever doc is read next.
 
-### WHAT PROMPT V OWES THAT V-0 REMOVED THE TESTS FOR
+### WHAT PROMPT V OWED THAT V-0 REMOVED THE TESTS FOR — BOTH PAID, 2026-09-21
 
 Two assertions were deleted with the adapter because their subject stopped existing, NOT because the
 requirement lapsed. They are written here because a test that is red for the whole of V-0's life
@@ -298,6 +298,14 @@ teaches the next session to delete it rather than satisfy it:
    checks belong in the adapter's own first commit. `scripts/forge-tests.mjs` had two `--live` POSTs
    at the deleted webhook; one of them would have passed a 404. An endpoint that trusts its body is
    how a free unlock ships.
+
+**BOTH ARE PAID, 2026-09-21 (Prompt V).** (1) The DOKU branch builds both redirect URLs through
+`pairUrl` for compat, asserted line by line in `tests/doku.spec.mjs` - a single match over the whole
+branch was tried first and did NOT guard, because one right URL satisfied it while the other was
+wrong, which is X-b1 exactly. DOKU's two callback fields turn out to be checkout-page vs
+result-page rather than success vs failure, so the `?bayar=selesai` marker goes on the result URL
+only. (2) The two `--live` forgery checks are restored against `/api/doku/notify`, assert 401
+exactly, and PASS against the deployed preview.
 
 ## THE PREVIOUS WORK, 2026-09-09 - PROMPT Y-2, SITE CHROME AND THE COMPAT FLOW
 

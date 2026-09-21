@@ -167,32 +167,137 @@ the real capture:
 
 ---
 
-## Part 2 — The sandbox walk (§5)
+## Part 2 — The sandbox probe, 2026-09-21 (Code), with real keys
 
-**NOT DONE. Blocked.**
+Reyner put the sandbox pair in `.env.local`. `npm run probe:doku` ran. **The headline
+is a blocker, and it is an account setting, not code.**
 
-`scripts/doku-probe.mjs` is written and answers §2's three remaining questions in one run.
-It needs `DOKU_CLIENT_ID` and `DOKU_SECRET_KEY` (the **sandbox** pair) in `.env.local` on
-the machine running it. The four variables Reyner set live in Vercel **Preview** scope,
-which this machine cannot read, and there is no Vercel CLI or token here — see the
-2026-09-21 note in the memory index.
+### 2.0 QRIS IS INACTIVE ON THE SANDBOX ACCOUNT
 
-Two ways forward, Reyner's call:
+All four probe calls returned the same thing:
 
-1. Put the sandbox Client-Id and Secret Key in `.env.local` locally, and
-   `npm run probe:doku` answers 2.1–2.3 below without deploying anything.
-2. Or wait for §5's preview walk, where the adapter itself is the instrument — but that
-   means building `lib/doku/client.js` against a signature rule nothing has confirmed,
-   which is the order §2 exists to prevent.
+```
+$ npm run probe:doku
+── 2.1 + 2.3  QRIS, no customer block
+status      400
+body        {"message":["PAYMENT CHANNEL IS INACTIVE"]}
+```
+
+**No QRIS payment can be made on this account**, so §5's walk cannot happen and §4's
+captured QRIS notification does not exist. Amendment B.5 says to stop and report rather
+than switch products, and that is what this is. **The product is still QRIS**;
+`PAYMENT_METHOD_TYPES = ['QRIS']` is unchanged in `lib/doku/client.js`.
+
+### 2.0a What that failure PROVES, which is a great deal
+
+A follow-up run answered the question the probe could not: does a business-level error
+mean the signature passed?
+
+| probe | answer |
+|---|---|
+| same request, **wrong secret** | `{"error":{"code":"invalid_signature","message":"Invalid Header Signature"}}` |
+| same request, **right secret** | `{"message":["PAYMENT CHANNEL IS INACTIVE"]}` |
+
+**DOKU verifies the signature before it looks at the body.** So `PAYMENT CHANNEL IS
+INACTIVE` is proof that `signComponents` produced a signature DOKU accepted. The signing
+rule is confirmed against the real thing, which is what §4 wanted the sandbox for.
+
+And Checkout itself works end to end on this account:
+
+```
+── Q3 VIRTUAL_ACCOUNT_BCA
+   status 200  {"message":["SUCCESS"],"response":{"order":{"amount":"39000",...},
+     "payment":{"token_id":"37d0...","url":"https://staging.doku.com/checkout-link-..."}}}
+```
+
+So: account live, credentials right, signing right, Checkout right. **Only the QRIS
+channel is switched off.**
+
+### 2.0b Two things that changed the code
+
+1. **There are TWO error envelopes.** Amendment B.4 says `error.message` is a string.
+   That is true of the AUTH envelope only. Business answers - success *and* validation
+   failure - use a top-level **array** with no `error` key:
+   `{"message":["PAYMENT CHANNEL IS INACTIVE"]}`, `{"message":["SUCCESS"],"response":{...}}`.
+   `errorMessageOf` reads both.
+2. **`order.amount` comes back as the STRING `"39000"`.** `amountMatchesSku` takes a
+   number and returns false for a string, so a verified, correct, fully paid
+   notification would have settled as `amount_mismatch`. `amountNumber` is the single
+   coercion. This is the finding most likely to have reached a real buyer.
+
+Also: `NOT_A_REAL_CHANNEL` returns the **same** `PAYMENT CHANNEL IS INACTIVE`, so DOKU
+does not distinguish an unknown enum from a disabled one. The reading "QRIS is a valid
+enum that is not enabled here" rests on the docs confirming the enum plus VA working on
+the same account, not on this message alone. And omitting `payment_method_types`
+entirely returns `500 INTERNAL SERVER ERROR`, so it is required in practice.
+
+### 2.1-2.3 still unanswered, and the probe said so wrongly
+
+`probe:doku` printed a **2.2 verdict of "REJECTED. Keep the suffix"** and that verdict is
+worthless: all four calls failed for a reason that has nothing to do with repeated
+invoice numbers. **The instrument reported a conclusion where it had learned nothing**,
+which is the inverse of the trap this repo usually hits. The suffix stays because the
+question is unanswered, not because it was answered - and the deferred register carries
+the row.
+
+`customer` required or not (2.3) is likewise unanswered by the probe. The docs say it is
+optional for QRIS and `createCheckout` omits it when there is no email.
+
+---
+
+## Part 3 — The sandbox walk (§5)
+
+**NOT DONE. Blocked on two things, one of them Reyner's and one of them DOKU's.**
+
+`/api/doku/notify` is LIVE on the preview as of 2026-09-21 and answers `401` to an
+unsigned body, which is what DOKU's Back Office needs before it will accept a
+Notification URL:
+
+```
+$ curl -X POST https://katon-git-feat-doku-checkout-renge13s-projects.vercel.app/api/doku/notify \
+       -H "Content-Type: application/json" -d '{}'
+401
+
+$ FORGE_BASE_URL=https://katon-git-feat-doku-checkout-renge13s-projects.vercel.app \
+    npm run report:forge -- --live
+  LIVE (vs https://katon-git-feat-doku-checkout-...)
+    checkmark  a forged DOKU notification with NO headers is rejected
+    checkmark  a forged DOKU notification with a WRONG signature is rejected
+```
+
+### The two blockers
+
+1. **REYNER:** set the sandbox Back Office Notification URL to
+   `https://katon-git-feat-doku-checkout-renge13s-projects.vercel.app/api/doku/notify`.
+   It will save now that the path answers.
+2. **DOKU:** enable QRIS as a Checkout method on the sandbox account (and, separately,
+   on production before any real sale). This is the one Katon cannot do, and the
+   2026-09-08 notes say Reyner already asked by email.
+
+### A way to finish the walk WITHOUT QRIS, if Reyner wants it
+
+`VIRTUAL_ACCOUNT_BCA` is active on the same account and returns a real Checkout
+session. Paying one in the simulator would deliver a **real, signed, Checkout
+notification** to `/api/doku/notify` — which would prove the signature verification,
+the `invoice_number` split, the amount coercion and the `paid` flip against DOKU's
+actual bytes rather than a composed body.
+
+**This is not switching products.** The product stays QRIS and the code stays QRIS; VA
+would be a one-off transport in a sandbox, used to obtain the fixture. What it would
+NOT prove is the QRIS-specific part of the notification body (`service.id`,
+`channel.id`, and whatever QRIS-only block accompanies them) — the fields the handler
+reads are channel-independent, but §4's fixture would have to be labelled for what it
+is. **It needs Reyner's yes, because Amendment B.5 says stop and report rather than
+improvise around an inactive channel.**
 
 ### Still open
 
 | # | question | how it gets answered |
 |---|---|---|
-| 2.1 | Is QRIS enabled as a Checkout method on the sandbox account? | `probe:doku` — a real `createCheckout` either returns a `payment.url` or names the method as unavailable |
-| 2.2 | What does a repeated `invoice_number` do? | `probe:doku` sends the same one twice |
-| 2.3 | Is `customer` required for QRIS? | `probe:doku` sends one request without a customer block |
-| 2.4 | The exact QRIS-on-Checkout notification body | §5 walk only: pay in `sandbox.doku.com/integration/simulator/` and capture from the function log |
+| 2.1 | Is QRIS enabled on the account? | **ANSWERED: NO.** `PAYMENT CHANNEL IS INACTIVE`. DOKU has to switch it on. |
+| 2.2 | What does a repeated `invoice_number` do? | unanswered — re-run `probe:doku` once QRIS is live. The suffix stays meanwhile. |
+| 2.3 | Is `customer` required for QRIS? | unanswered by probe; docs say optional and `createCheckout` omits it without an email |
+| 2.4 | The exact QRIS-on-Checkout notification body | the walk, once QRIS is enabled — or a labelled VA capture, if Reyner says yes |
 
 ### What a sandbox walk will NOT prove
 

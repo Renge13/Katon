@@ -30,8 +30,7 @@ a shareable card out. Target: Indonesian women, mid-20s to 40s.
 
 ## STACK
 
-Next.js 15 (App Router, JS) · React 19 · Supabase (Postgres) · QRIS via DOKU (Prompt V; sales closed
-until it lands) · Vercel.
+Next.js 15 (App Router, JS) · React 19 · Supabase (Postgres) · QRIS via DOKU Checkout · Vercel.
 Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
 
 ---
