@@ -12,6 +12,8 @@
 // a second opinion about what a valid birth date is.
 // ============================================================
 
+import { GENDER_WORDS } from '../lib/site/birthSummary.js';
+
 const pad = (n) => String(n).padStart(2, '0');
 
 /** The engine's supported range starts here. */
@@ -40,7 +42,9 @@ export const HOURS = Array.from({ length: 24 }, (_, h) => h);
  * for two words is more machinery than the words are worth (the same call the
  * rulings file makes for the two shared JSX strings).
  */
-export const GENDER_WORDS = { female: 'Perempuan', male: 'Laki-laki' };
+// MOVED to lib/site/birthSummary.js (2026-09-23) so the PDF cover can read it
+// under plain node. Re-exported so every existing import keeps working.
+export { GENDER_WORDS };
 
 /** Today, in the browser's own local calendar - the same day the reader means. */
 export const today = () => {

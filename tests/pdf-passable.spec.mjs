@@ -37,6 +37,7 @@ import { buildAppendix } from '../lib/pdf/appendix.js';
 import { buildPairAppendix } from '../lib/pdf/pairAppendix.js';
 import { pageTexts, textBoxes } from '../lib/pdf/inspect.js';
 import { PASANGAN_COPY } from '../lib/site/copy.js';
+import { RENDER_COPY } from '../lib/render/copy.js';
 import { GLOSSARY } from '../lib/semantic/glossary.js';
 
 const A = { birthDate: '1989-09-13', birthTime: '09:00' };
@@ -305,4 +306,102 @@ test('THE REFRAME IS IN THE TABLE UNDER THE SEAT ROWS, AND ONLY ON A HARD SEAT',
   assert.equal((soft.facts || []).some((f) => f.id === 'p2_reframe'), false, '1x9 is a soft seat');
   assert.equal(factRows(soft).some((r) => r.note), false,
     'a soft seat is not told its seat is survivable, because nobody suggested it was not');
+});
+
+// ============================================================
+// AB §4, THE LAYOUT ROWS (PR 2, 2026-09-23)
+// ============================================================
+// Every row below was marked ok by Reyner on the P2 markup. These assert what
+// each row makes OBSERVABLE, and every one of them fails on `60ab99e` (the
+// inspector fix, before the layout). What they cannot see is whether the page is
+// BEAUTIFUL; that is Reyner's round-1 read of the rebuilt PDFs, per AB §5. The
+// measure (A12) is measured in the PR, not pinned here, for the reason the header
+// of this file gives.
+
+const docs = async () => {
+  const m = await mirror();
+  const c = await compat();
+  return [
+    { name: 'mirror', texts: pageTexts(m.buffer), buffer: m.buffer, edition: RENDER_COPY.pdfEditionMirror },
+    { name: 'compat', texts: pageTexts(c.buffer), buffer: c.buffer, edition: RENDER_COPY.pdfEditionCompat },
+  ];
+};
+
+test('A1 THE COVER CARRIES THE WORDMARK AND ITS RULED PRODUCT NAME', async () => {
+  for (const d of await docs()) {
+    const lines = d.texts[0].split('\n').map((l) => l.trim());
+    assert.equal(lines[0], 'KATON', `${d.name}: the cover does not open on the wordmark`);
+    // The eyebrow is set `textTransform: uppercase`, so it extracts in capitals.
+    assert.ok(lines.includes(d.edition.toUpperCase()), `${d.name}: no "${d.edition}" eyebrow on the cover`);
+  }
+});
+
+test('A2 NO COVER PRINTS AN ISO DATE OR AN ENGLISH GENDER WORD', async () => {
+  for (const d of await docs()) {
+    const cover = d.texts[0];
+    assert.equal(/\d{4}-\d{2}-\d{2}/u.test(cover), false, `${d.name}: ISO date on the cover`);
+    assert.equal(/\b(female|male)\b/u.test(cover), false, `${d.name}: English gender word on the cover`);
+  }
+  // And the compat cover names the pair exactly as the web report's header does.
+  const [, c] = await docs();
+  assert.ok(c.texts[0].includes('Perempuan, 13 September 1989 dan Laki-laki, 4 Maret 1990'),
+    'the compat cover does not carry pairLine');
+});
+
+test('B2 EVERY PAGE AFTER THE COVER CARRIES THE RUNNING FOOTER, and the cover does not', async () => {
+  for (const d of await docs()) {
+    const footer = `Katon - ${d.edition}`;
+    assert.equal(d.texts[0].includes(footer), false, `${d.name}: the cover carries the footer`);
+    d.texts.slice(1).forEach((t, i) => {
+      assert.ok(t.includes(footer), `${d.name}: page ${i + 2} has no running footer`);
+    });
+  }
+});
+
+test('A11 THE DISCLAIMER IS ON THE COVER AND ON NO OTHER PAGE', async () => {
+  for (const d of await docs()) {
+    const hits = d.texts.map((t, i) => (t.includes(RENDER_COPY.pdfDisclaimer) ? i + 1 : null)).filter(Boolean);
+    assert.deepEqual(hits, [1], `${d.name}: the disclaimer is on page(s) ${hits.join(', ')}`);
+  }
+});
+
+test('C5 BOTH COMPAT CHARTS SHARE ONE PAGE', async () => {
+  const [, c] = await docs();
+  const both = c.texts.filter((t) => t.includes(PASANGAN_COPY.pdf_chart_a_heading)
+    && t.includes(PASANGAN_COPY.pdf_chart_b_heading));
+  assert.equal(both.length, 1, 'the two chart blocks are not on one page');
+});
+
+test('A10 THE ELEMENTS ARE BARS, NOT A "Kayu: 0" LIST', async () => {
+  for (const d of await docs()) {
+    const listed = d.texts.join('\n').split('\n').filter((l) => /^(Kayu|Api|Tanah|Logam|Air): /u.test(l.trim()));
+    assert.deepEqual(listed, [], `${d.name}: the element presence still prints as a list`);
+  }
+});
+
+test('C3 A BRANCH AND ITS ANIMAL SIT ON ONE LINE in the facts table', async () => {
+  const c = await compat();
+  const texts = pageTexts(c.buffer);
+  const page = texts.findIndex((t) => t.includes(PASANGAN_COPY.pdf_facts_heading));
+  const runs = textBoxes(c.buffer)[page];
+  const p2 = c.semanticJson.facts.find((f) => f.id === 'p2_day_pair');
+  const branch = p2.provenance.a_branch;
+  const animal = GLOSSARY.shio[branch].name_id;
+  const han = runs.find((r) => r.text.trim() === branch);
+  const name = runs.find((r) => r.text.trim() === animal && han && Math.abs(r.x - han.x) < 40);
+  assert.ok(han && name, `precondition: ${branch} and ${animal} are both drawn on the facts page`);
+  assert.ok(Math.abs(han.y - name.y) < 2, `${branch} at y=${han.y} and ${animal} at y=${name.y} are stacked, not one line`);
+});
+
+test('A8 THE APPENDIX TERM COLUMN IS 150pt, the meaning takes the rest', async () => {
+  const m = await mirror();
+  const texts = pageTexts(m.buffer);
+  const page = texts.findIndex((t) => t.includes('Istilah dalam Bacaanmu'));
+  const runs = textBoxes(m.buffer)[page];
+  // The first named entry and its meaning: the term, then the run to its right on
+  // the same baseline.
+  const term = runs.find((r) => r.text.trim() === 'Aspek Pengelola');
+  const meaning = runs.find((r) => term && Math.abs(r.y - term.y) < 2 && r.x > term.x + 20);
+  assert.ok(term && meaning, 'precondition: a term and its meaning share a row');
+  assert.equal(Math.round(meaning.x - term.x), 150, `the meaning starts ${meaning.x - term.x}pt after the term`);
 });

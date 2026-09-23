@@ -20,6 +20,7 @@ import { test } from 'node:test';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { assembleFallback } from '../lib/render/fallback.js';
+import { RENDER_COPY } from '../lib/render/copy.js';
 import { buildPairPdf } from '../lib/pdf/build.js';
 import { factRows } from '../lib/pdf/pairDocument.js';
 import { REF_PREFIX } from '../lib/pdf/document.js';
@@ -260,7 +261,10 @@ test('the fixed point converges and all three verifies pass, for BOTH pairs', as
     assert.equal(report.rebuilds, 0, `${name}: nothing is referenced, so nothing to resolve`);
     assert.equal(report.referenced, 0, `${name}: something is still referenced`);
     assert.deepEqual(pageMap, {}, `${name}: a map was resolved for nothing`);
-    assert.ok(report.pages >= 8, `${name}: ${report.pages} pages, fewer than the six sections need`);
+    // ONE PAGE PER SECTION, not a page count (AB §5: page count is a consequence).
+    // It was `>= 8` while each chart had a page of its own; C5 stacks them on one.
+    // Cover, reading, charts, facts, appendix.
+    assert.ok(report.pages >= 5, `${name}: ${report.pages} pages, fewer than the five sections need`);
     assert.ok(report.appendixStart > 1 && report.appendixStart <= report.pages);
     assert.equal(texts.length, report.pages);
     assert.ok(flat(texts[report.appendixStart - 1]).includes(APPENDIX_HEADING));
@@ -431,10 +435,10 @@ test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () =>
 
 // ── THE COVER (Reyner, 2026-09-14, ruling 2) ───────────────
 
-test('THE COVER LEADS WITH THE ENGLISH NAMES, Indonesian underneath', async () => {
-  // Ruled 2026-09-14 after Cowork read the Y-1 PDF: `name_en` is the bigger title,
-  // `name_id` sits under it, smaller. Same shape on the mirror's Complete Edition
-  // cover - `tests/pdf-document.spec.mjs` asserts that half.
+test('THE COVER LEADS WITH THE INDONESIAN NAMES, English once underneath', async () => {
+  // ── REVERSED 2026-09-22 (P2 markup A3, Reyner "ok") ──────────
+  // Was the 2026-09-14 ruling 2, English first. Rule 23: Indonesian first, English
+  // pair once. `tests/pdf-document.spec.mjs` asserts the mirror's half.
   //
   // THE SEPARATOR STAYS ` - `. Reyner's example wrote "The Sun · The Garden" with a
   // middle dot; rule 20 is keyboard characters only, and `·` is not one. Read as an
@@ -447,14 +451,14 @@ test('THE COVER LEADS WITH THE ENGLISH NAMES, Indonesian underneath', async () =
     const a = semanticJson.core.a;
     const b = semanticJson.core.b;
 
-    assert.equal(cover[0], `${a.archetype_name_en} - ${b.archetype_name_en}`,
-      `${name}: the first line of the cover is not the English pair`);
-    assert.equal(cover[1], `${a.archetype_name_id} dan ${b.archetype_name_id}`,
-      `${name}: the Indonesian pair is not the line under it`);
+    const at = cover.indexOf(`${a.archetype_name_id} dan ${b.archetype_name_id}`);
+    assert.ok(at > -1, `${name}: the Indonesian pair is not a title line on the cover`);
+    assert.equal(cover[at + 1], `${a.archetype_name_en} - ${b.archetype_name_en}`,
+      `${name}: the English pair is not the line directly under it`);
     // ORDER IS THE ASSERTION, not mere presence: both strings were on the cover
-    // before this ruling too, the wrong way round.
-    assert.ok(texts[0].indexOf(a.archetype_name_en) < texts[0].indexOf(a.archetype_name_id),
-      `${name}: the Indonesian name still comes first`);
+    // before this ruling too, the other way round.
+    assert.ok(texts[0].indexOf(a.archetype_name_id) < texts[0].indexOf(a.archetype_name_en),
+      `${name}: the English name still comes first`);
   }
 });
 
@@ -547,7 +551,10 @@ test('THE QUADRANT NAME IS THE READING\'S TITLE LINE, after the P0 sentence', as
     const { texts, semanticJson } = await build(name);
     const q = semanticJson.core.quadrant;
     const title = GLOSSARY.kompatibilitas[`p5_${q}`].name_id;
-    const lines = texts[1].split('\n').map((l) => l.trim()).filter(Boolean);
+    // The running footer (B2) is drawn first on every page; it is chrome, not the
+    // reading, so it is not one of the reading's lines.
+    const footer = `Katon - ${RENDER_COPY.pdfEditionCompat}`;
+    const lines = texts[1].split('\n').map((l) => l.trim()).filter((l) => l && l !== footer);
 
     const a = semanticJson.core.a.archetype_name_id;
     const b = semanticJson.core.b.archetype_name_id;
