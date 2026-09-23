@@ -23,6 +23,28 @@ CHECK 4 - every item states what it buys a customer.
   defects (paragraph gap; PETA DINAMIKA eyebrow with no heading) ride in the same pass. Ruled, not open.
 - Everything else parks behind launch. Distribution is the next thinking job.
 
+## 0b. Reyner's rulings, 2026-09-23 (chat), VERBATIM
+
+Recorded here because the repo is the source (REPO-IS-SOURCE, below). Item 4 and its ruled sentence
+had existed only in the Claude project and on a branch copy of a Cowork state doc until Code found them
+there on 2026-09-23.
+
+- **`PAY-SAFETY-ALL-PURCHASES`**: Payment-without-notification safety applies to every paid purchase.
+  Both Rp 19.000 mirror purchases and pair purchases must have an on-load DOKU reconciliation path, so
+  a customer's payment can still settle when the provider's confirmation was not received. Mirror
+  reconcile is a production-flip gate.
+- **`PENDING-BODY-REPLACE`**: `pending_body` is replaced by the ruled sentence (as already in #129,
+  plain `hello@katon.app`). "Tidak perlu memuat ulang." is not retained. The auto-update sentence
+  covers it, and the five-minute instruction is the recovery path.
+- **`REPO-IS-SOURCE`**: launch-cut item 4 and PAY-SAFETY-ALL-PURCHASES must exist in main's
+  handoff/ops docs, not only in the Claude project or on branch copies.
+- **`RECLOSE-DEFERRED`**: a payment started just before the fence closes is not reconciled while the
+  fence stays closed. This doesn't affect launch. It goes in the DEFERRED REGISTER until payments can be
+  safely reconciled while closed.
+
+Merge authority, same day: Code merges #129, #130 and the mirror-reconcile PR once CI is green and the
+proofs are quoted; #128 waits for Reyner's round-1 marks. Recorded in `docs/COWORK-BRIEF.md` section 3.
+
 ## 1. Why it took this long (Cowork's honest account, for the record)
 Three causes, in order of cost. (a) Payments built twice: Xendit integrated (Prompt F/I, live keys 08-07),
 Xendit repriced, adapter torn out (#122) and DOKU built (#124); DOKU is now blocked on the ACCOUNT (QRIS
@@ -70,6 +92,19 @@ pass was explicitly excluded from Y-4 and is the one PDF item still open.
    reads) and puts the matching report on the preview; Reyner reads on his phone and marks up in ONE pass
    (page + what is not passable); Cowork turns the markup into the P2 prompt; two rounds, then ship.
    Acceptance = Reyner's "passable", not a metric. Page count is a consequence, never a target (Y-4 rule).
+4. **PAY-WITHOUT-NOTIFICATION SAFETY + the `pending_body` contact line** (ruled 2026-09-22; widened to
+   every purchase by PAY-SAFETY-ALL-PURCHASES, 2026-09-23). DOKU's HTTP Notification has never been
+   delivered to Katon (ticket 1149053), so a buyer can pay and her row stay unpaid.
+   (a) A report page that loads on an UNPAID purchase with a DOKU invoice makes ONE DOKU check-status
+   call and settles on SUCCESS for its own invoice at the right amount - pairs through `settlePair`
+   (**#129, merged `91a21e8`**), the Rp 19.000 mirror purchase through `settleReading` (the
+   mirror-reconcile PR). Never from a poll; no DOKU call when the fence is closed or mocked.
+   (b) `pending_body` is REPLACED by Reyner's ruled sentence, verbatim:
+   `Halaman ini otomatis diperbarui setelah pembayaran diterima. Jika sudah membayar tetapi belum berubah dalam 5 menit, kirim tautan halaman ini ke hello@katon.app.`
+   (#129, `769337a`; amendment j in `docs/content/pasangan-copy-rulings.md`).
+   Source of the 09-22 ruling: the Cowork state doc of 2026-09-22 §0 (branch copy
+   `docs/handoff/cowork-state-2026-09-22.md` on `feat/ab-paid-layout`); this entry is now its home
+   on main.
 
 ### REMOVED from the plan (not parked - dropped)
 - Free-reading token cap ("3 then wait or pay"). Cause already handled: `mirror_create` is limited to 10 per
