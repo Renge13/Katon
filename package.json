@@ -120,6 +120,7 @@
     "test:doku": "node --conditions=react-server --test tests/doku.spec.mjs",
     "doku:status": "node --conditions=react-server --env-file-if-exists=.env.local scripts/doku-status.mjs",
     "test:carry-birth": "node --import ./scripts/jsx-register.mjs --test tests/carry-birth.spec.mjs",
+    "test:paid-cta-fence": "node --import ./scripts/jsx-register.mjs --test tests/paid-cta-fence.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs"
   },
   "dependencies": {

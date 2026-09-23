@@ -1,5 +1,5 @@
 import PasanganReport from '@/components/PasanganReport.jsx';
-import { paymentsProvider } from '@/lib/paymentFence';
+import { checkoutOpen, paymentsProvider } from '@/lib/paymentFence';
 
 // `/kompatibilitas/[id]` — pending before the webhook lands, the report after.
 //
@@ -24,7 +24,7 @@ export default async function PairPage({ params }) {
   return (
     <PasanganReport
       id={id}
-      salesClosed={provider === 'closed'}
+      salesClosed={!checkoutOpen()}
       mockPayments={provider === 'mock'}
     />
   );
