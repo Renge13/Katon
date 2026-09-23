@@ -46,7 +46,9 @@ test('pageTexts READS TEXT DRAWN IN AN EMBEDDED (CID) FACE', async () => {
 
 test('pageTexts CARRIES NO GLYPH-ID NOISE: no NUL, no C0 control bytes', async () => {
   const [page] = pageTexts(await probe());
-  // The failure the old heuristic existed for: CID bytes read as latin1.
+  // The failure the old heuristic existed for: CID bytes read as latin1. Matching
+  // control characters IS the assertion, so the lint rule against them is off here.
+  // eslint-disable-next-line no-control-regex
   assert.equal(/[\u0000-\u0008\u000e-\u001f]/u.test(page), false, JSON.stringify(page));
 });
 
