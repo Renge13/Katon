@@ -70,7 +70,7 @@ function fireEvent(token, event, extra = null) {
 }
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
-import { SITE_COPY, UPCOMING_COPY } from '../lib/site/copy.js';
+import { SITE_COPY, UPCOMING_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
 // MOVED OUT 2026-09-08 and re-exported. It is a pure function over an error
 // body, and living in a component made it unreachable from any test running
@@ -82,6 +82,7 @@ import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFiel
 import CopyLink from './CopyLink.jsx';
 import { CHROME_COPY } from '../lib/site/copy.js';
 import { ProseBlocks } from './ProseBlocks.jsx';
+import { FENCE_REFUSALS } from '../lib/paymentFence.js';
 import { formatIdr } from '../lib/site/format.js';
 import { rememberBirth } from '../lib/site/carryBirth.js';
 
@@ -208,7 +209,13 @@ function presenceBars(presence) {
   }));
 }
 
-export default function Funnel() {
+// ── `salesOpen` IS THE FENCE'S ANSWER, READ ON THE SERVER. RULED 2026-09-23 ──
+// `app/page.js` and `app/r/[token]/page.js` pass `checkoutOpen()` from
+// `lib/paymentFence.js`. While it is false no paid entry point renders - the
+// Rp 19.000 offer and the home compat card - because production answered
+// `payment_closed` and the offer spun forever. It DEFAULTS TO FALSE so a caller
+// that forgets to pass it fails closed, which is the fence's own direction.
+export default function Funnel({ salesOpen = false } = {}) {
   // THE PHASE IS THE SCREEN. `calculating` used to be one of these values and it
   // was never a screen of its own - it was a full-screen TAKEOVER that replaced
   // whichever screen the reader was on, which is exactly what commit 1 deletes.
@@ -415,9 +422,9 @@ export default function Funnel() {
   // 22s funnel. Removing this is the ruling, not an accident, and it is recorded
   // here because a deletion this fresh reads like a botched merge otherwise.
 
-  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} />;
+  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} salesOpen={salesOpen} />;
   if (phase === 'season') return <SeasonGate season={season} onAnswer={onSeasonAnswer} />;
-  return <Reading reading={reading} onReset={reset} />;
+  return <Reading reading={reading} onReset={reset} salesOpen={salesOpen} />;
 }
 
 
@@ -435,7 +442,7 @@ function Para({ children, style }) {
 }
 
 /* ---------------- Home (input) ---------------- */
-function Home({ form, setForm, error, onSubmit, busy }) {
+function Home({ form, setForm, error, onSubmit, busy, salesOpen = false }) {
   return (
     <div style={wrap}>
       <div style={{ paddingTop: 60 }}>
@@ -482,6 +489,9 @@ function Home({ form, setForm, error, onSubmit, busy }) {
               <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, fontWeight: 500, color: 'var(--tinta)' }}>{SITE_COPY.home_mirror_label}</div>
               <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', marginTop: 4 }}>{SITE_COPY.home_mirror_sub}</div>
             </div>
+            {/* HIDDEN WHILE THE FENCE IS CLOSED, ruled 2026-09-23. It is the door to a
+                paid product, and /kompatibilitas has nothing to sell until DOKU. */}
+            {salesOpen && (
             <a
               href={COMPAT_ROUTE}
               style={{ display: 'block', border: '1px solid var(--divider)', borderRadius: 16, padding: '14px 16px', textDecoration: 'none' }}
@@ -492,6 +502,7 @@ function Home({ form, setForm, error, onSubmit, busy }) {
               </div>
               <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', marginTop: 4 }}>{SITE_COPY.home_compat_sub}</div>
             </a>
+            )}
           </div>
         </Reveal>
 
@@ -766,7 +777,7 @@ function prefersReducedMotion() {
   catch { return false; }
 }
 
-export function Reading({ reading, onReset, initialStage }) {
+export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
   const chart = reading.chart;
   // ── THE PROSE HANDOFF ──────────────────────────────────
   //
@@ -992,7 +1003,13 @@ export function Reading({ reading, onReset, initialStage }) {
       )}
 
       {/* the offer. AFTER the reading, never in front of it. */}
-      <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
+      {/* ── NO OFFER WHILE THE FENCE IS CLOSED. RULED 2026-09-23. ──
+          Unless she is already INSIDE a purchase: `initialStage` is set only for a
+          buyer returning to her link (`delivered`) or back from checkout
+          (`pending`), and closing sales is not revoking what she bought. */}
+      {(salesOpen || initialStage) && (
+        <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
+      )}
 
       {/* THE UPCOMING BLOCK, AND IT SITS BELOW THE ARTIFACT DECISION ON PURPOSE.
           Ruled order: Mirror -> Artifact decision -> Compat / Annual interest.
@@ -1260,6 +1277,9 @@ function Offer({ reading, initialStage }) {
   }, [reading?.token, initialStage]);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [busy, setBusy] = useState(false);
+  // `closed`: the pay route refused on the fence. `error`: it failed otherwise.
+  const [closed, setClosed] = useState(false);
+  const [error, setError] = useState(null);
   const pollRef = useRef(null);
 
   async function startCheckout() {
@@ -1272,9 +1292,23 @@ function Offer({ reading, initialStage }) {
     // Open the provider's checkout in a new tab; this tab keeps polling and
     // unlocks when the verified webhook flips paid. Triggered from the click gesture
     // so it is not popup-blocked, and a fallback link shows in the pending state.
-    if (res?.invoiceUrl) { setInvoiceUrl(res.invoiceUrl); window.open(res.invoiceUrl, '_blank', 'noopener'); }
+    //
+    // ── NO URL, NO WAITING STATE. THE 2026-09-23 PRODUCTION HANG. ──
+    // This used to go to `pending` whatever came back. With the fence closed the
+    // route answers `503 payment_closed`, so the reader got a spinner polling for a
+    // payment that could not exist - forever. A page rendered while sales were open
+    // and tapped after they closed (the back button, an old tab) still lands here,
+    // so the refusal is RENDERED as the ruled closed message, never waited on.
     setBusy(false);
-    setStage('pending');
+    if (res?.invoiceUrl) {
+      setInvoiceUrl(res.invoiceUrl);
+      window.open(res.invoiceUrl, '_blank', 'noopener');
+      setStage('pending');
+    } else if (FENCE_REFUSALS.includes(res?.error)) {
+      setClosed(true);
+    } else {
+      setError(readableError(res));
+    }
   }
 
   useEffect(() => {
@@ -1350,11 +1384,19 @@ function Offer({ reading, initialStage }) {
                 words at .1em tracking cost nothing to pin. */}
             <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: GLOW, whiteSpace: 'nowrap' }}>sekali bayar</div>
           </div>
+          {closed ? (
+            <div style={{ marginTop: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', color: GLOW }}>{PASANGAN_COPY.sales_closed_title}</div>
+              <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(234,241,242,.85)', margin: '8px 0 0' }}>{PASANGAN_COPY.sales_closed_body}</p>
+            </div>
+          ) : (
           <div style={{ marginTop: 16 }}>
+            {error && <div style={{ color: '#F2B8A0', fontSize: 13, marginBottom: 12 }}>{error}</div>}
             <Button onClick={startCheckout} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {busy ? 'Menyiapkan pembayaran...' : <>Ambil Complete Edition <Icon.arrow size={17} /></>}
             </Button>
           </div>
+          )}
           {/* THE GUARANTEE, AND IT IS NOT OPTIONAL. Verbatim from
               SITE_COPY.harga.artifact.noteAfter, which is where it already carries
               Reyner's approval. */}
@@ -1734,7 +1776,7 @@ function Delivery({ token }) {
      GET /api/deliver/[token]   whether the card + PDF are hers yet
    The reading is shown either way, because it is free. The delivery opens beneath it
    when it is ready. */
-export function ReadingByToken({ token }) {
+export function ReadingByToken({ token, salesOpen = false }) {
   const [status, setStatus] = useState('loading'); // loading | notfound | ready
   const [reading, setReading] = useState(null);
   const [delivered, setDelivered] = useState(false);
@@ -1780,6 +1822,7 @@ export function ReadingByToken({ token }) {
       reading={reading}
       onReset={goHome}
       initialStage={delivered ? 'delivered' : (fromCheckout ? 'pending' : undefined)}
+      salesOpen={salesOpen}
     />
   );
 }

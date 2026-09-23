@@ -177,5 +177,7 @@ test('THE REPORT PAGE RESOLVES mockPayments ON THE SERVER', () => {
   const src = code('app/kompatibilitas/[id]/page.js');
   assert.match(src, /paymentsProvider\(\)/u, 'the page asks the server-side provider');
   assert.match(src, /mockPayments=\{[^}]*'mock'/u, 'and passes the mock flag down');
-  assert.match(src, /salesClosed=\{[^}]*'closed'/u, 'alongside the closed one');
+  // The closed flag is the fence's own `checkoutOpen()` since 2026-09-23, so the
+  // page and the pay route cannot disagree about what "closed" means.
+  assert.match(src, /salesClosed=\{!checkoutOpen\(\)\}/u, 'alongside the closed one');
 });
