@@ -118,11 +118,14 @@
     "test:doku-signature": "node --test tests/doku-signature.spec.mjs",
     "probe:doku": "node --env-file-if-exists=.env.local scripts/doku-probe.mjs",
     "test:doku": "node --conditions=react-server --test tests/doku.spec.mjs",
+    "probe:reconcile": "node --conditions=react-server --env-file-if-exists=.env.local scripts/probe-reconcile.mjs",
     "doku:status": "node --conditions=react-server --env-file-if-exists=.env.local scripts/doku-status.mjs",
     "test:carry-birth": "node --import ./scripts/jsx-register.mjs --test tests/carry-birth.spec.mjs",
     "test:paid-cta-fence": "node --import ./scripts/jsx-register.mjs --test tests/paid-cta-fence.spec.mjs",
     "test:pair-reconcile": "node --conditions=react-server --test tests/pair-reconcile.spec.mjs",
     "test:pair-reconcile-client": "node --import ./scripts/jsx-register.mjs --test tests/pair-reconcile-client.spec.mjs",
+    "test:reading-reconcile": "node --conditions=react-server --test tests/reading-reconcile.spec.mjs",
+    "test:reading-reconcile-client": "node --import ./scripts/jsx-register.mjs --test tests/reading-reconcile-client.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs"
   },
   "dependencies": {

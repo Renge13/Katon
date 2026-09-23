@@ -1780,6 +1780,18 @@ export function ReadingByToken({ token, salesOpen = false }) {
   const [status, setStatus] = useState('loading'); // loading | notfound | ready
   const [reading, setReading] = useState(null);
   const [delivered, setDelivered] = useState(false);
+  // ── CHECK-STATUS ON LOAD, ONCE (PAY-SAFETY-ALL-PURCHASES, 2026-09-23) ──
+  // DOKU's notification has never been delivered to Katon, so a buyer who paid
+  // Rp 19.000 can sit on an unpaid row. On the FIRST load of an unpaid purchase the
+  // page asks the server to reconcile it - one DOKU check-status, settled through
+  // `settleReading` - and re-reads the manifest if the answer is paid. The ref keeps
+  // it to once per page load (React's dev double-invoke included); the Offer's
+  // pending poll re-reads the manifest every 3s and never triggers it.
+  //
+  // THE SERVER DECIDES WHETHER DOKU IS ASKED AT ALL: closed fence, mock, or no
+  // invoice answer `{ paid: false }` with no network call, so the page holds no
+  // copy of the provider rule. Same shape as the compat report (#129).
+  const reconciledRef = useRef(false);
   // A provider's success redirect lands here with `?bayar=selesai`. It says only
   // "she came back from checkout", never "she paid" - the paid flag comes from the
   // server, and a hand-typed query string must not change what she is shown beyond
@@ -1796,7 +1808,15 @@ export function ReadingByToken({ token, salesOpen = false }) {
         const served = await res.json();
         if (!served || served.error || !served.token) { if (!cancelled) setStatus('notfound'); return; }
 
-        const m = await fetch(`/api/deliver/${token}`).then((r) => r.json()).catch(() => null);
+        let m = await fetch(`/api/deliver/${token}`).then((r) => r.json()).catch(() => null);
+        if (m && !m.error && m.paid !== true && !reconciledRef.current) {
+          reconciledRef.current = true;
+          const r = await fetch(`/api/deliver/${token}/reconcile`, { method: 'POST' })
+            .then((x) => x.json()).catch(() => null);
+          if (r?.paid === true) {
+            m = await fetch(`/api/deliver/${token}`).then((x) => x.json()).catch(() => null);
+          }
+        }
         if (cancelled) return;
         setReading(served);
         setDelivered(Boolean(m?.paid && m.items?.length && m.items.every((i) => i.ready)));

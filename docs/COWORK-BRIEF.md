@@ -240,6 +240,14 @@ The worked example, from the day this was ruled:
 **Surface it ONCE.** Raising the same constraint a second time, in new words, is reopening the
 ruling by attrition. If it was answered, it is answered.
 
+### MERGE AUTHORITY IS GRANTED PER PR, IN CHAT, AND IS RECORDED HERE (Reyner, 2026-09-23)
+
+The standing rule is that Code hands over the preview and does not merge without Reyner's approval in
+that session. On 2026-09-23 he granted it explicitly for three PRs: **Code merges #129, #130 and the
+mirror-reconcile PR once CI is green and the proofs are quoted. #128 is NOT covered - it waits for
+Reyner's round-1 marks.** Merges use merge commits, never squash, because PR bodies cite commit
+hashes. The grant is for those PRs only; it does not extend to the next one.
+
 ---
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
@@ -496,6 +504,19 @@ under the seat rows, hard seats only.
 **The rule already exists and this is a count against it:** a claim about what the code does
 carries the command that produced it. "They already appear in the table" is a claim about two
 cells and one of them was never run.
+
+### Launch-cut item 4 and a ruled sentence written only to the project, found by Code on a branch copy (09-23)
+
+Launch-cut item 4 (pay-without-notification safety) and Reyner's ruled `pending_body` sentence were
+in the Claude project's state doc and nowhere on main. `docs/handoff/launch-cut-2026-09-21.md` on main
+listed three "ships with launch" items; the fourth, and the verbatim sentence, existed only as
+`docs/handoff/cowork-state-2026-09-22.md` on the `feat/ab-paid-layout` branch, where Code found them
+when asked to build item 4 (`git show feat/ab-paid-layout:docs/handoff/cowork-state-2026-09-22.md`,
+lines 15-16). A session on main, or one that trusted main's launch cut, would have built nothing and
+reported the item absent. This is the fourth project-only instance of the same shape (skill §3,
+"Wrote a prompt only into the Claude project"). Reyner's REPO-IS-SOURCE ruling of the same day closes
+it for this item: item 4 and PAY-SAFETY-ALL-PURCHASES now live in main's launch cut (§3 item 4, §0b)
+and in `docs/ops/doku-walk.md`'s production-flip gate.
 
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
