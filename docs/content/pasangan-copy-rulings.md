@@ -83,6 +83,11 @@ AMENDMENT i (Reyner, 2026-09-14): FIVE SLOTS FOR THE COMPAT PDF, all five ruled 
   baganmu sendiri", which is false of a legend built from TWO charts, so the compat appendix prints
   no sub-line rather than inventing a sentence. Nothing is waiting on it.
 
+AMENDMENT j, RULED 2026-09-22 (Reyner), launch-cut item 4: `pending_body` gains the contact line for a
+buyer whose payment did not update the page. Verbatim from the Cowork state doc of 2026-09-22 §0 ("pending_body
+contact line"). Cowork swept it: 0 blocklist hits, control fired 3. It REPLACES the old second sentence
+("Tidak perlu memuat ulang.") rather than appending to it - the ruled value is the whole string.
+
 SWEEP 2026-09-14 (amendment i): the five strings compiled against the 70 live style patterns the way
 lib/validate/style.js compiles them (new RegExp(entry.pattern, entry.flags || 'iu'), objects carrying
 `pattern` only). 0 hits, 0 non-keyboard characters, 0 em-dash/curly/question mark, 0 `bukan X tapi Y`.
@@ -126,7 +131,7 @@ promise of the same family: true while access is token-only and no email is sent
 | PASANGAN_COPY | `form_submit` | `Lanjut ke Pembayaran` |
 | PASANGAN_COPY | `season_gate_b_intro` | `Tanggal lahirnya bertepatan dengan pergantian musim. Jawab sebisamu, atau tanyakan langsung kepadanya jika ragu.` |
 | PASANGAN_COPY | `pending_title` | `Menunggu Konfirmasi Pembayaran` |
-| PASANGAN_COPY | `pending_body` | `Halaman ini otomatis diperbarui setelah pembayaran diterima. Tidak perlu memuat ulang.` |
+| PASANGAN_COPY | `pending_body` | `Halaman ini otomatis diperbarui setelah pembayaran diterima. Jika sudah membayar tetapi belum berubah dalam 5 menit, kirim tautan halaman ini ke hello@katon.app.` |
 | PASANGAN_COPY | ~~`paid_title`~~ | DROPPED 2026-09-09 (was `Bacaan Kalian Sudah Siap`). Remove slot, render, and spec entry. |
 | CHROME_COPY (moved from PASANGAN_COPY, amendment g) | `link_keep` | `Simpan tautan ini untuk membaca kembali.` |
 | PASANGAN_COPY | `unpaid_resume` | `Bacaan ini belum dibayar. Selesaikan pembayaran untuk membukanya.` |
