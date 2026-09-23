@@ -315,9 +315,19 @@ test('THE FACTS TABLE DRAWS ITS BRANCH HANZI IN THE HAN FAMILY, not the Latin on
     const page = texts.find((t) => t.replace(/\s+/gu, '')
       .includes(PASANGAN_COPY.pdf_facts_heading.replace(/\s+/gu, '')));
     assert.ok(page, `${name}: no facts page`);
-    const lone = page.split('\n').map((l) => l.trim()).filter((l) => l.length === 1);
+    // ── THE TELL NARROWED, AND A POSITIVE CHECK ADDED (2026-09-23) ──
+    // `pageTexts` now DECODES the han face through its ToUnicode CMap, so a
+    // correctly drawn 子 is a legitimate lone line and the tell is a lone line that
+    // is NOT a Han character - which is exactly what a substitution produced (`P`,
+    // `*`). And because the han face is visible now, the branch itself can be
+    // asserted PRESENT, which the old instrument could not do at all.
+    const lone = page.split('\n').map((l) => l.trim())
+      .filter((l) => l.length === 1 && !/\p{Script=Han}/u.test(l));
     assert.deepEqual(lone, [],
       `${name}: lone one-character line(s) on the facts page - a substituted hanzi`);
+    for (const branch of [p2.provenance.a_branch, p2.provenance.b_branch]) {
+      assert.ok(page.includes(branch), `${name}: ${branch} is not drawn as a character on the facts page`);
+    }
     // And the pairing rule 23 requires is there: the Indonesian name beside it.
     for (const branch of [p2.provenance.a_branch, p2.provenance.b_branch]) {
       const shio = GLOSSARY.shio?.[branch]?.name_id;
