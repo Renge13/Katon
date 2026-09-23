@@ -232,7 +232,7 @@ marked ok by Reyner 2026-09-22). Two PRs.
 
 **PR 1 - §3, the DEFECT rows. MERGED as #126 (`f9473ec`).**
 
-**PR 2 - §4, the LAYOUT rows. IN PROGRESS on `feat/ab-paid-layout`, one commit landed.**
+**PR 2 - §4, the LAYOUT rows. BUILT on `feat/ab-paid-layout` 2026-09-23; PR open, awaiting Reyner's round-1 read.**
 
 A POINTER, NOT A TASK LIST - this file's own 2026-08-01 rule, and the rows themselves live in AB §4.
 What is below is the STATE a resuming session cannot get from the prompt, because the prompt predates
@@ -244,10 +244,13 @@ the work:
   committed ALONE because it is the one §4 item that can 500 a lambda (#123).
   `FAMILY_SERIF` is exported and already imported into `lib/pdf/document.js` - the layout
   can draw with it immediately.
-- **Not started: the eight remaining §4 rows** - A1 cover, A8 appendix table, A10 element
-  bars, A11/C5 merged chart pages, A12 measure (~70 characters; the headings half is done),
-  B2 running footer, C3 facts rows, C4 verdict row. Read AB §4 for what each one says; do
-  not work from this list, which names them only so a resuming session knows the count.
+- **Landed 2026-09-23, all eight remaining §4 rows** in one layout commit, after two that
+  it needed: the report's two SCREEN defects (`ProseBlocks.jsx`; #126 never touched
+  `components/`), and an INSPECTOR fix - `pageTexts` dropped every CID run, so the new
+  serif headings were invisible to `build.js`'s verifies and to every test that finds a
+  page by its heading. The PR body carries the commit list and the red runs.
+- **Round 1 is open**: Reyner reads both rebuilt PDFs and the 390-wide report screenshot
+  (AB §5). Anything still open after round 2 goes to the DEFERRED REGISTER.
 - **THE PROOF STEP IS THE LAST COMMIT AND IS NOT OPTIONAL: fetch BOTH PDF routes on the
   preview.** A green local build says nothing about tracing - that is exactly what #123
   was - and `tests/pdf-font-lambda.spec.mjs` checks the CONFIG, not the deploy.
