@@ -56,8 +56,9 @@ async function mirror() {
   if (cache.has('mirror')) return cache.get('mirror');
   const chart = calculateBaziChart(A);
   const semanticJson = buildSemanticJson(chart);
+  // gender: the reading row's, which the delivery handler passes (R3, 2026-09-24).
   const out = await buildCompleteEditionPdf({
-    chart, semanticJson, rendered: renderedFor(semanticJson),
+    chart, semanticJson, rendered: renderedFor(semanticJson), gender: 'female',
   });
   const value = { ...out, chart, semanticJson, appendix: buildAppendix({ chart, semanticJson }) };
   cache.set('mirror', value);
@@ -343,10 +344,9 @@ test('A2 NO COVER PRINTS AN ISO DATE OR AN ENGLISH GENDER WORD', async () => {
     assert.equal(/\d{4}-\d{2}-\d{2}/u.test(cover), false, `${d.name}: ISO date on the cover`);
     assert.equal(/\b(female|male)\b/u.test(cover), false, `${d.name}: English gender word on the cover`);
   }
-  // And the compat cover names the pair exactly as the web report's header does.
-  const [, c] = await docs();
-  assert.ok(c.texts[0].includes('Perempuan, 13 September 1989 dan Laki-laki, 4 Maret 1990'),
-    'the compat cover does not carry pairLine');
+  // ~~And the compat cover names the pair exactly as the web report's header does
+  // (`pairLine`).~~ SUPERSEDED 2026-09-24 by round-1 markup R3: both covers print
+  // `birthSummary` unchanged, one line per person - asserted positively by R3 below.
 });
 
 test('B2 EVERY PAGE AFTER THE COVER CARRIES THE RUNNING FOOTER, and the cover does not', async () => {
@@ -452,4 +452,24 @@ test('R2 THE COMPAT GLOSSARY CARRIES NO TERM FROM THE PARTNER\'S CHART ALONE, an
   for (const name of ['Kursi Independen', 'Kuda', 'Naga']) {
     assert.ok(printed.has(name), `"${name}" is missing`);
   }
+});
+
+// ── R3 (round-1 markup, 2026-09-24): A2 applied the same way on both covers ──
+// A2 ruled the stepper's own `birthSummary` form for the covers. The mirror printed
+// it without the gender (the chart does not carry one) and the compat printed
+// `pairLine` - full months, gender first. Both now print `birthSummary` output
+// UNCHANGED, gender included; the compat one line per person, reader first.
+
+test('R3 BOTH COVERS PRINT birthSummary UNCHANGED, gender included, one line per person', async () => {
+  const [m, c] = await docs();
+  const lines = (t) => t.split('\n').map((l) => l.trim());
+  // Read with runs joined: react-pdf may split a line into runs at a digit.
+  const joined = (t) => t.replace(/\s*\n\s*/gu, ' ');
+  assert.ok(joined(m.texts[0]).includes('13 Sep 1989, 09.00, Perempuan'),
+    `mirror cover: ${JSON.stringify(lines(m.texts[0]))}`);
+  const cover = joined(c.texts[0]);
+  assert.ok(cover.includes('13 Sep 1989, 09.00, Perempuan'), `compat cover, reader: ${cover}`);
+  assert.ok(cover.includes('4 Mar 1990, 14.00, Laki-laki'), `compat cover, partner: ${cover}`);
+  assert.equal(cover.includes(' dan Laki-laki'), false, 'the two people are not joined into one pairLine sentence');
+  assert.ok(cover.indexOf('13 Sep 1989') < cover.indexOf('4 Mar 1990'), 'the reader comes first');
 });
