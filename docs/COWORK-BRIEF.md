@@ -518,6 +518,14 @@ reported the item absent. This is the fourth project-only instance of the same s
 it for this item: item 4 and PAY-SAFETY-ALL-PURCHASES now live in main's launch cut (§3 item 4, §0b)
 and in `docs/ops/doku-walk.md`'s production-flip gate.
 
+### 09-23 Cowork advised against Reyner's own A3 cover ruling without reading p2-markup; withdrawn 09-24.
+
+On 2026-09-23 Cowork pushed back on the Complete Edition cover dropping the element (`Matahari - Api` became
+`Matahari` / `The Sun`). That cover IS Reyner's own A3 ruling of 2026-09-22 (Indonesian title, English
+once, smaller), recorded in `docs/handoff/p2-markup-2026-09-22.md` row A3, which Cowork did not re-read
+before advising. Withdrawn in the round-1 markup (`docs/handoff/p2-round1-markup-2026-09-24.md`, Code's
+call 3). The shape is the skill's first one: the answer was in the document that owned the decision.
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
