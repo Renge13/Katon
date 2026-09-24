@@ -248,6 +248,11 @@ mirror-reconcile PR once CI is green and the proofs are quoted. #128 is NOT cove
 Reyner's round-1 marks.** Merges use merge commits, never squash, because PR bodies cite commit
 hashes. The grant is for those PRs only; it does not extend to the next one.
 
+**STANDING RULE, Reyner 2026-09-24: a DOCS-ONLY PR may be merged by Code once CI is green.** Docs-only
+means the diff touches nothing but documentation (`docs/**`, `CLAUDE.md`, prompt and handoff files): no
+code, no tests, no copy bank, no config. Any PR that also touches code still needs a per-PR grant as above.
+Merge commits, never squash.
+
 ---
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
