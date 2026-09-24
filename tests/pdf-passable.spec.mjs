@@ -483,3 +483,22 @@ test('R4 THE ELEMENT VALUES USE A DECIMAL COMMA (27,5), never a point', async ()
   assert.deepEqual(values.filter((v) => v.includes('.')), [], 'a decimal point on an Indonesian page');
   assert.ok(values.includes('27,5'), `Api's 27.5 prints as 27,5: ${JSON.stringify(values)}`);
 });
+
+// ── THE FACTS TABLE BREATHES (Reyner, 2026-09-24) ───────────
+// "Data di Balik Bacaan Ini" rows read crowded. Measured on this fixture before the
+// change: a row's description began 19pt below the row line, and the next row 40pt
+// below it. The ruled direction is MORE space, so the assertion is a floor, set at
+// the new measurement - a later tightening that crowds the table again fails here.
+test('FACTS ROWS HAVE ROOM: a description sits >= 22pt below its row, the next row >= 48pt', async () => {
+  const c = await compat();
+  const texts = pageTexts(c.buffer);
+  const page = texts.findIndex((t) => t.includes(PASANGAN_COPY.pdf_facts_heading));
+  const runs = textBoxes(c.buffer)[page];
+  const y = (start) => runs.find((r) => r.text.trim().startsWith(start))?.y;
+  const row = y('Inti Menghidupi');
+  const desc = y('Unsur salah satu');
+  const next = y('Kursi Independen');
+  assert.ok(row && desc && next, 'precondition: the first row, its description and the next row are found');
+  assert.ok(desc - row >= 22, `description ${desc - row}pt below its row`);
+  assert.ok(next - row >= 48, `next row ${next - row}pt below`);
+});
