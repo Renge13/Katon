@@ -473,3 +473,13 @@ test('R3 BOTH COVERS PRINT birthSummary UNCHANGED, gender included, one line per
   assert.equal(cover.includes(' dan Laki-laki'), false, 'the two people are not joined into one pairLine sentence');
   assert.ok(cover.indexOf('13 Sep 1989') < cover.indexOf('4 Mar 1990'), 'the reader comes first');
 });
+
+// ── R4 (round-1 markup, 2026-09-24): Indonesian decimals on the bars ──
+test('R4 THE ELEMENT VALUES USE A DECIMAL COMMA (27,5), never a point', async () => {
+  const [m] = await docs();
+  const chartPage = m.texts.find((t) => t.includes('Sebaran Unsur'));
+  const values = chartPage.split('\n').map((l) => l.trim()).filter((l) => /^\d+([.,]\d+)?$/u.test(l));
+  assert.ok(values.length >= 5, `precondition: five values on the chart page, got ${JSON.stringify(values)}`);
+  assert.deepEqual(values.filter((v) => v.includes('.')), [], 'a decimal point on an Indonesian page');
+  assert.ok(values.includes('27,5'), `Api's 27.5 prints as 27,5: ${JSON.stringify(values)}`);
+});
