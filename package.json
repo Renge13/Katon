@@ -132,6 +132,7 @@
     "test:front-door": "node --import ./scripts/jsx-register.mjs --test tests/front-door.spec.mjs",
     "test:voice-cache": "node --conditions=react-server --test tests/voice-cache.spec.mjs",
     "test:voice-prompt": "node --test tests/voice-prompt.spec.mjs",
+    "test:voice-engine": "node --test tests/voice-engine.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs",
     "build:spectral-ttf": "node scripts/build-spectral-ttf.mjs"
   },
