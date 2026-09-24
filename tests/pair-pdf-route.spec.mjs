@@ -132,11 +132,17 @@ test('UNPAID IS 402 AND LEAKS NOTHING DERIVED - no chart, no hanzi, no archetype
   assert.equal(calls, 0, 'a document was built for an unpaid caller');
 });
 
-test('PAID WITH NO CACHE ROW IS 409 reading_not_rendered, and starts no render', async () => {
+test('PAID WITH NO CACHE ROW AND A WARM THAT FLOORS IS 409 reading_not_rendered, and builds no PDF', async () => {
   // THE FLOOR CASE, which is the one this answer exists for. Rule 16 keeps floors
   // out of `render_cache`, so a reader whose render failed has no row - and she gets
   // a refusal rather than a document, because her next page load retries the
   // provider and a PDF built from a floor would be the version she keeps.
+  //
+  // ── RETITLED 2026-09-24: it was "and starts no render" ────
+  // Since the pre-bump fix, a miss is warmed through the REAL report door
+  // (`servePairReading`, the default `warm`). With no GEMINI_API_KEY here that door
+  // floors, persists nothing, and the route still refuses - so this now proves the
+  // floor case END TO END through the real door, not by skipping it.
   const id = await newPair(true);
   const res = await servePairPdf(request(), id, { renderPdf: stubPdf() });
 
@@ -222,4 +228,55 @@ test('AN UNPAID CALLER CANNOT SPEND THE PDF BUDGET', async () => {
   await seedCache();
   const res = await servePairPdf(request(), paid, { renderPdf });
   assert.equal(res.status, 200, 'an unpaid caller drained the paid budget');
+});
+
+// ── THE PRE-BUMP BUYER (Reyner, 2026-09-24) ─────────────────
+// Production, 2026-09-24: `GET /api/pair/g4WH4_9QbCrCj3Gha934q/pdf` answered
+// `409 {"error":"reading_not_rendered"}` for Reyner's own paid pair. Her reading
+// was cached on 09-08 under an older ENGINE_VERSION, which is hashed into the key,
+// so the PDF route's read missed; only the REPORT page renders, so a buyer who
+// tapped "Unduh PDF" first got JSON. Ruled: the PDF route warms the render through
+// the SAME door the report page uses (`servePairReading`, which the settle path
+// also warms through), then prints that cached row. No second render path.
+
+test('A PRE-BUMP BUYER GETS A PDF: an old-engine row is warmed through the report door', async () => {
+  const id = await newPair(true);
+  const sj = semanticFor();
+  // Her reading as it was cached BEFORE the bump: a real row, under an old key.
+  const old = { ...sj, engine_version: '0.0.1-before-the-bump' };
+  await writeCache(cacheKey(old), {
+    ...assembleFallback(sj), engineVersion: old.engine_version, source: 'gemini',
+    model: 'test-model', promptVersion: 'oldprompt000', stage6Version: '1.17.0',
+  });
+
+  // The warm door, standing in for `servePairReading`'s effect: a render that
+  // passed the gate is persisted under the CURRENT key. Counted, so "warmed once"
+  // and "never warmed" differ.
+  let warmed = 0;
+  const warm = async () => { warmed += 1; await seedCache(); };
+
+  let handed = null;
+  const res = await servePairPdf(request(), id, {
+    renderPdf: async (args) => { handed = args; return { buffer: Buffer.from('%PDF-1.7\nstub\n%%EOF\n') }; },
+    warm,
+  });
+
+  assert.equal(res.status, 200, 'a pre-bump buyer who taps Unduh PDF first gets a file, not 409');
+  assert.equal(res.headers.get('content-type'), 'application/pdf');
+  assert.equal(warmed, 1, 'the report door was asked exactly once');
+  assert.equal(handed.rendered.prompt_version, 'testprompt00', 'the PDF prints the WARMED current row');
+});
+
+test('A WARM THAT CACHES NOTHING (a floor) IS STILL 409, and builds nothing', async () => {
+  // The floor is never persisted (rule 16), so a warm that floors leaves the cache
+  // empty and the route refuses exactly as before - her next load retries.
+  const id = await newPair(true);
+  let warmed = 0;
+  const res = await servePairPdf(request(), id, {
+    renderPdf: stubPdf(),
+    warm: async () => { warmed += 1; },
+  });
+  assert.equal(res.status, 409);
+  assert.equal(warmed, 1);
+  assert.equal(calls, 0);
 });

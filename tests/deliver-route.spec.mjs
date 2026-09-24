@@ -178,10 +178,17 @@ test('a LEGACY paid reading is refused, not served a floor-built document', asyn
     + 'that names her Akar - two live name sets, PROGRESS LIVE STATE divergence 3');
 });
 
-test('a paid mirror reading with NO cached render is refused, not rendered fresh', async () => {
-  // Rule 16 and prompt M both: the PDF reads render_cache and never re-renders. A
-  // PDF that regenerates its own prose is a second reading wearing the first one's
-  // name, and the buyer would get a document that does not match what she read.
+test('a paid mirror reading whose warm FLOORS is refused, and no PDF is built', async () => {
+  // Rule 16 and prompt M both: the PDF prints render_cache and never renders PROSE OF
+  // ITS OWN. A PDF that regenerates its own prose is a second reading wearing the
+  // first one's name, and the buyer would get a document that does not match what
+  // she read.
+  //
+  // ── RETITLED 2026-09-24: it was "refused, not rendered fresh" ────
+  // A miss is now warmed through the READING PAGE'S OWN door (`serveMirrorReading`,
+  // the default `warm`), so the document is still the reading the page serves. With
+  // no GEMINI_API_KEY here that door floors and persists nothing, and this still
+  // answers 409 - the floor case through the real door.
   const id = await seed({ paid: true, cacheKey: 'a-key-that-was-served-once' });
   const { renderPdf, calls } = stubPdf();
 
@@ -266,4 +273,28 @@ test('the rate limit sits AFTER the gate, so a refusal cannot be probed for free
     const res = await serveDeliveryPdf(req('192.0.2.44'), id, { renderPdf });
     assert.equal(res.status, 402, 'still the gate, never the rate limiter');
   }
+});
+
+// ── THE PRE-BUMP BUYER, MIRROR (Reyner, 2026-09-24) ─────────
+// Same defect as the pair PDF: a reading cached under an older ENGINE_VERSION
+// misses on the current key, and only the reading page renders. The PDF route now
+// warms through the reading page's own door (`serveMirrorReading`), then prints
+// that row. No second render path.
+
+test('A PRE-BUMP MIRROR BUYER GETS A PDF: the old-engine row is warmed through the reading door', async () => {
+  const id = await seed({ paid: true, cacheKey: 'an-old-engine-key' });
+  const { semanticJson } = semanticFromRow({ ...BIRTH });
+  await writeCache('an-old-engine-key', {
+    ...assembleFallback(semanticJson), engineVersion: '0.0.1-before-the-bump',
+    source: 'gemini', promptVersion: 'oldprompt000', stage6Version: STAGE6_VERSION,
+  });
+  let warmed = 0;
+  const { renderPdf, calls } = stubPdf();
+  const res = await serveDeliveryPdf(req(), id, {
+    renderPdf,
+    warm: async () => { warmed += 1; await cacheAReading(); },
+  });
+  assert.equal(res.status, 200, 'a file, not 409');
+  assert.equal(warmed, 1, 'the reading door was asked exactly once');
+  assert.equal(calls.length, 1);
 });
