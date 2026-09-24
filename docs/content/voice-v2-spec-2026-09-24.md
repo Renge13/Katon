@@ -23,6 +23,10 @@ engine (facts, meanings, relations)  ->  WRITER (Gemini, short prompt, free)  ->
   medical/financial claims, missing critical meaning.
 - **A rule comes back only on evidence.** If round-2 output shows a real failure (slang, meta talk, a tic),
   that one rule is re-added, with the output that justified it. Nothing is carried over "just in case".
+- **THE GATE IS INTENTIONALLY LOOSE (Reyner, 2026-09-24).** Verbatim: "The gate is intentionally loose. A guardrail is added only after a real failure appears in rendered output: real failure → fixture → narrow guardrail → re-test. Never: imagined failure → new rule. The main MVP risk is a sterile reading, not a permissive one."
+  This governs the reviewer too: no word list is added to D1-D4, and the judge's J3 stays the question
+  "is this more certain than the supplied facts and meanings support?", never a lexicon. Words like
+  "selalu" or "tidak pernah" may illustrate J3 in the judge prompt; they are not a check.
 
 ---
 
@@ -92,7 +96,13 @@ only reading can catch.
 | D1 | invented chart fact | every glossary term name (badges, Aspek, relations, palaces, conditions from `glossary.json`) that appears in the prose must belong to a SUPPLIED fact | hard |
 | D2 | missing critical fact | every required point is represented by a block `fact_id`. The fact's label or name does NOT have to appear in the prose; whether its meaning was covered is J4's call | soft (regenerate) |
 | D3 | form | Chinese characters, typographic characters, percentages/scores, malformed JSON, `kamu`/`dia` direction and addressing B (existing `pair.js`) | hard |
-| D4 | ethics lexicon | the existing `verdict`, fatalism, medical and financial entries of `blocklist.json` ONLY | hard |
+| D4 | ethics lexicon | the existing `verdict`, fatalism, medical, financial, **ranking and self_harm** entries of `blocklist.json` | hard |
+
+**CORRECTED 2026-09-24 (Reyner, on Code's flag).** This row first read "the existing `verdict`, fatalism,
+medical and financial entries of `blocklist.json` ONLY". That list silently dropped two of
+`forbidden_content`'s five categories: `ranking` (CLAUDE.md rule 25, no ranking of gods or strength states
+as good or bad) and `self_harm`. Code built it literally, logging both instead of gating, and flagged it.
+Both are hard under D4. They are not new rules, they are existing ones the table omitted.
 
 **Removed from the gate** (kept as logged metrics where useful): every `style.*` category (slang, particles,
 hedging, `bukan X melainkan Y`, `secara`, essay connectives, tension_collapse tokens) and stem-overlap

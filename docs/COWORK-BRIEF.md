@@ -253,6 +253,14 @@ means the diff touches nothing but documentation (`docs/**`, `CLAUDE.md`, prompt
 code, no tests, no copy bank, no config. Any PR that also touches code still needs a per-PR grant as above.
 Merge commits, never squash.
 
+### THE GATE IS INTENTIONALLY LOOSE (Reyner, 2026-09-24)
+
+"The gate is intentionally loose. A guardrail is added only after a real failure appears in rendered output: real failure → fixture → narrow guardrail → re-test. Never: imagined failure → new rule. The main MVP risk is a sterile reading, not a permissive one."
+
+What it means when you write a spec or a prompt for Code: propose a guardrail only with the rendered output
+that failed. A check "in case the model does X" is the imagined-failure half and is not written. Recorded in
+`docs/content/voice-v2-spec-2026-09-24.md` §1.
+
 ---
 
 ## 4. THE ERROR LEDGER — read this before you assert a BaZi fact
@@ -531,6 +539,15 @@ reserves E for the compat pair-layer engine; Code found the line and the prompt 
 code-fact like any other and carries its grep. (2) The launch cut itself was written only into the Claude
 project, the third instance of the project-only failure (the fourth, item 4 on a branch copy, is the
 09-23 entry above). Both are recorded where AA's §7 said they would be, in the commit that builds AA.
+### 09-24 the voice-v2 spec's D4 row said "ONLY" and dropped two existing ethics categories. Code flagged it.
+
+`docs/content/voice-v2-spec-2026-09-24.md` §4a listed D4 as "the existing `verdict`, fatalism, medical and
+financial entries of `blocklist.json` ONLY". `blocklist.json#forbidden_content` has five categories; the
+row named three and the word ONLY removed `ranking` (CLAUDE.md rule 25) and `self_harm` from the gate.
+Code built it literally (both logged, not gating) and flagged it in the round-2 report instead of deciding.
+Reyner corrected it the same day: both are hard. **A list closed with ONLY is a claim about the whole
+source; open the source and count before writing it.**
+
 ### 09-23 Cowork advised against Reyner's own A3 cover ruling without reading p2-markup; withdrawn 09-24.
 
 On 2026-09-23 Cowork pushed back on the Complete Edition cover dropping the element (`Matahari - Api` became
