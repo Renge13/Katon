@@ -1,5 +1,5 @@
 // ============================================================
-// tests/voice-judge.spec.mjs — the v2 judge gates, auditably (spec §4b)
+// tests/voice-judge.spec.mjs — the v2 judge, ADVISORY (spec §4b; ruled 2026-09-24)
 // ============================================================
 // Run: npm run test:voice-judge
 //
@@ -7,8 +7,9 @@
 // by the judge's own system prompt, so each case scripts what the JUDGE says and
 // asserts what the pipeline DOES with it. Calibration against real Gemini is a
 // separate, spending step (scripts/calibrate-judge.mjs); this file proves the
-// wiring: severities, the malformed rule, "a judge that cannot run is not a pass",
-// the stored review, and that v1 never calls the judge at all.
+// wiring. Since 1.29.0 the judge is ADVISORY (Reyner, 2026-09-24): it runs, its
+// findings are stored with the spec's severity kept as `judge_severity`, and it
+// never rejects, regenerates or floors. D1-D4 alone gate v2. v1 never calls it.
 // ============================================================
 
 import assert from 'node:assert/strict';
@@ -91,53 +92,51 @@ test('A CLEAN JUDGE: served, the review is stored with the render', async () => 
   assert.ok(row.review, 'the review is on the cached row');
 });
 
-test('J1 IS HARD: the draft is rejected, regenerated once, then served when the judge clears it', async () => {
-  const sj = v2();
-  const calls = stub(sj, [[J1], []]);
-  const out = await render(sj);
-  assert.equal(out.source, 'gemini');
-  assert.equal(calls.writer, 2, 'one regeneration');
-  assert.equal(out.review.rejected_drafts[0].findings[0].check, 'v2.judge_j1');
-  assert.equal(out.review.rejected_drafts[0].findings[0].severity, 'hard');
-});
-
-test('A PERSISTENT J1 FLOORS after its one regeneration', async () => {
+test('ADVISORY: a J1 finding is stored at flag, keeps its spec severity, and rejects nothing', async () => {
   const sj = v2();
   const calls = stub(sj, [[J1]]);
   const out = await render(sj);
-  assert.equal(out.source, 'module_assembly');
-  assert.equal(calls.writer, 2, 'exactly one regeneration, then the floor');
+  assert.equal(out.source, 'gemini', 'served: the judge does not reject');
+  assert.equal(calls.writer, 1, 'no regeneration spent on a judge finding');
+  const f = out.review.judge[0];
+  assert.equal(f.check, 'v2.judge_j1');
+  assert.equal(f.severity, 'flag');
+  assert.equal(f.judge_severity, 'hard');
 });
 
-test('J3 IS SOFT (regenerate), J4 MISSING COST IS HARD', async () => {
+test('ADVISORY: J3 keeps soft, J4 missing cost keeps hard, neither regenerates', async () => {
   let sj = v2();
-  stub(sj, [[J3], []]);
+  stub(sj, [[J3]]);
   let out = await render(sj);
   assert.equal(out.source, 'gemini');
-  assert.equal(out.review.rejected_drafts[0].findings[0].severity, 'soft');
+  assert.equal(out.review.judge[0].judge_severity, 'soft');
   __clearMemCache(); __clearInFlight();
   sj = v2();
-  const calls = stub(sj, [[J4_COST], []]);
+  const calls = stub(sj, [[J4_COST]]);
   out = await render(sj);
-  assert.equal(out.review.rejected_drafts[0].findings[0].severity, 'hard');
-  assert.equal(calls.writer, 2);
+  assert.equal(out.source, 'gemini');
+  assert.equal(out.review.judge[0].judge_severity, 'hard');
+  assert.equal(calls.writer, 1);
 });
 
 test('A MALFORMED FINDING (no grounding shown) IS KEPT AND NEVER ACTED ON', async () => {
   const sj = v2();
   const calls = stub(sj, [[MALFORMED]]);
   const out = await render(sj);
-  assert.equal(out.source, 'gemini', 'served: the malformed finding rejected nothing');
+  assert.equal(out.source, 'gemini');
   assert.equal(calls.writer, 1);
   assert.equal(out.review.judge_malformed.length, 1, 'but it is stored for reading');
+  assert.deepEqual(out.review.judge, []);
 });
 
-test('A JUDGE THAT CANNOT RUN IS NOT A PASS: the floor, and no regeneration', async () => {
+test('A JUDGE THAT CANNOT RUN IS RECORDED AND CHANGES NOTHING: D1-D4 passed, so it serves', async () => {
   const sj = v2();
   const calls = stub(sj, ['DOWN']);
   const out = await render(sj);
-  assert.equal(out.source, 'module_assembly');
-  assert.equal(calls.writer, 1, 'no regeneration spent against a reviewer that is down');
+  assert.equal(out.source, 'gemini');
+  assert.equal(calls.writer, 1);
+  assert.equal(out.review.judge[0].check, 'v2.judge_unavailable');
+  assert.equal(out.review.judge[0].severity, 'flag');
 });
 
 test('v1 NEVER CALLS THE JUDGE', async () => {
