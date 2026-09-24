@@ -225,6 +225,40 @@ finds it changed has found a defect rather than the ruling. The floor rate is st
 budget - rule 15 leaves one provider, so an outage is a 100% floor. It simply no longer decides ship
 or no-ship.
 
+## THE CURRENT WORK, 2026-09-22 - PROMPT AB ("P2"), THE PAID PRODUCT PASSABLE
+
+**`docs/prompts/AB-paid-passable.md`**, input `docs/handoff/p2-markup-2026-09-22.md` (every row
+marked ok by Reyner 2026-09-22). Two PRs.
+
+**PR 1 - §3, the DEFECT rows. MERGED as #126 (`f9473ec`).**
+
+**PR 2 - §4, the LAYOUT rows. BUILT on `feat/ab-paid-layout` 2026-09-23; PR open, awaiting Reyner's round-1 read.**
+
+A POINTER, NOT A TASK LIST - this file's own 2026-08-01 rule, and the rows themselves live in AB §4.
+What is below is the STATE a resuming session cannot get from the prompt, because the prompt predates
+the work:
+
+- **Landed: `3859cc9`, the heading face.** Spectral 400/600 fetched by
+  `npm run build:spectral-ttf`, committed under `lib/pdf/fonts/`, registered in
+  `lib/pdf/fonts.js` as `FAMILY_SERIF`, and traced in `next.config.mjs`. Done FIRST and
+  committed ALONE because it is the one §4 item that can 500 a lambda (#123).
+  `FAMILY_SERIF` is exported and already imported into `lib/pdf/document.js` - the layout
+  can draw with it immediately.
+- **Landed 2026-09-23, all eight remaining §4 rows** in one layout commit, after two that
+  it needed: the report's two SCREEN defects (`ProseBlocks.jsx`; #126 never touched
+  `components/`), and an INSPECTOR fix - `pageTexts` dropped every CID run, so the new
+  serif headings were invisible to `build.js`'s verifies and to every test that finds a
+  page by its heading. The PR body carries the commit list and the red runs.
+- **Round 1 is open**: Reyner reads both rebuilt PDFs and the 390-wide report screenshot
+  (AB §5). Anything still open after round 2 goes to the DEFERRED REGISTER.
+- **THE PROOF STEP IS THE LAST COMMIT AND IS NOT OPTIONAL: fetch BOTH PDF routes on the
+  preview.** A green local build says nothing about tracing - that is exactly what #123
+  was - and `tests/pdf-font-lambda.spec.mjs` checks the CONFIG, not the deploy.
+- **Round 1's review is Reyner reading both rebuilt PDFs and a 390-wide report screenshot
+  on his phone** (AB §5). Cap is two rounds; anything left goes to the DEFERRED REGISTER.
+
+Session state for the handover: `docs/handoff/cowork-state-2026-09-22.md`.
+
 ## THE CURRENT WORK, 2026-09-14 (night) - PROMPT Y-4, THE PDF AS A DOCUMENT
 
 **`docs/prompts/Y-pdf-4.md`, RELEASED 2026-09-14** after Reyner read the built compat PDF. R6-R8 are

@@ -129,3 +129,26 @@ test('next.config.mjs TRACES THE FACE INTO EVERY /api BUNDLE', () => {
   assert.ok(api.includes('./docs/content/renderer-prompt.txt'), 'the mirror prompt is still traced');
   assert.ok(api.includes('./docs/content/compat-renderer-prompt.txt'), 'and the pair prompt');
 });
+
+test('EVERY REGISTERED FACE IS TRACED, not just the one that broke', async () => {
+  // ── WHY THIS IS DERIVED AND NOT A SECOND LIST ────────────
+  // The Spectral faces (AB §4, A12) are read exactly the way the hanzi face is, so
+  // they can fail exactly the way it did in #123: absent from the lambda, 500 on
+  // every deployed PDF request, perfect on every local build.
+  //
+  // An assertion naming `spectral-400.ttf` and `spectral-600.ttf` would be a THIRD
+  // list of faces - after `SERIF_TTF_RELATIVE` and `next.config.mjs` - and the one
+  // that goes stale is always the list nobody edits. So this walks the registry
+  // constant and requires a trace entry for each, which means a fourth face added
+  // tomorrow fails here until it is traced.
+  const { SERIF_TTF_RELATIVE, HAN_TTF_RELATIVE } = await import('../lib/pdf/fonts.js');
+  const api = (nextConfig.outputFileTracingIncludes ?? {})['/api/**/*'] ?? [];
+  const asEntry = (rel) => `./${rel.split(path.sep).join('/')}`;
+
+  const faces = [HAN_TTF_RELATIVE, ...Object.values(SERIF_TTF_RELATIVE)];
+  assert.ok(faces.length >= 3, 'the hanzi face and both serif weights');
+  for (const rel of faces) {
+    assert.ok(api.includes(asEntry(rel)),
+      `${asEntry(rel)} is registered but not traced - that is #123, once per face`);
+  }
+});

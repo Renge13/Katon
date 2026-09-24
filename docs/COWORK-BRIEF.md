@@ -526,6 +526,13 @@ reserves E for the compat pair-layer engine; Code found the line and the prompt 
 code-fact like any other and carries its grep. (2) The launch cut itself was written only into the Claude
 project, the third instance of the project-only failure (the fourth, item 4 on a branch copy, is the
 09-23 entry above). Both are recorded where AA's §7 said they would be, in the commit that builds AA.
+### 09-23 Cowork advised against Reyner's own A3 cover ruling without reading p2-markup; withdrawn 09-24.
+
+On 2026-09-23 Cowork pushed back on the Complete Edition cover dropping the element (`Matahari - Api` became
+`Matahari` / `The Sun`). That cover IS Reyner's own A3 ruling of 2026-09-22 (Indonesian title, English
+once, smaller), recorded in `docs/handoff/p2-markup-2026-09-22.md` row A3, which Cowork did not re-read
+before advising. Withdrawn in the round-1 markup (`docs/handoff/p2-round1-markup-2026-09-24.md`, Code's
+call 3). The shape is the skill's first one: the answer was in the document that owned the decision.
 
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 

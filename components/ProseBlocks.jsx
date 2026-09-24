@@ -42,6 +42,35 @@ function Para({ children, style }) {
   return <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15.5, lineHeight: 1.75, color: 'var(--tinta-soft)', margin: 0, ...style }}>{children}</p>;
 }
 
+/**
+ * The block's serif heading line. ONE definition, for the glossary name and for
+ * the section words promoted into its place (see `labelLevels`).
+ */
+function HeadingLine({ children }) {
+  return <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.2, color: 'var(--tinta)' }}>{children}</div>;
+}
+
+/**
+ * ── AN EYEBROW RENDERS ONLY OVER A HEADING. AB §3, ruled ok 2026-09-22. ──
+ * An eyebrow is a label FOR the line under it. `PETA DINAMIKA` printed as an
+ * eyebrow with the penutup straight beneath it, and a block whose glossary cell
+ * has no name did the same: a caption over nothing. The rule, applied here once
+ * for every caller:
+ *
+ *   eyebrow + name   both levels, as before
+ *   eyebrow alone    the eyebrow's words BECOME the heading, and no eyebrow
+ *   name alone       the heading
+ *
+ * NO NEW WORDS. The promoted text is the ruled section label (or `section_close`)
+ * that was already printing; only its level changes. Rule 14 still holds: the
+ * engine owns the words, the component owns how big they are.
+ */
+function labelLevels(label) {
+  if (!label) return { eyebrow: null, heading: null };
+  if (label.name) return { eyebrow: label.eyebrow || null, heading: label.name };
+  return { eyebrow: null, heading: label.eyebrow || null };
+}
+
 function Section({ eyebrow, children, style }) {
   return (
     <div style={{ marginTop: 40, paddingTop: 34, borderTop: '1px solid var(--divider)', ...style }}>
@@ -109,24 +138,22 @@ export function ProseBlocks({ reading, labelFor = null, modelHeadings = true, cl
   return (
     <>
       {(reading.blocks || []).map((b, i) => {
-        const label = labelFor ? labelFor(b) : null;
+        const { eyebrow: labelEyebrow, heading: labelHeading } = labelLevels(labelFor ? labelFor(b) : null);
         return (
           <Section
             key={i}
             eyebrow={(modelHeadings && b.heading) || undefined}
             style={i === 0 ? { marginTop: 34 } : undefined}
           >
-            {label && (label.eyebrow || label.name) && (
+            {labelHeading && (
               <Reveal>
                 <div style={{ marginBottom: 14 }}>
-                  {label.eyebrow && <Eyebrow style={{ marginBottom: 4 }}>{label.eyebrow}</Eyebrow>}
+                  {labelEyebrow && <Eyebrow style={{ marginBottom: 4 }}>{labelEyebrow}</Eyebrow>}
                   {/* The big serif line is the GLOSSARY's name for this block's
-                      primary fact. Absent when the cell has none (p0, p7), and
-                      absent means nothing renders - never the key, never the
-                      model's heading standing in for it. */}
-                  {label.name && (
-                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.2, color: 'var(--tinta)' }}>{label.name}</div>
-                  )}
+                      primary fact, or - when the cell has none - the section's
+                      own ruled words promoted to this level (`labelLevels`).
+                      Never the key, never the model's heading standing in. */}
+                  <HeadingLine>{labelHeading}</HeadingLine>
                 </div>
               </Reveal>
             )}
@@ -162,14 +189,24 @@ export function ProseBlocks({ reading, labelFor = null, modelHeadings = true, cl
 
           A PROP, so the MIRROR's penutup stays bare: it passes nothing, and Y-2
           commit 4 is explicit that nothing structural changes in the funnel. */}
+      {/* THE CLOSING WORDS ARE A HEADING NOW, not an eyebrow (AB §3): they have no
+          glossary name to sit over, so by `labelLevels` they take the heading's
+          place. Same ruled string, same position. */}
       {reading.penutup && closeEyebrow && (
         <Reveal>
-          <Eyebrow style={{ marginTop: 40, marginBottom: 14 }}>{closeEyebrow}</Eyebrow>
+          <div style={{ marginTop: 40, marginBottom: 14 }}><HeadingLine>{closeEyebrow}</HeadingLine></div>
         </Reveal>
       )}
+      {/* ── THE PENUTUP IS BODY TEXT. AB §3 / markup A4, ruled ok 2026-09-22. ──
+          It was 18/1.6 serif italic against a 15.5/1.75 body, which made the last
+          paragraph read as a different KIND of text - Reyner's "paragraph gap".
+          It is the same defect the PDF had, fixed the same way: one paragraph
+          style (`Para`), and the separation carried by SPACE above it rather than
+          by size. On the compat report the closing heading above it now does the
+          announcing the italic used to. */}
       {reading.penutup && (
-        <div className="k-prose" style={{ animationDelay: `${proseDelayMs(total - 1, total)}ms`, marginTop: 34 }}>
-          <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.6, color: 'var(--kayu)', margin: 0 }}>{reading.penutup}</p>
+        <div className="k-prose" style={{ animationDelay: `${proseDelayMs(total - 1, total)}ms`, marginTop: closeEyebrow ? 0 : 40 }}>
+          <Para>{reading.penutup}</Para>
         </div>
       )}
     </>

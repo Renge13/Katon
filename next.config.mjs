@@ -22,6 +22,13 @@ const nextConfig = {
       // 500 on every deployed request while every local build is perfect. Measured
       // off `app/api/pair/[id]/pdf/route.js.nft.json`: 238 files traced, 0 fonts.
       './lib/pdf/fonts/noto-serif-tc-han.ttf',
+      // THE HEADING FACE, added 2026-09-22 (AB §4, A12). Same reason, same failure
+      // mode: `lib/pdf/fonts.js` reads these with `fs.readFileSync(path.join(...))`,
+      // which no bundler can follow, so without these two lines both PDF routes 500
+      // in the lambda while every local build is perfect. That is #123 exactly, and
+      // the whole point of writing them here in the same commit as the registration.
+      './lib/pdf/fonts/spectral-400.ttf',
+      './lib/pdf/fonts/spectral-600.ttf',
     ],
   },
 };
