@@ -228,3 +228,19 @@ than a second copy of an old one.
 dates and the two gender words exactly as the report header shows them, and nothing else. This is
 recorded here rather than only in the prompt because it is a RULING about what a reader sees, and the
 next session to look at a sparse cover will want to know the sparseness was chosen.
+
+## The front door - RULED 2026-09-24 (Prompt AA, amendment k)
+
+Ruled by Cowork on Reyner's explicit delegation of 2026-09-24 ("I let you decide on AA copy cells"),
+and recorded here by Code from Reyner's message: Cowork's own edit of AA §4 never reached the tree
+(COWORK-BRIEF §4). The sub-line is kept unchanged; the 1280px header stays 460.
+
+`home_lock_line` REPLACES the hard-coded under-CTA line ON HOME ONLY. It carries the word "Gratis",
+which left the page with the deleted mirror card (`home_mirror_sub`). `components/PasanganSteps.jsx`
+keeps `Privat. Hanya bisa diakses via tautanmu.` unchanged, because compat is not free - so from the
+applying commit on, the shared-JSX row above lists the stepper only.
+
+| Bank | Slot | Ruled string |
+|---|---|---|
+| SITE_COPY | `home_compat_link` | `Baca dinamika dua orang` |
+| SITE_COPY | `home_lock_line` | `Gratis dan privat. Hanya bisa diakses via tautanmu.` |
