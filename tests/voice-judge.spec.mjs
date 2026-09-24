@@ -145,3 +145,43 @@ test('v1 NEVER CALLS THE JUDGE', async () => {
   await render(sj);
   assert.equal(calls.judge, 0);
 });
+
+// ── THE FIX ROUND (2026-09-24): (c) J4 only over the render's own points, (d) no
+// non-findings, (a) the relation glosses read the right way round ──
+import { wellFormed, judgeRendering } from '../lib/validate/judge.js';
+
+test('(d) A NON-FINDING IS MALFORMED: unsupported "None" or empty', () => {
+  const g = ['void_stack_month'];
+  assert.equal(wellFormed({ class: 'J1', grounding_considered: g, supported: 'x', unsupported: 'None' }), false);
+  assert.equal(wellFormed({ class: 'J1', grounding_considered: g, supported: 'x', unsupported: ' ' }), false);
+  assert.equal(wellFormed({ class: 'J1', grounding_considered: g, supported: 'x', unsupported: 'a star the chart lacks' }), true);
+});
+
+test('(c) J4 ONLY OVER THE RENDER\'S OWN REQUIRED POINTS, and none with an empty list', async () => {
+  const sj = v2();
+  const stray = { ...J4_COST, sentence: 'aspek_convergence_食神' }; // a fact, not a required point
+  assert.ok(!sj.required_points.some((r) => r.fact_id === stray.sentence), 'precondition');
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    candidates: [{ content: { parts: [{ text: JSON.stringify({ findings: [J4_COST, stray] }) }] } }],
+  }), { status: 200 });
+  const draft = assembleFallback(sj);
+  const out = await judgeRendering(draft, sj);
+  assert.deepEqual(out.findings.map((f) => f.sentence), ['void_stack_month']);
+  assert.deepEqual(out.malformed.map((f) => f.sentence), ['aspek_convergence_食神']);
+  const none = await judgeRendering(draft, { ...sj, required_points: [] });
+  assert.deepEqual(none.findings, [], 'no required points, no J4');
+});
+
+test('(a) THE GLOSSES READ THE ENGINE THE RIGHT WAY ROUND, pinned on chart 1', () => {
+  // relation_to_season is elementRelation(season ruler, Day Master): the arguments
+  // the other way round from relation_to_day_master. Chart 1 is Fire born in a
+  // Metal month, worksheet S2's "Api menghabiskan tenaga untuk menundukkan Logam".
+  const facts = v2().facts;
+  const strength = facts.find((f) => f.id.startsWith('strength_')).provenance;
+  assert.deepEqual([strength.element, strength.season_ruler_element, strength.relation_to_season], ['Api', 'Logam', 'controls']);
+  assert.ok(JUDGE_PROMPT.includes("controls = the Day Master's element controls the season's"));
+  // Missing Wood, which feeds Fire (worksheet S2: "Api menyala dari kayu").
+  const wood = facts.find((f) => f.id === 'element_missing_Wood').provenance;
+  assert.equal(wood.relation_to_day_master, 'feeds');
+  assert.ok(JUDGE_PROMPT.includes("feeds = it produces the Day Master's element"));
+});

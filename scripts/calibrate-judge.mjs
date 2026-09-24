@@ -4,7 +4,7 @@
 // ============================================================
 //   node --conditions=react-server scripts/calibrate-judge.mjs [--runs 3] [--out file.json]
 //
-// SPENDS (a few cents of Gemini at gemini-3.1-flash-lite). Reads GEMINI_API_KEY
+// SPENDS: the judge model (lib/validate/judge.js JUDGE_MODEL) once per case per run. Reads GEMINI_API_KEY
 // from .env.local.
 //
 // Round 2 instruction (Reyner, 2026-09-24): "Judge calibration before anything is
@@ -141,7 +141,12 @@ const CASES = [
 ];
 if (JSON.stringify(CASES.at(-1).rendered).includes('bukti berikutnya')) throw new Error('J4 seed did not drop the cost');
 
-const PRICE = { in: 0.25 / 1e6, out: 1.5 / 1e6 };
+// Per 1M tokens, paid Standard tier, prompts <= 200k (ai.google.dev/gemini-api/docs/pricing,
+// read 2026-09-24). Thought tokens bill as output.
+const PRICES = {
+  'gemini-3.1-flash-lite': { in: 0.25 / 1e6, out: 1.5 / 1e6 },
+  'gemini-3.1-pro-preview': { in: 2.0 / 1e6, out: 12.0 / 1e6 },
+};
 /** Is this finding the planted violation? */
 function hitsPlant(c, f) {
   if (f.class !== c.planted) return false;
@@ -158,6 +163,8 @@ for (const c of CASES) {
   for (let run = 1; run <= RUNS; run += 1) {
     const out = await judgeRendering(c.rendered, c.payload);
     const u = out.usage || {};
+    const PRICE = PRICES[out.model];
+    if (!PRICE) throw new Error(`no price for ${out.model}`);
     const cost = (u.promptTokenCount || 0) * PRICE.in + ((u.candidatesTokenCount || 0) + (u.thoughtsTokenCount || 0)) * PRICE.out;
     spend += cost;
     const caught = c.planted ? out.findings.some((f) => hitsPlant(c, f)) : null;
