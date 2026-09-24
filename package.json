@@ -133,6 +133,7 @@
     "test:voice-cache": "node --conditions=react-server --test tests/voice-cache.spec.mjs",
     "test:voice-prompt": "node --test tests/voice-prompt.spec.mjs",
     "test:voice-engine": "node --test tests/voice-engine.spec.mjs",
+    "test:voice-gate": "node --conditions=react-server --test tests/voice-gate.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs",
     "build:spectral-ttf": "node scripts/build-spectral-ttf.mjs"
   },
