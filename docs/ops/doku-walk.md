@@ -24,11 +24,15 @@ added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
 | c | production keys, `PAYMENTS_PROVIDER=doku`, no `DOKU_SANDBOX` | OPEN - production has no `PAYMENTS_PROVIDER` and no DOKU vars | Vercel env (Reyner) |
 | d | notify URL set on the production QRIS channel | OPEN | production Back Office (Reyner) |
 | e | #129 merged (pair reconcile on load) | **DONE**, `91a21e8` | `gh pr view 129` |
-| f | mirror reconcile merged and verified: one on-load call, never from the poll; one DOKU check-status settling through `settleReading` only on SUCCESS for its own invoice at the right amount; no call when closed or mocked; red-first both ways; fence guard broken on purpose; one REAL sandbox check-status through the reconcile path | built and verified in the mirror-reconcile PR; merged hash in that PR | `npm run probe:reconcile` (2026-09-23: `status=SUCCESS`, `amount_mismatch` on the wrong sku, `paid=true` on the right one) |
+| f | mirror reconcile merged and verified: one on-load call, never from the poll; one DOKU check-status settling through `settleReading` only on SUCCESS for its own invoice at the right amount; no call when closed or mocked; red-first both ways; fence guard broken on purpose; one REAL sandbox check-status through the reconcile path | **DONE**, `186b827` (#131) | `npm run probe:reconcile` (2026-09-23: `status=SUCCESS`, `amount_mismatch` on the wrong sku, `paid=true` on the right one) |
 | g | `pending_body` replacement merged | **DONE**, `769337a` in #129 | `tests/pasangan-copy.spec.mjs` |
-| h | item 4 and PAY-SAFETY-ALL-PURCHASES on main | this PR (launch cut §3 item 4 and §0b) | `grep -n "PAY-SAFETY-ALL-PURCHASES" docs/handoff/launch-cut-2026-09-21.md` |
+| h | item 4 and PAY-SAFETY-ALL-PURCHASES on main | **DONE**, `186b827` (#131: launch cut §3 item 4 and §0b) | `grep -n "PAY-SAFETY-ALL-PURCHASES" docs/handoff/launch-cut-2026-09-21.md` |
 
-Then: **Reyner's Rp 39.000 walk** on production.
+Then: **Reyner's two production purchases: Rp 19.000 mirror AND Rp 39.000 compat (ruled 2026-09-24).**
+
+### DOKU notes
+
+- 09-24: QRIS reset applied on sandbox; the QRIS Credential Settings tab is an INPUT form for credentials issued by DOKU Ops (Client ID, Shared Key, Client Secret, MPAN, NMID), blank after the reset.
 
 ---
 

@@ -207,6 +207,7 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
 - Scripts containing backticks or regexes go through the file tool, never a shell heredoc.
 - **Migrations** are applied manually in the Supabase SQL editor (no CLI migration tracking).
   Always run the migration BEFORE deploying code that depends on it.
+  From 2026-10-30 Supabase no longer auto-grants Data API access to new public tables. Every migration that creates a table ends with `grant select, insert, update, delete on public.<table> to service_role;`. Never grant anon or authenticated: the app reads only through the service role (`lib/supabase.js`) and every table has RLS on.
 - ~~`contents/*.md` are the DEPRECATED hand-authored cells... do not delete them until the new
   pipeline ships.~~ **DONE 2026-08-23 — the pipeline shipped and they are deleted.** See SUPERSEDED
   for what went with them. The line is struck rather than removed because it is the record of a
