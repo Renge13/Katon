@@ -1,4 +1,4 @@
-# Prompt AA — THE FRONT DOOR (Cowork, 2026-09-21). STATUS: DRAFT - NOT RELEASED until Reyner rules the launch cut.
+# Prompt AA — THE FRONT DOOR (Cowork, 2026-09-21). STATUS: RELEASED 2026-09-24. Copy cells in §4 RULED (Cowork, by Reyner's explicit delegation in chat 2026-09-24: "I let you decide on AA copy cells"). Reyner may overrule any cell on the preview.
 
 **Code: commit this file yourself, alone, as the first commit** - Cowork's tree writes are not durable
 (COWORK-BRIEF §4). NAMING: this was drafted as "Prompt E"; Code found `docs/prompts/F-payments-pricing.md:4`
