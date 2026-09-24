@@ -534,6 +534,16 @@ once, smaller), recorded in `docs/handoff/p2-markup-2026-09-22.md` row A3, which
 before advising. Withdrawn in the round-1 markup (`docs/handoff/p2-round1-markup-2026-09-24.md`, Code's
 call 3). The shape is the skill's first one: the answer was in the document that owned the decision.
 
+### 09-24 Cowork reported AA §4 ruled; the edit never landed (parallel edits on one file, not re-read). Code caught it.
+
+Cowork's AA prompt reached the tree with a new status line saying "Copy cells in §4 RULED", and a §4
+table whose ruling cells were still empty; the `salesOpen` rule Reyner's message cited was not in the
+file either. Two edits to one file, the second not re-read after the first, so only one survived. Code
+found it by diffing the tree write against `main` (`git diff docs/prompts/AA-front-door.md`: one line
+changed), committed the file as written (`f8f8450`), built AA behind a `PENDING()` sentinel, and held the
+merge. The cells were authored by Code from Reyner's message (`28109c8`). **A status line is a claim about
+the rest of the file; re-read the file after writing it.**
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
