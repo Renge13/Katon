@@ -22,6 +22,7 @@ import { act } from 'react';
 
 import Funnel from '../components/Funnel.jsx';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
+import { SITE_COPY } from '../lib/site/copy.js';
 
 async function mountHome(salesOpen) {
   const prev = globalThis.fetch;
@@ -65,6 +66,16 @@ test('FENCE OPEN: exactly ONE link to compat, and it sits AFTER the button', asy
     // DOCUMENT_POSITION_FOLLOWING: the link comes after the form's button, never
     // above the form (the mirror stays the first thing, ruled 2026-09-07).
     assert.ok(button.compareDocumentPosition(links[0]) & 4, 'the compat link is below the button');
+  } finally { ui.unmount(); }
+});
+
+test('THE HOME LOCK LINE IS home_lock_line, and the link carries its ruled words', async () => {
+  // Amendment k (2026-09-24). Read from the bank, never retyped here.
+  const ui = await mountHome(true);
+  try {
+    assert.ok(ui.host.textContent.includes(SITE_COPY.home_lock_line), 'Home prints its own lock line');
+    assert.equal(ui.compatLinks()[0].textContent.trim(), SITE_COPY.home_compat_link);
+    assert.equal(/@@UNRULED/u.test(ui.host.textContent), false, 'no sentinel on the front door');
   } finally { ui.unmount(); }
 });
 

@@ -527,7 +527,9 @@ function Home({ form, setForm, error, onSubmit, busy, salesOpen = false }) {
                 ledger first. */}
             <Button type="submit" disabled={busy}>{busy ? 'Menyiapkan...' : 'Lihat Refleksiku'}</Button>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 12.5, color: 'var(--muted-warm)', marginTop: 14 }}>
-              <Icon.lock size={13} /> Privat. Hanya bisa diakses via tautanmu.
+              {/* HOME'S OWN LOCK LINE (AA, amendment k): "Gratis" returns here. The
+                  compat stepper keeps the plain lock line - compat is not free. */}
+              <Icon.lock size={13} /> {SITE_COPY.home_lock_line}
             </div>
             {/* ── THE ONLY OTHER DOOR ON THE PAGE (AA §2 item 7) ──────────
                 One text link to compat, in the lock line's quiet register. HIDDEN
