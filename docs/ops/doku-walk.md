@@ -42,6 +42,25 @@ Then: **Reyner's two production purchases: Rp 19.000 mirror AND Rp 39.000 compat
   - **A SNAP banner is shown** in the Back Office. Open question to DOKU.
   - **Sandbox QRIS Disable was applied twice and still shows Active.** Production QR Payment is NOT
     activated and was left untouched.
+- **WHICH URL VERIFIES DOKU SANDBOX SIGNATURES TODAY (Code, 2026-09-24, no env var changed).** One
+  hand-signed notification per URL, signed with the sandbox `DOKU_CLIENT_ID` (`BRN-0285...`) /
+  `DOKU_SECRET_KEY` through `lib/doku/signature.js#signComponents` - the function the route verifies
+  with - for a row id that does not exist (`probe-nonexistent-row.<ts>`), so nothing settles:
+
+  ```
+  200  https://katon-git-feat-doku-checkout-renge13s-projects.vercel.app/api/doku/notify  {"received":true}
+  200  https://katon-git-feat-facts-spacing-renge13s-projects.vercel.app/api/doku/notify  {"received":true}
+  503  https://www.katon.app/api/doku/notify  {"error":"doku_not_configured"}
+  ```
+
+  **So: the VA BCA-registered URL verifies sandbox signatures today** (the `feat-doku-checkout` preview
+  alias), and so does any current Preview deployment, because the Preview environment carries the
+  sandbox keys. Production has no DOKU keys and answers 503 by design (gate row c). No env change is
+  needed for sandbox. The probe was a throwaway script (it signs a request the way `tests/doku.spec.mjs`'s
+  `signedRequest` does, POSTs it, prints the status); it is not committed, to keep this PR docs-only.
+  NOTE on the first run: the `feat-facts-spacing` alias answered an HTML page while its deploy was
+  still aliasing; re-run a minute later it verified. A probe against a just-pushed branch needs its
+  deploy to be `success` first.
 
 ---
 
