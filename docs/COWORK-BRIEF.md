@@ -518,6 +518,15 @@ reported the item absent. This is the fourth project-only instance of the same s
 it for this item: item 4 and PAY-SAFETY-ALL-PURCHASES now live in main's launch cut (§3 item 4, §0b)
 and in `docs/ops/doku-walk.md`'s production-flip gate.
 
+### A prompt letter named "free" from a directory listing, and the launch cut written only to the project (AA §7, 2026-09-21)
+
+Two entries Prompt AA's own ledger section asks for. (1) Cowork drafted AA as "Prompt E" and wrote
+"E was never used; it is free" - asserted from a directory listing. `docs/prompts/F-payments-pricing.md:4`
+reserves E for the compat pair-layer engine; Code found the line and the prompt became AA. A name is a
+code-fact like any other and carries its grep. (2) The launch cut itself was written only into the Claude
+project, the third instance of the project-only failure (the fourth, item 4 on a branch copy, is the
+09-23 entry above). Both are recorded where AA's §7 said they would be, in the commit that builds AA.
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
