@@ -23,6 +23,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { assembleFallback } from '../lib/render/fallback.js';
+import { RENDER_COPY } from '../lib/render/copy.js';
 import {
   buildAppendix, assertEveryMechanicExplained, anchorId, anchorIds, GROUP_ORDER,
 } from '../lib/pdf/appendix.js';
@@ -194,7 +195,12 @@ test('THE PDF AUTHORS NOTHING: the reading is the cached prose, verbatim', async
   // "verbatim" means here. Line breaking is layout. Anything else is the document
   // editing the reading.
   const strip = (x) => x.replace(/\s+/g, '');
-  const text = strip(latinText(buf));
+  // THE RUNNING FOOTER IS LAYOUT TOO (AB §4, B2). It is drawn on every page, so a
+  // paragraph that crosses a page has `Katon - Edisi Lengkap` between its halves in
+  // the concatenated text - exactly like a line break, and removed for the same
+  // reason. Removed as the footer's own string, never by pattern.
+  const footer = `Katon - ${RENDER_COPY.pdfEditionMirror}`;
+  const text = strip(latinText(buf).split(footer).join(''));
 
   for (const block of rendered.blocks) {
     const want = strip(block.text);
@@ -649,27 +655,30 @@ test('THE MIRROR DOCUMENT IS BYTE-FOR-BYTE THE SAME DOCUMENT after the refactor'
 
 // ── THE COVER (Reyner, 2026-09-14, ruling 2) ───────────────
 
-test('THE COVER LEADS WITH THE ENGLISH NAME, Indonesian underneath', async () => {
-  // Ruled 2026-09-14 on the compat cover and applied HERE TOO in the same ruling -
-  // "same `coverPage` shape". `name_en` is the bigger title; `name_id` sits under
-  // it, smaller, with the element it always carried.
+test('THE COVER LEADS WITH THE INDONESIAN NAME, English once underneath', async () => {
+  // ── REVERSED 2026-09-22 (P2 markup A3, Reyner "ok") ──────────
+  // This asserted the 2026-09-14 ruling 2 - English title, Indonesian under it.
+  // Reyner's later mark reverses it on CLAUDE.md rule 23's terms: Indonesian name
+  // first, English pair ONCE, smaller. Rewritten rather than deleted, so the order
+  // stays asserted in the direction that is now ruled.
   //
-  // THIS MOVES THE MIRROR DOCUMENT, which is why `tests/fixtures/pdf-chart1-
-  // pages.json` is re-pinned in the same commit. It is the first intended change to
-  // that document since the fixture was captured, and the fixture's own header says
-  // regenerate only for exactly this: an intended, ruled change.
+  // The cover also gained the wordmark and the `Edisi Lengkap` eyebrow above the
+  // title (A1), so the title is found by content, not by line index.
   const { chart, semanticJson, rendered } = fixture('chart 1');
   const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
   const cover = pageTexts(buffer)[0].split('\n').map((l) => l.trim()).filter(Boolean);
   const core = semanticJson.core;
 
-  assert.equal(cover[0], core.archetype_name_en, 'the first line is not the English name');
-  assert.equal(cover[1], `${core.archetype_name_id} - ${core.element}`,
-    'the Indonesian name and element are not the line under it');
-  // ORDER, not presence: both were on the cover before, the wrong way round.
+  const at = cover.indexOf(core.archetype_name_id);
+  assert.ok(at > -1, 'the Indonesian name is not a line of its own on the cover');
+  assert.equal(cover[at + 1], core.archetype_name_en,
+    'the English name is not the line directly under the Indonesian title');
+  assert.equal(cover.filter((l) => l.includes(core.archetype_name_en)).length, 1,
+    'the English name prints ONCE');
+  // ORDER, not presence: both were on the cover before, the other way round.
   const page = pageTexts(buffer)[0];
-  assert.ok(page.indexOf(core.archetype_name_en) < page.indexOf(core.archetype_name_id),
-    'the Indonesian name still comes first');
+  assert.ok(page.indexOf(core.archetype_name_id) < page.indexOf(core.archetype_name_en),
+    'the English name still comes first');
 
   // THE METADATA TITLE IS UNCHANGED, explicitly ruled. It is what a reader sees in
   // a viewer tab and in her downloads folder, and it stays Indonesian.
