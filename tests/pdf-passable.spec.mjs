@@ -418,3 +418,38 @@ test('R1 NO GLOSSARY ROW BREAKS ACROSS A PAGE, and no group heading is left at a
     assert.deepEqual(glossarySplits(buffer), [], `${name}: a glossary row or heading breaks across a page`);
   }
 });
+
+// ── R2 = A (round-1 markup, 2026-09-24): the compat glossary is the READER's ──
+// The legend merged both charts' terms, and every per-chart entry is second-person
+// mirror text - so the partner's terms were told to the buyer as facts about HER
+// (`Seimbang`: "Baganmu berdiri di titik tengah yang stabil" to a reader who is
+// Lemah one row above). Ruled A: Kompatibilitas + the reader's own chart terms +
+// Shio. Terms found only in the partner's chart are dropped.
+
+/** The terms the appendix PRINTS, read off its term column. */
+function printedTerms(buffer) {
+  const texts = pageTexts(buffer);
+  const start = texts.findIndex((t) => t.includes('Istilah dalam Bacaanmu'));
+  return textBoxes(buffer).slice(start)
+    .flatMap((runs) => runs.filter((r) => r.size === 10 && r.x < 150).map((r) => r.text.trim()));
+}
+
+test('R2 THE COMPAT GLOSSARY CARRIES NO TERM FROM THE PARTNER\'S CHART ALONE, and all of the reader\'s', async () => {
+  const c = await compat();
+  const printed = new Set(printedTerms(c.buffer));
+  // The eight partner-only terms Cowork found on the round-1 PDF, by name.
+  for (const t of ['Seimbang', 'Dominan Tanah', 'Tanah', 'Ikatan', 'Aspek Pendorong',
+    'Aspek Pelindung', 'Mata Pisau', 'Bintang Perantau']) {
+    assert.equal(printed.has(t), false, `the partner's "${t}" is told to the reader`);
+  }
+  // BOTH WAYS: every term of the reader's own chart is still there, and the
+  // Kompatibilitas group, and the partner's Shio (neutral text, and his branches
+  // print in the facts table).
+  const own = buildAppendix({ chart: c.chartA, semanticJson: buildSemanticJson(c.chartA) });
+  for (const g of own.groups) {
+    for (const e of g.entries) if (e.name) assert.ok(printed.has(e.name), `the reader's "${e.name}" (${g.group}) is missing`);
+  }
+  for (const name of ['Kursi Independen', 'Kuda', 'Naga']) {
+    assert.ok(printed.has(name), `"${name}" is missing`);
+  }
+});
