@@ -151,9 +151,45 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.29.0');
+    assert.equal(onV2.stage6_version, '1.30.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
+  } finally {
+    globalThis.fetch = prev.fetch;
+    if (prev.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = prev.key;
+  }
+});
+
+// ── A v2 PAIR MAY CITE EITHER PERSON'S SUPPLIED MIRROR FACTS (1.30.0) ──
+// The first v2 render run floored both pairs: every draft opened with a block about
+// the reader citing `day_master_Fire`, a fact E2 supplies under `mirror.a`, and the
+// shape check knew only the pair's own ids. The same draft still refuses under v1,
+// which supplies no mirror.
+test('PAIR SHAPE: a block citing a supplied mirror fact is served under v2, refused under v1', async () => {
+  const prev = { fetch: globalThis.fetch, key: process.env.GEMINI_API_KEY };
+  process.env.GEMINI_API_KEY = 'test-key-never-sent-anywhere';
+  const serve = async (sj) => {
+    const d = draftFor(sj);
+    const portrait = {
+      fact_ids: ['day_master_Fire'], heading: 'Kamu dalam Hubungan Ini',
+      text: 'Kamu adalah Matahari, dan tenagamu harus terus diisi dari luar.',
+    };
+    const body = { blocks: [portrait, ...d.blocks], penutup: 'Penutup yang cukup panjang untuk sebuah bacaan.' };
+    globalThis.fetch = async () => new Response(JSON.stringify({
+      candidates: [{ content: { parts: [{ text: JSON.stringify(body) }] } }],
+    }), { status: 200 });
+    __clearMemCache(); __clearInFlight();
+    return renderReading(sj, { spendGuards: false, dedupeInFlight: false, validationRetries: 0 });
+  };
+  try {
+    const pj2 = buildPairSemantic(A, B, { voice: 'v2' });
+    assert.ok(pj2.mirror.a.facts.some((f) => f.id === 'day_master_Fire'), 'precondition: supplied under mirror.a');
+    assert.ok(!pj2.facts.some((f) => f.id === 'day_master_Fire'), 'precondition: not a pair fact');
+    const onV2 = await serve(pj2);
+    assert.equal(onV2.source, 'gemini', JSON.stringify(onV2.attempts?.map((a) => a.error ?? a.stage6)));
+    const onV1 = await serve(buildPairSemantic(A, B, { voice: 'v1' }));
+    assert.equal(onV1.source, 'module_assembly');
+    assert.match(String(onV1.attempts?.[0]?.error), /cites unknown fact "day_master_Fire"/);
   } finally {
     globalThis.fetch = prev.fetch;
     if (prev.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = prev.key;
