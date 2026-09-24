@@ -104,6 +104,16 @@ test('D4: fatalism is HARD; a pair verdict is HARD', () => {
   assert.equal(v1r.findings.find((f) => f.check === 'pair.verdict')?.severity, 'flag');
 });
 
+test('D4: ranking and self_harm are HARD under v2 too (spec §4a, corrected 2026-09-24)', () => {
+  const sj = v2(A);
+  const ranked = validateRenderingV2(plant(draftFor(sj), 'Ini aspek terbaik yang bisa dimiliki seseorang.'), sj);
+  assert.ok(checks(ranked).includes('forbidden.ranking'), JSON.stringify(checks(ranked)));
+  assert.equal(ranked.ok, false);
+  const harm = validateRenderingV2(plant(draftFor(sj), 'Kadang rasanya tidak ada gunanya mencoba lagi.'), sj);
+  assert.ok(checks(harm).includes('forbidden.self_harm'), JSON.stringify(checks(harm)));
+  assert.equal(harm.ok, false);
+});
+
 test('LOGGED, NOT GATING: a style.* hit rejects under v1 and passes under v2', () => {
   // `slang` is a style category (blocklist.json style.slang). v1 rejects it; v2
   // records it at severity `flag` and accepts - the spec's "removed from the gate".
@@ -141,7 +151,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.27.0');
+    assert.equal(onV2.stage6_version, '1.28.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
