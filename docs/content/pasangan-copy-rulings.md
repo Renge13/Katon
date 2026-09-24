@@ -112,10 +112,10 @@ promise of the same family: true while access is token-only and no email is sent
 
 | Bank | Slot | Ruled string |
 |---|---|---|
-| SITE_COPY | `home_mirror_label` | `Bacaan Diri` |
-| SITE_COPY | `home_mirror_sub` | `Pahami polamu sendiri. Gratis.` |
-| SITE_COPY | `home_compat_label` | `Kompatibilitas` |
-| SITE_COPY | `home_compat_sub` | `Dinamika dua orang, dibaca dari dua tanggal lahir.` |
+| SITE_COPY | ~~`home_mirror_label`~~ | DROPPED 2026-09-24 by Prompt AA (was `Bacaan Diri`): the two-card grid left the front door. Remove slot and render. |
+| SITE_COPY | ~~`home_mirror_sub`~~ | DROPPED 2026-09-24 by Prompt AA (was `Pahami polamu sendiri. Gratis.`): the two-card grid left the front door. Remove slot and render. |
+| SITE_COPY | ~~`home_compat_label`~~ | DROPPED 2026-09-24 by Prompt AA (was `Kompatibilitas`): the two-card grid left the front door. Remove slot and render. |
+| SITE_COPY | ~~`home_compat_sub`~~ | DROPPED 2026-09-24 by Prompt AA (was `Dinamika dua orang, dibaca dari dua tanggal lahir.`): the two-card grid left the front door. Remove slot and render. |
 | PASANGAN_COPY | `page_title` | `Bacaan Kompatibilitas` |
 | PASANGAN_COPY | `page_lead` | `Peta dinamika dua pola: tarikan, titik gesekan, dan ritme harian kalian.` |
 | PASANGAN_COPY | `includes_1` | `Inti diri kalian berdua dan dinamika hubungannya` |
