@@ -149,8 +149,11 @@ test('every slot the surface renders EXISTS', () => {
   assert.deepEqual(Object.keys(PASANGAN_COPY).sort(), PASANGAN_SLOTS.slice().sort(),
     'the bank has exactly the slots the surface renders - no orphans either way');
 
+  // Prompt AA (2026-09-24): the four two-card slots are DELETED and ONE link slot
+  // replaces them. Both halves asserted, so a slot that came back fails too.
+  assert.equal(typeof SITE_COPY.home_compat_link, 'string', 'home_compat_link must be a string');
   for (const slot of ['home_mirror_label', 'home_mirror_sub', 'home_compat_label', 'home_compat_sub']) {
-    assert.equal(typeof SITE_COPY[slot], 'string', `${slot} must be a string`);
+    assert.equal(SITE_COPY[slot], undefined, `${slot} was deleted with the two-card grid`);
   }
 });
 
