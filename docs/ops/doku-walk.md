@@ -9,6 +9,29 @@ is a memory, not a fact.
 
 ---
 
+## THE PRODUCTION-FLIP GATE (a-h). Updated 2026-09-23 on Reyner's ruling
+
+**Sales reopen only when every item is true, and then Reyner's Rp 39.000 walk is acceptance.**
+Items a-d are the four-item gate as ruled in the launch cut (`docs/handoff/launch-cut-2026-09-21.md`
+§3 item 1). Until this date they were written only there and in the Claude project; this file did
+not carry them, so this section ADDS the gate here rather than amending an existing one. e-h were
+added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
+
+| | gate | status 2026-09-23 | proof |
+|---|---|---|---|
+| a | QRIS active for production | OPEN (DOKU ticket 1149053) | DOKU Back Office |
+| b | one delivered notification captured | OPEN - DOKU has delivered none, on any walk (§ WALK 2 and 3 below) | the `DOKU_CAPTURE` log line |
+| c | production keys, `PAYMENTS_PROVIDER=doku`, no `DOKU_SANDBOX` | OPEN - production has no `PAYMENTS_PROVIDER` and no DOKU vars | Vercel env (Reyner) |
+| d | notify URL set on the production QRIS channel | OPEN | production Back Office (Reyner) |
+| e | #129 merged (pair reconcile on load) | **DONE**, `91a21e8` | `gh pr view 129` |
+| f | mirror reconcile merged and verified: one on-load call, never from the poll; one DOKU check-status settling through `settleReading` only on SUCCESS for its own invoice at the right amount; no call when closed or mocked; red-first both ways; fence guard broken on purpose; one REAL sandbox check-status through the reconcile path | built and verified in the mirror-reconcile PR; merged hash in that PR | `npm run probe:reconcile` (2026-09-23: `status=SUCCESS`, `amount_mismatch` on the wrong sku, `paid=true` on the right one) |
+| g | `pending_body` replacement merged | **DONE**, `769337a` in #129 | `tests/pasangan-copy.spec.mjs` |
+| h | item 4 and PAY-SAFETY-ALL-PURCHASES on main | this PR (launch cut §3 item 4 and §0b) | `grep -n "PAY-SAFETY-ALL-PURCHASES" docs/handoff/launch-cut-2026-09-21.md` |
+
+Then: **Reyner's Rp 39.000 walk** on production.
+
+---
+
 ## Part 1 — The pre-sandbox probe, 2026-09-21 (Code)
 
 Run before any route work, per Reyner's instruction. No credential was used and none was

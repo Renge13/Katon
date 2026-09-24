@@ -1,5 +1,5 @@
 import { PasanganFromQuery } from '@/components/Pasangan.jsx';
-import { paymentsProvider } from '@/lib/paymentFence';
+import { checkoutOpen } from '@/lib/paymentFence';
 
 // `/kompatibilitas` — RULED BY REYNER 2026-09-08. The path is the reader-facing
 // name; the internal identifiers stay `PASANGAN_COPY` / `pasangan_*`.
@@ -14,8 +14,11 @@ import { paymentsProvider } from '@/lib/paymentFence';
 // submit. That distinction is the whole defect this hotfix is about at one level
 // up: a reader must not be invited into a path that cannot complete.
 //
-// The card on Home still points here, per the ruling. A closed shop with its
-// door still on the map is honest; a card that vanishes looks like a bug.
+// ~~The card on Home still points here, per the ruling.~~ SUPERSEDED 2026-09-23:
+// Reyner ruled that while the fence is closed EVERY paid entry point is hidden,
+// the Home card and the header link included (PROGRESS INTERIM REGISTER, "PAID
+// CTA HIDDEN WHILE FENCE CLOSED"). This page still answers an old link with its
+// closed state, which is the honest reply to someone who already has the URL.
 export default function KompatibilitasPage() {
-  return <PasanganFromQuery salesClosed={paymentsProvider() === 'closed'} />;
+  return <PasanganFromQuery salesClosed={!checkoutOpen()} />;
 }

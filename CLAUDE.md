@@ -204,6 +204,7 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
   the message names — this has happened twice, once carrying a locked-file renumbering under a
   "docs chore" subject. Either stage selectively, or widen the message. Run `git status` and read it
   before writing the subject line, not after.
+- Scripts containing backticks or regexes go through the file tool, never a shell heredoc.
 - **Migrations** are applied manually in the Supabase SQL editor (no CLI migration tracking).
   Always run the migration BEFORE deploying code that depends on it.
 - ~~`contents/*.md` are the DEPRECATED hand-authored cells... do not delete them until the new

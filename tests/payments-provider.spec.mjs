@@ -314,8 +314,13 @@ test('THE SALES-CLOSED STATE IS DECIDED ON THE SERVER', () => {
     // a local now that it derives two flags from it, and a test that fails on
     // that refactor is teaching people to stop reading it.
     const src = read(page);
-    assert.match(src, /paymentsProvider\(\)/u, `${page} asks the server-side provider`);
-    assert.match(src, /salesClosed=\{[^}]*'closed'/u, `${page} passes it down`);
+    // ONE SOURCE SINCE 2026-09-23: `checkoutOpen()`, the fence's own export, which
+    // is false in exactly the cases `POST /api/pay` refuses. It replaced
+    // `paymentsProvider() === 'closed'`, a second copy of the rule that called a
+    // misconfigured DOKU "open" and would have hung the form the way the mirror
+    // offer hung in production.
+    assert.match(src, /checkoutOpen\(\)/u, `${page} asks the server-side fence`);
+    assert.match(src, /salesClosed=\{!checkoutOpen\(\)\}/u, `${page} passes it down`);
   }
   // And the components render the ruled strings rather than composing a sentence.
   assert.match(read('components/Pasangan.jsx'), /sales_closed_title/u);

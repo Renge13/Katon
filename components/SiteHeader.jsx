@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CHROME_COPY } from '@/lib/site/copy';
-import { NAV_HREFS, isCurrent } from '@/lib/site/nav';
+import { NAV_HREFS, isCurrent, navKeys } from '@/lib/site/nav';
 
 // The persistent site header (Y-2 ruling 1, Reyner 2026-09-08): the wordmark
 // links home, and two links name the two products. Mounted once in
@@ -34,12 +34,15 @@ import { NAV_HREFS, isCurrent } from '@/lib/site/nav';
 // CALLED by a test rather than grepped for - this file imports `next/link`, which
 // the plain node test runner cannot resolve. The labels come from CHROME_COPY;
 // neither is typed here.
-const NAV = [
-  { href: NAV_HREFS.mirror, label: CHROME_COPY.nav_mirror },
-  { href: NAV_HREFS.compat, label: CHROME_COPY.nav_compat },
-];
+const NAV = {
+  mirror: { href: NAV_HREFS.mirror, label: CHROME_COPY.nav_mirror },
+  compat: { href: NAV_HREFS.compat, label: CHROME_COPY.nav_compat },
+};
 
-export default function SiteHeader() {
+// `salesOpen` comes from `app/layout.js`, which reads `checkoutOpen()`. While the
+// fence is closed the compat link is not drawn (ruled 2026-09-23): it is a door to
+// a paid product with nothing to sell behind it.
+export default function SiteHeader({ salesOpen = false } = {}) {
   const pathname = usePathname() || '/';
 
   return (
@@ -102,7 +105,7 @@ export default function SiteHeader() {
         </Link>
 
         <nav style={{ display: 'flex', gap: 16 }}>
-          {NAV.map((item) => {
+          {navKeys({ salesOpen }).map((k) => NAV[k]).map((item) => {
             const current = isCurrent(pathname, item.href);
             return (
               <Link

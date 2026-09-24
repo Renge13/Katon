@@ -2,6 +2,7 @@ import { Spectral, Hanken_Grotesk, Archivo } from 'next/font/google';
 import './globals.css';
 import SiteFooter from '@/components/SiteFooter.jsx';
 import SiteHeader from '@/components/SiteHeader.jsx';
+import { checkoutOpen } from '@/lib/paymentFence';
 
 // Root layout for the Katon Next.js App Router app.
 // Fonts: Spectral (display/serif) + Hanken Grotesk (sans/UI), self-hosted via
@@ -69,7 +70,7 @@ export default function RootLayout({ children }) {
             `app/` has exactly one layout.js, so this covers every route - there
             is no nested layout that could shadow it, and a test walks the route
             table rather than a list to keep that true. */}
-        <SiteHeader />
+        <SiteHeader salesOpen={checkoutOpen()} />
         <div style={{ flex: '1 0 auto' }}>{children}</div>
         <SiteFooter />
       </body>

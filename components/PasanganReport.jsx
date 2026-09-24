@@ -270,6 +270,27 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
     fetch(`/api/mock-pay/${id}`, { method: 'POST' }).catch(() => {});
   }, [mockPay, id]);
 
+  // ── CHECK-STATUS ON LOAD, ONCE (launch-cut item 4, 2026-09-23) ──
+  // DOKU's notification has never been delivered to Katon, so a buyer who paid can
+  // sit on an unpaid row. On the FIRST load of an unpaid pair the page asks the
+  // server to reconcile it - one DOKU check-status, settled through `settlePair` -
+  // and re-reads if the answer is paid. The ref keeps it to once per page load: the
+  // poll below calls `load()` every 3s and must never trigger a DOKU call.
+  //
+  // THE SERVER DECIDES WHETHER DOKU IS ASKED AT ALL. Closed fence, mock, no invoice:
+  // the route answers `{ paid: false }` without a network call. So the page does
+  // not need to know the provider, and does not get a second copy of that rule.
+  const reconciledRef = useRef(false);
+  const reconcileOnce = useCallback(async (body) => {
+    // "Unpaid" is `reportView.js`'s own test - any status but 'paid' - minus a
+    // missing body or an error (404, failed load), which have no invoice to ask about.
+    if (reconciledRef.current || !body || body.error || body.status === 'paid') return body;
+    reconciledRef.current = true;
+    const r = await fetch(`/api/pair/${id}/reconcile`, { method: 'POST' })
+      .then((x) => x.json()).catch(() => null);
+    return r?.paid === true ? load() : body;
+  }, [id, load]);
+
   useEffect(() => {
     let live = true;
     // `void` rather than awaited-and-then-set: the lint rule reads a promise
@@ -277,11 +298,11 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
     // is right that the FIRST paint must not depend on it. Nothing renders until
     // `loaded`, and `loaded` is set inside the async continuation below.
     (async () => {
-      await load();
+      await reconcileOnce(await load());
       if (live) setLoaded(true);
     })();
     return () => { live = false; };
-  }, [load]);
+  }, [load, reconcileOnce]);
 
   // POLLING ONLY WHILE THE REDIRECT SAYS A PAYMENT JUST HAPPENED and the server
   // still says unpaid. A page opened cold on an unpaid pair does not poll - it
