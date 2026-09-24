@@ -38,6 +38,7 @@ import { buildPairAppendix } from '../lib/pdf/pairAppendix.js';
 import { pageTexts, textBoxes } from '../lib/pdf/inspect.js';
 import { PASANGAN_COPY } from '../lib/site/copy.js';
 import { RENDER_COPY } from '../lib/render/copy.js';
+import { glossarySplits } from './helpers/pdfRows.mjs';
 import { GLOSSARY } from '../lib/semantic/glossary.js';
 
 const A = { birthDate: '1989-09-13', birthTime: '09:00' };
@@ -404,4 +405,16 @@ test('A8 THE APPENDIX TERM COLUMN IS 150pt, the meaning takes the rest', async (
   const meaning = runs.find((r) => term && Math.abs(r.y - term.y) < 2 && r.x > term.x + 20);
   assert.ok(term && meaning, 'precondition: a term and its meaning share a row');
   assert.equal(Math.round(meaning.x - term.x), 150, `the meaning starts ${meaning.x - term.x}pt after the term`);
+});
+
+// ── R1 (round-1 markup, 2026-09-24): a glossary row never breaks ──
+// The #126 orphan/widow assertion (A5) measured PROSE paragraphs; it could not see a
+// two-column table row, and passed on a PDF with `Lemah` alone at the foot of p7
+// and its meaning on p8. `glossarySplits` reads the appendix pages themselves.
+
+test('R1 NO GLOSSARY ROW BREAKS ACROSS A PAGE, and no group heading is left at a foot', async () => {
+  for (const [name, build] of [['mirror', mirror], ['compat', compat]]) {
+    const { buffer } = await build();
+    assert.deepEqual(glossarySplits(buffer), [], `${name}: a glossary row or heading breaks across a page`);
+  }
 });
