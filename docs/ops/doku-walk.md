@@ -33,6 +33,15 @@ Then: **Reyner's two production purchases: Rp 19.000 mirror AND Rp 39.000 compat
 ### DOKU notes
 
 - 09-24: QRIS reset applied on sandbox; the QRIS Credential Settings tab is an INPUT form for credentials issued by DOKU Ops (Client ID, Shared Key, Client Secret, MPAN, NMID), blank after the reset.
+- **2026-09-24, sandbox BRN-0285-1789959005561 (Reyner, read in the Back Office):**
+  - **QRIS Notify URL is EMPTY**, and every save there has always failed with an error toast. The
+    2026-09-21 line "The URL had been saved on the QRIS channel" (§ WHY NOTHING WAS DELIVERED) is struck
+    in place and marked CORRECTED - it was a secondhand account of a save, recorded as fact (COWORK-BRIEF §4).
+  - **The VA BCA Payment Notification URL IS saved**: `…feat-doku-checkout…/api/doku/notify`, API 1.1,
+    Aggregator. So walk 2's premise (a URL registered on the channel that took the payment) holds.
+  - **A SNAP banner is shown** in the Back Office. Open question to DOKU.
+  - **Sandbox QRIS Disable was applied twice and still shows Active.** Production QR Payment is NOT
+    activated and was left untouched.
 
 ---
 
@@ -349,9 +358,11 @@ Answered by Reyner, 2026-09-21, and it is the kind of thing that is obvious once
 and expensive until then:
 
 > **DOKU registers a Notification URL against each PAYMENT CHANNEL, not against the
-> merchant account.** The URL had been saved on the **QRIS** channel — which is
-> inactive — and the walk paid through **VA BCA**, whose channel had no URL at all. So
-> DOKU had nowhere to send it and never tried.
+> merchant account.** ~~The URL had been saved on the **QRIS** channel — which is
+> inactive —~~ **CORRECTED 2026-09-24 (Reyner): the QRIS Notify URL is EMPTY, and
+> every save there has always failed with an error toast** - and the walk paid through
+> **VA BCA**, whose channel had no URL at all. So DOKU had nowhere to send it and never
+> tried.
 
 **THE PRODUCTION CONSEQUENCE, and it is the reason this is written down here rather
 than left in a chat message.** "Is the Notification URL registered?" is not a
