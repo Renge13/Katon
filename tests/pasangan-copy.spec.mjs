@@ -127,6 +127,13 @@ function worksheet() {
     const m = BANK_ROW.exec(line);
     if (m) raw.push({ bank: m[1], slot: m[2], value: m[3] });
   }
+  // ── AMENDMENT k's TABLE, READ FROM 2026-09-24 (Prompt AA) ───
+  // Landed unparsed in its rulings commit, the amendment-i precedent; this loop is
+  // in the APPLYING commit, where the two strings reach the bank.
+  for (const line of section('The front door').split(/\r?\n/u)) {
+    const m = BANK_ROW.exec(line);
+    if (m) raw.push({ bank: m[1], slot: m[2], value: m[3] });
+  }
 
   const rows = [];
   const seen = new Map();
@@ -159,12 +166,15 @@ function status() {
   return m[1];
 }
 
-test('THE WORKSHEET IS 36 RULED SLOTS AND ONE DROPPED ONE', () => {
+test('THE WORKSHEET IS 32 RULED SLOTS AND FIVE DROPPED ONES', () => {
   const rows = worksheet();
   // 31 + amendment i's 5 = 36, and the arithmetic is the tripwire on the parser:
   // if the compat-PDF section ever stops being read, this is what says so.
-  assert.equal(rows.length, 36, 'the three ruled tables carry 36 slots between them');
-  assert.equal(new Set(rows.map((r) => `${r.bank}.${r.slot}`)).size, 36, 'and no slot twice');
+  // 36 -> 32 on 2026-09-24: Prompt AA deleted the front door's two-card grid, and
+  // its four SITE_COPY rows are recorded DROPPED rather than removed. 32 -> 34 the
+  // same day: amendment k's two front-door strings.
+  assert.equal(rows.length, 34, 'the four ruled tables carry 34 slots between them');
+  assert.equal(new Set(rows.map((r) => `${r.bank}.${r.slot}`)).size, 34, 'and no slot twice');
 
   const byBank = {};
   for (const r of rows) byBank[r.bank] = (byBank[r.bank] || 0) + 1;
@@ -172,15 +182,18 @@ test('THE WORKSHEET IS 36 RULED SLOTS AND ONE DROPPED ONE', () => {
   // and the total does not. A slot that changes banks must show up here, because
   // "moved, not aliased" is the whole point of the amendment.
   assert.deepEqual(byBank,
-    { SITE_COPY: 4, PASANGAN_COPY: 29, 'SITE_COPY.privasi': 2, CHROME_COPY: 1 });
+    { PASANGAN_COPY: 29, 'SITE_COPY.privasi': 2, CHROME_COPY: 1, SITE_COPY: 2 });
 
   // THE DROP IS AN ASSERTION, NOT A GAP. `paid_title` is recorded as deleted, so
   // the bank must not still carry it - otherwise the row reads as history while
   // the slot is live, which is the exact pair of states a file like this exists
   // to keep from drifting apart.
-  assert.deepEqual(dropped(), ['paid_title'], 'one slot is recorded as dropped');
+  assert.deepEqual(dropped(),
+    ['home_mirror_label', 'home_mirror_sub', 'home_compat_label', 'home_compat_sub', 'paid_title'],
+    'five slots are recorded as dropped, in file order');
   for (const slot of dropped()) {
-    assert.equal(slot in PASANGAN_COPY, false, `${slot} is recorded DROPPED but still in the bank`);
+    assert.equal(slot in PASANGAN_COPY, false, `${slot} is recorded DROPPED but still in PASANGAN_COPY`);
+    assert.equal(slot in SITE_COPY, false, `${slot} is recorded DROPPED but still in SITE_COPY`);
   }
 
   // THREE OTHER TABLES IN THIS FILE ARE NOT RULED VALUES, and each would do
@@ -326,10 +339,11 @@ test('THE SHARED JSX STRINGS ARE THE RULED ONES, IN EVERY FILE THAT CARRIES THEM
   // with the hour picker (Y-2 Addendum 2 item 4) - #112 flagged it as the one
   // "Jamnya saja" no ruling covered and left it, which is why it is here now.
   assert.equal(rows.length, 3, 'the shared table has three ruled strings');
+  // THE UNDER-CTA LINE IS THE STEPPER'S ALONE SINCE 2026-09-24: Home prints
+  // SITE_COPY.home_lock_line (amendment k), which carries "Gratis".
   assert.deepEqual(rows.flatMap((r) => r.files),
-    ['components/BirthFields.jsx', 'components/Funnel.jsx', 'components/PasanganSteps.jsx',
-      'components/Funnel.jsx'],
-    'the under-CTA line is in BOTH products (the compat half lives in the stepper since Y-2 commit 2), and Funnel carries a second ruled string of its own');
+    ['components/BirthFields.jsx', 'components/PasanganSteps.jsx', 'components/Funnel.jsx'],
+    'the under-CTA line is the compat stepper\'s; Funnel carries the season-gate string');
 
   for (const { files, was, now } of rows) {
     for (const file of files) {

@@ -214,8 +214,13 @@ test('PROPOSITION 5: Home is untouched and sets no --k-rise-dur', async () => {
     // The relative shape is unchanged - a tightening step, with the compat card
     // still slotted between the lead and the form. This assertion's job is
     // unchanged too: catching Home's cadence altered as a SIDE EFFECT.
-    assert.deepEqual(delaysIn(ui.host), ['0s', '0.06s', '0.1s', '0.14s', '0.22s'],
-      "Home's cadence: the headline starts the page, the compat card sits between lead and form");
+    // ── 0.1s REMOVED 2026-09-24 (Prompt AA), AND NOTHING WAS RENUMBERED ──
+    // The compat card's Reveal left with the two-card grid. The survivors keep their
+    // delays - this assertion's own rule is that a removal must not renumber its
+    // neighbours - and the new compat LINK sits inside the button's existing 0.22s
+    // Reveal, so it adds no beat of its own.
+    assert.deepEqual(delaysIn(ui.host), ['0s', '0.06s', '0.14s', '0.22s'],
+      "Home's cadence: the headline starts the page, the lead, the form, the button");
 
     for (const n of [ui.host, ...ui.host.querySelectorAll('*')]) {
       const v = n.style?.getPropertyValue?.('--k-rise-dur');

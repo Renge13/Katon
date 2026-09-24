@@ -128,6 +128,7 @@
     "test:pair-reconcile-client": "node --import ./scripts/jsx-register.mjs --test tests/pair-reconcile-client.spec.mjs",
     "test:reading-reconcile": "node --conditions=react-server --test tests/reading-reconcile.spec.mjs",
     "test:reading-reconcile-client": "node --import ./scripts/jsx-register.mjs --test tests/reading-reconcile-client.spec.mjs",
+    "test:front-door": "node --import ./scripts/jsx-register.mjs --test tests/front-door.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs",
     "build:spectral-ttf": "node scripts/build-spectral-ttf.mjs"
   },

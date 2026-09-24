@@ -523,6 +523,14 @@ reported the item absent. This is the fourth project-only instance of the same s
 it for this item: item 4 and PAY-SAFETY-ALL-PURCHASES now live in main's launch cut (§3 item 4, §0b)
 and in `docs/ops/doku-walk.md`'s production-flip gate.
 
+### A prompt letter named "free" from a directory listing, and the launch cut written only to the project (AA §7, 2026-09-21)
+
+Two entries Prompt AA's own ledger section asks for. (1) Cowork drafted AA as "Prompt E" and wrote
+"E was never used; it is free" - asserted from a directory listing. `docs/prompts/F-payments-pricing.md:4`
+reserves E for the compat pair-layer engine; Code found the line and the prompt became AA. A name is a
+code-fact like any other and carries its grep. (2) The launch cut itself was written only into the Claude
+project, the third instance of the project-only failure (the fourth, item 4 on a branch copy, is the
+09-23 entry above). Both are recorded where AA's §7 said they would be, in the commit that builds AA.
 ### 09-23 Cowork advised against Reyner's own A3 cover ruling without reading p2-markup; withdrawn 09-24.
 
 On 2026-09-23 Cowork pushed back on the Complete Edition cover dropping the element (`Matahari - Api` became
@@ -530,6 +538,16 @@ On 2026-09-23 Cowork pushed back on the Complete Edition cover dropping the elem
 once, smaller), recorded in `docs/handoff/p2-markup-2026-09-22.md` row A3, which Cowork did not re-read
 before advising. Withdrawn in the round-1 markup (`docs/handoff/p2-round1-markup-2026-09-24.md`, Code's
 call 3). The shape is the skill's first one: the answer was in the document that owned the decision.
+
+### 09-24 Cowork reported AA §4 ruled; the edit never landed (parallel edits on one file, not re-read). Code caught it.
+
+Cowork's AA prompt reached the tree with a new status line saying "Copy cells in §4 RULED", and a §4
+table whose ruling cells were still empty; the `salesOpen` rule Reyner's message cited was not in the
+file either. Two edits to one file, the second not re-read after the first, so only one survived. Code
+found it by diffing the tree write against `main` (`git diff docs/prompts/AA-front-door.md`: one line
+changed), committed the file as written (`f8f8450`), built AA behind a `PENDING()` sentinel, and held the
+merge. The cells were authored by Code from Reyner's message (`28109c8`). **A status line is a claim about
+the rest of the file; re-read the file after writing it.**
 
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 

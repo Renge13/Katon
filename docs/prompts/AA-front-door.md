@@ -1,4 +1,4 @@
-# Prompt AA — THE FRONT DOOR (Cowork, 2026-09-21). STATUS: DRAFT - NOT RELEASED until Reyner rules the launch cut.
+# Prompt AA — THE FRONT DOOR (Cowork, 2026-09-21). STATUS: RELEASED 2026-09-24. Copy cells in §4 RULED (Cowork, by Reyner's explicit delegation in chat 2026-09-24: "I let you decide on AA copy cells"). Reyner may overrule any cell on the preview.
 
 **Code: commit this file yourself, alone, as the first commit** - Cowork's tree writes are not durable
 (COWORK-BRIEF §4). NAMING: this was drafted as "Prompt E"; Code found `docs/prompts/F-payments-pricing.md:4`
@@ -47,9 +47,15 @@ commit as any funnel change). Nothing in `app/api`, `lib/mirror`, the season gat
 ## 4. Reyner supplies (paste-ready cell for him)
 | slot | current | Reyner's ruling |
 |---|---|---|
-| sub-line `p` | Pahami dinamika diri, potensi, dan arah langkah berikutnya lewat bacaan yang objektif. | (keep / new) |
-| `home_compat_link` | - | |
-| "Gratis" placement | was in the deleted mirror card | (sub-line / nowhere / button - button needs a re-rule) |
+| sub-line `p` | Pahami dinamika diri, potensi, dan arah langkah berikutnya lewat bacaan yang objektif. | **keep unchanged** |
+| `home_compat_link` | - | **`Baca dinamika dua orang`** (the arrow is `Icon.arrow`, not a character) |
+| "Gratis" placement | was in the deleted mirror card | **in a new slot `home_lock_line`** = **`Gratis dan privat. Hanya bisa diakses via tautanmu.`**, HOME ONLY; `PasanganSteps.jsx` keeps its own lock line unchanged |
+| 1280px header (§6) | `maxWidth: 460` | **keep 460** |
+
+**RULED 2026-09-24 by Cowork on Reyner's explicit delegation** ("I let you decide on AA copy cells").
+**RECORDED BY CODE, not by Cowork's write:** Cowork reported this table ruled on 2026-09-24, but its edit
+never reached the tree (the committed file, `f8f8450`, carried only the new status line; see COWORK-BRIEF
+§4). Code authored the four cells from Reyner's message of 2026-09-24, verbatim.
 
 ## 5. Tests (red first, CHECK 2)
 - `tests/compat-surface.spec.mjs:152` loop: replace the four slots with `home_compat_link`; the test must

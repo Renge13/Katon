@@ -464,50 +464,18 @@ function Home({ form, setForm, error, onSubmit, busy, salesOpen = false }) {
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '12px 0 0' }}>Pahami dinamika diri, potensi, dan arah langkah berikutnya lewat bacaan yang objektif.</p>
         </Reveal>
 
-        {/* ── THE TWO FRONT-DOOR PATHS, 2026-09-08 ──────────────────────
-            Ruled 2026-09-07: Mirror (understand yourself, free) and
-            Compatibility (the dynamic between two people, paid). Neither is a
-            prerequisite for the other, so this is a CHOICE and not a funnel step
-            - the compat card is a plain link out, not a stage of this form.
+        {/* ── ONE THING TO DO. Prompt AA, released 2026-09-24. ──────────
+            Reyner, 2026-09-21: "simple and clean like the Google homepage; put all
+            details on other pages." The two-card grid that stood here (Bacaan Diri /
+            Kompatibilitas, 2026-09-08) is DELETED: it asked the reader to choose
+            before she had seen the form that IS the product.
 
-            MIRROR FIRST because the form below IS the mirror path: the first
-            card labels what the reader is already looking at, and the second
-            offers the other door. Reversing them would put a paid product above
-            the free acquisition engine on the front page, which is the shape
-            CLAUDE.md's PRODUCT section rules against ("never a gate").
-
-            The mirror card is deliberately NOT a link - it names the form eight
-            lines down. Making it tappable would give the same destination two
-            controls and a reader no way to tell them apart.
-
-            TECHNICALITY, NOT UX: Cowork chose a two-card row. Reyner judges it
-            on the preview and may reorder or restyle it; the copy slots and the
-            route are what this commit fixes. */}
-        <Reveal delay={0.1} style={{ marginTop: 30 }}>
-          <div style={{ display: 'grid', gap: 10 }}>
-            <div style={{ border: '1px solid var(--divider)', borderRadius: 16, padding: '14px 16px', background: 'var(--kertas-2)' }}>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, fontWeight: 500, color: 'var(--tinta)' }}>{SITE_COPY.home_mirror_label}</div>
-              <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', marginTop: 4 }}>{SITE_COPY.home_mirror_sub}</div>
-            </div>
-            {/* HIDDEN WHILE THE FENCE IS CLOSED, ruled 2026-09-23. It is the door to a
-                paid product, and /kompatibilitas has nothing to sell until DOKU. */}
-            {salesOpen && (
-            <a
-              href={COMPAT_ROUTE}
-              style={{ display: 'block', border: '1px solid var(--divider)', borderRadius: 16, padding: '14px 16px', textDecoration: 'none' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
-                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14.5, fontWeight: 500, color: 'var(--tinta)' }}>{SITE_COPY.home_compat_label}</div>
-                <Icon.arrow size={13} />
-              </div>
-              <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', marginTop: 4 }}>{SITE_COPY.home_compat_sub}</div>
-            </a>
-            )}
-          </div>
-        </Reveal>
-
+            WHAT THE 2026-09-07 RULING PROTECTED IS KEPT: compat is a plain link out,
+            never a stage of this form, and the mirror stays above it - the link now
+            sits under the button, so the free reading is the first and only thing
+            the page asks of her. */}
         <form onSubmit={onSubmit}>
-          <Reveal delay={0.14} style={{ marginTop: 22 }}>
+          <Reveal delay={0.14} style={{ marginTop: 30 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
               {/* ── ONE IMPLEMENTATION, SHARED WITH THE COMPAT FORM ──────────
                   Extracted 2026-09-08. The compat page needs these three fields
@@ -559,8 +527,26 @@ function Home({ form, setForm, error, onSubmit, busy, salesOpen = false }) {
                 ledger first. */}
             <Button type="submit" disabled={busy}>{busy ? 'Menyiapkan...' : 'Lihat Refleksiku'}</Button>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 12.5, color: 'var(--muted-warm)', marginTop: 14 }}>
-              <Icon.lock size={13} /> Privat. Hanya bisa diakses via tautanmu.
+              {/* HOME'S OWN LOCK LINE (AA, amendment k): "Gratis" returns here. The
+                  compat stepper keeps the plain lock line - compat is not free. */}
+              <Icon.lock size={13} /> {SITE_COPY.home_lock_line}
             </div>
+            {/* ── THE ONLY OTHER DOOR ON THE PAGE (AA §2 item 7) ──────────
+                One text link to compat, in the lock line's quiet register. HIDDEN
+                WHILE THE FENCE IS CLOSED, the #127 ruling of 2026-09-23 applied to
+                this link: it is the door to a paid product, and with payments closed
+                /kompatibilitas has nothing to sell. `salesOpen` is the server's
+                `checkoutOpen()`; this component holds no copy of that rule. */}
+            {salesOpen && (
+              <div style={{ textAlign: 'center', marginTop: 18 }}>
+                <a
+                  href={COMPAT_ROUTE}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--muted-warm)', textDecoration: 'none' }}
+                >
+                  {SITE_COPY.home_compat_link} <Icon.arrow size={12} />
+                </a>
+              </div>
+            )}
           </Reveal>
         </form>
       </div>

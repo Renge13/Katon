@@ -112,10 +112,10 @@ promise of the same family: true while access is token-only and no email is sent
 
 | Bank | Slot | Ruled string |
 |---|---|---|
-| SITE_COPY | `home_mirror_label` | `Bacaan Diri` |
-| SITE_COPY | `home_mirror_sub` | `Pahami polamu sendiri. Gratis.` |
-| SITE_COPY | `home_compat_label` | `Kompatibilitas` |
-| SITE_COPY | `home_compat_sub` | `Dinamika dua orang, dibaca dari dua tanggal lahir.` |
+| SITE_COPY | ~~`home_mirror_label`~~ | DROPPED 2026-09-24 by Prompt AA (was `Bacaan Diri`): the two-card grid left the front door. Remove slot and render. |
+| SITE_COPY | ~~`home_mirror_sub`~~ | DROPPED 2026-09-24 by Prompt AA (was `Pahami polamu sendiri. Gratis.`): the two-card grid left the front door. Remove slot and render. |
+| SITE_COPY | ~~`home_compat_label`~~ | DROPPED 2026-09-24 by Prompt AA (was `Kompatibilitas`): the two-card grid left the front door. Remove slot and render. |
+| SITE_COPY | ~~`home_compat_sub`~~ | DROPPED 2026-09-24 by Prompt AA (was `Dinamika dua orang, dibaca dari dua tanggal lahir.`): the two-card grid left the front door. Remove slot and render. |
 | PASANGAN_COPY | `page_title` | `Bacaan Kompatibilitas` |
 | PASANGAN_COPY | `page_lead` | `Peta dinamika dua pola: tarikan, titik gesekan, dan ritme harian kalian.` |
 | PASANGAN_COPY | `includes_1` | `Inti diri kalian berdua dan dinamika hubungannya` |
@@ -160,7 +160,7 @@ the block's primary fact, never a model heading. Chrome strings, PASANGAN_COPY.
 | Where | Was | Ruled string |
 |---|---|---|
 | `components/BirthFields.jsx:119` helper under Jam lahir | `Jamnya saja sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.` | `Tanpa jam tetap akurat, pakai jam jauh lebih presisi.` |
-| `components/Funnel.jsx:534` AND `components/PasanganSteps.jsx:224` under CTA | `Bersifat pribadi. Hanya untukmu.` | `Privat. Hanya bisa diakses via tautanmu.` |
+| `components/PasanganSteps.jsx:224` under CTA (Home dropped out 2026-09-24: it prints `SITE_COPY.home_lock_line`, amendment k) | `Bersifat pribadi. Hanya untukmu.` | `Privat. Hanya bisa diakses via tautanmu.` |
 | `components/Funnel.jsx:664` helper under the season gate's hour | `Jamnya saja sudah cukup. Dengan ini kamu juga mendapat pilar keempat.` | `Jam lahir membuka pilar keempat.` |
 
 The third row is RULED 2026-09-09, after #112 flagged it as the one "Jamnya saja" the
@@ -228,3 +228,19 @@ than a second copy of an old one.
 dates and the two gender words exactly as the report header shows them, and nothing else. This is
 recorded here rather than only in the prompt because it is a RULING about what a reader sees, and the
 next session to look at a sparse cover will want to know the sparseness was chosen.
+
+## The front door - RULED 2026-09-24 (Prompt AA, amendment k)
+
+Ruled by Cowork on Reyner's explicit delegation of 2026-09-24 ("I let you decide on AA copy cells"),
+and recorded here by Code from Reyner's message: Cowork's own edit of AA §4 never reached the tree
+(COWORK-BRIEF §4). The sub-line is kept unchanged; the 1280px header stays 460.
+
+`home_lock_line` REPLACES the hard-coded under-CTA line ON HOME ONLY. It carries the word "Gratis",
+which left the page with the deleted mirror card (`home_mirror_sub`). `components/PasanganSteps.jsx`
+keeps `Privat. Hanya bisa diakses via tautanmu.` unchanged, because compat is not free - so from the
+applying commit on, the shared-JSX row above lists the stepper only.
+
+| Bank | Slot | Ruled string |
+|---|---|---|
+| SITE_COPY | `home_compat_link` | `Baca dinamika dua orang` |
+| SITE_COPY | `home_lock_line` | `Gratis dan privat. Hanya bisa diakses via tautanmu.` |
