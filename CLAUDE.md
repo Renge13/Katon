@@ -138,7 +138,7 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
 17. **Nothing reaches a user without passing Stage-6 post-validation.** LLM output is guilty until
     validated. Module assembly is the always-available floor.
 18. **Paywall is server-gated.** `paid` flips only in the verified provider notification
-    (`settlePair` / `markReadingPaid`, the single door), never from any client path. Paid content is
+    (`settlePair` / `settleReading`, the single door), never from any client path. Paid content is
     imported only by the `/full` route.
 19. Rate-limit per IP/session. No bulk endpoint. No enumerable reading URLs. The real abuse risk is
     content harvesting, not API cost (the entire mirror space costs ~$115 to cache forever).

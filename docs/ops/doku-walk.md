@@ -33,6 +33,34 @@ Then: **Reyner's two production purchases: Rp 19.000 mirror AND Rp 39.000 compat
 ### DOKU notes
 
 - 09-24: QRIS reset applied on sandbox; the QRIS Credential Settings tab is an INPUT form for credentials issued by DOKU Ops (Client ID, Shared Key, Client Secret, MPAN, NMID), blank after the reset.
+- **2026-09-24, sandbox BRN-0285-1789959005561 (Reyner, read in the Back Office):**
+  - **QRIS Notify URL is EMPTY**, and every save there has always failed with an error toast. The
+    2026-09-21 line "The URL had been saved on the QRIS channel" (§ WHY NOTHING WAS DELIVERED) is struck
+    in place and marked CORRECTED - it was a secondhand account of a save, recorded as fact (COWORK-BRIEF §4).
+  - **The VA BCA Payment Notification URL IS saved**: `…feat-doku-checkout…/api/doku/notify`, API 1.1,
+    Aggregator. So walk 2's premise (a URL registered on the channel that took the payment) holds.
+  - **A SNAP banner is shown** in the Back Office. Open question to DOKU.
+  - **Sandbox QRIS Disable was applied twice and still shows Active.** Production QR Payment is NOT
+    activated and was left untouched.
+- **WHICH URL VERIFIES DOKU SANDBOX SIGNATURES TODAY (Code, 2026-09-24, no env var changed).** One
+  hand-signed notification per URL, signed with the sandbox `DOKU_CLIENT_ID` (`BRN-0285...`) /
+  `DOKU_SECRET_KEY` through `lib/doku/signature.js#signComponents` - the function the route verifies
+  with - for a row id that does not exist (`probe-nonexistent-row.<ts>`), so nothing settles:
+
+  ```
+  200  https://katon-git-feat-doku-checkout-renge13s-projects.vercel.app/api/doku/notify  {"received":true}
+  200  https://katon-git-feat-facts-spacing-renge13s-projects.vercel.app/api/doku/notify  {"received":true}
+  503  https://www.katon.app/api/doku/notify  {"error":"doku_not_configured"}
+  ```
+
+  **So: the VA BCA-registered URL verifies sandbox signatures today** (the `feat-doku-checkout` preview
+  alias), and so does any current Preview deployment, because the Preview environment carries the
+  sandbox keys. Production has no DOKU keys and answers 503 by design (gate row c). No env change is
+  needed for sandbox. The probe was a throwaway script (it signs a request the way `tests/doku.spec.mjs`'s
+  `signedRequest` does, POSTs it, prints the status); it is not committed, to keep this PR docs-only.
+  NOTE on the first run: the `feat-facts-spacing` alias answered an HTML page while its deploy was
+  still aliasing; re-run a minute later it verified. A probe against a just-pushed branch needs its
+  deploy to be `success` first.
 
 ---
 
@@ -349,9 +377,11 @@ Answered by Reyner, 2026-09-21, and it is the kind of thing that is obvious once
 and expensive until then:
 
 > **DOKU registers a Notification URL against each PAYMENT CHANNEL, not against the
-> merchant account.** The URL had been saved on the **QRIS** channel — which is
-> inactive — and the walk paid through **VA BCA**, whose channel had no URL at all. So
-> DOKU had nowhere to send it and never tried.
+> merchant account.** ~~The URL had been saved on the **QRIS** channel — which is
+> inactive —~~ **CORRECTED 2026-09-24 (Reyner): the QRIS Notify URL is EMPTY, and
+> every save there has always failed with an error toast** - and the walk paid through
+> **VA BCA**, whose channel had no URL at all. So DOKU had nowhere to send it and never
+> tried.
 
 **THE PRODUCTION CONSEQUENCE, and it is the reason this is written down here rather
 than left in a chat message.** "Is the Notification URL registered?" is not a

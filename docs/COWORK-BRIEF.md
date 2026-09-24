@@ -549,6 +549,15 @@ changed), committed the file as written (`f8f8450`), built AA behind a `PENDING(
 merge. The cells were authored by Code from Reyner's message (`28109c8`). **A status line is a claim about
 the rest of the file; re-read the file after writing it.**
 
+### A secondhand account of a Back Office save was recorded as fact, and Cowork repeated it on 09-24 before Reyner corrected it.
+
+`docs/ops/doku-walk.md` (§ WHY NOTHING WAS DELIVERED, 2026-09-21) said "The URL had been saved on the
+QRIS channel". Nobody had looked: it was an account of a save, and on 2026-09-24 Reyner read the sandbox
+Back Office (BRN-0285-1789959005561) and found the QRIS Notify URL EMPTY, with every save there always
+failing with an error toast. Cowork repeated the sentence on 09-24 as a premise before the correction.
+Struck in place, marked CORRECTED. **A Back Office state is a fact only when someone read it on the
+screen, and the entry says who and when.**
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
