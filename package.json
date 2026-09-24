@@ -131,6 +131,7 @@
     "test:reading-reconcile-client": "node --import ./scripts/jsx-register.mjs --test tests/reading-reconcile-client.spec.mjs",
     "test:front-door": "node --import ./scripts/jsx-register.mjs --test tests/front-door.spec.mjs",
     "test:voice-cache": "node --conditions=react-server --test tests/voice-cache.spec.mjs",
+    "test:voice-prompt": "node --test tests/voice-prompt.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs",
     "build:spectral-ttf": "node scripts/build-spectral-ttf.mjs"
   },
