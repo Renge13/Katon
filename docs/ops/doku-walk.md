@@ -55,7 +55,7 @@ exercised on a production row:
 | | option | what it takes |
 |---|---|---|
 | A | **Vercel Deployment Protection on Preview** | Enabled for Preview, then **verified on an OLD permanent URL**, not only on a fresh build: whether it covers deployments built before it was switched on is the thing to prove |
-| B | **Delete every Preview deployment built before 2026-09-25 11:45Z, plus the `ops/doku-walk` branch var** | The general Preview `PAYMENTS_PROVIDER` has been `closed` since then: the 07:24Z build still had the door open and the 11:45Z build had it closed. Deleting only the branch-aliased deployments is NOT enough, because each older deployment keeps its own URL. After the var is deleted, `ops/doku-walk` needs a new build (an empty commit) or its current deployment deleted too, since an env change reaches only new builds |
+| B | **Delete every Preview deployment built before 2026-09-25 11:45Z, plus the `ops/doku-walk` branch var** | The general Preview `PAYMENTS_PROVIDER` has been `closed` since then: the 07:24Z build still had the door open and the 11:45Z build had it closed. Deleting only the branch-aliased deployments is NOT enough, because each older deployment keeps its own URL. The var itself is deleted under EVERY option (below) |
 | C | **A separate Preview DB** | THE DEFERRED REGISTER row "A SEPARATE PREVIEW DATABASE" (migrations 0001-0010 applied there by hand first, Preview Supabase vars re-pointed) |
 
 **Verification, the same whichever option is chosen:**
@@ -81,10 +81,15 @@ the template).
 Vercel steps** (deleting deployments, the branch var, or turning on protection) and runs the
 verification. Without one, Reyner does them in the dashboard and Code runs the verification.
 
-**ONE ORDERING POINT FOR FLIP DAY, flagged rather than resolved.** The 2026-09-25 Cowork ruling (2)
-deletes the `ops/doku-walk` branch var AFTER the two production purchases. Option (B) deletes it BEFORE
-sales reopen, and the purchases come after the reopen. Under (B) the var goes first. Under (A) or (C)
-ruling (2) stands as written.
+**THE `ops/doku-walk` BRANCH VAR IS DELETED ON FLIP DAY, BEFORE SALES REOPEN, UNDER ANY GATE-i OPTION.**
+Settled 2026-09-25 by Cowork (rule 9). **It supersedes the 2026-09-25 ruling (2)'s "after the two
+production purchases"**, recorded in `docs/PROGRESS.md` (INTERIM REGISTER, the shared-database row).
+Why the order does not matter to the purchases: Reyner's two acceptance purchases run on PRODUCTION and
+never use that preview. And until the var is gone, its build can settle a production row against a
+sandbox payment, which is the thing gate i exists to rule out. After the var is deleted, the
+`ops/doku-walk` build still carries `doku`, because an env change reaches only new builds. Either push an
+empty commit to it, or delete its current deployment. Under (B) that deployment goes with the rest; under
+(A) or (C) it is one extra step.
 
 **GATE b AMENDED, 2026-09-25 (Reyner), and the risk it accepts.** Four sandbox payments reached SUCCESS
 at DOKU with zero notification attempts (walks 1-4; for walk 4 Reyner read the Runtime Logs of all
