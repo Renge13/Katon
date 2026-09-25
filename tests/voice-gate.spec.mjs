@@ -79,11 +79,12 @@ test('D2: a required point no block cites is SOFT', () => {
   assert.equal(d2.severity, 'soft');
 });
 
-test('D3: hanzi, a typographic dash, and a percentage are each HARD', () => {
+// A typographic dash was HARD here until 1.32.0; fix (ii) normalises it instead,
+// and the FIX (ii) tests below assert that.
+test('D3: hanzi outside a bracket and a percentage are each HARD', () => {
   const sj = v2(A);
   for (const [sentence, check] of [
     ['Pilar harimu 丙子 berdiri tegak.', 'v2.d3_hanzi'],
-    ['Ini penting — sangat penting.', 'v2.d3_typography'],
     ['Api-mu mengisi 27,5% bagan.', 'v2.d3_score'],
   ]) {
     const r = validateRenderingV2(plant(draftFor(sj), sentence), sj);
@@ -173,6 +174,28 @@ test('FIX (i): a pair brackets BOTH archetypes and leaves the ruled opening unto
   assert.deepEqual(checks(r), [], JSON.stringify(checks(r)));
 });
 
+// ── FIX (ii), ROUND 3: TYPOGRAPHY IS NORMALISED, NOT REJECTED (1.32.0) ──
+// Round 2: 6 of 22 v2 drafts rejected on typography, every run-2 hit U+2014, and
+// chart 1 floored on it. Each character has one keyboard equivalent.
+test('FIX (ii): an em-dash, en-dash, curly quotes and an ellipsis are normalised and served', () => {
+  const sj = v2(A);
+  const r = validateRenderingV2(plant(draftFor(sj),
+    'Rasanya ‘hampir pas’—seolah selalu ada yang kurang – kata orang “nanti saja”…'), sj);
+  assert.deepEqual(checks(r), [], JSON.stringify(checks(r)));
+  assert.ok(prose(r).includes('Rasanya \'hampir pas\' - seolah selalu ada yang kurang - kata orang "nanti saja"...'),
+    prose(r).slice(-140));
+  assert.equal(/[—–‘’“”…]/u.test(prose(r)), false);
+});
+
+test('FIX (ii): a hanzi-only bracket is removed; hanzi outside a bracket still rejects', () => {
+  const sj = v2(A);
+  const r = validateRenderingV2(plant(draftFor(sj), 'Kamu memegang Aspek Pengelola (正財) di Pilar Kerja.'), sj);
+  assert.deepEqual(checks(r), [], JSON.stringify(checks(r)));
+  assert.ok(prose(r).includes('Kamu memegang Aspek Pengelola di Pilar Kerja.'), prose(r).slice(-120));
+  const bare = validateRenderingV2(plant(draftFor(sj), 'Pilar harimu 丙子 berdiri tegak.'), sj);
+  assert.ok(checks(bare).includes('v2.d3_hanzi'), 'hanzi outside a bracket is still D3');
+});
+
 // ── THE ROUTE: a v2 JSON is judged by the v2 gate, a v1 JSON by v1's ──
 // End to end through renderReading, with the provider stubbed. The same draft -
 // the floor's own blocks plus one slang sentence - is ACCEPTED under v2 and floors
@@ -197,7 +220,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.31.0');
+    assert.equal(onV2.stage6_version, '1.32.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
