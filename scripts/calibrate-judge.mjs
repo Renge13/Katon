@@ -40,13 +40,9 @@ import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { scrubInternal } from '../lib/render/payload.js';
 import { judgeRendering } from '../lib/validate/judge.js';
 
-const ENV = '.env.local';
-if (fs.existsSync(ENV)) {
-  for (const line of fs.readFileSync(ENV, 'utf8').split(/\r?\n/)) {
-    const m = /^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/.exec(line);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
-  }
-}
+import { sample, plant, loadEnvLocal, PRICES } from './voice-v2-samples.mjs';
+
+loadEnvLocal();
 const arg = (name, fallback = null) => {
   const i = process.argv.indexOf(`--${name}`);
   return i > -1 ? (process.argv[i + 1] ?? true) : fallback;
@@ -54,46 +50,7 @@ const arg = (name, fallback = null) => {
 const RUNS = Number(arg('runs', 3));
 const OUT = arg('out', null);
 
-// ── the worksheet samples ──────────────────────────────────
-const SHEET = fs.readFileSync('docs/content/voice-v2-worksheet-2026-09-24.md', 'utf8');
-function sample(tag) {
-  const start = SHEET.indexOf(`### ${tag}.`);
-  if (start < 0) throw new Error(`worksheet: no section ${tag}`);
-  const after = SHEET.indexOf('**After', start);
-  const lines = SHEET.slice(after).split(/\r?\n/).slice(1);
-  const quoted = [];
-  let begun = false;
-  for (const line of lines) {
-    if (line.startsWith('>')) { begun = true; quoted.push(line.replace(/^>\s?/, '')); } else if (begun) break;
-  }
-  const blocks = [];
-  let penutup = null;
-  let current = null;
-  for (const line of quoted) {
-    const h = /^\*\*(.+)\*\*$/.exec(line.trim());
-    if (h) {
-      if (h[1] === 'Penutup') { penutup = ''; current = null; continue; }
-      current = { heading: h[1], text: '' };
-      blocks.push(current);
-      continue;
-    }
-    if (penutup !== null && current === null) { penutup += `${line}\n`; continue; }
-    if (current) current.text += `${line}\n`;
-  }
-  const tidy = (s) => s.replace(/\n{3,}/g, '\n\n').trim();
-  return {
-    blocks: blocks.map((b) => ({ heading: b.heading, text: tidy(b.text) })),
-    penutup: penutup === null ? '' : tidy(penutup),
-  };
-}
-function plant(rendered, from, to) {
-  const all = JSON.stringify(rendered);
-  if (!all.includes(JSON.stringify(from).slice(1, -1))) throw new Error(`seed anchor not found: ${from.slice(0, 60)}`);
-  return {
-    blocks: rendered.blocks.map((b) => ({ ...b, text: b.text.split(from).join(to) })),
-    penutup: rendered.penutup.split(from).join(to),
-  };
-}
+// ── the worksheet samples: scripts/voice-v2-samples.mjs ─────
 
 // ── the charts (worksheet §5: chart A, and S4's pair A + B) ──
 const A = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' });
@@ -141,12 +98,6 @@ const CASES = [
 ];
 if (JSON.stringify(CASES.at(-1).rendered).includes('bukti berikutnya')) throw new Error('J4 seed did not drop the cost');
 
-// Per 1M tokens, paid Standard tier, prompts <= 200k (ai.google.dev/gemini-api/docs/pricing,
-// read 2026-09-24). Thought tokens bill as output.
-const PRICES = {
-  'gemini-3.1-flash-lite': { in: 0.25 / 1e6, out: 1.5 / 1e6 },
-  'gemini-3.1-pro-preview': { in: 2.0 / 1e6, out: 12.0 / 1e6 },
-};
 /** Is this finding the planted violation? */
 function hitsPlant(c, f) {
   if (f.class !== c.planted) return false;
