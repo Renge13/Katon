@@ -10,6 +10,9 @@
 // wiring. Since 1.29.0 the judge is ADVISORY (Reyner, 2026-09-24): it runs, its
 // findings are stored with the spec's severity kept as `judge_severity`, and it
 // never rejects, regenerates or floors. D1-D4 alone gate v2. v1 never calls it.
+// SINCE 1.33.0 J1 ALONE GATES (round 3, after scripts/calibrate-j1.mjs passed):
+// a J1 regenerates once with the quote fed back, a second J1 floors, and a judge
+// that cannot run floors too (J1 unchecked is not a pass). J2-J4 stay advisory.
 // ============================================================
 
 import assert from 'node:assert/strict';
@@ -61,7 +64,7 @@ const MALFORMED = { sentence: 'Kamu tenang.', class: 'J1', grounding_considered:
  */
 function stub(sj, script) {
   const draft = assembleFallback(sj);
-  const calls = { writer: 0, judge: 0 };
+  const calls = { writer: 0, judge: 0, writerBodies: [] };
   globalThis.fetch = async (_url, opts) => {
     const body = JSON.parse(opts.body);
     const isJudge = body.systemInstruction.parts[0].text === JUDGE_PROMPT;
@@ -72,6 +75,7 @@ function stub(sj, script) {
       return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ findings: reply }) }] } }] }), { status: 200 });
     }
     calls.writer += 1;
+    calls.writerBodies.push(opts.body);
     return new Response(JSON.stringify({
       candidates: [{ content: { parts: [{ text: JSON.stringify({ blocks: draft.blocks, penutup: 'Penutup yang cukup panjang untuk sebuah bacaan yang utuh.' }) }] } }],
     }), { status: 200 });
@@ -92,14 +96,41 @@ test('A CLEAN JUDGE: served, the review is stored with the render', async () => 
   assert.ok(row.review, 'the review is on the cached row');
 });
 
-test('ADVISORY: a J1 finding is stored at flag, keeps its spec severity, and rejects nothing', async () => {
+test('J1 GATES (1.33.0): a J1 regenerates ONCE with the quoted finding fed back; a clean retry is served', async () => {
+  const sj = v2();
+  const calls = stub(sj, [[J1], []]);
+  const out = await render(sj);
+  assert.equal(out.source, 'gemini');
+  assert.equal(calls.writer, 2, 'one regeneration');
+  assert.equal(calls.judge, 2);
+  assert.ok(calls.writerBodies[1].includes(J1.sentence), 'the second writer call quotes the J1 sentence');
+  assert.ok(calls.writerBodies[1].includes(J1.unsupported), 'and what was unsupported');
+  assert.equal(calls.writerBodies[0].includes(J1.sentence), false, 'the first did not');
+  const rejected = out.review.rejected_drafts[0].findings.find((f) => f.check === 'v2.judge_j1');
+  assert.equal(rejected.severity, 'hard', 'the rejection is stored with the render');
+});
+
+test('J1 GATES (1.33.0): a second J1 serves the floor', async () => {
   const sj = v2();
   const calls = stub(sj, [[J1]]);
   const out = await render(sj);
-  assert.equal(out.source, 'gemini', 'served: the judge does not reject');
-  assert.equal(calls.writer, 1, 'no regeneration spent on a judge finding');
+  assert.equal(out.source, 'module_assembly');
+  assert.equal(calls.writer, 2, 'the one v2 regeneration, then the floor');
+});
+
+test('ADVISORY STILL: a J2 finding is stored at flag, keeps its spec severity, and rejects nothing', async () => {
+  const sj = v2();
+  const J2 = {
+    sentence: 'Bintang Penolong muncul karena Tanda Kekosongan.', class: 'J2',
+    grounding_considered: ['badge_天乙貴人', 'void_stack_month'], supported: 'both sit at Pilar Kerja',
+    unsupported: 'the causal link',
+  };
+  const calls = stub(sj, [[J2]]);
+  const out = await render(sj);
+  assert.equal(out.source, 'gemini', 'served: J2 does not reject');
+  assert.equal(calls.writer, 1, 'no regeneration spent on J2');
   const f = out.review.judge[0];
-  assert.equal(f.check, 'v2.judge_j1');
+  assert.equal(f.check, 'v2.judge_j2');
   assert.equal(f.severity, 'flag');
   assert.equal(f.judge_severity, 'hard');
 });
@@ -129,14 +160,14 @@ test('A MALFORMED FINDING (no grounding shown) IS KEPT AND NEVER ACTED ON', asyn
   assert.deepEqual(out.review.judge, []);
 });
 
-test('A JUDGE THAT CANNOT RUN IS RECORDED AND CHANGES NOTHING: D1-D4 passed, so it serves', async () => {
+test('A JUDGE THAT CANNOT RUN IS NOT A PASS (1.33.0): J1 was never checked, so it regenerates, then floors', async () => {
   const sj = v2();
   const calls = stub(sj, ['DOWN']);
   const out = await render(sj);
-  assert.equal(out.source, 'gemini');
-  assert.equal(calls.writer, 1);
-  assert.equal(out.review.judge[0].check, 'v2.judge_unavailable');
-  assert.equal(out.review.judge[0].severity, 'flag');
+  assert.equal(out.source, 'module_assembly');
+  assert.equal(calls.writer, 2);
+  const rejected = out.review?.rejected_drafts ?? null;
+  assert.equal(rejected, null, 'the floor carries no review');
 });
 
 test('v1 NEVER CALLS THE JUDGE', async () => {
