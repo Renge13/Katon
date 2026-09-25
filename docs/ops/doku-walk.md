@@ -17,10 +17,10 @@ Items a-d are the four-item gate as ruled in the launch cut (`docs/handoff/launc
 not carry them, so this section ADDS the gate here rather than amending an existing one. e-h were
 added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
 
-| | gate | status 2026-09-23 | proof |
+| | gate | status (dated per row since 2026-09-25; the rest as of 2026-09-23) | proof |
 |---|---|---|---|
-| a | QRIS active for production | OPEN (DOKU ticket 1149053) | DOKU Back Office |
-| b | one delivered notification captured | OPEN - DOKU has delivered none, on any walk (§ WALK 2 and 3 below) | the `DOKU_CAPTURE` log line |
+| a | QRIS active for production | OPEN, **SUBMITTED 2026-09-24 17:05 WIB** (Reyner): production QRIS activation, brand "Katon", MCC **5817**. Back Office status **UPDATING** (under DOKU review). DOKU ticket 1149053. See § GATE a below | DOKU Back Office |
+| b | one delivered notification captured | OPEN - DOKU has delivered none, on any walk (§ WALK 2 and 3 below). **2026-09-25: sandbox QRIS is now ACTIVE; the QRIS walk is blocked on one Preview env value and one sandbox Back Office field** (§ GATE b, 2026-09-25) | the `DOKU_CAPTURE` log line |
 | c | production keys, `PAYMENTS_PROVIDER=doku`, no `DOKU_SANDBOX` | OPEN - production has no `PAYMENTS_PROVIDER` and no DOKU vars | Vercel env (Reyner) |
 | d | notify URL set on the production QRIS channel | OPEN | production Back Office (Reyner) |
 | e | #129 merged (pair reconcile on load) | **DONE**, `91a21e8` | `gh pr view 129` |
@@ -61,6 +61,85 @@ Then: **Reyner's two production purchases: Rp 19.000 mirror AND Rp 39.000 compat
   NOTE on the first run: the `feat-facts-spacing` alias answered an HTML page while its deploy was
   still aliasing; re-run a minute later it verified. A probe against a just-pushed branch needs its
   deploy to be `success` first.
+
+### GATE a, 2026-09-24 (Reyner, recorded 2026-09-25 from Prompt AC)
+
+Production QRIS activation was **submitted 2026-09-24 17:05 WIB**, brand **"Katon"**, MCC **5817**
+("Barang Digital - Aplikasi, selain game"). DOKU's Back Office also shows a 5816 row carrying the same
+label; **that label is a duplicate typo on DOKU's side**: standard MCC 5816 is digital goods, GAMES,
+and 5817 is digital goods, applications excluding games, which is what Katon is. Back Office status:
+**UPDATING** (under DOKU review). **This is Reyner's account of a Back Office screen, recorded as his
+report**, not something this repo can read (COWORK-BRIEF §4, the 2026-09-24 secondhand-save entry).
+
+### GATE b, 2026-09-25: SANDBOX QRIS IS ACTIVE; THE WALK IS BLOCKED ON TWO SETTINGS (Code)
+
+Reyner filled the sandbox QRIS credentials in the Back Office after DOKU's Disable procedure (Prompt AC
+§A). Then:
+
+**1. `npm run probe:doku` (2026-09-25T05:52:07Z): QRIS WORKS ON SANDBOX.** Every call returned 200 with a
+QRIS Checkout session, where every call on 2026-09-21 returned `PAYMENT CHANNEL IS INACTIVE`:
+
+```
+── 2.1 + 2.3  QRIS, no customer block
+status      200
+body        {"message":["SUCCESS"],"response":{"order":{"amount":"39000","invoice_number":"probe-mugjn23k-nocust",...},
+            "payment":{"payment_method_types":["QRIS"],"payment_due_date":60,"token_id":"22c1e6c4...",
+            "url":"https://staging.doku.com/checkout-link-v2/22c1e6c4...",...},
+            "additional_info":{"origin":{"product":"CHECKOUT","system":"mid-jokul-checkout-system","apiFormat":"JOKUL","source":"direct"}},...}
+── 2.2       first use of an invoice_number   status 200  session_id ec1a2d9a...
+── 2.2       SAME invoice_number again        status 200  session_id ca1c046c...
+── 2.2 verdict
+A SECOND SESSION WAS CREATED. Keep the suffix - two live sessions for one pair is exactly what it exists to keep apart.
+```
+
+This answers three of Part 3's "Still open" rows at once, and this time the verdict is earned: the
+calls succeeded, so the 2.2 line is about repeated invoice numbers and not about an inactive channel
+(the failure Part 2's 2.1-2.3 section records). **2.1** QRIS is enabled on the sandbox account.
+**2.2** A repeated `invoice_number` creates a SECOND live session, so the suffix stays for a measured
+reason now. **2.3** QRIS needs no `customer` block. `order.amount` came back as the STRING `"39000"`
+again, which `amountNumber` exists for.
+
+**2. The walk stopped at the first product call, because Preview is still on `mock`.** Measured, not
+recalled, on the latest main-code preview (`katon-git-docs-voice-v2-loose-gate-...`, main at `7827746`):
+
+```
+POST /api/mirror                          -> token IKWSWkN5TKqBiOse6hHAu
+GET  /api/deliver/IKWSWkN5TKqBiOse6hHAu   -> {"paid":false,...}
+POST /api/pay/IKWSWkN5TKqBiOse6hHAu {"sku":"artifact"}   (05:53:59Z)
+     -> {"ok":true,"pending":true,"invoiceUrl":"/r/IKWSWkN5TKqBiOse6hHAu?bayar=mock","mock":true}
+```
+
+`paymentsProvider()` answered `mock`, so no DOKU session exists for this reading and nothing was paid.
+Prompt AC §A.3: "If anything needs an env change or a Back Office change, NAME IT for Reyner and stop.
+Do not work around it." A hand-built QRIS session outside `/api/pay` would not store the invoice on the
+row, so neither `settleReading`'s amount check nor reconcile-on-load could be tested by it. That is the
+workaround the ruling rules out, so it was not built.
+
+**3. THE TWO CHANGES, both Reyner's:**
+
+| # | where | change | why |
+|---|---|---|---|
+| 1 | Vercel, **Preview** scope | `PAYMENTS_PROVIDER` = `doku` (it is `mock`). Keep the sandbox `DOKU_CLIENT_ID` / `DOKU_SECRET_KEY` / `DOKU_SANDBOX`, and confirm `DOKU_CAPTURE=1` is still set. **Production untouched.** Then redeploy `ops/doku-walk` | `POST /api/pay` creates a DOKU session only when the provider is `doku`. While it is set, every preview's checkout goes to the DOKU sandbox (no money) instead of the mock page |
+| 2 | DOKU **sandbox** Back Office, **QRIS** channel | Notification URL = `https://katon-git-ops-doku-walk-renge13s-projects.vercel.app/api/doku/notify` | The QRIS Notify URL was EMPTY on 2026-09-24 and every save failed with an error toast. The VA BCA URL points at `feat-doku-checkout`, a build that settles readings inline, not through `settleReading` (`git show 33a9ec5:lib/doku/notify.js`), so a delivery there would not test the path gate b is about. If the save still fails, that is the question for DOKU |
+
+`ops/doku-walk` is main's tree plus one empty commit (`d84a3c8`), pushed 2026-09-25 so the alias exists
+and runs current code. Vercel built no Preview for the branch while its head was `main`'s own
+commit. It is not for merging. **The URL is ready to register**, measured 2026-09-25 with a throwaway
+script built the same way as the 2026-09-24 one above (a hand-signed notification for a row id that
+does not exist, so nothing settles), plus a wrong-secret control:
+
+```
+POST (unsigned {})                  401
+06:19:57Z  sandbox secret           200  {"received":true}
+06:19:57Z  wrong secret (control)   401  {"error":"invalid signature"}
+```
+
+**4. What the walk will report, once both are set** (Prompt AC §A.2): a Rp 19.000 mirror bought through
+`/api/pay` on the `ops/doku-walk` alias and paid in the sandbox QRIS simulator. Then, in this order:
+whether the notification was delivered (the `[doku][capture]` lines in that deployment's Runtime Logs,
+which Reyner reads; Code cannot read Vercel logs); whether `settleReading` flipped the row, read from
+`GET /api/deliver/<id>` BEFORE the page is opened, because the page's on-load reconcile is a second door
+and would hide which one fired; and only then, whether reconcile-on-load agrees.
 
 ---
 
@@ -538,9 +617,9 @@ improvise around an inactive channel.**
 
 | # | question | how it gets answered |
 |---|---|---|
-| 2.1 | Is QRIS enabled on the account? | **ANSWERED: NO.** `PAYMENT CHANNEL IS INACTIVE`. DOKU has to switch it on. |
-| 2.2 | What does a repeated `invoice_number` do? | unanswered — re-run `probe:doku` once QRIS is live. The suffix stays meanwhile. |
-| 2.3 | Is `customer` required for QRIS? | unanswered by probe; docs say optional and `createCheckout` omits it without an email |
+| 2.1 | Is QRIS enabled on the account? | **ANSWERED: NO.** `PAYMENT CHANNEL IS INACTIVE`. DOKU has to switch it on. **2026-09-25: YES on sandbox** (probe 200, § GATE b 2026-09-25). Production: gate a |
+| 2.2 | What does a repeated `invoice_number` do? | unanswered — re-run `probe:doku` once QRIS is live. The suffix stays meanwhile. **ANSWERED 2026-09-25: a SECOND session is created**; the suffix stays |
+| 2.3 | Is `customer` required for QRIS? | unanswered by probe; docs say optional and `createCheckout` omits it without an email. **ANSWERED 2026-09-25: NOT required** (200 with no customer block) |
 | 2.4 | The exact QRIS-on-Checkout notification body | the walk, once QRIS is enabled — or a labelled VA capture, if Reyner says yes |
 
 ### What a sandbox walk will NOT prove
