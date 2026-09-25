@@ -186,6 +186,15 @@ and would hide which one fired; and only then, whether reconcile-on-load agrees.
    after the HMAC passes, and a refusal logs its reason. Both are in the Runtime Logs of the deployment
    above, from 06:50Z, and **Reyner reads them**. Code has no Vercel log access, and the browser pane is
    not signed in to Vercel.
+
+   **READ BY REYNER, 2026-09-25: DOKU SENT NO NOTIFICATION.** Vercel Runtime Logs, the last hour,
+   ALL deployments. The only three `/api/doku/notify` requests are Code's own probes at 13:19 WIB
+   (06:19Z, User-Agent `node`, the build before the empty commit): `missing_header` 401,
+   `probe-nonexistent-row` 200, `bad_signature` 401. They match the three lines under change 2 above.
+   **Nothing reached `/api/doku/notify` on any host after the 13:50:41 WIB payment.** So it was not
+   refused: nothing was sent. That is four sandbox payments DOKU recorded as SUCCESS with zero
+   notification attempts (walks 1-3 on VA, this one on Checkout QRIS). The reconcile line that
+   delivered the product, 13:55:18 WIB: `[reconcile] ... status=SUCCESS paid=true reason=ok`.
 4. **Reconcile-on-load agrees with DOKU and delivered.** Opening `/r/eJm6p6PjG8f_0eridE39x` made exactly
    one `POST /api/deliver/<id>/reconcile` (answer `{"paid":true}`), then:
    ```
