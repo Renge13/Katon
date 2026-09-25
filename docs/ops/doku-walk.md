@@ -20,7 +20,7 @@ added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
 | | gate | status (dated per row since 2026-09-25; the rest as of 2026-09-23) | proof |
 |---|---|---|---|
 | a | QRIS active for production | OPEN, **SUBMITTED 2026-09-24 17:05 WIB** (Reyner): production QRIS activation, brand "Katon", MCC **5817**. Back Office status **UPDATING** (under DOKU review). DOKU ticket 1149053. See § GATE a below | DOKU Back Office |
-| b | one delivered notification captured | OPEN - DOKU has delivered none, on any walk (§ WALK 2 and 3 below). **2026-09-25: sandbox QRIS is now ACTIVE; the QRIS walk is blocked on one Preview env value and one sandbox Back Office field** (§ GATE b, 2026-09-25). **2026-09-25, WALK 4: a real sandbox QRIS payment of Rp 19.000 reached SUCCESS at DOKU, and NO notification settled the row in 4 minutes; reconcile-on-load delivered it** (§ WALK 4). Whether `/api/doku/notify` received anything at all is in that deployment's Runtime Logs, which Code cannot read | the `DOKU_CAPTURE` log line |
+| b | ~~one delivered notification captured~~ **AMENDED by Reyner 2026-09-25:** reconcile-on-load proven on a real sandbox Checkout QRIS payment, AND re-proven on both production purchases (Rp 19.000 mirror + Rp 39.000 compat) | **SANDBOX HALF DONE 2026-09-25**: invoice `eJm6p6PjG8f_0eridE39x.muglimjz`, reconcile log 13:55:18 WIB `[reconcile] ... status=SUCCESS paid=true reason=ok` (§ WALK 4). **PRODUCTION HALF OPEN**: it is Reyner's two acceptance purchases below. The notification question stays open with DOKU (ticket 1149053) and **no longer blocks launch**. History of the old wording: DOKU has delivered none on any walk (§ WALK 2, 3 and 4) | walk 4 + the `[reconcile]` line on each production purchase |
 | c | production keys, `PAYMENTS_PROVIDER=doku`, no `DOKU_SANDBOX` | OPEN - production has no `PAYMENTS_PROVIDER` and no DOKU vars | Vercel env (Reyner) |
 | d | notify URL set on the production QRIS channel | OPEN | production Back Office (Reyner) |
 | e | #129 merged (pair reconcile on load) | **DONE**, `91a21e8` | `gh pr view 129` |
@@ -29,6 +29,17 @@ added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
 | h | item 4 and PAY-SAFETY-ALL-PURCHASES on main | **DONE**, `186b827` (#131: launch cut §3 item 4 and §0b) | `grep -n "PAY-SAFETY-ALL-PURCHASES" docs/handoff/launch-cut-2026-09-21.md` |
 
 Then: **Reyner's two production purchases: Rp 19.000 mirror AND Rp 39.000 compat (ruled 2026-09-24).**
+Since the 2026-09-25 amendment each one must also show reconcile-on-load settling it: its `[reconcile]
+... status=SUCCESS paid=true reason=ok` line, or the row already paid if a notification did arrive.
+
+**GATE b AMENDED, 2026-09-25 (Reyner), and the risk it accepts.** Four sandbox payments reached SUCCESS
+at DOKU with zero notification attempts (walks 1-4; for walk 4 Reyner read the Runtime Logs of all
+deployments). Reconcile-on-load delivered walk 4. So launch no longer waits on DOKU's notification:
+the notification question stays open with DOKU (ticket 1149053). **Residual risk, accepted:** a buyer
+who pays and never returns to her page stays unpaid until she does. Two things mitigate it:
+`auto_redirect` sends her back to Katon's page after paying, which runs the reconcile, and the
+`pending_body` contact line gives her `hello@katon.app`. Recorded in `docs/handoff/launch-cut-2026-09-21.md`
+§0c.
 
 ### DOKU notes
 
