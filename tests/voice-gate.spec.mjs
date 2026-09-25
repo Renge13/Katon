@@ -127,6 +127,52 @@ test('LOGGED, NOT GATING: a style.* hit rejects under v1 and passes under v2', (
   assert.ok(r.findings.some((f) => f.check.startsWith('style.') && f.severity === 'flag'), 'but it is logged');
 });
 
+// ── FIX (i), ROUND 3: THE ARCHETYPE BRACKET IS THE ENGINE'S (1.31.0) ──
+// Round 2's served v2 readings wrote "Matahari (Bing)", "Embun (Water)", and
+// "Matahari (丙)" floored PZ0t on D3. The bracket now comes from
+// core.archetype_name_en, before any check runs.
+/** Put a sentence at the START of the first block, so it is the first prose mention. */
+const lead = (draft, sentence) => {
+  draft.blocks[0].text = `${sentence} ${draft.blocks[0].text}`;
+  return draft;
+};
+const prose = (r) => [...r.normalized.blocks.map((b) => b.text), r.normalized.penutup].join('\n');
+
+test('FIX (i): a wrong archetype bracket is replaced with core.archetype_name_en', () => {
+  const sj = v2(A);
+  assert.equal(sj.core.archetype_name_en, 'The Sun', 'precondition');
+  const r = validateRenderingV2(lead(draftFor(sj), 'Kamu adalah Matahari (Bing), unsur Api.'), sj);
+  assert.ok(prose(r).startsWith('Kamu adalah Matahari (The Sun), unsur Api.'), prose(r).slice(0, 80));
+  assert.equal(prose(r).includes('(Bing)'), false);
+});
+
+test('FIX (i): a hanzi archetype bracket no longer rejects on D3 - the bracket is the engine\'s', () => {
+  const sj = v2(A);
+  const r = validateRenderingV2(lead(draftFor(sj), 'Kamu adalah Matahari (丙), unsur Api.'), sj);
+  assert.deepEqual(checks(r), [], JSON.stringify(checks(r)));
+  assert.ok(prose(r).startsWith('Kamu adalah Matahari (The Sun)'));
+});
+
+test('FIX (i): a square-bracket gloss after the archetype is replaced, not doubled; an element keeps its own', () => {
+  const sj = v2(A);
+  const r = validateRenderingV2(lead(draftFor(sj), 'Kamu adalah Api [Fire] dengan arketipe Matahari [Sun].'), sj);
+  assert.ok(prose(r).startsWith('Kamu adalah Api [Fire] dengan arketipe Matahari (The Sun).'), prose(r).slice(0, 90));
+});
+
+test('FIX (i): a pair brackets BOTH archetypes and leaves the ruled opening untouched', () => {
+  const pj = buildPairSemantic(A, B, { voice: 'v2' });
+  assert.deepEqual([pj.core.a.archetype_name_en, pj.core.b.archetype_name_en], ['The Sun', 'The Mountain'], 'precondition');
+  const d = draftFor(pj);
+  const opening = { fact_ids: ['p0_opening'], heading: '', text: 'Ini adalah bacaan tentang dua individu: Matahari dan Gunung.' };
+  const body = lead({ ...d, blocks: d.blocks.filter((b) => !(b.fact_ids || []).includes('p0_opening')) },
+    'Kamu adalah Matahari (Bing). Dia adalah Gunung (戊).');
+  const r = validateRenderingV2({ ...body, blocks: [opening, ...body.blocks] }, pj);
+  assert.equal(r.normalized.blocks[0].text, opening.text, 'the opening is byte-identical');
+  assert.ok(r.normalized.blocks[1].text.startsWith('Kamu adalah Matahari (The Sun). Dia adalah Gunung (The Mountain).'),
+    r.normalized.blocks[1].text.slice(0, 90));
+  assert.deepEqual(checks(r), [], JSON.stringify(checks(r)));
+});
+
 // ── THE ROUTE: a v2 JSON is judged by the v2 gate, a v1 JSON by v1's ──
 // End to end through renderReading, with the provider stubbed. The same draft -
 // the floor's own blocks plus one slang sentence - is ACCEPTED under v2 and floors
@@ -151,7 +197,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.30.0');
+    assert.equal(onV2.stage6_version, '1.31.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
