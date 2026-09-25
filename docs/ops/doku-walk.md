@@ -9,13 +9,14 @@ is a memory, not a fact.
 
 ---
 
-## THE PRODUCTION-FLIP GATE (a-h). Updated 2026-09-23 on Reyner's ruling
+## THE PRODUCTION-FLIP GATE (a-i). Updated 2026-09-23 on Reyner's ruling; item i added 2026-09-25
 
 **Sales reopen only when every item is true, and then Reyner's Rp 39.000 walk is acceptance.**
 Items a-d are the four-item gate as ruled in the launch cut (`docs/handoff/launch-cut-2026-09-21.md`
 §3 item 1). Until this date they were written only there and in the Claude project; this file did
 not carry them, so this section ADDS the gate here rather than amending an existing one. e-h were
-added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
+added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b). i was added 2026-09-25
+(Reyner): a gate item, deliberately not a free backlog row (§ GATE i below).
 
 | | gate | status (dated per row since 2026-09-25; the rest as of 2026-09-23) | proof |
 |---|---|---|---|
@@ -27,10 +28,63 @@ added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
 | f | mirror reconcile merged and verified: one on-load call, never from the poll; one DOKU check-status settling through `settleReading` only on SUCCESS for its own invoice at the right amount; no call when closed or mocked; red-first both ways; fence guard broken on purpose; one REAL sandbox check-status through the reconcile path | **DONE**, `186b827` (#131) | `npm run probe:reconcile` (2026-09-23: `status=SUCCESS`, `amount_mismatch` on the wrong sku, `paid=true` on the right one) |
 | g | `pending_body` replacement merged | **DONE**, `769337a` in #129 | `tests/pasangan-copy.spec.mjs` |
 | h | item 4 and PAY-SAFETY-ALL-PURCHASES on main | **DONE**, `186b827` (#131: launch cut §3 item 4 and §0b) | `grep -n "PAY-SAFETY-ALL-PURCHASES" docs/handoff/launch-cut-2026-09-21.md` |
+| i | **Before sales reopen, no non-production build can mark a row paid in the production DB** (Reyner, 2026-09-25) | **OPEN, BY RULING until flip day.** Satisfied by ONE of (A) Vercel Deployment Protection on Preview, (B) deleting every pre-change Preview deployment plus the `ops/doku-walk` branch var, (C) a separate Preview DB. **The choice is made on flip day** (§ GATE i) | the § GATE i verification, run on flip day |
 
 Then: **Reyner's two production purchases: Rp 19.000 mirror AND Rp 39.000 compat (ruled 2026-09-24).**
 Since the 2026-09-25 amendment each one must also show reconcile-on-load settling it: its `[reconcile]
 ... status=SUCCESS paid=true reason=ok` line, or the row already paid if a notification did arrive.
+
+### GATE i, ruled 2026-09-25 (Reyner): NO NON-PRODUCTION BUILD MARKS A PRODUCTION ROW PAID
+
+**The ruling.** Protections are backlogged until before release. Nothing that slows testing goes in now:
+previews stay public, and the `ops/doku-walk` env (`PAYMENTS_PROVIDER=doku`, branch-scoped) stays. It is
+recorded as a production-flip gate item, **not a free backlog row**, so it cannot be skipped on flip
+day: *"Before sales reopen, no non-production build can mark a row paid in the production DB."*
+
+**Why it is a gate** (`docs/PROGRESS.md` INTERIM REGISTER, "PRODUCTION AND PREVIEW SHARE ONE SUPABASE
+DATABASE"). Preview and production share one database. Two open paths, both by code reading and not
+exercised on a production row:
+- Every Preview build made while Preview was `mock` still answers `POST /api/mock-pay/<id>`, which flips
+  `paid` on any row. That is 25 live branch aliases plus each such deployment's own URL, probed
+  2026-09-25 11:47Z.
+- `ops/doku-walk` writes a SANDBOX invoice onto any row, including a production one, and a free
+  simulator payment then settles it through reconcile.
+
+**Satisfied by ONE of these, chosen on flip day:**
+
+| | option | what it takes |
+|---|---|---|
+| A | **Vercel Deployment Protection on Preview** | Enabled for Preview, then **verified on an OLD permanent URL**, not only on a fresh build: whether it covers deployments built before it was switched on is the thing to prove |
+| B | **Delete every Preview deployment built before 2026-09-25 11:45Z, plus the `ops/doku-walk` branch var** | The general Preview `PAYMENTS_PROVIDER` has been `closed` since then: the 07:24Z build still had the door open and the 11:45Z build had it closed. Deleting only the branch-aliased deployments is NOT enough, because each older deployment keeps its own URL. After the var is deleted, `ops/doku-walk` needs a new build (an empty commit) or its current deployment deleted too, since an env change reaches only new builds |
+| C | **A separate Preview DB** | THE DEFERRED REGISTER row "A SEPARATE PREVIEW DATABASE" (migrations 0001-0010 applied there by hand first, Preview Supabase vars re-pointed) |
+
+**Verification, the same whichever option is chosen:**
+
+```
+POST https://katon-40sxaxzg3-renge13s-projects.vercel.app/api/mock-pay/<nonexistent id>
+POST https://katon-git-feat-voice-v2-renge13s-projects.vercel.app/api/mock-pay/<nonexistent id>
+     -> neither reaches the route (not a 404 {"error":"not_found"}, which means the lookup ran)
+GET  https://www.katon.app/  and  https://katon.app/
+     -> both still serve publicly
+```
+
+The first URL is the `d931aa7` build (07:24Z, door open on 2026-09-25). The second is one of the 25 open
+aliases. **An alias follows its branch's LATEST build**, so a push to `feat/voice-v2` after 11:45Z would
+move it onto a closed build and the check would pass for the wrong reason. On flip day, first confirm its
+latest deployment predates 2026-09-25 11:45Z. If it doesn't, use another alias from the 2026-09-25 list
+that still does. The permanent URL has no such drift. Under (C) the routes may still answer, but against a database that holds no production row,
+so the check becomes: a reading created on `www.katon.app` returns 404 from the Preview host. **An id
+that does not exist** keeps the probe read-only, because both lookups miss (the probe of 2026-09-25 is
+the template).
+
+**Who does it.** The choice is Reyner's. **If Reyner provides a Vercel token on flip day, Code does the
+Vercel steps** (deleting deployments, the branch var, or turning on protection) and runs the
+verification. Without one, Reyner does them in the dashboard and Code runs the verification.
+
+**ONE ORDERING POINT FOR FLIP DAY, flagged rather than resolved.** The 2026-09-25 Cowork ruling (2)
+deletes the `ops/doku-walk` branch var AFTER the two production purchases. Option (B) deletes it BEFORE
+sales reopen, and the purchases come after the reopen. Under (B) the var goes first. Under (A) or (C)
+ruling (2) stands as written.
 
 **GATE b AMENDED, 2026-09-25 (Reyner), and the risk it accepts.** Four sandbox payments reached SUCCESS
 at DOKU with zero notification attempts (walks 1-4; for walk 4 Reyner read the Runtime Logs of all
