@@ -20,7 +20,7 @@ added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
 | | gate | status (dated per row since 2026-09-25; the rest as of 2026-09-23) | proof |
 |---|---|---|---|
 | a | QRIS active for production | OPEN, **SUBMITTED 2026-09-24 17:05 WIB** (Reyner): production QRIS activation, brand "Katon", MCC **5817**. Back Office status **UPDATING** (under DOKU review). DOKU ticket 1149053. See § GATE a below | DOKU Back Office |
-| b | one delivered notification captured | OPEN - DOKU has delivered none, on any walk (§ WALK 2 and 3 below). **2026-09-25: sandbox QRIS is now ACTIVE; the QRIS walk is blocked on one Preview env value and one sandbox Back Office field** (§ GATE b, 2026-09-25) | the `DOKU_CAPTURE` log line |
+| b | one delivered notification captured | OPEN - DOKU has delivered none, on any walk (§ WALK 2 and 3 below). **2026-09-25: sandbox QRIS is now ACTIVE; the QRIS walk is blocked on one Preview env value and one sandbox Back Office field** (§ GATE b, 2026-09-25). **2026-09-25, WALK 4: a real sandbox QRIS payment of Rp 19.000 reached SUCCESS at DOKU, and NO notification settled the row in 4 minutes; reconcile-on-load delivered it** (§ WALK 4). Whether `/api/doku/notify` received anything at all is in that deployment's Runtime Logs, which Code cannot read | the `DOKU_CAPTURE` log line |
 | c | production keys, `PAYMENTS_PROVIDER=doku`, no `DOKU_SANDBOX` | OPEN - production has no `PAYMENTS_PROVIDER` and no DOKU vars | Vercel env (Reyner) |
 | d | notify URL set on the production QRIS channel | OPEN | production Back Office (Reyner) |
 | e | #129 merged (pair reconcile on load) | **DONE**, `91a21e8` | `gh pr view 129` |
@@ -140,6 +140,75 @@ whether the notification was delivered (the `[doku][capture]` lines in that depl
 which Reyner reads; Code cannot read Vercel logs); whether `settleReading` flipped the row, read from
 `GET /api/deliver/<id>` BEFORE the page is opened, because the page's on-load reconcile is a second door
 and would hide which one fired; and only then, whether reconcile-on-load agrees.
+
+### WALK 4, 2026-09-25: A REAL SANDBOX QRIS PAYMENT. DOKU SUCCESS, NO NOTIFICATION SETTLED, RECONCILE DELIVERED (Code)
+
+**The two changes above, as Reyner actually made them (2026-09-25):**
+- **Change 1, done, narrower than asked:** `PAYMENTS_PROVIDER=doku` added for Preview, scoped to branch
+  `ops/doku-walk` ONLY. Every other preview stays `mock`. It reached a deployment through an empty commit,
+  `583151b`: an env change reaches a Preview only through a new build.
+- **Change 2, OVERRIDDEN by Reyner:** the sandbox QRIS Notify URL is **DOKU-prefilled** with
+  `https://sandbox.doku.com/dw-qris-merchant-bo/notification/payment`, and he left it. So the QRIS
+  channel notifies **DOKU's own merchant back office**, not Katon. Nothing in the sandbox Back Office points
+  the QRIS channel at `/api/doku/notify`. That is the most likely reason for step 4's result, and it is
+  recorded as a likelihood: nothing measured here says what DOKU did with the payment event.
+
+**The walk, in order (deployment `3xERvzAFvN6xDG28tuKTgPkhZvsJ`, commit `583151b`, alias
+`katon-git-ops-doku-walk-renge13s-projects.vercel.app`):**
+
+1. **The pay call is DOKU now, not mock.**
+   ```
+   06:44:44Z  POST /api/mirror                 -> token eJm6p6PjG8f_0eridE39x
+              GET  /api/deliver/<id>           -> {"paid":false,...}
+   06:44:46Z  POST /api/pay/<id> {"sku":"artifact"}
+              -> {"ok":true,"pending":true,"invoiceUrl":"https://staging.doku.com/checkout-link-v2/8c988d48..."}
+   ```
+   DOKU's QRIS page: invoice **`eJm6p6PjG8f_0eridE39x.muglimjz`**, IDR 19.000, line item "Katon - Complete
+   Edition", NMID ID2026092439403.
+2. **Paid in DOKU's QRIS simulator**, `https://sandbox.doku.com/qris-simulator/` (Customer, INPUT QR, the
+   QR string from the checkout page, "Inbound (Off Us)"). NOT the Jokul simulator at
+   `/integration/simulator/`, which has no QRIS option on any tab. The QRIS one is named in DOKU's SNAP
+   QRIS guide (`developers.doku.com/accept-payments/direct-api/snap/integration-guide/qris.md`).
+   - First PAY at 06:47:13Z answered **"Duplicate transmission/duplicate QR"**, and DOKU kept the invoice
+     `PENDING` for the next two minutes. Nothing was paid by it.
+   - Second attempt on a fresh simulator page: **"Success", Amount 19000, Acquirer DOKU, Transaction ID
+     `eJm6p6PjG8f_0eridE39x.muglimjz`, Reference Number TW2026092510.**
+3. **DOKU has the money; Katon's row did not flip** (read BEFORE the page was opened):
+   ```
+   npm run doku:status -- eJm6p6PjG8f_0eridE39x.muglimjz
+   06:50:41Z -> 06:54:42Z   doku=SUCCESS   GET /api/deliver/<id> paid=false   (16 polls, 15s apart)
+   ```
+   The check-status record reads `service.id SCAN_CODE`, `channel.id QRIS`, `acquirer DOKU`,
+   `additional_info.product CHECKOUT`, `order.amount` the NUMBER `19000`, `transaction.amount` the
+   STRING `"19000.0"`.
+   **So no notification reached `settleReading` in four minutes.** Whether one reached
+   `/api/doku/notify` and was REFUSED cannot be told from here. The `[doku][capture]` lines only print
+   after the HMAC passes, and a refusal logs its reason. Both are in the Runtime Logs of the deployment
+   above, from 06:50Z, and **Reyner reads them**. Code has no Vercel log access, and the browser pane is
+   not signed in to Vercel.
+
+   **READ BY REYNER, 2026-09-25: DOKU SENT NO NOTIFICATION.** Vercel Runtime Logs, the last hour,
+   ALL deployments. The only three `/api/doku/notify` requests are Code's own probes at 13:19 WIB
+   (06:19Z, User-Agent `node`, the build before the empty commit): `missing_header` 401,
+   `probe-nonexistent-row` 200, `bad_signature` 401. They match the three lines under change 2 above.
+   **Nothing reached `/api/doku/notify` on any host after the 13:50:41 WIB payment.** So it was not
+   refused: nothing was sent. That is four sandbox payments DOKU recorded as SUCCESS with zero
+   notification attempts (walks 1-3 on VA, this one on Checkout QRIS). The reconcile line that
+   delivered the product, 13:55:18 WIB: `[reconcile] ... status=SUCCESS paid=true reason=ok`.
+4. **Reconcile-on-load agrees with DOKU and delivered.** Opening `/r/eJm6p6PjG8f_0eridE39x` made exactly
+   one `POST /api/deliver/<id>/reconcile` (answer `{"paid":true}`), then:
+   ```
+   06:55:38Z  GET /api/deliver/<id> -> {"paid":true, card ready, pdf ready}
+   ```
+   and the page shows "Unduh PDF" and "Kartu dan PDF-mu bisa diunduh kapan saja dari tautan bacaan ini."
+   This is PAY-SAFETY-ALL-PURCHASES working on a real DOKU record. A buyer whose notification never
+   arrives still gets her product the moment she opens her reading.
+
+**What this does and does not close.** Gate b stays OPEN: no notification has been captured, and the
+fixture still does not exist. What changed: the reconcile path (gate f) is now proven end to end on a
+real sandbox QRIS payment, not only on a check-status probe. The open question for DOKU is now
+specific: **with the QRIS Notify URL prefilled to DOKU's own back office, does a Checkout QRIS payment
+send any HTTP Notification to the merchant, and if so to which URL?**
 
 ---
 
