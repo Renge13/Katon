@@ -55,7 +55,10 @@ const arg = (name, fallback = null) => {
   return i > -1 ? (process.argv[i + 1] ?? true) : fallback;
 };
 const ONLY = arg('only', null);
-const OUT_DIR = 'reports/voice-v2';
+// Round 3 (2026-09-25): `--out reports/voice-v2/round3 --voices v2` re-renders v2
+// alone into its own folder, leaving round 2's files where they are.
+const OUT_DIR = arg('out', 'reports/voice-v2');
+const VOICES = String(arg('voices', 'v1,v2')).split(',');
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
 // Per 1M tokens, paid Standard tier, prompts <= 200k (ai.google.dev/gemini-api/docs/pricing,
@@ -126,7 +129,7 @@ globalThis.fetch = async (url, opts) => {
 const summary = [];
 for (const s of SUBJECTS) {
   if (ONLY && s.id !== ONLY) continue;
-  for (const voice of ['v1', 'v2']) {
+  for (const voice of VOICES) {
     __clearMemCache(); __clearInFlight(); wire = [];
     const a = calculateBaziChart(s.a);
     const sj = s.kind === 'pair'
@@ -151,6 +154,13 @@ for (const s of SUBJECTS) {
       d_findings_rejected: rejected.map((at) => ({ reason: at.error ?? at.reason ?? null, detail: at.stage6_detail ?? null })),
       judge_findings: out.review?.judge ?? [],
       judge_malformed: out.review?.judge_malformed ?? [],
+      // Since STAGE6 1.33.0 a J1 rejects, so the judge's verdict on EVERY attempt is
+      // kept, served or not: a regeneration or a floor caused by J1 is quoted from
+      // the attempt it fired on, and a floor (which carries no `review`) still has it.
+      judge_by_attempt: (out.attempts || []).map((at, i) => ({
+        attempt: i + 1, ok: at.ok ?? null, stage6: at.stage6 ?? [], judge: at.judge ?? null,
+      })),
+      j1_rejections: (out.attempts || []).filter((at) => (at.stage6 || []).includes('v2.judge_j1')).length,
       verdict_hits: writerCalls.flatMap((w, i) => (w.draft ? verdictQuotes(w.draft).map((q) => ({ draft: i + 1, ...q })) : [])),
       spend_usd: { writer: spend(writerCalls), judge: spend(judgeCalls), total: spend(wire) },
       tokens: wire.map((w) => ({ role: w.role, model: w.model, status: w.status, usage: w.usage, cost_usd: w.cost_usd })),
@@ -164,10 +174,10 @@ for (const s of SUBJECTS) {
     summary.push({
       subject: s.id, voice, source: record.source, words: record.words, regenerations: record.regenerations,
       d_served: record.d_findings_served.filter((f) => f.severity !== 'flag').length,
-      d_rejected: record.d_findings_rejected.length, judge: record.judge_findings.length,
+      d_rejected: record.d_findings_rejected.length, judge: record.judge_findings.length, j1_rejections: record.j1_rejections,
       verdict_hits: record.verdict_hits.length, spend: record.spend_usd.total,
     });
-    console.log(`${s.id.padEnd(24)} ${voice} ${record.source.padEnd(16)} words ${String(record.words).padStart(5)} regen ${record.regenerations} judge ${record.judge_findings.length} verdict ${record.verdict_hits.length} $${record.spend_usd.total.toFixed(4)} ${ms}ms`);
+    console.log(`${s.id.padEnd(24)} ${voice} ${record.source.padEnd(16)} words ${String(record.words).padStart(5)} regen ${record.regenerations} j1-rej ${record.j1_rejections} judge ${record.judge_findings.length} verdict ${record.verdict_hits.length} $${record.spend_usd.total.toFixed(4)} ${ms}ms`);
   }
 }
 fs.writeFileSync(`${OUT_DIR}/summary.json`, JSON.stringify(summary, null, 2));
