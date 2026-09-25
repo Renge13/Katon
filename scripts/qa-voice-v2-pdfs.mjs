@@ -22,7 +22,10 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { buildCompleteEditionPdf, buildPairPdf } from '../lib/pdf/build.js';
 
-const DIR = 'reports/voice-v2';
+// `--dir reports/voice-v2/round3` for round 3's v2-only run (2026-09-25). With one
+// voice present the index shows one column and says so.
+const dirAt = process.argv.indexOf('--dir');
+const DIR = dirAt > -1 ? process.argv[dirAt + 1] : 'reports/voice-v2';
 const records = fs.readdirSync(DIR).filter((f) => /-(v1|v2)\.json$/.test(f))
   .map((f) => JSON.parse(fs.readFileSync(`${DIR}/${f}`, 'utf8')));
 if (records.length === 0) throw new Error(`no renders in ${DIR}; run qa-voice-v2-renders.mjs first`);
@@ -54,13 +57,15 @@ for (const r of records) {
 }
 
 const subjects = [...new Set(records.map((r) => r.subject))];
+const voices = [...new Set(records.map((r) => r.voice))].sort();
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const cell = (r) => (r
   ? `<div class="col"><h3>${esc(r.voice)} ${r.floored ? '<span class="floor">FLOOR (module assembly, not a reading)</span>' : ''}</h3>
-<p class="meta">${r.words} words, ${r.regenerations} regeneration(s), judge findings ${r.judge_findings.length}, $${r.spend_usd.total.toFixed(4)}</p>
+<p class="meta">${r.words} words, ${r.regenerations} regeneration(s)${r.j1_rejections ? `, ${r.j1_rejections} J1 rejection(s)` : ''}, judge findings ${r.judge_findings.length}, $${r.spend_usd.total.toFixed(4)}</p>
 <iframe src="${esc(r.subject)}-${esc(r.voice)}.pdf"></iframe></div>`
   : '<div class="col"><h3>missing</h3></div>');
-const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Voice v1 vs v2</title>
+const title = voices.length === 1 ? `Voice ${voices[0]} renders` : 'Voice v1 vs v2';
+const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{--bg:#faf8f4;--fg:#1d1b18;--muted:#6b655c;--line:#ddd6cb;--warn:#a33a1f}
@@ -72,9 +77,9 @@ section{border-top:1px solid var(--line);padding:12px 0}
 iframe{width:100%;height:80vh;border:1px solid var(--line);background:#fff}
 .meta{color:var(--muted);margin:0 0 8px}.floor{color:var(--warn);font-size:13px}
 </style></head><body>
-<h1>Voice v1 vs v2</h1>
-<p class="meta">Same engine facts per row. Judge advisory. Rendered in memory, not from render_cache.</p>
-${subjects.map((s) => `<section><h2>${esc(s)}</h2><div class="row">${cell(records.find((r) => r.subject === s && r.voice === 'v1'))}${cell(records.find((r) => r.subject === s && r.voice === 'v2'))}</div></section>`).join('\n')}
+<h1>${title}</h1>
+<p class="meta">Same engine facts per row. STAGE6 ${esc(records[0].stage6_version)}. Rendered in memory, not from render_cache.</p>
+${subjects.map((s) => `<section><h2>${esc(s)}</h2><div class="row"${voices.length === 1 ? ' style="grid-template-columns:1fr"' : ''}>${voices.map((v) => cell(records.find((r) => r.subject === s && r.voice === v))).join('')}</div></section>`).join('\n')}
 </body></html>`;
 fs.writeFileSync(`${DIR}/index.html`, html);
 console.log(`${DIR}/index.html`);
