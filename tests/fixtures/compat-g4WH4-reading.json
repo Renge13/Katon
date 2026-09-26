@@ -1,0 +1,70 @@
+{
+  "_about": "Production GET /api/pair/g4WH4_9QbCrCj3Gha934q/reading, read 2026-09-26, served_from \"cache\" (a validated model render; the colophon of the production PDF reads prompt 6e7b2997b97c40a3, gate 1.25.0). Only blocks and penutup are kept. The fixture for the compat PDF layout tests: it is the reading whose PDF stranded the \"Pola Kontras\" heading at the foot of page 2 (reports/p2-acceptance, 2026-09-25). Real output: never edit, never regenerate.",
+  "inputs": {
+    "a": {
+      "birthDate": "1989-09-13",
+      "birthTime": "09:00",
+      "gender": "male"
+    },
+    "b": {
+      "birthDate": "1997-09-14",
+      "birthTime": "13:00",
+      "gender": "female"
+    }
+  },
+  "rendered": {
+    "blocks": [
+      {
+        "text": "Ini adalah bacaan tentang dua individu: Matahari dan Taman.",
+        "heading": "",
+        "fact_ids": [
+          "p0_opening"
+        ]
+      },
+      {
+        "text": "Unsur Api milikmu memberi energi ke unsur Tanah miliknya dengan alur yang stabil. Kamu menjadi sumber dorongan, sementara dia menerima dan merasa aman bergerak di dalamnya. Dalam seminggu biasa, ini terlihat dari siapa yang membuka pembicaraan soal rencana baru: hampir selalu kamu. Dia menyambut, lalu mengeksekusinya dengan tenang. Peran ini konsisten dan jarang berbalik.",
+        "heading": "Inti Menghidupi",
+        "fact_ids": [
+          "p1_stem_relation"
+        ]
+      },
+      {
+        "text": "Terdapat gesekan halus pada kursi pasangan kalian. Ini bukan penentu kegagalan, melainkan tanda bahwa hubungan membutuhkan perhatian ekstra dan kesadaran penuh. Gesekan ini tidak hadir lewat ledakan besar, melainkan rasa tidak nyaman yang menumpuk dari detail kecil yang diabaikan. Saat kesadaran tinggi, gesekan langsung dibahas hari itu juga. Saat lelah, gesekan dipendam sampai menjadi percikan yang lebih besar.",
+        "heading": "Kursi Bergesekan",
+        "fact_ids": [
+          "p2_day_pair",
+          "p2_reframe"
+        ]
+      },
+      {
+        "text": "Salah satu pilar kehidupan dia menyentuh langsung ruang privatmu. Dinamika dari area hidupnya berdampak langsung ke suasana hubungan. Saat area hidup pasangan tersebut mengalami tekanan, suasananya langsung terbawa ke rumah dan kamu merasakannya sebelum dia sempat bercerita.",
+        "heading": "Sentuhan Pilar Kehidupan",
+        "fact_ids": [
+          "p2_palace_frame"
+        ]
+      },
+      {
+        "text": "Dia membawa elemen yang tidak dominan di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan di area yang tadinya rawan rapuh. Kehadiran dia meredakan kegelisahan di area tertentu, sehingga ketiadaannya membuat area tersebut terasa tidak stabil.",
+        "heading": "Penyeimbang Unsur",
+        "fact_ids": [
+          "p3_supply"
+        ]
+      },
+      {
+        "text": "Karakter dominan kalian berasal dari kelompok berbeda. Sudut pandang dasar yang berbeda memberikan perspektif baru jika dikomunikasikan, namun rawan disalahartikan jika dibiarkan tanpa penjelasan. Kalian sering merespons kabar atau kejadian yang sama dengan fokus yang berbeda total, menghasilkan dua interpretasi yang berseberangan dari satu peristiwa.",
+        "heading": "Pola Kontras",
+        "fact_ids": [
+          "p4_temperament"
+        ]
+      },
+      {
+        "text": "Ketiadaan dorongan otomatis membuat hubungan tidak berjalan dengan sendirinya. Kelangsungan hubungan murni lahir dari niat dan pilihan sadar yang diperbarui setiap hari. Kebersamaan dan penyesuaian harus dijadwalkan secara sengaja. Jika tidak ada inisiatif aktif, hubungan mudah terasa berjarak.",
+        "heading": "Tarikan Tenang, Ritme Bergesek",
+        "fact_ids": [
+          "p5_pull_fit"
+        ]
+      }
+    ],
+    "penutup": "Hubungan ini meminta kamu untuk menjaga kesadaran penuh atas detail kecil yang muncul di antara kalian. Kamu diminta untuk tidak membiarkan gesekan terpendam, melainkan membicarakannya secara terbuka saat itu juga. Hubungan ini juga meminta kamu untuk menghargai keseimbangan yang dia, Taman, bawa ke dalam hidupmu, serta secara aktif menjadwalkan waktu kebersamaan agar ritme kalian tetap terjaga."
+  }
+}
