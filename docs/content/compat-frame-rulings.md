@@ -1,6 +1,8 @@
 <!--
 STATUS: RULED. Reyner, 2026-09-26. Four cells, eight strings, recorded verbatim from
 docs/prompts/AD-frame-fix-and-checks-loosening.md (Job A, "Reyner's labels (2026-09-26). Use verbatim").
+RENAMED by Reyner 2026-09-26, before merge: p2_frame_clash name_id "Beda Arah" -> "Berseberangan"
+(it shared "Arah" with the hour pillar's "Pilar Arah", printed beside it on frame rows). Meaning unchanged.
 Applied with:
   node scripts/apply-rulings.mjs docs/content/compat-frame-rulings.md --expect 8
 
@@ -22,7 +24,7 @@ oppose and rub. The seat cells stay for the day pair; a frame hit takes one of t
 
 ## kompatibilitas.p2_frame_clash
 
-- name_id: "Beda Arah"
+- name_id: "Berseberangan"
 - label_meaning: "Salah satu pilar berhadapan langsung dengan kursi pasangan. Karena posisinya berseberangan persis, dinamikanya menjadi lebih intens dan mudah memanas."
 
 ## kompatibilitas.p2_frame_harm
