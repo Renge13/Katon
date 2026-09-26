@@ -1,6 +1,6 @@
 # Voice constraint rulings: Reyner, 2026-09-26
 
-STATUS: RULED by Reyner (chat, 2026-09-26). TIMING AMENDED BY REYNER THE SAME DAY: the voice work runs NOW, IN PARALLEL with the DOKU wait, and it is LAUNCH-CRITICAL. Katon does NOT launch on v1 because the DOKU gate is met. Launch sequence: frame-hit truth fix -> Reyner's 3-5 examples -> simplify constraints (this file) -> model bake-off -> representative test -> Reyner's acceptance -> launch (plus the DOKU production-flip gate). Two-round cap applies; what happens at the cap is pending Reyner.
+STATUS: RULED by Reyner (chat, 2026-09-26). TIMING AMENDED BY REYNER THE SAME DAY: the voice work runs NOW, IN PARALLEL with the DOKU wait, and it is LAUNCH-CRITICAL. Katon does NOT launch on v1 because the DOKU gate is met. Launch sequence: frame-hit truth fix -> Reyner's 3-5 examples -> simplify constraints (this file) -> model bake-off -> representative test -> Reyner's acceptance -> launch (plus the DOKU production-flip gate). Two-round cap = a DECISION CHECKPOINT, NOT A QUALITY CEILING: if round 2 is not accepted, nothing launches automatically; Reyner chooses to accept, run one more targeted round, or change the approach. Its purpose is to prevent endless iteration, not to force a voice through.
 Source audit: Cowork's writing-constraints audit (Claude project `claude/KATON-writing-constraints-audit-2026-09-26.md`), read on the `feat/voice-v2` working tree. Row ids B1-B29 and C1-C7 refer to that audit.
 This file is not durable until Code commits it. Commit it docs-only, alone.
 
@@ -11,6 +11,8 @@ This file is not durable until Code commits it. Commit it docs-only, alone.
 - **Reyner's five questions are HIS evaluation criteria, never renderer instructions.** Is it specific? Does it create recognition? Could it happen on an ordinary Tuesday? Would someone send this sentence to a spouse or sibling? Does it leave curiosity alive?
 - **`fact -> interpretation -> scene -> tension -> open loop` is a mental model, not a paragraph formula.** 80/20 recognition vs suggestion is a target for the whole experience, never something the renderer counts. Some paragraphs are a single sharp observation, some a scene, some a contrast.
 - **Order of work (capped experiment, parallel to the DOKU wait):** (1) loosen coverage; (2) shorten the prompt; (3) Reyner writes 3-5 examples, which are worked examples and not templates; (4) test stronger writer models; (5) Reyner judges with his five questions.
+- **Voice acceptance is Reyner's alone,** using his five questions. No automated voice score is built for the representative test. The existing factual, safety and document checks stay.
+- **Examples are Katon-native,** written by Reyner from real engine facts, one per mode: (1) strong self-recognition, (2) concrete everyday scene, (3) tension or contradiction that does not resolve into advice, (4) compatibility moment that makes the relationship feel real, (5) open-loop ending that makes the reader curious about another person. No fixed structure per example. The Gemini conversation Reyner shared is a behavioral reference only (recognize -> wonder -> ask -> test against another person -> compare -> keep exploring); its prose is not copied and its factual looseness is not acceptable in Katon.
 
 ## Generation constraints (B)
 | Row | Ruling | Note |
