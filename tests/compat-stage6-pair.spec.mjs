@@ -60,7 +60,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // every v1 check are unchanged by it, which this file's other assertions prove.
   // 1.42.0: no judge in the v2 render path (Reyner, 2026-09-26, MVP); v1 unchanged.
   // 1.43.0: a cached row is re-gated by the voice that wrote it (AG item 4); v1 unchanged.
-  assert.equal(STAGE6_VERSION, '1.43.0');
+  // 1.44.0: fact.badge_invented reads both mirrors on a v2 pair (AG item 4); v1 unchanged.
+  assert.equal(STAGE6_VERSION, '1.44.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {

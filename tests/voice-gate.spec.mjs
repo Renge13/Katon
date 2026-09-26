@@ -18,6 +18,7 @@ import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { validateRenderingV2 } from '../lib/validate/v2.js';
 import { validateRendering } from '../lib/validate/index.js';
+import { GLOSSARY } from '../lib/semantic/glossary.js';
 
 const A = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
 const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
@@ -329,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.43.0');
+    assert.equal(onV2.stage6_version, '1.44.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -372,4 +373,29 @@ test('PAIR SHAPE: a block citing a supplied mirror fact is served under v2, refu
     globalThis.fetch = prev.fetch;
     if (prev.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = prev.key;
   }
+});
+
+// ── fact.badge_invented READS BOTH MIRRORS ON A v2 PAIR (STAGE6 1.44.0) ──
+// Prompt AG item 4, an AF defect: checkBadgeInvention read only `semantic.facts`,
+// which on a pair holds the pair facts. On a v2 pair each person's badges ride in
+// `mirror.a` / `mirror.b`, so naming a badge the engine SUPPLIED was a hard
+// fact.badge_invented (hard on v2 through V2_FACT_HARD).
+test('BADGES ON A v2 PAIR: a supplied badge (either person) passes; an absent one is still invented', () => {
+  const pj = buildPairSemantic(A, B, { voice: 'v2' });
+  const aBadges = pj.mirror.a.facts.filter((f) => f.id.startsWith('badge_')).map((f) => f.label);
+  const bBadges = pj.mirror.b.facts.filter((f) => f.id.startsWith('badge_')).map((f) => f.label);
+  assert.ok(aBadges.includes('Bunga Persik'), `precondition: A carries Bunga Persik (${aBadges})`);
+  assert.ok(bBadges.includes('Mata Pisau'), `precondition: B carries Mata Pisau (${bBadges})`);
+  for (const sentence of ['Bunga Persik membuat orang mengingatmu.', 'Mata Pisau-nya membuatnya cepat memutuskan.']) {
+    const r = validateRenderingV2(plant(draftFor(pj), sentence), pj);
+    assert.equal(r.findings.some((f) => f.check === 'fact.badge_invented'), false, `${sentence} -> ${JSON.stringify(checks(r))}`);
+  }
+  // A badge neither person carries still fires, so the test can fail the other way.
+  // Every SUPPLIED label, not only badge_* ids: Tanda Kekosongan rides on a void_* fact.
+  const all = new Set([...pj.facts, ...pj.mirror.a.facts, ...pj.mirror.b.facts].map((f) => f.label));
+  const absent = Object.values(GLOSSARY.bintang).map((e) => e.name_id).find((n) => n && !all.has(n));
+  assert.ok(absent, 'precondition: some glossary badge is carried by neither person');
+  const bad = validateRenderingV2(plant(draftFor(pj), `${absent} membuatmu gelisah.`), pj);
+  assert.ok(bad.findings.some((f) => f.check === 'fact.badge_invented' && f.severity === 'hard'),
+    `${absent}: ${JSON.stringify(bad.findings.map((f) => `${f.severity} ${f.check}`))}`);
 });
