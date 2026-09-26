@@ -19,6 +19,7 @@ const nextConfig = {
       // like the two above, so untraced they would throw on every render route.
       './docs/content/renderer-prompt-v2.txt',
       './docs/content/compat-renderer-prompt-v2.txt',
+      './docs/content/voice-examples-v2.txt',
       // THE HANZI FACE, added 2026-09-21. Same fault as the two prompts above and
       // the same fix, one asset later: `lib/pdf/fonts.js` reads it with
       // `fs.readFileSync(path.join(...))`, which no bundler can follow, so without
