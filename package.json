@@ -39,6 +39,7 @@
     "test:pair-semantic": "node --test tests/pair-semantic.spec.mjs",
     "test:pair-frame-labels": "node --test tests/pair-frame-labels.spec.mjs",
     "test:compat-prompt": "node --test tests/compat-prompt.spec.mjs",
+    "test:pair-truth": "node --conditions=react-server --test tests/pair-truth.spec.mjs",
     "test:compat-stage6-pair": "node --conditions=react-server --test tests/compat-stage6-pair.spec.mjs",
     "test:compat-p0-engine": "node --conditions=react-server --test tests/compat-p0-engine.spec.mjs",
     "test:compat-voice-round2": "node --conditions=react-server --test tests/compat-voice-round2.spec.mjs",

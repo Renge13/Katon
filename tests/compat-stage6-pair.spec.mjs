@@ -58,10 +58,15 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // and stays rejected in mirror ones.
   // 1.26.0-1.38.0 (2026-09-24) are the voice-v2 gate and judge, VOICE=v2 only; this exemption and
   // every v1 check are unchanged by it, which this file's other assertions prove.
+  // 1.39.0: pair direction and supplier are hard (Prompt AG item 1): tightens,
+  // pair only (tests/pair-truth.spec.mjs).
+  // 1.40.0: a cross-chart relation between two non-day pillars is hard (AG item 1).
+  // 1.41.0: element dominance agrees with the engine (mirror; v2 pairs via mirror.a/b).
   // 1.42.0: no judge in the v2 render path (Reyner, 2026-09-26, MVP); v1 unchanged.
   // 1.43.0: a cached row is re-gated by the voice that wrote it (AG item 4); v1 unchanged.
   // 1.44.0: fact.badge_invented reads both mirrors on a v2 pair (AG item 4); v1 unchanged.
-  assert.equal(STAGE6_VERSION, '1.44.0');
+  // 1.45.0: main's 1.39.0-1.41.0 merged onto v2 (AG item 1).
+  assert.equal(STAGE6_VERSION, '1.45.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
