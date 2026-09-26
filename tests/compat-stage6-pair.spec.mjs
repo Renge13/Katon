@@ -56,9 +56,9 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // R2 / R2-SCOPE, 2026-09-13). ONE accept-changing edit and it LOOSENS: the
   // shape the compat prompt mandates stops being rejected in compat readings,
   // and stays rejected in mirror ones.
-  // 1.26.0-1.36.0 (2026-09-24) are the voice-v2 gate and judge, VOICE=v2 only; this exemption and
+  // 1.26.0-1.37.0 (2026-09-24) are the voice-v2 gate and judge, VOICE=v2 only; this exemption and
   // every v1 check are unchanged by it, which this file's other assertions prove.
-  assert.equal(STAGE6_VERSION, '1.36.0');
+  assert.equal(STAGE6_VERSION, '1.37.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {

@@ -124,6 +124,31 @@ test('D2 (pair): citing p2_day_pair and p5_pull_fit, not p3/p4, leaves no D2 fin
   assert.deepEqual(d2Of(validateRenderingV2(citingOnly(sj, keep), sj)), []);
 });
 
+// ── SQUARE-BRACKET GLOSSES (Prompt AD amendment 2, item 4, 2026-09-26) ──
+// Post-processing, not a gate: a bound term (rule 23: archetype, Aspek, Bintang)
+// gets its sanctioned round bracket; anything else loses the gloss.
+const served = (r) => [...r.normalized.blocks.map((b) => b.text), r.normalized.penutup].join('\n');
+
+test('SQUARE BRACKETS: an element or relation gloss is removed; nothing square is served', () => {
+  const sj = v2(A);
+  const r = validateRenderingV2(plant(draftFor(sj),
+    'Kamu adalah Logam [Metal] di luar, Api [Fire] di dalam, dengan Setengah Gabungan [Half Combination].'), sj);
+  const text = served(r);
+  assert.equal(text.includes('['), false, text.slice(0, 200));
+  assert.ok(text.includes('Kamu adalah Logam di luar, Api di dalam, dengan Setengah Gabungan.'));
+});
+
+test('SQUARE BRACKETS: a bound Aspek keeps its SANCTIONED gloss, round, even when the writer paraphrased it', () => {
+  const sj = v2(A);
+  assert.equal(sj.facts.find((f) => f.label === 'Aspek Pengelola')?.label_bracket, 'Direct Wealth', 'precondition');
+  const r = validateRenderingV2(plant(draftFor(sj),
+    'Aspek Pengelola [Direct Wealth] menjaga ritmemu, dan Bintang Penolong [Helper] datang tepat waktu.'), sj);
+  const text = served(r);
+  assert.ok(text.includes('Aspek Pengelola (Direct Wealth) menjaga ritmemu'), text.slice(0, 300));
+  assert.ok(text.includes('Bintang Penolong (Nobleman) datang tepat waktu'));
+  assert.equal(text.includes('['), false);
+});
+
 // ── factGuard ON v2 (Prompt AD amendment 2, item 3, 2026-09-26) ──
 // Six truth checks hard, three voice checks logged. Each assertion names the fact.*
 // check itself: D1 also catches some of these plants, and a test that passed on D1
@@ -236,10 +261,12 @@ test('FIX (i): a hanzi archetype bracket no longer rejects on D3 - the bracket i
   assert.ok(prose(r).startsWith('Kamu adalah Matahari (The Sun)'));
 });
 
-test('FIX (i): a square-bracket gloss after the archetype is replaced, not doubled; an element keeps its own', () => {
+test('FIX (i): a square-bracket gloss after the archetype is replaced, not doubled; an element loses its own (1.37.0)', () => {
   const sj = v2(A);
   const r = validateRenderingV2(lead(draftFor(sj), 'Kamu adalah Api [Fire] dengan arketipe Matahari [Sun].'), sj);
-  assert.ok(prose(r).startsWith('Kamu adalah Api [Fire] dengan arketipe Matahari (The Sun).'), prose(r).slice(0, 90));
+  // Until 1.37.0 fix (i) left "Api [Fire]" as written (its scope was the archetype);
+  // AD amendment 2 item 4 removes an unbound term's square gloss.
+  assert.ok(prose(r).startsWith('Kamu adalah Api dengan arketipe Matahari (The Sun).'), prose(r).slice(0, 90));
 });
 
 test('FIX (i): a pair brackets BOTH archetypes and leaves the ruled opening untouched', () => {
@@ -302,7 +329,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.36.0');
+    assert.equal(onV2.stage6_version, '1.37.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
