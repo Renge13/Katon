@@ -1,6 +1,6 @@
 # Voice constraint rulings: Reyner, 2026-09-26
 
-STATUS: RULED by Reyner (chat, 2026-09-26). POST-LAUNCH work. NOTHING CHANGES BEFORE LAUNCH.
+STATUS: RULED by Reyner (chat, 2026-09-26). TIMING AMENDED BY REYNER THE SAME DAY: the voice work runs NOW, IN PARALLEL with the DOKU wait, and it is LAUNCH-CRITICAL. Katon does NOT launch on v1 because the DOKU gate is met. Launch sequence: frame-hit truth fix -> Reyner's 3-5 examples -> simplify constraints (this file) -> model bake-off -> representative test -> Reyner's acceptance -> launch (plus the DOKU production-flip gate). Two-round cap applies; what happens at the cap is pending Reyner.
 Source audit: Cowork's writing-constraints audit (Claude project `claude/KATON-writing-constraints-audit-2026-09-26.md`), read on the `feat/voice-v2` working tree. Row ids B1-B29 and C1-C7 refer to that audit.
 This file is not durable until Code commits it. Commit it docs-only, alone.
 
@@ -10,7 +10,7 @@ This file is not durable until Code commits it. Commit it docs-only, alone.
 - **Loosen both halves at once.** A soft check triggers regeneration with a directive, so it is a generation-time rule. Loosening the prompt without loosening the matching review check puts the constraint straight back.
 - **Reyner's five questions are HIS evaluation criteria, never renderer instructions.** Is it specific? Does it create recognition? Could it happen on an ordinary Tuesday? Would someone send this sentence to a spouse or sibling? Does it leave curiosity alive?
 - **`fact -> interpretation -> scene -> tension -> open loop` is a mental model, not a paragraph formula.** 80/20 recognition vs suggestion is a target for the whole experience, never something the renderer counts. Some paragraphs are a single sharp observation, some a scene, some a contrast.
-- **Order of work (post-launch, capped experiment):** (1) loosen coverage; (2) shorten the prompt; (3) Reyner writes 3-5 examples, which are worked examples and not templates; (4) test stronger writer models; (5) Reyner judges with his five questions.
+- **Order of work (capped experiment, parallel to the DOKU wait):** (1) loosen coverage; (2) shorten the prompt; (3) Reyner writes 3-5 examples, which are worked examples and not templates; (4) test stronger writer models; (5) Reyner judges with his five questions.
 
 ## Generation constraints (B)
 | Row | Ruling | Note |
