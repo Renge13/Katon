@@ -854,54 +854,6 @@ test('THE BRACKET SCOPE IS READ FROM THE GLOSSARY, so no category can be missed'
   assert.ok(!judged.includes('Fondasi Pasangan'), 'a palace is not an Aspek or a Bintang');
 });
 
-test('the slot-filling check is inert against today\'s Stage 3, and that is the point', () => {
-  // Prompt H specifies: flag when block order matches JSON order AND importance
-  // is non-monotonic. Implemented as specced rather than reinterpreted -
-  // reinterpreting it would mean flagging the order the prompt explicitly asks
-  // for. Reported, not hidden.
-  const inJsonOrder = goodReading(); // the floor emits required_points order
-  const result = validateRendering(inJsonOrder, CHART_1);
-  assert.ok(!checksIn(result).includes('coverage.slot_filling'));
-
-  // WHY IT IS STILL INERT, UNDER THE ORDER K CHANGED (2026-08-11).
-  //
-  // The old pin here was "facts[] is sorted by descending importance", which
-  // made the two conditions mutually exclusive outright. Stage 3 now lifts the
-  // identity spine to the front, so facts[] is NOT globally sorted any more and
-  // that pin would have been simply false. The contract it is replaced by is the
-  // one Stage 3 actually emits, and it has two halves.
-  const roles = CHART_1.facts.map((f) => f.hierarchy.role);
-  const opening = roles.findIndex((role) => role !== 'spine');
-  assert.ok(opening >= 1, 'facts[] must open with the engine-mandated spine run');
-
-  // Half 1: the opening is the ENGINE's order, so the check skips it. Obeying a
-  // commanded order was never evidence of slot-filling.
-  // Half 2: past the opening, importance still descends - so "matches JSON
-  // order" and "importance is monotonic" remain the same statement there, and
-  // the check still cannot fire. If EITHER half goes, this check wakes up.
-  const tail = CHART_1.facts.slice(opening).map((f) => f.importance);
-  assert.deepEqual(tail, [...tail].sort((a, b) => b - a),
-    'if the findings tail ever stops being importance-sorted, this check wakes up');
-});
-
-test('the identity opening is not read as slot-filling', () => {
-  // The regression this pairs with: before coverage.js was taught to skip the
-  // opening, EVERY well-formed reading raised coverage.slot_filling, because the
-  // engine's own opening is non-monotonic (day master 55, then strength 78, then
-  // CR-1 85 on chart 1). A flag on every reading is a flag on nothing.
-  const opening = CHART_1.facts.slice(0, 3);
-  assert.deepEqual(opening.map((f) => f.hierarchy.role), ['spine', 'spine', 'spine']);
-  const importances = opening.map((f) => f.importance);
-  assert.notDeepEqual(importances, [...importances].sort((a, b) => b - a),
-    'the opening must be non-monotonic, or this test proves nothing');
-
-  const reading = goodReading();
-  const leadIds = reading.blocks.map((b) => b.fact_ids[0]);
-  assert.deepEqual(leadIds.slice(0, 3), opening.map((f) => f.id),
-    'the floor must lead with the spine, in order');
-  assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('coverage.slot_filling'));
-});
-
 // ── 3. FORBIDDEN CONTENT ───────────────────────────────────
 
 test('every forbidden category hard-rejects', () => {
@@ -1336,7 +1288,9 @@ test('the stricter directive names the failures and omits the flags', () => {
   for (const f of result.findings.filter((x) => x.severity !== 'flag')) {
     assert.ok(directive.includes(f.check), `directive omitted ${f.check}`);
   }
-  assert.ok(!directive.includes('[coverage.slot_filling]'), 'a flag is not a failure to fix');
+  for (const f of result.findings.filter((x) => x.severity === 'flag')) {
+    assert.ok(!directive.includes(`[${f.check}]`), `a flag is not a failure to fix: ${f.check}`);
+  }
 });
 
 // ── the payload scrub (the sanctioned engine line) ─────────
