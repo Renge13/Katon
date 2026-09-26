@@ -63,6 +63,14 @@ Written by Cowork, 2026-09-26, for a FRESH Claude Code session. It sits in the w
 - A test that fails if any frame-hit variant is a seat cell key, and passes for the day pair. Fixtures: the births behind g4WH4, PZ0t and rVe4ca (read-only `GET https://www.katon.app/api/pair/<id>` or `reports/`). Show it failing on `main` before your change.
 - A test that every glossary label is unique. Also report near-duplicates that share a word with another label or pillar name (e.g. "Beda Arah" vs "Pilar Arah", any other "Tarik" label). Report only; Reyner decides.
 
+**Rulings file update (docs, same PR; Reyner, 2026-09-26):** in `docs/content/voice-constraint-rulings-2026-09-26.md`, under "## Principles (ruled)":
+- Replace the whole bullet that starts `- **Examples are Katon-native,**` with:
+  "- **Examples are Katon-native,** written by Reyner from real engine facts. Five examples, each showing a kind of curiosity, not a writing technique: (1) a direct \"what am I?\" answer, (2) an explanation of why the engine gives that answer, (3) a concrete recognition moment, (4) a comparison between two people, (5) a revelation that naturally creates another question. Any length or shape. The Gemini conversation Reyner shared is a behavioral reference only (answer -> explain why -> interpret -> give another handle -> the next question appears); its prose is not copied and its factual looseness is not acceptable in Katon."
+- Add after it:
+  "- **Target: the reading behaves like the first turn of a conversation.** Answer the curiosity. Explain the why. Make it recognizable. Leave something worth exploring. This is a direction, not stages: no new mandatory writing stages and no new hard writing rules follow from it. Reyner's acceptance question: does it make someone want to ask the next question? \"Why\" explanations use only the engine's reasons (provenance), never invented chart causes."
+  "- **Product (not decided):** launch keeps the reading/PDF surface. Whether Katon becomes a conversational interpreter is not decided; demand is tested separately. The loop the voice optimises for: understand myself -> become curious -> test it against someone I know -> compare -> explore the relationship -> come back with another person or question."
+Quote the diff in your report.
+
 **Then:**
 - Open a PR and merge after CI, like #147-#150.
 - Regenerate the PDFs for the four affected pairs into `reports/frame-fix/`. Report, per pair, the facts-page frame rows and the appendix entries as printed.
@@ -153,4 +161,5 @@ Also untouched:
 - The replay table.
 - The J1 matrix.
 - The final B15 pattern list.
+- Every J2 (invented causality) finding from the replay, in full. The new target asks the writer to explain the why, so Cowork reviews these by hand (J2 stays advisory).
 - Any row you could not implement as written, and why. Do not substitute a different rule.
