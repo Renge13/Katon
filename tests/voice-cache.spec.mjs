@@ -78,6 +78,22 @@ test('THE VOICE IS IN THE KEY: v2 keys differ from v1, for both kinds', () => {
   assert.notEqual(cacheKey(v2p), V1_KEYS.pair);
 });
 
+// ── CACHE IDENTITY, Prompt AG item 4 (2026-09-26) ──
+// The two cross-voice tests below pass even with `voice` stripped from the key
+// entirely - measured by that mutation of cacheKey - because a v2 semantic JSON
+// differs from v1 in CONTENT (v2 facts, the pair's mirror.a/b), and that alone
+// keeps the keys apart. So they cannot see the voice prefix. This one can: the
+// same object with only `voice` changed must hash differently, which is the
+// guarantee the prefix exists for ("isolation must not depend on a field
+// surviving canonicalisation").
+test('THE VOICE ALONE MOVES THE KEY: identical content, different voice, different key', () => {
+  const sj = buildSemanticJson(A);
+  assert.equal(sj.voice, undefined, 'precondition: a v1 object carries no voice');
+  assert.notEqual(cacheKey({ ...sj, voice: 'v2' }), cacheKey(sj));
+  const pj = buildPairSemantic(A, B);
+  assert.notEqual(cacheKey({ ...pj, voice: 'v2' }), cacheKey(pj));
+});
+
 /** A servable row for `semanticJson`, the way a real serve writes it. */
 async function cacheRow(semanticJson, promptVersion) {
   await writeCache(cacheKey(semanticJson), {
@@ -102,6 +118,18 @@ for (const [from, to] of [['v1', 'v2'], ['v2', 'v1']]) {
     assert.equal(same.cached, true, `${from} under ${from} must hit its own row`);
   });
 }
+
+test('THE PROMPT IS NOT IN THE KEY: a v2 row written under an older v2 prompt is still served', async () => {
+  // By design (lib/render/prompt.js header): prompt_version is metadata, so a
+  // prompt edit does not re-render every cached reading. Recorded as a test so the
+  // AG item 4 answer - voice cannot cross, prompt can - is a fact, not a memory.
+  const sj = withVoice('v2', () => buildSemanticJson(A));
+  await cacheRow(sj, 'v2-an-older-prompt');
+  const served = await withVoice('v2',
+    () => renderReading(buildSemanticJson(A), { spendGuards: false, dedupeInFlight: false }));
+  assert.equal(served.cached, true);
+  assert.equal(served.prompt_version, 'v2-an-older-prompt');
+});
 
 // ── A CACHED ROW IS RE-CHECKED BY THE VOICE THAT WROTE IT (STAGE6 1.43.0) ──
 // Prompt AG item 4, an AF defect: lib/mirror/handlers.js re-gated every cached
