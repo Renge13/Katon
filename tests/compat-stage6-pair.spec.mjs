@@ -59,7 +59,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // 1.26.0-1.38.0 are spent on feat/voice-v2 and are never reused here.
   // 1.39.0: pair direction and supplier are hard (Prompt AG item 1): tightens,
   // pair only (tests/pair-truth.spec.mjs).
-  assert.equal(STAGE6_VERSION, '1.39.0');
+  // 1.40.0: a cross-chart relation between two non-day pillars is hard (AG item 1).
+  assert.equal(STAGE6_VERSION, '1.40.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {

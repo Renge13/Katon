@@ -118,3 +118,49 @@ test('PZ0t: the same planted inversion fires on a second pair', () => {
   const rendered = { blocks: [{ fact_ids: ['p1_stem_relation'], heading: 'x', text: 'Unsur Tanah miliknya menghidupi unsur Api milikmu.' }], penutup: '' };
   assert.ok(checks(rendered, pz).includes('pair.stem_inverted'));
 });
+
+// ── CROSS-CHART RELATIONS LAND ON DAY SEATS (STAGE6 1.40.0) ──
+
+// The S4 compat sample (docs/content/voice-v2-worksheet-2026-09-24.md §S4, the
+// "After" blockquote), which calibrate-j1 plants its seeds into. Written for PZ0t.
+const worksheet = readFileSync(new URL('../docs/content/voice-v2-worksheet-2026-09-24.md', import.meta.url), 'utf8')
+  .replace(/\r\n?/g, '\n');
+const s4Quote = worksheet.slice(worksheet.indexOf('### S4.'), worksheet.indexOf('**Penutup**', worksheet.indexOf('### S4.')))
+  .split('\n').filter((l) => l.startsWith('> ') && !l.startsWith('> **')).map((l) => l.slice(2));
+const S4_SEATS = s4Quote.find((p) => p.startsWith('Kursi pasangan kalian'));
+const PAIR_IDS = ['p1_stem_relation', 'p2_day_pair', 'p2_palace_frame', 'p3_supply', 'p4_temperament', 'p5_pull_fit'];
+const one = (text) => ({ blocks: [{ fact_ids: ['p2_day_pair', 'p2_palace_frame'], heading: 'Di Antara Kalian', text }], penutup: '' });
+const ANCHOR = 'Dari arah sebaliknya, Pilar Kerja-mu terikat dengan kursi pasangannya.';
+const plant = (seed) => S4_SEATS.replace(ANCHOR, `${ANCHOR} ${seed}`);
+
+test('THE PREMISE: in PZ0t every cross-chart hit lands on a day seat, and B year 午 clashes A day 子', () => {
+  const frame = pz.facts.find((f) => f.id === 'p2_palace_frame').provenance;
+  for (const hit of [...frame.a_hits_b, ...frame.b_hits_a]) assert.equal(hit.to.position, 'day');
+  assert.ok(frame.b_hits_a.some((h) => h.relation === '冲' && h.from.position === 'year' && h.from.branch === '午'));
+  assert.ok(S4_SEATS.includes(ANCHOR), 'the S4 sample moved; the seeds have no anchor');
+});
+
+test('SEATS: seed-S4 fires ("Pilar Akarmu dan Pilar Akar-nya juga saling mengikat")', () => {
+  assert.ok(checks(one(plant('Pilar Akarmu dan Pilar Akar-nya juga saling mengikat.')), pz).includes('pair.cross_chart_seat'));
+});
+
+test('SEATS: fail-monthclash fires ("Pilar Kerja kalian berdua saling berbenturan")', () => {
+  const seed = 'Misalnya, ketika kalian berdebat soal uang, biasanya itu karena Pilar Kerja kalian berdua saling berbenturan.';
+  assert.ok(checks(one(plant(seed)), pz).includes('pair.cross_chart_seat'));
+});
+
+test('SEATS: the true S4 text passes, including B year clashing A seat', () => {
+  assert.ok(S4_SEATS.includes('Pilar Akar-nya berbenturan dengan Fondasi Pasanganmu.'));
+  assert.ok(!checks(one(S4_SEATS), pz).includes('pair.cross_chart_seat'));
+  assert.ok(!checks(one('Pilar Akar-nya berbenturan dengan kursi pasanganmu.'), pz).includes('pair.cross_chart_seat'));
+  // One person's own two pillars is not a cross-chart claim.
+  assert.ok(!checks(one('Pilar Kerja-mu dan Pilar Akar-mu saling berbenturan.'), pz).includes('pair.cross_chart_seat'));
+});
+
+test('THE WHOLE S4 SAMPLE PASSES ALL THREE PAIR-TRUTH CHECKS', () => {
+  const rendered = { blocks: [{ fact_ids: PAIR_IDS, heading: 'S4', text: s4Quote.join('\n\n') }], penutup: '' };
+  const found = checks(rendered, pz);
+  for (const id of ['pair.stem_inverted', 'pair.supply_inverted', 'pair.cross_chart_seat']) {
+    assert.ok(!found.includes(id), `${id} fired on the true S4 sample`);
+  }
+});
