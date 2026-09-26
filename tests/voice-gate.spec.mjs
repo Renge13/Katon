@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.45.0');
+    assert.equal(onV2.stage6_version, '1.46.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -398,4 +398,18 @@ test('BADGES ON A v2 PAIR: a supplied badge (either person) passes; an absent on
   const bad = validateRenderingV2(plant(draftFor(pj), `${absent} membuatmu gelisah.`), pj);
   assert.ok(bad.findings.some((f) => f.check === 'fact.badge_invented' && f.severity === 'hard'),
     `${absent}: ${JSON.stringify(bad.findings.map((f) => `${f.severity} ${f.check}`))}`);
+});
+
+// ── fact.element_dominance IS HARD ON v2 (STAGE6 1.46.0, Prompt AG item 1) ──
+// Main's 1.41.0 check lives in factGuard; v2 downgrades every factGuard id to a
+// flag unless it is in V2_FACT_HARD. A truth check that only logs on the voice
+// that launches would not be the ruled "hard deterministic checks on v1 and v2".
+test('ELEMENT DOMINANCE IS HARD ON v2: seed-S3 on a v2 mirror rejects', () => {
+  const sj = v2(A);
+  assert.ok(sj.facts.some((f) => f.id === 'element_missing_Wood'), 'precondition: no Kayu');
+  const r = validateRenderingV2(plant(draftFor(sj), 'Di baganmu, Kayu adalah unsur yang paling banyak.'), sj);
+  const f = r.findings.find((x) => x.check === 'fact.element_dominance');
+  assert.ok(f, JSON.stringify(r.findings.map((x) => x.check)));
+  assert.equal(f.severity, 'hard');
+  assert.equal(r.ok, false);
 });

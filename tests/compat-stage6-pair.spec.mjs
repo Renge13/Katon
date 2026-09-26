@@ -66,7 +66,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // 1.43.0: a cached row is re-gated by the voice that wrote it (AG item 4); v1 unchanged.
   // 1.44.0: fact.badge_invented reads both mirrors on a v2 pair (AG item 4); v1 unchanged.
   // 1.45.0: main's 1.39.0-1.41.0 merged onto v2 (AG item 1).
-  assert.equal(STAGE6_VERSION, '1.45.0');
+  // 1.46.0: fact.element_dominance is hard on v2 (AG item 1).
+  assert.equal(STAGE6_VERSION, '1.46.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {

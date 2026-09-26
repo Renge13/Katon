@@ -149,5 +149,5 @@ test('THE MIRROR IS UNTOUCHED, and neither check is a gate change', () => {
   ).filter((f) => f.check.startsWith('pair.direction') || f.check.startsWith('pair.penutup'));
   assert.ok(logged.length > 0);
   for (const f of logged) assert.equal(f.severity, 'flag');
-  assert.equal(STAGE6_VERSION, '1.45.0'); // 1.26.0-1.38.0, 1.42.0-1.45.0: the voice-v2 gate; 1.39.0-1.41.0: main's truth checks
+  assert.equal(STAGE6_VERSION, '1.46.0'); // 1.26.0-1.38.0, 1.42.0-1.46.0: the voice-v2 gate; 1.39.0-1.41.0: main's truth checks
 });
