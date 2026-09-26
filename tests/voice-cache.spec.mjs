@@ -26,10 +26,13 @@ import { STAGE6_VERSION } from '../lib/render/fence.js';
 const A = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
 const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 
-// On `main` bb4a0b0, VOICE unset. THESE MUST NEVER MOVE on this branch.
+// On `main`, VOICE unset. THESE MUST NEVER MOVE on this branch. mirror: bb4a0b0.
+// pair: re-pinned to `main` ec8ea00 (PR #151, 2026-09-26), where frame hits got
+// their own p2_frame_* cells and the pair semantic JSON moved on main itself; it was
+// b600cf5b... on bb4a0b0 and 38062f2. A key that moves WITHOUT main moving is the bug.
 const V1_KEYS = {
   mirror: 'b38088d0aa89991d2da6521cd6e6536e4a3fbf34fa6422133f0782a442c3511f',
-  pair: 'b600cf5b1d3168751e1308b7b4b8a6f38430bace947765e4ef9acf4561e013a0',
+  pair: 'c6d3d6ff2591e022be64524eb36174d03a22007cd4e1cd9bce1e2247a7e83b58',
 };
 
 const ENV = ['VOICE', 'VERCEL_ENV', 'GEMINI_API_KEY'];
