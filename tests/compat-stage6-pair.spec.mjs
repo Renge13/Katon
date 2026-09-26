@@ -58,7 +58,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // and stays rejected in mirror ones.
   // 1.26.0-1.38.0 (2026-09-24) are the voice-v2 gate and judge, VOICE=v2 only; this exemption and
   // every v1 check are unchanged by it, which this file's other assertions prove.
-  assert.equal(STAGE6_VERSION, '1.38.0');
+  // 1.42.0: no judge in the v2 render path (Reyner, 2026-09-26, MVP); v1 unchanged.
+  assert.equal(STAGE6_VERSION, '1.42.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
