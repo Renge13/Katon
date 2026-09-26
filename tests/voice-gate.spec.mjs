@@ -124,6 +124,43 @@ test('D2 (pair): citing p2_day_pair and p5_pull_fit, not p3/p4, leaves no D2 fin
   assert.deepEqual(d2Of(validateRenderingV2(citingOnly(sj, keep), sj)), []);
 });
 
+// ── factGuard ON v2 (Prompt AD amendment 2, item 3, 2026-09-26) ──
+// Six truth checks hard, three voice checks logged. Each assertion names the fact.*
+// check itself: D1 also catches some of these plants, and a test that passed on D1
+// would pass whether or not factGuard runs.
+const findingOf = (r, check) => r.findings.find((f) => f.check === check);
+
+test('factGuard on v2: a planted strength contradiction is fact.strength_contradiction, HARD', () => {
+  const sj = v2(A);
+  assert.equal(sj.strength.verdict, 'weak', 'precondition');
+  const draft = draftFor(sj);
+  const block = draft.blocks.find((b) => (b.fact_ids || []).some((id) => id.startsWith('strength_')));
+  block.text += ' Bagan kamu termasuk Kuat.';
+  const f = findingOf(validateRenderingV2(draft, sj), 'fact.strength_contradiction');
+  assert.ok(f, 'fired');
+  assert.equal(f.severity, 'hard');
+});
+
+test('factGuard on v2: a planted invented badge is fact.badge_invented, HARD', () => {
+  const sj = v2(A);
+  assert.equal(sj.facts.some((f) => f.id === 'badge_驛馬'), false, 'precondition');
+  const r = validateRenderingV2(plant(draftFor(sj), 'Kamu juga membawa Bintang Perantau.'), sj);
+  const f = findingOf(r, 'fact.badge_invented');
+  assert.ok(f, 'fired');
+  assert.equal(f.severity, 'hard');
+});
+
+test('factGuard on v2: the three voice checks are LOGGED, never rejecting', () => {
+  const sj = v2(A);
+  const draft = draftFor(sj);
+  const block = draft.blocks.find((b) => (b.fact_ids || []).some((id) => id.startsWith('strength_')));
+  block.text = 'Kamu Lemah.'; // a bare label: rule 21's same-breath explanation is gone
+  const r = validateRenderingV2(draft, sj);
+  const voice = r.findings.filter((f) => ['fact.strength_bare_label', 'fact.strength_same_breath', 'fact.palace_dropped'].includes(f.check));
+  assert.ok(voice.length > 0, 'precondition: the plant trips at least one of the three');
+  for (const f of voice) assert.equal(f.severity, 'flag', `${f.check} is logged on v2`);
+});
+
 // A typographic dash was HARD here until 1.32.0; fix (ii) normalises it instead,
 // and the FIX (ii) tests below assert that.
 test('D3: hanzi outside a bracket and a percentage are each HARD', () => {
@@ -265,7 +302,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.34.0');
+    assert.equal(onV2.stage6_version, '1.36.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
