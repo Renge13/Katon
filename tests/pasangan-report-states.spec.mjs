@@ -554,6 +554,39 @@ test('THE PDF LINK IS ON `ready` AND ABSENT FROM `floor`, and carries the bearer
   } finally { onFloor.unmount(); floor(); }
 });
 
+// ── "Unduh PDF" IS THE PAGE'S PRIMARY ACTION (2026-09-26) ──
+// It was a small outlined pill with the LOCK icon, styled as `Salin tautan`'s
+// twin. Now it is the kit's primary `Button`, full width, with the kit's download
+// icon (`Icon.save`) - the same shape as the mirror's own "Unduh PDF"
+// (components/Funnel.jsx), reused rather than restyled.
+import { Icon } from '../components/kit.jsx';
+
+function iconMarkupR(name, size) {
+  const host = document.createElement('div');
+  const root = createRoot(host);
+  act(() => root.render(React.createElement(Icon[name], { size })));
+  const html = host.innerHTML;
+  act(() => root.unmount());
+  return html;
+}
+
+test('"Unduh PDF" IS THE PRIMARY BUTTON, FULL WIDTH, WITH THE DOWNLOAD ICON', async () => {
+  const ready = stub({ pair: { status: 'paid' }, reading: READING('render') });
+  const ui = await mount();
+  try {
+    const link = ui.host.querySelector('a[href="/api/pair/p1/pdf"]');
+    assert.ok(link, 'precondition: the ready view has its PDF link');
+    const button = link.querySelector('button');
+    assert.ok(button, 'the link holds a button');
+    assert.equal(button.style.background, 'var(--clay)', 'primary colour');
+    assert.equal(button.style.width, '100%', 'full width');
+    const svg = button.querySelector('svg')?.outerHTML ?? '';
+    assert.equal(svg, iconMarkupR('save', 17), 'the download icon');
+    assert.ok(button.textContent.includes(PASANGAN_COPY.report_download_pdf), 'its ruled label');
+    assert.equal(link.innerHTML.includes(iconMarkupR('lock', 11)), false, 'no lock on it');
+  } finally { ui.unmount(); ready(); }
+});
+
 test('NO NON-READY VIEW OFFERS THE PDF', async () => {
   // Every other state, as a set rather than a list to keep in step: an unpaid
   // caller seeing a download link would be the paywall leaking a control, and the
