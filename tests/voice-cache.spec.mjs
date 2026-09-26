@@ -102,3 +102,30 @@ for (const [from, to] of [['v1', 'v2'], ['v2', 'v1']]) {
     assert.equal(same.cached, true, `${from} under ${from} must hit its own row`);
   });
 }
+
+// ── A CACHED ROW IS RE-CHECKED BY THE VOICE THAT WROTE IT (STAGE6 1.43.0) ──
+// Prompt AG item 4, an AF defect: lib/mirror/handlers.js re-gated every cached
+// row with the v1 validator, so a v2 reading that passed v2's gate when it was
+// written was floored on a later serve by a v1 rule v2 deliberately logs instead.
+test('A CACHED v2 ROW IS RE-GATED BY v2, NOT v1 (and a v1 row still by v1)', async () => {
+  const { floorIfHardFailing } = await import('../lib/mirror/handlers.js');
+  const v2sj = withVoice('v2', () => buildSemanticJson(A));
+  const v1sj = withVoice(null, () => buildSemanticJson(A)); // withVoice leaves VOICE set
+  // The strength block said bare: fact.strength_same_breath is HARD on v1 and a
+  // logged flag on v2 (1.36.0). Everything else is the floor's own text.
+  const bare = (sj) => {
+    const floor = assembleFallback(sj);
+    return {
+      blocks: floor.blocks.map((b) => (b.fact_ids.includes('strength_weak') ? { ...b, text: 'Kamu Lemah.' } : b)),
+      penutup: 'Penutup yang cukup panjang untuk sebuah bacaan yang utuh.',
+      source: 'gemini', cached: true, cache_key: cacheKey(sj),
+    };
+  };
+  assert.ok(v2sj.facts.some((f) => f.id === 'strength_weak'), 'precondition: a weak chart');
+  const onV2 = floorIfHardFailing(bare(v2sj), v2sj);
+  assert.equal(onV2.source, 'gemini', 'the v2 row is served as written');
+  assert.notEqual(onV2.hard_fail_fallback, true);
+  // The same text on a v1 row is still floored, so the test can fail the other way.
+  const onV1 = floorIfHardFailing(bare(v1sj), v1sj);
+  assert.equal(onV1.hard_fail_fallback, true, 'v1 still floors a bare strength label');
+});
