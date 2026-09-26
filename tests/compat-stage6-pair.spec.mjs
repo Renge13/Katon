@@ -432,10 +432,14 @@ test("Reyner's scope lists are what he ruled, and they live in the DATA file", (
   // the literal sets means such an edit cannot land without also landing here,
   // where STAGE6_VERSION is asserted one screen up.
   const scope = BLOCKLIST.style._pair_scope.tension_collapse;
+  // The four `p2_frame_*` keys (2026-09-26, Prompt AD) are NOT a scope change: a
+  // frame hit used to derive its seat key, and each frame key sits in exactly the
+  // list its seat key does, so every block scans as it did before.
   assert.deepEqual(scope.banned_in,
-    ['p2_clash', 'p2_harm', 'p2_punishment', 'p3_same_imbalance', 'p1_controls', 'p5_q2', 'p5_q4']);
+    ['p2_clash', 'p2_harm', 'p2_punishment', 'p2_frame_clash', 'p2_frame_harm', 'p2_frame_punishment',
+      'p3_same_imbalance', 'p1_controls', 'p5_q2', 'p5_q4']);
   assert.deepEqual(scope.permitted_in,
-    ['p3_supplies', 'p2_harmony', 'p1_combination', 'p5_q1', 'p5_q3']);
+    ['p3_supplies', 'p2_harmony', 'p2_frame_harmony', 'p1_combination', 'p5_q1', 'p5_q3']);
   // `_`-prefixed keys are skipped by style.js's compile filter, so the scope
   // block cannot be mistaken for a pattern category.
   assert.equal(Object.keys(BLOCKLIST.style).includes('_pair_scope'), true);

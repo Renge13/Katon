@@ -1,0 +1,282 @@
+{
+ "_note": "EVIDENCE, not output. branchRelations as served by GET https://www.katon.app/api/pair/<id> on 2026-09-26 (read-only). Births: g4WH4 and PZ0t from scripts/qa-voice-v2-renders.mjs; rVe4ca is a RECONSTRUCTION - its real births were not read (no store access); these are one of 21 birth pairs in 1955-2008 whose full GET facts body reproduces production byte-for-byte. JoWcjAT0Rc3DlLQlj3JiT serves a body byte-identical to PZ0t. Never regenerate this to make a test pass.",
+ "pairs": [
+  {
+   "id": "g4WH4_9QbCrCj3Gha934q",
+   "a": {
+    "birthDate": "1989-09-13",
+    "birthTime": "09:00",
+    "gender": "male"
+   },
+   "b": {
+    "birthDate": "1997-09-14",
+    "birthTime": "13:00",
+    "gender": "female"
+   },
+   "branchRelations": {
+    "dayBranchPair": [
+     {
+      "kind": "compat_branch_relation",
+      "relation": "害",
+      "branches": [
+       "子",
+       "未"
+      ],
+      "from": {
+       "chart": "A",
+       "position": "day",
+       "branch": "子"
+      },
+      "to": {
+       "chart": "B",
+       "position": "day",
+       "branch": "未"
+      }
+     }
+    ],
+    "bHitsASpousePalace": [
+     {
+      "kind": "compat_branch_relation",
+      "relation": "六合",
+      "branches": [
+       "子",
+       "丑"
+      ],
+      "from": {
+       "chart": "B",
+       "position": "year",
+       "branch": "丑"
+      },
+      "to": {
+       "chart": "A",
+       "position": "day",
+       "branch": "子"
+      }
+     },
+     {
+      "kind": "compat_branch_relation",
+      "relation": "害",
+      "branches": [
+       "子",
+       "未"
+      ],
+      "from": {
+       "chart": "B",
+       "position": "day",
+       "branch": "未"
+      },
+      "to": {
+       "chart": "A",
+       "position": "day",
+       "branch": "子"
+      }
+     },
+     {
+      "kind": "compat_branch_relation",
+      "relation": "害",
+      "branches": [
+       "子",
+       "未"
+      ],
+      "from": {
+       "chart": "B",
+       "position": "hour",
+       "branch": "未"
+      },
+      "to": {
+       "chart": "A",
+       "position": "day",
+       "branch": "子"
+      }
+     }
+    ],
+    "aHitsBSpousePalace": [
+     {
+      "kind": "compat_branch_relation",
+      "relation": "害",
+      "branches": [
+       "子",
+       "未"
+      ],
+      "from": {
+       "chart": "A",
+       "position": "day",
+       "branch": "子"
+      },
+      "to": {
+       "chart": "B",
+       "position": "day",
+       "branch": "未"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "PZ0t_B3YDnzdXc2LWV38D",
+   "a": {
+    "birthDate": "1989-09-13",
+    "birthTime": "09:00",
+    "gender": "female"
+   },
+   "b": {
+    "birthDate": "1990-03-04",
+    "birthTime": "14:00",
+    "gender": "male"
+   },
+   "branchRelations": {
+    "dayBranchPair": [],
+    "bHitsASpousePalace": [
+     {
+      "kind": "compat_branch_relation",
+      "relation": "冲",
+      "branches": [
+       "子",
+       "午"
+      ],
+      "from": {
+       "chart": "B",
+       "position": "year",
+       "branch": "午"
+      },
+      "to": {
+       "chart": "A",
+       "position": "day",
+       "branch": "子"
+      }
+     },
+     {
+      "kind": "compat_branch_relation",
+      "relation": "害",
+      "branches": [
+       "子",
+       "未"
+      ],
+      "from": {
+       "chart": "B",
+       "position": "hour",
+       "branch": "未"
+      },
+      "to": {
+       "chart": "A",
+       "position": "day",
+       "branch": "子"
+      }
+     }
+    ],
+    "aHitsBSpousePalace": [
+     {
+      "kind": "compat_branch_relation",
+      "relation": "六合",
+      "branches": [
+       "辰",
+       "酉"
+      ],
+      "from": {
+       "chart": "A",
+       "position": "month",
+       "branch": "酉"
+      },
+      "to": {
+       "chart": "B",
+       "position": "day",
+       "branch": "辰"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rVe4ca-FOhsprfGUucTxA",
+   "reconstructed": true,
+   "a": {
+    "birthDate": "1981-02-20",
+    "birthTime": "07:00"
+   },
+   "b": {
+    "birthDate": "1988-07-04",
+    "birthTime": "05:00"
+   },
+   "branchRelations": {
+    "dayBranchPair": [
+     {
+      "kind": "compat_branch_relation",
+      "relation": "六合",
+      "branches": [
+       "巳",
+       "申"
+      ],
+      "from": {
+       "chart": "A",
+       "position": "day",
+       "branch": "巳"
+      },
+      "to": {
+       "chart": "B",
+       "position": "day",
+       "branch": "申"
+      }
+     }
+    ],
+    "bHitsASpousePalace": [
+     {
+      "kind": "compat_branch_relation",
+      "relation": "六合",
+      "branches": [
+       "巳",
+       "申"
+      ],
+      "from": {
+       "chart": "B",
+       "position": "day",
+       "branch": "申"
+      },
+      "to": {
+       "chart": "A",
+       "position": "day",
+       "branch": "巳"
+      }
+     }
+    ],
+    "aHitsBSpousePalace": [
+     {
+      "kind": "compat_branch_relation",
+      "relation": "冲",
+      "branches": [
+       "寅",
+       "申"
+      ],
+      "from": {
+       "chart": "A",
+       "position": "month",
+       "branch": "寅"
+      },
+      "to": {
+       "chart": "B",
+       "position": "day",
+       "branch": "申"
+      }
+     },
+     {
+      "kind": "compat_branch_relation",
+      "relation": "六合",
+      "branches": [
+       "巳",
+       "申"
+      ],
+      "from": {
+       "chart": "A",
+       "position": "day",
+       "branch": "巳"
+      },
+      "to": {
+       "chart": "B",
+       "position": "day",
+       "branch": "申"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

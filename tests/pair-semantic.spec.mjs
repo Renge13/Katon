@@ -183,7 +183,10 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // the shape and a second copy of the key list is the thing that would drift.
   // The seeds file adds fields to existing cells rather than new cells, so the
   // 25-cell count below is unchanged and the per-cell field sets grow.
-  const md = ['compat-glossary-rulings.md', 'compat-glossary-rulings-2.md', 'compat-seeds-rulings.md']
+  // The fourth file is the frame-hit tranche of 2026-09-26 (Prompt AD): four NEW
+  // cells, `name_id` + `label_meaning` each, no seeds.
+  const md = ['compat-glossary-rulings.md', 'compat-glossary-rulings-2.md', 'compat-seeds-rulings.md',
+    'compat-frame-rulings.md']
     .map((f) => readFileSync(path.join(ROOT, 'docs', 'content', f), 'utf8'))
     .join('\n');
   const ruled = {};
@@ -204,7 +207,7 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
     if (m) ruled[heading].push(m[1]);
   }
 
-  assert.equal(Object.keys(ruled).length, 25, 'the two rulings files have 25 cells');
+  assert.equal(Object.keys(ruled).length, 29, 'the rulings files have 29 cells (25 + the 4 frame cells)');
 
   const cells = Object.keys(GLOSSARY.kompatibilitas).filter((k) => !k.startsWith('_'));
   assert.deepEqual(cells.slice().sort(), Object.keys(ruled).sort(),
@@ -225,10 +228,12 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // stripped by the same `_`-prefix rule as `_note`, so it is not an assignment
   // and does not count.
   //
-  // 46 + 1 + 42 = 89, and the arithmetic is written out because this number is
+  // Plus the frame tranche of 2026-09-26: 4 cells x (name_id + label_meaning) = 8.
+  //
+  // 46 + 1 + 42 + 8 = 97, and the arithmetic is written out because this number is
   // the one a later tranche has to update deliberately rather than by reading a
   // failure and typing whatever the actual was.
-  assert.equal(total, 89, '89 assignments across the three tranches');
+  assert.equal(total, 97, '97 assignments across the four tranches');
 
   // NO SEEDS. Nothing was ruled for gift/cost/actionable, and a placeholder for a
   // string nobody has ruled is an invitation to invent one.

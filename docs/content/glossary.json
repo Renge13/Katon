@@ -781,10 +781,30 @@
    "daily_seed": "Kalian bisa berada di ruang yang sama dalam kesibukan masing-masing tanpa gangguan, namun jarak emosional cepat terasa jika tidak ada kegiatan bersama."
   },
   "p2_palace_frame": {
-   "_note": "A FRAME for the palace scans. The renderer names the pillar and reuses the p2_* names above for the relation, so a palace hit needs no cell of its own.",
+   "_note": "A FRAME for the palace scans. The renderer names the pillar; the relation it found is named by the p2_frame_* cells below (Reyner, 2026-09-26). The seat names (p2_harmony, p2_clash, p2_harm, p2_punishment) describe BOTH seats and are never used for a frame hit.",
    "label_meaning": "Salah satu pilar di bagan dia terhubung langsung dengan kursi pasanganmu. Elemen hidupnya memengaruhi ranah terdekatmu.",
    "meaning_seed": "Salah satu pilar kehidupan pasangan menyentuh langsung ruang privatmu, membuat dinamika dari area hidupnya berdampak langsung ke suasana hubungan.",
    "daily_seed": "Saat area hidup pasangan tersebut mengalami tekanan, suasananya langsung terbawa ke rumah dan kamu merasakannya sebelum dia sempat cerita."
+  },
+  "p2_frame_harmony": {
+   "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 六合 with the other person's day branch. Never used for the day pair, which is p2_harmony. Ruled by Reyner 2026-09-26.",
+   "name_id": "Saling Tarik",
+   "label_meaning": "Salah satu pilar dan kursi pasangan ibarat magnet. Keduanya langsung menempel dan terhubung dengan sendirinya tanpa perlu dipaksa."
+  },
+  "p2_frame_clash": {
+   "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 冲 with the other person's day branch. Never used for the day pair, which is p2_clash. Ruled by Reyner 2026-09-26.",
+   "name_id": "Beda Arah",
+   "label_meaning": "Salah satu pilar berhadapan langsung dengan kursi pasangan. Karena posisinya berseberangan persis, dinamikanya menjadi lebih intens dan mudah memanas."
+  },
+  "p2_frame_harm": {
+   "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 害 with the other person's day branch. Never used for the day pair, which is p2_harm. Ruled by Reyner 2026-09-26.",
+   "name_id": "Senggolan Halus",
+   "label_meaning": "Salah satu pilar menyenggol kursi pasangan secara halus. Tidak sampai bertabrakan, tetapi cukup memicu gesekan dari hal-hal kecil yang dibiarkan menumpuk."
+  },
+  "p2_frame_punishment": {
+   "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 刑 with the other person's day branch. Never used for the day pair, which is p2_punishment. Ruled by Reyner 2026-09-26.",
+   "name_id": "Siklus Berulang",
+   "label_meaning": "Salah satu pilar dan kursi pasangan memiliki kecenderungan memutar ulang pola masa lalu. Jika tidak disadari, kebiasaan lama akan terus berulang."
   },
   "p3_supplies": {
    "_note": "aSupplies or bSupplies is non-null. Direction-neutral: the renderer names who supplies whom.",
