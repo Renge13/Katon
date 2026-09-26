@@ -79,6 +79,51 @@ test('D2: a required point no block cites is SOFT', () => {
   assert.equal(d2.severity, 'soft');
 });
 
+// ── D2's REQUIRED SET (Prompt AD amendment 1, item 2, 2026-09-26) ──
+// Citation-based as before; only the set shrinks. Mirror: the three identity facts.
+// Pair: p2_day_pair and p5_pull_fit. The identity ids are derived HERE from the
+// facts' own provenance, never read off required_points, so the test cannot agree
+// with the code by construction.
+const identityIds = (sj) => [
+  sj.facts.find((f) => f.provenance.kind === 'day_stem' && f.provenance.stem === sj.core.day_master),
+  sj.facts.find((f) => f.provenance.kind === 'strength' && f.provenance.verdict === sj.strength.verdict),
+  sj.facts.find((f) => (f.god ?? f.provenance.god) === sj.core.main_profile && f.hierarchy.role === 'spine'),
+].map((f) => f.id);
+/** The floor draft, citing only `keep`; blocks left citing nothing are dropped. */
+const citingOnly = (sj, keep) => {
+  const draft = draftFor(sj);
+  for (const b of draft.blocks) b.fact_ids = (b.fact_ids || []).filter((id) => keep.includes(id));
+  draft.blocks = draft.blocks.filter((b) => b.fact_ids.length > 0);
+  return draft;
+};
+const d2Of = (r) => r.findings.filter((f) => f.check === 'v2.d2_point_not_cited').map((f) => f.where);
+
+test('D2 (mirror): citing only the three identity facts leaves no D2 finding', () => {
+  const sj = v2(A);
+  const ids = identityIds(sj);
+  assert.equal(new Set(ids).size, 3, 'precondition: three distinct identity facts');
+  assert.ok(sj.facts.filter((f) => f.hierarchy.role === 'spine' || f.importance >= 65).length > 3,
+    'precondition: the v1 set is larger than three, or this test proves nothing');
+  assert.deepEqual(d2Of(validateRenderingV2(citingOnly(sj, ids), sj)), []);
+});
+
+test('D2 (mirror): the same draft without the strength fact has exactly one D2, soft, on strength', () => {
+  const sj = v2(A);
+  const [dm, strength, profile] = identityIds(sj);
+  const r = validateRenderingV2(citingOnly(sj, [dm, profile]), sj);
+  assert.deepEqual(d2Of(r), [strength]);
+  assert.equal(r.findings.find((f) => f.check === 'v2.d2_point_not_cited').severity, 'soft');
+});
+
+test('D2 (pair): citing p2_day_pair and p5_pull_fit, not p3/p4, leaves no D2 finding', () => {
+  const sj = buildPairSemantic(A, B, { voice: 'v2' });
+  const dropped = sj.facts.filter((f) => /^p[34]_/u.test(f.id)).map((f) => f.id);
+  assert.ok(dropped.includes('p4_temperament'), `precondition: ${dropped}`);
+  const keep = sj.facts.map((f) => f.id).filter((id) => !dropped.includes(id));
+  assert.ok(keep.includes('p2_day_pair') && keep.includes('p5_pull_fit'));
+  assert.deepEqual(d2Of(validateRenderingV2(citingOnly(sj, keep), sj)), []);
+});
+
 // A typographic dash was HARD here until 1.32.0; fix (ii) normalises it instead,
 // and the FIX (ii) tests below assert that.
 test('D3: hanzi outside a bracket and a percentage are each HARD', () => {
@@ -220,7 +265,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.33.0');
+    assert.equal(onV2.stage6_version, '1.34.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
