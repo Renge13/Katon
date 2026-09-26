@@ -135,19 +135,45 @@ test('ADVISORY STILL: a J2 finding is stored at flag, keeps its spec severity, a
   assert.equal(f.judge_severity, 'hard');
 });
 
-test('ADVISORY: J3 keeps soft, J4 missing cost keeps hard, neither regenerates', async () => {
-  let sj = v2();
-  stub(sj, [[J3]]);
-  let out = await render(sj);
+test('ADVISORY: J3 keeps soft and does not regenerate', async () => {
+  const sj = v2();
+  const calls = stub(sj, [[J3]]);
+  const out = await render(sj);
   assert.equal(out.source, 'gemini');
   assert.equal(out.review.judge[0].judge_severity, 'soft');
-  __clearMemCache(); __clearInFlight();
-  sj = v2();
-  const calls = stub(sj, [[J4_COST]]);
-  out = await render(sj);
-  assert.equal(out.source, 'gemini');
-  assert.equal(out.review.judge[0].judge_severity, 'hard');
   assert.equal(calls.writer, 1);
+});
+
+// ── 1.39.0 (Prompt AD Job B, amendment 1 item 5 + amendment 2 item 1): J4 removed; rubric narrowed ──
+test('J4 IS GONE (1.39.0): a J4 the model returns anyway is malformed, never a finding', async () => {
+  const sj = v2();
+  assert.ok(sj.required_points.some((r) => r.fact_id === J4_COST.sentence), 'precondition: it names a real required point');
+  stub(sj, [[J4_COST]]);
+  const out = await render(sj);
+  assert.equal(out.source, 'gemini');
+  assert.deepEqual(out.review.judge, [], 'not a finding');
+  assert.deepEqual(out.review.judge_malformed.map((f) => f.class), ['J4'], 'kept for reading');
+});
+
+test('THE JUDGE NO LONGER RECEIVES required_points (1.39.0)', async () => {
+  const sj = v2();
+  let sent = null;
+  globalThis.fetch = async (_url, opts) => {
+    sent = JSON.parse(JSON.parse(opts.body).contents[0].parts[0].text);
+    return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"findings":[]}' }] } }] }), { status: 200 });
+  };
+  await judgeRendering(assembleFallback(sj), sj);
+  assert.deepEqual(Object.keys(sent).sort(), ['facts', 'reading']);
+});
+
+test('THE RUBRIC (1.39.0): J1 has the scene boundary, J2 only chart causes, J3 only rule 25, no J4', () => {
+  assert.ok(JUDGE_PROMPT.includes('Misalnya, ketika ...'), 'J1 names the scene framings');
+  assert.ok(JUDGE_PROMPT.includes('Tahun lalu kamu ...'), 'J1 names the past-event violation');
+  assert.ok(/J2 invented chart causality/u.test(JUDGE_PROMPT) && JUDGE_PROMPT.includes('Karena pola ini, ...'), 'J2');
+  assert.ok(/J3 predictive certainty: ONLY/u.test(JUDGE_PROMPT), 'J3 is rule 25 only');
+  assert.ok(JUDGE_PROMPT.includes('If the cause is itself a chart fact the supplied facts do not contain, it is J1, not J2.'), 'J1 precedence (amendment 2 item 1), verbatim');
+  assert.equal(/\bJ4\b/u.test(JUDGE_PROMPT), false, 'no J4 anywhere in the prompt');
+  assert.equal(JUDGE_PROMPT.includes('required_points'), false);
 });
 
 test('A MALFORMED FINDING (no grounding shown) IS KEPT AND NEVER ACTED ON', async () => {
@@ -202,21 +228,6 @@ test('(d) A NON-FINDING IS MALFORMED: unsupported "None" or empty', () => {
   assert.equal(wellFormed({ class: 'J1', grounding_considered: g, supported: 'x', unsupported: 'None' }), false);
   assert.equal(wellFormed({ class: 'J1', grounding_considered: g, supported: 'x', unsupported: ' ' }), false);
   assert.equal(wellFormed({ class: 'J1', grounding_considered: g, supported: 'x', unsupported: 'a star the chart lacks' }), true);
-});
-
-test('(c) J4 ONLY OVER THE RENDER\'S OWN REQUIRED POINTS, and none with an empty list', async () => {
-  const sj = v2();
-  const stray = { ...J4_COST, sentence: 'aspek_convergence_食神' }; // a fact, not a required point
-  assert.ok(!sj.required_points.some((r) => r.fact_id === stray.sentence), 'precondition');
-  globalThis.fetch = async () => new Response(JSON.stringify({
-    candidates: [{ content: { parts: [{ text: JSON.stringify({ findings: [J4_COST, stray] }) }] } }],
-  }), { status: 200 });
-  const draft = assembleFallback(sj);
-  const out = await judgeRendering(draft, sj);
-  assert.deepEqual(out.findings.map((f) => f.sentence), ['void_stack_month']);
-  assert.deepEqual(out.malformed.map((f) => f.sentence), ['aspek_convergence_食神']);
-  const none = await judgeRendering(draft, { ...sj, required_points: [] });
-  assert.deepEqual(none.findings, [], 'no required points, no J4');
 });
 
 test('(a) THE GLOSSES READ THE ENGINE THE RIGHT WAY ROUND, pinned on chart 1', () => {
