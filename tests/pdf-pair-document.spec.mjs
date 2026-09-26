@@ -380,7 +380,11 @@ test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () =>
   const { texts, semanticJson } = await build('Y-1 fixture');
   const frame = semanticJson.facts.find((f) => f.id === 'p2_palace_frame');
   assert.ok(frame, 'precondition: Y-1 carries a palace frame');
-  assert.ok(frame.provenance.variants.includes('p2_harmony'),
+  // Its frame relation is B's YEAR 丑 forming 六合 with A's seat 子. Since
+  // 2026-09-26 (Prompt AD) that hit is keyed to `p2_frame_harmony`, never to the
+  // seat cell `p2_harmony` - which describes BOTH seats, and this pair's seats are
+  // harmed. tests/pair-frame-labels.spec.mjs owns that rule; this reads it.
+  assert.ok(frame.provenance.variants.includes('p2_frame_harmony'),
     'precondition: its frame relation is the 六合 that produced the wrong sentence');
 
   // ── SCOPED TO THE FACTS PAGE, WHICH IS WHAT THE RULING SAYS ──
@@ -398,19 +402,22 @@ test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () =>
     'the day-pair variant\'s meaning is printed on a frame row');
   assert.ok(factsPage.includes(flat(K.p2_palace_frame.label_meaning)),
     'the frame row does not carry the frame\'s own meaning');
-  // The term is still the relation's name, which is what makes the row findable
-  // against the legend entry for it.
-  assert.ok(factsPage.includes(K.p2_harmony.name_id), 'the relation name is gone from the row');
+  // The term is the relation's FRAME name, which is what makes the row findable
+  // against the legend entry for it. The seat name must not be on the page at all:
+  // this pair's seats are not bound (2026-09-26).
+  assert.ok(factsPage.includes(K.p2_frame_harmony.name_id), 'the frame relation name is gone from the row');
+  assert.equal(factsPage.includes(K.p2_harmony.name_id), false,
+    'the frame row still wears the SEAT name');
   // AND THE APPENDIX STILL EXPLAINS THE RELATION. Asserted, not assumed: the fix
   // must not have closed the table's gap by emptying the legend.
-  assert.ok(flat(texts.join('\n')).includes(flat(K.p2_harmony.label_meaning)),
+  assert.ok(flat(texts.join('\n')).includes(flat(K.p2_frame_harmony.label_meaning)),
     'the variant lost its appendix entry');
 
   // BOTH COLUMNS CARRY A BRANCH, and the row knows it: the pillar creating the
   // frame and the spouse palace it touches. Asserted on the row DATA so a layout
   // change cannot quietly empty one side.
   const rows = factRows(semanticJson);
-  const frameRow = rows.find((r) => r.anchorKey === 'p2_harmony');
+  const frameRow = rows.find((r) => r.anchorKey === 'p2_frame_harmony');
   assert.ok(frameRow, 'no frame row was emitted at all');
   assert.equal(frameRow.branches, true, 'a frame row holds branch characters');
   assert.ok(frameRow.a && frameRow.b, 'a frame row must name both sides');
