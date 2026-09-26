@@ -54,26 +54,20 @@ function PageUrl({ id, withCopy = false }) {
  * there is no second token and no header to set, which is what makes an anchor
  * enough.
  *
- * ── THE SAME TREATMENT AS `Salin tautan`, DELIBERATELY ─────
- * Y-3: no new visual language. The style below is `CopyLink`'s button, and the two
- * sit in one row. The label is a RULED SLOT and draws a sentinel until Reyner rules
- * it, which a production build refuses - so this cannot ship with Cowork's words in
- * it by anyone forgetting.
+ * ── THE PAGE'S PRIMARY ACTION (2026-09-26) ────────────────
+ * It was `CopyLink`'s small outlined pill with the LOCK icon (Y-3: "no new visual
+ * language"). Now it is the kit's primary `Button`, full width, with the download
+ * icon - exactly the mirror's own "Unduh PDF" in components/Funnel.jsx, reused rather
+ * than restyled, so there is still no new visual language. The label is a RULED
+ * SLOT, unchanged.
  */
 function DownloadPdf({ id }) {
   return (
     <div style={{ marginTop: 10 }}>
-      <a
-        href={`/api/pair/${id}/pdf`}
-        style={{
-          background: 'none', border: '1px solid var(--border)', borderRadius: 999,
-          padding: '10px 14px', cursor: 'pointer', whiteSpace: 'nowrap',
-          fontFamily: 'var(--font-sans)', fontSize: 12.5, color: 'var(--tinta-soft)',
-          display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
-        }}
-      >
-        <Icon.lock size={11} />
-        {PASANGAN_COPY.report_download_pdf}
+      <a href={`/api/pair/${id}/pdf`} style={{ display: 'block', textDecoration: 'none' }}>
+        <Button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Icon.save size={17} /> {PASANGAN_COPY.report_download_pdf}
+        </Button>
       </a>
     </div>
   );

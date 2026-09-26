@@ -43,6 +43,7 @@ export const Icon = {
   chevDown: (p) => <Ic {...p} d={<path d="M6 9l6 6 6-6" />} />,
   lock:     (p) => <Ic {...p} d={<g><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></g>} />,
   save:     (p) => <Ic {...p} d={<g><path d="M12 4v11" /><path d="M8 11l4 4 4-4" /><path d="M6 20h12" /></g>} />,
+  copy:     (p) => <Ic {...p} d={<g><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></g>} />,
   check:    (p) => <Ic {...p} d={<path d="M5 12l5 5 9-10" />} />,
   arrow:    (p) => <Ic {...p} d={<g><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></g>} />,
   sparkle:  (p) => <Ic {...p} d={<path d="M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10l5.2-1.6z" />} />,
