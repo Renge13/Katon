@@ -15,6 +15,7 @@ import { readFileSync } from 'node:fs';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
+import { buildSemanticJson } from '../lib/semantic/index.js';
 import { validateRendering } from '../lib/validate/index.js';
 
 const fixture = (name) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8'));
@@ -163,4 +164,61 @@ test('THE WHOLE S4 SAMPLE PASSES ALL THREE PAIR-TRUTH CHECKS', () => {
   for (const id of ['pair.stem_inverted', 'pair.supply_inverted', 'pair.cross_chart_seat']) {
     assert.ok(!found.includes(id), `${id} fired on the true S4 sample`);
   }
+});
+
+// ── ELEMENT DOMINANCE AGREES WITH THE ENGINE (STAGE6 1.41.0) ──
+
+// calibrate-j1's mirror: A 1989-09-13 09:00. Kayu 0 (element_missing_Wood), Air
+// 37.5 (element_dominant_Water, the top share), Api 27.5.
+const chartA = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' });
+const mirror = buildSemanticJson(chartA);
+const mirrorOne = (text) => ({ blocks: [{ fact_ids: ['spouse_palace'], heading: 'x', text }], penutup: '' });
+
+test('THE PREMISE: Kayu is missing and Air is the top share', () => {
+  const p = mirror.chart.element_presence;
+  assert.equal(p.Kayu, 0);
+  assert.equal(Math.max(...Object.values(p)), p.Air);
+  assert.ok(mirror.facts.some((f) => f.id === 'element_missing_Wood'));
+  assert.ok(mirror.facts.some((f) => f.id === 'element_dominant_Water'));
+});
+
+test('DOMINANCE: seed-S3 fires ("Kayu adalah unsur yang paling banyak", Kayu is missing)', () => {
+  assert.ok(checks(mirrorOne('Di baganmu, Kayu adalah unsur yang paling banyak.'), mirror).includes('fact.element_dominance'));
+});
+
+test('DOMINANCE: an element that is present but not the top share fires', () => {
+  assert.ok(checks(mirrorOne('Api mendominasi baganmu.'), mirror).includes('fact.element_dominance'));
+});
+
+test('DOMINANCE: the true sentence passes, and so does a negated one', () => {
+  for (const text of [
+    'Di baganmu, Air adalah unsur yang paling banyak.',
+    'Unsur Air dominan di baganmu.',
+    'Dia membawa elemen Kayu yang tidak dominan di baganmu.',
+    'Karakter dominanmu adalah Aspek Pengelola.',
+  ]) {
+    assert.ok(!checks(mirrorOne(text), mirror).includes('fact.element_dominance'), text);
+  }
+});
+
+test('DOMINANCE: an element name inside a longer word is not an element (word boundary)', () => {
+  // Kayu is missing on this chart, so a boundary-less match would fire here. This
+  // test exists because the first version's boundaries were written through a
+  // shell heredoc and lost their backslashes (`[\p{L}]` became `[p{L}]`), and
+  // every other test still passed.
+  assert.ok(!checks(mirrorOne('Kayuagung paling banyak menghasilkan jati.'), mirror).includes('fact.element_dominance'));
+});
+
+test('DOMINANCE ON A PAIR: per person through mirror.a / mirror.b (v2); a v1 pair has no element facts', () => {
+  const planted = { blocks: [{ fact_ids: ['p3_supply'], heading: 'x', text: 'Kayu adalah unsur yang paling banyak di baganmu.' }], penutup: '' };
+  // v1 (main): nothing to compare against, so nothing fires.
+  assert.ok(!checks(planted, g4).includes('fact.element_dominance'));
+  // v2 shape: each person's mirror facts ride on the pair object.
+  const mA = buildSemanticJson(calculateBaziChart(G4.inputs.a));
+  const mB = buildSemanticJson(calculateBaziChart(G4.inputs.b));
+  const g4v2 = { ...g4, mirror: { a: { facts: mA.facts }, b: { facts: mB.facts } } };
+  assert.ok(checks(planted, g4v2).includes('fact.element_dominance'));
+  const trueB = { ...planted, blocks: [{ ...planted.blocks[0], text: 'Tanah mendominasi bagannya.' }] };
+  assert.ok(mB.facts.some((f) => f.id === 'element_dominant_Earth'));
+  assert.ok(!checks(trueB, g4v2).includes('fact.element_dominance'));
 });

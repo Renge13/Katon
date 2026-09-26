@@ -149,5 +149,5 @@ test('THE MIRROR IS UNTOUCHED, and neither check is a gate change', () => {
   ).filter((f) => f.check.startsWith('pair.direction') || f.check.startsWith('pair.penutup'));
   assert.ok(logged.length > 0);
   for (const f of logged) assert.equal(f.severity, 'flag');
-  assert.equal(STAGE6_VERSION, '1.40.0'); // 1.39.0-1.40.0: pair truth checks are hard (AG item 1)
+  assert.equal(STAGE6_VERSION, '1.41.0'); // 1.39.0-1.41.0: engine-truth checks are hard (AG item 1)
 });
