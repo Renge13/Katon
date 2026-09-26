@@ -170,6 +170,22 @@ test('A JUDGE THAT CANNOT RUN IS NOT A PASS (1.33.0): J1 was never checked, so i
   assert.equal(rejected, null, 'the floor carries no review');
 });
 
+test('FLASH-LITE ONLY (Reyner, 2026-09-26): the judge is the WRITER\'s model id, read from config', async () => {
+  const { JUDGE_MODEL } = await import('../lib/validate/judge.js');
+  const { modelFor, DEFAULT_TIER } = await import('../lib/render/config.js');
+  assert.equal(JUDGE_MODEL, modelFor(DEFAULT_TIER, 'gemini'));
+  assert.equal(JUDGE_MODEL, 'gemini-3.1-flash-lite');
+  // And it is the model the judge actually calls.
+  const sj = v2();
+  let url = null;
+  globalThis.fetch = async (u) => {
+    url = String(u);
+    return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"findings":[]}' }] } }] }), { status: 200 });
+  };
+  await judgeRendering(assembleFallback(sj), sj);
+  assert.ok(url.includes('/gemini-3.1-flash-lite:generateContent'), url);
+});
+
 test('v1 NEVER CALLS THE JUDGE', async () => {
   const sj = v1();
   const calls = stub(sj, [[J1]]);
