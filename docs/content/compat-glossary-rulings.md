@@ -6,6 +6,7 @@ This file lands on main ALONE, before the PR that applies it (the #28 ruling).
 
 APPLIES TO: `glossary.json#kompatibilitas`, the 24 keys X-b2 commit 1 adds as PENDING() placeholders.
   node scripts/apply-rulings.mjs docs/content/compat-glossary-rulings.md --expect 46
+AMENDED 2026-09-28 (Prompt AM): the file now holds 48 assignments, so re-applying it is --expect 48.
 46 = 19 cells x (name_id + label_meaning) + 3 x name_en + 5 text-only cells as label_meaning.
 Apply AFTER X-b2 commit 1 has created the keys; the script refuses an unknown block.
 
@@ -82,7 +83,14 @@ lib/validate/style.js:63 compiles it): PATTERNS 65, falsifiers 5/5 fired, DRAFT 
 ## kompatibilitas.p3_supplies
 
 - name_id: "Penyeimbang Unsur"
-- label_meaning: "Dia membawa elemen yang tidak dominan di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan."
+- label_meaning: "Dia membawa elemen yang kadarnya lebih rendah di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan."
+
+AMENDED 2026-09-28 (Prompt AM, ruling 1): the meaning line said "tidak dominan" and now says "kadarnya lebih rendah". Record at the end of this file.
+
+## kompatibilitas.p3_reader_gives
+
+- name_id: "Penyeimbang Unsur"
+- label_meaning: "Kamu membawa elemen yang kadarnya lebih rendah di bagannya. Kehadiranmu secara alami memberi keseimbangan yang ia butuhkan."
 
 ## kompatibilitas.p3_same_imbalance
 
@@ -143,3 +151,27 @@ lib/validate/style.js:63 compiles it): PATTERNS 65, falsifiers 5/5 fired, DRAFT 
 ## kompatibilitas.p7_asks_lead
 
 - label_meaning: "Komitmen yang dituntut dari masing-masing pihak"
+
+### AMENDMENT RECORD 2026-09-28 (Prompt AM): Penyeimbang Unsur in both directions
+
+Reyner, verbatim:
+
+```
+1. Use the drafts, with "kadarnya lebih rendah" in the meaning line and writer guidance.
+2. Leave the Complete Edition header unchanged and park it.
+3. Approve #168, and approve #167 after the copy is applied.
+```
+
+Keyed form of ruling 1, as Cowork tightened it and Reyner confirmed by pasting Prompt AM (the texts applied, byte for byte):
+
+| Cell | Field | Text |
+| `kompatibilitas.p3_supplies` (partner gives) | `label_meaning` | Dia membawa elemen yang kadarnya lebih rendah di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan. |
+| `kompatibilitas.p3_supplies` | `meaning_seed` | Salah satu membawa elemen yang kadarnya lebih rendah di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh. |
+| NEW cell, only the reader gives (name it to fit the section's key scheme; say which) | `name_id` | Penyeimbang Unsur |
+| same new cell | `label_meaning` | Kamu membawa elemen yang kadarnya lebih rendah di bagannya. Kehadiranmu secara alami memberi keseimbangan yang ia butuhkan. |
+| same new cell | `daily_seed` | Kehadiranmu secara alami meredakan kegelisahan di area tertentu dalam hidupnya, sehingga ketiadaanmu langsung membuat area tersebut terasa tidak stabil baginya. |
+| same new cell | `meaning_seed` | the same text as `p3_supplies.meaning_seed` above (it is direction-neutral) |
+
+The new cell is `kompatibilitas.p3_reader_gives` (Claude Code named it to the section's `p3_<descriptor>` scheme). `p3_supplies.daily_seed` and `p3_no_supply` are unchanged. The two seed fields live in `docs/content/compat-seeds-rulings.md` with the rest of the seeds.
+
+WHY. Reyner's ruling 2 of Prompt AL (`docs/product/ah-protection-rulings-2026-09-28.md`, third set) made the giver hold MORE of an element than the receiver. That makes the one-way case common: on 2000 seeded random pairs (2026-09-28, PR #167) only the reader gives in 14.5% of pairs, against 0.3% before. The old meaning line ("Dia membawa ...", the partner brings the reader something) was then untrue for those readers, on the floor and in the PDF table. The engine now picks `p3_reader_gives` when the supplied fact carries A to B and no B to A; both directions, or the partner alone, stay `p3_supplies`.

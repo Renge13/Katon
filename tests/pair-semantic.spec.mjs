@@ -207,7 +207,11 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
     if (m) ruled[heading].push(m[1]);
   }
 
-  assert.equal(Object.keys(ruled).length, 29, 'the rulings files have 29 cells (25 + the 4 frame cells)');
+  // 30 since 2026-09-28 (Prompt AM): `p3_reader_gives`, ruled in the first and
+  // third files, is the only new cell. The amendment's own record sits under a
+  // `###` heading so neither this parser nor scripts/apply-rulings.mjs reads it.
+  assert.equal(Object.keys(ruled).length, 30,
+    'the rulings files have 30 cells (25 + the 4 frame cells + p3_reader_gives)');
 
   const cells = Object.keys(GLOSSARY.kompatibilitas).filter((k) => !k.startsWith('_'));
   assert.deepEqual(cells.slice().sort(), Object.keys(ruled).sort(),
@@ -230,10 +234,14 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   //
   // Plus the frame tranche of 2026-09-26: 4 cells x (name_id + label_meaning) = 8.
   //
-  // 46 + 1 + 42 + 8 = 97, and the arithmetic is written out because this number is
-  // the one a later tranche has to update deliberately rather than by reading a
+  // Plus Prompt AM, 2026-09-28: `p3_reader_gives` x (name_id + label_meaning +
+  // meaning_seed + daily_seed) = 4. Its two amendments to `p3_supplies` replace
+  // values and add no field.
+  //
+  // 46 + 1 + 42 + 8 + 4 = 101, and the arithmetic is written out because this number
+  // is the one a later tranche has to update deliberately rather than by reading a
   // failure and typing whatever the actual was.
-  assert.equal(total, 97, '97 assignments across the four tranches');
+  assert.equal(total, 101, '101 assignments across the five tranches');
 
   // NO SEEDS. Nothing was ruled for gift/cost/actionable, and a placeholder for a
   // string nobody has ruled is an invitation to invent one.
