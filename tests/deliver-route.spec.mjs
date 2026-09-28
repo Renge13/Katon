@@ -298,3 +298,35 @@ test('A PRE-BUMP MIRROR BUYER GETS A PDF: the old-engine row is warmed through t
   assert.equal(warmed, 1, 'the reading door was asked exactly once');
   assert.equal(calls.length, 1);
 });
+
+// ── THE CE PDF RE-CHECKS A CACHED READING BEFORE IT PRINTS IT (Prompt AJ §1) ──
+// Same defect as the pair PDF: only the reading PAGE re-gated a cached row (#155),
+// so a buyer who asked for the PDF first got the stored text unchecked.
+test('THE CE PDF NEVER PRINTS A HARD-FAILING READING, even when the PDF is asked for first', async () => {
+  const { semanticJson, key } = semanticFromRow({ ...BIRTH });
+  const id = await seed({ paid: true, cacheKey: key });
+  // "ramalan" is a HARD reject (forbidden.fatalism, rule 25) - the planted row the
+  // page-path test uses in tests/mirror-route.spec.mjs. Written as a real model row.
+  await writeCache(key, {
+    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Ini ramalan untuk kamu.' }],
+    penutup: 'Penutup.', engineVersion: semanticJson.engine_version,
+    source: 'gemini', model: 'planted-model', promptVersion: 'planted', stage6Version: STAGE6_VERSION,
+  });
+  let warmed = 0;
+  const { renderPdf, calls } = stubPdf();
+  const res = await serveDeliveryPdf(req(), id, {
+    renderPdf,
+    warm: async () => {
+      warmed += 1;
+      await writeCache(key, {
+        ...assembleFallback(semanticJson), engineVersion: semanticJson.engine_version,
+        source: 'gemini', model: 'test-model', promptVersion: 'rerendered000', stage6Version: STAGE6_VERSION,
+      });
+    },
+  });
+  const printed = JSON.stringify(calls[0]?.rendered?.blocks ?? []);
+  assert.equal(printed.includes('ramalan'), false, 'the CE PDF printed the hard-failing reading');
+  assert.equal(res.status, 200);
+  assert.equal(warmed, 1, 'the bad row was dropped and re-rendered through the reading door');
+  assert.equal(calls[0].rendered.prompt_version, 'rerendered000');
+});

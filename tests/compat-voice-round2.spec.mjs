@@ -149,5 +149,5 @@ test('THE MIRROR IS UNTOUCHED, and neither check is a gate change', () => {
   ).filter((f) => f.check.startsWith('pair.direction') || f.check.startsWith('pair.penutup'));
   assert.ok(logged.length > 0);
   for (const f of logged) assert.equal(f.severity, 'flag');
-  assert.equal(STAGE6_VERSION, '1.47.0'); // 1.47.0: a cached pair row is re-gated on serve (AI §2)
+  assert.equal(STAGE6_VERSION, '1.50.0'); // 1.47.0: a cached pair row is re-gated on serve (AI §2)
 });
