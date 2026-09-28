@@ -8,7 +8,9 @@
 // the check is red-first and controlled on, copied out of the stored JSON by script,
 // never retyped, with each reading's births.
 //   reject   round 4d PZ0t, served: "Aspek Pengelola-mu ... di Pilar Kerja dan Pilar Diri"
-//   log      an2 run 1 PZ0t, served: the same claim with no possessive (subject unknown)
+//   log      an2 run 1 PZ0t, served: the same claim with no possessive (subject unknown);
+//            since STAGE6 1.57.0 it is false for BOTH people and so rejected (Prompt AP §3)
+//   one-true round 4c PZ0t, served: no possessive, true for A only - still logged
 //   control  round 4d chart1, served: its true Aspek-at-pillar and relation-span sentences
 // ============================================================
 
@@ -17,6 +19,7 @@ import fs from 'node:fs';
 const SRC = [
   { role: 'reject', file: 'reports/voice-v2/round4d/PZ0t_B3YDnzdXc2LWV38D-v2.json', find: /Aspek Pengelola-mu yang menonjol di Pilar Kerja dan Pilar Diri/u },
   { role: 'log', file: 'reports/voice-v2/an2/r1/PZ0t_B3YDnzdXc2LWV38D-v2.json', find: /Aspek Pengelola yang menonjol di Pilar Kerja dan Pilar Diri/u },
+  { role: 'one-true', file: 'reports/voice-v2/round4c/PZ0t_B3YDnzdXc2LWV38D-v2.json', find: /Aspek Pengelola yang menonjol di Pilar Kerja\.$/u },
   // AN quoted these loosely ("Aspek Pengelola ... di pilar kerja"); the served text puts the
   // pillar first, and the relation carries its bracket. Matched as served.
   { role: 'control', file: 'reports/voice-v2/round4d/chart1-v2.json', find: /^Di pilar kerja, kamu membawa Aspek Pengelola|Setengah Gabungan \(Half Combination\) antara Pilar Akar, Pilar Kerja, dan Pilar Arah/u },
@@ -31,7 +34,7 @@ for (const s of SRC) {
     }
   }
 }
-for (const role of ['reject', 'log', 'control']) if (!out.some((x) => x.role === role)) throw new Error(`no ${role} literal found`);
+for (const role of ['reject', 'log', 'one-true', 'control']) if (!out.some((x) => x.role === role)) throw new Error(`no ${role} literal found`);
 fs.writeFileSync('tests/fixtures/voice-v2-aspek-pillar.json', `${JSON.stringify({
   _about: 'EVIDENCE, not output. Extracted by scripts/extract-aspek-pillar-fixture.mjs (Prompt AO §2) from the stored served readings named in each entry. Never retyped.',
   cases: out,
