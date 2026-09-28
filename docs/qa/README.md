@@ -37,6 +37,7 @@ citations the rule exists to protect.
 
 | Artifact | What question it answers | prompt | gate | Superseded by |
 |---|---|---|---|---|
+| `2026-09-28-voice-v2-round4-representative.md` | **Round 4, the representative test (AE item 4):** 5 mirrors + 2 pairs, v2 only, Flash-lite writer, NO judge, AE's prompts with Reyner's examples and the ruled pair opening. 7/7 first pass, 0 floors, $0.0217. What a reader would see: PZ0t serves the opening twice (braided block), nested brackets on two mirrors, and "Mungkin menarik untuk ..." closing 7/7. The examples are copied verbatim where a subject shares the example's chart facts (PZ0t, rVe4ca, chart6). | `v2-ae09c859acbfc342` / `v2-349d650a51eaa980` | `1.46.0` | - |
 | `2026-08-17-renders.md` | The first real end-to-end renders. Does the chain produce servable prose at all? | - | - | - |
 | `2026-08-18-rejections.md` + `2026-08-18-rejections.json` | WHICH Stage 6 checks actually fire, and how often, over a large trace. The rejection-cause census. | - | `1.9.0` | - |
 | `2026-08-18-retry-depth.md` + `2026-08-18-retry-depth.json` | Does a regeneration buy a lower floor rate, and how much per extra depth? The depth curve, and the trace whose stored prose later served the depth-pair reads. | - | `1.9.0` | - |
