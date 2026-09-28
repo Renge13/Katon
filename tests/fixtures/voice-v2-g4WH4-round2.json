@@ -1,0 +1,63 @@
+{
+  "_about": "Voice v2 round 2 (2026-09-24), pair g4WH4_9QbCrCj3Gha934q: the SERVED v2 reading exactly as reports/voice-v2/g4WH4_9QbCrCj3Gha934q-v2.json#rendered recorded it (writer gemini-3.1-flash-lite, STAGE6 1.30.0). Seeded J1 fixture for scripts/calibrate-j1.mjs. It carries a real invented chart fact that D1-D4 served and the round-2 judge caught as J1: \"dia membawa elemen Air yang tidak dominan di baganmu\", where the engine has B supplying Wood to A and Water as A's DOMINANT element (p3_supply; mirror.a element_dominant_Water). Real model output: never edit, never regenerate.",
+  "inputs": {
+    "a": {
+      "birthDate": "1989-09-13",
+      "birthTime": "09:00",
+      "gender": "male"
+    },
+    "b": {
+      "birthDate": "1997-09-14",
+      "birthTime": "13:00",
+      "gender": "female"
+    }
+  },
+  "writer_model": "gemini-3.1-flash-lite",
+  "stage6_version": "1.30.0",
+  "prompt_version": "v2-fa36aa563b29eb52",
+  "rendered": {
+    "blocks": [
+      {
+        "fact_ids": [
+          "p0_opening"
+        ],
+        "heading": "",
+        "text": "Ini adalah bacaan tentang dua individu: Matahari dan Taman."
+      },
+      {
+        "fact_ids": [
+          "day_master_Fire",
+          "day_master_Earth",
+          "p1_stem_relation"
+        ],
+        "heading": "Dinamika Matahari dan Taman",
+        "text": "Kamu adalah Matahari (Bing), sosok yang menerangi sekitarmu dengan kehangatan yang terasa bahkan sebelum kamu bicara. Sebagai Aspek Pengelola (Direct Wealth), kamu adalah pengatur yang rapi, namun nyalamu membutuhkan bahan bakar dari luar untuk terus bersinar. Di sisi lain, dia adalah Taman (Ji), sosok yang kokoh dan mampu menampung beban tanpa goyah. Dalam hubungan ini, kamu berperan sebagai sumber energi yang menghidupi dia. Alur ini konsisten; kamu sering menjadi pemicu inisiatif dan dorongan baru, sementara dia menyambut dan mengeksekusi peran tersebut dengan ketenangan yang stabil."
+      },
+      {
+        "fact_ids": [
+          "p2_day_pair",
+          "p2_reframe",
+          "p2_palace_frame"
+        ],
+        "heading": "Gesekan di Kursi Pasangan",
+        "text": "Hubungan kalian memiliki gesekan halus pada kursi pasangan. Ini bukan tentang konflik besar yang meledak, melainkan tentang detail kecil yang menumpuk dan rasa tidak nyaman yang muncul perlahan. Karena salah satu pilar dalam bagan dia terhubung langsung dengan ruang privatmu, suasana hatinya atau tekanan yang ia alami di area hidupnya akan langsung terasa di rumah sebelum ia sempat bercerita. Gesekan ini bukanlah vonis kegagalan, melainkan tanda bahwa hubungan ini menuntut kesadaran penuh. Saat kamu merasa lelah, gesekan ini mungkin terasa seperti beban, namun saat kamu sadar, ia menjadi titik untuk saling memahami lebih dalam."
+      },
+      {
+        "fact_ids": [
+          "p3_supply",
+          "p4_temperament"
+        ],
+        "heading": "Saling Melengkapi dalam Perbedaan",
+        "text": "Kalian membawa pola kontras yang menarik. Kamu, dengan fokus pada pengelolaan dan hasil, sering kali merespons peristiwa dengan cara yang berbeda total dari dia, yang lebih berorientasi pada proses sebagai Aspek Perajin (Eating God). Namun, di sinilah letak kekuatannya: dia membawa elemen Air yang tidak dominan di baganmu, memberikan keseimbangan yang menenangkan di area yang tadinya rawan rapuh. Kehadirannya secara alami meredakan kegelisahanmu, dan sebaliknya, kamu memberikan dorongan energi yang ia butuhkan untuk bergerak."
+      },
+      {
+        "fact_ids": [
+          "p5_pull_fit"
+        ],
+        "heading": "Komitmen yang Disengaja",
+        "text": "Hubungan kalian tidak memiliki tarikan otomatis yang membuat segalanya berjalan dengan sendirinya. Ini adalah hubungan yang digerakkan oleh keputusan sadar. Jika tidak ada inisiatif aktif untuk menjadwalkan waktu bersama atau melakukan penyesuaian, hubungan ini bisa terasa berjarak. Keberlanjutan kalian murni lahir dari niat yang diperbarui setiap hari, sebuah pilihan untuk tetap hadir bagi satu sama lain di tengah ritme harian yang mungkin berbeda."
+      }
+    ],
+    "penutup": "Hubungan ini meminta kalian untuk tidak mengandalkan arus alami, melainkan membangun kebersamaan melalui pilihan sadar. Bagi kamu, ini adalah ajakan untuk tidak memendam gesekan kecil, sementara bagi dia, ini adalah undangan untuk tetap terbuka meski ia terbiasa menanggung beban sendirian. Hubungan ini akan tumbuh bukan karena ia sempurna, tetapi karena kalian berdua memilih untuk terus menyeimbangkan ritme satu sama lain."
+  }
+}

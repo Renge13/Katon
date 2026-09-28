@@ -1,0 +1,41 @@
+{
+  "_about": "EVIDENCE, not output. Extracted by script (2026-09-28, Prompt AJ §3) from reports/voice-v2/round4/<subject>-v2.json: the WRITER DRAFT block that carried the archetype in parentheses, and the SERVED block the v2 gate made of it (STAGE6 1.46.0), which nested the English bracket inside. Never retyped.",
+  "cases": [
+    {
+      "subject": "chart13",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-02-04",
+          "birthTime": "04:00",
+          "gender": "male"
+        },
+        "b": null
+      },
+      "fact_ids": [
+        "day_master_Wood",
+        "strength_balanced",
+        "main_profile"
+      ],
+      "draft_text": "Sebagai Kayu (Bambu), kamu tumbuh dengan terus menjangkau hal baru; bagimu, berhenti berkembang terasa jauh lebih buruk daripada salah arah. Kamu memiliki dorongan alami untuk memperbaiki keadaan, namun ini membawa konsekuensi: kamu sulit sekali melambat, bahkan saat tubuh dan pikiranmu sangat membutuhkan istirahat. Baganmu berada di titik Seimbang, yang berarti kamu sanggup menopang diri sendiri sekaligus tetap terbuka menerima dari luar. Namun, karena tidak ada dorongan ekstrem dari baganmu, arah hidupmu harus kamu tentukan sendiri. Di Pilar Kerja, kamu memiliki Aspek Peraih (Indirect Wealth) yang membuatmu mampu melihat peluang di tempat yang dilewati orang lain. Kamu tidak takut pada ketidakpastian, tetapi ingatlah bahwa apa yang datang dengan mudah bisa lepas dengan mudah pula jika tidak dikelola dengan tuntas.",
+      "served_text": "Sebagai Kayu (Bambu (The Bamboo)), kamu tumbuh dengan terus menjangkau hal baru; bagimu, berhenti berkembang terasa jauh lebih buruk daripada salah arah. Kamu memiliki dorongan alami untuk memperbaiki keadaan, namun ini membawa konsekuensi: kamu sulit sekali melambat, bahkan saat tubuh dan pikiranmu sangat membutuhkan istirahat. Baganmu berada di titik Seimbang, yang berarti kamu sanggup menopang diri sendiri sekaligus tetap terbuka menerima dari luar. Namun, karena tidak ada dorongan ekstrem dari baganmu, arah hidupmu harus kamu tentukan sendiri. Di Pilar Kerja, kamu memiliki Aspek Peraih (Indirect Wealth) yang membuatmu mampu melihat peluang di tempat yang dilewati orang lain. Kamu tidak takut pada ketidakpastian, tetapi ingatlah bahwa apa yang datang dengan mudah bisa lepas dengan mudah pula jika tidak dikelola dengan tuntas."
+    },
+    {
+      "subject": "chart8",
+      "inputs": {
+        "a": {
+          "birthDate": "1992-01-05",
+          "birthTime": "08:00",
+          "gender": "male"
+        },
+        "b": null
+      },
+      "fact_ids": [
+        "day_master_Metal",
+        "strength_balanced",
+        "main_profile"
+      ],
+      "draft_text": "Sebagai Logam (Besi Tempa), kamu memiliki ketegasan alami; kamu tahu persis kapan sesuatu harus dihentikan atau dipotong. Pekerjaan yang setengah jadi terasa lebih mengganggu bagimu daripada bagi orang lain, dan ini membuatmu sangat andal dalam memastikan segala sesuatu selesai dengan rapi. Orang sering salah mengira kamu kaku atau dingin, padahal kamu hanya menolak berpura-pura ramah demi kenyamanan orang lain. Baganmu berada di titik Seimbang, yang berarti kamu jarang goyah meski situasi berubah drastis. Kamu sanggup menopang dirimu sendiri, namun karena tidak ada dorongan ekstrem dari bagan, arah hidupmu sepenuhnya berada di tanganmu sendiri. Di Pilar Kerja, kamu membawa Aspek Pemijar (Hurting Officer) yang membuatmu sangat tajam dalam melihat ketidakefisienan. Kamu adalah orang yang paling berani menyuarakan kebenaran, meski kejujuranmu sering kali terasa mahal karena orang yang kamu koreksi lebih mengingat rasa sakitnya daripada substansi perbaikannya.",
+      "served_text": "Sebagai Logam (Besi Tempa (The Forge)), kamu memiliki ketegasan alami; kamu tahu persis kapan sesuatu harus dihentikan atau dipotong. Pekerjaan yang setengah jadi terasa lebih mengganggu bagimu daripada bagi orang lain, dan ini membuatmu sangat andal dalam memastikan segala sesuatu selesai dengan rapi. Orang sering salah mengira kamu kaku atau dingin, padahal kamu hanya menolak berpura-pura ramah demi kenyamanan orang lain. Baganmu berada di titik Seimbang, yang berarti kamu jarang goyah meski situasi berubah drastis. Kamu sanggup menopang dirimu sendiri, namun karena tidak ada dorongan ekstrem dari bagan, arah hidupmu sepenuhnya berada di tanganmu sendiri. Di Pilar Kerja, kamu membawa Aspek Pemijar (Hurting Officer) yang membuatmu sangat tajam dalam melihat ketidakefisienan. Kamu adalah orang yang paling berani menyuarakan kebenaran, meski kejujuranmu sering kali terasa mahal karena orang yang kamu koreksi lebih mengingat rasa sakitnya daripada substansi perbaikannya."
+    }
+  ]
+}

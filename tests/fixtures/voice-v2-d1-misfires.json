@@ -1,0 +1,87 @@
+{
+  "_about": "EVIDENCE, not output. Extracted by script (2026-09-28, Prompt AK §1) from reports/voice-v2/{aj2,round4b}/rVe4ca-FOhsprfGUucTxA-v2.json: every v2.d1_invented_term REJECTION line, and the draft block that produced each. Never retyped.",
+  "inputs": {
+    "a": {
+      "birthDate": "1981-02-20",
+      "birthTime": "07:00"
+    },
+    "b": {
+      "birthDate": "1988-07-04",
+      "birthTime": "05:00"
+    }
+  },
+  "rejections": [
+    {
+      "run": "aj2",
+      "message": "\"Kuat\" (kekuatan) appears in the prose but no supplied fact carries it"
+    },
+    {
+      "run": "aj2",
+      "message": "\"Berseberangan\" (kompatibilitas) appears in the prose but no supplied fact carries it"
+    },
+    {
+      "run": "round4b",
+      "message": "\"Kuat\" (kekuatan) appears in the prose but no supplied fact carries it"
+    },
+    {
+      "run": "round4b",
+      "message": "\"Berseberangan\" (kompatibilitas) appears in the prose but no supplied fact carries it"
+    },
+    {
+      "run": "round4b",
+      "message": "\"Kuat\" (kekuatan) appears in the prose but no supplied fact carries it"
+    }
+  ],
+  "blocks": [
+    {
+      "run": "aj2",
+      "draft": 2,
+      "fact_ids": [
+        "p2_day_pair",
+        "p5_pull_fit"
+      ],
+      "heading": "Ruang Privat yang Mengunci",
+      "text": "Kamu adalah Tanah (Taman) yang stabil, sementara dia adalah Logam (Besi Tempa) yang tegas. Di antara kalian, terdapat Kursi Terikat yang membuat hubungan ini memiliki daya tarik alami sejak awal. Dalam keseharian, ini terasa seperti memiliki tempat pulang yang selalu menarik kalian kembali, terlepas dari dinamika di luar. Hubungan kalian ditandai dengan Tarikan Kuat dan Ritme Seirama, di mana rutinitas harian mengalir tanpa hambatan dan waktu berkualitas tercipta secara natural, membuat kalian jarang diterpa gejolak yang berarti."
+    },
+    {
+      "run": "aj2",
+      "draft": 2,
+      "fact_ids": [
+        "p4_temperament",
+        "p2_palace_frame"
+      ],
+      "heading": "Perspektif yang Berseberangan",
+      "text": "Meski ritme kalian seirama, terdapat Pola Kontras dalam karakter dominan kalian. Kamu digerakkan oleh Aspek Pengatur yang disiplin, sementara dia didorong oleh Aspek Pelindung yang intuitif. Sering kali, kalian merespons kejadian yang sama dengan fokus yang berbeda total, yang jika tidak dikomunikasikan, bisa menghasilkan interpretasi yang berseberangan. Selain itu, ada dinamika di mana pilar kehidupan dia menyentuh langsung ruang privatmu. Saat dia mengalami tekanan, suasananya bisa langsung terbawa ke rumah dan kamu merasakannya bahkan sebelum dia sempat bercerita."
+    },
+    {
+      "run": "round4b",
+      "draft": 1,
+      "fact_ids": [
+        "p2_day_pair",
+        "p5_pull_fit"
+      ],
+      "heading": "Tarikan yang Mengunci",
+      "text": "Sebagai seseorang dengan elemen Tanah (Taman), kamu memiliki fondasi yang stabil, sementara dia, sebagai elemen Logam (Besi Tempa), membawa ketegasan yang tajam. Di antara kalian, terdapat Kursi Terikat yang membuat kursi pasangan kalian saling mengunci. Ini menciptakan daya tarik alami yang bekerja secara spontan di ruang paling privat. Dalam keseharian, ini terasa seperti tempat pulang yang selalu menarik kalian kembali; setelah hari yang berat di luar, kalian secara otomatis mencari keberadaan satu sama lain tanpa perlu dorongan kata-kata. Hubungan kalian memiliki Tarikan Kuat dan Ritme Seirama, membuat rutinitas harian mengalir tanpa hambatan dan waktu berkualitas tercipta dengan sangat alami."
+    },
+    {
+      "run": "round4b",
+      "draft": 1,
+      "fact_ids": [
+        "p4_temperament",
+        "p2_palace_frame"
+      ],
+      "heading": "Perspektif yang Berseberangan",
+      "text": "Meski ritme kalian seirama, terdapat Pola Kontras dalam cara kalian merespons dunia. Kamu digerakkan oleh Aspek Pengatur (Direct Officer) yang disiplin, sementara dia digerakkan oleh Aspek Pelindung (Direct Resource) yang intuitif. Kalian sering merespons kejadian yang sama dengan fokus yang berbeda total, menghasilkan interpretasi yang berseberangan. Selain itu, ada dinamika di mana salah satu pilar kehidupan dia menyentuh langsung ruang privatmu. Saat area hidupnya mengalami tekanan, suasananya langsung terbawa ke rumah dan kamu sering kali merasakannya bahkan sebelum dia sempat bercerita."
+    },
+    {
+      "run": "round4b",
+      "draft": 2,
+      "fact_ids": [
+        "p2_day_pair",
+        "p5_pull_fit"
+      ],
+      "heading": "Ruang Privat yang Mengunci",
+      "text": "Kamu adalah Taman (Tanah) yang stabil, sementara dia adalah Besi Tempa (Logam) yang tegas. Di antara kalian, terdapat Kursi Terikat yang membuat kursi pasangan kalian saling mengunci. Ini menciptakan daya tarik alami yang bekerja secara spontan di ruang paling privat. Dalam keseharian, ini terasa seperti tempat pulang yang selalu menarik kalian berdua kembali; setelah hari yang berat di luar, kalian secara otomatis mencari keberadaan satu sama lain tanpa perlu dorongan kata-kata. Hubungan kalian memiliki Tarikan Kuat dan Ritme Seirama, membuat rutinitas harian mengalir tanpa hambatan dan waktu berkualitas tercipta secara alami."
+    }
+  ]
+}

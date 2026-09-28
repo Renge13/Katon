@@ -1,0 +1,275 @@
+{
+  "_about": "EVIDENCE, not output. Extracted by scripts/extract-closing-hedges.mjs (Prompt AL §2) from reports/voice-v2/round4c/*.json: every served v2 reading with a block or penutup whose FINAL sentence begins \"Mungkin menarik untuk\" or \"Menarik untuk\", and the whole served reading. Never retyped.",
+  "readings": [
+    {
+      "source": "reports/voice-v2/round4c/PZ0t_B3YDnzdXc2LWV38D-v2.json",
+      "subject": "PZ0t_B3YDnzdXc2LWV38D",
+      "kind": "pair",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-09-13",
+          "birthTime": "09:00",
+          "gender": "female"
+        },
+        "b": {
+          "birthDate": "1990-03-04",
+          "birthTime": "14:00",
+          "gender": "male"
+        }
+      },
+      "floored": false,
+      "closes": [
+        {
+          "where": "penutup",
+          "sentence": "Mungkin menarik untuk memperhatikan bagaimana kalian saling mengisi saat salah satu merasa kehilangan arah."
+        }
+      ],
+      "rendered": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "p0_opening"
+            ],
+            "heading": "",
+            "text": "Ini adalah bacaan tentang dinamika dua individu: Matahari dan Gunung. Lewat bacaan ini, kita akan melihat bagaimana cara kalian merespons satu sama lain di keseharian, di mana fokus kalian bertemu atau berbeda, dan apa yang sebenarnya menggerakkan ritme di balik hubungan ini."
+          },
+          {
+            "fact_ids": [
+              "day_master_Fire",
+              "strength_weak",
+              "profile_vs_favorable"
+            ],
+            "heading": "Dirimu sebagai Matahari",
+            "text": "Sebagai Matahari (The Sun), kehadiranmu langsung terasa bahkan sebelum kamu bicara. Kamu menerangi sekitarmu lebih dulu sebelum menghangatkan dirimu sendiri, dan nyala itu memakai tenaga yang tidak mengisi dirinya sendiri. Kapasitas energimu tergolong Lemah karena kamu lahir di bulan yang elemen musimnya mengontrol elemen dirimu; ini bukan berarti kamu tidak mampu, melainkan penanda bahwa sumber tenagamu murni berada di luar dirimu. Di keseharian, ini tercermin dari Aspek Pengelola yang menonjol di Pilar Kerja. Kamu dipercaya memegang hal penting dan merawatnya dengan rapi, namun karena aspek ini berelemen Logam yang mengurasmu, semakin banyak urusan yang kamu pegang, semakin sedikit energi yang tersisa untuk dirimu sendiri."
+          },
+          {
+            "fact_ids": [
+              "p1_stem_relation",
+              "p4_temperament"
+            ],
+            "heading": "Dinamika Pengayom dan Kontras",
+            "text": "Di antara kalian mengalir dinamika Inti Menghidupi, di mana unsur Apimu secara alami memberi energi ke unsur Tanah miliknya. Ada alur pengayom dan yang diayomi yang konsisten: keputusan dan inisiatif baru hampir selalu dipicu olehmu, sementara dia menyambut, mengeksekusi, dan merasa aman bergerak dalam alur tersebut. Namun, kalian memiliki Pola Kontras dalam cara merespons dunia. Kamu digerakkan oleh Aspek Pengelola yang fokus menjaga hasil, sementara dia digerakkan oleh Aspek Pendamping yang terbiasa menyelesaikan semuanya sendiri. Kalian sering merespons kejadian yang sama dengan fokus yang berbeda total, menghasilkan dua interpretasi yang berseberangan dari satu peristiwa."
+          },
+          {
+            "fact_ids": [
+              "p5_pull_fit",
+              "p2_day_pair"
+            ],
+            "heading": "Tarikan dan Ruang Pribadi",
+            "text": "Hubungan kalian memiliki magnet emosional yang kuat, namun ritme harian kalian sering bersimpangan, menghasilkan dinamika yang pekat, intens, sekaligus melelahkan. Di tingkat fondasi, terdapat kondisi Kursi Independen. Ruang pribadi kalian berjalan terpisah tanpa daya tarik atau gesekan otomatis dari pilar ini. Kedekatan tidak terjadi spontan, melainkan harus dibangun dari area lain. Kalian bisa berada di ruang yang sama dalam kesibukan masing-masing tanpa gangguan, namun jarak emosional cepat terasa jika tidak ada kegiatan bersama yang disengaja."
+          },
+          {
+            "fact_ids": [
+              "p2_palace_frame",
+              "p3_supply"
+            ],
+            "heading": "Saling Melengkapi",
+            "text": "Salah satu pilar kehidupan dia menyentuh langsung ruang privatmu, membuat dinamika dari area hidupnya berdampak langsung ke suasana hubungan; saat area hidupnya mengalami tekanan, suasananya langsung terbawa ke rumah dan kamu merasakannya sebelum dia sempat cerita. Meski begitu, kalian saling menyeimbangkan kepingan yang hilang. Kamu membawa elemen Air yang ia butuhkan, dan dia membawa elemen Kayu yang kamu butuhkan. Kehadiran kalian secara alami meredakan kegelisahan di area tertentu, sehingga ketiadaan satu sama lain langsung membuat area tersebut terasa tidak stabil."
+          }
+        ],
+        "penutup": "Dinamika kalian adalah perpaduan antara tarikan magnetis yang kuat dan kebutuhan untuk terus menyesuaikan ritme yang sering bersimpangan. Mungkin menarik untuk memperhatikan bagaimana kalian saling mengisi saat salah satu merasa kehilangan arah."
+      }
+    },
+    {
+      "source": "reports/voice-v2/round4c/chart13-v2.json",
+      "subject": "chart13",
+      "kind": "mirror",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-02-04",
+          "birthTime": "04:00",
+          "gender": "male"
+        },
+        "b": null
+      },
+      "floored": false,
+      "closes": [
+        {
+          "where": "penutup",
+          "sentence": "Mungkin menarik untuk melihat bagaimana caramu membagi beban ini di masa depan."
+        }
+      ],
+      "rendered": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Wood",
+              "strength_balanced",
+              "main_profile"
+            ],
+            "heading": "Dinamika Bambu yang Seimbang",
+            "text": "Sebagai Kayu dengan arketipe Bambu (The Bamboo), kamu tumbuh dengan menjangkau hal baru; berhenti berkembang terasa lebih buruk bagimu daripada salah arah. Kamu memiliki dorongan alami untuk maju dan memperbaiki keadaan, namun ini membawa konsekuensi: kamu sulit melambat, bahkan di saat tubuh dan pikiranmu sangat membutuhkan istirahat. Orang sering salah mengira kamu mudah mengikuti arus, padahal kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah. Baganmu berada di titik Seimbang, yang berarti kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar. Situasi bisa berubah, tetapi kamu jarang ikut goyah. Di Pilar Kerja, kamu membawa Aspek Peraih (Indirect Wealth), yang membuatmu melihat peluang di tempat yang dilewati orang lain. Kesempatan dan hasil terasa mudah datang, tetapi juga mudah lepas karena kamu jarang menyimpannya cukup lama untuk benar-benar merasa aman."
+          },
+          {
+            "fact_ids": [
+              "relation_冲_丑未",
+              "element_dominant_Earth"
+            ],
+            "heading": "Benturan dan Beban Pengelolaan",
+            "text": "Ada Benturan yang terjadi antara Pilar Kerja dan Pilar Diri. Dinamika ini membuat perubahan di area hidupmu datang mendadak dan membawa guncangan, bukan lewat proses perlahan. Namun, kamu terbiasa beradaptasi dengan guncangan cepat; situasi sulit yang membuat orang lain panik sudah pernah kamu lewati. Ketenangan di area ini tidak datang otomatis, melainkan butuh dijaga dengan usaha yang sadar. Hal ini diperumit oleh dominasi elemen Tanah dalam baganmu. Kamu dipenuhi hal-hal yang menuntut pengelolaan, mulai dari peluang hingga tanggung jawab orang lain. Kesempatan memang tak pernah habis di tanganmu, tetapi urusan sering kali melebihi kapasitas fisikmu, membuat perhatianmu terpecah dan banyak hal terbengkalai setengah jalan."
+          },
+          {
+            "fact_ids": [
+              "spouse_palace",
+              "aspek_convergence_比肩"
+            ],
+            "heading": "Fondasi Pribadi dan Kemandirian",
+            "text": "Fondasi Pasangan di Pilar Diri menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain bisa menganggapnya berat. Di sini, kamu cenderung membawa pola yang sama dengan cara kerjamu: berani mengetuk pintu peluang namun sulit untuk menetap. Ini selaras dengan Aspek Pendamping (Friend) yang tersebar di Pilar Akar, Pilar Kerja, dan Pilar Diri. Kamu terbiasa menyelesaikan semuanya sendiri. Meminta tolong terasa lebih berat daripada mengerjakan sesuatu dua kali lipat. Orang tahu kamu bisa dititipi hal penting dan tidak akan hilang di tengah jalan, tetapi bantuan sering datang terlambat karena kamu tidak pernah memintanya, dan orang mengira kamu tidak membutuhkannya."
+          }
+        ],
+        "penutup": "Kamu memiliki kapasitas untuk menopang banyak hal, namun tantangan terbesarmu bukanlah mencari peluang baru, melainkan memilih mana yang layak untuk dipertahankan hingga tuntas. Mungkin menarik untuk melihat bagaimana caramu membagi beban ini di masa depan."
+      }
+    },
+    {
+      "source": "reports/voice-v2/round4c/chart4-v2.json",
+      "subject": "chart4",
+      "kind": "mirror",
+      "inputs": {
+        "a": {
+          "birthDate": "1995-06-01",
+          "birthTime": "06:00",
+          "gender": "female"
+        },
+        "b": null
+      },
+      "floored": false,
+      "closes": [
+        {
+          "where": "penutup",
+          "sentence": "Mungkin menarik untuk melihat bagaimana kamu bisa mulai menjemput bantuan yang sebenarnya sudah tersedia di sekitarmu, alih-alih menunggu sampai kamu benar-benar kehabisan tenaga."
+        }
+      ],
+      "rendered": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Water",
+              "strength_weak",
+              "main_profile"
+            ],
+            "heading": "Karakter Embun yang Adaptif",
+            "text": "Sebagai Embun (The Morning Dew), elemen Air di dalam dirimu membuatmu menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Orang sering salah mengira kamu acuh tak acuh, padahal kamu sebenarnya menyerap hampir semua detail dan menyimpannya diam-diam. Kapasitas energimu tergolong Lemah, yang berarti sumber tenagamu murni berada di luar dirimu. Kamu sangat peka membaca situasi dan tahu cara memanfaatkan dukungan di sekitarmu, namun kamu akan kehabisan energi lebih cepat jika berada di lingkungan yang tidak menopang. Di Pilar Kerja, kamu memiliki Aspek Pelindung yang membuatmu cepat menyerap ilmu dan selalu mendapatkan bantuan tepat pada waktunya. Namun, kenyamanan dari bantuan ini sering kali membuatmu terlalu lama bersiap sebelum benar-benar melangkah."
+          },
+          {
+            "fact_ids": [
+              "relation_刑_self_亥",
+              "relation_冲_巳亥"
+            ],
+            "heading": "Dinamika Internal yang Intens",
+            "text": "Dalam petamu, terdapat Simpul yang muncul dari pengulangan elemen di Pilar Akar dan Pilar Diri. Ini membuatmu sangat memahami situasi rumit yang tidak punya jawaban sederhana, namun kekuatanmu di area ini bisa berbalik menekan dirimu sendiri jika tidak dibatasi. Selain itu, ada Benturan antara Pilar Kerja, Pilar Akar, dan Pilar Diri. Perubahan di area ini biasanya datang mendadak dan membawa guncangan. Kamu terbiasa beradaptasi dengan guncangan cepat, namun kestabilan di area ini tidak datang otomatis; ia butuh dijaga dengan usaha yang sadar dan terus-menerus."
+          },
+          {
+            "fact_ids": [
+              "relation_半合_亥卯",
+              "spouse_palace"
+            ],
+            "heading": "Rasa Hampir Pas",
+            "text": "Terdapat Setengah Gabungan yang menarik elemen Kayu di antara Pilar Akar, Pilar Diri, dan Pilar Arah. Arah geraknya sudah sangat jelas, namun dalam keseharian, ini sering kali terasa seperti rasa 'hampir pas': semuanya sudah jalan, tapi kamu selalu merasa harus menambah satu hal lagi sebelum berani menyebutnya selesai. Dinamika ini juga tercermin dalam Fondasi Pasangan di Pilar Diri, yang menyimpan Aspek Pendorong. Tekstur relasi yang terasa wajar bagimu adalah yang memiliki tantangan, karena kamu bergerak lebih cepat saat ada persaingan."
+          }
+        ],
+        "penutup": "Kamu memiliki pola yang unik di mana bantuan selalu ada, namun kamu sering kali merasa harus berjuang sendirian karena terbiasa menanggung beban. Mungkin menarik untuk melihat bagaimana kamu bisa mulai menjemput bantuan yang sebenarnya sudah tersedia di sekitarmu, alih-alih menunggu sampai kamu benar-benar kehabisan tenaga."
+      }
+    },
+    {
+      "source": "reports/voice-v2/round4c/chart6-v2.json",
+      "subject": "chart6",
+      "kind": "mirror",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-03-03",
+          "birthTime": "00:15",
+          "gender": "male"
+        },
+        "b": null
+      },
+      "floored": false,
+      "closes": [
+        {
+          "where": "penutup",
+          "sentence": "Mungkin menarik untuk melihat bagaimana ketegasanmu dalam mengambil keputusan berinteraksi dengan kecenderunganmu untuk selalu mencari tantangan baru."
+        }
+      ],
+      "rendered": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Water",
+              "strength_balanced",
+              "main_profile"
+            ],
+            "heading": "Aliran yang Menemukan Jalan",
+            "text": "Sebagai Samudra (The Ocean), elemen Air di dalam dirimu membuatmu menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Orang sering salah mengira kamu sulit ditebak, padahal arah tujuanmu sebenarnya selalu sama, hanya jalurnya saja yang berganti-ganti. Kamu memiliki kapasitas yang seimbang, yang berarti kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar. Situasi bisa berubah drastis, tetapi kamu jarang ikut goyah. Di dalam keseharian, ini diperkuat oleh Aspek Peraih (Indirect Wealth) yang dominan di Pilar Kerja. Kamu melihat peluang di tempat yang dilewati orang lain, membuat kesempatan terasa mudah datang. Namun, ingatlah bahwa yang datang besar bisa hilang besar; kamu jarang menyimpannya cukup lama untuk benar-benar merasa aman."
+          },
+          {
+            "fact_ids": [
+              "relation_害_寅巳",
+              "spouse_palace"
+            ],
+            "heading": "Ketajaman dalam Tekanan",
+            "text": "Ada gesekan kecil yang terjadi terus-menerus antara Pilar Akar dan Pilar Kerja, yang kita kenal sebagai Gesekan (Harm). Ini bukan benturan besar, melainkan masalah sepele yang menumpuk perlahan. Sisi baiknya, kamu sangat peka pada detail kecil yang diabaikan orang lain, sehingga masalah jarang membesar tanpa terdeteksi olehmu lebih dulu. Dinamika ini berlanjut ke kehidupan pribadimu di Pilar Diri, di mana bersarang Aspek Penantang (Seven Killings). Kamu tumbuh paling cepat saat berada di bawah tekanan; keadaan yang terlalu aman justru membuatmu gelisah. Sering kali, kamu mencari tekanan yang sebenarnya tidak perlu karena beristirahat terasa seperti kehilangan arah."
+          },
+          {
+            "fact_ids": [
+              "badge_羊刃"
+            ],
+            "heading": "Keputusan yang Tajam",
+            "text": "Di Pilar Arah, kamu memiliki Mata Pisau (Yang Blade). Ini adalah titik di mana kamu berhenti menimbang dan langsung mengambil keputusan tegas. Orang di sekitarmu sering kaget dengan seberapa cepat perubahan itu terjadi. Ketegasan ini sering menyelamatkanmu di situasi kritis, namun ketajaman yang sama bisa melukai hubungan atau situasi yang tidak perlu dirusak. Apa yang terputus di titik ini sering kali sulit untuk disambung kembali."
+          }
+        ],
+        "penutup": "Kamu memiliki Bintang Penolong (Nobleman) yang selalu hadir saat kamu menemui jalan buntu, namun bantuan itu perlu kamu jemput. Kamu terbiasa menyelesaikan semuanya sendiri sampai lupa bahwa ada jalur bantuan yang terbuka untukmu. Mungkin menarik untuk melihat bagaimana ketegasanmu dalam mengambil keputusan berinteraksi dengan kecenderunganmu untuk selalu mencari tantangan baru."
+      }
+    },
+    {
+      "source": "reports/voice-v2/round4c/chart8-v2.json",
+      "subject": "chart8",
+      "kind": "mirror",
+      "inputs": {
+        "a": {
+          "birthDate": "1992-01-05",
+          "birthTime": "08:00",
+          "gender": "male"
+        },
+        "b": null
+      },
+      "floored": false,
+      "closes": [
+        {
+          "where": "penutup",
+          "sentence": "Menarik untuk melihat bagaimana kamu menyeimbangkan keinginan untuk mandiri dengan celah-celah bantuan yang sebenarnya sudah tersedia di sekitarmu."
+        }
+      ],
+      "rendered": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Metal",
+              "strength_balanced",
+              "main_profile"
+            ],
+            "heading": "Karakter Besi Tempa",
+            "text": "Sebagai Logam (Besi Tempa), kamu memiliki ketegasan alami; kamu tahu persis kapan sesuatu harus dihentikan atau dipotong. Pekerjaan yang setengah jadi terasa lebih mengganggu bagimu daripada bagi orang lain, dan kamu memiliki standar tinggi untuk menyelesaikannya dengan rapi. Orang sering salah mengira kamu kaku atau dingin, padahal kamu hanya menolak berpura-pura ramah demi kenyamanan orang lain. Baganmu berada di titik Seimbang, yang memberimu kelenturan tinggi. Saat situasi berubah drastis, kamu jarang ikut goyah, namun karena tidak ada dorongan ekstrem dari bagan, arah hidupmu harus kamu tentukan sendiri. Di Pilar Kerja, kamu membawa Aspek Pemijar (Hurting Officer). Ini membuatmu sangat cepat melihat celah dan cara yang lebih efisien. Kamu sulit diam saat melihat hal yang tidak masuk akal, dan kejujuranmu sering kali menjadi pedang bermata dua: kamu berani menyuarakan kebenaran, namun orang yang kamu koreksi sering kali lebih mengingat rasa sakitnya daripada poin perbaikannya."
+          },
+          {
+            "fact_ids": [
+              "relation_刑_self_辰",
+              "relation_半合_子辰",
+              "relation_害_子未"
+            ],
+            "heading": "Dinamika Internal",
+            "text": "Ada tegangan unik dalam dirimu yang muncul dari Simpul (Punishment) di Pilar Diri dan Pilar Arah. Kamu justru berlebihan di wilayah yang paling kamu kuasai, yang terkadang membuat kekuatanmu berbalik menekan dirimu sendiri. Ini diperumit dengan Setengah Gabungan antara Pilar Kerja, Pilar Diri, dan Pilar Arah yang menarik elemen Air. Dalam keseharian, ini terasa seperti rasa 'hampir pas'; semuanya sudah jalan dan arahnya jelas, tapi kamu selalu merasa harus menambah satu hal lagi sebelum berani menyebutnya selesai. Selain itu, terdapat Gesekan (Harm) antara Pilar Akar dan Pilar Kerja. Ini bukan benturan besar, melainkan masalah sepele yang menumpuk perlahan. Kamu sangat peka pada detail kecil yang diabaikan orang lain, namun gesekan ini sering muncul kembali dalam bentuk lain jika tidak segera dibereskan."
+          },
+          {
+            "fact_ids": [
+              "element_dominant_Metal",
+              "spouse_palace",
+              "aspek_convergence_比肩"
+            ],
+            "heading": "Kemandirian dan Relasi",
+            "text": "Baganmu didominasi oleh elemen diri sendiri, yang membuatmu melangkah tanpa perlu izin orang lain dan tidak suka ruang pribadimu diatur-atur. Pendirianmu kokoh, namun sisi keras ini membuat masukan dari luar sukar masuk; kamu sering baru sadar salah jalan setelah dampaknya telanjur besar. Di Pilar Diri, terdapat Fondasi Pasangan yang menampung Aspek Pemikir (Indirect Resource). Ini menunjukkan tekstur relasi yang terasa wajar bagimu, di mana kamu memahami sesuatu lewat jalan intuitif yang sulit dijelaskan. Kamu sering merasa berjarak dari lingkungan sekitar karena menjelaskan isi kepalamu terasa lebih melelahkan daripada memikirkannya sendiri. Kecenderungan ini diperkuat oleh Aspek Pendamping (Friend) yang dominan, membuatmu terbiasa menyelesaikan semuanya sendiri. Meminta tolong terasa lebih berat daripada mengerjakan sesuatu dua kali lipat, sehingga bantuan sering datang terlambat karena orang mengira kamu tidak membutuhkannya."
+          }
+        ],
+        "penutup": "Kamu memiliki Bintang Penolong yang menunggu di Pilar Akar; pertolongan itu nyata, namun ia menuntutmu untuk menurunkan sedikit pertahanan diri dan memintanya lebih awal sebelum situasinya mendesak. Menarik untuk melihat bagaimana kamu menyeimbangkan keinginan untuk mandiri dengan celah-celah bantuan yang sebenarnya sudah tersedia di sekitarmu."
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+EXAMPLES (written by Reyner, 2026-09-26). They come from OTHER people's charts. They show the
+experience a Katon reading gives: answer the curiosity, explain the why, make it recognisable, leave
+something worth exploring. Never reuse their facts, names or sentences; your JSON is the only source of
+facts for this reading. They are not a template: vary length and shape. Only the block text is shown.
+
+=== MIRROR EXAMPLES ===
+
+--- Example 1. The reader's unspoken question: "What kind of person am I, really?"
+Facts it drew on: Day Master Air (Samudra), label_meaning, salah_dikira, gift, cost; main profile Aspek
+Pengelola converging in Pilar Kerja and Pilar Diri, label_meaning, gift, cost.
+
+Sebagai Samudra, elemen Air di dalam dirimu membuatmu menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Orang sering salah mengira kamu plin-plan dan sulit ditebak, padahal arah tujuanmu sebenarnya selalu sama, hanya jalurnya saja yang berganti-ganti. Di saat orang lain menemui jalan buntu, kamu mampu menembus situasi tersebut dengan mencari celah. Sesuatu yang terus mengalir seperti dirimu tentu sulit untuk diikat; komitmen jangka panjang pada satu bentuk kaku akan selalu terasa amat berat bagimu.
+
+Di luar cara gerakmu, ada Aspek Pengelola yang sangat menonjol di pilar kerja dan kehidupan personalmu. Ini membuatmu sering dipercaya memegang hal penting dan merawatnya dengan rapi, sehingga apa yang kamu urus jarang berantakan. Kepercayaan datang sendiri tanpa perlu kamu minta, dan orang merasa tenang saat kamu yang memegang kendali. Sayangnya, ada konsekuensi yang harus dibayar: semakin banyak urusan yang kamu pegang, semakin sedikit energi yang tersisa untuk dirimu sendiri.
+
+--- Example 2. The reader's unspoken question: "Why does the chart say that?"
+Facts it drew on: day stem Water -> Samudra; strength Lemah (provenance: month branch Horse, season
+element Fire, Water controls Fire; favourable Metal, Water; unfavourable Earth, Fire, Wood); tension
+rule CR-1: main profile Aspek Pengelola is Fire, an unfavourable element, in Pilar Kerja and Pilar Diri.
+
+Kesimpulan ini berasal dari elemen intimu. Kamu adalah Samudra karena batang hari lahirmu adalah Air. Namun, kapasitas energimu tergolong Lemah karena kamu lahir di bulan Kuda, yang musimnya berelemen Api. Dalam siklus elemen, Air bertugas mengontrol Api, sehingga energi musim kelahiranmu tidak mensuplai atau memberimu makan. Lemah di sini bukan berarti tidak mampu; ini hanya penanda bahwa sumber tenagamu murni berada di luar dirimu: kamu secara spesifik membutuhkan elemen Logam dan Air, sementara Tanah, Api, dan Kayu akan mengurasmu. Berada di tempat yang tepat akan membuatmu melesat cepat, dan tempat yang salah akan mengurasmu sampai habis.
+
+Tegangan terbesar dalam petamu juga bisa dijelaskan: Aspek Pengelola-mu yang menonjol itu berelemen Api. Ini berarti aspek terkuatmu, yang bersarang di Pilar Kerja dan Pilar Diri, secara konstan menarik tenaganya dari salah satu elemen yang pada dasarnya melelahkanmu. Peran-peran dominanmu sehari-hari justru memakan energi dari sumur yang kapasitasnya terbatas.
+
+--- Example 3. The reaction it aims for: "That is so me."
+Facts it drew on: Setengah Gabungan (Half Combination) of Horse and Dog across Pilar Kerja and Pilar
+Diri, combining toward Fire; label_meaning, cost.
+
+Di keseharian, ada interaksi Setengah Gabungan yang menarik elemen Api di antara Pilar Kerja dan Pilar Diri-mu. Artinya, dua dari tiga bagian sudah saling tarik. Arah geraknya sudah sangat jelas, meskipun kekuatannya belum sepenuhnya padu. Kondisi ini sering kali muncul dalam bentuk rasa "hampir pas": semuanya sudah jalan dan arahnya jelas, tapi kamu selalu merasa harus menambah atau membereskan satu hal lagi sebelum berani menyebutnya selesai.
+
+--- Example 5. A revelation that leaves her wondering about someone else
+Facts it drew on: Fondasi Pasangan in Pilar Diri holding Aspek Penantang (palace meaning; Aspek
+Penantang label_meaning, gift, cost); Bintang Penolong in Pilar Arah.
+
+Fondasi Pasangan adalah tempat membaca dinamika hubungan paling dekatmu. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain bisa menganggapnya berat. Di fondasi ini bersarang Aspek Penantang, yang menjelaskan mengapa kamu tumbuh paling cepat saat berada di bawah tekanan. Kamu tidak pernah lumpuh saat situasi memburuk; justru di titik itulah pikiranmu paling jernih. Sebaliknya, keadaan yang terlalu aman justru membuatmu gelisah, memancingmu mencari tekanan yang sebenarnya tidak perlu karena beristirahat terasa seperti kehilangan arah.
+
+Namun, ritme bertekanan tinggi ini tidak berdiri sendiri. Di Pilar Arahmu terdapat Bintang Penolong; saat kamu benar-benar menemui jalan buntu, selalu ada orang yang tidak terduga muncul membantu di saat yang tepat.
+
+=== PAIR EXAMPLES ===
+
+--- Example 4. The reader's unspoken question: "What about me and them?"
+Facts it drew on: Inti Menghidupi (A's Fire produces B's Earth; label_meaning, daily_seed); Penyeimbang
+Unsur (A brings Water to B, B brings Wood to A); Pola Kontras (A Aspek Pengelola, B Aspek Perajin;
+daily_seed); Kursi Bergesekan (seats Rat and Goat, harm) with its reframe; Tarikan Tenang, Ritme Bergesek.
+Each pair fact keeps its own meaning; none is presented as the cause of another.
+
+Di antara kalian mengalir dinamika Inti Menghidupi, di mana unsur Apimu secara alami memberi energi ke unsur Tanahnya. Ada dinamika pengayom dan yang diayomi dengan alur yang konsisten. Dalam seminggu biasa, ini terlihat dari siapa yang membuka pembicaraan soal rencana baru: hampir selalu kamu. Dia kemudian menyambut, mengeksekusi, dan merasa aman bergerak dalam alur tersebut. Kalian juga saling menyeimbangkan kepingan yang hilang; kamu membawa elemen Air yang ia butuhkan, dan ia membawa elemen Kayu yang kamu butuhkan.
+
+Namun, ada Pola Kontras dalam cara kalian merespons dunia. Kamu digerakkan oleh Aspek Pengelola (menjaga hasil), sementara dia digerakkan oleh Aspek Perajin (fokus pada proses). Kalian sering merespons kejadian yang sama dengan fokus yang berbeda total, menghasilkan dua interpretasi yang berseberangan.
+
+Di tingkat fondasi, terdapat kondisi Kursi Bergesekan. Terjadi gesekan halus antar kursi pasangan yang bekerja perlahan lewat detail kecil yang menumpuk, bukan lewat konflik besar. Ini bukan penentu kegagalan. Di sisi lain, indikator Tarikan Tenang dan Ritme Bergesek menunjukkan bahwa tarikan alami kalian minim dan ritme harian membutuhkan penyesuaian. Kelangsungan hubungan ini murni digerakkan oleh komitmen dan keputusan sadar.
