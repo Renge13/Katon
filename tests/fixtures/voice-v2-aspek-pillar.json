@@ -50,6 +50,30 @@
       "sentence": "Di keseharian, ini terlihat dari Aspek Pengelola yang menonjol di Pilar Kerja dan Pilar Diri."
     },
     {
+      "role": "one-true",
+      "source": "reports/voice-v2/round4c/PZ0t_B3YDnzdXc2LWV38D-v2.json",
+      "kind": "pair",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-09-13",
+          "birthTime": "09:00",
+          "gender": "female"
+        },
+        "b": {
+          "birthDate": "1990-03-04",
+          "birthTime": "14:00",
+          "gender": "male"
+        }
+      },
+      "fact_ids": [
+        "day_master_Fire",
+        "strength_weak",
+        "profile_vs_favorable"
+      ],
+      "heading": "Dirimu sebagai Matahari",
+      "sentence": "Di keseharian, ini tercermin dari Aspek Pengelola yang menonjol di Pilar Kerja."
+    },
+    {
       "role": "control",
       "source": "reports/voice-v2/round4d/chart1-v2.json",
       "kind": "mirror",
