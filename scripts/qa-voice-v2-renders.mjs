@@ -86,6 +86,18 @@ const SUBJECTS = [
   // birth pairs whose full GET facts body reproduces production byte-for-byte. No
   // gender is known, so none is passed.
   { id: 'rVe4ca-FOhsprfGUucTxA', kind: 'pair', a: { birthDate: '1981-02-20', birthTime: '07:00' }, b: { birthDate: '1988-07-04', birthTime: '05:00' } },
+  // `--pairs 12x6,13x11` adds fixture-chart pairs as subjects `pair-12x6` ... (Prompt AO
+  // §2, 2026-09-28): A is the first chart, B the second, births and genders from
+  // tests/bazi-validation.fixture.js. Two FIXTURE charts, not a real couple.
+  ...(arg('pairs', null)?.split(',') ?? []).map((spec) => {
+    const [x, y] = spec.split('x').map(Number);
+    const c = (id) => {
+      const r = VALIDATION_CHARTS.find((v) => v.id === id);
+      if (!r) throw new Error(`--pairs: no validation chart ${id}`);
+      return { birthDate: r.date, birthTime: r.time, gender: GENDER[r.gender] };
+    };
+    return { id: `pair-${x}x${y}`, kind: 'pair', a: c(x), b: c(y) };
+  }),
 ];
 // `--subjects a,b,c` renders exactly those ids (round 4 excludes the examples' own
 // charts, g4WH4 and eJm6p6PjG8f, so it tests voice and not copying).
