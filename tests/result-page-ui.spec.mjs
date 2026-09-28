@@ -157,3 +157,74 @@ test('§3 "Ganti tanggal" sits one persona step above "Refleksimu"', async () =>
     assert.equal(back.style.marginBottom, firstDivider.style.marginTop);
   } finally { m.unmount(); f.restore(); }
 });
+
+// ── §4. THE BRACKETED ENGLISH GLOSS IS ITALIC ──────────────
+// Detection is the glossary's own `name_en` set (lib/render/glossNames.js), and the
+// names reach the client through the root layout's provider. Mounted here inside
+// that same provider, with the same list the layout passes.
+import { GlossNamesProvider } from '../components/GlossNames.jsx';
+import { GLOSS_NAMES_EN } from '../lib/render/glossNames.js';
+import { ProseBlocks } from '../components/ProseBlocks.jsx';
+
+const GLOSS_TEXT = 'Kamu adalah Gunung (The Mountain) yang tenang. Ada Aspek Tujuh Pembunuh (Seven Killings) di Pilar Kerja, dan satu (catatan kecil) yang bukan istilah.';
+const GLOSS_PENUTUP = 'Di pilar itu ada Tanda Kekosongan (Void).';
+
+async function mountProse(reading, { provider = true } = {}) {
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  const inner = React.createElement(ProseBlocks, { reading });
+  const el = provider ? React.createElement(GlossNamesProvider, { names: GLOSS_NAMES_EN }, inner) : inner;
+  await act(async () => { root.render(el); });
+  return { host, unmount: () => { act(() => root.unmount()); host.remove(); } };
+}
+
+test('§4 PRECONDITION: the glossary supplies the three names this test uses, and not the decoy', () => {
+  for (const n of ['The Mountain', 'Seven Killings', 'Void']) assert.ok(GLOSS_NAMES_EN.includes(n), n);
+  assert.equal(GLOSS_NAMES_EN.includes('catatan kecil'), false);
+});
+
+test('§4 "(The Mountain)" -> an italic node around "The Mountain" and nothing else', async () => {
+  const m = await mountProse({ blocks: [{ heading: 'Inti', paragraphs: [GLOSS_TEXT] }], penutup: GLOSS_PENUTUP });
+  try {
+    const ems = [...m.host.querySelectorAll('em')].map((e) => e.textContent);
+    assert.deepEqual(ems, ['The Mountain', 'Seven Killings', 'Void'],
+      'only the glossary English is italic, in order, and "(catatan kecil)" is not');
+    // The brackets stay upright: each <em> sits between a "(" and a ")" in plain text.
+    for (const em of m.host.querySelectorAll('em')) {
+      assert.ok(em.previousSibling?.textContent.endsWith('('), `"(" before ${em.textContent} is outside the italic`);
+      assert.ok(em.nextSibling?.textContent.startsWith(')'), `")" after ${em.textContent} is outside the italic`);
+    }
+  } finally { m.unmount(); }
+});
+
+test('§4 STYLING ONLY: every paragraph reads back byte-identical to the served string', async () => {
+  const m = await mountProse({ blocks: [{ heading: 'Inti', paragraphs: [GLOSS_TEXT] }], penutup: GLOSS_PENUTUP });
+  try {
+    const ps = [...m.host.querySelectorAll('p')].map((p) => p.textContent);
+    assert.deepEqual(ps, [GLOSS_TEXT, GLOSS_PENUTUP]);
+  } finally { m.unmount(); }
+});
+
+test('§4 THE RESULT PAGE ITSELF italicises the gloss in its prose', async () => {
+  const f = stubFetch();
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  const reading = { ...IN_SESSION, blocks: [{ heading: 'Inti dirimu', paragraphs: [GLOSS_TEXT] }] };
+  await act(async () => {
+    root.render(React.createElement(GlossNamesProvider, { names: GLOSS_NAMES_EN },
+      React.createElement(Reading, { reading, onReset() {}, salesOpen: false })));
+  });
+  try {
+    const ems = [...host.querySelectorAll('.k-prose em')].map((e) => e.textContent);
+    assert.deepEqual(ems, ['The Mountain', 'Seven Killings']);
+  } finally { act(() => root.unmount()); host.remove(); f.restore(); }
+});
+
+test('§4 THE ROOT LAYOUT PROVIDES THE GLOSSARY LIST, so production has the names', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../app/layout.js', import.meta.url), 'utf8');
+  assert.match(src, /<GlossNamesProvider names=\{GLOSS_NAMES_EN\}>/u);
+  assert.match(src, /from '@\/lib\/render\/glossNames(\.js)?'/u);
+});

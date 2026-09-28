@@ -18,6 +18,9 @@
 import { useMemo } from 'react';
 import { Reveal, Eyebrow } from './kit.jsx';
 import { splitParagraphs } from '../lib/render/paragraphs.js';
+// Bracketed glossary English in italic (Prompt AQ §4). Styling only: the text a
+// paragraph reads back is the served string, byte for byte.
+import { GlossText } from './GlossNames.jsx';
 
 /**
  * The reveal cadence, MOVED HERE UNCHANGED with the renderer it governs.
@@ -159,7 +162,7 @@ export function ProseBlocks({ reading, labelFor = null, modelHeadings = true, cl
             )}
             {paragraphsOf(b).map((p, j) => (
               <div key={j} className="k-prose" style={{ animationDelay: `${proseDelayMs(offsets[i] + j, total)}ms` }}>
-                <Para style={{ marginTop: j ? 14 : 0 }}>{p}</Para>
+                <Para style={{ marginTop: j ? 14 : 0 }}><GlossText text={p} /></Para>
               </div>
             ))}
           </Section>
@@ -206,7 +209,7 @@ export function ProseBlocks({ reading, labelFor = null, modelHeadings = true, cl
           announcing the italic used to. */}
       {reading.penutup && (
         <div className="k-prose" style={{ animationDelay: `${proseDelayMs(total - 1, total)}ms`, marginTop: closeEyebrow ? 0 : 40 }}>
-          <Para>{reading.penutup}</Para>
+          <Para><GlossText text={reading.penutup} /></Para>
         </div>
       )}
     </>
