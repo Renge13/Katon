@@ -18,10 +18,14 @@
 // header for why.
 // ============================================================
 
+import { checkBotId } from 'botid/server';
 import { createMirrorReading } from '@/lib/mirror/handlers.js';
 
 export const runtime = 'nodejs';
 
 export async function POST(request) {
-  return createMirrorReading(request);
+  // BotID Basic (AK §3.3): the one route that creates a reading, and so the only
+  // one that mints a token whose first GET can start a free writer call. Local dev
+  // always returns { isBot: false } (vercel.com/docs/botid/local-development-behavior).
+  return createMirrorReading(request, { botCheck: () => checkBotId() });
 }

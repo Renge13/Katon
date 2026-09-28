@@ -20,7 +20,7 @@ added 2026-09-23 (PAY-SAFETY-ALL-PURCHASES and REPO-IS-SOURCE, launch cut §0b).
 
 | | gate | status (dated per row since 2026-09-25; the rest as of 2026-09-23) | proof |
 |---|---|---|---|
-| a | QRIS active for production | OPEN, **SUBMITTED 2026-09-24 17:05 WIB** (Reyner): production QRIS activation, brand "Katon", MCC **5817**. Back Office status **UPDATING** (under DOKU review). DOKU ticket 1149053. See § GATE a below | DOKU Back Office |
+| a | QRIS active for production | OPEN, **RESUBMITTED 2026-09-28** (Reyner): MCC 5817, Nama Pendek Brand "Katon App"; the PT's KBLI is 63900 (§ GATE a, RESUBMITTED). First **SUBMITTED 2026-09-24 17:05 WIB** (Reyner): production QRIS activation, brand "Katon", MCC **5817**. Back Office status **UPDATING** (under DOKU review). DOKU ticket 1149053. See § GATE a below | DOKU Back Office |
 | b | ~~one delivered notification captured~~ **AMENDED by Reyner 2026-09-25:** reconcile-on-load proven on a real sandbox Checkout QRIS payment, AND re-proven on both production purchases (Rp 19.000 mirror + Rp 39.000 compat) | **SANDBOX HALF DONE 2026-09-25**: invoice `eJm6p6PjG8f_0eridE39x.muglimjz`, reconcile log 13:55:18 WIB `[reconcile] ... status=SUCCESS paid=true reason=ok` (§ WALK 4). **PRODUCTION HALF OPEN**: it is Reyner's two acceptance purchases below. The notification question stays open with DOKU (ticket 1149053) and **no longer blocks launch**. History of the old wording: DOKU has delivered none on any walk (§ WALK 2, 3 and 4) | walk 4 + the `[reconcile]` line on each production purchase |
 | c | production keys, `PAYMENTS_PROVIDER=doku`, no `DOKU_SANDBOX` | OPEN - production has no `PAYMENTS_PROVIDER` and no DOKU vars | Vercel env (Reyner) |
 | d | notify URL set on the production QRIS channel | OPEN | production Back Office (Reyner) |
@@ -131,6 +131,11 @@ who pays and never returns to her page stays unpaid until she does. Two things m
   NOTE on the first run: the `feat-facts-spacing` alias answered an HTML page while its deploy was
   still aliasing; re-run a minute later it verified. A probe against a just-pushed branch needs its
   deploy to be `success` first.
+
+### GATE a, RESUBMITTED 2026-09-28 (Reyner, recorded from Prompt AK amendment 1)
+
+DOKU production QRIS was resubmitted 2026-09-28 with MCC 5817 and Nama Pendek Brand "Katon App". The PT's KBLI is 63900. This is Reyner's report of the resubmission, recorded as his report; the
+repo cannot read the Back Office. The row in the gate table above carries the same line.
 
 ### GATE a, 2026-09-24 (Reyner, recorded 2026-09-25 from Prompt AC)
 
