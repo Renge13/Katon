@@ -124,9 +124,19 @@ test('EVERY GLOSSARY LABEL IS UNIQUE', () => {
   };
   walk(GLOSSARY, '');
   assert.ok(labels.length > 80, `precondition: the walk found the labels (${labels.length})`);
+  // ── ONE RULED EXCEPTION, AND IT IS A PAIR OF VARIANTS, NOT TWO TERMS ──
+  // Reyner ruled `p3_reader_gives.name_id` = "Penyeimbang Unsur", the same name as
+  // `p3_supplies` (Prompt AM, 2026-09-28): it is the one term, Penyeimbang Unsur,
+  // said from the reader's side. Neither risk this test names can arise: a reading
+  // carries at most one of the two (lib/semantic/pair.js `p3SupplyKey` returns one
+  // key), so no legend or facts page holds both, and appendix anchors are
+  // `section.key` (lib/pdf/appendix.js `anchorId`), never the label. Only this pair
+  // is exempt; any other shared label still fails.
+  const SAME_TERM = new Set(['kompatibilitas.p3_supplies', 'kompatibilitas.p3_reader_gives']);
   const seen = new Map();
   for (const [label, at] of labels) {
-    assert.ok(!seen.has(label), `"${label}" is the label of both ${seen.get(label)} and ${at}`);
+    const bothVariants = SAME_TERM.has(at) && SAME_TERM.has(seen.get(label));
+    assert.ok(!seen.has(label) || bothVariants, `"${label}" is the label of both ${seen.get(label)} and ${at}`);
     seen.set(label, at);
   }
 });

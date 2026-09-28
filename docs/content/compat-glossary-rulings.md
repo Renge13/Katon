@@ -152,7 +152,7 @@ AMENDED 2026-09-28 (Prompt AM, ruling 1): the meaning line said "tidak dominan" 
 
 - label_meaning: "Komitmen yang dituntut dari masing-masing pihak"
 
-## AMENDMENT RECORD 2026-09-28 (Prompt AM): Penyeimbang Unsur in both directions
+### AMENDMENT RECORD 2026-09-28 (Prompt AM): Penyeimbang Unsur in both directions
 
 Reyner, verbatim:
 
