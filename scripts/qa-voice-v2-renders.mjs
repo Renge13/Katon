@@ -81,7 +81,19 @@ const SUBJECTS = [
   // pullFit) reproduce byte-for-byte from these inputs.
   { id: 'PZ0t_B3YDnzdXc2LWV38D', kind: 'pair', a: { birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' }, b: { birthDate: '1990-03-04', birthTime: '14:00', gender: 'male' } },
   { id: 'g4WH4_9QbCrCj3Gha934q', kind: 'pair', a: { birthDate: '1989-09-13', birthTime: '09:00', gender: 'male' }, b: { birthDate: '1997-09-14', birthTime: '13:00', gender: 'female' } },
+  // Round 4 (Prompt AE item 4, 2026-09-28). RECONSTRUCTED births, not the real
+  // ones: tests/fixtures/pair-frame-hits.fixture.json records them as one of 21
+  // birth pairs whose full GET facts body reproduces production byte-for-byte. No
+  // gender is known, so none is passed.
+  { id: 'rVe4ca-FOhsprfGUucTxA', kind: 'pair', a: { birthDate: '1981-02-20', birthTime: '07:00' }, b: { birthDate: '1988-07-04', birthTime: '05:00' } },
 ];
+// `--subjects a,b,c` renders exactly those ids (round 4 excludes the examples' own
+// charts, g4WH4 and eJm6p6PjG8f, so it tests voice and not copying).
+const SUBJECT_FILTER = arg('subjects', null)?.split(',');
+if (SUBJECT_FILTER) {
+  const unknown = SUBJECT_FILTER.filter((id) => !SUBJECTS.some((s) => s.id === id));
+  if (unknown.length) throw new Error(`unknown subject(s): ${unknown.join(', ')}`);
+}
 
 // ── the verdict quote finder, compiled exactly as the gate compiles it ──
 const VERDICT = (BLOCKLIST.verdict?.patterns ?? []).filter((e) => e?.pattern)
@@ -129,6 +141,7 @@ globalThis.fetch = async (url, opts) => {
 const summary = [];
 for (const s of SUBJECTS) {
   if (ONLY && s.id !== ONLY) continue;
+  if (SUBJECT_FILTER && !SUBJECT_FILTER.includes(s.id)) continue;
   for (const voice of VOICES) {
     __clearMemCache(); __clearInFlight(); wire = [];
     const a = calculateBaziChart(s.a);

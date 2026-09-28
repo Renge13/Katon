@@ -26,6 +26,9 @@ import { buildCompleteEditionPdf, buildPairPdf } from '../lib/pdf/build.js';
 // voice present the index shows one column and says so.
 const dirAt = process.argv.indexOf('--dir');
 const DIR = dirAt > -1 ? process.argv[dirAt + 1] : 'reports/voice-v2';
+// A FLOORED reading is marked in its FILE NAME as well as in the index (Prompt AI
+// §4, 2026-09-28), so a PDF opened on its own cannot pass for a render.
+const pdfName = (r) => `${r.subject}-${r.voice}${r.floored ? '-FLOOR' : ''}.pdf`;
 const records = fs.readdirSync(DIR).filter((f) => /-(v1|v2)\.json$/.test(f))
   .map((f) => JSON.parse(fs.readFileSync(`${DIR}/${f}`, 'utf8')));
 if (records.length === 0) throw new Error(`no renders in ${DIR}; run qa-voice-v2-renders.mjs first`);
@@ -52,8 +55,8 @@ for (const r of records) {
       gender: r.inputs.a.gender ?? null,
     });
   }
-  fs.writeFileSync(`${DIR}/${r.subject}-${r.voice}.pdf`, built.buffer);
-  console.log(`${r.subject}-${r.voice}.pdf ${(built.buffer.length / 1024).toFixed(0)} KB${r.floored ? '  FLOOR' : ''}`);
+  fs.writeFileSync(`${DIR}/${pdfName(r)}`, built.buffer);
+  console.log(`${pdfName(r)} ${(built.buffer.length / 1024).toFixed(0)} KB${r.floored ? '  FLOOR' : ''}`);
 }
 
 const subjects = [...new Set(records.map((r) => r.subject))];
@@ -62,7 +65,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const cell = (r) => (r
   ? `<div class="col"><h3>${esc(r.voice)} ${r.floored ? '<span class="floor">FLOOR (module assembly, not a reading)</span>' : ''}</h3>
 <p class="meta">${r.words} words, ${r.regenerations} regeneration(s)${r.j1_rejections ? `, ${r.j1_rejections} J1 rejection(s)` : ''}, judge findings ${r.judge_findings.length}, $${r.spend_usd.total.toFixed(4)}</p>
-<iframe src="${esc(r.subject)}-${esc(r.voice)}.pdf"></iframe></div>`
+<iframe src="${esc(pdfName(r))}"></iframe></div>`
   : '<div class="col"><h3>missing</h3></div>');
 const title = voices.length === 1 ? `Voice ${voices[0]} renders` : 'Voice v1 vs v2';
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title}</title>
