@@ -41,9 +41,14 @@ The draft's rejections, quoted:
 - `v2.d1_invented_term` "Kuat" (kekuatan). The sentence is "Hubungan kalian memiliki **Tarikan Kuat dan Ritme
   Seirama** ..." - the supplied quadrant name "Tarikan Kuat, Ritme Seirama" with "dan" for the comma, and D1
   then reads "Kuat" as a strength term.
-- `v2.d1_invented_term` "Berseberangan" (kompatibilitas). The sentence is "... menghasilkan interpretasi yang
+- `v2.d1_invented_term` "Berseberangan" (kompatibilitas). ~~The sentence is "... menghasilkan interpretasi yang
   **berseberangan**." That is the ordinary adjective, and Reyner's own Example 4 wording ("dua interpretasi
-  yang berseberangan"). D1 matches it against the frame-clash name `p2_frame_clash` "Berseberangan".
+  yang berseberangan"). D1 matches it against the frame-clash name `p2_frame_clash` "Berseberangan".~~
+  **CORRECTED 2026-09-28 (Prompt AK §1):** that attribution was wrong. D1 is case-sensitive (`new RegExp(...,
+  'gu')` in `inventedTerms`), so the lowercase adjective never fired. The hit is the draft's TITLE-CASE
+  HEADING, "Perspektif yang Berseberangan" (block `p4_temperament` + `p2_palace_frame`;
+  `tests/fixtures/voice-v2-d1-misfires.json`). The word is capitalised by heading style, and it happens to be
+  the true name of rVe4ca's frame clash (冲), which `p2_palace_frame` carries with `label: null`.
 
 Neither is an invented fact. Both are the gate matching a glossary NAME against ordinary or paraphrased words.
 Reported, not changed: it is a gate change and needs Cowork's ruling. In the AJ §2 measurement
