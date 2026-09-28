@@ -33,9 +33,13 @@ const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 // RE-PINNED AGAIN to `main` 6cdbe69 (PR #156, 2026-09-28): Reyner's new p0_opening
 // line is inside the pair semantic JSON, so main's own pair key moved; it was
 // c6d3d6ff... on ec8ea00. Computed on a detached checkout of origin/main 6cdbe69.
+// RE-PINNED to `main` 799e7bc (PR #167, 2026-09-28): the Penyeimbang Unsur rule
+// (the giver must hold MORE) moved this pair's p3 supplies, so main's own pair key
+// moved; it was 9dcfc125... on 6cdbe69. Computed on a checkout of main 799e7bc (a
+// worktree differing from it only by one PROGRESS.md row); the mirror key did not move.
 const V1_KEYS = {
   mirror: 'b38088d0aa89991d2da6521cd6e6536e4a3fbf34fa6422133f0782a442c3511f',
-  pair: '9dcfc125bba4e1a80e9d23214137dd3c68f705ceafeb63d00b3172274a622301',
+  pair: '423d02fd8465f31e67470b092239981b91e34e07e59d36a5fa050fac898add00',
 };
 
 const ENV = ['VOICE', 'VERCEL_ENV', 'GEMINI_API_KEY'];
