@@ -68,7 +68,10 @@ const { validateRenderingV2 } = await import('../lib/validate/v2.js');
 const { factGuard } = await import('../lib/validate/fact.js');
 const { renderedText } = await import('../lib/validate/text.js');
 
-const DIRS = ['reports/voice-v2', 'reports/voice-v2/run1-stage6-1.29.0', 'reports/voice-v2/round3'];
+// `--dirs a,b` replays other folders (AK §1 adds round4 and round4b); the default
+// is the original three, the 64 drafts every earlier diff in the commit log counts.
+const DIRS = arg('dirs', null)?.split(',')
+  ?? ['reports/voice-v2', 'reports/voice-v2/run1-stage6-1.29.0', 'reports/voice-v2/round3'];
 const line = (f) => `${f.severity} ${f.check} :: ${f.message}`;
 const metrics = () => ({
   same_breath: [], coverage: [], block_chars: [], breaks_per_block: [], total_chars: [],

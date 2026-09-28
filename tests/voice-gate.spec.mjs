@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.52.0');
+    assert.equal(onV2.stage6_version, '1.53.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -455,4 +455,46 @@ test('NO NESTED BRACKET: the English goes on the first BARE mention, and nowhere
   const out = validateRenderingV2(onlyInside, sj);
   const all = out.normalized.blocks.map((b) => b.text).join(' ');
   assert.equal(all.includes(`(${en})`), false, 'inserted on a mention inside parentheses');
+});
+
+// ── A SUPPLIED TERM WRITTEN WITH "dan" FOR ITS COMMA IS THAT TERM (STAGE6 1.53.0, AK §1) ──
+// rVe4ca floored in round 4b and in the AJ §2 measurement. One cause: the writer
+// wrote the supplied quadrant name "Tarikan Kuat, Ritme Seirama" as "Tarikan Kuat
+// dan Ritme Seirama", the mask no longer matched it, and D1 rejected the bare "Kuat"
+// as an invented strength term. Cowork's ruling: normalise it to the ruled spelling
+// and LOG it, never reject it - for terms the engine supplied for this reading only.
+import D1_MISFIRES from './fixtures/voice-v2-d1-misfires.json' with { type: 'json' };
+
+const rVe = () => buildPairSemantic(
+  calculateBaziChart(D1_MISFIRES.inputs.a), calculateBaziChart(D1_MISFIRES.inputs.b), { voice: 'v2' },
+);
+const danBlock = D1_MISFIRES.blocks.find((b) => b.text.includes('Tarikan Kuat dan Ritme Seirama'));
+
+test('THE REJECTION LINE THIS IS ABOUT: D1 said "Kuat" (kekuatan) was invented', () => {
+  assert.ok(D1_MISFIRES.rejections.some((r) => r.message.startsWith('"Kuat" (kekuatan) appears in the prose')));
+  assert.ok(danBlock, 'the draft block behind it is in the fixture');
+});
+
+test('"Tarikan Kuat dan Ritme Seirama" IS THE SUPPLIED "Tarikan Kuat, Ritme Seirama": normalised and logged, not rejected', () => {
+  const sj = rVe();
+  assert.ok(sj.facts.some((f) => f.label === 'Tarikan Kuat, Ritme Seirama'), 'precondition: the engine supplies it');
+  const draft = draftFor(sj);
+  draft.blocks = [{ fact_ids: danBlock.fact_ids, heading: 'x', text: danBlock.text }, ...draft.blocks];
+  const out = validateRenderingV2(draft, sj);
+  assert.equal(out.findings.some((f) => f.check === 'v2.d1_invented_term' && f.message.startsWith('"Kuat"')), false,
+    JSON.stringify(out.findings.filter((f) => f.check === 'v2.d1_invented_term').map((f) => f.message)));
+  assert.ok(out.normalized.blocks[0].text.includes('Tarikan Kuat, Ritme Seirama'), 'served in the ruled spelling');
+  assert.equal(out.normalized.blocks[0].text.includes('Tarikan Kuat dan Ritme Seirama'), false);
+  const log = out.findings.find((f) => f.check === 'terms.normalised');
+  assert.ok(log && log.severity === 'flag', 'logged as normalised, at flag');
+});
+
+test('ONLY SUPPLIED TERMS: a "dan" spelling of a quadrant this reading was NOT given is not normalised', () => {
+  const sj = rVe();
+  const other = 'Tarikan Tenang, Ritme Bergesek';
+  assert.equal(sj.facts.some((f) => f.label === other), false, 'precondition');
+  const draft = draftFor(sj);
+  draft.blocks[0].text = `${draft.blocks[0].text} Hubungan kalian memiliki Tarikan Tenang dan Ritme Bergesek.`;
+  const out = validateRenderingV2(draft, sj);
+  assert.ok(out.normalized.blocks[0].text.includes('Tarikan Tenang dan Ritme Bergesek'), 'left as written');
 });
