@@ -296,3 +296,56 @@ test('facts.pattern AND facts.quadrant ARE GLOSSARY NAMES', async () => {
   assert.ok(names.includes(out.facts.pattern), `pattern "${out.facts.pattern}" is a ruled name`);
   assert.ok(names.includes(out.facts.quadrant), `quadrant "${out.facts.quadrant}" is a ruled name`);
 });
+
+// ── A CACHED PAIR ROW IS RE-GATED ON SERVE (STAGE6 1.47.0, Prompt AI §2) ──
+// Until 1.47.0 servePairReading re-checked only a FLOOR; a cached pair row was
+// served as stored, whatever gate had been added since. The case that matters is
+// real: tests/fixtures/pair-reading-g4WH4.json is the production paid response of
+// 2026-09-08, served from cache, and it says "Dia membawa elemen air" where B
+// brings Kayu - rejected since #154 (pair.supply_inverted), served anyway.
+import { readFileSync } from 'node:fs';
+import { writeCache } from '../lib/render/cache.js';
+import { STAGE6_VERSION } from '../lib/render/fence.js';
+
+const G4_INPUTS = JSON.parse(readFileSync(new URL('./fixtures/compat-g4WH4-reading.json', import.meta.url), 'utf8')).inputs;
+const G4_PROD = JSON.parse(readFileSync(new URL('./fixtures/pair-reading-g4WH4.json', import.meta.url), 'utf8')).reading;
+
+test('THE 2026-09-08 g4WH4 PAID ROW IS RE-GATED: floored once, dropped, re-rendered on the next visit', async () => {
+  const id = `pair-${Math.random().toString(36).slice(2, 10)}`;
+  const { a, b } = G4_INPUTS;
+  await createPair({
+    id,
+    a_birth_date: a.birthDate, a_birth_time: a.birthTime, a_gender: a.gender, a_term_side: null,
+    b_birth_date: b.birthDate, b_birth_time: b.birthTime, b_gender: b.gender, b_term_side: null,
+    sku: 'compat', paid: false, email: null,
+  });
+  await markPairPaid(id, new Date().toISOString());
+  const sj = buildPairSemantic(calculateBaziChart(a), calculateBaziChart(b));
+  const key = cacheKey(sj);
+  await writeCache(key, {
+    ...G4_PROD, engineVersion: sj.engine_version, source: 'gemini', model: 'production-2026-09-08',
+    promptVersion: 'production-2026-09-08', stage6Version: STAGE6_VERSION,
+  });
+  assert.ok(validateRendering(G4_PROD, sj).findings.some((f) => f.check === 'pair.supply_inverted'),
+    'precondition: the stored production text fails the current gate');
+
+  // Visit 1: not served as stored. The floor, no provider call, and the row is out.
+  stubForbiddenProvider();
+  const first = await (await servePairReading(request(), id)).json();
+  assert.equal(first.served_from, 'floor', `served_from ${first.served_from}`);
+  assert.equal(fetchCalls, 0);
+  assert.ok(!JSON.stringify(first.reading).toLowerCase().includes('elemen air'), 'the inverted sentence is not served');
+  assert.equal(await readCache(key), null, 'the bad row no longer serves');
+
+  // Visit 2: a real render (stubbed provider returning a passing draft) replaces it.
+  const draft = { blocks: assembleFallback(sj).blocks, penutup: 'Penutup yang cukup panjang untuk kalian berdua.' };
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    return Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify(draft) }] }, finishReason: 'STOP' }] });
+  };
+  const second = await (await servePairReading(request(), id)).json();
+  assert.equal(second.served_from, 'render', `served_from ${second.served_from}`);
+  assert.ok(fetchCalls > 0);
+  const row = await readCache(key);
+  assert.ok(row && !JSON.stringify(row.blocks).toLowerCase().includes('elemen air'), 'the re-render replaced the row');
+});

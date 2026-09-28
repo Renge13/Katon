@@ -1,5 +1,5 @@
 # Prompt AG: deterministic pair-truth checks + no semantic judge in the render path (Cowork, 2026-09-26)
-**RULED:** Reyner, 2026-09-26: the MVP render path is engine → Flash-lite writer → deterministic checks → serve. There is no semantic judge in production and no writer bake-off (this replaces option D and the judge round 3). The full ruling is in `docs/product/product-boundary-rulings-2026-09-26.md`, which sits untracked in the working tree. Evidence: `reports/architecture-cost-2026-09-26.md` (Prompt AF).
+**RULED:** Reyner, 2026-09-26: the MVP render path is engine → Flash-lite writer → deterministic checks → serve. There is no semantic judge in production and no writer bake-off (this replaces option D and the judge round 3). The full ruling is in `docs/product/product-boundary-rulings-2026-09-26.md`, which sits untracked in the working tree. Evidence: `docs/qa/2026-09-26-architecture-cost.md` (Prompt AF).
 
 ## 0. Docs first (a docs-only PR to main; Reyner approves the merge)
 - Commit `docs/product/product-boundary-rulings-2026-09-26.md` exactly as it is.
