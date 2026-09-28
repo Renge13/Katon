@@ -2,10 +2,9 @@
 
 STATUS: RULED by Reyner (chat, 2026-09-26). TIMING AMENDED BY REYNER THE SAME DAY: the voice work runs NOW, IN PARALLEL with the DOKU wait, and it is LAUNCH-CRITICAL. Katon does NOT launch on v1 because the DOKU gate is met. Launch sequence: frame-hit truth fix -> Reyner's examples -> simplify constraints -> deterministic validation updates -> representative test -> Reyner's acceptance -> launch (the DOKU production gate is independent; no model bake-off, no semantic-judge checkpoint; Reyner 2026-09-26, MVP). Judges J1-J4 (rows C3-C6) are development/QA tools for sampled calibration only, never in the production render path (Reyner 2026-09-26, MVP). Two-round cap = a DECISION CHECKPOINT, NOT A QUALITY CEILING: if round 2 is not accepted, nothing launches automatically; Reyner chooses to accept, run one more targeted round, or change the approach. Its purpose is to prevent endless iteration, not to force a voice through.
 Source audit: Cowork's writing-constraints audit (Claude project `claude/KATON-writing-constraints-audit-2026-09-26.md`), read on the `feat/voice-v2` working tree. Row ids B1-B29 and C1-C7 refer to that audit.
-This file is not durable until Code commits it. Commit it docs-only, alone.
 
 ## Principles (ruled)
-- **Strict input, free interpretation, strict verification.** Hard rules protect the truth. Examples teach the voice. The reviewer catches mistakes. The writer gets to write.
+- **Strict input, free interpretation, strict verification.** Hard rules protect the truth. Examples teach the voice. The reviewer catches mistakes (deterministic checks; the semantic judge is QA-only for the MVP). The writer gets to write.
 - **Remove voice prescriptions, not guardrails.** The hard truth, safety and document constraints (audit section A) and rule 25 stay unchanged.
 - **Loosen both halves at once.** A soft check triggers regeneration with a directive, so it is a generation-time rule. Loosening the prompt without loosening the matching review check puts the constraint straight back.
 - **Reyner's five questions are HIS evaluation criteria, never renderer instructions.** Is it specific? Does it create recognition? Could it happen on an ordinary Tuesday? Would someone send this sentence to a spouse or sibling? Does it leave curiosity alive?
@@ -27,7 +26,7 @@ This file is not durable until Code commits it. Commit it docs-only, alone.
 | B6 gift before cost / cost mandatory per fact | LOOSEN + MOVE TO REVIEW | No per-fact gift/cost choreography. The reading as a whole must have tension and not be a pile of compliments (B16 protects this). |
 | B7 VARY THE MOVE | REMOVE | Examples teach variation. |
 | B8 "never add a sentence that carries no new fact" | REMOVE the restrictive part | Replace with: don't add empty prose; not every useful sentence adds a chart fact (an image, tension, contrast or scene is value). |
-| B9 "no added specificity" | LOOSEN | Never claim something actually happened to the person. Illustrative scenes are fine ("Misalnya, ketika...", "Dalam keseharian, ini bisa terasa seperti..."). J1 protects the boundary. |
+| B9 "no added specificity" | LOOSEN | Never claim something actually happened to the person. Illustrative scenes are fine ("Misalnya, ketika...", "Dalam keseharian, ini bisa terasa seperti..."). Deterministic checks and Reyner's acceptance read protect it; J1 is a QA tool. |
 | B10 "not a stylist / no elegance" | REMOVE | |
 | B11 "constrain it, do not decorate it" | REMOVE | Keep "no fake persona" only. |
 | B12 one committed image per claim | KEEP no-hedging, DROP one-image limit | |
