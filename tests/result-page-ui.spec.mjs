@@ -140,3 +140,20 @@ test('§2 AND IT NO LONGER FIRES upcoming_seen - a counter for a block nobody ca
     assert.equal(fired.length, 0, 'upcoming_seen was posted');
   } finally { m.unmount(); f.restore(); }
 });
+
+// ── §3. THE BACK LINK AND THE EYEBROW HAVE ROOM ────────────
+// The step is the page's own: the one between the persona block and the first
+// divider (ProseBlocks' first Section, marginTop 34). Asserted as EQUAL to that
+// rendered value rather than as a typed 34, so the two cannot drift apart.
+test('§3 "Ganti tanggal" sits one persona step above "Refleksimu"', async () => {
+  const f = stubFetch();
+  const m = await mount(IN_SESSION);
+  try {
+    const back = [...m.host.querySelectorAll('button')].find((b) => b.textContent.includes('Ganti tanggal'));
+    assert.ok(back, 'the back link renders');
+    const firstDivider = [...m.host.querySelectorAll('div')].find((d) => d.style.borderTop && d.style.marginTop);
+    assert.ok(firstDivider, 'the first divider renders');
+    assert.equal(firstDivider.style.marginTop, '34px', 'precondition: the persona step is still 34');
+    assert.equal(back.style.marginBottom, firstDivider.style.marginTop);
+  } finally { m.unmount(); f.restore(); }
+});

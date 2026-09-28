@@ -848,7 +848,11 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
     // inheriting the fallback. Everything inside this root gets .45s, which
     // includes the Sebaran Unsur bars - that is the ruled scope, not an oversight.
     <div className="k-fade" style={{ ...wrap, ...themeVars(element), '--k-rise-dur': '.45s' }}>
-      <button onClick={onReset} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '18px 0 0', fontFamily: 'var(--font-sans)' }}>← Ganti tanggal</button>
+      {/* marginBottom 34 IS THE PAGE'S OWN STEP, not a new number (Prompt AQ §3):
+          the one between the persona block and the first divider (ProseBlocks'
+          first Section, marginTop 34). Reyner, 2026-09-28: the back link and
+          REFLEKSIMU sat 4px apart and read as one line. */}
+      <button onClick={onReset} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '18px 0 0', margin: '0 0 34px', fontFamily: 'var(--font-sans)' }}>← Ganti tanggal</button>
 
       {/* persona. RULE 23's BRACKET-ONCE: the Indonesian name leads and the English
           pair appears once, here, and never again in the body. */}
