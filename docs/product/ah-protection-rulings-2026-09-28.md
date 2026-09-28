@@ -60,3 +60,23 @@ Keyed (Cowork, AK amendment 1):
   floor, the paid flow renders a full reading (from the paid budget) before the PDF is built, and warms it
   at settle. The PDF never prints floor prose.
 - **6. Per-IP 100/day + BotID on `/api/mirror`:** approves AK §3.2 and §3.3 as the abuse-protection layer.
+
+## Reyner, 2026-09-28, third set (Prompt AL), verbatim
+```
+1. Yes. Remove "Mungkin menarik" mechanically as proposed.
+2. Yes. Adopt the stricter Penyeimbang Unsur rule.
+3. Yes. Hide "Unduh PDF" until the reading is ready, using the existing Compatibility pattern.
+4. Yes to #161–#165. Merge #161 before #165.
+```
+Keyed (Cowork, Prompt AL):
+- **1** is a voice ruling and is recorded as B35 in `docs/content/voice-constraint-rulings-2026-09-26.md`.
+- **2. Penyeimbang Unsur, ADOPTED.** Replaces the measurement-only limit of ruling 3 above. `supplyFor`
+  (`lib/compat/complementarity.js`) names "X membawa elemen E" only when the supplier holds MORE of E than
+  the receiver; an element the supplier holds less of, or the same amount of, is skipped. The walk is
+  unchanged: the receiver's favourable list, scarcest first. A direction where no element qualifies
+  carries no Penyeimbang fact. This is the candidate AK §2 measured.
+- **3. Complete Edition PDF before it is ready:** the Complete Edition page hides "Unduh PDF" until the
+  reading is ready, reusing the Compatibility report's existing mechanism and states. No new copy: if the
+  Compatibility waiting-state text does not read correctly for a Complete Edition, the work stops and the
+  copy goes to Reyner.
+- **4** is the merge order for PRs #161-#165 (Prompt AL §0). Executed 2026-09-28.
