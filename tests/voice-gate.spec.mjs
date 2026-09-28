@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.56.0');
+    assert.equal(onV2.stage6_version, '1.57.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -665,8 +665,22 @@ test('ASPEK@PILLAR: the round-4d served sentence ("Aspek Pengelola-mu ... Pilar 
   assert.equal(r.ok, false);
 });
 
-test('ASPEK@PILLAR: the same claim with no possessive (an2 run 1) is LOGGED, not rejected', () => {
+// ── FALSE FOR BOTH PEOPLE IS FALSE WHOEVER IT IS ABOUT (STAGE6 1.57.0, Prompt AP §3) ──
+// Cowork's technical ruling, inside Reyner's AN ruling: a no-marker claim that matches
+// NEITHER person's placement is rejected; true for one and false for the other, it is
+// still only logged, because there is no way to know which person is meant.
+test('ASPEK@PILLAR: the no-possessive an2 run-1 claim is false for BOTH people, so it is HARD', () => {
   const [c] = caseOf('log');
+  const sj = pairSj(c, 'v2');
+  const r = validateRenderingV2(plant(draftFor(sj), c.sentence), sj);
+  const hits = aspekHard(r);
+  assert.equal(hits.length, 1, JSON.stringify(r.findings.filter((f) => f.check.startsWith('fact.aspek'))));
+  assert.match(hits[0].message, /both/u);
+  assert.equal(r.findings.some((f) => f.check === 'fact.aspek_pillar_unattributed'), false);
+});
+
+test('ASPEK@PILLAR: a no-possessive claim true for ONE person (round 4c) is still only LOGGED', () => {
+  const [c] = caseOf('one-true');
   const sj = pairSj(c, 'v2');
   const r = validateRenderingV2(plant(draftFor(sj), c.sentence), sj);
   assert.equal(aspekHard(r).length, 0);
