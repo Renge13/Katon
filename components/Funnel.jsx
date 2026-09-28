@@ -826,6 +826,14 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
   const cardData = reading.card
     ? { ...reading.card, footer: mergeFooter(reading.card.footer, reading.birthDate, reading.gender) }
     : null;
+  // THE HEADER'S PROFILE LINE IS THE CARD FOOTER'S, SAME SOURCE AND SAME WORDS
+  // (Prompt AQ §1, 2026-09-28). The session that created the reading holds the date
+  // and gender; a reopened or shared link holds neither, and then there is no line
+  // at all rather than an empty one. Serving them on the permalink would put a
+  // birth date on every link a reader shares, and that is Reyner's to rule.
+  const profileLine = (reading.birthDate || reading.gender)
+    ? mergeFooter(null, reading.birthDate, reading.gender).left
+    : '';
 
   return (
     // `--k-rise-dur` SCOPED TO THE READING, 2026-09-05. Reyner ruled the persona
@@ -852,6 +860,11 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--tinta-soft)' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: el.mid }} /> {element}{chart?.day_master?.stem ? ` · ${chart.day_master.stem}` : ''}
         </div>
+        {/* Inside the 360ms reveal, not a fifth step: the persona stagger is ruled
+            at four (0/120/240/360). Uppercased by CSS, as the card footer is. */}
+        {profileLine && (
+          <div data-profile-line style={{ marginTop: 8, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>{profileLine}</div>
+        )}
       </Reveal>
 
       {/* THE PROSE, AND THE SKELETON THAT HANDS THE SPACE OVER TO IT.
