@@ -8,6 +8,12 @@
 //
 // Prompt Q commit 5. READ-ONLY. No dashboard, no dependency, no write path.
 //
+// ── THE UPCOMING BLOCK IS GONE, 2026-09-28 (Prompt AQ §2) ──
+// Nothing fires `upcoming_seen` or `interest_registered` any more, so the two
+// interest rates below describe readers up to that date only. They are kept
+// because the recorded rows are kept. A window starting after 2026-09-28 reads
+// 0 / 0 for both, and that is the block's absence, not a broken funnel.
+//
 // ── WHY IT ACCEPTS A FIXTURE, WHICH IS A RULED DECISION ──
 // In dev-fallback mode the counters live in the NEXT SERVER'S memory, not in this
 // script's process, so "walk the funnel locally, then run the read-out" cannot

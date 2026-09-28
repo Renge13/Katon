@@ -107,3 +107,36 @@ test('§1 RE-ACCESS: no date, no gender -> no line, no empty row, no stray separ
     assert.equal(m.text().includes(' | '), false, 'no bare separator anywhere on the page');
   } finally { m.unmount(); f.restore(); }
 });
+
+// ── §2. THE UPCOMING BLOCK IS GONE ─────────────────────────
+// Its eyebrow, its lead, the Setahun ke Depan card and the interest link, by the
+// words a reader saw. Literals on purpose: the copy bank they came from is deleted
+// in the same commit, so importing it would make this test unable to run.
+const UPCOMING_WORDS = [
+  'Yang sedang dikerjakan',
+  'Dua bacaan ini belum dijual',
+  'Setahun ke Depan',
+  'Beri tahu saya kalau sudah siap',
+];
+
+test('§2 THE PAGE NO LONGER RENDERS THE UPCOMING BLOCK', async () => {
+  const f = stubFetch();
+  const m = await mount(IN_SESSION);
+  try {
+    for (const w of UPCOMING_WORDS) {
+      assert.equal(m.text().includes(w), false, `"${w}" is still on the result page`);
+    }
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('§2 AND IT NO LONGER FIRES upcoming_seen - a counter for a block nobody can see', async () => {
+  // jsdom has no IntersectionObserver, so the old block fired on mount. That makes
+  // this a real red on the old build rather than a wait for a scroll.
+  const f = stubFetch();
+  const m = await mount(IN_SESSION);
+  try {
+    await act(async () => {});
+    const fired = f.calls.filter((c) => c.body?.event === 'upcoming_seen');
+    assert.equal(fired.length, 0, 'upcoming_seen was posted');
+  } finally { m.unmount(); f.restore(); }
+});

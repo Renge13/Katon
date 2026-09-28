@@ -58,7 +58,7 @@ export const SENTINEL = '@@UNRULED';
  *
  * @returns {Array<{path: string, value: string}>}
  */
-export function scanUnruled(node, path = 'UPCOMING_COPY', found = []) {
+export function scanUnruled(node, path = 'bank', found = []) {
   if (typeof node === 'string') {
     if (node.includes(SENTINEL)) found.push({ path, value: node });
     return found;

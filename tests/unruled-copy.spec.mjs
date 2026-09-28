@@ -30,7 +30,11 @@
 // would fix it by deleting the spec. The state change is enforced by the
 // production gate, which is where a hold belongs; this file protects the gate.
 //
-// The one thing it does check about the CONTENT is that no price lives in the
+// UPCOMING_COPY WAS DELETED 2026-09-28 (Prompt AQ §2) with the block it fed, and
+// its two shape tests went with it. The detector and the gate are what this file
+// protects, and they serve every other bank unchanged.
+//
+// The one thing it does check about the CONTENT is that no price lives in a
 // bank. Prices resolve from lib/pricing.js at render time, and a number typed
 // into a copy bank is a second source of truth for what a thing costs.
 // ============================================================
@@ -42,26 +46,12 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { UPCOMING_COPY, COMPAT_COPY, PENDING, COPY_BANKS } from '../lib/site/copy.js';
+import { COMPAT_COPY, PENDING, COPY_BANKS } from '../lib/site/copy.js';
 import * as copyModule from '../lib/site/copy.js';
 import { UNRULED_SOURCES } from '../lib/site/unruledScan.js';
 import { scanUnruled, SENTINEL } from '../scripts/check-unruled-copy.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-
-/**
- * The slots the block needs to render at all. Commit 4 builds the structure and
- * commits 5-6 depend on it existing, so a missing slot is a build break rather
- * than a wording question - which is why the SHAPE is asserted while the WORDS
- * are not.
- */
-const REQUIRED = [
-  'eyebrow', 'lead', 'availability', 'interestCta',
-  // `thanks` was replaced and SPLIT into these two on 2026-09-01 - one receipt for
-  // the tap, one for the contact submit. Both are required: a missing one is a
-  // moment that confirms nothing, which is the defect the split exists to fix.
-  'interestNoted', 'contactSent', 'contactLabel', 'contactSubmit',
-];
 
 test('the detector finds a sentinel at any depth', () => {
   const found = scanUnruled({
@@ -95,24 +85,6 @@ test('the detector is silent on copy that carries no sentinel', () => {
   assert.deepEqual(found, [], 'a clean bank must produce no findings');
 });
 
-test('every required slot exists and is a non-empty string', () => {
-  for (const slot of REQUIRED) {
-    assert.equal(typeof UPCOMING_COPY[slot], 'string', `${slot} must be a string`);
-    assert.ok(UPCOMING_COPY[slot].trim().length > 0, `${slot} must not be empty`);
-  }
-  // `compat` LEFT THIS BLOCK 2026-09-08: it is for sale now, and `Upcoming`
-  // advertises what is not. Its two ruled strings were deleted rather than moved
-  // to the front-door card - they were ruled for a not-for-sale teaser, and
-  // whether they fit a card that sells is Reyner's call.
-  for (const product of ['annual']) {
-    for (const slot of ['label', 'sub']) {
-      const v = UPCOMING_COPY[product]?.[slot];
-      assert.equal(typeof v, 'string', `${product}.${slot} must be a string`);
-      assert.ok(v.trim().length > 0, `${product}.${slot} must not be empty`);
-    }
-  }
-});
-
 test('COMPAT_COPY carries its one slot, and it is RULED', () => {
   // INVERTED 2026-09-08, which is what the previous version of this test told the
   // next session to do: it asserted the slot must STAY a sentinel until Reyner
@@ -136,14 +108,6 @@ test('no price is hardcoded into the compat copy bank either', () => {
   // source of truth for what a thing costs, and lib/pricing.js is the first.
   assert.ok(!/\d{2}[.,]?\d{3}/.test(JSON.stringify(COMPAT_COPY)),
     'a price-shaped number is in COMPAT_COPY; resolve it from lib/pricing.js instead');
-});
-
-test('no price is hardcoded into the copy bank', () => {
-  // Guards against 39.000 / 79.000 being typed in beside the words when the
-  // wording is ruled. lib/pricing.js is the only source of a price.
-  const seen = JSON.stringify(UPCOMING_COPY);
-  assert.ok(!/\d{2}[.,]?\d{3}/.test(seen),
-    'a price-shaped number is in UPCOMING_COPY; resolve it from lib/pricing.js instead');
 });
 
 test('the production gate is wired into prebuild AND VERCEL ACTUALLY INVOKES IT', () => {
