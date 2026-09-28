@@ -27,7 +27,14 @@ function fenceAfter(heading) {
   const open = ae.indexOf('```\n', at);
   return `${ae.slice(open + 4, ae.indexOf('\n```', open + 4))}\n`;
 }
-const AE_MIRROR = fenceAfter('## 1. Replace `docs/content/renderer-prompt-v2.txt`');
+// AE §1 VERBATIM, with the ONE ruled edit since: B31 (Reyner, 2026-09-28) removed
+// the example clause from the open-ended close. Applied here as that exact edit, so
+// any other drift from AE still fails the verbatim test below.
+const B31_FROM = 'makes her want to look further, for instance at the people closest to her. Advice';
+const B31_TO = 'makes her want to look further. Advice';
+const AE_MIRROR_RAW = fenceAfter('## 1. Replace `docs/content/renderer-prompt-v2.txt`');
+assert.ok(AE_MIRROR_RAW.includes(B31_FROM), 'AE §1 no longer carries the clause B31 removes');
+const AE_MIRROR = AE_MIRROR_RAW.replace(B31_FROM, B31_TO);
 const AE_COMPAT = fenceAfter('## 2. Replace `docs/content/compat-renderer-prompt-v2.txt`');
 
 const EXAMPLES = read('docs/content/voice-examples-v2.txt');
@@ -81,5 +88,19 @@ test('A v2 ROW CARRIES A v2 PROMPT VERSION, distinct from every v1 version', () 
     const v2 = promptVersionFor(kind, 'v2');
     assert.match(v2, /^v2-/u);
     assert.notEqual(v2, V1_VERSIONS[kind]);
+  }
+});
+
+// ── B31 (Reyner, 2026-09-28): KEEP THE OPEN-ENDED CLOSE, REMOVE THE EXAMPLE PHRASE ──
+// Round 4 ended a thought with "Mungkin menarik untuk melihat/memperhatikan ..." in
+// 7 of 7 readings, most of them pointing at the people closest to her: the prompt's
+// own example, followed. The permission stays; the example goes
+// (docs/content/voice-constraint-rulings-2026-09-26.md B31).
+test('B31: the v2 prompts carry the open-ended close WITHOUT its example phrase', () => {
+  for (const kind of ['mirror', 'pair']) {
+    const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
+    assert.equal(p.includes('for instance at the people closest to her'), false, `${kind} still has the example`);
+    assert.ok(p.includes('You may end a thought on an open observation that makes her want to look further.'),
+      `${kind} lost the permission itself`);
   }
 });
