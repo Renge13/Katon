@@ -61,7 +61,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // pair only (tests/pair-truth.spec.mjs).
   // 1.40.0: a cross-chart relation between two non-day pillars is hard (AG item 1).
   // 1.41.0: element dominance agrees with the engine (mirror; v2 pairs via mirror.a/b).
-  assert.equal(STAGE6_VERSION, '1.41.0');
+  // 1.42.0-1.46.0 are spent on feat/voice-v2. 1.47.0: a cached pair row is re-gated on serve (AI §2).
+  assert.equal(STAGE6_VERSION, '1.47.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
