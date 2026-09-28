@@ -447,11 +447,13 @@ test("Reyner's scope lists are what he ruled, and they live in the DATA file", (
   // The four `p2_frame_*` keys (2026-09-26, Prompt AD) are NOT a scope change: a
   // frame hit used to derive its seat key, and each frame key sits in exactly the
   // list its seat key does, so every block scans as it did before.
+  // The same for `p3_reader_gives` (2026-09-28, Prompt AM): it used to be keyed
+  // `p3_supplies`, and it sits beside it.
   assert.deepEqual(scope.banned_in,
     ['p2_clash', 'p2_harm', 'p2_punishment', 'p2_frame_clash', 'p2_frame_harm', 'p2_frame_punishment',
       'p3_same_imbalance', 'p1_controls', 'p5_q2', 'p5_q4']);
   assert.deepEqual(scope.permitted_in,
-    ['p3_supplies', 'p2_harmony', 'p2_frame_harmony', 'p1_combination', 'p5_q1', 'p5_q3']);
+    ['p3_supplies', 'p3_reader_gives', 'p2_harmony', 'p2_frame_harmony', 'p1_combination', 'p5_q1', 'p5_q3']);
   // `_`-prefixed keys are skipped by style.js's compile filter, so the scope
   // block cannot be mistaken for a pattern category.
   assert.equal(Object.keys(BLOCKLIST.style).includes('_pair_scope'), true);
@@ -481,6 +483,19 @@ test('PERMITTED: harmony vocabulary in the P3 supply block passes', () => {
   const rendered = into(renderingFor(sj), 'p3_supply', PHRASE);
   assert.deepEqual(tension(rendered, sj), [],
     'p3_supplies is a complementarity block and the phrase states the fact');
+});
+
+test('PERMITTED: the same phrase in the P3 block when only the READER gives (p3_reader_gives, Prompt AM)', async () => {
+  // NOT A SCOPE CHANGE, the p2_frame_* reasoning above: this block was keyed
+  // `p3_supplies` until the reader-side cell existed, so it sits in the list its
+  // parent key does and every block scans exactly as it did before.
+  const { VALIDATION_CHARTS } = await import('./bazi-validation.fixture.js');
+  const chart = (id) => { const r = VALIDATION_CHARTS.find((x) => x.id === id); return c(r.date, r.time); };
+  const sj = buildPairSemantic(chart(9), chart(11));
+  const p3 = sj.facts.find((f) => f.id === 'p3_supply');
+  assert.equal(variantKeysFor(p3)[0], 'p3_reader_gives', 'precondition: only the reader gives');
+  assert.deepEqual(tension(into(renderingFor(sj), 'p3_supply', PHRASE), sj), [],
+    'p3_reader_gives is the same complementarity fact from the reader\'s side');
 });
 
 test('BANNED: the same phrase in the P2 tension block still rejects', () => {

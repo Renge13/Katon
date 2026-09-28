@@ -138,14 +138,15 @@ test('sameImbalance names the element BOTH charts lack (charts 5 x 105)', () => 
     receiver_favourable_rank: 1,
     supplier_presence_percent: 8.8,
   });
-  //   B supplies from A(5)'s list [Wood, Fire] - B holds 16.7 Wood, rank 0.
+  //   B supplies from A(5)'s list [Wood, Fire] - B holds 16.7 Wood against A's 17.5,
+  //   less, so it is skipped (ruling 2, AL §3); Fire 26.7 > 20, rank 1.
   assert.deepEqual(out.bSupplies, {
     kind: 'compat_complementarity',
-    element: 'Wood',
+    element: 'Fire',
     supplier: 'B',
     receiver: 'A',
-    receiver_favourable_rank: 0,
-    supplier_presence_percent: 16.7,
+    receiver_favourable_rank: 1,
+    supplier_presence_percent: 26.7,
   });
 });
 
@@ -175,9 +176,12 @@ test('the caller\'s strength objects are used, not recomputed', () => {
   // chart 1's real list [Wood, Fire] would make B supply Wood at rank 0; the
   // stipulated list below puts Fire first instead, so the two are distinguishable.
   const out = compatComplementarity(fixture(1), fixture(5), { favorable: ['Fire', 'Wood'] });
-  assert.equal(out.bSupplies.element, 'Fire');
-  assert.equal(out.bSupplies.receiver_favourable_rank, 0);
-  assert.equal(out.bSupplies.supplier_presence_percent, 20);  // chart 5 holds 20 Fire
+  // Fire first, but chart 5 holds 20 Fire against chart 1's 27.5, so it is skipped
+  // (ruling 2, AL §3) and Wood lands at rank 1 - still distinguishable from the
+  // recomputed list, where Wood is rank 0.
+  assert.equal(out.bSupplies.element, 'Wood');
+  assert.equal(out.bSupplies.receiver_favourable_rank, 1);
+  assert.equal(out.bSupplies.supplier_presence_percent, 17.5);  // chart 5 holds 17.5 Wood
 });
 
 test('touches neither closed engine file, and no Indonesian string', () => {
@@ -207,3 +211,107 @@ test('touches neither closed engine file, and no Indonesian string', () => {
   }
   assert.ok(!code.includes('elementId'), 'must not call elementId');
 });
+
+// ── PENYEIMBANG UNSUR: THE SUPPLIER MUST HOLD MORE (Reyner's ruling 2, Prompt AL §3) ──
+// docs/product/ah-protection-rulings-2026-09-28.md, third set: "X membawa elemen E"
+// only when X holds MORE of E than the receiver; less or the same amount is skipped.
+// The walk is unchanged (the receiver's favourable list, scarcest first).
+const pairCharts = (a, b) => [calculateBaziChart(a), calculateBaziChart(b)];
+
+test('rVe4ca: A brings B Fire (not Water), B brings A Earth (not Fire) - AK §2\'s numbers', () => {
+  // A holds Water 1.3 against B's 5: less, skipped; Fire 11.3 > 7.5. B holds Fire
+  // 7.5 against A's 11.3: less, skipped; Earth 51.3 > 35.
+  const [a, b] = pairCharts({ birthDate: '1981-02-20', birthTime: '07:00' }, { birthDate: '1988-07-04', birthTime: '05:00' });
+  const out = compatComplementarity(a, b);
+  assert.equal(out.aSupplies.element, 'Fire');
+  assert.equal(out.bSupplies.element, 'Earth');
+});
+
+test('NO ELEMENT QUALIFIES in one direction: that direction is null, the other stands (charts 9 x 11)', () => {
+  // Chart 9 favours [Water, Wood]; chart 11 holds Water 5 < 13.8 and Wood 11.3 < 17.5.
+  const out = compatComplementarity(fixture(9), fixture(11));
+  assert.equal(out.bSupplies, null);
+  assert.equal(out.aSupplies.element, 'Fire');
+});
+
+test('THE SAME AMOUNT DOES NOT QUALIFY: a chart against itself supplies nothing either way', () => {
+  const out = compatComplementarity(fixture(1), fixture(1));
+  assert.equal(out.aSupplies, null);
+  assert.equal(out.bSupplies, null);
+});
+
+test('A DIRECTION WITH NO QUALIFYING ELEMENT carries no Penyeimbang fact: the fact, the PDF column and the no-supply cell', async () => {
+  const { buildPairSemantic } = await import('../lib/semantic/pair.js');
+  const { factRows } = await import('../lib/pdf/pairDocument.js');
+  // 9 x 11: only A gives. The p3_supply fact lists one direction; the PDF row keeps
+  // its term and leaves B's column empty rather than naming an element.
+  const oneWay = buildPairSemantic(fixture(9), fixture(11));
+  const supplies = oneWay.facts.find((f) => f.id === 'p3_supply').provenance.supplies;
+  assert.deepEqual(supplies.map((s) => `${s.from}>${s.to}`), ['a>b']);
+  // Only the reader gives, so the row is the reader-side cell (Prompt AM ruling 1).
+  const row = factRows(oneWay).find((r) => r.anchorKey === 'p3_reader_gives');
+  assert.equal(row.a, 'Api');
+  assert.equal(row.b, '');
+  // A chart against itself: nothing qualifies either way, so the ruled no-supply
+  // cell stands in and no Penyeimbang row is printed.
+  const none = buildPairSemantic(fixture(1), fixture(1));
+  assert.deepEqual(none.facts.find((f) => f.id === 'p3_supply').provenance.supplies, []);
+  const rows = factRows(none).map((r) => r.anchorKey);
+  assert.ok(rows.includes('p3_no_supply'));
+  assert.equal(rows.includes('p3_supplies'), false);
+});
+
+// ── WHO GIVES DECIDES THE CELL (Prompt AM ruling 1, 2026-09-28) ──
+// `p3_supplies` says "Dia membawa ..." - the partner brings the reader something.
+// When only the reader gives (A to B, no B to A), that line is untrue, so the
+// engine picks the ruled `p3_reader_gives` ("Kamu membawa ...") on every surface
+// that prints the cell: the floor, the PDF facts table and the glossary appendix.
+// Both directions, or the partner alone, keep `p3_supplies`. Texts are read from
+// the glossary, never restated here.
+const P3 = async (a, b) => {
+  const { buildPairSemantic } = await import('../lib/semantic/pair.js');
+  const { factRows } = await import('../lib/pdf/pairDocument.js');
+  const { buildPairAppendix } = await import('../lib/pdf/pairAppendix.js');
+  const { assembleFallback } = await import('../lib/render/fallback.js');
+  const { GLOSSARY } = await import('../lib/semantic/glossary.js');
+  const sj = buildPairSemantic(a, b);
+  const floor = assembleFallback(sj).blocks.find((bl) => (bl.fact_ids || []).includes('p3_supply'));
+  const row = factRows(sj).find((r) => /^p3_(supplies|reader_gives)$/u.test(r.anchorKey));
+  const appendixKeys = buildPairAppendix({ chartA: a, chartB: b, semanticJson: sj }).groups
+    .flatMap((g) => g.entries).filter((e) => e.section === 'kompatibilitas').map((e) => e.key);
+  return {
+    K: GLOSSARY.kompatibilitas,
+    directions: sj.facts.find((f) => f.id === 'p3_supply').provenance.supplies.map((s) => `${s.from}>${s.to}`),
+    floor: floor?.text ?? '', row, appendixKeys,
+  };
+};
+
+test('ONLY THE READER GIVES (9 x 11): floor, PDF row and appendix all use p3_reader_gives', async () => {
+  const r = await P3(fixture(9), fixture(11));
+  assert.deepEqual(r.directions, ['a>b'], 'precondition: only A gives');
+  assert.ok(r.floor.includes(r.K.p3_reader_gives.label_meaning), `floor: ${r.floor}`);
+  assert.equal(r.floor.includes(r.K.p3_supplies.label_meaning), false, 'the floor must not say the partner gives');
+  assert.equal(r.row.anchorKey, 'p3_reader_gives');
+  assert.equal(r.row.meaning, r.K.p3_reader_gives.label_meaning);
+  assert.equal(r.row.term, 'Penyeimbang Unsur');
+  assert.equal(r.row.a, 'Api');
+  assert.equal(r.row.b, '');
+  assert.ok(r.appendixKeys.includes('p3_reader_gives'));
+  assert.equal(r.appendixKeys.includes('p3_supplies'), false);
+});
+
+for (const [name, a, b, want] of [
+  ['BOTH GIVE (rVe4ca)', { birthDate: '1981-02-20', birthTime: '07:00' }, { birthDate: '1988-07-04', birthTime: '05:00' }, ['a>b', 'b>a']],
+  ['ONLY THE PARTNER GIVES (2 x 6)', 2, 6, ['b>a']],
+]) {
+  test(`${name}: p3_supplies stays, on every surface`, async () => {
+    const chart = (x) => (typeof x === 'number' ? fixture(x) : calculateBaziChart(x));
+    const r = await P3(chart(a), chart(b));
+    assert.deepEqual(r.directions, want, 'precondition: the directions');
+    assert.ok(r.floor.includes(r.K.p3_supplies.label_meaning), `floor: ${r.floor}`);
+    assert.equal(r.row.anchorKey, 'p3_supplies');
+    assert.equal(r.row.meaning, r.K.p3_supplies.label_meaning);
+    assert.ok(r.appendixKeys.includes('p3_supplies'));
+    assert.equal(r.appendixKeys.includes('p3_reader_gives'), false);
+  });
+}

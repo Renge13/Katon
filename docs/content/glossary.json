@@ -809,9 +809,16 @@
   "p3_supplies": {
    "_note": "aSupplies or bSupplies is non-null. Direction-neutral: the renderer names who supplies whom.",
    "name_id": "Penyeimbang Unsur",
-   "label_meaning": "Dia membawa elemen yang tidak dominan di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan.",
-   "meaning_seed": "Salah satu membawa elemen yang absen di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh.",
+   "label_meaning": "Dia membawa elemen yang kadarnya lebih rendah di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan.",
+   "meaning_seed": "Salah satu membawa elemen yang kadarnya lebih rendah di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh.",
    "daily_seed": "Kehadiran pasangan secara alami meredakan kegelisahan di area tertentu, sehingga ketiadaannya langsung membuat area tersebut terasa tidak stabil."
+  },
+  "p3_reader_gives": {
+   "_note": "Only the reader gives: the p3_supply fact carries A to B and no B to A (lib/semantic/pair.js p3SupplyKey). Direction-fixed, unlike p3_supplies: kamu is the reader (A), ia and -nya the other person (B). Both directions, or the partner alone, stay p3_supplies.",
+   "name_id": "Penyeimbang Unsur",
+   "label_meaning": "Kamu membawa elemen yang kadarnya lebih rendah di bagannya. Kehadiranmu secara alami memberi keseimbangan yang ia butuhkan.",
+   "meaning_seed": "Salah satu membawa elemen yang kadarnya lebih rendah di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh.",
+   "daily_seed": "Kehadiranmu secara alami meredakan kegelisahan di area tertentu dalam hidupnya, sehingga ketiadaanmu langsung membuat area tersebut terasa tidak stabil baginya."
   },
   "p3_same_imbalance": {
    "_note": "An element BOTH charts lack. Not a fault in either person.",
@@ -821,7 +828,7 @@
    "daily_seed": "Keputusan di area tertentu sering tertunda karena kalian berdua sama-sama menghindar, sampai ada dorongan dari keadaan atau pihak luar."
   },
   "p3_no_supply": {
-   "_note": "Neither direction supplies. Unreachable from the 13-chart fixture (base-rates run 1: 2.2.a held on 100.0% of 5000 pairs), and cell-ruled anyway so the floor is never silent on P3.",
+   "_note": "Neither direction supplies. Reachable since 2026-09-28, when the giver had to hold MORE of an element than the receiver (Reyner, Prompt AL ruling 2): fixture pairs 5 x 9 and 9 x 5 get it, and node --conditions=react-server scripts/compat-base-rates.mjs (5000 pairs, seed 20260907) measured 89 of 5000 = 1.8% on 2026-09-28 (PR #167 measured 38 of 2000 = 1.9% with another sampler). A measurement with its date, not a constant. Before that ruling it was unreachable (base-rates run 1: 2.2.a held on 100.0% of 5000 pairs). Cell-ruled so the floor is never silent on P3.",
    "name_id": "Mandiri Elementar",
    "label_meaning": "Tidak ada aliran elemen khusus yang saling mengisi. Hubungan berjalan mandiri tanpa rasa saling tergantung secara energi.",
    "meaning_seed": "Masing-masing mempertahankan ruang energinya secara utuh. Hubungan terasa ringan karena tidak ada tuntutan untuk saling mengisi, namun bisa terasa terpisah jika tidak ada area yang sengaja dibangun bersama.",

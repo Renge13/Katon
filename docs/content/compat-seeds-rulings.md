@@ -2,6 +2,7 @@
 STATUS: RULED. Reyner, 2026-09-10. Cowork drafted (docs/content/compat-seeds-worksheet.md, v2), Reyner
 rewrote all 42, Cowork swept. Lands on main ALONE before the PR that applies it (the #28 ruling), then:
   node scripts/apply-rulings.mjs docs/content/compat-seeds-rulings.md --expect 42
+AMENDED 2026-09-28 (Prompt AM): the file now holds 44 assignments, so re-applying it is --expect 44.
 Apply on a tree where glossary.json#kompatibilitas already holds the 21 cells (it does since X-b2);
 the script inserts the two new fields at the end of each cell (no cost_seed anchor in this section).
 
@@ -104,8 +105,15 @@ asks the model to avoid the form. Semantic material, Gemini rewrites; left as ru
 
 ## kompatibilitas.p3_supplies
 
-- meaning_seed: "Salah satu membawa elemen yang absen di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh."
+- meaning_seed: "Salah satu membawa elemen yang kadarnya lebih rendah di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh."
 - daily_seed: "Kehadiran pasangan secara alami meredakan kegelisahan di area tertentu, sehingga ketiadaannya langsung membuat area tersebut terasa tidak stabil."
+
+AMENDED 2026-09-28 (Prompt AM, ruling 1): the meaning seed said "absen" and now says "kadarnya lebih rendah". The daily seed is unchanged. Record: the end of docs/content/compat-glossary-rulings.md.
+
+## kompatibilitas.p3_reader_gives
+
+- meaning_seed: "Salah satu membawa elemen yang kadarnya lebih rendah di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh."
+- daily_seed: "Kehadiranmu secara alami meredakan kegelisahan di area tertentu dalam hidupnya, sehingga ketiadaanmu langsung membuat area tersebut terasa tidak stabil baginya."
 
 ## kompatibilitas.p3_same_imbalance
 
