@@ -41,9 +41,13 @@
 //
 // ── CLEAN SET: EVERY REQUIRED POINT THE SAMPLE CLAIMS ──────
 // As calibrate-judge.mjs does, each S-sample is judged with the required points its
-// worksheet grounding note claims. Since STAGE6 1.35.0 the judge no longer receives
-// required_points at all (J4 is removed), so this narrowing is inert and kept only
-// so the payloads stay the ones round 3 calibrated on.
+// worksheet grounding note claims. ON THIS BRANCH the judge still receives
+// required_points and still runs J4 over them (lib/validate/judge.js: the prompt's
+// J4 line, and the fix-round rule that a J4 outside the render's own points is
+// malformed), so this narrowing is LIVE: it decides which J4 findings a sample can
+// draw. The 1.35.0 rubric that removed J4 and stopped passing required_points
+// exists only on the side branch feat/voice-v2-judge-rubric. (Corrected 2026-09-28,
+// Prompt AI §3; the old text said J4 was removed here, which it never was.)
 //
 // ── B9, THE SCENE BOUNDARY (added 2026-09-26, Prompt AD Job B + amendment 1) ──
 // Ten more cases on the same four samples, one planted sentence each:
