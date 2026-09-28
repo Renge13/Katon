@@ -638,10 +638,40 @@ test('the fallback does NOT overwrite the row it refused to serve', async () => 
 
   await serve(token);
 
-  // Overwriting with the floor would answer the QA question by deleting it.
-  const row = await readCache(key);
+  // Overwriting with the floor would answer the QA question by deleting it. Since
+  // the row is INVALIDATED on a serve-time hard fail (below), it is read the way a
+  // QA surface reads it: the prose is still there, it just no longer serves.
+  const row = await readCache(key, { includeUnvalidated: true });
   assert.equal(row.source, 'gemini');
   assert.equal(row.blocks[0].text, 'Ini ramalan untuk kamu.');
+});
+
+// ── A SERVE-TIME HARD FAIL MUST NOT FLOOR A CHART FOREVER (Prompt AI §2) ──
+// The floor is never cached (rule 16), so it self-heals - except on this path:
+// the bad row stayed, so every later visit was a cache hit on the same bad row
+// and floored again, with no render ever attempted. A new hard check (#154's
+// element dominance, say) would floor every cached chart it catches permanently.
+test('A SERVE-TIME HARD FAIL DROPS THE ROW, SO THE NEXT VISIT RE-RENDERS', async () => {
+  const token = await createOk();
+  const key = readingMem().get(token).cache_key;
+  await plantHardFailingRow(key);
+
+  // Visit 1: the row hard-fails re-gating. Floor served, no provider call.
+  fetchCalls = 0;
+  stubForbiddenProvider();
+  const first = await (await serve(token)).json();
+  assert.equal(first.meta.hard_fail_fallback, true);
+  assert.equal(fetchCalls, 0);
+  assert.equal(await readCache(key), null, 'the bad row no longer serves');
+
+  // Visit 2: a real render, which passes and is cached in its place.
+  const { semanticJson } = semanticFromRow(readingMem().get(token));
+  stubRecoveredProvider(semanticJson);
+  const second = await (await serve(token)).json();
+  assert.equal(second.meta.source, 'gemini', 'the second visit re-rendered');
+  assert.ok(fetchCalls > 0);
+  const row = await readCache(key);
+  assert.ok(row && !JSON.stringify(row.blocks).includes('ramalan'), 'the re-render replaced the bad row');
 });
 
 test('a SOFT failure keeps serving; only hard checks pull a reading', async () => {
