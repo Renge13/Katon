@@ -73,6 +73,7 @@
     "test:submit-guard": "node --import ./scripts/jsx-register.mjs --test tests/funnel-submit-guard.spec.mjs",
     "test:stagger": "node --import ./scripts/jsx-register.mjs --test tests/stagger-cadence.spec.mjs",
     "test:ratelimit": "node --conditions=react-server --test tests/ratelimit.spec.mjs",
+    "test:writer-cap-trace": "node --conditions=react-server --test tests/writer-cap-trace.spec.mjs",
     "test:paid-budget": "node --conditions=react-server --test tests/paid-budget.spec.mjs",
     "test:ce-real-reading": "node --conditions=react-server --test tests/ce-real-reading.spec.mjs",
     "test:keepalive": "node --conditions=react-server --test tests/keepalive.spec.mjs",
