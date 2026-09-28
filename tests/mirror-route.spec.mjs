@@ -872,3 +872,26 @@ test('BotID: a request judged HUMAN creates the reading as before', async () => 
   );
   assert.equal(res.status, 201);
 });
+
+// ── PER-IP DAILY CAP ON NEW READINGS (Prompt AK §3.2, Reyner's ruling 6) ──
+// 100 new readings per IP per day on POST /api/mirror, beside the existing 60 per
+// hour. The hourly limit binds first inside one hour, so the day's earlier creates
+// are simulated by charging the daily bucket directly for this IP.
+test('THE PER-IP DAILY CAP: the 101st new reading of the day from one IP is refused with the ruled line', async () => {
+  const daily = RATE_LIMITS.mirror_create_daily;
+  assert.ok(daily, 'there is no per-IP daily bucket for new readings');
+  assert.equal(daily.ip.limit, 100);
+  assert.equal(daily.ip.windowSeconds, 86_400);
+  const { consume } = await import('../lib/ratelimit.js');
+  for (let i = 0; i < daily.ip.limit; i += 1) await consume('mirror_create_daily', { ip: '198.51.100.77' });
+
+  const over = await create(CHART_A, { ip: '198.51.100.77' });
+  assert.equal(over.status, 429);
+  const body = await over.json();
+  assert.equal(body.error, 'rate_limited_ip');
+  const { readableError } = await import('../lib/site/readableError.js');
+  assert.equal(readableError(body), 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.');
+  assert.ok(Number(over.headers.get('retry-after')) > 0);
+  // Another IP is untouched.
+  assert.equal((await create(CHART_A, { ip: '198.51.100.78' })).status, 201);
+});

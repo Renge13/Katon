@@ -36,7 +36,12 @@ Switch ruling #6 to Vercel BotID Basic. Use it only on the create-reading/AI-gen
   bound, separate from the free daily cap.
 - **The per-IP daily cap on new readings is sized as a share of the global cap**, so one setting covers
   both "no single actor exhausts it" and "it scales when the cap changes".
-- **The reserve slice ships only if AJ §5.1 shows it survives IP rotation.** Otherwise it leaves the plan.
+- ~~**The reserve slice ships only if AJ §5.1 shows it survives IP rotation.** Otherwise it leaves the plan.~~
+  **DROPPED 2026-09-28 (Prompt AK §3.5).** AJ §5.1 showed it does not survive rotation: it was reserved for
+  "actors with fewer than 3 new readings today", and a rotating-IP script makes 1-2 per IP, so every IP
+  qualifies and the reserve drains like the rest. The per-IP daily cap (100 new readings per IP per day,
+  `mirror_create_daily` in `lib/ratelimit.js`) handles a single heavy IP, and BotID Basic on
+  `POST /api/mirror` handles the rotating one.
 
 ## Reyner, 2026-09-28, second set (Prompt AK amendment 1), verbatim
 ```

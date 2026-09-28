@@ -522,3 +522,28 @@ test('THE PAGE CANNOT TELL A CONFIG REFUSAL FROM A TRANSIENT ONE, and says so', 
       'the one refusal that IS named stays named');
   }
 });
+
+// ── THE RULED RATE-LIMIT LINE REACHES A READER (Prompt AK §3.2, 2026-09-28) ──
+// The limiter refuses with `rate_limited_${dimension}` (lib/ratelimit.js consume:
+// 'rate_limited_ip', 'rate_limited_session'), and readableError matched only
+// 'rate_limited' | 'session' | 'ip' - strings no server path sends. So every
+// rate-limited reader got "Ada yang salah. Coba lagi sebentar." and Reyner's ruled
+// line was unreachable. The test above could not see it: it checked the three
+// strings readableError knew, not the ones the server sends. This one reads the
+// server's own reasons off a real refusal.
+import { consume as consumeLimit, __clearMemRateLimit as clearLimits } from '../lib/ratelimit.js';
+
+test('A REAL LIMITER REFUSAL, per dimension, reads as the ruled rate-limit line', async () => {
+  clearLimits();
+  const ruled = readableError({ error: 'rate_limited' });
+  assert.equal(ruled, 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.', 'the ruled line itself');
+  for (const identity of [{ session: 'sess-rl-test' }, { ip: '192.0.2.200' }]) {
+    let refusal = null;
+    for (let i = 0; i < 1000 && !refusal; i += 1) {
+      const v = await consumeLimit('mirror_create', identity);
+      if (!v.allowed) refusal = v.reason;
+    }
+    assert.ok(refusal, 'precondition: the limiter refused');
+    assert.equal(readableError({ error: refusal }), ruled, `${refusal} reads as "${readableError({ error: refusal })}"`);
+  }
+});
