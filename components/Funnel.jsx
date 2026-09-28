@@ -1312,7 +1312,11 @@ function Offer({ reading, initialStage }) {
     return () => clearInterval(pollRef.current);
   }, [stage, reading.token]);
 
-  if (stage === 'delivered') return <Delivery token={reading.token} />;
+  // `module_assembly` is the floor (lib/mirror/view.js `meta.source`), the fact the
+  // pair route names `served_from: 'floor'`. See Delivery's PDF link for why it matters.
+  if (stage === 'delivered') {
+    return <Delivery token={reading.token} view={reading.meta?.source === 'module_assembly' ? 'floor' : 'ready'} />;
+  }
   if (stage === 'pending') return <Pending invoiceUrl={invoiceUrl} />;
 
   return (
@@ -1672,7 +1676,7 @@ function Pending({ invoiceUrl }) {
  * scale the clone, so a hidden node must still have a real width - `visibility:
  * hidden` inside a clipped box, never `display: none`, which has no box to measure.
  */
-function Delivery({ token }) {
+function Delivery({ token, view = 'ready' }) {
   const [paidCard, setPaidCard] = useState(null);
   const [state, setState] = useState('loading'); // loading | ready | failed
   const [saving, setSaving] = useState(null); // 'card' | 'pdf' | null
@@ -1743,11 +1747,21 @@ function Delivery({ token }) {
                 Content-Disposition: attachment, so the browser saves it and the tab
                 keeps its state; building a blob would hold a whole PDF in memory to
                 achieve the same thing. */}
-            <a href={`/api/deliver/${token}/pdf`} style={{ textDecoration: 'none' }}>
-              <Button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <Icon.save size={17} /> Unduh PDF
-              </Button>
-            </a>
+            {/* ── ON `ready` ONLY AND NOT ON `floor` (Reyner's ruling 3, Prompt AL §4) ──
+                The Compatibility report's pattern, reused: components/PasanganReport.jsx
+                renders its PDF control on `view === 'ready'` alone. The PDF route
+                answers 409 `reading_not_rendered` when no printable render exists
+                after its warm (lib/deliver/handlers.js), and a floor is never
+                persisted (rule 16), while the card route still answers 200. So the
+                choice is a hidden link or a broken one: hidden, no text in its place,
+                and a reload re-renders and brings it back. */}
+            {view === 'ready' && (
+              <a href={`/api/deliver/${token}/pdf`} style={{ textDecoration: 'none' }}>
+                <Button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <Icon.save size={17} /> Unduh PDF
+                </Button>
+              </a>
+            )}
           </div>
         </>
       )}
