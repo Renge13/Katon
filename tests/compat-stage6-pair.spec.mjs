@@ -56,7 +56,12 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // R2 / R2-SCOPE, 2026-09-13). ONE accept-changing edit and it LOOSENS: the
   // shape the compat prompt mandates stops being rejected in compat readings,
   // and stays rejected in mirror ones.
-  assert.equal(STAGE6_VERSION, '1.25.0');
+  // 1.26.0-1.38.0 are spent on feat/voice-v2 and are never reused here.
+  // 1.39.0: pair direction and supplier are hard (Prompt AG item 1): tightens,
+  // pair only (tests/pair-truth.spec.mjs).
+  // 1.40.0: a cross-chart relation between two non-day pillars is hard (AG item 1).
+  // 1.41.0: element dominance agrees with the engine (mirror; v2 pairs via mirror.a/b).
+  assert.equal(STAGE6_VERSION, '1.41.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
