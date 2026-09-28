@@ -49,3 +49,46 @@ test('E2: the v2 pair payload carries both people\'s mirror facts; v1 carries no
   assert.ok(v2.mirror.b.facts.some((f) => f.id === 'badge_羊刃'), 'B\'s Mata Pisau is in the payload');
   assert.equal(JSON.stringify(v1).includes('badge_羊刃'), false, 'and was not before');
 });
+
+// ── EACH PERSON'S PILLARS, BY NAME (Prompt AN, 2026-09-28) ──
+// Round 4d served, for PZ0t's reader (A, month 癸酉 Ayam, a Metal season): "kamu lahir
+// di bulan Kuda, yang musimnya berelemen Api". Kuda (午) is B's YEAR branch. A mirror
+// payload carries `chart` - the pillars, their animals, their palaces - and on the
+// mirror every stored month claim is true; the v2 pair payload carried each person's
+// FACTS and no chart, so the month was a bare 酉 in a provenance field while B's facts
+// carried 午. The cause, removed: each person gets the mirror's own pillar identity.
+// `element_presence` is deliberately NOT carried: `checkElementDominance`
+// (lib/validate/fact.js) reads `mirror.x.chart.element_presence` when present, so
+// adding it would change what the v2 gate accepts and must ship alone.
+import fs from 'node:fs';
+import { writerPayload } from '../lib/render/payload.js';
+import GLOSSARY from '../docs/content/glossary.json' with { type: 'json' };
+
+const PZ0T_4D = 'reports/voice-v2/round4d/PZ0t_B3YDnzdXc2LWV38D-v2.json';
+
+test('AN: the served round-4d sentence this is about named B\'s branch as A\'s month', { skip: !fs.existsSync(PZ0T_4D) && 'reports/ not present' }, () => {
+  const served = JSON.parse(fs.readFileSync(PZ0T_4D, 'utf8'));
+  const sentence = served.rendered.blocks.map((b) => b.text).join(' ')
+    .split(/(?<=[.!?])\s+/u).find((s) => /lahir di bulan/u.test(s));
+  assert.ok(sentence, 'the sentence is in the served reading');
+  const said = /lahir di bulan (\p{L}+)/u.exec(sentence)[1];
+  assert.equal(said, GLOSSARY.shio[B.year.branch].name_id, 'it is B\'s year animal');
+  assert.notEqual(said, GLOSSARY.shio[A.month.branch].name_id, 'and not A\'s month animal');
+});
+
+test('AN: the v2 pair writer payload names each person\'s pillars and animals; v1 unchanged', () => {
+  const v1 = buildPairSemantic(A, B, { voice: 'v1' });
+  assert.equal('mirror' in v1, false, 'v1 pair payload unchanged');
+  const sent = writerPayload(buildPairSemantic(A, B, { voice: 'v2' }));
+  for (const [side, chart] of [['a', A], ['b', B]]) {
+    const own = buildSemanticJson(chart, { voice: 'v2' }).chart;
+    const got = sent.mirror[side].chart;
+    assert.ok(got, `mirror.${side}.chart reaches the writer`);
+    for (const k of ['year', 'month', 'day', 'hour', 'animals', 'palaces']) {
+      assert.deepEqual(got[k], own[k], `mirror.${side}.chart.${k} is the mirror's own`);
+    }
+    assert.equal(got.animals.month, GLOSSARY.shio[chart.month.branch].name_id);
+    assert.equal('element_presence' in got, false, 'presence withheld: it would move element_dominance');
+  }
+  assert.equal(sent.mirror.a.chart.animals.month, 'Ayam');
+});
