@@ -136,6 +136,7 @@
     "test:voice-engine": "node --test tests/voice-engine.spec.mjs",
     "test:voice-gate": "node --conditions=react-server --test tests/voice-gate.spec.mjs",
     "test:voice-judge": "node --conditions=react-server --test tests/voice-judge.spec.mjs",
+    "test:voice-pair-opening": "node --conditions=react-server --test tests/voice-pair-opening.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs",
     "build:spectral-ttf": "node scripts/build-spectral-ttf.mjs"
   },
