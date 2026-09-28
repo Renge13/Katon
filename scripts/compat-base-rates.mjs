@@ -73,6 +73,7 @@ import { compatComplementarity } from '../lib/compat/complementarity.js';
 import { compatStemRelation } from '../lib/compat/stemRelation.js';
 import { compatTemperament } from '../lib/compat/temperament.js';
 import { compatPullFit } from '../lib/compat/pullFit.js';
+import { p3SupplyKey } from '../lib/semantic/pair.js';
 
 const DEFAULTS = { charts: 2000, pairs: 5000, seed: 20260907 };
 
@@ -251,6 +252,10 @@ function tally({ charts, pairs, seed }) {
     relation: Object.fromEntries(RELATIONS.map((r) => [r, 0])),
     pullHigh: 0,
     fitHigh: 0,
+    // P3, as the reader meets it: the cell `p3SupplyKey` picks (Prompt AM,
+    // 2026-09-28), split so "both give" and "only the partner gives" - both
+    // `p3_supplies` - stay distinguishable.
+    p3: { both: 0, partner_only: 0, reader_only: 0, none: 0 },
   };
 
   // Variant tallies. The RNG is untouched by this - charts and pair indices are
@@ -323,6 +328,24 @@ function tally({ charts, pairs, seed }) {
     for (const { clause, held } of pullFit.fit_reasons) if (held) counts.fitHeld[clause] += 1;
     counts.pattern[temperament.pattern] += 1;
     counts.relation[temperament.relation] += 1;
+
+    const supplies = [
+      facts.comp.aSupplies && { from: 'a' },
+      facts.comp.bSupplies && { from: 'b' },
+    ].filter(Boolean);
+    const key = p3SupplyKey(supplies);
+    counts.p3[key === 'p3_no_supply' ? 'none'
+      : key === 'p3_reader_gives' ? 'reader_only'
+        : supplies.length === 2 ? 'both' : 'partner_only'] += 1;
+  }
+
+  // P3 against the standalone predicates, which read `comp` directly rather than
+  // through `p3SupplyKey`: two computations of one fact must agree.
+  if (counts.p3.both !== standalone['2.2.a both directions']) {
+    throw new Error(`INVARIANT BREACH: P3 both=${counts.p3.both} but 2.2.a both=${standalone['2.2.a both directions']}`);
+  }
+  if (pairs - counts.p3.none !== standalone['2.2.a ruled (either direction)']) {
+    throw new Error(`INVARIANT BREACH: P3 some-supply=${pairs - counts.p3.none} but 2.2.a either=${standalone['2.2.a ruled (either direction)']}`);
   }
 
   assertInvariants(counts, pairs);
@@ -341,6 +364,7 @@ function assertInvariants(counts, pairs) {
   if (sum(counts.quadrant) !== pairs) fail(`quadrants sum to ${sum(counts.quadrant)}, not ${pairs}`);
   if (sum(counts.pattern) !== pairs) fail(`patterns sum to ${sum(counts.pattern)}, not ${pairs}`);
   if (sum(counts.relation) !== pairs) fail(`relations sum to ${sum(counts.relation)}, not ${pairs}`);
+  if (sum(counts.p3) !== pairs) fail(`P3 cells sum to ${sum(counts.p3)}, not ${pairs}`);
 
   // 2.3: the quadrant is a pure function of the two booleans.
   const q = counts.quadrant;
@@ -453,6 +477,15 @@ function report({ counts }, { charts, pairs, seed }) {
   lines.push('P4 PATTERN                        count      rate');
   for (const p of PATTERNS) {
     lines.push(`  ${p}${' '.repeat(32 - p.length)}${String(counts.pattern[p]).padStart(6)}  ${pct(counts.pattern[p], pairs).padStart(8)}`);
+  }
+  lines.push('');
+  lines.push('P3 SUPPLY (the cell a reader gets) count      rate');
+  const P3_ROWS = [
+    ['both', 'both give (p3_supplies)'], ['partner_only', 'only the partner (p3_supplies)'],
+    ['reader_only', 'only the reader (p3_reader_gives)'], ['none', 'neither (p3_no_supply)'],
+  ];
+  for (const [k, label] of P3_ROWS) {
+    lines.push(`  ${label}${' '.repeat(Math.max(1, 32 - label.length))}${String(counts.p3[k]).padStart(6)}  ${pct(counts.p3[k], pairs).padStart(8)}`);
   }
   return lines.join('\n');
 }

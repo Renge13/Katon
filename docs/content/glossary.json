@@ -707,9 +707,9 @@
  "kompatibilitas": {
   "_README": "THE PAIR READING'S GLOSSARY, KEYED BY VARIANT. Each key is a RELATION the engine can find, not a fact id, because lib/render/fallback.js picks text by what the pair actually carries: a clashed seat and a harmonised seat are one fact and two different things to say. The first shape of this section was keyed by fact id and could only ever have said one of them. The TEXT is Reyner's - he is the sole authority on Indonesian register (CLAUDE.md rule 20) - and none of it was authored by Claude Code or by Cowork. THE SHAPE IS THE RULINGS FILE'S: docs/content/compat-glossary-rulings.md, 24 cells, 46 assignments. 19 cells carry name_id + label_meaning, three of those also carry name_en (the P4 badges), and five carry label_meaning alone. NO gift_seed, cost_seed or actionable_seed: nothing was ruled for them, and a placeholder for a string nobody has ruled invites one to be invented. scripts/check-unruled-copy.mjs scans this section and REFUSES a production build while any placeholder survives. Applied by: node scripts/apply-rulings.mjs docs/content/compat-glossary-rulings.md --expect 46",
   "p0_opening": {
-   "_note": "THE OPENING. Ruled 2026-09-08 in docs/content/compat-glossary-rulings-2.md and AMENDED 2026-09-09 (amendment h: it named the reader alongside the two archetypes, so it read as three people), and it closes the gap that made both_named exempt on the floor: with no ruled opening cell the module-assembly floor named neither person. A TEMPLATE - {A} and {B} are the two archetype name_id values, substituted by lib/semantic/pair.js at fact-build time. Braces trip style.code_leak, so _template: true tells every glossary sweep to test the SUBSTITUTED text. The template itself is never served.",
+   "_note": "THE OPENING. Ruled 2026-09-08 in docs/content/compat-glossary-rulings-2.md and AMENDED 2026-09-09 (amendment h: it named the reader alongside the two archetypes, so it read as three people) and again 2026-09-28 (Prompt AI amendment 1: two sentences, ending in its own full stop), and it closes the gap that made both_named exempt on the floor: with no ruled opening cell the module-assembly floor named neither person. A TEMPLATE - {A} and {B} are the two archetype name_id values, substituted by lib/semantic/pair.js at fact-build time. Braces trip style.code_leak, so _template: true tells every glossary sweep to test the SUBSTITUTED text. The template itself is never served.",
    "_template": true,
-   "label_meaning": "Ini adalah bacaan tentang dua individu: {A} dan {B}"
+   "label_meaning": "Ini adalah bacaan tentang dinamika dua individu: {A} dan {B}. Lewat bacaan ini, kita akan melihat bagaimana cara kalian merespons satu sama lain di keseharian, di mana fokus kalian bertemu atau berbeda, dan apa yang sebenarnya menggerakkan ritme di balik hubungan ini."
   },
   "p1_same": {
    "_note": "stemRelation.cycle === same",
@@ -781,17 +781,44 @@
    "daily_seed": "Kalian bisa berada di ruang yang sama dalam kesibukan masing-masing tanpa gangguan, namun jarak emosional cepat terasa jika tidak ada kegiatan bersama."
   },
   "p2_palace_frame": {
-   "_note": "A FRAME for the palace scans. The renderer names the pillar and reuses the p2_* names above for the relation, so a palace hit needs no cell of its own.",
+   "_note": "A FRAME for the palace scans. The renderer names the pillar; the relation it found is named by the p2_frame_* cells below (Reyner, 2026-09-26). The seat names (p2_harmony, p2_clash, p2_harm, p2_punishment) describe BOTH seats and are never used for a frame hit.",
    "label_meaning": "Salah satu pilar di bagan dia terhubung langsung dengan kursi pasanganmu. Elemen hidupnya memengaruhi ranah terdekatmu.",
    "meaning_seed": "Salah satu pilar kehidupan pasangan menyentuh langsung ruang privatmu, membuat dinamika dari area hidupnya berdampak langsung ke suasana hubungan.",
    "daily_seed": "Saat area hidup pasangan tersebut mengalami tekanan, suasananya langsung terbawa ke rumah dan kamu merasakannya sebelum dia sempat cerita."
   },
+  "p2_frame_harmony": {
+   "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 六合 with the other person's day branch. Never used for the day pair, which is p2_harmony. Ruled by Reyner 2026-09-26.",
+   "name_id": "Saling Tarik",
+   "label_meaning": "Salah satu pilar dan kursi pasangan ibarat magnet. Keduanya langsung menempel dan terhubung dengan sendirinya tanpa perlu dipaksa."
+  },
+  "p2_frame_clash": {
+   "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 冲 with the other person's day branch. Never used for the day pair, which is p2_clash. Ruled by Reyner 2026-09-26.",
+   "name_id": "Berseberangan",
+   "label_meaning": "Salah satu pilar berhadapan langsung dengan kursi pasangan. Karena posisinya berseberangan persis, dinamikanya menjadi lebih intens dan mudah memanas."
+  },
+  "p2_frame_harm": {
+   "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 害 with the other person's day branch. Never used for the day pair, which is p2_harm. Ruled by Reyner 2026-09-26.",
+   "name_id": "Senggolan Halus",
+   "label_meaning": "Salah satu pilar menyenggol kursi pasangan secara halus. Tidak sampai bertabrakan, tetapi cukup memicu gesekan dari hal-hal kecil yang dibiarkan menumpuk."
+  },
+  "p2_frame_punishment": {
+   "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 刑 with the other person's day branch. Never used for the day pair, which is p2_punishment. Ruled by Reyner 2026-09-26.",
+   "name_id": "Siklus Berulang",
+   "label_meaning": "Salah satu pilar dan kursi pasangan memiliki kecenderungan memutar ulang pola masa lalu. Jika tidak disadari, kebiasaan lama akan terus berulang."
+  },
   "p3_supplies": {
    "_note": "aSupplies or bSupplies is non-null. Direction-neutral: the renderer names who supplies whom.",
    "name_id": "Penyeimbang Unsur",
-   "label_meaning": "Dia membawa elemen yang tidak dominan di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan.",
-   "meaning_seed": "Salah satu membawa elemen yang absen di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh.",
+   "label_meaning": "Dia membawa elemen yang kadarnya lebih rendah di baganmu. Kehadirannya secara alami memberi keseimbangan yang kamu butuhkan.",
+   "meaning_seed": "Salah satu membawa elemen yang kadarnya lebih rendah di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh.",
    "daily_seed": "Kehadiran pasangan secara alami meredakan kegelisahan di area tertentu, sehingga ketiadaannya langsung membuat area tersebut terasa tidak stabil."
+  },
+  "p3_reader_gives": {
+   "_note": "Only the reader gives: the p3_supply fact carries A to B and no B to A (lib/semantic/pair.js p3SupplyKey). Direction-fixed, unlike p3_supplies: kamu is the reader (A), ia and -nya the other person (B). Both directions, or the partner alone, stay p3_supplies.",
+   "name_id": "Penyeimbang Unsur",
+   "label_meaning": "Kamu membawa elemen yang kadarnya lebih rendah di bagannya. Kehadiranmu secara alami memberi keseimbangan yang ia butuhkan.",
+   "meaning_seed": "Salah satu membawa elemen yang kadarnya lebih rendah di bagan pasangannya, memberikan rasa seimbang dan tenang di area yang tadinya rawan rapuh.",
+   "daily_seed": "Kehadiranmu secara alami meredakan kegelisahan di area tertentu dalam hidupnya, sehingga ketiadaanmu langsung membuat area tersebut terasa tidak stabil baginya."
   },
   "p3_same_imbalance": {
    "_note": "An element BOTH charts lack. Not a fault in either person.",
@@ -801,7 +828,7 @@
    "daily_seed": "Keputusan di area tertentu sering tertunda karena kalian berdua sama-sama menghindar, sampai ada dorongan dari keadaan atau pihak luar."
   },
   "p3_no_supply": {
-   "_note": "Neither direction supplies. Unreachable from the 13-chart fixture (base-rates run 1: 2.2.a held on 100.0% of 5000 pairs), and cell-ruled anyway so the floor is never silent on P3.",
+   "_note": "Neither direction supplies. Reachable since 2026-09-28, when the giver had to hold MORE of an element than the receiver (Reyner, Prompt AL ruling 2): fixture pairs 5 x 9 and 9 x 5 get it, and node --conditions=react-server scripts/compat-base-rates.mjs (5000 pairs, seed 20260907) measured 89 of 5000 = 1.8% on 2026-09-28 (PR #167 measured 38 of 2000 = 1.9% with another sampler). A measurement with its date, not a constant. Before that ruling it was unreachable (base-rates run 1: 2.2.a held on 100.0% of 5000 pairs). Cell-ruled so the floor is never silent on P3.",
    "name_id": "Mandiri Elementar",
    "label_meaning": "Tidak ada aliran elemen khusus yang saling mengisi. Hubungan berjalan mandiri tanpa rasa saling tergantung secara energi.",
    "meaning_seed": "Masing-masing mempertahankan ruang energinya secara utuh. Hubungan terasa ringan karena tidak ada tuntutan untuk saling mengisi, namun bisa terasa terpisah jika tidak ada area yang sengaja dibangun bersama.",

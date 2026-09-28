@@ -37,6 +37,7 @@ citations the rule exists to protect.
 
 | Artifact | What question it answers | prompt | gate | Superseded by |
 |---|---|---|---|---|
+| `2026-09-26-architecture-cost.md` | **Prompt AF's answer, the evidence behind the 2026-09-26 product-boundary rulings**: the production render path end to end, measured writer and judge cost per reading, regeneration rates, which truth errors the deterministic gate could and could not see, cache identity, and abuse bounds. A read-only study, not a render run. Committed from the gitignored `reports/` copy on 2026-09-28 with a header listing what has since changed. | - | `1.25.0` (main) / `1.38.0` (feat/voice-v2) | - |
 | `2026-08-17-renders.md` | The first real end-to-end renders. Does the chain produce servable prose at all? | - | - | - |
 | `2026-08-18-rejections.md` + `2026-08-18-rejections.json` | WHICH Stage 6 checks actually fire, and how often, over a large trace. The rejection-cause census. | - | `1.9.0` | - |
 | `2026-08-18-retry-depth.md` + `2026-08-18-retry-depth.json` | Does a regeneration buy a lower floor rate, and how much per extra depth? The depth curve, and the trace whose stored prose later served the depth-pair reads. | - | `1.9.0` | - |

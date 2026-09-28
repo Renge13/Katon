@@ -388,3 +388,28 @@ test('THE PORTAL IS CLEANED UP WITH THE COMPONENT', async () => {
   assert.equal(document.querySelector('[role="status"]'), null,
     'the toast goes with the component');
 });
+
+// ── THE BUTTON SHOWS WHAT IT DOES (2026-09-26) ─────────────
+// It carried the LOCK, the same icon as the "keep this link" line above it, so the
+// button read as a padlock rather than as "copy". The kit's copy icon now, drawn by
+// the same renderer so the comparison is markup against markup.
+import { Icon } from '../components/kit.jsx';
+
+function iconMarkup(name, size) {
+  const host = document.createElement('div');
+  const root = createRoot(host);
+  act(() => root.render(React.createElement(Icon[name], { size })));
+  const html = host.innerHTML;
+  act(() => root.unmount());
+  return html;
+}
+
+test('THE COPY BUTTON CARRIES THE COPY ICON, NOT THE LOCK', () => {
+  assert.equal(typeof Icon.copy, 'function', 'the kit has a copy icon');
+  const ui = mount({ url: URL_, withCopy: true });
+  try {
+    const svg = ui.button().querySelector('svg')?.outerHTML ?? '';
+    assert.equal(svg, iconMarkup('copy', 11), 'the button draws the copy icon');
+    assert.notEqual(svg, iconMarkup('lock', 11), 'the button still draws the lock');
+  } finally { ui.unmount(); }
+});

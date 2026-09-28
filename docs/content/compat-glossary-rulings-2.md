@@ -15,7 +15,7 @@ The template itself is never served.
 
 ## kompatibilitas.p0_opening
 
-- label_meaning: "Ini adalah bacaan tentang dua individu: {A} dan {B}"
+- label_meaning: "Ini adalah bacaan tentang dinamika dua individu: {A} dan {B}. Lewat bacaan ini, kita akan melihat bagaimana cara kalian merespons satu sama lain di keseharian, di mana fokus kalian bertemu atau berbeda, dan apa yang sebenarnya menggerakkan ritme di balik hubungan ini."
 
 **AMENDED 2026-09-09 (amendment h, `docs/content/pasangan-copy-rulings.md`).** It was
 `"Bacaan ini tentang kamu, {A}, dan {B}."` and Reyner saw it rendered on a real paid report:
@@ -26,3 +26,9 @@ replacement and amended the digit "2" to "dua" himself.
 The row is corrected HERE as well as in the amendment, because this file is the one a session opens
 when it asks what `p0_opening` was ruled to be. A ruling recorded in one file and superseded in
 another is how a stale value gets re-applied by someone being careful.
+
+**AMENDED 2026-09-28 (Reyner, via Prompt AI amendment 1, `docs/prompts/AI-amendment-1-pair-opening.md`).**
+It was `Ini adalah bacaan tentang dua individu: {A} dan {B}` (no final full stop; the render appends one) and is now the row above, verbatim.
+It closes B19 in `docs/content/voice-constraint-rulings-2026-09-26.md`. Why: Reyner's earlier draft
+said "perbedaan fokus kalian", which is false for Pola Cermin (`p4_matching`) and Pola Serumpun
+pairs; "bertemu atau berbeda" is true of every pair. The new text ends in its own full stop.

@@ -183,7 +183,10 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // the shape and a second copy of the key list is the thing that would drift.
   // The seeds file adds fields to existing cells rather than new cells, so the
   // 25-cell count below is unchanged and the per-cell field sets grow.
-  const md = ['compat-glossary-rulings.md', 'compat-glossary-rulings-2.md', 'compat-seeds-rulings.md']
+  // The fourth file is the frame-hit tranche of 2026-09-26 (Prompt AD): four NEW
+  // cells, `name_id` + `label_meaning` each, no seeds.
+  const md = ['compat-glossary-rulings.md', 'compat-glossary-rulings-2.md', 'compat-seeds-rulings.md',
+    'compat-frame-rulings.md']
     .map((f) => readFileSync(path.join(ROOT, 'docs', 'content', f), 'utf8'))
     .join('\n');
   const ruled = {};
@@ -204,7 +207,11 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
     if (m) ruled[heading].push(m[1]);
   }
 
-  assert.equal(Object.keys(ruled).length, 25, 'the two rulings files have 25 cells');
+  // 30 since 2026-09-28 (Prompt AM): `p3_reader_gives`, ruled in the first and
+  // third files, is the only new cell. The amendment's own record sits under a
+  // `###` heading so neither this parser nor scripts/apply-rulings.mjs reads it.
+  assert.equal(Object.keys(ruled).length, 30,
+    'the rulings files have 30 cells (25 + the 4 frame cells + p3_reader_gives)');
 
   const cells = Object.keys(GLOSSARY.kompatibilitas).filter((k) => !k.startsWith('_'));
   assert.deepEqual(cells.slice().sort(), Object.keys(ruled).sort(),
@@ -225,10 +232,16 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // stripped by the same `_`-prefix rule as `_note`, so it is not an assignment
   // and does not count.
   //
-  // 46 + 1 + 42 = 89, and the arithmetic is written out because this number is
-  // the one a later tranche has to update deliberately rather than by reading a
+  // Plus the frame tranche of 2026-09-26: 4 cells x (name_id + label_meaning) = 8.
+  //
+  // Plus Prompt AM, 2026-09-28: `p3_reader_gives` x (name_id + label_meaning +
+  // meaning_seed + daily_seed) = 4. Its two amendments to `p3_supplies` replace
+  // values and add no field.
+  //
+  // 46 + 1 + 42 + 8 + 4 = 101, and the arithmetic is written out because this number
+  // is the one a later tranche has to update deliberately rather than by reading a
   // failure and typing whatever the actual was.
-  assert.equal(total, 89, '89 assignments across the three tranches');
+  assert.equal(total, 101, '101 assignments across the five tranches');
 
   // NO SEEDS. Nothing was ruled for gift/cost/actionable, and a placeholder for a
   // string nobody has ruled is an invitation to invent one.
@@ -441,7 +454,13 @@ test('THE OPENING NAMES TWO PEOPLE, NOT THREE', async () => {
   const a = sj.core.a.archetype_name_id;
   const b = sj.core.b.archetype_name_id;
 
-  assert.equal(p0.label_meaning, `Ini adalah bacaan tentang dua individu: ${a} dan ${b}`);
+  // READ FROM THE RULING, NOT RETYPED (2026-09-28, Prompt AI amendment 1). This
+  // held its own copy of the 2026-09-09 sentence, a second source of truth that
+  // goes stale the day Reyner rules again - and he did.
+  const rulings = readFileSync(new URL('../docs/content/compat-glossary-rulings-2.md', import.meta.url), 'utf8')
+    .replace(/\r\n?/g, '\n');
+  const ruled = /^- label_meaning: "(.*)"$/mu.exec(rulings.slice(rulings.indexOf('## kompatibilitas.p0_opening')))[1];
+  assert.equal(p0.label_meaning, fillPairTemplate(ruled, a, b));
 
   // A first, B second - she typed her own birth into step 1, and a reading that
   // reverses them is a reading about the wrong person first.

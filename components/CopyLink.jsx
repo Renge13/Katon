@@ -160,7 +160,9 @@ export default function CopyLink({ url, withCopy = false }) {
             display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
           }}
         >
-          <Icon.lock size={11} />
+          {/* The COPY icon (2026-09-26). It was the lock - the same icon as the
+              "keep this link" line above - so the button read as a padlock. */}
+          <Icon.copy size={11} />
           {CHROME_COPY.copy_link}
         </button>
       )}

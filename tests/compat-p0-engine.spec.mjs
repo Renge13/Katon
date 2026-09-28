@@ -22,6 +22,7 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { readFileSync } from 'node:fs';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
@@ -71,12 +72,50 @@ const PAIRS = [
   },
 ];
 
-/** The ruled cell, filled, exactly as `lib/semantic/pair.js` fills it. */
+// ── THE EXPECTED TEXT IS READ FROM THE RULING, NOT FROM THE GLOSSARY ──
+// Changed 2026-09-28 (Prompt AI amendment 1). This used to fill the GLOSSARY cell,
+// so every assertion here agreed with the glossary whatever it said, and a cell
+// that drifted from Reyner's words would have passed. The row in
+// docs/content/compat-glossary-rulings-2.md is his ruling; the glossary is the
+// copy. And since 2026-09-28 the ruled line ends in its OWN full stop, so the
+// served block is the ruled text exactly - `sentence()` in lib/render/fallback.js
+// adds one only when none is there.
+const RULED_P0 = (() => {
+  const md = readFileSync(new URL('../docs/content/compat-glossary-rulings-2.md', import.meta.url), 'utf8')
+    .replace(/\r\n?/g, '\n');
+  const section = md.slice(md.indexOf('## kompatibilitas.p0_opening'));
+  const m = /^- label_meaning: "(.*)"$/mu.exec(section);
+  assert.ok(m, 'the p0_opening row is missing from the rulings file');
+  return m[1];
+})();
+
+/** The RULED line, filled, exactly as `lib/semantic/pair.js` fills the cell. */
 const ruledOpening = (sj) => fillPairTemplate(
-  GLOSSARY.kompatibilitas.p0_opening.label_meaning,
+  RULED_P0,
   sj.core.a.archetype_name_id,
   sj.core.b.archetype_name_id,
 );
+
+test('EXACTLY ONE FINAL FULL STOP on the served opening, floor path and model path', async () => {
+  for (const { label, sj } of PAIRS) {
+    const floor = withEngineOpening(assembleFallback(sj), sj).rendered.blocks[0].text;
+    assert.equal(floor, ruledOpening(sj), `${label} floor`);
+    assert.match(floor, /[^.]\.$/u, `${label}: exactly one final full stop`);
+  }
+  // The model path, through renderReading with a stubbed provider.
+  __clearMemCache(); __clearMemRateLimit(); __clearInFlight();
+  const { sj } = PAIRS[1];
+  await withEnv({ GEMINI_API_KEY: 'test' }, async () => {
+    const out = await renderReading(sj, {
+      dedupeInFlight: false,
+      spendGuards: false,
+      fetchImpl: async () => geminiSays(modelResponse(sj, (b) => b)),
+    });
+    assert.equal(out.source, 'gemini', `floored instead: ${JSON.stringify(out.findings)}`);
+    assert.equal(out.blocks[0].text, ruledOpening(sj));
+    assert.match(out.blocks[0].text, /[^.]\.$/u);
+  });
+});
 
 const PENUTUP = 'Peta ini sudah cukup jelas untuk kamu jalani mulai sekarang.';
 /** A rendering shaped like a model's, built from the floor's own ruled prose. */
@@ -97,7 +136,7 @@ test('11/11 pair openings are the ruled sentence, byte for byte', () => {
     // ends without terminal punctuation and `blockFor` closes it. If the cell ever
     // gains its own full stop this goes red, which is the correct outcome - two
     // full stops in the opening is exactly the kind of thing nobody would notice.
-    assert.equal(block.text, `${ruledOpening(sj)}.`, label);
+    assert.equal(block.text, ruledOpening(sj), label);
   }
 });
 
@@ -134,7 +173,9 @@ test('THE OPENING CANNOT TRIP block_too_short, for ANY pair of archetypes', () =
   for (const a of names) {
     for (const b of names) {
       if (a === b) continue;
-      shortest = Math.min(shortest, `${fillPairTemplate(GLOSSARY.kompatibilitas.p0_opening.label_meaning, a, b)}.`.length);
+      // Closed the way blockFor's sentence() closes it: a full stop only if none.
+      const filled = fillPairTemplate(GLOSSARY.kompatibilitas.p0_opening.label_meaning, a, b);
+      shortest = Math.min(shortest, (/[.!?]$/u.test(filled) ? filled : `${filled}.`).length);
     }
   }
   assert.ok(
@@ -157,7 +198,7 @@ test("E2's own paraphrase is replaced, and does not survive anywhere", () => {
 
   const { rendered, hadOwnOpening } = withEngineOpening(model, sj);
   assert.equal(hadOwnOpening, true);
-  assert.equal(rendered.blocks[0].text, `${ruledOpening(sj)}.`);
+  assert.equal(rendered.blocks[0].text, ruledOpening(sj));
   assert.equal(
     JSON.stringify(rendered).includes('menyoroti dinamika'), false,
     'the model opening was kept somewhere',
@@ -233,8 +274,8 @@ test('THE MODEL PATH: a paraphrased opening is replaced before the gate, and cou
     });
 
     assert.equal(out.source, 'gemini', `floored instead: ${JSON.stringify(out.findings)}`);
-    assert.equal(out.blocks[0].text, `${ruledOpening(sj)}.`);
-    assert.equal(out.stage6_version, '1.25.0');
+    assert.equal(out.blocks[0].text, ruledOpening(sj));
+    assert.equal(out.stage6_version, '1.50.0'); // 1.26.0-1.38.0, 1.42.0-1.46.0 are spent on feat/voice-v2; 1.47.0 is the pair serve re-gate
     // LOG ONLY, on the attempt record the QA tape already reads.
     assert.equal(out.attempts.at(-1).p0_model_wrote_anyway, true);
   });
@@ -255,7 +296,7 @@ test('THE MODEL PATH: a model that obeys is not counted', async () => {
     });
 
     assert.equal(out.source, 'gemini', `floored instead: ${JSON.stringify(out.findings)}`);
-    assert.equal(out.blocks[0].text, `${ruledOpening(sj)}.`);
+    assert.equal(out.blocks[0].text, ruledOpening(sj));
     assert.equal(out.attempts.at(-1).p0_model_wrote_anyway, undefined);
   });
 });
@@ -273,7 +314,7 @@ test('THE FLOOR PATH: the provider fails, the reader still gets the ruled openin
     });
 
     assert.equal(out.source, 'module_assembly');
-    assert.equal(out.blocks[0].text, `${ruledOpening(sj)}.`);
+    assert.equal(out.blocks[0].text, ruledOpening(sj));
     assert.deepEqual(out.blocks[0].fact_ids, [OPENING_FACT_ID]);
   });
 });

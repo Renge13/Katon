@@ -45,6 +45,22 @@ there on 2026-09-23.
 Merge authority, same day: Code merges #129, #130 and the mirror-reconcile PR once CI is green and the
 proofs are quoted; #128 waits for Reyner's round-1 marks. Recorded in `docs/COWORK-BRIEF.md` section 3.
 
+## 0c. Reyner's rulings, 2026-09-25
+
+- **`GATE-B-AMENDED`**. §3 item 1's gate b was "one DELIVERED notification captured". It is now:
+  **"reconcile-on-load proven on a real sandbox Checkout QRIS payment (DONE 2026-09-25, invoice
+  eJm6p6PjG8f_0eridE39x.muglimjz, log 13:55:18 WIB `[reconcile] ... status=SUCCESS paid=true
+  reason=ok`) AND re-proven on both production purchases (Rp 19.000 mirror + Rp 39.000 compat)."**
+  The notification question stays open with DOKU (ticket 1149053) and **no longer blocks launch**.
+  **Residual risk, accepted:** a buyer who pays and never returns to her page stays unpaid until she does.
+  `auto_redirect` (`lib/doku/client.js#createCheckout`) and the `pending_body` contact line (§0b) mitigate
+  it. Evidence: four sandbox payments DOKU recorded as SUCCESS with zero notification attempts. For the
+  fourth, Reyner read the Runtime Logs of all deployments: the only `/api/doku/notify` requests were
+  Code's own probes (`docs/ops/doku-walk.md` § WALK 4).
+- **`VOICE-V2-PARKED`**. Launch on v1. `feat/voice-v2` stays unmerged and is not deleted; migration 0011 is
+  not applied. The DEFERRED REGISTER row in `docs/PROGRESS.md` carries what the branch holds, why, and the
+  reopen trigger.
+
 ## 1. Why it took this long (Cowork's honest account, for the record)
 Three causes, in order of cost. (a) Payments built twice: Xendit integrated (Prompt F/I, live keys 08-07),
 Xendit repriced, adapter torn out (#122) and DOKU built (#124); DOKU is now blocked on the ACCOUNT (QRIS
@@ -70,8 +86,9 @@ pass was explicitly excluded from Y-4 and is the one PDF item still open.
 
 ### Ships with launch (gated on DOKU only)
 1. **DOKU production flip** - the four-item gate (project state doc §0; `docs/ops/doku-walk.md`), unchanged,
-   nothing added: a) QRIS active on Checkout for production; b) one DELIVERED notification captured;
-   c) production keys + `PAYMENTS_PROVIDER=doku`, no `DOKU_SANDBOX`; d) notify URL on the QRIS channel in
+   nothing added: a) QRIS active on Checkout for production; b) ~~one DELIVERED notification captured~~
+   **AMENDED 2026-09-25 (§0c): reconcile-on-load proven on a real sandbox Checkout QRIS payment (DONE) AND
+   re-proven on both production purchases**; c) production keys + `PAYMENTS_PROVIDER=doku`, no `DOKU_SANDBOX`; d) notify URL on the QRIS channel in
    the PRODUCTION Back Office. Reyner's Rp 39.000 walk is acceptance. Critical path = DOKU ticket 1149053;
    escalate by phone/sales contact if silent two more working days.
 2. **Front door simplification** - Prompt AA (one small PR). Headline, one sentence, the birth form, ONE

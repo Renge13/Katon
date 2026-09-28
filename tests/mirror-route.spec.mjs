@@ -638,10 +638,40 @@ test('the fallback does NOT overwrite the row it refused to serve', async () => 
 
   await serve(token);
 
-  // Overwriting with the floor would answer the QA question by deleting it.
-  const row = await readCache(key);
+  // Overwriting with the floor would answer the QA question by deleting it. Since
+  // the row is INVALIDATED on a serve-time hard fail (below), it is read the way a
+  // QA surface reads it: the prose is still there, it just no longer serves.
+  const row = await readCache(key, { includeUnvalidated: true });
   assert.equal(row.source, 'gemini');
   assert.equal(row.blocks[0].text, 'Ini ramalan untuk kamu.');
+});
+
+// ── A SERVE-TIME HARD FAIL MUST NOT FLOOR A CHART FOREVER (Prompt AI §2) ──
+// The floor is never cached (rule 16), so it self-heals - except on this path:
+// the bad row stayed, so every later visit was a cache hit on the same bad row
+// and floored again, with no render ever attempted. A new hard check (#154's
+// element dominance, say) would floor every cached chart it catches permanently.
+test('A SERVE-TIME HARD FAIL DROPS THE ROW, SO THE NEXT VISIT RE-RENDERS', async () => {
+  const token = await createOk();
+  const key = readingMem().get(token).cache_key;
+  await plantHardFailingRow(key);
+
+  // Visit 1: the row hard-fails re-gating. Floor served, no provider call.
+  fetchCalls = 0;
+  stubForbiddenProvider();
+  const first = await (await serve(token)).json();
+  assert.equal(first.meta.hard_fail_fallback, true);
+  assert.equal(fetchCalls, 0);
+  assert.equal(await readCache(key), null, 'the bad row no longer serves');
+
+  // Visit 2: a real render, which passes and is cached in its place.
+  const { semanticJson } = semanticFromRow(readingMem().get(token));
+  stubRecoveredProvider(semanticJson);
+  const second = await (await serve(token)).json();
+  assert.equal(second.meta.source, 'gemini', 'the second visit re-rendered');
+  assert.ok(fetchCalls > 0);
+  const row = await readCache(key);
+  assert.ok(row && !JSON.stringify(row.blocks).includes('ramalan'), 'the re-render replaced the bad row');
 });
 
 test('a SOFT failure keeps serving; only hard checks pull a reading', async () => {
@@ -815,4 +845,53 @@ test('the reading and its card name the SAME archetype - the 08-13 divergence, c
       'the card and the reading disagree about her archetype');
     assert.equal(body.card.nameEn, body.chart.archetype.name_en);
   }
+});
+
+// ── VERCEL BotID BASIC ON POST /api/mirror (Prompt AK §3.3, ruling 6 + AJ amendment 2) ──
+// The route passes BotID's verdict in as `botCheck` (app/api/mirror/route.js calls
+// checkBotId() from 'botid/server'); here it is stubbed. A request judged a bot gets
+// the EXISTING rate-limit refusal - 429 and the ruled line - and no token is minted.
+test('BotID: a request judged a BOT is refused like a rate limit, and no reading is created', async () => {
+  const before = readingMem().size;
+  const res = await createMirrorReading(
+    request({ method: 'POST', body: CHART_A }),
+    { botCheck: async () => ({ isBot: true }) },
+  );
+  assert.equal(res.status, 429);
+  const body = await res.json();
+  const { readableError } = await import('../lib/site/readableError.js');
+  assert.equal(readableError(body), 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.');
+  assert.equal(body.token, undefined, 'no token minted');
+  assert.equal(readingMem().size, before, 'no reading row was created');
+});
+
+test('BotID: a request judged HUMAN creates the reading as before', async () => {
+  const res = await createMirrorReading(
+    request({ method: 'POST', body: CHART_A }),
+    { botCheck: async () => ({ isBot: false }) },
+  );
+  assert.equal(res.status, 201);
+});
+
+// ── PER-IP DAILY CAP ON NEW READINGS (Prompt AK §3.2, Reyner's ruling 6) ──
+// 100 new readings per IP per day on POST /api/mirror, beside the existing 60 per
+// hour. The hourly limit binds first inside one hour, so the day's earlier creates
+// are simulated by charging the daily bucket directly for this IP.
+test('THE PER-IP DAILY CAP: the 101st new reading of the day from one IP is refused with the ruled line', async () => {
+  const daily = RATE_LIMITS.mirror_create_daily;
+  assert.ok(daily, 'there is no per-IP daily bucket for new readings');
+  assert.equal(daily.ip.limit, 100);
+  assert.equal(daily.ip.windowSeconds, 86_400);
+  const { consume } = await import('../lib/ratelimit.js');
+  for (let i = 0; i < daily.ip.limit; i += 1) await consume('mirror_create_daily', { ip: '198.51.100.77' });
+
+  const over = await create(CHART_A, { ip: '198.51.100.77' });
+  assert.equal(over.status, 429);
+  const body = await over.json();
+  assert.equal(body.error, 'rate_limited_ip');
+  const { readableError } = await import('../lib/site/readableError.js');
+  assert.equal(readableError(body), 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.');
+  assert.ok(Number(over.headers.get('retry-after')) > 0);
+  // Another IP is untouched.
+  assert.equal((await create(CHART_A, { ip: '198.51.100.78' })).status, 201);
 });

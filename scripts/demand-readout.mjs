@@ -72,7 +72,11 @@ const num = (n) => String(n).padStart(6);
  * Everything that means the DATA is wrong, rather than the product being
  * unpopular. Each one is a NUMBER THAT WOULD OTHERWISE LOOK PLAUSIBLE.
  */
-export function anomalies(events, interest) {
+/** Funnel rows only: `system:` rows (AK §3.4) are facts about the service, not a reader. */
+const funnelOnly = (events) => (events ?? []).filter((e) => !String(e.reading_id ?? '').startsWith('system:'));
+
+export function anomalies(allEvents, interest) {
+  const events = funnelOnly(allEvents);
   const out = [];
 
   // 1. The unique index is (reading_id, event). A second ROW for the same pair
@@ -125,7 +129,8 @@ export function anomalies(events, interest) {
 }
 
 /** The whole report as data, so a test can assert numbers instead of parsing text. */
-export function summarise(events, interest) {
+export function summarise(allEvents, interest) {
+  const events = funnelOnly(allEvents);
   const completed = readersWith(events, 'mirror_served');
   const upcomingSeen = readersWith(events, 'upcoming_seen');
   const startedCheckout = readersWith(events, 'checkout_started');

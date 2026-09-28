@@ -502,3 +502,62 @@ test('FACTS ROWS HAVE ROOM: a description sits >= 22pt below its row, the next r
   assert.ok(desc - row >= 22, `description ${desc - row}pt below its row`);
   assert.ok(next - row >= 48, `next row ${next - row}pt below`);
 });
+
+// ── 2026-09-26: TWO COMPAT PDF DEFECTS, from Cowork's read of the production PDF ──
+// Fixture: the g4WH4 production reading, whole (tests/fixtures/compat-g4WH4-reading.json).
+// Built with it, the compat PDF left the heading "Pola Kontras" alone at the foot of
+// page 2 and printed "Kursi Bergesekan 子 Tikus | 未 Kambing" twice on the facts page.
+import fs from 'node:fs';
+import { factRows } from '../lib/pdf/pairDocument.js';
+
+const G4 = JSON.parse(fs.readFileSync('tests/fixtures/compat-g4WH4-reading.json', 'utf8'));
+const g4Charts = () => [calculateBaziChart(G4.inputs.a), calculateBaziChart(G4.inputs.b)];
+let g4Built = null;
+async function compatG4() {
+  if (g4Built) return g4Built;
+  const [chartA, chartB] = g4Charts();
+  g4Built = await buildPairPdf({
+    chartA, chartB, semanticJson: buildPairSemantic(chartA, chartB), rendered: G4.rendered,
+    pair: {
+      a: { date: G4.inputs.a.birthDate, gender: G4.inputs.a.gender },
+      b: { date: G4.inputs.b.birthDate, gender: G4.inputs.b.gender },
+    },
+  });
+  return g4Built;
+}
+
+test('H1 NO PROSE HEADING IS LEFT AT THE FOOT OF A PAGE (compat, the g4WH4 production reading)', async () => {
+  const { buffer } = await compatG4();
+  const headings = G4.rendered.blocks.map((b) => b.heading).filter(Boolean);
+  assert.ok(headings.includes('Pola Kontras'), 'precondition: the fixture carries the heading that stranded');
+  const stranded = pageTexts(buffer).flatMap((t, i) => {
+    const lines = t.split(/\n/).map((l) => l.trim()).filter(Boolean)
+      .filter((l) => !l.startsWith(RENDER_COPY.pdfEditionCompat));
+    return headings.includes(lines.at(-1)) ? [`page ${i + 1}: ${lines.at(-1)}`] : [];
+  });
+  assert.deepEqual(stranded, [], 'a heading ends a page and its paragraph starts the next');
+});
+
+test('F1 A FRAME ROW NAMES THE PILLAR THAT CREATES IT, so no two facts rows read the same', async () => {
+  const [chartA, chartB] = g4Charts();
+  const semanticJson = buildPairSemantic(chartA, chartB);
+  const frame = semanticJson.facts.find((f) => f.id === 'p2_palace_frame').provenance;
+  // The engine's own hits that become rows (a day-to-day hit IS the day pair).
+  const hits = [...frame.a_hits_b, ...frame.b_hits_a]
+    .filter((h) => !(h.from.position === 'day' && h.to.position === 'day'));
+  assert.deepEqual(hits.map((h) => `${h.from.chart}.${h.from.position}.${h.from.branch}`), ['B.year.丑', 'B.hour.未'],
+    'precondition: the two frame hits this page prints');
+  const rows = factRows(semanticJson).filter((r) => r.branches);
+  for (const h of hits) {
+    const pillar = GLOSSARY.pilar[h.from.position].name_id;
+    const side = h.from.chart === 'A' ? 'aPillar' : 'bPillar';
+    const row = rows.find((r) => r.frame && r[side] === pillar);
+    assert.ok(row, `the ${h.from.position} hit's row names ${pillar} in ${side}`);
+  }
+  const seen = rows.map((r) => [r.term, r.a, r.aPillar ?? '', r.b, r.bPillar ?? ''].join('|'));
+  assert.equal(new Set(seen).size, seen.length, `two rows read the same: ${JSON.stringify(seen)}`);
+  // And on the page itself.
+  const { buffer } = await compatG4();
+  const facts = pageTexts(buffer).find((t) => t.includes(PASANGAN_COPY.pdf_facts_heading));
+  for (const p of ['Pilar Akar', 'Pilar Arah']) assert.ok(facts.includes(p), `the facts page prints ${p}`);
+});
