@@ -1,0 +1,51 @@
+{
+  "_about": "EVIDENCE, not output. Extracted by scripts/extract-d1-heading-misfires.mjs (Prompt AL §1) from reports/voice-v2/round4c/PZ0t_B3YDnzdXc2LWV38D-v2.json, reports/voice-v2/round4b/rVe4ca-FOhsprfGUucTxA-v2.json: every v2.d1_invented_term REJECTION line whose term sat in a heading of the rejected draft and nowhere in its prose, with that heading. Never retyped.",
+  "cases": [
+    {
+      "source": "reports/voice-v2/round4c/PZ0t_B3YDnzdXc2LWV38D-v2.json",
+      "draft": 1,
+      "kind": "pair",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-09-13",
+          "birthTime": "09:00",
+          "gender": "female"
+        },
+        "b": {
+          "birthDate": "1990-03-04",
+          "birthTime": "14:00",
+          "gender": "male"
+        }
+      },
+      "rejection": "\"Kuat\" (kekuatan) appears in the prose but no supplied fact carries it",
+      "term": "Kuat",
+      "heading": "Tarikan Kuat dan Perbedaan Sudut Pandang",
+      "fact_ids": [
+        "p4_temperament",
+        "p5_pull_fit"
+      ]
+    },
+    {
+      "source": "reports/voice-v2/round4b/rVe4ca-FOhsprfGUucTxA-v2.json",
+      "draft": 1,
+      "kind": "pair",
+      "inputs": {
+        "a": {
+          "birthDate": "1981-02-20",
+          "birthTime": "07:00"
+        },
+        "b": {
+          "birthDate": "1988-07-04",
+          "birthTime": "05:00"
+        }
+      },
+      "rejection": "\"Berseberangan\" (kompatibilitas) appears in the prose but no supplied fact carries it",
+      "term": "Berseberangan",
+      "heading": "Perspektif yang Berseberangan",
+      "fact_ids": [
+        "p4_temperament",
+        "p2_palace_frame"
+      ]
+    }
+  ]
+}

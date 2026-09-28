@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.53.0');
+    assert.equal(onV2.stage6_version, '1.54.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -497,4 +497,60 @@ test('ONLY SUPPLIED TERMS: a "dan" spelling of a quadrant this reading was NOT g
   draft.blocks[0].text = `${draft.blocks[0].text} Hubungan kalian memiliki Tarikan Tenang dan Ritme Bergesek.`;
   const out = validateRenderingV2(draft, sj);
   assert.ok(out.normalized.blocks[0].text.includes('Tarikan Tenang dan Ritme Bergesek'), 'left as written');
+});
+
+// ── D1 IN A HEADING: TITLE CASE IS NOT A TERM CLAIM (STAGE6 1.54.0, Prompt AL §1) ──
+// Headings are title case, so a capital letter there is not evidence of a term.
+// PZ0t (round 4c) was rejected for "Kuat" in the heading "Tarikan Kuat dan
+// Perbedaan Sudut Pandang"; rVe4ca (round 4b) for "Berseberangan" in "Perspektif
+// yang Berseberangan". Neither term was anywhere in the prose. Cowork's ruling: in
+// a heading, D1 fires only on a complete MULTI-WORD glossary term name the engine
+// did not supply. Prose is unchanged.
+import D1_HEADINGS from './fixtures/voice-v2-d1-heading-misfires.json' with { type: 'json' };
+
+const pairOf = (c) => buildPairSemantic(calculateBaziChart(c.inputs.a), calculateBaziChart(c.inputs.b), { voice: 'v2' });
+const d1Terms = (r) => r.findings.filter((f) => f.check === 'v2.d1_invented_term').map((f) => /^"([^"]+)"/u.exec(f.message)[1]);
+const withHeading = (sj, heading) => {
+  const draft = draftFor(sj);
+  draft.blocks[draft.blocks.length - 1].heading = heading;
+  return draft;
+};
+
+test('THE REJECTION LINES THIS IS ABOUT: both are single-word terms, both from a heading only', () => {
+  assert.deepEqual(D1_HEADINGS.cases.map((c) => c.source.split('/')[2]), ['round4c', 'round4b']);
+  for (const c of D1_HEADINGS.cases) {
+    assert.ok(c.rejection.startsWith(`"${c.term}" (`), c.rejection);
+    assert.equal(c.term.includes(' '), false, 'a single-word term');
+  }
+});
+
+for (const c of D1_HEADINGS.cases) {
+  test(`HEADING "${c.heading}": no D1 on the single word "${c.term}"`, () => {
+    const sj = pairOf(c);
+    assert.ok(checks(validateRenderingV2(draftFor(sj), sj)).length === 0, 'precondition: the floor draft passes');
+    const r = validateRenderingV2(withHeading(sj, c.heading), sj);
+    assert.equal(d1Terms(r).includes(c.term), false, JSON.stringify(d1Terms(r)));
+  });
+
+  test(`PROSE IS UNCHANGED: "${c.heading}" mid-sentence still rejects "${c.term}"`, () => {
+    const sj = pairOf(c);
+    const r = validateRenderingV2(plant(draftFor(sj), `Bagian ini tentang ${c.heading}.`), sj);
+    assert.ok(d1Terms(r).includes(c.term), JSON.stringify(d1Terms(r)));
+  });
+}
+
+test('CONTROL: a heading carrying a complete multi-word glossary term the engine did not supply still rejects', () => {
+  const c = D1_HEADINGS.cases[0];
+  const sj = pairOf(c);
+  const supplied = new Set([
+    ...sj.facts, ...(sj.mirror?.a?.facts || []), ...(sj.mirror?.b?.facts || []),
+  ].flatMap((f) => [f.label, f.palace]).filter(Boolean));
+  // Picked by script, from the sections D1 reads (lib/validate/v2.js termUniverse).
+  const term = ['aspek', 'bintang', 'kekuatan', 'relasi_cabang', 'pilar', 'kompatibilitas']
+    .flatMap((s) => Object.entries(GLOSSARY[s] || {}).filter(([k]) => !k.startsWith('_')).map(([, cell]) => cell?.name_id))
+    .find((name) => name && name.includes(' ') && ![...supplied].some((s) => s.includes(name) || name.includes(s)));
+  assert.ok(term, 'there is an unsupplied multi-word term to plant');
+  const r = validateRenderingV2(withHeading(sj, `Tentang ${term}`), sj);
+  assert.ok(d1Terms(r).includes(term), `${term}: ${JSON.stringify(d1Terms(r))}`);
+  assert.equal(r.ok, false);
 });
