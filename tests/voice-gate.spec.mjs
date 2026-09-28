@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.54.0');
+    assert.equal(onV2.stage6_version, '1.55.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -553,4 +553,91 @@ test('CONTROL: a heading carrying a complete multi-word glossary term the engine
   const r = validateRenderingV2(withHeading(sj, `Tentang ${term}`), sj);
   assert.ok(d1Terms(r).includes(term), `${term}: ${JSON.stringify(d1Terms(r))}`);
   assert.equal(r.ok, false);
+});
+
+// ── THE CLOSING HEDGE IS DROPPED, DETERMINISTICALLY (STAGE6 1.55.0, Prompt AL §2) ──
+// Reyner's B33 ("remove it"), recorded as B35: the prompt route was tried twice
+// (B31, B33) and "Mungkin menarik" stayed. If a block's (or the penutup's) FINAL
+// sentence begins "Mungkin menarik untuk" or "Menarik untuk", that sentence is
+// dropped, provided one sentence remains. Nothing is added or rewritten. The gate
+// re-runs on the result; if a check that rejects would newly fail, the sentence is
+// kept (`close.hedge_kept`). v2 only.
+import HEDGES from './fixtures/voice-v2-closing-hedges.json' with { type: 'json' };
+import { withEngineOpening } from '../lib/render/pairOpening.js';
+
+const semanticOf = (rec) => (rec.kind === 'pair'
+  ? buildPairSemantic(calculateBaziChart(rec.inputs.a), calculateBaziChart(rec.inputs.b), { voice: 'v2' })
+  : buildSemanticJson(calculateBaziChart(rec.inputs.a), { voice: 'v2' }));
+const logOf = (r, check) => r.findings.filter((f) => f.check === check);
+
+test('THE FIVE ROUND-4c CLOSES THIS IS ABOUT: each is the final sentence of a penutup', () => {
+  assert.deepEqual(HEDGES.readings.map((r) => r.source.split('/').at(-1)).sort(),
+    ['PZ0t_B3YDnzdXc2LWV38D-v2.json', 'chart13-v2.json', 'chart4-v2.json', 'chart6-v2.json', 'chart8-v2.json']);
+  for (const r of HEDGES.readings) {
+    assert.deepEqual(r.closes.map((c) => c.where), ['penutup']);
+    assert.ok(r.rendered.penutup.trimEnd().endsWith(r.closes[0].sentence));
+  }
+});
+
+for (const rec of HEDGES.readings) {
+  const name = rec.source.split('/').at(-1);
+  test(`${name}: the closing hedge is dropped and nothing else in the penutup moves`, () => {
+    const sj = semanticOf(rec);
+    const r = validateRenderingV2(withEngineOpening(structuredClone(rec.rendered), sj).rendered, sj);
+    const { sentence } = rec.closes[0];
+    const before = rec.rendered.penutup;
+    const expected = before.slice(0, before.lastIndexOf(sentence)).trimEnd();
+    assert.equal(r.normalized.penutup, expected);
+    const dropped = logOf(r, 'close.hedge_dropped');
+    assert.equal(dropped.length, 1);
+    assert.equal(dropped[0].severity, 'flag');
+    assert.ok(dropped[0].message.includes(sentence));
+  });
+}
+
+test('MID-BLOCK: the phrase opening a sentence that is not the last is left alone and logged', () => {
+  const sj = v2(A);
+  const draft = draftFor(sj);
+  const penutup = 'Mungkin menarik untuk melihat pola ini lebih dekat. Arahmu sudah cukup jelas.';
+  draft.penutup = penutup;
+  const r = validateRenderingV2(draft, sj);
+  assert.equal(r.normalized.penutup, penutup);
+  assert.equal(logOf(r, 'close.hedge_dropped').length, 0);
+  assert.equal(logOf(r, 'close.hedge_midblock').length, 1);
+});
+
+test('A LONE SENTENCE: a block that is only the hedge keeps it, because one sentence must remain', () => {
+  const sj = v2(A);
+  const draft = draftFor(sj);
+  draft.penutup = 'Menarik untuk melihat bagaimana ini berkembang.';
+  const r = validateRenderingV2(draft, sj);
+  assert.equal(r.normalized.penutup, draft.penutup);
+  assert.equal(logOf(r, 'close.hedge_dropped').length, 0);
+});
+
+test('KEPT: when dropping the hedge would make a rejecting check fail, the sentence stays (close.hedge_kept)', () => {
+  const HARD_SEAT = calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' });
+  const sj = buildPairSemantic(A, HARD_SEAT, { voice: 'v2' });
+  assert.ok(sj.safety_flags.includes('p2_reframe_required'), 'precondition: the reframe is required');
+  const reframe = sj.facts.find((f) => f.id === 'p2_reframe').label_meaning;
+  const draft = draftFor(sj);
+  const idx = draft.blocks.findIndex((b) => (b.fact_ids || []).includes('p2_reframe'));
+  assert.notEqual(idx, -1);
+  // The reframe lives ONLY in the final, hedged sentence of its block.
+  const text = `Kalian berdua sama-sama cepat membaca suasana. Mungkin menarik untuk melihat bahwa ${reframe.replace(/[.!?]+\s*/gu, ', ').replace(/,\s*$/u, '')}.`;
+  draft.blocks[idx].text = text;
+  const r = validateRenderingV2(draft, sj);
+  assert.equal(r.normalized.blocks[idx].text, text, 'the hedged sentence is kept');
+  assert.equal(r.findings.some((f) => f.check === 'pair.reframe_missing'), false, 'the kept reading carries the reframe');
+  assert.equal(logOf(r, 'close.hedge_kept').length, 1);
+  assert.equal(logOf(r, 'close.hedge_dropped').length, 0);
+});
+
+test('v1 IS UNTOUCHED: the v1 gate drops nothing and logs no close.* line', () => {
+  const rec = HEDGES.readings[0];
+  const sj = rec.kind === 'pair'
+    ? buildPairSemantic(calculateBaziChart(rec.inputs.a), calculateBaziChart(rec.inputs.b))
+    : buildSemanticJson(calculateBaziChart(rec.inputs.a));
+  const r = validateRendering(withEngineOpening(structuredClone(rec.rendered), sj).rendered, sj);
+  assert.equal(r.findings.some((f) => f.check.startsWith('close.')), false);
 });
