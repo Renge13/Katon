@@ -1,5 +1,5 @@
 # Product boundary rulings, 2026-09-26 (Reyner)
-STATUS: RULED by Reyner (chat, 2026-09-26; items 5, 6 and 9 amended by him later the same day for the MVP), after Cowork's pressure test against the repo and `reports/architecture-cost-2026-09-26.md` (Prompt AF).
+STATUS: RULED by Reyner (chat, 2026-09-26; items 5, 6 and 9 amended by him later the same day for the MVP), after Cowork's pressure test against the repo and `docs/qa/2026-09-26-architecture-cost.md` (Prompt AF).
 **This confirms, and does not replace:**
 - PROGRESS "PRODUCT / FUNNEL — DECIDED";
 - `docs/product/paid-product-map.md` § RULED 2026-08-29;
