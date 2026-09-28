@@ -446,7 +446,13 @@ test('THE OPENING NAMES TWO PEOPLE, NOT THREE', async () => {
   const a = sj.core.a.archetype_name_id;
   const b = sj.core.b.archetype_name_id;
 
-  assert.equal(p0.label_meaning, `Ini adalah bacaan tentang dua individu: ${a} dan ${b}`);
+  // READ FROM THE RULING, NOT RETYPED (2026-09-28, Prompt AI amendment 1). This
+  // held its own copy of the 2026-09-09 sentence, a second source of truth that
+  // goes stale the day Reyner rules again - and he did.
+  const rulings = readFileSync(new URL('../docs/content/compat-glossary-rulings-2.md', import.meta.url), 'utf8')
+    .replace(/\r\n?/g, '\n');
+  const ruled = /^- label_meaning: "(.*)"$/mu.exec(rulings.slice(rulings.indexOf('## kompatibilitas.p0_opening')))[1];
+  assert.equal(p0.label_meaning, fillPairTemplate(ruled, a, b));
 
   // A first, B second - she typed her own birth into step 1, and a reading that
   // reverses them is a reading about the wrong person first.
