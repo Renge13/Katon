@@ -1,3 +1,5 @@
+import { withBotId } from 'botid/next/config';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // App Router. The shared `public/` directory serves static assets.
@@ -33,4 +35,6 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// BotID's proxy rewrites (vercel.com/docs/botid/get-started, "Configure redirects"),
+// so ad-blockers and third-party scripts cannot strip its challenge. Prompt AK §3.3.
+export default withBotId(nextConfig);

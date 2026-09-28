@@ -846,3 +846,52 @@ test('the reading and its card name the SAME archetype - the 08-13 divergence, c
     assert.equal(body.card.nameEn, body.chart.archetype.name_en);
   }
 });
+
+// ── VERCEL BotID BASIC ON POST /api/mirror (Prompt AK §3.3, ruling 6 + AJ amendment 2) ──
+// The route passes BotID's verdict in as `botCheck` (app/api/mirror/route.js calls
+// checkBotId() from 'botid/server'); here it is stubbed. A request judged a bot gets
+// the EXISTING rate-limit refusal - 429 and the ruled line - and no token is minted.
+test('BotID: a request judged a BOT is refused like a rate limit, and no reading is created', async () => {
+  const before = readingMem().size;
+  const res = await createMirrorReading(
+    request({ method: 'POST', body: CHART_A }),
+    { botCheck: async () => ({ isBot: true }) },
+  );
+  assert.equal(res.status, 429);
+  const body = await res.json();
+  const { readableError } = await import('../lib/site/readableError.js');
+  assert.equal(readableError(body), 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.');
+  assert.equal(body.token, undefined, 'no token minted');
+  assert.equal(readingMem().size, before, 'no reading row was created');
+});
+
+test('BotID: a request judged HUMAN creates the reading as before', async () => {
+  const res = await createMirrorReading(
+    request({ method: 'POST', body: CHART_A }),
+    { botCheck: async () => ({ isBot: false }) },
+  );
+  assert.equal(res.status, 201);
+});
+
+// ── PER-IP DAILY CAP ON NEW READINGS (Prompt AK §3.2, Reyner's ruling 6) ──
+// 100 new readings per IP per day on POST /api/mirror, beside the existing 60 per
+// hour. The hourly limit binds first inside one hour, so the day's earlier creates
+// are simulated by charging the daily bucket directly for this IP.
+test('THE PER-IP DAILY CAP: the 101st new reading of the day from one IP is refused with the ruled line', async () => {
+  const daily = RATE_LIMITS.mirror_create_daily;
+  assert.ok(daily, 'there is no per-IP daily bucket for new readings');
+  assert.equal(daily.ip.limit, 100);
+  assert.equal(daily.ip.windowSeconds, 86_400);
+  const { consume } = await import('../lib/ratelimit.js');
+  for (let i = 0; i < daily.ip.limit; i += 1) await consume('mirror_create_daily', { ip: '198.51.100.77' });
+
+  const over = await create(CHART_A, { ip: '198.51.100.77' });
+  assert.equal(over.status, 429);
+  const body = await over.json();
+  assert.equal(body.error, 'rate_limited_ip');
+  const { readableError } = await import('../lib/site/readableError.js');
+  assert.equal(readableError(body), 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.');
+  assert.ok(Number(over.headers.get('retry-after')) > 0);
+  // Another IP is untouched.
+  assert.equal((await create(CHART_A, { ip: '198.51.100.78' })).status, 201);
+});
