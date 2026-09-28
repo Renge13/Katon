@@ -248,7 +248,8 @@ test('A DIRECTION WITH NO QUALIFYING ELEMENT carries no Penyeimbang fact: the fa
   const oneWay = buildPairSemantic(fixture(9), fixture(11));
   const supplies = oneWay.facts.find((f) => f.id === 'p3_supply').provenance.supplies;
   assert.deepEqual(supplies.map((s) => `${s.from}>${s.to}`), ['a>b']);
-  const row = factRows(oneWay).find((r) => r.anchorKey === 'p3_supplies');
+  // Only the reader gives, so the row is the reader-side cell (Prompt AM ruling 1).
+  const row = factRows(oneWay).find((r) => r.anchorKey === 'p3_reader_gives');
   assert.equal(row.a, 'Api');
   assert.equal(row.b, '');
   // A chart against itself: nothing qualifies either way, so the ruled no-supply
@@ -259,3 +260,58 @@ test('A DIRECTION WITH NO QUALIFYING ELEMENT carries no Penyeimbang fact: the fa
   assert.ok(rows.includes('p3_no_supply'));
   assert.equal(rows.includes('p3_supplies'), false);
 });
+
+// ── WHO GIVES DECIDES THE CELL (Prompt AM ruling 1, 2026-09-28) ──
+// `p3_supplies` says "Dia membawa ..." - the partner brings the reader something.
+// When only the reader gives (A to B, no B to A), that line is untrue, so the
+// engine picks the ruled `p3_reader_gives` ("Kamu membawa ...") on every surface
+// that prints the cell: the floor, the PDF facts table and the glossary appendix.
+// Both directions, or the partner alone, keep `p3_supplies`. Texts are read from
+// the glossary, never restated here.
+const P3 = async (a, b) => {
+  const { buildPairSemantic } = await import('../lib/semantic/pair.js');
+  const { factRows } = await import('../lib/pdf/pairDocument.js');
+  const { buildPairAppendix } = await import('../lib/pdf/pairAppendix.js');
+  const { assembleFallback } = await import('../lib/render/fallback.js');
+  const { GLOSSARY } = await import('../lib/semantic/glossary.js');
+  const sj = buildPairSemantic(a, b);
+  const floor = assembleFallback(sj).blocks.find((bl) => (bl.fact_ids || []).includes('p3_supply'));
+  const row = factRows(sj).find((r) => /^p3_(supplies|reader_gives)$/u.test(r.anchorKey));
+  const appendixKeys = buildPairAppendix({ chartA: a, chartB: b, semanticJson: sj }).groups
+    .flatMap((g) => g.entries).filter((e) => e.section === 'kompatibilitas').map((e) => e.key);
+  return {
+    K: GLOSSARY.kompatibilitas,
+    directions: sj.facts.find((f) => f.id === 'p3_supply').provenance.supplies.map((s) => `${s.from}>${s.to}`),
+    floor: floor?.text ?? '', row, appendixKeys,
+  };
+};
+
+test('ONLY THE READER GIVES (9 x 11): floor, PDF row and appendix all use p3_reader_gives', async () => {
+  const r = await P3(fixture(9), fixture(11));
+  assert.deepEqual(r.directions, ['a>b'], 'precondition: only A gives');
+  assert.ok(r.floor.includes(r.K.p3_reader_gives.label_meaning), `floor: ${r.floor}`);
+  assert.equal(r.floor.includes(r.K.p3_supplies.label_meaning), false, 'the floor must not say the partner gives');
+  assert.equal(r.row.anchorKey, 'p3_reader_gives');
+  assert.equal(r.row.meaning, r.K.p3_reader_gives.label_meaning);
+  assert.equal(r.row.term, 'Penyeimbang Unsur');
+  assert.equal(r.row.a, 'Api');
+  assert.equal(r.row.b, '');
+  assert.ok(r.appendixKeys.includes('p3_reader_gives'));
+  assert.equal(r.appendixKeys.includes('p3_supplies'), false);
+});
+
+for (const [name, a, b, want] of [
+  ['BOTH GIVE (rVe4ca)', { birthDate: '1981-02-20', birthTime: '07:00' }, { birthDate: '1988-07-04', birthTime: '05:00' }, ['a>b', 'b>a']],
+  ['ONLY THE PARTNER GIVES (2 x 6)', 2, 6, ['b>a']],
+]) {
+  test(`${name}: p3_supplies stays, on every surface`, async () => {
+    const chart = (x) => (typeof x === 'number' ? fixture(x) : calculateBaziChart(x));
+    const r = await P3(chart(a), chart(b));
+    assert.deepEqual(r.directions, want, 'precondition: the directions');
+    assert.ok(r.floor.includes(r.K.p3_supplies.label_meaning), `floor: ${r.floor}`);
+    assert.equal(r.row.anchorKey, 'p3_supplies');
+    assert.equal(r.row.meaning, r.K.p3_supplies.label_meaning);
+    assert.ok(r.appendixKeys.includes('p3_supplies'));
+    assert.equal(r.appendixKeys.includes('p3_reader_gives'), false);
+  });
+}
