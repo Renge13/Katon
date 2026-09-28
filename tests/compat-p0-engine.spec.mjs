@@ -275,7 +275,7 @@ test('THE MODEL PATH: a paraphrased opening is replaced before the gate, and cou
 
     assert.equal(out.source, 'gemini', `floored instead: ${JSON.stringify(out.findings)}`);
     assert.equal(out.blocks[0].text, ruledOpening(sj));
-    assert.equal(out.stage6_version, '1.47.0'); // 1.26.0-1.38.0, 1.42.0-1.46.0 are spent on feat/voice-v2; 1.47.0 is the pair serve re-gate
+    assert.equal(out.stage6_version, '1.49.0'); // 1.26.0-1.38.0, 1.42.0-1.46.0 are spent on feat/voice-v2; 1.47.0 is the pair serve re-gate
     // LOG ONLY, on the attempt record the QA tape already reads.
     assert.equal(out.attempts.at(-1).p0_model_wrote_anyway, true);
   });

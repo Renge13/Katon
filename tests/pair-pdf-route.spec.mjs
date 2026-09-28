@@ -16,6 +16,7 @@
 // ============================================================
 
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   test, beforeEach, afterEach,
 } from 'node:test';
@@ -279,4 +280,49 @@ test('A WARM THAT CACHES NOTHING (a floor) IS STILL 409, and builds nothing', as
   assert.equal(res.status, 409);
   assert.equal(warmed, 1);
   assert.equal(calls, 0);
+});
+
+// ── THE PDF RE-CHECKS A CACHED READING BEFORE IT PRINTS IT (Prompt AJ §1) ──
+// The PDF printed whatever row the cache held; only the report PAGE re-gated it
+// (#155). A buyer who tapped "Unduh PDF" before opening the page got the stored
+// text as it was, whatever gate had been added since. The real case: the
+// 2026-09-08 g4WH4 paid row, "Dia membawa elemen air" where B brings Kayu.
+test('THE PDF NEVER PRINTS A HARD-FAILING READING: the g4WH4 row, PDF requested before the page', async () => {
+  const fixture = (n) => JSON.parse(readFileSync(new URL(`./fixtures/${n}`, import.meta.url), 'utf8'));
+  const { a, b } = fixture('compat-g4WH4-reading.json').inputs;
+  const prod = fixture('pair-reading-g4WH4.json').reading;
+  const id = `pair-${Math.random().toString(36).slice(2, 10)}`;
+  await createPair({
+    id,
+    a_birth_date: a.birthDate, a_birth_time: a.birthTime, a_gender: a.gender, a_term_side: null,
+    b_birth_date: b.birthDate, b_birth_time: b.birthTime, b_gender: b.gender, b_term_side: null,
+    sku: 'compat', paid: false, email: null,
+  });
+  await markPairPaid(id, new Date().toISOString());
+  const sj = buildPairSemantic(calculateBaziChart(a), calculateBaziChart(b));
+  await writeCache(cacheKey(sj), {
+    ...prod, engineVersion: sj.engine_version, source: 'gemini', model: 'production-2026-09-08',
+    promptVersion: 'production-2026-09-08', stage6Version: '1.25.0',
+  });
+
+  // The report door, standing in for servePairReading: a passing render persisted.
+  let warmed = 0;
+  const warm = async () => {
+    warmed += 1;
+    await writeCache(cacheKey(sj), {
+      ...assembleFallback(sj), engineVersion: sj.engine_version, source: 'gemini',
+      model: 'test-model', promptVersion: 'rerendered000', stage6Version: '1.25.0',
+    });
+  };
+  let handed = null;
+  const res = await servePairPdf(request(), id, {
+    renderPdf: async (args) => { handed = args; return { buffer: Buffer.from('%PDF-1.7\nstub\n%%EOF\n') }; },
+    warm,
+  });
+
+  const printed = JSON.stringify(handed?.rendered?.blocks ?? []).toLowerCase();
+  assert.equal(printed.includes('elemen air'), false, 'the PDF printed the inverted sentence');
+  assert.equal(res.status, 200);
+  assert.equal(warmed, 1, 'the bad row was dropped and the reading re-rendered through the report door');
+  assert.equal(handed.rendered.prompt_version, 'rerendered000');
 });
