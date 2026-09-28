@@ -847,6 +847,32 @@ test('the reading and its card name the SAME archetype - the 08-13 divergence, c
   }
 });
 
+// ── VERCEL BotID BASIC ON POST /api/mirror (Prompt AK §3.3, ruling 6 + AJ amendment 2) ──
+// The route passes BotID's verdict in as `botCheck` (app/api/mirror/route.js calls
+// checkBotId() from 'botid/server'); here it is stubbed. A request judged a bot gets
+// the EXISTING rate-limit refusal - 429 and the ruled line - and no token is minted.
+test('BotID: a request judged a BOT is refused like a rate limit, and no reading is created', async () => {
+  const before = readingMem().size;
+  const res = await createMirrorReading(
+    request({ method: 'POST', body: CHART_A }),
+    { botCheck: async () => ({ isBot: true }) },
+  );
+  assert.equal(res.status, 429);
+  const body = await res.json();
+  const { readableError } = await import('../lib/site/readableError.js');
+  assert.equal(readableError(body), 'Terlalu banyak bacaan dari perangkat ini. Coba lagi nanti.');
+  assert.equal(body.token, undefined, 'no token minted');
+  assert.equal(readingMem().size, before, 'no reading row was created');
+});
+
+test('BotID: a request judged HUMAN creates the reading as before', async () => {
+  const res = await createMirrorReading(
+    request({ method: 'POST', body: CHART_A }),
+    { botCheck: async () => ({ isBot: false }) },
+  );
+  assert.equal(res.status, 201);
+});
+
 // ── PER-IP DAILY CAP ON NEW READINGS (Prompt AK §3.2, Reyner's ruling 6) ──
 // 100 new readings per IP per day on POST /api/mirror, beside the existing 60 per
 // hour. The hourly limit binds first inside one hour, so the day's earlier creates
