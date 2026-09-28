@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.48.0');
+    assert.equal(onV2.stage6_version, '1.51.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -412,4 +412,47 @@ test('ELEMENT DOMINANCE IS HARD ON v2: seed-S3 on a v2 mirror rejects', () => {
   assert.ok(f, JSON.stringify(r.findings.map((x) => x.check)));
   assert.equal(f.severity, 'hard');
   assert.equal(r.ok, false);
+});
+
+// ── NO NESTED BRACKETS (STAGE6 1.51.0, Prompt AJ §3) ──
+// Round 4 served "Sebagai Kayu (Bambu (The Bamboo))" and "Sebagai Logam (Besi Tempa
+// (The Forge))": the writer put the archetype in parentheses after the element, and
+// the insertion bracketed that mention anyway. Cowork's ruling: never insert on an
+// archetype mention already inside parentheses; bracket the first BARE mention; if
+// there is none, insert nothing (the cover already shows the English name).
+import NESTED from './fixtures/voice-v2-round4-nested-brackets.json' with { type: 'json' };
+
+const NESTED_RE = /\([^()]*\([^()]*\)[^()]*\)/u;
+for (const c of NESTED.cases) {
+  test(`NO NESTED BRACKET: ${c.subject}'s round-4 draft, verbatim`, () => {
+    assert.ok(NESTED_RE.test(c.served_text), 'precondition: the fixture records the served defect');
+    const sj = buildSemanticJson(calculateBaziChart(c.inputs.a), { voice: 'v2' });
+    // THE DRAFT BLOCK ALONE. Padding it with the floor's blocks made this pass on the
+    // defect: the floor's identity line already carries "(The Bamboo)", so the
+    // insertion saw the bracket present and inserted nothing. Only the normalised
+    // text is read here, so the gate's verdict on a one-block draft does not matter.
+    const draft = { blocks: [{ fact_ids: c.fact_ids, heading: 'x', text: c.draft_text }], penutup: '' };
+    const out = validateRenderingV2(draft, sj);
+    const served = out.normalized.blocks[0].text;
+    assert.equal(NESTED_RE.test(served), false, `nested bracket served: ${served.slice(0, 80)}`);
+    const name = sj.core.archetype_name_id;
+    assert.ok(served.includes(`(${name})`), 'the writer\'s own parenthesis is kept as written');
+  });
+}
+
+test('NO NESTED BRACKET: the English goes on the first BARE mention, and nowhere when there is none', () => {
+  const sj = v2(A);
+  const name = sj.core.archetype_name_id;
+  const en = sj.core.archetype_name_en;
+  const withBare = draftFor(sj);
+  withBare.blocks[0].text = `Sebagai Api (${name}), kamu hangat. ${name} menerangi sekitarmu.`;
+  const t1 = validateRenderingV2(withBare, sj).normalized.blocks[0].text;
+  assert.ok(t1.includes(`${name} (${en}) menerangi`), t1.slice(0, 120));
+  assert.equal(NESTED_RE.test(t1), false);
+  const onlyInside = draftFor(sj);
+  onlyInside.blocks = onlyInside.blocks.map((b) => ({ ...b, text: b.text.split(name).join('dia') }));
+  onlyInside.blocks[0].text = `Sebagai Api (${name}), kamu hangat.`;
+  const out = validateRenderingV2(onlyInside, sj);
+  const all = out.normalized.blocks.map((b) => b.text).join(' ');
+  assert.equal(all.includes(`(${en})`), false, 'inserted on a mention inside parentheses');
 });
