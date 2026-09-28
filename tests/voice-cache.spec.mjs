@@ -30,9 +30,12 @@ const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 // pair: re-pinned to `main` ec8ea00 (PR #151, 2026-09-26), where frame hits got
 // their own p2_frame_* cells and the pair semantic JSON moved on main itself; it was
 // b600cf5b... on bb4a0b0 and 38062f2. A key that moves WITHOUT main moving is the bug.
+// RE-PINNED AGAIN to `main` 6cdbe69 (PR #156, 2026-09-28): Reyner's new p0_opening
+// line is inside the pair semantic JSON, so main's own pair key moved; it was
+// c6d3d6ff... on ec8ea00. Computed on a detached checkout of origin/main 6cdbe69.
 const V1_KEYS = {
   mirror: 'b38088d0aa89991d2da6521cd6e6536e4a3fbf34fa6422133f0782a442c3511f',
-  pair: 'c6d3d6ff2591e022be64524eb36174d03a22007cd4e1cd9bce1e2247a7e83b58',
+  pair: '9dcfc125bba4e1a80e9d23214137dd3c68f705ceafeb63d00b3172274a622301',
 };
 
 const ENV = ['VOICE', 'VERCEL_ENV', 'GEMINI_API_KEY'];

@@ -37,7 +37,7 @@ This file is not durable until Code commits it. Commit it docs-only, alone.
 | B16 hold the tension + tension-collapse bans | KEEP | |
 | B17 make meaning felt, not defined | KEEP | Strong keep. |
 | B18 rule 21 same-breath (fact.strength_same_breath, strength_bare_label) | KEEP principle, LOOSEN enforcement | Not a hard reject; soft with at most one regeneration, or preferably explained naturally nearby. A voice issue, not a truth failure. |
-| B19 pair P0 opening line | REWRITE | Keep the mechanism and fixed order; Reyner rewrites the glossary line "Ini adalah bacaan tentang dua individu: {A} dan {B}". |
+| B19 pair P0 opening line | RULED 2026-09-28 | Mechanism and fixed order kept. Reyner's line is `kompatibilitas.p0_opening` in `docs/content/compat-glossary-rulings-2.md` (AMENDED 2026-09-28). |
 | B20 palace named in every fact block (fact.palace_dropped HARD) | LOOSEN | Name the palace when it adds meaning; not mandatory per block. |
 | B21 importance ranking | KEEP, with caveat | Hierarchy controls what matters; it does not make the prose mechanically ordered. |
 | B22 confident penutup, no summary | KEEP principle | Examples teach execution; no formula. |

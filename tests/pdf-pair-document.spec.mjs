@@ -31,6 +31,8 @@ import {
 } from '../lib/pdf/inspect.js';
 import { VALIDATION_CHARTS, HOUR_UNKNOWN_CHARTS } from './bazi-validation.fixture.js';
 import GLOSSARY from '../docs/content/glossary.json' with { type: 'json' };
+import { fillPairTemplate } from '../lib/semantic/glossary.js';
+import { readFileSync } from 'node:fs';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
 
 const ALL = [...VALIDATION_CHARTS, ...HOUR_UNKNOWN_CHARTS];
@@ -76,6 +78,17 @@ async function build(name) {
 
 /** Page text carries the LAYOUT's line breaks; a sentence does not. */
 const flat = (t) => t.replace(/\s+/gu, ' ').trim();
+
+// THE P0 SENTENCE IS READ FROM THE RULING, NOT RETYPED (2026-09-28, Prompt AI
+// amendment 1). Both tests below held their own copy of the 2026-09-09 line.
+// The ruled line ends in its own full stop, and it is two sentences now, so it
+// wraps: a page is matched on its FLATTENED text, never line by line.
+const RULED_P0 = (() => {
+  const md = readFileSync(new URL('../docs/content/compat-glossary-rulings-2.md', import.meta.url), 'utf8')
+    .replace(/\r\n?/g, '\n');
+  return /^- label_meaning: "(.*)"$/mu.exec(md.slice(md.indexOf('## kompatibilitas.p0_opening')))[1];
+})();
+const p0Sentence = (sj) => fillPairTemplate(RULED_P0, sj.core.a.archetype_name_id, sj.core.b.archetype_name_id);
 const names = Object.keys(PAIRS);
 
 test('THE PDF AUTHORS NOTHING: every block is the cached prose, ON THE READING PAGE', async () => {
@@ -112,7 +125,8 @@ test('the engine P0 sentence is on the reading page, ONCE', async () => {
     const { texts, semanticJson } = await build(name);
     const a = semanticJson.core.a.archetype_name_id;
     const b = semanticJson.core.b.archetype_name_id;
-    const sentence = `Ini adalah bacaan tentang dua individu: ${a} dan ${b}.`;
+    const sentence = p0Sentence(semanticJson);
+    assert.ok(sentence.includes(a) && sentence.includes(b));
     const hits = texts.filter((t) => flat(t).includes(sentence));
     assert.equal(hits.length, 1, `${name}: the opening appears on ${hits.length} pages, want 1`);
     // ── IT IS THE SUB-LINE NOW, NOT THE FIRST LINE. C1, 2026-09-22. ──
@@ -571,8 +585,8 @@ test('THE QUADRANT NAME IS THE READING\'S TITLE LINE, after the P0 sentence', as
     // headline leads and the sentence explains it, which is the order every other
     // page of this document already uses.
     assert.equal(lines[0], title, `${name}: the quadrant title does not lead the reading`);
-    assert.equal(lines[1], `Ini adalah bacaan tentang dua individu: ${a} dan ${b}.`,
-      `${name}: the P0 sentence is not the line under the title`);
+    assert.ok(flat(lines.slice(1).join(' ')).startsWith(p0Sentence(semanticJson)),
+      `${name}: the P0 sentence is not the text under the title (${a}, ${b})`);
     // ONCE on that page: it is a title, and the P5 block names it again lower down
     // only if the model wrote it, which is not this assertion's business.
     assert.equal(lines.filter((l) => l === title).length, 1,
