@@ -37,3 +37,21 @@ Switch ruling #6 to Vercel BotID Basic. Use it only on the create-reading/AI-gen
 - **The per-IP daily cap on new readings is sized as a share of the global cap**, so one setting covers
   both "no single actor exhausts it" and "it scales when the cap changes".
 - **The reserve slice ships only if AJ §5.1 shows it survives IP rotation.** Otherwise it leaves the plan.
+
+## Reyner, 2026-09-28, second set (Prompt AK amendment 1), verbatim
+```
+3. Penyeimbang Unsur: proceed with AK §2 measurement only. No engine change until we see how many compatibility pairs actually change.
+4. Separate paid AI budget: approve.
+5. Complete Edition fallback: must be fixed before launch. If the saved Mirror is fallback text, the paid flow must generate a full reading before rendering the paid PDF.
+6. Per-IP 100/day + BotID on `/api/mirror`: approve as the abuse-protection layer.
+```
+Keyed (Cowork, AK amendment 1):
+- **3. Penyeimbang Unsur:** AK §2 measures the candidate meaning ("X membawa E" only when the supplier holds
+  MORE of E than the receiver); no engine, glossary or check change until the counts are read.
+- **4. Separate paid AI budget:** approves AK §3.1 - a render for a PAID reading (a paid pair, or the Mirror
+  of a token with a paid Complete Edition) draws on its own daily counter, a runaway guard of 500 calls;
+  the free cap stays at 1,500 (ruling 5).
+- **5. Complete Edition fallback, BEFORE LAUNCH:** AK §3.6 - if the saved Mirror is missing or is the
+  floor, the paid flow renders a full reading (from the paid budget) before the PDF is built, and warms it
+  at settle. The PDF never prints floor prose.
+- **6. Per-IP 100/day + BotID on `/api/mirror`:** approves AK §3.2 and §3.3 as the abuse-protection layer.
