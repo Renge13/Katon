@@ -58,14 +58,20 @@ afterEach(() => {
 
 const withVoice = (v, fn) => { if (v) process.env.VOICE = v; else delete process.env.VOICE; return fn(); };
 
-test('THE SWITCH: default v1; v2 only when asked, and NEVER in production', () => {
+test('THE SWITCH: default v1; v2 only when VOICE=v2, in every environment including production', () => {
   assert.equal(voiceVersion(), 'v1');
   process.env.VOICE = 'v2';
   assert.equal(voiceVersion(), 'v2');
   process.env.VERCEL_ENV = 'preview';
   assert.equal(voiceVersion(), 'v2', 'v2 on Preview');
+  // The production force is gone (Prompt AO §4): production follows VOICE like Preview.
   process.env.VERCEL_ENV = 'production';
-  assert.equal(voiceVersion(), 'v1', 'production refuses v2 whatever VOICE says');
+  assert.equal(voiceVersion(), 'v2', 'production serves v2 when VOICE=v2');
+  // ROLLBACK is an env change, not a code revert: VOICE=v1, or VOICE unset, is v1.
+  process.env.VOICE = 'v1';
+  assert.equal(voiceVersion(), 'v1', 'VOICE=v1 in production rolls back to v1');
+  delete process.env.VOICE;
+  assert.equal(voiceVersion(), 'v1', 'VOICE unset in production is v1');
   process.env.VOICE = 'nonsense';
   delete process.env.VERCEL_ENV;
   assert.equal(voiceVersion(), 'v1', 'an unknown value is v1');
