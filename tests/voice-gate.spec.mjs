@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.55.0');
+    assert.equal(onV2.stage6_version, '1.56.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -640,4 +640,64 @@ test('v1 IS UNTOUCHED: the v1 gate drops nothing and logs no close.* line', () =
     : buildSemanticJson(calculateBaziChart(rec.inputs.a));
   const r = validateRendering(withEngineOpening(structuredClone(rec.rendered), sj).rendered, sj);
   assert.equal(r.findings.some((f) => f.check.startsWith('close.')), false);
+});
+
+// ── ASPEK AT A NAMED PILLAR (STAGE6 1.56.0, Prompt AO §2; Reyner's AN ruling) ──
+// "Aspek <X> ... di Pilar <Y>" (and lists, "di Pilar Kerja dan Pilar Diri") must match
+// where the engine places X for the person it is about - a pillar is right if ANY stem
+// or hidden stem there carries X (aspekOccurrences, lib/semantic/facts.js). Subject:
+// the reader on a mirror; on a pair, "-mu" on the Aspek name is A, "-nya" or "dia" is
+// B, otherwise it does not fire and is logged (fact.aspek_pillar_unattributed).
+// Literals extracted by scripts/extract-aspek-pillar-fixture.mjs from served JSON.
+import ASPEK_PILLAR from './fixtures/voice-v2-aspek-pillar.json' with { type: 'json' };
+
+const caseOf = (role) => ASPEK_PILLAR.cases.filter((c) => c.role === role);
+const pairSj = (c, voice) => buildPairSemantic(calculateBaziChart(c.inputs.a), calculateBaziChart(c.inputs.b), { voice });
+const aspekHard = (r) => r.findings.filter((f) => f.check === 'fact.aspek_pillar' && f.severity !== 'flag');
+
+test('ASPEK@PILLAR: the round-4d served sentence ("Aspek Pengelola-mu ... Pilar Kerja dan Pilar Diri") is HARD on a v2 pair', () => {
+  const [c] = caseOf('reject');
+  const sj = pairSj(c, 'v2');
+  const r = validateRenderingV2(plant(draftFor(sj), c.sentence), sj);
+  const hits = aspekHard(r);
+  assert.equal(hits.length, 1, JSON.stringify(r.findings.filter((f) => f.check.startsWith('fact.aspek'))));
+  assert.match(hits[0].message, /Pilar Diri/u);
+  assert.equal(r.ok, false);
+});
+
+test('ASPEK@PILLAR: the same claim with no possessive (an2 run 1) is LOGGED, not rejected', () => {
+  const [c] = caseOf('log');
+  const sj = pairSj(c, 'v2');
+  const r = validateRenderingV2(plant(draftFor(sj), c.sentence), sj);
+  assert.equal(aspekHard(r).length, 0);
+  const log = r.findings.filter((f) => f.check === 'fact.aspek_pillar_unattributed');
+  assert.equal(log.length, 1);
+  assert.equal(log[0].severity, 'flag');
+});
+
+test('ASPEK@PILLAR CONTROL: chart1\'s true served sentences pass on both voices', () => {
+  const chart = calculateBaziChart(caseOf('control')[0].inputs.a);
+  for (const voice of ['v1', 'v2']) {
+    const sj = buildSemanticJson(chart, { voice });
+    let draft = draftFor(sj);
+    for (const c of caseOf('control')) draft = plant(draft, c.sentence);
+    const r = (voice === 'v2' ? validateRenderingV2 : validateRendering)(draft, sj);
+    assert.deepEqual(r.findings.filter((f) => f.check.startsWith('fact.aspek')), [], voice);
+  }
+});
+
+test('ASPEK@PILLAR on a MIRROR: a false pillar is HARD on both voices, a true one passes', () => {
+  // A: Aspek Pengelola sits at Pilar Kerja only (the 辛 hidden in 酉).
+  for (const voice of ['v1', 'v2']) {
+    const sj = buildSemanticJson(A, { voice });
+    const gate = voice === 'v2' ? validateRenderingV2 : validateRendering;
+    assert.equal(aspekHard(gate(plant(draftFor(sj), 'Aspek Pengelola-mu terlihat di Pilar Diri.'), sj)).length, 1, voice);
+    assert.equal(aspekHard(gate(plant(draftFor(sj), 'Aspek Pengelola-mu terlihat di Pilar Kerja.'), sj)).length, 0, voice);
+  }
+});
+
+test('ASPEK@PILLAR on a v2 PAIR: "-nya" is B (Pengelola at Pilar Diri only)', () => {
+  const sj = buildPairSemantic(A, B, { voice: 'v2' });
+  assert.equal(aspekHard(validateRenderingV2(plant(draftFor(sj), 'Aspek Pengelola-nya menonjol di Pilar Kerja.'), sj)).length, 1);
+  assert.equal(aspekHard(validateRenderingV2(plant(draftFor(sj), 'Aspek Pengelola-nya menonjol di Pilar Diri.'), sj)).length, 0);
 });

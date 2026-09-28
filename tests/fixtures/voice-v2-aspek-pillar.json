@@ -1,0 +1,92 @@
+{
+  "_about": "EVIDENCE, not output. Extracted by scripts/extract-aspek-pillar-fixture.mjs (Prompt AO §2) from the stored served readings named in each entry. Never retyped.",
+  "cases": [
+    {
+      "role": "reject",
+      "source": "reports/voice-v2/round4d/PZ0t_B3YDnzdXc2LWV38D-v2.json",
+      "kind": "pair",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-09-13",
+          "birthTime": "09:00",
+          "gender": "female"
+        },
+        "b": {
+          "birthDate": "1990-03-04",
+          "birthTime": "14:00",
+          "gender": "male"
+        }
+      },
+      "fact_ids": [
+        "day_master_Fire",
+        "strength_weak",
+        "profile_vs_favorable"
+      ],
+      "heading": "Dirimu sebagai Matahari",
+      "sentence": "Tegangan terbesar dalam petamu muncul karena Aspek Pengelola-mu yang menonjol di Pilar Kerja dan Pilar Diri justru berelemen Logam, yang secara konstan menarik tenaganya dari elemen yang pada dasarnya melelahkanmu."
+    },
+    {
+      "role": "log",
+      "source": "reports/voice-v2/an2/r1/PZ0t_B3YDnzdXc2LWV38D-v2.json",
+      "kind": "pair",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-09-13",
+          "birthTime": "09:00",
+          "gender": "female"
+        },
+        "b": {
+          "birthDate": "1990-03-04",
+          "birthTime": "14:00",
+          "gender": "male"
+        }
+      },
+      "fact_ids": [
+        "day_master_Fire",
+        "strength_weak",
+        "profile_vs_favorable"
+      ],
+      "heading": "Dirimu sebagai Matahari",
+      "sentence": "Di keseharian, ini terlihat dari Aspek Pengelola yang menonjol di Pilar Kerja dan Pilar Diri."
+    },
+    {
+      "role": "control",
+      "source": "reports/voice-v2/round4d/chart1-v2.json",
+      "kind": "mirror",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-09-13",
+          "birthTime": "09:00",
+          "gender": "male"
+        },
+        "b": null
+      },
+      "fact_ids": [
+        "day_master_Fire",
+        "strength_weak",
+        "profile_vs_favorable"
+      ],
+      "heading": "Inti Api yang Terus Menyala",
+      "sentence": "Di pilar kerja, kamu membawa Aspek Pengelola (Direct Wealth)."
+    },
+    {
+      "role": "control",
+      "source": "reports/voice-v2/round4d/chart1-v2.json",
+      "kind": "mirror",
+      "inputs": {
+        "a": {
+          "birthDate": "1989-09-13",
+          "birthTime": "09:00",
+          "gender": "male"
+        },
+        "b": null
+      },
+      "fact_ids": [
+        "void_stack_month",
+        "relation_半合_巳酉"
+      ],
+      "heading": "Rasa Hampir Pas",
+      "sentence": "Kondisi ini diperkuat oleh interaksi Setengah Gabungan (Half Combination) antara Pilar Akar, Pilar Kerja, dan Pilar Arah yang menarik elemen Logam."
+    }
+  ]
+}
