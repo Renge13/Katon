@@ -828,7 +828,7 @@
    "daily_seed": "Keputusan di area tertentu sering tertunda karena kalian berdua sama-sama menghindar, sampai ada dorongan dari keadaan atau pihak luar."
   },
   "p3_no_supply": {
-   "_note": "Neither direction supplies. Unreachable from the 13-chart fixture (base-rates run 1: 2.2.a held on 100.0% of 5000 pairs), and cell-ruled anyway so the floor is never silent on P3.",
+   "_note": "Neither direction supplies. Reachable since 2026-09-28, when the giver had to hold MORE of an element than the receiver (Reyner, Prompt AL ruling 2): fixture pairs 5 x 9 and 9 x 5 get it, and node --conditions=react-server scripts/compat-base-rates.mjs (5000 pairs, seed 20260907) measured 89 of 5000 = 1.8% on 2026-09-28 (PR #167 measured 38 of 2000 = 1.9% with another sampler). A measurement with its date, not a constant. Before that ruling it was unreachable (base-rates run 1: 2.2.a held on 100.0% of 5000 pairs). Cell-ruled so the floor is never silent on P3.",
    "name_id": "Mandiri Elementar",
    "label_meaning": "Tidak ada aliran elemen khusus yang saling mengisi. Hubungan berjalan mandiri tanpa rasa saling tergantung secara energi.",
    "meaning_seed": "Masing-masing mempertahankan ruang energinya secara utuh. Hubungan terasa ringan karena tidak ada tuntutan untuk saling mengisi, namun bisa terasa terpisah jika tidak ada area yang sengaja dibangun bersama.",
