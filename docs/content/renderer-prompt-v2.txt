@@ -17,8 +17,8 @@ using only the reasons in `provenance`. Connect facts that belong together. Show
 fact gives and what it costs; the reading as a whole carries tension and is never a list of compliments.
 Use imagery and illustrative everyday scenes ("Misalnya, ...", "Dalam keseharian, ini bisa terasa
 seperti ..."). A recurring pattern may be stated with conviction ("hampir selalu kamu"); a specific past
-event may not. Write with conviction about who she is. You may end a thought on an open observation that
-makes her want to look further. Advice is optional, never
+event may not. Write with conviction about who she is. End on a confident observation that leaves her wanting to look
+further; do not open it with "Mungkin menarik untuk...". Advice is optional, never
 required.
 
 Do not invent means:

@@ -27,15 +27,26 @@ function fenceAfter(heading) {
   const open = ae.indexOf('```\n', at);
   return `${ae.slice(open + 4, ae.indexOf('\n```', open + 4))}\n`;
 }
-// AE §1 VERBATIM, with the ONE ruled edit since: B31 (Reyner, 2026-09-28) removed
-// the example clause from the open-ended close. Applied here as that exact edit, so
-// any other drift from AE still fails the verbatim test below.
-const B31_FROM = 'makes her want to look further, for instance at the people closest to her. Advice';
-const B31_TO = 'makes her want to look further. Advice';
-const AE_MIRROR_RAW = fenceAfter('## 1. Replace `docs/content/renderer-prompt-v2.txt`');
-assert.ok(AE_MIRROR_RAW.includes(B31_FROM), 'AE §1 no longer carries the clause B31 removes');
-const AE_MIRROR = AE_MIRROR_RAW.replace(B31_FROM, B31_TO);
-const AE_COMPAT = fenceAfter('## 2. Replace `docs/content/compat-renderer-prompt-v2.txt`');
+// AE §1 and §2 VERBATIM, with the ruled edits since, applied here as those exact
+// edits in order, so any other drift from AE still fails the verbatim tests below.
+//   B31 (Reyner, 2026-09-28): the open-ended close loses its example clause.
+//   B33/B34 (Reyner, 2026-09-28; AK amendment 1 §1b): the close becomes ONE
+//   instruction - a confident observation, not "Mungkin menarik untuk..." - and the
+//   pair prompt's own close line, which invited an open musing, goes.
+const CLOSE_NEW = 'End on a confident observation that leaves her wanting to look\nfurther; do not open it with "Mungkin menarik untuk...". Advice is optional, never\nrequired.';
+const MIRROR_EDITS = [
+  ['makes her want to look further, for instance at the people closest to her. Advice', 'makes her want to look further. Advice'],
+  ['You may end a thought on an open observation that\nmakes her want to look further. Advice is optional, never\nrequired.', CLOSE_NEW],
+];
+const COMPAT_EDITS = [
+  ['The penutup leaves something worth exploring between them. It does not sum the pair up and does not\nassign homework', 'The penutup does not sum the pair up and does not\nassign homework'],
+];
+const applyEdits = (text, edits, where) => edits.reduce((t, [from, to]) => {
+  assert.ok(t.includes(from), `${where} no longer carries: ${from.slice(0, 50)}`);
+  return t.replace(from, to);
+}, text);
+const AE_MIRROR = applyEdits(fenceAfter('## 1. Replace `docs/content/renderer-prompt-v2.txt`'), MIRROR_EDITS, 'AE §1');
+const AE_COMPAT = applyEdits(fenceAfter('## 2. Replace `docs/content/compat-renderer-prompt-v2.txt`'), COMPAT_EDITS, 'AE §2');
 
 const EXAMPLES = read('docs/content/voice-examples-v2.txt');
 const MIRROR_EXAMPLES = EXAMPLES.slice(0, EXAMPLES.indexOf('=== PAIR EXAMPLES ==='));
@@ -100,7 +111,24 @@ test('B31: the v2 prompts carry the open-ended close WITHOUT its example phrase'
   for (const kind of ['mirror', 'pair']) {
     const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
     assert.equal(p.includes('for instance at the people closest to her'), false, `${kind} still has the example`);
-    assert.ok(p.includes('You may end a thought on an open observation that makes her want to look further.'),
-      `${kind} lost the permission itself`);
+    // The permission to end open is kept; since B33/B34 it is worded as the
+    // confident-close instruction (tested below), so this checks the open ending.
+    assert.ok(p.includes('leaves her wanting to look further'), `${kind} lost the open-ended ending itself`);
+  }
+});
+
+// ── B33 / B34 (Reyner, 2026-09-28): ONE CLOSE INSTRUCTION, NO INVITED QUESTION ──
+// "Mungkin menarik" stayed in 4 of 7 round-4b readings after B31. The prompt now says
+// it once: end on a confident observation, not "Mungkin menarik untuk...". Questions
+// are neither banned nor asked for; the old wording that invited an open musing goes.
+// Prompt only: no gate, no blocklist entry (docs/content/voice-constraint-rulings B33, B34).
+test('B33/B34: the v2 prompts carry the confident-close instruction and none of the removed wording', () => {
+  for (const kind of ['mirror', 'pair']) {
+    const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
+    assert.ok(p.includes('End on a confident observation that leaves her wanting to look further; do not open it with "Mungkin menarik untuk...".'),
+      `${kind} lacks the new close instruction`);
+    for (const gone of ['You may end a thought on an open observation', 'The penutup leaves something worth exploring between them']) {
+      assert.equal(p.includes(gone), false, `${kind} still says: ${gone}`);
+    }
   }
 });
