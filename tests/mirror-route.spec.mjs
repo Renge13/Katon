@@ -895,3 +895,49 @@ test('THE PER-IP DAILY CAP: the 101st new reading of the day from one IP is refu
   // Another IP is untouched.
   assert.equal((await create(CHART_A, { ip: '198.51.100.78' })).status, 201);
 });
+
+// ── WHY A READING FLOORED, RECORDED (Prompt AU §5) ──
+// AS §2 could not say why a production reading floored: `mirror_served` carried the
+// source and nothing else, and no log names the cause. The detail now carries it: the
+// gate check ids of the last rejected draft, or transport / cap / guard / no_key.
+const servedDetail = async (token) => {
+  const { readEvents } = await import('../lib/analytics/events.js');
+  return (await readEvents()).find((e) => e.reading_id === token && e.event === 'mirror_served')?.detail;
+};
+
+test('AU §5: a TRANSPORT floor records floor.kind transport', async () => {
+  globalThis.__katonFunnelMem?.clear();
+  const token = await createOk();
+  const body = await (await serve(token)).json();
+  assert.equal(body.meta.source, 'module_assembly', 'precondition: the failing provider floors it');
+  assert.deepEqual((await servedDetail(token)).floor, { kind: 'transport' });
+});
+
+test('AU §5: a GATE floor records the finding ids of the last rejected draft', async () => {
+  globalThis.__katonFunnelMem?.clear();
+  const token = await createOk();
+  const { semanticJson } = semanticFromRow(readingMem().get(token));
+  // Every draft carries an em-dash, which v1 rejects (style.typography) and never repairs.
+  const bad = {
+    blocks: assembleFallback(semanticJson).blocks.map((b, i) => (i === 0 ? { ...b, text: `${b.text} Kamu tenang — selalu.` } : b)),
+    penutup: 'Peta ini sudah cukup jelas untuk kamu jalani mulai sekarang.',
+  };
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    return Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify(bad) }] }, finishReason: 'STOP' }] });
+  };
+  const body = await (await serve(token)).json();
+  assert.equal(body.meta.source, 'module_assembly', 'precondition: the gate floors it');
+  const floor = (await servedDetail(token)).floor;
+  assert.equal(floor.kind, 'gate');
+  assert.ok(floor.checks.includes('style.typography'), `checks: ${JSON.stringify(floor.checks)}`);
+});
+
+test('AU §5: a served RENDER records no floor', async () => {
+  globalThis.__katonFunnelMem?.clear();
+  const token = await createOk();
+  await warmCache(token);
+  const detail = await servedDetail(token);
+  assert.equal(detail.source, 'gemini');
+  assert.equal('floor' in detail, false);
+});
