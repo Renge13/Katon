@@ -349,3 +349,44 @@ test('THE 2026-09-08 g4WH4 PAID ROW IS RE-GATED: floored once, dropped, re-rende
   const row = await readCache(key);
   assert.ok(row && !JSON.stringify(row.blocks).toLowerCase().includes('elemen air'), 'the re-render replaced the row');
 });
+
+// ── pair_served: THE PAIR'S SERVED EVENT, WITH THE FLOOR REASON (Prompt AV §5) ──
+// mirror_served (#179) records render or floor and why; a pair recorded nothing, only
+// `served_from` in the response. The event is keyed by the pair id, server-fired only
+// (the client route's allowlist does not carry it), first occurrence wins, and it holds
+// check ids and kinds, never text.
+const pairServed = (id) => globalThis.__katonFunnelMem?.get(`${id} pair_served`) ?? null;
+
+test('AV §5: a paid pair served as a FLOOR records pair_served with the floor reason', async () => {
+  globalThis.__katonFunnelMem?.clear();
+  const id = await newPair(true);
+  stubFailingProvider();
+  const body = await (await servePairReading(request(), id)).json();
+  assert.equal(body.served_from, 'floor', 'precondition: the chain exhausted onto the floor');
+  const ev = pairServed(id);
+  assert.ok(ev, 'pair_served was recorded');
+  assert.equal(ev.detail.source, 'module_assembly');
+  assert.equal(ev.detail.floor?.kind, 'transport');
+});
+
+test('AV §5: a paid pair served as a RENDER records pair_served with no floor', async () => {
+  globalThis.__katonFunnelMem?.clear();
+  const id = await newPair(true);
+  const sj = buildPairSemantic(calculateBaziChart(A), calculateBaziChart(B));
+  const draft = { blocks: assembleFallback(sj).blocks, penutup: 'Penutup yang cukup panjang untuk kalian berdua.' };
+  globalThis.fetch = async () => Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify(draft) }] }, finishReason: 'STOP' }] });
+  const body = await (await servePairReading(request(), id)).json();
+  assert.equal(body.served_from, 'render', `precondition: served_from ${body.served_from}`);
+  const ev = pairServed(id);
+  assert.ok(ev, 'pair_served was recorded');
+  assert.equal(ev.detail.source, 'gemini');
+  assert.equal('floor' in ev.detail, false);
+});
+
+test('AV §5: an UNPAID pair records no pair_served (nothing was served)', async () => {
+  globalThis.__katonFunnelMem?.clear();
+  const id = await newPair(false);
+  stubForbiddenProvider();
+  await servePairReading(request(), id);
+  assert.equal(pairServed(id), null);
+});

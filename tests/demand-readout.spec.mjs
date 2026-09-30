@@ -161,3 +161,23 @@ test('the window filter is inclusive of its last day', () => {
   assert.match(inclusive.stdout, /UNKNOWN EVENT "mirror_serve"/,
     'the last day of the window must be included in full');
 });
+
+// ── pair_served (Prompt AV §5): KNOWN, COUNTED ON ITS OWN, IN NO MIRROR DENOMINATOR ──
+test('AV §5: a pair_served row is not an anomaly, is counted as a pair, and moves no mirror number', () => {
+  const base = [
+    { reading_id: 'a', event: 'reading_created', detail: null, count: 1, created_at: '2026-09-30T01:00:00.000Z' },
+    { reading_id: 'a', event: 'mirror_served', detail: { source: 'gemini' }, count: 1, created_at: '2026-09-30T01:00:10.000Z' },
+  ];
+  const pairs = [
+    { reading_id: 'p1', event: 'pair_served', detail: { source: 'gemini' }, count: 1, created_at: '2026-09-30T02:00:00.000Z' },
+    { reading_id: 'p2', event: 'pair_served', detail: { source: 'module_assembly', floor: { kind: 'transport' } }, count: 1, created_at: '2026-09-30T02:00:00.000Z' },
+  ];
+  assert.deepEqual(anomalies([...base, ...pairs], []), []);
+  const before = summarise(base, []);
+  const after = summarise([...base, ...pairs], []);
+  assert.equal(after.pairsServed, 2);
+  assert.equal(after.pairsFloored, 1);
+  for (const k of ['created', 'completed', 'floored', 'downloaded', 'purchasedArtifact', 'upcomingSeen']) {
+    assert.equal(after[k], before[k], `${k} moved`);
+  }
+});

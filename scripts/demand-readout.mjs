@@ -78,6 +78,15 @@ const num = (n) => String(n).padStart(6);
  * Everything that means the DATA is wrong, rather than the product being
  * unpopular. Each one is a NUMBER THAT WOULD OTHERWISE LOOK PLAUSIBLE.
  */
+/**
+ * Every funnel event name. lib/analytics/events.js FUNNEL_EVENTS is the source; this
+ * plain-node script cannot import that server-only module, so the copy is asserted
+ * equal to it in tests/analytics-events.spec.mjs. `pair_served` (Prompt AV §5) is keyed
+ * by a PAIR id and enters no mirror denominator below: those count readers by name.
+ */
+export const KNOWN_EVENTS = new Set(['reading_created', 'mirror_served', 'card_downloaded', 'offer_seen',
+  'checkout_started', 'purchase_confirmed', 'upcoming_seen', 'interest_registered', 'pair_served']);
+
 /** Funnel rows only: `system:` rows (AK §3.4) are facts about the service, not a reader. */
 const funnelOnly = (events) => (events ?? []).filter((e) => !String(e.reading_id ?? '').startsWith('system:'));
 
@@ -125,10 +134,8 @@ export function anomalies(allEvents, interest) {
 
   // 5. An event name the schema does not know. A typo creates a ninth event and
   //    quietly halves whatever it was meant to be.
-  const KNOWN = new Set(['reading_created', 'mirror_served', 'card_downloaded', 'offer_seen',
-    'checkout_started', 'purchase_confirmed', 'upcoming_seen', 'interest_registered']);
   for (const name of new Set(events.map((e) => e.event))) {
-    if (!KNOWN.has(name)) out.push(`UNKNOWN EVENT "${name}": not one of the eight. A typo in a call site creates a ninth event silently.`);
+    if (!KNOWN_EVENTS.has(name)) out.push(`UNKNOWN EVENT "${name}": not one of the ${KNOWN_EVENTS.size}. A typo in a call site creates a new event silently.`);
   }
 
   return out;
@@ -159,6 +166,11 @@ export function summarise(allEvents, interest) {
     annual: byProduct('annual').size,
     interestSignals: interest.length,
     withContact: interest.filter((r) => r.contact).length,
+    // Compatibility serves (AV §5), by pair id: outside every mirror denominator.
+    pairsServed: readersWith(events, 'pair_served').size,
+    pairsFloored: new Set(events
+      .filter((e) => e.event === 'pair_served' && e.detail?.source === 'module_assembly')
+      .map((e) => e.reading_id)).size,
   };
 }
 
@@ -194,6 +206,9 @@ if (invoked) {
   // signal; this measures willingness to hand over a contact, which is a
   // different question and must never be read as demand.
   console.log(`contact capture                      ${num(s.withContact)}  of ${s.interestSignals} interest signals (NOT the interest metric)`);
+  console.log('');
+  console.log(`compatibility pairs served           ${num(s.pairsServed)}     (pair_served, by pair id; no mirror denominator)`);
+  console.log(`  of which floored (module_assembly) ${num(s.pairsFloored)}  ${pct(s.pairsFloored, s.pairsServed)}`);
 
   // A caller reading stdout must not be able to miss the warning block.
   process.exitCode = found.length ? 1 : 0;
