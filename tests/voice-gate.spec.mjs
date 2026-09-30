@@ -904,3 +904,49 @@ test('RELATION STRIP: a pair reading is unchanged (the pair writer was not switc
   assert.ok(out.normalized.penutup.includes('Benturan (clash)'), out.normalized.penutup);
   assert.equal(out.findings.some((f) => f.check === 'brackets.relation_stripped'), false);
 });
+
+// ── THE ROUND-6 SWITCH ON THE WIRE (Prompt AV §2 items 2 and 3) ──
+// What the provider is SENT, captured off the stubbed fetch: the v2 MIRROR writer runs
+// at temperature 0.9 and is handed no English for a relation; the v2 pair and every v1
+// reading keep 0.2 and their payload as before (neither was tested in round 6).
+const SMEW = calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' });
+const RELATION_KIND = new Set(['branch_relation', 'punishment']);
+async function onTheWire(sj) {
+  const prev = { fetch: globalThis.fetch, key: process.env.GEMINI_API_KEY };
+  process.env.GEMINI_API_KEY = 'test-key-never-sent-anywhere';
+  let body = null;
+  globalThis.fetch = async (url, init) => {
+    body = JSON.parse(init.body);
+    return new Response(JSON.stringify({
+      candidates: [{ content: { parts: [{ text: JSON.stringify(draftFor(sj)) }] } }],
+    }), { status: 200 });
+  };
+  try {
+    __clearMemCache(); __clearInFlight();
+    await renderReading(sj, { spendGuards: false, dedupeInFlight: false });
+    const payload = JSON.parse(body.contents[0].parts[0].text);
+    const relationFacts = [...(payload.facts || []), ...(payload.mirror?.a?.facts || []), ...(payload.mirror?.b?.facts || [])]
+      .filter((f) => RELATION_KIND.has(f.provenance?.kind));
+    return { temperature: body.generationConfig.temperature, relationFacts };
+  } finally {
+    globalThis.fetch = prev.fetch;
+    if (prev.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = prev.key;
+  }
+}
+
+test('ROUND-6 SWITCH: the v2 mirror writer runs at 0.9 and is handed no relation English', async () => {
+  const w = await onTheWire(v2(SMEW));
+  assert.equal(w.temperature, 0.9);
+  assert.ok(w.relationFacts.length >= 4, 'precondition: smewTN carries four relation facts');
+  assert.deepEqual(w.relationFacts.filter((f) => f.label_bracket).map((f) => f.id), []);
+  assert.ok(w.relationFacts.every((f) => f.label), 'the Indonesian name is still handed over');
+});
+
+test('ROUND-6 SWITCH CONTROLS: the v2 pair and the v1 mirror are unchanged (0.2, relation English kept)', async () => {
+  const pair = await onTheWire(buildPairSemantic(SMEW, B, { voice: 'v2' }));
+  assert.equal(pair.temperature, 0.2);
+  assert.ok(pair.relationFacts.some((f) => f.label_bracket), 'the pair payload keeps its relation English');
+  const v1 = await onTheWire(buildSemanticJson(SMEW, { voice: 'v1' }));
+  assert.equal(v1.temperature, 0.2);
+  assert.ok(v1.relationFacts.some((f) => f.label_bracket), 'the v1 payload keeps its relation English');
+});

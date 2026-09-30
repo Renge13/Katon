@@ -787,7 +787,9 @@ test('THE APPENDIX IS A TWO-COLUMN TABLE, term beside meaning', async () => {
     // The run that draws the term, anywhere in the appendix.
     let found = null;
     for (const runs of pages.slice(report.appendixStart - 1)) {
-      const term = runs.find((r) => r.text.replace(/\s+/gu, '') === e.name.replace(/\s+/gu, ''));
+      // A TERM-COLUMN run (10pt), not a group heading of the same words: since AX
+      // (2026-09-30) the Pilar Konsepsi group heads a row also named Pilar Konsepsi.
+      const term = runs.find((r) => r.size === 10 && r.text.replace(/\s+/gu, '') === e.name.replace(/\s+/gu, ''));
       if (!term) continue;
       // A run on the SAME baseline and to the RIGHT of it is the meaning column.
       found = runs.find((r) => r.y === term.y && r.x > term.x);

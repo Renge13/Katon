@@ -129,7 +129,7 @@
   "空亡": {
    "name_id": "Tanda Kekosongan",
    "name_en": "Void",
-   "label_meaning": "Orang lain melihat kamu berhasil di bidang ini, tetapi kamu sendiri sering merasa belum pantas menyandangnya. Hasilnya tidak pernah kurang. Rasa memilikinya yang tidak pernah ikut hadir.",
+   "label_meaning": "Orang lain melihat kamu berhasil di bidang ini, tetapi kamu sendiri sering merasa belum pantas menyandangnya. Hasilnya tidak pernah kurang, tetapi rasa memilikinya tidak pernah ikut hadir.",
    "gift_seed": "Kamu tidak pernah bersandar pada keberuntungan di bidang ini. Apa pun yang kamu capai di sana, kamu bangun murni dengan kerja keras.",
    "cost_seed": "Pengakuan orang lain tidak pernah menempel di dalam dirimu. Orang sudah menganggapmu ahli, tetapi kamu masih terus menunggu bukti berikutnya.",
    "actionable_seed": "Pengakuan di bidang ini tidak akan menempel dengan sendirinya. Sebut hasil kerjamu dengan lantang, meskipun rasanya canggung.",
@@ -302,7 +302,7 @@
   "same": {
    "name_id": null,
    "name_en": "Dominant Self Element",
-   "label_meaning": "Baganmu didominasi elemen diri. Kamu melangkah tanpa perlu izin orang lain, dan tak suka ruang pribadimu diatur-atur.",
+   "label_meaning": "Unsur dirimu paling banyak muncul di bagan. Kamu melangkah tanpa perlu izin orang lain, dan tak suka ruang pribadimu diatur-atur.",
    "gift_seed": "Pendirianmu kokoh. Saat orang lain ragu, arahmu tetap jelas.",
    "cost_seed": "Kepala keras membuat masukan sukar masuk. Kamu baru sadar salah jalan setelah dampaknya telanjur besar.",
    "actionable_seed": "Pilih satu orang yang berani menyanggahmu, lalu minta pendapatnya sebelum mengambil keputusan besar. Dengarkan sampai habis tanpa memotong."
@@ -541,7 +541,7 @@
    "domain_id": "kehidupan pribadi dan hubungan terdekatmu",
    "branch_name_id": "Fondasi Pasangan",
    "branch_name_en": "Spouse Palace",
-   "branch_label_meaning": "Tempat membaca dinamika hubungan paling dekat. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu, meskipun orang lain bisa menganggapnya berat."
+   "branch_label_meaning": "Tempat membaca dinamika hubungan paling dekat. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu."
   },
   "hour": {
    "name_id": "Pilar Arah",
@@ -552,7 +552,8 @@
   "conception": {
    "name_id": "Pilar Konsepsi",
    "name_en": "Conception Pillar",
-   "_note": "胎元. NOT one of the four chart positions - it is derived from the month pillar and is DISPLAY ONLY, printed in Joey's Personal Chart Details block so a cross-checking reader does not find it missing. It has NO label_meaning on purpose: nothing downstream interprets it, and inventing one would be unreviewed interpretive copy. Ruled by Reyner 2026-08-07, replacing the hand-authored 'Istana Konsepsi' that lived in lib/readingView.js and in no glossary entry. Anything iterating pilar for the four positions must key on year/month/day/hour, never on Object.keys."
+   "label_meaning": "Dihitung dari perkiraan masa pembuahan, sekitar sepuluh bulan sebelum kelahiranmu. Pilar ini melengkapi bagan dan tidak dibaca sendiri.",
+   "_note": "胎元. NOT one of the four chart positions - it is derived from the month pillar and is printed in Joey's Personal Chart Details block so a cross-checking reader does not find it missing. ~~It has NO label_meaning on purpose (Reyner 2026-08-07)~~: LIFTED by Reyner 2026-09-30 (Prompt AX, verbatim): 'Pilar Konsepsi label_meaning: \"Dihitung dari perkiraan masa pembuahan, sekitar sepuluh bulan sebelum kelahiranmu. Pilar ini melengkapi bagan dan tidak dibaca sendiri.\"' It explains what the pillar is and says it is not read on its own; nothing downstream interprets it. The 2026-08-07 ruling also replaced the hand-authored 'Istana Konsepsi' that lived in lib/readingView.js. Anything iterating pilar for the four positions must key on year/month/day/hour, never on Object.keys."
   }
  },
  "salah_dikira": {
