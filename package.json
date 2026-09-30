@@ -144,7 +144,8 @@
     "test:voice-judge": "node --conditions=react-server --test tests/voice-judge.spec.mjs",
     "test:voice-pair-opening": "node --conditions=react-server --test tests/voice-pair-opening.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs",
-    "build:spectral-ttf": "node scripts/build-spectral-ttf.mjs"
+    "build:spectral-ttf": "node scripts/build-pdf-fonts.mjs",
+    "build:pdf-fonts": "node scripts/build-pdf-fonts.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.6.1",

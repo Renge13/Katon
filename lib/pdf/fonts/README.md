@@ -20,3 +20,19 @@ committed file offline.
 
 **LICENSE: SIL Open Font License 1.1** - https://openfontlicense.org
 Redistribution of a subset is permitted. Noto Serif TC is a Google Fonts release.
+
+## The Latin faces: `spectral-*.ttf`, `hanken-*.ttf`
+
+**Fetched. Do not edit.** Regenerate with `npm run build:pdf-fonts`, which reads the
+list from `lib/pdf/fonts.js` `LATIN_FACES` (one list: registration, the fetch, and the
+lambda-trace test all read it).
+
+- **Spectral** 400, 600 and 400 italic: the site's `--font-serif`. Headings, the cover
+  title, and the English names (italic).
+- **Hanken Grotesk** 400, 600 and 400 italic: the site's `--font-sans` and the web
+  wordmark's face. The body since Prompt AW (2026-09-30); Helvetica before.
+
+Whole faces, not subsets, fetched as TrueType because react-pdf cannot read woff2.
+`tests/pdf-font-lambda.spec.mjs` checks each covers printable ASCII and the middle dot.
+
+**LICENSE: SIL Open Font License 1.1** for both families (Google Fonts releases).

@@ -39,6 +39,13 @@ const nextConfig = {
       // the whole point of writing them here in the same commit as the registration.
       './lib/pdf/fonts/spectral-400.ttf',
       './lib/pdf/fonts/spectral-600.ttf',
+      // Prompt AW (2026-09-30): Spectral's italic and the site's sans, Hanken Grotesk.
+      // Same read, same failure mode; tests/pdf-font-lambda.spec.mjs walks
+      // lib/pdf/fonts.js LATIN_FACES and fails until each is here.
+      './lib/pdf/fonts/spectral-400-italic.ttf',
+      './lib/pdf/fonts/hanken-400.ttf',
+      './lib/pdf/fonts/hanken-600.ttf',
+      './lib/pdf/fonts/hanken-400-italic.ttf',
     ],
   },
 };

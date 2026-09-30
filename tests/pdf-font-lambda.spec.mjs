@@ -50,6 +50,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 
 import nextConfig from '../next.config.mjs';
 import {
@@ -141,14 +142,34 @@ test('EVERY REGISTERED FACE IS TRACED, not just the one that broke', async () =>
   // that goes stale is always the list nobody edits. So this walks the registry
   // constant and requires a trace entry for each, which means a fourth face added
   // tomorrow fails here until it is traced.
-  const { SERIF_TTF_RELATIVE, HAN_TTF_RELATIVE } = await import('../lib/pdf/fonts.js');
+  // Since Prompt AW it walks LATIN_FACES, the one registry every Latin face is
+  // registered from: Spectral 400/600/italic and Hanken Grotesk 400/600/italic.
+  const { LATIN_FACES, HAN_TTF_RELATIVE } = await import('../lib/pdf/fonts.js');
   const api = (nextConfig.outputFileTracingIncludes ?? {})['/api/**/*'] ?? [];
   const asEntry = (rel) => `./${rel.split(path.sep).join('/')}`;
 
-  const faces = [HAN_TTF_RELATIVE, ...Object.values(SERIF_TTF_RELATIVE)];
-  assert.ok(faces.length >= 3, 'the hanzi face and both serif weights');
+  const faces = [HAN_TTF_RELATIVE, ...LATIN_FACES.map((f) => f.relative)];
+  assert.ok(faces.length >= 7, 'the hanzi face and all six Latin faces');
   for (const rel of faces) {
     assert.ok(api.includes(asEntry(rel)),
       `${asEntry(rel)} is registered but not traced - that is #123, once per face`);
+  }
+});
+
+// ── EVERY LATIN FACE DRAWS WHAT THE DOCUMENT PRINTS (Prompt AW) ──
+// Hanken Grotesk became the BODY face, so a glyph it lacks would be tofu in the
+// reading itself. The reading is keyboard characters by rule 20 (v2 normalises
+// typography before Stage 6), and the chart labels join element and animal with a
+// middle dot, as the web does ("Logam · Ular"). Checked offline against the committed
+// files, for all six faces.
+test('EVERY LATIN FACE COVERS PRINTABLE ASCII AND THE MIDDLE DOT', async () => {
+  const { LATIN_FACES } = await import('../lib/pdf/fonts.js');
+  const need = [...Array.from({ length: 0x7e - 0x20 + 1 }, (_, i) => 0x20 + i), 0xb7];
+  for (const face of LATIN_FACES) {
+    const buf = readFileSync(path.join(process.cwd(), face.relative));
+    assert.ok(isTrueType(buf), `${face.relative} is a TTF`);
+    const have = codePointsOf(buf);
+    const missing = need.filter((c) => !have.has(c)).map((c) => String.fromCodePoint(c));
+    assert.deepEqual(missing, [], `${face.relative} lacks ${missing.join('')}`);
   }
 });
