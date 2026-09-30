@@ -85,6 +85,23 @@ const PORT = Number(process.argv.includes('--port') ? process.argv[process.argv.
  * page for that one run only; they are byte-identical to the same render from
  * #187's HEAD. Ruled by Reyner. THIS PAGE STAYS NEUTRAL ON PURPOSE: with no rule
  * here, removing the card's pin fails this gate (5 of 5, 229711-266912 pixels).
+ *
+ * ── THE REFERENCE MOVED TO #187, SAME DAY. THE CLAIM IS "CARD B UNCHANGED SINCE #187" ──
+ * #183 re-worded Tanda Kekosongan's second sentence, and the two charts that show
+ * that badge (wu-1984-03-15, gui-1954-01-07) went red by copy, not layout: with the
+ * old sentence put back, 5 of 5 IDENTICAL. Ruled by Reyner: all five re-written on
+ * main at #187's merge (`032de29`, before the line-height pin), this page at 1.6 for
+ * that run only. So this gate NO LONGER proves "Card B unchanged since before prompt
+ * R". It proves "Card B unchanged since #187", and #187's own QA doc is what ties
+ * #187 back to the pre-R card. The three charts without that badge came out
+ * byte-identical to the 892f5e0^ renders they replaced.
+ *
+ * ── STANDING RULE, RULED BY REYNER 2026-09-30 ──
+ * WHEN A RULED COPY CHANGE MOVES A GATE CHART'S PIXELS, THE SAME PR RE-BASELINES IT
+ * AND ATTACHES BEFORE/AFTER IMAGES OF THE AFFECTED CARDS, so the change is reviewed
+ * rather than hidden. Re-baseline on the PR's PRE-CHANGE tree with the new copy in,
+ * name the copy change in the commit, and show the two images in the PR. A red
+ * that nobody attributes to a copy change is a layout change until shown otherwise.
  */
 const CHARTS = [
   { label: 'bing-1989-09-13', stem: '丙', birthDate: '1989-09-13', birthTime: '09:00' },
@@ -265,7 +282,9 @@ if (WRITE) {
     console.log(`  ${r.differing === 0 ? 'PASS' : 'FAIL'}  ${r.label.padEnd(18)} ${verdict}`);
   }
   if (bad.length) {
-    console.log(`\nCARD B MOVED on ${bad.length} of ${results.length} charts. Prompt R does not touch Card B.`);
+    console.log(`\nCARD B MOVED on ${bad.length} of ${results.length} charts.`);
+    console.log('If a RULED COPY change moved it, re-baseline in the same PR and attach before/after');
+    console.log("images of the affected cards (standing rule in this file's header). Otherwise it is layout.");
     process.exitCode = 1;
   } else if (results.length) {
     console.log(`\nCard B is pixel-identical on all ${results.length} charts.`);
