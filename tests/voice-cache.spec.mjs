@@ -45,8 +45,12 @@ const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 // RE-PINNED the MIRROR again in the same PR (Prompt AX §2, 2026-09-30), so saved
 // readings are rewritten once: Reyner's Tanda Kekosongan sentence is in chart 1's
 // semantic JSON (its 空亡 badge); it was 9514960e... The pair key still does not move.
+// RE-PINNED the MIRROR on the AY + AZ glossary batch (2026-10-01, Reyner-ruled, one
+// deploy with STAGE6 1.64.0 and the prompt direction): chart 1's semantic JSON carries
+// rewritten actionable / cost / Dominan cells; it was a60fc58e... The pair key still
+// does not move: the v1 pair semantic JSON carries none of those cells.
 const V1_KEYS = {
-  mirror: 'a60fc58e8e7821ce6e76071ac170aa039276d8e66f2d4da2cc1825d396235dcb',
+  mirror: 'c318c80bc05794bc17b036f7682d95c13678ba7abcb63330138c2bb416e1771e',
   pair: '423d02fd8465f31e67470b092239981b91e34e07e59d36a5fa050fac898add00',
 };
 
