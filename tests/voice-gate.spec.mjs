@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.61.0');
+    assert.equal(onV2.stage6_version, '1.62.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -836,4 +836,71 @@ test('ROUND 6 FOLDING CONTROL: a folded sentence giving a relation PART of its p
   assert.equal(hits.length, 1, hits.join(' | '));
   assert.match(hits[0], /relation_冲_寅申 .*dropping \[day\]/u);
   assert.equal(r.ok, false, 'a false partial span is still HARD');
+});
+
+test('ROUND 6: on v2 a relation\'s English is an unsanctioned bracket, an Aspek\'s is not', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  const draft = draftFor(sj);
+  // Not directly after a relation's name, so the mirror's strip (1.62.0) leaves it for
+  // this logged rule to see: the two cover different positions.
+  draft.penutup = 'Hari-harimu sering terasa seperti tabrakan kecil (Clash), dan Aspek Penantang (Seven Killings) menjaga langkahmu.';
+  const r = validateRenderingV2(draft, sj);
+  const hits = r.findings.filter((f) => f.check === 'style.unsanctioned_bracket').map((f) => f.message);
+  assert.ok(hits.some((m) => m.includes('(Clash)')), `relation English not flagged: ${hits.join(' | ')}`);
+  assert.equal(hits.some((m) => m.includes('(Seven Killings)')), false, 'an Aspek bracket stays sanctioned');
+  // Logged, never rejecting: style is a flag on v2.
+  assert.ok(r.findings.filter((f) => f.check === 'style.unsanctioned_bracket').every((f) => f.severity === 'flag'));
+});
+
+// ── RELATIONS CARRY NO ENGLISH: THE MECHANICAL STRIP (STAGE6 1.62.0, Prompt AV §2 item 3) ──
+// Reyner, 2026-09-30: English brackets on Arketipe, Aspek and Bintang only; none for a
+// relation. Round 6 took the English off the writer payload and the writer typed its
+// own ("(trine)", "(self-punishment)"). So on a v2 MIRROR a parenthetical directly
+// after a relation's Indonesian name (glossary relasi_cabang) is removed WHATEVER IT
+// CONTAINS, and logged. Position, not a word list. Rejects nothing.
+import RELATION_R6 from './fixtures/relation-english-r6.json' with { type: 'json' };
+
+const RELATION_NAMES = Object.entries(GLOSSARY.relasi_cabang).filter(([k]) => !k.startsWith('_')).map(([, v]) => v.name_id);
+const relationBrackets = (text) => RELATION_NAMES.flatMap((n) => {
+  const hits = [];
+  let at = text.indexOf(n);
+  while (at !== -1) {
+    const m = /^\s*\(([^()]{1,60})\)/u.exec(text.slice(at + n.length));
+    if (m) hits.push(`${n} (${m[1]})`);
+    at = text.indexOf(n, at + 1);
+  }
+  return hits;
+});
+
+for (const rec of RELATION_R6.readings) {
+  test(`RELATION STRIP: ${rec.id}'s served draft carries no relation English after the gate`, () => {
+    assert.ok(rec.served_relation_english.length >= 3, 'precondition: the fixture records what was served');
+    const sj = buildSemanticJson(calculateBaziChart(rec.inputs), { voice: 'v2' });
+    const out = validateRenderingV2(withEngineOpening(structuredClone(rec.draft), sj).rendered, sj);
+    assert.deepEqual(relationBrackets(servedText(out)), [], 'no parenthetical after a relation name');
+    const logged = out.findings.filter((f) => f.check === 'brackets.relation_stripped');
+    for (const was of rec.served_relation_english) {
+      assert.ok(logged.some((f) => f.message.includes(was)), `logged: ${was}`);
+    }
+    assert.ok(logged.every((f) => f.severity === 'flag'), 'logged, never rejecting');
+  });
+}
+
+test('RELATION STRIP CONTROLS: an Aspek or Bintang bracket stays, a lowercase common noun is not a relation, the rest of the sentence is kept', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  const draft = draftFor(sj);
+  draft.penutup = 'Benturan (Pilar Kerja dan Pilar Diri) yang kamu rasakan tidak menggoyahkan Aspek Penantang (Seven Killings), dan ikatan (bond) dengan orang terdekat tetap kuat.';
+  const t = validateRenderingV2(draft, sj).normalized.penutup;
+  assert.ok(t.startsWith('Benturan yang kamu rasakan'), t);
+  assert.ok(t.includes('Aspek Penantang (Seven Killings)'), t);
+  assert.ok(t.includes('ikatan (bond)'), t);
+});
+
+test('RELATION STRIP: a pair reading is unchanged (the pair writer was not switched)', () => {
+  const pj = buildPairSemantic(A, B, { voice: 'v2' });
+  const draft = draftFor(pj);
+  draft.penutup = `${draft.penutup || ''} Benturan (clash) di antara kalian terasa di hari biasa.`.trim();
+  const out = validateRenderingV2(draft, pj);
+  assert.ok(out.normalized.penutup.includes('Benturan (clash)'), out.normalized.penutup);
+  assert.equal(out.findings.some((f) => f.check === 'brackets.relation_stripped'), false);
 });
