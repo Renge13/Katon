@@ -1086,7 +1086,7 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
       {/* The Compatibility block (Prompt AY §2): directly after the offer, and only
           while the fence is open. See CompatOffer. */}
       {salesOpen && (
-        <div style={{ marginTop: 20 }}><CompatOffer /></div>
+        <div style={{ marginTop: 20 }}><CompatOffer token={reading.token} /></div>
       )}
 
       {/* THE UPCOMING BLOCK IS GONE (Prompt AQ §2). "Yang sedang dikerjakan", the
@@ -1430,6 +1430,7 @@ function Offer({ reading, initialStage }) {
             from the copy bank. It replaced "Kartu resolusi tinggi dan PDF dari
             bacaanmu, siap disimpan atau dicetak.", itself restored on 2026-08-05. */}
         <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '20px 0 0' }}>{CHROME_COPY.offer_headline}</p>
+        <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(234,241,242,.82)', margin: '10px 0 0' }}>{CHROME_COPY.offer_description}</p>
         <SalesItems items={CHROME_COPY.offer_items} dark />
 
         <div style={{ height: 24 }} />
@@ -1487,10 +1488,11 @@ function Offer({ reading, initialStage }) {
             </Button>
           </div>
           )}
-          {/* THE GUARANTEE, AND IT IS NOT OPTIONAL. Verbatim from
-              SITE_COPY.harga.artifact.noteAfter, which is where it already carries
-              Reyner's approval. */}
-          <div style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(234,241,242,.7)', marginTop: 14, textAlign: 'center' }}>Melewatinya tidak mengurangi apa pun dari bacaan gratismu.</div>
+          {/* THE LINE UNDER THE BUTTON IS GONE (Reyner, 2026-10-01, Prompt AZ §4):
+              "Melewatinya tidak mengurangi apa pun dari bacaan gratismu." The
+              description above now says the same thing first ("Isi bacaannya sama
+              dengan yang bisa kamu baca gratis di atas."). The sentence still closes
+              the /harga Complete Edition note (SITE_COPY.harga.artifact.noteAfter). */}
         </div>
       </div>
     </Reveal>
@@ -1528,10 +1530,21 @@ function SalesItems({ items, dark = false }) {
  * it on `salesOpen` alone. Unlike the offer it has no `initialStage` exception,
  * because nothing about THIS reading's purchase lives in it.
  *
- * NO EVENTS YET. `compat_cta_seen` / `compat_cta_click` are proposed names only;
- * adding them to FUNNEL_EVENTS is Reyner's call (AY §2).
+ * TWO EVENTS (Reyner, 2026-10-01, Prompt AZ §4), allowlisted server-side like the
+ * other client events (lib/mirror/handlers.js CLIENT_EVENTS, FUNNEL_EVENTS):
+ *   compat_cta_seen   when the block is displayed - it renders only while the fence
+ *                     is open, so mounting IS being displayed; the ref keeps a
+ *                     re-render from re-firing, as offer_seen's does.
+ *   compat_cta_click  on the button. fireEvent sends with `keepalive`, so the
+ *                     request outlives the navigation to /kompatibilitas.
  */
-function CompatOffer() {
+function CompatOffer({ token }) {
+  const seenRef = useRef(false);
+  useEffect(() => {
+    if (seenRef.current) return;
+    seenRef.current = true;
+    fireEvent(token, 'compat_cta_seen');
+  }, [token]);
   return (
     <Reveal>
       <div style={{ background: 'var(--kertas)', border: '1px solid var(--border)', borderRadius: 26, padding: '30px 24px 26px' }}>
@@ -1545,6 +1558,7 @@ function CompatOffer() {
         </div>
         <a
           href={COMPAT_ROUTE}
+          onClick={() => fireEvent(token, 'compat_cta_click')}
           style={{
             marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 16, borderRadius: 16, padding: '15px 22px',

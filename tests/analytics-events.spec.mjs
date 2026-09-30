@@ -114,10 +114,12 @@ test('blank contact normalises to null, not to an empty string', async () => {
 
 // ── 5. THE EVENT LIST IS CLOSED ─────────────────────────────
 
-test('the nine events are fixed, and a typo cannot invent a tenth', async () => {
+test('the eleven events are fixed, and a typo cannot invent a twelfth', async () => {
   // Nine since Prompt AV §5 (2026-09-30): pair_served, keyed by a pair id.
-  assert.equal(FUNNEL_EVENTS.length, 9);
+  assert.equal(FUNNEL_EVENTS.length, 11);
   assert.ok(FUNNEL_EVENTS.includes('pair_served'));
+  // Prompt AZ §4 (Reyner, 2026-10-01): the Compatibility block's two events.
+  assert.ok(FUNNEL_EVENTS.includes('compat_cta_seen') && FUNNEL_EVENTS.includes('compat_cta_click'));
   assert.ok(Object.isFrozen(FUNNEL_EVENTS));
   assert.deepEqual(INTEREST_PRODUCTS, ['compat', 'annual']);
   // A near-miss is rejected. Without the closed list this would create a silent

@@ -29,7 +29,7 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
 import { checkoutOpen } from '../lib/paymentFence.js';
 import { navKeys } from '../lib/site/nav.js';
-import { PASANGAN_COPY, CHROME_COPY } from '../lib/site/copy.js';
+import { PASANGAN_COPY, CHROME_COPY, SITE_COPY } from '../lib/site/copy.js';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
 import { priceFor } from '../lib/pricing.js';
 import { formatIdr } from '../lib/site/format.js';
@@ -187,6 +187,10 @@ test('AY §2: the offer carries the ruled headline and its three labelled lines,
     const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
     const t = open.text();
     assert.ok(t.includes(CHROME_COPY.offer_headline), 'the ruled headline');
+    assert.ok(t.includes(CHROME_COPY.offer_description), 'the AZ description under it');
+    assert.ok(t.indexOf(CHROME_COPY.offer_headline) < t.indexOf(CHROME_COPY.offer_description), 'directly under the headline');
+    assert.ok(t.includes('Kartu Edisi Lengkap') && !t.includes('Kartu Ringkasan Visual'), 'line 3 is AZ\'s');
+    assert.ok(!t.includes('Melewatinya tidak mengurangi'), 'the line under the button is gone (AZ §4)');
     for (const item of CHROME_COPY.offer_items) {
       assert.ok(t.includes(item.label) && t.includes(item.text), `the line "${item.label}"`);
     }
@@ -223,6 +227,41 @@ test('AY §2: THE COMPATIBILITY BLOCK renders after the offer under an open fenc
     assert.ok(!bought.text().includes(CHROME_COPY.compat_cta), 'closed fence + delivered: still no compat block');
     await bought.unmount();
   } finally { f.restore(); }
+});
+
+test('AZ §4: THE COMPAT BLOCK FIRES compat_cta_seen when displayed and compat_cta_click on its button; nothing when hidden', async () => {
+  const prev = globalThis.fetch;
+  const sent = [];
+  globalThis.fetch = async (url, init) => {
+    if (String(url).endsWith('/event')) sent.push(JSON.parse(init.body).event);
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  try {
+    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
+    assert.ok(sent.includes('compat_cta_seen'), `displayed: ${sent.join(', ')}`);
+    const link = [...open.host.querySelectorAll('a')].find((a) => a.textContent.includes(CHROME_COPY.compat_cta));
+    // Stop jsdom navigating; the handler still runs.
+    link.addEventListener('click', (e) => e.preventDefault());
+    await act(async () => { link.click(); });
+    assert.ok(sent.includes('compat_cta_click'), `clicked: ${sent.join(', ')}`);
+    assert.equal(sent.filter((e) => e === 'compat_cta_seen').length, 1, 'seen fires once');
+    await open.unmount();
+
+    sent.length = 0;
+    const closed = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: false }));
+    assert.ok(!sent.includes('compat_cta_seen'), 'hidden: no seen event');
+    await closed.unmount();
+  } finally { globalThis.fetch = prev; }
+});
+
+test('AZ §4: /harga\'s Complete Edition body IS the offer\'s copy-bank entries, not a duplicate', () => {
+  // A source guard: app/ pages are not rendered under node --test (the @/ alias). The
+  // screenshots in docs/qa/2026-10-01-sales-blocks-az/ show the rendered page.
+  const page = readFileSync(new URL('../app/harga/page.js', import.meta.url), 'utf8');
+  for (const key of ['offer_headline', 'offer_description', 'offer_items']) {
+    assert.match(page, new RegExp(`CHROME_COPY\\.${key}`, 'u'), `/harga reads CHROME_COPY.${key}`);
+  }
+  assert.equal(SITE_COPY.harga.artifact.body, undefined, 'the duplicated /harga body string is gone');
 });
 
 // ── ONE SOURCE: THE FENCE, READ BY THE SERVER PAGES ────────

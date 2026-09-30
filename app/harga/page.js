@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import StaticPage, { Card, P } from '@/components/StaticPage.jsx';
-import { SITE_COPY } from '@/lib/site/copy';
+import { SITE_COPY, CHROME_COPY } from '@/lib/site/copy';
 import { SKUS, priceFor, isSellable } from '@/lib/pricing';
 import { formatIdr } from '@/lib/site/format';
 
@@ -88,7 +88,7 @@ function Row({ name, price, badge, badgeTone, anchor, body, note }) {
         </div>
       )}
 
-      <P style={{ margin: '12px 0 0' }}>{body}</P>
+      {typeof body === 'string' ? <P style={{ margin: '12px 0 0' }}>{body}</P> : body}
       {note && (
         <P style={{ margin: '10px 0 0', fontSize: 13.5, color: 'var(--muted-warm)' }}>{note}</P>
       )}
@@ -114,6 +114,30 @@ function noteNode(copy) {
   );
 }
 
+// ── THE COMPLETE EDITION BODY IS THE OFFER'S (Reyner, 2026-10-01, Prompt AZ §4) ──
+// "the Complete Edition body becomes the same headline, description and three lines,
+// from the same copy-bank entries (not duplicated strings)". So it is READ from
+// CHROME_COPY, the entries components/Funnel.jsx's Offer renders, and the catalogue
+// cannot drift from the offer.
+function ArtifactBody() {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <P style={{ margin: 0, fontFamily: 'var(--font-serif)', fontSize: 18, lineHeight: 1.45, color: 'var(--tinta)' }}>
+        {CHROME_COPY.offer_headline}
+      </P>
+      <P style={{ margin: '8px 0 0' }}>{CHROME_COPY.offer_description}</P>
+      <div style={{ display: 'grid', gap: 12, marginTop: 14 }}>
+        {CHROME_COPY.offer_items.map((item) => (
+          <div key={item.label}>
+            <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4, color: 'var(--tinta)' }}>{item.label}</div>
+            <P style={{ margin: '3px 0 0', fontSize: 14 }}>{item.text}</P>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // One paid row, driven entirely by the SKU table.
 function PaidRow({ sku, copy }) {
   const price = priceFor(sku);
@@ -130,7 +154,7 @@ function PaidRow({ sku, copy }) {
       badge={sellable ? (discounted ? q.launchLabel : null) : q.soonLabel}
       badgeTone={sellable ? 'accent' : 'quiet'}
       anchor={discounted ? formatIdr(list) : null}
-      body={copy.body}
+      body={sku === 'artifact' ? <ArtifactBody /> : copy.body}
       note={noteNode(copy)}
     />
   );
