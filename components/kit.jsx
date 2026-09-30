@@ -76,7 +76,7 @@ export function Rule({ light, width = '100%', style }) {
 }
 
 // One "Komposisi Energimu" bar — width = pct (max-normalized). NEUTRAL: no raw
-// numbers; gloss describes the ELEMENT; badges mark dominant/thinnest only.
+// numbers; gloss describes the ELEMENT; badges mark the most / least (every tied bar).
 export function BalanceBar({ label, gloss, pct, element, isDominant, isMissing }) {
   const c = elColor(element);
   return (
@@ -86,8 +86,8 @@ export function BalanceBar({ label, gloss, pct, element, isDominant, isMissing }
           <span style={{ fontFamily: 'var(--font-serif)', fontSize: 16, color: 'var(--tinta)' }}>{label}</span>
           <span style={{ fontSize: 12.5, color: 'var(--muted-warm)' }}>{gloss}</span>
         </div>
-        {isDominant && <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: c.mid }}>{CHROME_COPY.presence_tag_strongest}</span>}
-        {isMissing && <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--clay)' }}>{CHROME_COPY.presence_tag_thinnest}</span>}
+        {isDominant && <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: c.mid }}>{CHROME_COPY.presence_tag_most}</span>}
+        {isMissing && <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--clay)' }}>{CHROME_COPY.presence_tag_least}</span>}
       </div>
       <div style={{ height: 8, borderRadius: 6, background: 'var(--kertas-3)', overflow: 'hidden', border: '1px solid var(--divider)' }}>
         <div className="k-bar" style={{ height: '100%', width: `${pct}%`, borderRadius: 6, background: `linear-gradient(90deg, ${c.mid}, ${c.deep})`, transformOrigin: 'left' }} />

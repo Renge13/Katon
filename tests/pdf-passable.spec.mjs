@@ -602,3 +602,16 @@ test('AW §3.1: the Complete Edition prints ONE Shio under "Shio (tahun lahirmu)
   const cPrinted = animals.filter((a) => new RegExp(`\n${a}\n`, 'u').test(cAfter));
   assert.ok(cPrinted.length >= 1 && cPrinted.length <= 2, `the compat Shio: one per person (deduplicated), got ${cPrinted.join(', ')}`);
 });
+
+// ── AX §6 IN PRINT: the ruled tags, and a tie tags every tied bar (smewTN) ──
+test('AX §6: the Complete Edition tags smewTN\'s tied Tanah and Logam "PALING BANYAK", Air "PALING SEDIKIT"', async () => {
+  const { buildCompleteEditionPdf } = await import('../lib/pdf/build.js');
+  const { assembleFallback } = await import('../lib/render/fallback.js');
+  const chart = calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' });
+  const semanticJson = buildSemanticJson(chart);
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered: { ...assembleFallback(semanticJson), prompt_version: 't', stage6_version: 't' } });
+  const page = pageTexts(buffer).find((t) => t.includes('SEBARAN UNSUR'));
+  assert.equal(page.split('PALING BANYAK').length - 1, 2, 'Tanah and Logam');
+  assert.equal(page.split('PALING SEDIKIT').length - 1, 1, 'Air');
+  assert.equal(/PALING KUAT|PALING TIPIS/u.test(page), false);
+});

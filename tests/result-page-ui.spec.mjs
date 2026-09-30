@@ -401,3 +401,21 @@ test('BADGE CARD: a badge carried by two facts is ONE card, over the pillars of 
     assert.equal(voids[0].pillar, 'Pilar Kerja dan Pilar Arah');
   } finally { m.unmount(); f.restore(); }
 });
+
+// ── SEBARAN TAGS: "PALING BANYAK" / "PALING SEDIKIT", AND A TIE TAGS EVERY TIED BAR ──
+// Reyner, 2026-09-30 (Prompt AX §6): the tags were "Paling kuat" / "Paling tipis"
+// under a caveat that says the bars are not strength, and a tie tagged only the first
+// in order. smewTN (2001-02-14 13:00) holds Tanah and Logam level at 36,3: both tagged.
+import { CHROME_COPY as COPY_AX } from '../lib/site/copy.js';
+test('AX §6: the Sebaran tags are the ruled words, and smewTN\'s tied Tanah and Logam are both tagged', async () => {
+  assert.equal(COPY_AX.presence_tag_most, 'Paling banyak');
+  assert.equal(COPY_AX.presence_tag_least, 'Paling sedikit');
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, chart: viewFor({ birthDate: '2001-02-14', birthTime: '13:00' }) });
+  try {
+    const text = m.text();
+    assert.equal(text.split(COPY_AX.presence_tag_most).length - 1, 2, 'Tanah and Logam, both');
+    assert.equal(text.split(COPY_AX.presence_tag_least).length - 1, 1, 'Air');
+    assert.equal(/Paling kuat|Paling tipis/u.test(text), false, 'the old words are gone');
+  } finally { m.unmount(); f.restore(); }
+});

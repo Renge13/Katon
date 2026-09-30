@@ -792,7 +792,7 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
   const element = chart?.day_master?.element;
   const el = elColor(element);
   // The bars and which is tagged (first highest, first lowest): lib/site/elements.js.
-  const { bars, dominant: domIdx, thinnest: minIdx } = presenceBars(chart?.element_presence);
+  const { bars, most, least } = presenceBars(chart?.element_presence);
 
   const arch = chart?.archetype || {};
   // The card footer's date and gender are the CLIENT's - the free payload carries
@@ -926,7 +926,7 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
           <div style={{ display: 'grid', gap: 16 }}>
             {bars.map((b, i) => (
               <Reveal key={b.label} delay={i * 0.04}>
-                <BalanceBar label={b.label} gloss={ELEMENT_GLOSS[b.label]} pct={b.pct} element={b.element} isDominant={i === domIdx} isMissing={i === minIdx} />
+                <BalanceBar label={b.label} gloss={ELEMENT_GLOSS[b.label]} pct={b.pct} element={b.element} isDominant={most.includes(i)} isMissing={least.includes(i)} />
               </Reveal>
             ))}
           </div>
