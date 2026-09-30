@@ -20,6 +20,9 @@ const nextConfig = {
       // Voice v2 (round 2, VOICE=v2 on Preview only). Read at module load exactly
       // like the two above, so untraced they would throw on every render route.
       './docs/content/renderer-prompt-v2.txt',
+      // The v2 MIRROR's own prompt since the round-6 switch (Prompt AV §2), built from
+      // the file above by scripts/build-mirror-prompt-v2.mjs. Same load, same need.
+      './docs/content/renderer-prompt-v2-mirror.txt',
       './docs/content/compat-renderer-prompt-v2.txt',
       './docs/content/voice-examples-v2.txt',
       // THE HANZI FACE, added 2026-09-21. Same fault as the two prompts above and

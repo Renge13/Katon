@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.60.0');
+    assert.equal(onV2.stage6_version, '1.63.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -792,4 +792,224 @@ test('D1 CONTROL: an Aspek the engine supplies nowhere is still invented (chart 
   const sj = v2(calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' }));
   assert.equal(JSON.stringify(sj).includes('Aspek Pelindung'), false, 'precondition: not supplied anywhere');
   assert.equal(D1(validateRenderingV2(plant(draftFor(sj), 'Di fondasi ini ada Aspek Pelindung.'), sj)).length, 1);
+});
+
+// ── ROUND 6: A FOLDED RELATIONS BLOCK IS READ SENTENCE BY SENTENCE (Prompt AT §2, checks vs folding) ──
+// fact.relation_positions read the WHOLE block for every relation it cites. Folded
+// ("Weave them into one story"), a block cites several relations, so a pillar named for
+// one was charged to all the others, and "hari-harimu" (her days) read as the day
+// pillar. Loosened, not widened: in a block citing more than one relation, a relation is
+// judged only on the sentences that NAME it. A partial list in such a sentence still
+// rejects: the check keeps guarding the false statement.
+const foldedDraft = (sj, extra = '') => {
+  const rels = sj.facts.filter((f) => ['branch_relation', 'punishment'].includes(f.provenance?.kind));
+  const d = draftFor(sj);
+  d.blocks = d.blocks.filter((b) => !b.fact_ids.some((id) => rels.some((r) => r.id === id)));
+  const names = rels.map((r) => r.label);
+  d.blocks.push({
+    fact_ids: rels.map((r) => r.id), heading: 'Tarikan sehari-hari',
+    text: `Hari-harimu jarang berjalan satu arah. ${names.slice(0, -1).join(', ')} dan ${names.at(-1)} bergerak bersamaan, sehingga satu urusan sering menarik urusan lain. Yang membantu: selesaikan satu hal sebelum membuka yang berikutnya.${extra}`,
+  });
+  d.penutup = 'Kamu membawa ketenangan yang jarang dimiliki orang lain.';
+  return d;
+};
+const positionFindings = (r) => r.findings.filter((f) => f.check === 'fact.relation_positions').map((f) => f.message);
+
+test('ROUND 6 FOLDING: relations named in passing, none located, is not a dropped position', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  assert.deepEqual(positionFindings(validateRenderingV2(foldedDraft(sj), sj)), []);
+});
+
+test('ROUND 6 FOLDING: one relation located with its full positions_id does not charge the others', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '1995-06-01', birthTime: '06:00' }), { voice: 'v2' });
+  const benturan = sj.facts.find((f) => f.label === 'Benturan');
+  assert.ok(benturan, 'precondition: chart 4 carries a Benturan');
+  const d = foldedDraft(sj, ` Benturan terasa di antara ${benturan.provenance.positions_id}.`);
+  assert.deepEqual(positionFindings(validateRenderingV2(d, sj)), []);
+});
+
+test('ROUND 6 FOLDING CONTROL: a folded sentence giving a relation PART of its pillars still rejects', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  // Benturan spans [month, day]; this sentence gives only Pilar Kerja.
+  const r = validateRenderingV2(foldedDraft(sj, ' Benturan terasa paling keras di Pilar Kerja.'), sj);
+  const hits = positionFindings(r);
+  assert.equal(hits.length, 1, hits.join(' | '));
+  assert.match(hits[0], /relation_冲_寅申 .*dropping \[day\]/u);
+  assert.equal(r.ok, false, 'a false partial span is still HARD');
+});
+
+test('ROUND 6: on v2 a relation\'s English is an unsanctioned bracket, an Aspek\'s is not', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  const draft = draftFor(sj);
+  // Not directly after a relation's name, so the mirror's strip (1.62.0) leaves it for
+  // this logged rule to see: the two cover different positions.
+  draft.penutup = 'Hari-harimu sering terasa seperti tabrakan kecil (Clash), dan Aspek Penantang (Seven Killings) menjaga langkahmu.';
+  const r = validateRenderingV2(draft, sj);
+  const hits = r.findings.filter((f) => f.check === 'style.unsanctioned_bracket').map((f) => f.message);
+  assert.ok(hits.some((m) => m.includes('(Clash)')), `relation English not flagged: ${hits.join(' | ')}`);
+  assert.equal(hits.some((m) => m.includes('(Seven Killings)')), false, 'an Aspek bracket stays sanctioned');
+  // Logged, never rejecting: style is a flag on v2.
+  assert.ok(r.findings.filter((f) => f.check === 'style.unsanctioned_bracket').every((f) => f.severity === 'flag'));
+});
+
+// ── RELATIONS CARRY NO ENGLISH: THE MECHANICAL STRIP (STAGE6 1.62.0, Prompt AV §2 item 3) ──
+// Reyner, 2026-09-30: English brackets on Arketipe, Aspek and Bintang only; none for a
+// relation. Round 6 took the English off the writer payload and the writer typed its
+// own ("(trine)", "(self-punishment)"). So on a v2 MIRROR a parenthetical directly
+// after a relation's Indonesian name (glossary relasi_cabang) is removed WHATEVER IT
+// CONTAINS, and logged. Position, not a word list. Rejects nothing.
+import RELATION_R6 from './fixtures/relation-english-r6.json' with { type: 'json' };
+
+const RELATION_NAMES = Object.entries(GLOSSARY.relasi_cabang).filter(([k]) => !k.startsWith('_')).map(([, v]) => v.name_id);
+const relationBrackets = (text) => RELATION_NAMES.flatMap((n) => {
+  const hits = [];
+  let at = text.indexOf(n);
+  while (at !== -1) {
+    const m = /^\s*\(([^()]{1,60})\)/u.exec(text.slice(at + n.length));
+    if (m) hits.push(`${n} (${m[1]})`);
+    at = text.indexOf(n, at + 1);
+  }
+  return hits;
+});
+
+for (const rec of RELATION_R6.readings) {
+  test(`RELATION STRIP: ${rec.id}'s served draft carries no relation English after the gate`, () => {
+    assert.ok(rec.served_relation_english.length >= 3, 'precondition: the fixture records what was served');
+    const sj = buildSemanticJson(calculateBaziChart(rec.inputs), { voice: 'v2' });
+    const out = validateRenderingV2(withEngineOpening(structuredClone(rec.draft), sj).rendered, sj);
+    assert.deepEqual(relationBrackets(servedText(out)), [], 'no parenthetical after a relation name');
+    const logged = out.findings.filter((f) => f.check === 'brackets.relation_stripped');
+    for (const was of rec.served_relation_english) {
+      assert.ok(logged.some((f) => f.message.includes(was)), `logged: ${was}`);
+    }
+    assert.ok(logged.every((f) => f.severity === 'flag'), 'logged, never rejecting');
+  });
+}
+
+test('RELATION STRIP CONTROLS: an Aspek or Bintang bracket stays, a lowercase common noun is not a relation, the rest of the sentence is kept', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  const draft = draftFor(sj);
+  draft.penutup = 'Benturan (Pilar Kerja dan Pilar Diri) yang kamu rasakan tidak menggoyahkan Aspek Penantang (Seven Killings), dan ikatan (bond) dengan orang terdekat tetap kuat.';
+  const t = validateRenderingV2(draft, sj).normalized.penutup;
+  assert.ok(t.startsWith('Benturan yang kamu rasakan'), t);
+  assert.ok(t.includes('Aspek Penantang (Seven Killings)'), t);
+  assert.ok(t.includes('ikatan (bond)'), t);
+});
+
+test('RELATION STRIP: a pair reading is unchanged (the pair writer was not switched)', () => {
+  const pj = buildPairSemantic(A, B, { voice: 'v2' });
+  const draft = draftFor(pj);
+  draft.penutup = `${draft.penutup || ''} Benturan (clash) di antara kalian terasa di hari biasa.`.trim();
+  const out = validateRenderingV2(draft, pj);
+  assert.ok(out.normalized.penutup.includes('Benturan (clash)'), out.normalized.penutup);
+  assert.equal(out.findings.some((f) => f.check === 'brackets.relation_stripped'), false);
+});
+
+// ── THE ROUND-6 SWITCH ON THE WIRE (Prompt AV §2 items 2 and 3) ──
+// What the provider is SENT, captured off the stubbed fetch: the v2 MIRROR writer runs
+// at temperature 0.9 and is handed no English for a relation; the v2 pair and every v1
+// reading keep 0.2 and their payload as before (neither was tested in round 6).
+const SMEW = calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' });
+const RELATION_KIND = new Set(['branch_relation', 'punishment']);
+async function onTheWire(sj) {
+  const prev = { fetch: globalThis.fetch, key: process.env.GEMINI_API_KEY };
+  process.env.GEMINI_API_KEY = 'test-key-never-sent-anywhere';
+  let body = null;
+  globalThis.fetch = async (url, init) => {
+    body = JSON.parse(init.body);
+    return new Response(JSON.stringify({
+      candidates: [{ content: { parts: [{ text: JSON.stringify(draftFor(sj)) }] } }],
+    }), { status: 200 });
+  };
+  try {
+    __clearMemCache(); __clearInFlight();
+    await renderReading(sj, { spendGuards: false, dedupeInFlight: false });
+    const payload = JSON.parse(body.contents[0].parts[0].text);
+    const relationFacts = [...(payload.facts || []), ...(payload.mirror?.a?.facts || []), ...(payload.mirror?.b?.facts || [])]
+      .filter((f) => RELATION_KIND.has(f.provenance?.kind));
+    return { temperature: body.generationConfig.temperature, relationFacts };
+  } finally {
+    globalThis.fetch = prev.fetch;
+    if (prev.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = prev.key;
+  }
+}
+
+test('ROUND-6 SWITCH: the v2 mirror writer runs at 0.9 and is handed no relation English', async () => {
+  const w = await onTheWire(v2(SMEW));
+  assert.equal(w.temperature, 0.9);
+  assert.ok(w.relationFacts.length >= 4, 'precondition: smewTN carries four relation facts');
+  assert.deepEqual(w.relationFacts.filter((f) => f.label_bracket).map((f) => f.id), []);
+  assert.ok(w.relationFacts.every((f) => f.label), 'the Indonesian name is still handed over');
+});
+
+test('ROUND-6 SWITCH CONTROLS: the v2 pair and the v1 mirror are unchanged (0.2, relation English kept)', async () => {
+  const pair = await onTheWire(buildPairSemantic(SMEW, B, { voice: 'v2' }));
+  assert.equal(pair.temperature, 0.2);
+  assert.ok(pair.relationFacts.some((f) => f.label_bracket), 'the pair payload keeps its relation English');
+  const v1 = await onTheWire(buildSemanticJson(SMEW, { voice: 'v1' }));
+  assert.equal(v1.temperature, 0.2);
+  assert.ok(v1.relationFacts.some((f) => f.label_bracket), 'the v1 payload keeps its relation English');
+});
+
+// ── A BADGE AT A NAMED PILLAR MUST BE WHERE THE ENGINE PLACES IT (STAGE6 1.63.0, Prompt AV §4) ──
+// Since #177 a correct badge card sits beside the prose, so a sentence placing the badge
+// on the wrong pillar contradicts the card on the same screen. "Bintang X ... di Pilar Y"
+// (every glossary bintang, Tanda Kekosongan included) is HARD when the engine does not
+// place X at Y. Subject handling is fact.aspek_pillar's: the reader on a mirror; on a pair
+// "-mu" is A, "-nya"/"dia" is B, no marker and false for both is hard, true for one only
+// is logged (fact.bintang_pillar_unattributed).
+import BINTANG_CONTROLS from './fixtures/bintang-pillar-controls.json' with { type: 'json' };
+
+const bintangHits = (r) => r.findings.filter((f) => f.check === 'fact.bintang_pillar');
+const R605 = RELATION_R6.readings.find((x) => x.id === 'r6-05');
+
+test('BINTANG PILLAR RED: r6-05\'s served draft with Bintang Perantau moved to Pilar Arah (by script) is HARD', () => {
+  const sj = buildSemanticJson(calculateBaziChart(R605.inputs), { voice: 'v2' });
+  const TRUE = 'Bintang Perantau (Sky Horse) di Pilar Kerja';
+  const draft = structuredClone(R605.draft);
+  const block = draft.blocks.find((b) => b.text.includes(TRUE));
+  assert.ok(block, 'precondition: the served draft places Bintang Perantau at Pilar Kerja, where the engine does');
+  assert.deepEqual(bintangHits(validateRenderingV2(withEngineOpening(structuredClone(draft), sj).rendered, sj)), [], 'the true draft passes');
+  block.text = block.text.replace(TRUE, 'Bintang Perantau (Sky Horse) di Pilar Arah');
+  const r = validateRenderingV2(withEngineOpening(draft, sj).rendered, sj);
+  const hits = bintangHits(r);
+  assert.equal(hits.length, 1, hits.map((h) => h.message).join(' | '));
+  assert.match(hits[0].message, /Bintang Perantau sits at Pilar Kerja, not Pilar Arah/u);
+  assert.equal(hits[0].severity, 'hard');
+  assert.equal(r.ok, false);
+});
+
+test('BINTANG PILLAR RED, v1 too: the same wrong pillar on a v1 mirror is HARD', () => {
+  const sj = buildSemanticJson(calculateBaziChart(R605.inputs), { voice: 'v1' });
+  const r = validateRendering(plant(draftFor(sj), 'Bintang Perantau terasa paling kuat di Pilar Arah.'), sj);
+  assert.equal(r.findings.filter((f) => f.check === 'fact.bintang_pillar' && f.severity === 'hard').length, 1);
+});
+
+test(`BINTANG PILLAR CONTROLS: all ${BINTANG_CONTROLS.spans.length} true badge-pillar spans from rounds 5 and 6 pass, both voices`, () => {
+  assert.ok(BINTANG_CONTROLS.spans.length >= 10, 'precondition: the fixture holds the extracted spans');
+  for (const c of BINTANG_CONTROLS.spans) {
+    for (const voice of ['v2', 'v1']) {
+      const sj = buildSemanticJson(calculateBaziChart(c.inputs), { voice });
+      const draft = plant(draftFor(sj), `${c.span}.`);
+      const r = voice === 'v2' ? validateRenderingV2(draft, sj) : validateRendering(draft, sj);
+      assert.deepEqual(bintangHits(r).map((h) => h.message), [], `${voice} ${c.from}: ${c.span}`);
+    }
+  }
+});
+
+test('BINTANG PILLAR, a partial but true list passes: Bintang Penolong at Pilar Kerja alone, where it sits at Kerja and Arah', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '1995-06-01', birthTime: '06:00' }), { voice: 'v2' });
+  assert.deepEqual(bintangHits(validateRenderingV2(plant(draftFor(sj), 'Bintang Penolong hadir di Pilar Kerja.'), sj)), []);
+  assert.deepEqual(bintangHits(validateRenderingV2(plant(draftFor(sj), 'Bintang Penolong bersarang di Pilar Kerja dan Pilar Arah.'), sj)), []);
+});
+
+test('BINTANG PILLAR ON A PAIR: -mu is A, -nya is B; no marker false for both is HARD, true for one is logged', () => {
+  // A = smewTN (Bintang Cendekia at Pilar Diri), B = chart 4 (Bintang Cendekia at Pilar Arah).
+  const pj = buildPairSemantic(SMEW, calculateBaziChart({ birthDate: '1995-06-01', birthTime: '06:00' }), { voice: 'v2' });
+  const run = (s) => validateRenderingV2(plant(draftFor(pj), s), pj).findings
+    .filter((f) => f.check.startsWith('fact.bintang_pillar')).map((f) => `${f.check}/${f.severity}`);
+  assert.deepEqual(run('Bintang Cendekia-mu ada di Pilar Arah.'), ['fact.bintang_pillar/hard'], 'false for A');
+  assert.deepEqual(run('Bintang Cendekia-nya ada di Pilar Arah.'), [], 'true for B');
+  assert.deepEqual(run('Bintang Cendekia ada di Pilar Akar.'), ['fact.bintang_pillar/hard'], 'no marker, false for both');
+  assert.deepEqual(run('Bintang Cendekia ada di Pilar Arah.'), ['fact.bintang_pillar_unattributed/flag'], 'no marker, true for B only');
 });
