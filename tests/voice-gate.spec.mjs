@@ -805,3 +805,47 @@ test('ROUND 6: on v2 a relation\'s English is an unsanctioned bracket, an Aspek\
   // Logged, never rejecting: style is a flag on v2.
   assert.ok(r.findings.filter((f) => f.check === 'style.unsanctioned_bracket').every((f) => f.severity === 'flag'));
 });
+
+// ── ROUND 6: A FOLDED RELATIONS BLOCK IS READ SENTENCE BY SENTENCE (Prompt AT §2, checks vs folding) ──
+// fact.relation_positions read the WHOLE block for every relation it cites. Folded
+// ("Weave them into one story"), a block cites several relations, so a pillar named for
+// one was charged to all the others, and "hari-harimu" (her days) read as the day
+// pillar. Loosened, not widened: in a block citing more than one relation, a relation is
+// judged only on the sentences that NAME it. A partial list in such a sentence still
+// rejects: the check keeps guarding the false statement.
+const foldedDraft = (sj, extra = '') => {
+  const rels = sj.facts.filter((f) => ['branch_relation', 'punishment'].includes(f.provenance?.kind));
+  const d = draftFor(sj);
+  d.blocks = d.blocks.filter((b) => !b.fact_ids.some((id) => rels.some((r) => r.id === id)));
+  const names = rels.map((r) => r.label);
+  d.blocks.push({
+    fact_ids: rels.map((r) => r.id), heading: 'Tarikan sehari-hari',
+    text: `Hari-harimu jarang berjalan satu arah. ${names.slice(0, -1).join(', ')} dan ${names.at(-1)} bergerak bersamaan, sehingga satu urusan sering menarik urusan lain. Yang membantu: selesaikan satu hal sebelum membuka yang berikutnya.${extra}`,
+  });
+  d.penutup = 'Kamu membawa ketenangan yang jarang dimiliki orang lain.';
+  return d;
+};
+const positionFindings = (r) => r.findings.filter((f) => f.check === 'fact.relation_positions').map((f) => f.message);
+
+test('ROUND 6 FOLDING: relations named in passing, none located, is not a dropped position', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  assert.deepEqual(positionFindings(validateRenderingV2(foldedDraft(sj), sj)), []);
+});
+
+test('ROUND 6 FOLDING: one relation located with its full positions_id does not charge the others', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '1995-06-01', birthTime: '06:00' }), { voice: 'v2' });
+  const benturan = sj.facts.find((f) => f.label === 'Benturan');
+  assert.ok(benturan, 'precondition: chart 4 carries a Benturan');
+  const d = foldedDraft(sj, ` Benturan terasa di antara ${benturan.provenance.positions_id}.`);
+  assert.deepEqual(positionFindings(validateRenderingV2(d, sj)), []);
+});
+
+test('ROUND 6 FOLDING CONTROL: a folded sentence giving a relation PART of its pillars still rejects', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  // Benturan spans [month, day]; this sentence gives only Pilar Kerja.
+  const r = validateRenderingV2(foldedDraft(sj, ' Benturan terasa paling keras di Pilar Kerja.'), sj);
+  const hits = positionFindings(r);
+  assert.equal(hits.length, 1, hits.join(' | '));
+  assert.match(hits[0], /relation_冲_寅申 .*dropping \[day\]/u);
+  assert.equal(r.ok, false, 'a false partial span is still HARD');
+});
