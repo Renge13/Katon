@@ -182,8 +182,12 @@ test('AX §1: the v2 mirror prompt carries Reyner\'s three lines verbatim, and t
     'Mention a badge only where it belongs in the story; the page shows every badge on its own card.',
     "Advice is a plain, optional suggestion, never an imperative or reminder such as 'ingatlah', 'jangan lupa', or 'kamu harus'.",
     'Do not restate information already made explicit by the page unless it adds interpretation or context.',
-    'The page already shows her four pillars and Pilar Konsepsi, her element bars, and every badge with its one-line meaning.',
+    // "her four pillars" -> "her pillars", and the actionable line added after the
+    // imperative line: Reyner, 2026-09-30, the one adjustment after smoke-2.
+    'The page already shows her pillars and Pilar Konsepsi, her element bars, and every badge with its one-line meaning.',
+    "When you draw on an `actionable`, rewrite it as a possibility in your own words, for example 'Yang bisa membantu adalah …' or 'Kamu bisa …', never in its command form.",
   ];
+  assert.equal(mirror.includes('her four pillars'), false, 'the superseded wording is gone');
   for (const l of LINES) {
     assert.ok(mirror.includes(l), `mirror lacks: ${l}`);
     assert.equal(pair.includes(l), false, `pair carries: ${l}`);

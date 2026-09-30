@@ -18,6 +18,7 @@
 // ============================================================
 
 import fs from 'node:fs';
+import path from 'node:path';
 
 const OUT = (() => { const i = process.argv.indexOf('--out'); return i > -1 ? process.argv[i + 1] : null; })();
 const SUBJECTS = [
@@ -150,4 +151,9 @@ for (const s of SUBJECTS) {
   for (const x of rec.restated) console.log(`  RESTATES: ${x}`);
 }
 console.log(`TOTAL $${records.reduce((n, r) => n + r.cost_usd, 0).toFixed(4)}  prompt ${promptVersionFor('mirror', 'v2')}  stage6 ${STAGE6_VERSION}  temperature ${V2_MIRROR_TEMPERATURE}`);
-if (OUT) fs.writeFileSync(OUT, `${JSON.stringify(records, null, 2)}\n`);
+// The directory is gitignored and absent in a fresh worktree: smoke-3 (2026-09-30) paid
+// for five renders and lost its record to ENOENT here, after the console had printed.
+if (OUT) {
+  fs.mkdirSync(path.dirname(OUT), { recursive: true });
+  fs.writeFileSync(OUT, `${JSON.stringify(records, null, 2)}\n`);
+}

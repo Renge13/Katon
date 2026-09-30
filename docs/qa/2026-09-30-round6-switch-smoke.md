@@ -50,3 +50,34 @@ Listed by the script but NOT imperatives (a descriptive "harus"): chart4 "kapan 
 **The likely cause, upstream (CHECK 3).** The mirror prompt says a cost ends with "what helps, from its `actionable`, in your own words", and at least 20 of the glossary's 37 actionable cells are written as commands ("Pilih satu tugas ...", "Buat jadwal ...", "Mintalah bantuan ..."). Both `cobalah` sentences paraphrase such a seed. The new line forbids the imperative while the source it points at is one.
 
 **Restating the page (5+ shared words).** chart4: "Beruntung, kamu memiliki Aspek Pelindung (Direct Resource) di Pilar Kerja, yang menjamin bahwa kamu tidak benar-benar sendirian; bantuan justru sering datang di saat yang tepat, ..." shares "datang di saat yang tepat" with Bintang Penolong's card meaning, and attaches it to Aspek Pelindung.
+
+## Rerun 3, after Reyner's one adjustment (2026-09-30), the last run the cap allows
+
+```
+node --conditions=react-server scripts/smoke-round6-switch.mjs --out reports/voice-v2/round6-switch/smoke-3.json
+```
+
+**The adjustment, Reyner verbatim:** "her four pillars" becomes "her pillars", and after the imperative line: "When you draw on an `actionable`, rewrite it as a possibility in your own words, for example 'Yang bisa membantu adalah …' or 'Kamu bisa …', never in its command form." v2 mirror prompt `v2-9bef2ec0b0533039` (pair unchanged, `v2-3fdacdca5b04cd46`). Same five charts, same asserted wire, gate 1.62.0, temperature 0.9. **$0.0135.**
+
+**The JSON record was lost:** the script wrote it after printing and `reports/voice-v2/round6-switch/` did not exist in this worktree (ENOENT; fixed in the same commit). Everything below is the console output, verbatim. The run was not repeated: at 0.9 a second run is a different sample, and the cap is one re-render.
+
+| chart | served | words | relation English | questions | regens | cost | final sentence of the penutup |
+|---|---|---|---|---|---|---|---|
+| chart1 | served | 512 | 0 | 0 | 0 | $0.0029 | "Kamu tidak perlu selalu menjadi yang paling benar atau paling kuat; yang terpenting adalah menyadari bahwa kapasitasmu untuk bersinar sangat bergantung pada seberapa baik kamu menjaga sumber bahan bakarmu sendiri." |
+| chart4 | served | 400 | 0 | 0 | 0 | $0.0027 | "Kamu adalah pribadi yang piawai menembus kebuntuan dengan cara yang tidak kaku, dan ketajamanmu dalam melihat celah pertumbuhan adalah kekuatan yang terus mengalir dalam keseharianmu." |
+| chart7 | served | 435 | 0 | 0 | 0 | $0.0023 | "Kamu adalah sosok yang terus bertumbuh, seseorang yang mampu membawa keteraturan di tengah guncangan, dan selalu memiliki jalan keluar berkat dukungan yang mengalir di sekitarmu." |
+| chart13 | served | 420 | 0 | 0 | 0 | $0.0025 | "Meskipun guncangan adalah bagian dari keseharianmu, kamu memiliki ketangkasan untuk tetap berdiri kokoh di tengah badai." |
+| smewTN | served | 461 | 0 | 0 | 0 | $0.0030 | "Kamu adalah sosok yang stabil dan tangguh, dengan kemampuan untuk menavigasi tekanan yang justru membuat orang lain menyerah lebih awal." |
+
+**No close teases.** No "tidak terletak pada ... melainkan" close this run. The script's restating check printed nothing.
+
+**The imperative list.** None of "ingatlah", "jangan lupa", "kamu harus", "pastikan", "cobalah". The script lists every bare "harus"; six hits, read one by one:
+
+- chart1: "Namun, ini adalah harga yang harus kamu bayar: semakin banyak urusan yang kamu pikul sendirian, ..." Descriptive (the cost).
+- chart4: "... menetapkan satu pencapaian utama dan menguncinya setidaknya untuk satu tahun bisa memberikan stabilitas yang kamu butuhkan tanpa harus kehilangan semangat untuk bergerak." Descriptive. **This is the command-form seed ("tetapkan satu pencapaian utama dan kunci targetnya", r6-01) rewritten as a possibility**, which is what the new line asks for.
+- chart7: "... lebih baik salah arah daripada harus berhenti berkembang." Descriptive.
+- chart7: "Perhatian datang kepadamu tanpa harus kamu kejar, ..." Descriptive.
+- smewTN: "... kamu sering kali merasa harus menentukan sendiri ke mana harus melangkah, ..." Descriptive (what she feels).
+- **chart13: "Kamu sanggup menopang dirimu sendiri, namun karena tidak ada dorongan ekstrem dari luar, arah hidupmu memang harus kamu tentukan sendiri." NOT CLEARED BY CODE.** "harus kamu tentukan" is "harus" addressed to her, and it is smoke-2's counted imperative ("sehingga kamu harus menjadi penentu arah hidupmu sendiri") in object-first order. It can also be read as a statement of the chart (no outside push, so the direction is hers). Register is Reyner's; this run stops on it.
+
+**One close is advice-shaped, not listed.** chart1's penutup opens "Kamu tidak perlu ..." and turns on "yang terpenting adalah menyadari bahwa ...": no listed word, but a reminder in the position of the settled observation. Reported for the read.
