@@ -969,7 +969,12 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
             {chart.badge_cards.map((b, i) => (
               <Reveal key={b.id} delay={i * 0.04}>
                 <div data-badge-card style={{ border: '1px solid var(--divider)', borderRadius: 16, padding: '16px 16px 14px', background: 'var(--kertas-2)' }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+                  {/* THE PILLAR GOES UNDER THE NAME WHEN THE TWO DON'T FIT (Reyner, AX §5,
+                      2026-09-30: "pillar label on its own line under the badge name"). flex-wrap
+                      breaks a line on each item's max-content width, so the label drops whole
+                      rather than squeezing the name onto two lines; when both fit it stays
+                      beside the name. */}
+                  <div data-badge-head style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', columnGap: 10, rowGap: 2 }}>
                     <div data-badge-name style={{ fontFamily: 'var(--font-serif)', fontSize: 19, lineHeight: 1.25, color: 'var(--tinta)' }}>{b.name_id}</div>
                     <div data-badge-pillar style={{ fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted-warm)', whiteSpace: 'nowrap' }}>{b.palace}</div>
                   </div>

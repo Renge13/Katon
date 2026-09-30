@@ -368,3 +368,36 @@ test('AU §2 STATUS LINE: a reopened, already-served reading never shows it', as
     assert.equal(statusIn(m.host), null);
   } finally { m.unmount(); f.restore(); }
 });
+
+// ── A BADGE ON TWO PILLARS NAMES BOTH (the AU §3 card, fixed 2026-09-30) ──
+// The card read `f.palace`, the FIRST hit only, while AU §3 asked for "the pillar(s)
+// from the fact's positions". Chart 4 (1995-06-01 06:00) seats Bintang Penolong at
+// Pilar Kerja AND Pilar Arah; its card said Pilar Kerja. Found by the AV §3 smoke check,
+// where the prose (correctly) named both. 104 of 372 sampled charts carry such a badge.
+test('BADGE CARD: a badge on two pillars names both, in the engine\'s own reading-order phrase', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, chart: viewFor({ birthDate: '1995-06-01', birthTime: '06:00' }) });
+  try {
+    const cards = cardsIn(m.host);
+    assert.deepEqual(cards.map((c) => [c.name, c.pillar]), [
+      ['Bintang Perantau', 'Pilar Kerja'],
+      ['Bintang Cendekia', 'Pilar Arah'],
+      ['Bintang Penolong', 'Pilar Kerja dan Pilar Arah'],
+    ]);
+  } finally { m.unmount(); f.restore(); }
+});
+
+// ── ONE CARD PER BADGE (fixed 2026-09-30 with the two-pillar card) ──
+// Tanda Kekosongan reaches the semantic JSON as TWO facts on some charts: the void
+// branch's `void_stack_<position>` and the badge's own `badge_空亡`, same name, same
+// glossary meaning. #177 carded each, so 55 of 1,116 sampled charts showed the badge
+// twice. One card per name now, over every pillar either fact places it.
+test('BADGE CARD: a badge carried by two facts is ONE card, over the pillars of both', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, chart: viewFor({ birthDate: '1975-01-09', birthTime: '02:00' }) });
+  try {
+    const voids = cardsIn(m.host).filter((c) => c.name === 'Tanda Kekosongan');
+    assert.equal(voids.length, 1, 'one card for the badge');
+    assert.equal(voids[0].pillar, 'Pilar Kerja dan Pilar Arah');
+  } finally { m.unmount(); f.restore(); }
+});
