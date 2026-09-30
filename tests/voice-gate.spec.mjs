@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.62.0');
+    assert.equal(onV2.stage6_version, '1.63.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -949,4 +949,67 @@ test('ROUND-6 SWITCH CONTROLS: the v2 pair and the v1 mirror are unchanged (0.2,
   const v1 = await onTheWire(buildSemanticJson(SMEW, { voice: 'v1' }));
   assert.equal(v1.temperature, 0.2);
   assert.ok(v1.relationFacts.some((f) => f.label_bracket), 'the v1 payload keeps its relation English');
+});
+
+// ── A BADGE AT A NAMED PILLAR MUST BE WHERE THE ENGINE PLACES IT (STAGE6 1.63.0, Prompt AV §4) ──
+// Since #177 a correct badge card sits beside the prose, so a sentence placing the badge
+// on the wrong pillar contradicts the card on the same screen. "Bintang X ... di Pilar Y"
+// (every glossary bintang, Tanda Kekosongan included) is HARD when the engine does not
+// place X at Y. Subject handling is fact.aspek_pillar's: the reader on a mirror; on a pair
+// "-mu" is A, "-nya"/"dia" is B, no marker and false for both is hard, true for one only
+// is logged (fact.bintang_pillar_unattributed).
+import BINTANG_CONTROLS from './fixtures/bintang-pillar-controls.json' with { type: 'json' };
+
+const bintangHits = (r) => r.findings.filter((f) => f.check === 'fact.bintang_pillar');
+const R605 = RELATION_R6.readings.find((x) => x.id === 'r6-05');
+
+test('BINTANG PILLAR RED: r6-05\'s served draft with Bintang Perantau moved to Pilar Arah (by script) is HARD', () => {
+  const sj = buildSemanticJson(calculateBaziChart(R605.inputs), { voice: 'v2' });
+  const TRUE = 'Bintang Perantau (Sky Horse) di Pilar Kerja';
+  const draft = structuredClone(R605.draft);
+  const block = draft.blocks.find((b) => b.text.includes(TRUE));
+  assert.ok(block, 'precondition: the served draft places Bintang Perantau at Pilar Kerja, where the engine does');
+  assert.deepEqual(bintangHits(validateRenderingV2(withEngineOpening(structuredClone(draft), sj).rendered, sj)), [], 'the true draft passes');
+  block.text = block.text.replace(TRUE, 'Bintang Perantau (Sky Horse) di Pilar Arah');
+  const r = validateRenderingV2(withEngineOpening(draft, sj).rendered, sj);
+  const hits = bintangHits(r);
+  assert.equal(hits.length, 1, hits.map((h) => h.message).join(' | '));
+  assert.match(hits[0].message, /Bintang Perantau sits at Pilar Kerja, not Pilar Arah/u);
+  assert.equal(hits[0].severity, 'hard');
+  assert.equal(r.ok, false);
+});
+
+test('BINTANG PILLAR RED, v1 too: the same wrong pillar on a v1 mirror is HARD', () => {
+  const sj = buildSemanticJson(calculateBaziChart(R605.inputs), { voice: 'v1' });
+  const r = validateRendering(plant(draftFor(sj), 'Bintang Perantau terasa paling kuat di Pilar Arah.'), sj);
+  assert.equal(r.findings.filter((f) => f.check === 'fact.bintang_pillar' && f.severity === 'hard').length, 1);
+});
+
+test(`BINTANG PILLAR CONTROLS: all ${BINTANG_CONTROLS.spans.length} true badge-pillar spans from rounds 5 and 6 pass, both voices`, () => {
+  assert.ok(BINTANG_CONTROLS.spans.length >= 10, 'precondition: the fixture holds the extracted spans');
+  for (const c of BINTANG_CONTROLS.spans) {
+    for (const voice of ['v2', 'v1']) {
+      const sj = buildSemanticJson(calculateBaziChart(c.inputs), { voice });
+      const draft = plant(draftFor(sj), `${c.span}.`);
+      const r = voice === 'v2' ? validateRenderingV2(draft, sj) : validateRendering(draft, sj);
+      assert.deepEqual(bintangHits(r).map((h) => h.message), [], `${voice} ${c.from}: ${c.span}`);
+    }
+  }
+});
+
+test('BINTANG PILLAR, a partial but true list passes: Bintang Penolong at Pilar Kerja alone, where it sits at Kerja and Arah', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '1995-06-01', birthTime: '06:00' }), { voice: 'v2' });
+  assert.deepEqual(bintangHits(validateRenderingV2(plant(draftFor(sj), 'Bintang Penolong hadir di Pilar Kerja.'), sj)), []);
+  assert.deepEqual(bintangHits(validateRenderingV2(plant(draftFor(sj), 'Bintang Penolong bersarang di Pilar Kerja dan Pilar Arah.'), sj)), []);
+});
+
+test('BINTANG PILLAR ON A PAIR: -mu is A, -nya is B; no marker false for both is HARD, true for one is logged', () => {
+  // A = smewTN (Bintang Cendekia at Pilar Diri), B = chart 4 (Bintang Cendekia at Pilar Arah).
+  const pj = buildPairSemantic(SMEW, calculateBaziChart({ birthDate: '1995-06-01', birthTime: '06:00' }), { voice: 'v2' });
+  const run = (s) => validateRenderingV2(plant(draftFor(pj), s), pj).findings
+    .filter((f) => f.check.startsWith('fact.bintang_pillar')).map((f) => `${f.check}/${f.severity}`);
+  assert.deepEqual(run('Bintang Cendekia-mu ada di Pilar Arah.'), ['fact.bintang_pillar/hard'], 'false for A');
+  assert.deepEqual(run('Bintang Cendekia-nya ada di Pilar Arah.'), [], 'true for B');
+  assert.deepEqual(run('Bintang Cendekia ada di Pilar Akar.'), ['fact.bintang_pillar/hard'], 'no marker, false for both');
+  assert.deepEqual(run('Bintang Cendekia ada di Pilar Arah.'), ['fact.bintang_pillar_unattributed/flag'], 'no marker, true for B only');
 });
