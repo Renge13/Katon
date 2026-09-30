@@ -161,6 +161,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@napi-rs/canvas": "^1.0.9",
     "@types/node": "^25.7.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -170,6 +171,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
     "jsdom": "^30.0.1",
+    "pdfjs-dist": "^6.3.289",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.65.0"
   }
