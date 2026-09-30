@@ -239,7 +239,12 @@ test('胎元 PRINTS REYNER\'S MEANING (Prompt AX, 2026-09-30), and no invented o
   assert.ok(entry, 'the conception row prints now that it has a meaning');
   assert.equal(entry.meaning, RULED);
   assert.equal(entry.display_only, false, 'no longer exempt from correction 2');
-  assert.ok(a.groups.some((g) => g.group === 'Pilar Konsepsi'), 'its group heading returns with its row');
+  // FOLDED INTO 'Pilar' AS ITS LAST ROW (Reyner, 2026-09-30, #186): its own group
+  // printed "Pilar Konsepsi" as a heading over a row of the same name, alone on a page.
+  assert.equal(a.groups.some((g) => g.group === 'Pilar Konsepsi'), false, 'no group of its own');
+  const pilar = a.groups.find((g) => g.group === 'Pilar');
+  assert.equal(pilar.entries.at(-1).key, 'conception', 'the Pilar group\'s last row');
+  assert.deepEqual(pilar.entries.map((e) => e.key), ['year', 'month', 'day', 'hour', 'conception']);
   // "Istana Konsepsi" is the string the 08-07 ruling replaced; it must not come back.
   assert.ok(!JSON.stringify(a).includes('Istana Konsepsi'), 'the replaced name must not come back through the PDF');
   assert.doesNotThrow(() => assertEveryMechanicExplained(a));

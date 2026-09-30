@@ -227,7 +227,8 @@ test('the group order is prompt M\'s ENTIRE list, with Kompatibilitas first', ()
   // reversal.
   assert.equal(PAIR_GROUP_ORDER[0], PAIR_GROUP);
   assert.deepEqual(PER_CHART_GROUPS, [
-    'Aspek', 'Bintang', 'Elemen dan Kekuatan', 'Relasi Cabang', 'Pilar', 'Shio', 'Pilar Konsepsi',
+    // No 'Pilar Konsepsi' group since 2026-09-30: it is the Pilar group's last row (#186).
+    'Aspek', 'Bintang', 'Elemen dan Kekuatan', 'Relasi Cabang', 'Pilar', 'Shio',
   ]);
   assert.deepEqual(PER_CHART_GROUPS, GROUP_ORDER,
     'every mirror group is in the compat legend now');
