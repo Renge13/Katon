@@ -97,6 +97,7 @@
     "gate:card-b": "node scripts/gate-card-b-identity.mjs",
     "audit:card-budget": "node scripts/audit-card-budget.mjs",
     "probe:card-export": "node scripts/probe-card-export.mjs",
+    "probe:card-host": "node scripts/probe-card-host.mjs",
     "serve:reports": "node scripts/serve-reports.mjs",
     "report:engine": "node tests/bazi-engine.report.mjs",
     "report:compat-base-rates": "node scripts/compat-base-rates.mjs",
