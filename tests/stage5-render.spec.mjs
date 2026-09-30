@@ -118,10 +118,14 @@ test('a missing heading degrades to empty rather than failing the render', () =>
 
 test('the floor covers every required point, in hierarchy order', () => {
   const out = assembleFallback(CHART_1);
-  assert.deepEqual(
-    out.blocks.map((b) => b.fact_ids[0]),
-    CHART_1.required_points.map((p) => p.fact_id),
-  );
+  // AMENDED 2026-09-30 (Prompt AU §4): the Fondasi Pasangan block now also cites its
+  // occupant's convergence fact, whose own block folded into it. So every required
+  // point is CITED by some block, and the blocks still lead in hierarchy order.
+  const order = CHART_1.required_points.map((p) => p.fact_id);
+  const cited = new Set(out.blocks.flatMap((b) => b.fact_ids));
+  for (const id of order) assert.ok(cited.has(id), `required point ${id} is in no block`);
+  const leads = out.blocks.map((b) => b.fact_ids[0]);
+  assert.deepEqual(leads, order.filter((id) => leads.includes(id)), 'blocks lead in hierarchy order');
   assert.equal(out.source, 'module_assembly');
 });
 
@@ -1004,4 +1008,29 @@ test('the floor is not FUSED either - the element follows the image, never prece
     assert.ok(!new RegExp(`${element}\\s+${arche}`).test(opening),
       `chart ${tc.id}: the floor opens fused - "${opening}"`);
   }
+});
+
+// ── THE FONDASI PASANGAN SAYS WHAT SITS THERE (Prompt AU §4, Reyner's ruling 5, 2026-09-30) ──
+// The floor printed the palace as a definition and, where the occupant was a required
+// point, that Aspek as a separate block naming no pillar. Now the palace block names its
+// occupant with the ruled connective and carries the occupant's own glossary strings.
+const floorFor = (birthDate, birthTime) => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate, birthTime }), { voice: 'v2' });
+  const fl = assembleFallback(sj);
+  return { sj, fl, fondasi: fl.blocks.find((b) => b.fact_ids.includes('spouse_palace')) };
+};
+
+test('AU §4: smewTN\'s Fondasi block names Aspek Perajin and carries its strings; no separate block', () => {
+  const { sj, fl, fondasi } = floorFor('2001-02-14', '13:00');
+  const seat = sj.facts.find((f) => f.id === 'spouse_palace').seat_content;
+  assert.ok(fondasi.text.includes('Di fondasi ini ada Aspek Perajin (Eating God).'), fondasi.text);
+  assert.ok(fondasi.text.includes(seat.label_meaning), 'what sits there is described, not only named');
+  assert.ok(fondasi.fact_ids.includes('aspek_convergence_食神'), 'coverage still sees the occupant');
+  assert.equal(fl.blocks.filter((b) => b.heading === 'Aspek Perajin').length, 0, 'no separate block repeats it');
+});
+
+test('AU §4: when the occupant is the main profile it keeps its own block, and the Fondasi only names it', () => {
+  const { fl, fondasi } = floorFor('1989-02-04', '04:00'); // chart 13: Aspek Peraih, the main profile
+  assert.ok(fondasi.text.endsWith('Di fondasi ini ada Aspek Peraih (Indirect Wealth).'), fondasi.text);
+  assert.equal(fl.blocks.filter((b) => b.heading === 'Aspek Peraih').length, 1, 'the main profile keeps its block');
 });
