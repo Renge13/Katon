@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.59.0');
+    assert.equal(onV2.stage6_version, '1.60.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -770,4 +770,26 @@ test('ASPEK@PILLAR on a v2 PAIR: "-nya" is B (Pengelola at Pilar Diri only)', ()
   const sj = buildPairSemantic(A, B, { voice: 'v2' });
   assert.equal(aspekHard(validateRenderingV2(plant(draftFor(sj), 'Aspek Pengelola-nya menonjol di Pilar Kerja.'), sj)).length, 1);
   assert.equal(aspekHard(validateRenderingV2(plant(draftFor(sj), 'Aspek Pengelola-nya menonjol di Pilar Diri.'), sj)).length, 0);
+});
+
+// ── THE FONDASI OCCUPANT IS A SUPPLIED TERM (STAGE6 1.60.0, Prompt AU §4, CHECK 3) ──
+// The engine supplies what sits in the Fondasi Pasangan as spouse_palace.seat_content,
+// and the writer payload carries it. D1's supplied list read fact labels and palaces
+// only, so on a chart whose occupant has no fact of its own (chart 12: 食神, Aspek
+// Perajin) naming it was rejected as invented. That was the one chart of 13 where the
+// AS §4 fold tripped D1.
+const D1 = (r) => r.findings.filter((f) => f.check === 'v2.d1_invented_term').map((f) => f.message);
+
+test('D1: the Fondasi occupant the engine supplies is not an invented term (chart 12, Aspek Perajin)', () => {
+  const sj = v2(calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' }));
+  const sp = sj.facts.find((f) => f.id === 'spouse_palace');
+  assert.equal(sp.seat_content?.label, 'Aspek Perajin', 'precondition: the engine seats Aspek Perajin there');
+  assert.equal(sj.facts.some((f) => f.label === 'Aspek Perajin'), false, 'precondition: no fact of its own');
+  assert.deepEqual(D1(validateRenderingV2(plant(draftFor(sj), 'Di fondasi ini ada Aspek Perajin.'), sj)), []);
+});
+
+test('D1 CONTROL: an Aspek the engine supplies nowhere is still invented (chart 12, Aspek Pelindung)', () => {
+  const sj = v2(calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' }));
+  assert.equal(JSON.stringify(sj).includes('Aspek Pelindung'), false, 'precondition: not supplied anywhere');
+  assert.equal(D1(validateRenderingV2(plant(draftFor(sj), 'Di fondasi ini ada Aspek Pelindung.'), sj)).length, 1);
 });
