@@ -718,6 +718,33 @@ export const HEADS_THAT_OVERFLOW = Object.freeze(new Set([]));
 export const HEADLINE_OVERFLOW_FACTOR = 0.80;
 
 /**
+ * CARD B'S TWO-LINE HEAD STAYS AT 0.80. Restored 2026-09-30; it never should have moved.
+ *
+ * §0a replaced the word-count reduction with a real-fit gate, and its reasoning is
+ * about WIDTH on CARD A's 936 measure. Prompt R puts Card B out of scope in so many
+ * words - "Card B. Entirely. ... the 7px budget" - but <Headline> is shared, so
+ * `7100f1a` took 癸's MORNING / DEW from 111 to 139 on Card B as well. Nothing on
+ * Card B's side ruled that.
+ *
+ * ON CARD B THE REDUCTION IS NOT A WIDTH PROXY. It is paying for the second line
+ * of headline in HEIGHT, which Card B has 7px of. At 139 the two lines cost 47px
+ * more, and `npm run audit:card-budget -- --overflow` measured the result on
+ * 2026-09-30: MAX 癸 +40px, and three REAL 癸 charts +40px (1954-01-07 10:00 is
+ * one). Drawn, the 40px came out of the layout rather than off the edge: the
+ * hairline under the Aspek line flex-shrank to nothing, the badge text ran into
+ * the pillar cells, and the seal sat 19px off the bottom edge instead of 56 - on
+ * a paid card, visible only in the export. At 0.80 the same sweep reads 0
+ * overflow across 86 cases, 7px on the tightest - the 2026-08-26 figure to the
+ * pixel. `docs/qa/2026-09-30-card-b-headline.md` has both drawn.
+ *
+ * This is the RESTORATION, not the durable fix. 7px is a fifth of a line, and
+ * Reyner's 2026-08-26 answer to it - a layout that absorbs length - is still open.
+ * `tests/card-budget.spec.mjs` freezes the drawn size per stem, so a change here
+ * fails `npm test` rather than a customer's export.
+ */
+export const CARD_B_STACKED_HEAD_FACTOR = 0.80;
+
+/**
  * ── CARD B'S VERTICAL RECLAIM, 2026-08-26. RULED BY REYNER ──
  *
  * WHAT WENT WRONG. Card B's object is a fixed-height column flex with
@@ -1215,7 +1242,7 @@ export function splitName(nameEn) {
   };
 }
 
-function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, kickerGap = 14, aspekGap = 25 }) {
+function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, kickerGap = 14, aspekGap = 25, stackedFactor = null }) {
   const { kicker, head } = splitName(data.nameEn);
   // ── A REAL-FIT GATE, NOT A WORD COUNT (ruled 2026-08-31, prompt R §0a) ──
   // This read `head.length > 1 ? sc.headline * 0.80 : sc.headline` - a proxy for
@@ -1227,7 +1254,11 @@ function Headline({ data, palette, px, sc, showNameId, brassHair, nameGap = 18, 
   // fit on one line and only the LONGEST WORD is ever constrained. That is why
   // the set is keyed on words.
   const overflows = head.some((w) => HEADS_THAT_OVERFLOW.has(String(w).toUpperCase()));
-  const headSize = overflows ? sc.headline * HEADLINE_OVERFLOW_FACTOR : sc.headline;
+  // `stackedFactor` is CARD B's and only Card B passes it. There the reduction is a
+  // HEIGHT budget, not the width proxy §0a retired - see CARD_B_STACKED_HEAD_FACTOR.
+  const stacked = stackedFactor && head.length > 1;
+  const headSize = overflows ? sc.headline * HEADLINE_OVERFLOW_FACTOR
+    : stacked ? sc.headline * stackedFactor : sc.headline;
   return E('div', { style: { position: 'relative', display: 'flex', flexDirection: 'column' } },
     // Card A prints name_en ALONE — no Indonesian name, no ID eyebrow (08-03).
     // Card B may carry the Indonesian name; it is a document, not a share, and on
@@ -1563,6 +1594,7 @@ export function CardB({ data, scale = 1, id = 'card-b' }) {
     E(Headline, {
       key: 'h', data, palette, px, sc, showNameId: true, brassHair,
       nameGap: RECLAIMED_B.headNameGap, kickerGap: RECLAIMED_B.headKickerGap, aspekGap: RECLAIMED_B.headAspekGap,
+      stackedFactor: CARD_B_STACKED_HEAD_FACTOR,
     }),
     // ── CARD B'S VERTICAL SPACING IS TIGHTER THAN CARD A'S ──
     // §2.2, §2.3 and §2.4 are Card A deltas and are drawn at their ruled values
