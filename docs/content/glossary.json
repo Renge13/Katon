@@ -50,7 +50,7 @@
    "label_meaning": "Kamu cepat melihat cara yang lebih baik dan sulit diam saat melihat hal yang tidak efisien. Mengikuti aturan yang tidak masuk akal terasa menyiksa.",
    "gift_seed": "Kamu paling cepat menemukan celah dan paling berani menyuarakan kebenaran. Ide yang tajam biasanya datang darimu.",
    "cost_seed": "Kejujuranmu mahal harganya. Orang yang kamu koreksi sering mengingat rasa sakitnya, bukan kebenarannya.",
-   "actionable_seed": "Kritik yang ditahan sampai emosi reda jauh lebih didengar, karena satu poin perbaikan jernih esok harinya lebih bermakna daripada banyak perdebatan."
+   "actionable_seed": "Kritik yang ditahan sampai emosi reda jauh lebih didengar, karena satu poin perbaikan jernih keesokannya lebih bermakna daripada banyak perdebatan."
   },
   "正財": {
    "name_id": "Aspek Pengelola",
@@ -278,7 +278,7 @@
    "label_meaning": "Kamu bergerak ringan dan sulit merasa benar-benar mengakar. Rutinitas harian cepat membuatmu merasa jenuh.",
    "gift_seed": "Kamu tidak terikat pada satu pola hidup kaku. Perubahan besar tidak membuatmu cemas.",
    "cost_seed": "Kamu tidak memiliki jangkar alami. Proses yang membutuhkan waktu bertahun-tahun untuk berbuah sering kamu tinggalkan sebelum waktunya.",
-   "actionable_seed": "Rutinitas kecil yang diulang pada jam sama setiap minggu menjadi pijakan kokoh untuk membangun kestabilan fisik dan pikiran."
+   "actionable_seed": "Rutinitas kecil yang diulang pada waktu yang sama setiap minggu menjadi pijakan kokoh untuk membangun kestabilan fisik dan pikiran."
   },
   "金": {
    "name_id": null,
@@ -438,7 +438,7 @@
    "label_meaning": "Dua dari tiga bagian sudah saling tarik. Arah geraknya sudah jelas, meski kekuatannya belum sepenuhnya padu.",
    "gift_seed": "Tarikan energi ini sudah bekerja untukmu dan memberi arah yang jelas.",
    "cost_seed": "Dua dari tiga bagian sudah terhubung, jadi tinggal satu lagi yang kurang. Dalam kehidupan sehari-hari, ini terasa seperti rasa 'hampir pas': semuanya sudah jalan dan arahnya jelas, tapi kamu selalu merasa harus menambah satu hal lagi sebelum berani menyebutnya selesai.",
-   "actionable_seed": "Perasaan belum pas sering kali merupakan bagian dari ritme alami, sehingga jeda singkat menunjukkan bahwa apa yang ada di tangan sebenarnya sudah memadai."
+   "actionable_seed": "Rasa belum pas itu bagian dari ritmemu, bukan tanda ada yang rusak. Jeda sebentar sering sudah cukup untuk melihat bahwa yang ada di tanganmu sebenarnya sudah memadai."
   },
   "冲": {
    "name_id": "Benturan",
