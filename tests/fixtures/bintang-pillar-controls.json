@@ -1,0 +1,145 @@
+{
+  "_README": "Prompt AV §4 controls: every badge-at-pillar span (\"<badge> ... di Pilar Y\") in the round-5 and round-6 records, served text and drafts, deduplicated per subject. Extracted by script 2026-09-30 from reports/voice-v2/round5-data and round6-data (gitignored). Every one is TRUE to the engine. Evidence, not output.",
+  "spans": [
+    {
+      "subject": "chart1",
+      "inputs": {
+        "birthDate": "1989-09-13",
+        "birthTime": "09:00",
+        "gender": "male"
+      },
+      "span": "Bunga Persik di Pilar Kerja",
+      "from": "r5-01-v2.json#draft2"
+    },
+    {
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "span": "Tanda Kekosongan (Void) di Pilar Kerja",
+      "from": "r6-05-v2.json#draft1"
+    },
+    {
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "span": "Bintang Penolong di Pilar Arah",
+      "from": "r5-02-v2.json#draft1"
+    },
+    {
+      "subject": "chart1",
+      "inputs": {
+        "birthDate": "1989-09-13",
+        "birthTime": "09:00",
+        "gender": "male"
+      },
+      "span": "Bunga Persik di pilar kerja",
+      "from": "r5-03-v2.json#draft1"
+    },
+    {
+      "subject": "chart13",
+      "inputs": {
+        "birthDate": "1989-02-04",
+        "birthTime": "04:00",
+        "gender": "male"
+      },
+      "span": "Tanda Kekosongan di Pilar Akar",
+      "from": "r5-04-v2.json#draft1"
+    },
+    {
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "span": "Tanda Kekosongan (Tanda Kekosongan (Void)) yang cukup kuat di Pilar Kerja",
+      "from": "r5-05-v2.json#served"
+    },
+    {
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "span": "Bintang Perantau (Bintang Perantau (Sky Horse)) di Pilar Kerja",
+      "from": "r5-05-v2.json#served"
+    },
+    {
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "span": "Bintang Cendekia (Academic Star) di Pilar Diri",
+      "from": "r5-05-v2.json#draft1"
+    },
+    {
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "span": "Tanda Kekosongan (Tanda Kekosongan [Void]) yang cukup kuat di Pilar Kerja",
+      "from": "r5-05-v2.json#draft2"
+    },
+    {
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "span": "Bintang Perantau (Bintang Perantau [Sky Horse]) di Pilar Kerja",
+      "from": "r5-05-v2.json#draft2"
+    },
+    {
+      "subject": "chart1",
+      "inputs": {
+        "birthDate": "1989-09-13",
+        "birthTime": "09:00",
+        "gender": "male"
+      },
+      "span": "Bintang Penolong (Nobleman) di Pilar Kerja",
+      "from": "r5-11-v2.json#draft2"
+    },
+    {
+      "subject": "chart1",
+      "inputs": {
+        "birthDate": "1989-09-13",
+        "birthTime": "09:00",
+        "gender": "male"
+      },
+      "span": "Bunga Persik (Peach Blossom) di Pilar Kerja",
+      "from": "r6-03-v2.json#draft1"
+    },
+    {
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "span": "Bintang Perantau (Sky Horse) di Pilar Kerja",
+      "from": "r6-05-v2.json#draft1"
+    },
+    {
+      "subject": "chart4",
+      "inputs": {
+        "birthDate": "1995-06-01",
+        "birthTime": "06:00",
+        "gender": "female"
+      },
+      "span": "Bintang Penolong (Nobleman) yang tersebar di Pilar Kerja dan Pilar Arah",
+      "from": "r6-10-v2.json#draft1"
+    }
+  ]
+}
