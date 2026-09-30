@@ -1,0 +1,280 @@
+{
+  "_README": "Prompt AS §3 red-first evidence. Every round-5 writer draft (reports/voice-v2/round5-data, gitignored) that fact.strength_contradiction rejected at STAGE6 1.57.0, extracted by script on 2026-09-30 with the drafts VERBATIM. Evidence, not output: regenerate only to add cases, never to make a test pass.",
+  "stage6_version_extracted": "1.57.0",
+  "cases": [
+    {
+      "from": "r5-01-v2.json#draft1",
+      "inputs": {
+        "birthDate": "1989-09-13",
+        "birthTime": "09:00",
+        "gender": "male"
+      },
+      "verdict": "weak",
+      "findings": [
+        "the strength block names \"kuat\" but the verdict is \"weak\""
+      ],
+      "verdict_word_sentences": [
+        "Kamu adalah Api Matahari yang membawa kehadiran kuat di setiap ruangan; sebelum kamu bicara, orang sudah merasakan nyalamu.",
+        "Namun, karena energimu tergolong Lemah—bukan karena tidak mampu, melainkan karena kamu murni mengandalkan dukungan dari luar—nyalamu sangat bergantung pada lingkungan."
+      ],
+      "draft": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Fire",
+              "strength_weak",
+              "profile_vs_favorable"
+            ],
+            "heading": "Matahari yang Membutuhkan Bahan Bakar",
+            "text": "Kamu adalah Api Matahari yang membawa kehadiran kuat di setiap ruangan; sebelum kamu bicara, orang sudah merasakan nyalamu. Namun, karena energimu tergolong Lemah—bukan karena tidak mampu, melainkan karena kamu murni mengandalkan dukungan dari luar—nyalamu sangat bergantung pada lingkungan. Dalam keseharian, ini bisa terasa sangat melelahkan; saat kamu berada di lingkungan yang tidak mendukung, kamu merasa cepat sekali habis, seolah bateraimu tidak terisi ulang oleh keadaan. Di pilar kerjamu, terdapat Aspek Pengelola [Direct Wealth] yang menonjol. Ini membuatmu sangat terampil merawat tanggung jawab hingga semuanya rapi dan orang lain merasa tenang bersandar padamu. Namun, harganya mahal: karena elemen ini berelemen Logam yang pada dasarnya melelahkanmu, semakin banyak urusan yang kamu pegang, semakin sedikit energi yang tersisa untuk dirimu sendiri. Kamu sering salah dikira sebagai sosok dengan stamina tanpa batas, padahal di balik layar, kamu sering merasa kosong begitu keramaian mereda."
+          },
+          {
+            "fact_ids": [
+              "void_stack_month",
+              "relation_半合_巳酉",
+              "badge_桃花"
+            ],
+            "heading": "Antara Keberhasilan dan Rasa Cukup",
+            "text": "Di Pilar Kerjamu, terdapat Tanda Kekosongan [Void] yang unik. Meskipun orang lain melihatmu ahli dan mengakui keberhasilanmu, kamu sendiri jarang bisa merasakannya. Pengakuan itu tidak pernah menempel, membuatmu terus menunggu bukti berikutnya seolah apa yang sudah kamu capai belum benar-benar milikmu. Ini diperkuat dengan dinamika Setengah Gabungan antara pilar-pilarmu yang menarik elemen Logam. Arah gerakmu sudah sangat jelas dan teruji, tetapi selalu ada rasa 'hampir pas'—seperti ada satu hal lagi yang kurang sebelum kamu berani berhenti. Sering kali, kamu merasa harus menambah beban kerja lagi agar merasa lengkap, padahal itu hanya polamu. Untungnya, Bunga Persik [Peach Blossom] di pilar yang sama membuatmu sangat mudah menarik perhatian. Orang mengingatmu sejak pertemuan pertama, dan pintu-pintu kesempatan sering terbuka bagi mereka yang penasaran denganmu. Namun, daya tarik ini hanya membuka pintu; kedekatan yang nyata adalah tantangan yang harus kamu bangun dengan kehadiran yang konsisten, bukan sekadar kesan pertama."
+          },
+          {
+            "fact_ids": [
+              "aspek_convergence_正官",
+              "spouse_palace",
+              "element_missing_Wood"
+            ],
+            "heading": "Tuntutan yang Menghantui",
+            "text": "Baganmu didominasi oleh Aspek Pengatur [Direct Officer] yang muncul di pilar kerja, diri, dan arah. Kamu tahu betul apa yang harus dilakukan dan sulit rasanya membiarkan standar itu melorot; melanggar aturan terasa jauh lebih berat daripada mematuhinya. Ini tercermin kuat dalam Fondasi Pasangan di Pilar Diri, yang menunjukkan bahwa dalam hubungan terdekat, kamu cenderung membawa ekspektasi disiplin yang sama. Kamu jarang memberi izin pada dirimu sendiri untuk bersikap longgar, dan orang-orang di sekitarmu terbiasa menjadikanmu tempat bersandar. Karena elemen Kayu tidak muncul secara alami di baganmu, dorongan untuk mengubah arah atau sekadar beristirahat tidak akan muncul dari dalam diri. Kamu bisa bertahan sangat lama di situasi yang sudah tidak cocok hanya karena kamu tidak terbiasa menunggu inspirasi untuk pindah. Kamu tidak butuh alasan untuk bergerak, namun terkadang, kamu perlu membuat pemicu dari luar—seperti jadwal wajib santai yang dijaga sekeras kamu menjaga target kerja—untuk benar-benar berhenti sejenak."
+          }
+        ],
+        "penutup": "Jejak bantuan dan dukungan selalu ada di sekitarmu melalui Bintang Penolong [Nobleman], namun pertolongan itu tidak akan datang jika tidak kamu jemput. Kamu terbiasa menyelesaikan segalanya sendirian sampai lupa bahwa membagi beban bukanlah tanda kelemahan, melainkan strategi agar nyalamu tidak padam lebih cepat dari yang seharusnya. Cobalah untuk mulai meminta bantuan lebih awal dari yang biasanya terasa nyaman bagimu."
+      }
+    },
+    {
+      "from": "r5-05-v2.json#draft1",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "verdict": "balanced",
+      "findings": [
+        "the strength block names \"kuat\" but the verdict is \"balanced\""
+      ],
+      "verdict_word_sentences": [
+        "Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka, karena baganmu berada di titik Seimbang.",
+        "Meski begitu, ada tarikan kuat dari Aspek Penantang (Seven Killings) di Pilar Kerja yang menetap di sana sebagai profil utamamu."
+      ],
+      "draft": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Earth",
+              "strength_balanced",
+              "main_profile"
+            ],
+            "heading": "Gunung yang Terus Menantang Diri",
+            "text": "Kamu adalah Tanah dalam bentuk Gunung. Sebagai Day Master Tanah, kamu memancarkan keteguhan yang membuat orang lain menaruh hal-hal penting padamu karena kamu tidak mudah goyah. Kamu menampung beban lebih banyak dari yang terlihat di permukaan, seperti gunung yang menjadi tempat berpijak bagi sekitarnya. Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka, karena baganmu berada di titik Seimbang. Meski begitu, ada tarikan kuat dari Aspek Penantang (Seven Killings) di Pilar Kerja yang menetap di sana sebagai profil utamamu. Kamu tumbuh paling cepat saat berada di bawah tekanan; dalam keseharian, ini bisa terasa seperti saat rekan kerja panik karena tenggat waktu, kamu justru merasa pikiranmu paling jernih dan mampu mengurai benang kusut dengan dingin. Sayangnya, ini menciptakan pola di mana kamu sering mencari tekanan yang sebenarnya tidak perlu, karena saat semuanya terasa terlalu aman, kamu justru merasa kehilangan arah."
+          },
+          {
+            "fact_ids": [
+              "void_stack_month",
+              "relation_刑_trine_寅巳申",
+              "relation_冲_寅申"
+            ],
+            "heading": "Ketegangan di Balik Hasil yang Sempurna",
+            "text": "Di Pilar Kerja, kamu memiliki Tanda Kekosongan (Void). Inilah alasan mengapa meskipun orang melihatmu berhasil dan ahli, kamu sering merasa belum pantas menyandangnya. Pengakuan orang lain tidak pernah benar-benar menempel di dalam dirimu; kamu terus menunggu bukti berikutnya seolah-olah apa yang sudah kamu capai hanyalah kebetulan. Kondisi ini diperumit oleh Simpul (Punishment) yang mengikat Pilar Akar, Kerja, dan Diri, serta adanya Benturan (Clash) antara Pilar Kerja dan Pilar Diri. Masalah di hidupmu jarang berdiri sendiri. Misalnya, saat kariermu mengalami guncangan mendadak akibat Benturan tersebut, dampaknya akan langsung merembet ke kehidupan pribadimu. Memahami situasi rumit yang tidak punya jawaban sederhana adalah bakatmu, namun konsekuensinya adalah ketenangan di area tersebut tidak datang otomatis. Kamu perlu secara sadar menjaga rutinitas di Pilar Diri agar guncangan di Pilar Kerja tidak melumpuhkan segalanya."
+          },
+          {
+            "fact_ids": [
+              "spouse_palace",
+              "aspek_convergence_食神"
+            ],
+            "heading": "Seni Bekerja dalam Sunyi",
+            "text": "Di Pilar Diri, tempatmu menyimpan Fondasi Pasangan, bersarang pula energi Aspek Perajin (Eating God). Kamu senang mengerjakan sesuatu sampai selesai tanpa perlu ditonton, dan proses itu sendiri sudah memberimu kepuasan. Namun, karena ini bercampur dengan Aspek Pendamping (Friend) yang kuat, kamu terbiasa mengerjakan semuanya sendiri hingga terasa berat. Kamu jarang menagih hakmu atau menyebut namamu dalam kontribusi yang besar; sering kali, karyamu dipakai orang lain tanpa namamu ikut disebut. Jika kamu merasa lelah, ingatlah untuk mendokumentasikan dan mengirimkan langsung hasil kerjamu kepada mereka yang berwenang. Klaim kontribusimu dengan lugas tanpa harus menunggu orang lain menyadarinya sendiri."
+          },
+          {
+            "fact_ids": [
+              "badge_文昌",
+              "badge_天乙貴人"
+            ],
+            "heading": "Jejak Belajar dan Bantuan Tersembunyi",
+            "text": "Sebagai pemilik Bintang Cendekia (Academic Star) di Pilar Diri, kamu memiliki kemampuan menyerap hal baru dengan sangat cepat melalui pengamatan mandiri. Belajar tidak pernah terasa sebagai beban, namun kamu sering terjebak dalam jarak antara paham teori dan benar-benar mengeksekusinya. Jangan berhenti pada pemahaman; berikan wujud nyata dalam tujuh hari setiap kali kamu mempelajari hal baru. Selain itu, di Pilar Arah, kamu memiliki Bintang Penolong (Nobleman). Saat kamu berada di titik tersulit, selalu ada orang yang tidak diduga muncul untuk membantu. Kamu tidak benar-benar sendirian, tetapi kamu harus membiasakan diri meminta bantuan lebih awal sebelum segalanya terasa terlalu menyesakkan."
+          }
+        ],
+        "penutup": "Jejak-jejak yang tertanam di pilar-pilarmu menunjukkan seseorang yang tidak hanya berdiri kokoh, tetapi juga terus-menerus menguji kapasitas dirinya sendiri. Ada ritme yang menarik antara keinginan untuk menjadi gunung yang tenang dan dorongan untuk selalu berada di tengah badai. Mungkin sekarang saatnya untuk melihat bagaimana pola ini memengaruhi cara kamu mengambil keputusan besar dalam jangka panjang."
+      }
+    },
+    {
+      "from": "r5-07-v2.json#draft2",
+      "inputs": {
+        "birthDate": "1989-02-04",
+        "birthTime": "04:00",
+        "gender": "male"
+      },
+      "verdict": "balanced",
+      "findings": [
+        "the strength block names \"lemah\" but the verdict is \"balanced\"",
+        "the strength block names \"kuat\" but the verdict is \"balanced\""
+      ],
+      "verdict_word_sentences": [
+        "Secara kapasitas energi, baganmu berdiri di titik tengah yang Seimbang.",
+        "Karena Air menguras energi, posisimu tidak ekstrem kuat maupun lemah."
+      ],
+      "draft": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Wood",
+              "strength_balanced",
+              "main_profile"
+            ],
+            "heading": "Si Bambu yang Terbuka",
+            "text": "Sebagai Bambu, elemen Kayu di dalam dirimu membuatmu terus tumbuh dengan menjangkau hal baru. Berhenti berkembang terasa lebih buruk bagimu daripada salah arah. Orang sering salah mengira kamu mudah mengikuti arus, padahal kamu hanya sedang menunggu celah, dan arah tujuanmu tidak pernah berubah. Kamu memiliki dorongan alami untuk maju dan memperbaiki keadaan, membuat orang di sekitarmu ikut terdorong oleh energimu. Namun, dorongan ini membuatmu sulit melambat, bahkan di saat tubuh dan pikiranmu sangat membutuhkan istirahat.\n\nSecara kapasitas energi, baganmu berdiri di titik tengah yang Seimbang. Kesimpulan ini didapat dari elemen intimu, Kayu, yang lahir di bulan Kerbau dengan musim berelemen Air. Karena Air menguras energi, posisimu tidak ekstrem kuat maupun lemah. Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar. Kelenturanmu tinggi; perubahan mendadak yang membuat orang lain kehilangan arah biasanya hanya menggeser langkahmu sedikit saja. Konsekuensinya, arah hidupmu harus kamu tentukan sendiri, karena baganmu tidak akan memaksamu ke satu sudut. Tentukan satu komitmen untuk enam bulan ke depan dan tuliskan alasannya, agar saat ragu menghampiri, kamu punya pegangan alih-alih menunggu dorongan luar.\n\nKaraktermu semakin jelas dengan Aspek Peraih (Indirect Wealth) yang menjadi profil utamamu di Pilar Kerja, yang merepresentasikan pekerjaan dan kariermu. Kamu melihat peluang di tempat yang dilewati orang lain. Pintu sering terbuka justru karena kamu berani mengetuk lebih dulu. Sayangnya, yang datang besar bisa hilang besar, dan kamu jarang menyimpannya cukup lama untuk benar-benar merasa aman. Kunci dan eksekusi tuntas satu peluang di tangan sebelum mengejar yang baru, karena peluang yang setengah jalan hanya membuang energi."
+          },
+          {
+            "fact_ids": [
+              "relation_冲_丑未",
+              "spouse_palace",
+              "aspek_convergence_偏財"
+            ],
+            "heading": "Guncangan dan Dinamika",
+            "text": "Tegangan dalam petamu terlihat dari Benturan (Clash) antara Pilar Kerja dan Pilar Diri. Dua bagian ini saling berhadapan langsung, membuat perubahan di area pekerjaan dan kehidupan pribadimu sering datang mendadak dan membawa guncangan. Kamu terbiasa beradaptasi dengan guncangan cepat, melewati situasi sulit yang membuat orang lain panik. Namun, ketenangan di area ini tidak datang otomatis dan butuh dijaga dengan usaha yang sadar dan terus-menerus. Siapkan rencana cadangan sebelum dibutuhkan agar kamu bisa merespons dengan strategi, bukan panik.\n\nDi Pilar Diri, terdapat Fondasi Pasangan (Spouse Palace) yang menunjukkan dinamika hubungan paling dekatmu. Di sinilah Aspek Peraih juga bersarang, menguatkan tarikan energi Aspek Peraih yang juga ada di Pilar Kerjamu. Hubungan terdekatmu terasa wajar bagimu meskipun orang lain menganggapnya berat, penuh dengan dinamika melihat peluang dan ketidakpastian yang datang dan pergi."
+          },
+          {
+            "fact_ids": [
+              "element_dominant_Earth",
+              "aspek_convergence_正財"
+            ],
+            "heading": "Tuntutan Pengelolaan",
+            "text": "Baganmu dipenuhi oleh elemen Tanah yang sangat mendominasi. Ini berarti kamu dikelilingi hal-hal yang menuntut pengelolaan: peluang, tanggung jawab, dan urusan orang lain. Kesempatan tak pernah habis di tanganmu, dan kamu selalu punya objek untuk dikelola. Akan tetapi, urusan ini sering melebihi kapasitas fisikmu, membuat perhatianmu terpecah dan banyak hal terbengkalai setengah jalan. Pilih hanya tiga prioritas utama untuk kuartal ini dan fokus selesaikan sebelum menyentuh sisanya.\n\nDominasi ini didukung oleh Aspek Pengelola (Direct Wealth) yang mengumpul di Pilar Akar dan Pilar Arah. Kamu dipercaya memegang hal penting dan merawatnya dengan rapi, sehingga orang merasa tenang saat kamu memegang kendali. Sayangnya, semakin banyak yang kamu pegang, semakin sedikit energi yang tersisa untuk dirimu sendiri. Pilih satu tugas untuk diserahkan ke orang lain bulan ini, berikan petunjuk yang jelas, dan biarkan hasilnya berjalan meskipun tidak serapi caramu."
+          },
+          {
+            "fact_ids": [
+              "badge_空亡",
+              "aspek_convergence_比肩",
+              "aspek_convergence_偏印"
+            ],
+            "heading": "Jarak dan Pengakuan",
+            "text": "Di Pilar Akarmu terdapat Tanda Kekosongan (Void). Orang lain melihat kamu berhasil mengenai asal-usul dan latar belakangmu, tetapi kamu sendiri sering merasa belum pantas menyandangnya. Pengakuan orang lain tidak pernah menempel di dalam dirimu, meski kamu membangunnya murni dengan kerja keras. Sebut hasil kerjamu dengan lantang, meskipun rasanya canggung, agar pengakuan itu mulai terasa nyata bagimu.\n\nSelain itu, Aspek Pendamping (Friend) di Pilar Akar, Kerja, dan Diri membuatmu terbiasa menyelesaikan semuanya sendiri. Kamu tidak runtuh saat tidak ada yang menopang, tetapi bantuan sering datang terlambat karena kamu tidak pernah memintanya. Mintalah bantuan lebih awal sebelum situasinya makin mendesak. Terakhir, Aspek Pemikir (Indirect Resource) memberimu kemampuan memahami sesuatu lewat jalan intuitif yang sulit dijelaskan. Kesimpulanmu sering benar sebelum kamu sempat membuktikannya, meski ini kadang membuatmu merasa berjarak dari lingkungan sekitar karena menjelaskan isi kepalamu terasa melelahkan."
+          }
+        ],
+        "penutup": "Itulah gambaran kekuatan dan tarikan energi di dalam dirimu. Dengan kelenturan Bambu dan kepekaan melihat peluang, kamu punya kapasitas besar untuk mengelola apa pun yang datang. Tinggal bagaimana kamu memilih prioritas dan kapan harus melambat. Menarik, bukan?"
+      }
+    },
+    {
+      "from": "r5-10-v2.json#draft1",
+      "inputs": {
+        "birthDate": "1989-02-04",
+        "birthTime": "04:00",
+        "gender": "male"
+      },
+      "verdict": "balanced",
+      "findings": [
+        "the strength block names \"kuat\" but the verdict is \"balanced\""
+      ],
+      "verdict_word_sentences": [
+        "Daya lentur ini diperkuat oleh kapasitas energimu yang berada di titik Seimbang (Balanced).",
+        "Namun, posisi seimbang ini tidak memberimu dorongan dari luar; kamulah yang harus selalu menyalakan kompas itu sendiri.",
+        "Di saat yang sama, profil utamamu digerakkan oleh Aspek Peraih (Indirect Wealth) yang berakar kuat dari cabang bulan di Pilar Kerja."
+      ],
+      "draft": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Wood",
+              "strength_balanced",
+              "main_profile"
+            ],
+            "heading": "Dorongan Bertumbuh dan Naluri Peluang",
+            "text": "Sebagai Bambu, elemen intimu adalah Kayu (Wood). Karakter dasarmu tumbuh dengan terus menjangkau hal-hal baru; bagi dirimu, mandek atau berhenti berkembang terasa jauh lebih buruk daripada salah mengambil arah. Orang di sekitarmu sering keliru mengira kamu sekadar mengikuti arus. Padahal, kamu hanya sedang membaca keadaan dan menunggu celah, sementara tujuan aslimu tidak pernah bergeser. Daya lentur ini diperkuat oleh kapasitas energimu yang berada di titik Seimbang (Balanced). Lahir di bulan Kerbau dengan musim yang berelemen Air menguras tenagamu secara wajar, baganmu berdiri tegak menopang diri sendiri tanpa guncangan ekstrem. Perubahan mendadak yang biasanya membuat orang lain limbung hanya menggeser langkahmu sedikit saja.\n\nNamun, posisi seimbang ini tidak memberimu dorongan dari luar; kamulah yang harus selalu menyalakan kompas itu sendiri. Di saat yang sama, profil utamamu digerakkan oleh Aspek Peraih (Indirect Wealth) yang berakar kuat dari cabang bulan di Pilar Kerja. Kamu memiliki mata jeli untuk melihat peluang di tempat yang dilewati begitu saja oleh orang lain. Pintu baru sering terbuka karena kamu berani mengetuk lebih dulu di tengah ketidakpastian. Konsekuensinya, hasil dan kesempatan yang datang besar juga bisa lepas dengan cepat sebelum kamu sempat merasa benar-benar mapan dan aman."
+          },
+          {
+            "fact_ids": [
+              "relation_冲_丑未",
+              "spouse_palace",
+              "aspek_convergence_偏財"
+            ],
+            "heading": "Guncangan Antara Dunia Luar dan Ruang Personal",
+            "text": "Tegangan paling tajam dalam petamu terletak pada Benturan (Clash) langsung antara cabang Kerbau dan Kambing di Pilar Kerja dan Pilar Diri. Pertemuan dua pilar ini menandakan bahwa gesekan sering kali terjadi secara mendadak antara tuntutan kariermu dan ketenangan kehidupan pribadimu. Dalam keseharian, ini terasa seperti situasi di mana stabilitas kerja tiba-tiba mengguncang ritme rumah tangga, atau urusan domestik mendadak menuntut perhatian penuh di tengah proyek penting. Kamu memang punya ketahanan tinggi menghadapi situasi kritis yang membuat orang lain panik, tetapi ketenangan di area ini tidak pernah datang otomatis tanpa usaha sadar untuk menatanya.\n\nBenturan ini terasa semakin personal karena Fondasi Pasangan (Spouse Palace) di Pilar Diri memuat Aspek Peraih yang sama. Fondasi ini menunjukkan tekstur kedekatan yang menuntut dinamika cepat dan keterbukaan terhadap risiko. Kamu merasa hidup saat ada ruang gerak dan proyek bersama, tetapi ritme yang serba cepat ini rentan menyulut percikan jika tidak ada pembagian batas yang jelas antara ambisi luar dan kehangatan personal."
+          },
+          {
+            "fact_ids": [
+              "element_dominant_Earth",
+              "aspek_convergence_正財",
+              "aspek_convergence_比肩"
+            ],
+            "heading": "Beban Mengelola dan Kebiasaan Memikul Sendiri",
+            "text": "Jika melihat komposisi elemenmu secara menyeluruh, petamu didominasi oleh elemen Tanah yang dikontrol langsung oleh energimu. Dominasi ini muncul sebagai Aspek Pengelola (Direct Wealth) yang terbentang kuat di Pilar Akar dan Pilar Arah. Baganmu dipenuhi hal-hal yang menuntut pengelolaan: urusan, aset, tanggung jawab, dan kepentingan orang lain. Kamu dipercaya karena apa yang kamu sentuh jarang berantakan. Kepercayaan mengalir tanpa kamu minta, dan orang merasa tenang saat kendali ada di tanganmu.\n\nNamun, semakin banyak hal yang kamu pegang, semakin tipis energi yang tersisa untuk merawat dirimu sendiri. Situasi ini diperberat oleh hadirnya Aspek Pendamping (Friend) di Pilar Akar, Pilar Kerja, dan Pilar Diri, yang membuatmu terbiasa menuntaskan segala sesuatu seorang diri. Bagimu, meminta tolong sering terasa lebih berat daripada mengerjakan beban itu dua kali lipat sendirian. Akibatnya, orang-orang di sekitarmu mengira kamu selalu sanggup dan tidak membutuhkan bantuan, sehingga uluran tangan kerap datang terlambat saat energimu sudah di ambang batas."
+          },
+          {
+            "fact_ids": [
+              "badge_空亡",
+              "aspek_convergence_偏印"
+            ],
+            "heading": "Firasat Batin dan Rasa Asing pada Pencapaian",
+            "text": "Di balik ketangkasanmu berurusan dengan hal-hal nyata, ada Aspek Pemikir (Indirect Resource) yang menghubungkan Pilar Akar dan Pilar Kerja. Kamu sering membaca situasi dan menangkap pola lewat jalan intuitif. Kesimpulanmu kerap terbukti tepat mendahului pembuktian logika, meski menjelaskan prosesnya kepada orang lain sering terasa melelahkan. \n\nDi sisi lain, di Pilar Akar tempat asal-usul dan fondasimu berpijak, tertambat Tanda Kekosongan (Void). Tanda ini menjelaskan mengapa setiap kali kamu meraih pencapaian nyata yang diakui publik, ada ruang hampa di dalam batinmu yang merasa pencapaian itu belum sepenuhnya milikmu. Orang lain memandangmu berhasil dan berkompeten murni dari hasil kerja kerasmu, namun pengakuan dari luar seolah sulit menempel dan menumbuhkan rasa puas di dalam dirimu."
+          }
+        ],
+        "penutup": "Kamu memiliki daya lentur untuk terus bertumbuh di tengah tumpukan tanggung jawab dan guncangan mendadak, namun dorongan untuk selalu membuktikan diri sendirian kerap membuatmu lupa merasakan hasil yang sudah ada di genggamanmu."
+      }
+    },
+    {
+      "from": "r5-10-v2.json#draft2",
+      "inputs": {
+        "birthDate": "1989-02-04",
+        "birthTime": "04:00",
+        "gender": "male"
+      },
+      "verdict": "balanced",
+      "findings": [
+        "the strength block names \"kuat\" but the verdict is \"balanced\""
+      ],
+      "verdict_word_sentences": [
+        "Dorongan alami untuk maju ini mengalir kuat dan kerap menggerakkan orang-orang di sekitarmu, namun ia datang dengan harga: kamu sangat sulit melambat, bahkan ketika tubuh dan pikiranmu sudah berteriak menuntut istirahat.",
+        "Kapasitas energimu tergolong Seimbang (Balanced).",
+        "Namun, posisi yang seimbang ini tidak memberimu dorongan ekstrem yang memaksa dari dalam; arah hidupmu harus kamu tentukan sendiri secara sadar."
+      ],
+      "draft": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Wood",
+              "strength_balanced",
+              "main_profile"
+            ],
+            "heading": "Dorongan Bertumbuh dan Titik Tengah",
+            "text": "Sebagai Bambu, elemen intimu adalah Kayu (Wood) pada batang hari lahirmu. Karakter dasarmu tumbuh dengan menjangkau hal baru; berhenti berkembang terasa jauh lebih menyesakkan bagimu daripada sekadar salah melangkah. Orang sering salah mengira kamu mudah mengikuti arus ke mana pun angin bertiup, padahal kamu hanya sedang menunggu celah yang tepat tanpa pernah menggeser tujuan utamamu. Dorongan alami untuk maju ini mengalir kuat dan kerap menggerakkan orang-orang di sekitarmu, namun ia datang dengan harga: kamu sangat sulit melambat, bahkan ketika tubuh dan pikiranmu sudah berteriak menuntut istirahat.\n\nKapasitas energimu tergolong Seimbang (Balanced). Kamu lahir di bulan Kerbau dengan cabang musim berelemen Air yang menyerap tenagamu, namun struktur baganmu berdiri tepat di titik tengah yang stabil. Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima bantuan dari luar. Ketika situasi berubah mendadak dan membuat orang lain limbung, kelenturanmu membuatmu jarang ikut goyah. Namun, posisi yang seimbang ini tidak memberimu dorongan ekstrem yang memaksa dari dalam; arah hidupmu harus kamu tentukan sendiri secara sadar.\n\nDi saat yang sama, profil utamamu digerakkan oleh Aspek Peraih (Indirect Wealth) yang berakar di Pilar Kerja dari cabang Kerbau berelemen Tanah. Di ranah pekerjaan dan kariermu, kamu punya insting tajam untuk melihat peluang di tempat yang dilewati begitu saja oleh orang lain. Pintu sering terbuka karena kamu berani mengetuk lebih dulu tanpa takut pada ketidakpastian. Konsekuensinya, apa yang datang dalam jumlah besar bisa lepas sama cepatnya, membuatmu jarang menyimpannya cukup lama untuk merasa benar-benar tenang."
+          },
+          {
+            "fact_ids": [
+              "element_dominant_Earth",
+              "spouse_palace",
+              "aspek_convergence_偏財"
+            ],
+            "heading": "Banjir Urusan dan Ruang Pribadi",
+            "text": "Baganmu dipenuhi oleh elemen Tanah yang dominan, elemen yang berada di bawah kendali elemen Kayumu. Dalam keseharian, dominasi ini membuat hidupmu dipenuhi hal-hal yang menuntut pengelolaan: rentetan peluang baru, tumpukan tanggung jawab, hingga urusan orang lain yang seolah antre minta diselesaikan. Kesempatan memang tidak pernah habis di tanganmu, tetapi beban urusan ini kerap melampaui kapasitas fisikmu hingga perhatianmu terpecah dan banyak hal terbengkalai di tengah jalan.\n\nCorak ini bahkan merasuk ke ruang paling intimmu. Di Pilar Diri, Fondasi Pasangan (Spouse Palace) yang menjadi wadah relasi terdekatmu diisi oleh cabang Kambing yang juga memuat Aspek Peraih (Indirect Wealth). Hubungan pribadi yang terasa wajar bagimu selalu membawa dinamika mengejar peluang bersama dan menyukai tantangan, meski bagi orang lain ritme seperti itu terasa melelahkan. Kehadiran aspek ini di Pilar Kerja dan Pilar Diri memperkuat pola bahwa kamu lebih mudah terpikat pada proyek baru bersama pasangan daripada menikmati ketenangan yang statis."
+          },
+          {
+            "fact_ids": [
+              "relation_冲_丑未"
+            ],
+            "heading": "Benturan Antara Karier dan Diri",
+            "text": "Tegangan paling nyata dalam petamu terjadi karena interaksi Benturan (Clash) antara Kerbau dan Kambing di Pilar Kerja dan Pilar Diri. Ranah pekerjaan dan kehidupan personalmu saling berhadapan secara langsung. Dalam keseharian, dinamika ini terasa ketika perubahan karier tiba-tiba menuntut kompromi besar di ranah privat, atau sebaliknya, urusan pribadi mendadak mengguncang ritme kerjamu tanpa ada aba-aba perlahan.\n\nKamu memang sudah terbiasa beradaptasi cepat dengan guncangan yang bisa membuat orang lain panik. Namun, harga yang harus kamu bayar adalah rasa tenang yang tidak pernah hadir otomatis; kedamaian di dua area ini menuntut usaha sadar yang terus-menerus. Kuncinya adalah menyiapkan rencana cadangan sebelum gejolak itu datang, agar setiap guncangan direspons dengan strategi terukur, bukan dengan kepanikan sesaat."
+          },
+          {
+            "fact_ids": [
+              "badge_空亡",
+              "aspek_convergence_比肩",
+              "aspek_convergence_正財",
+              "aspek_convergence_偏印"
+            ],
+            "heading": "Jejak Peran dan Beban Sunyi",
+            "text": "Di Pilar Akar yang menaungi asal-usulmu, terdapat tanda bintang Tanda Kekosongan (Void) pada cabang Naga. Kamu membangun setiap pencapaian murni dengan kerja keras tanpa pernah bersandar pada keberuntungan, sehingga orang lain melihat prestasimu begitu nyata. Namun di dalam batinmu, rasa memiliki itu jarang ikut hadir; kamu kerap merasa belum pantas menyandangnya dan terus menunggu bukti berikutnya. Untuk mengatasinya, mulailah menyebut hasil kerjamu dengan lugas tanpa mengecilkannya.\n\nBeban ini diperberat oleh Aspek Pendamping (Friend) yang hadir di Pilar Akar, Pilar Kerja, dan Pilar Diri, membuatmu terbiasa menyelesaikan segalanya sendiri karena meminta tolong terasa lebih berat daripada bekerja dua kali lipat. Di sisi lain, Aspek Pengelola (Direct Wealth) di Pilar Akar dan Pilar Arah membuat orang lain tenang mempercayakan urusan rapi kepadamu, walau itu mengikis energimu sendiri. Sementara itu, Aspek Pemikir (Indirect Resource) di Pilar Akar dan Pilar Kerja memberimu firasat tajam membaca pola yang luput dari pandangan orang lain, meski kamu sering lelah saat harus menerjemahkan isi kepalamu ke lingkungan sekitar."
+          }
+        ],
+        "penutup": "Kamu berdiri kokoh dengan kapasitas yang seimbang di tengah pusaran peluang dan tanggung jawab yang terus berdatangan, namun benturan di pilar hidupmu menantangmu untuk memilih apakah kamu akan terus mengalir mengikuti setiap pintu yang terbuka atau mulai membatasi mana yang layak kamu jaga hingga tuntas."
+      }
+    }
+  ]
+}

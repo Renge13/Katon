@@ -19,6 +19,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
@@ -39,6 +40,8 @@ import {
   STRUCTURE_PARAMS, STYLE_PARAMS,
 } from '../lib/validate/index.js';
 import { hasUnsanctionedQuestion } from '../lib/validate/style.js';
+import { validateRenderingV2 } from '../lib/validate/v2.js';
+import { withEngineOpening } from '../lib/render/pairOpening.js';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
 import { stemOverlap, distinctiveStems, sentences } from '../lib/validate/text.js';
 
@@ -1998,6 +2001,77 @@ test('AN ADJECTIVAL USE CANNOT HIDE A BARE LABEL LATER IN THE SAME BLOCK', () =>
     'Aspek Pelindung yang kuat membentuk caramu bekerja. Baganmu Kuat. Titik.');
   assert.ok(checksIn(validateRendering(hidden, fresh)).includes('fact.strength_same_breath'),
     'the later bare verdict must still be caught');
+});
+
+// ── THE VERDICT, NOT THE WORD (Prompt AS §3, STAGE6 1.58.0) ──
+// The citing-block pass flagged ANY wrong verdict word in a block that cites the
+// strength fact. v2 merges facts into one block (day master + strength + main
+// profile), so every ordinary "kuat" in it counted: all six round-5 firings were
+// that, and they caused both round-5 floors. The fixture is those six drafts,
+// verbatim, extracted by script.
+const R5_STRENGTH = JSON.parse(readFileSync(
+  new URL('./fixtures/strength-contradiction-r5.json', import.meta.url), 'utf8'));
+
+test('AS §3 PRECONDITION: the fixture is the six round-5 firings', () => {
+  assert.equal(R5_STRENGTH.cases.length, 5);
+  assert.equal(R5_STRENGTH.cases.reduce((n, c) => n + c.findings.length, 0), 6);
+});
+
+for (const c of R5_STRENGTH.cases) {
+  test(`AS §3: ${c.from} (${c.verdict}) no longer reads an ordinary "kuat"/"lemah" as the verdict`, () => {
+    const sj = buildSemanticJson(calculateBaziChart(c.inputs), { voice: 'v2' });
+    const r = validateRenderingV2(withEngineOpening(c.draft, sj).rendered, sj, { provider: 'gemini' });
+    const fired = r.findings.filter((f) => f.check === 'fact.strength_contradiction').map((f) => f.message);
+    assert.deepEqual(fired, [], `still fires: ${fired.join(' | ')}`);
+  });
+}
+
+test('AS §3 CONTROLS: a verdict predicated of HER still hard-rejects, both gates', () => {
+  const weak = buildSemanticJson(calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' }));
+  const strong = buildSemanticJson(calculateBaziChart({ birthDate: '1996-10-02', birthTime: '19:20' }));
+  const earth = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }));
+  assert.equal(weak.strength.verdict, 'weak', 'fixture assumption');
+  assert.equal(strong.strength.verdict, 'strong', 'fixture assumption');
+  assert.equal(earth.strength.verdict, 'balanced', 'fixture assumption');
+  assert.equal(earth.core.element, 'Tanah', 'fixture assumption');
+  for (const [sj, claim] of [
+    [weak, 'Kamu kuat'],
+    [strong, 'Baganmu lemah'],
+    [earth, 'Tanah di dalam dirimu kuat'],
+    // Her Day Master element and her archetype are subjects too, read from the engine.
+    [weak, 'Api di dalam dirimu tergolong kuat'],
+    [earth, 'Gunung ini sangat lemah'],
+  ]) {
+    const id = sj.facts.find((f) => f.provenance?.kind === 'strength').id;
+    const meaning = sj.facts.find((f) => f.id === id).label_meaning;
+    const bad = withBlockText(goodReading(sj), id, `${claim}. ${meaning}`);
+    const result = validateRendering(bad, sj);
+    assert.ok(checksIn(result).includes('fact.strength_contradiction'), `v1 must catch: "${claim}"`);
+    assert.equal(result.hard, true);
+  }
+  // The same controls through the v2 gate, planted into a real round-5 draft of the
+  // same chart, so the merged-block shape that caused the misfires is what is tested.
+  for (const [from, claim] of [['r5-01-v2.json#draft1', 'Kamu kuat.'], ['r5-05-v2.json#draft1', 'Tanah di dalam dirimu kuat.']]) {
+    const c = R5_STRENGTH.cases.find((x) => x.from === from);
+    const sj = buildSemanticJson(calculateBaziChart(c.inputs), { voice: 'v2' });
+    const draft = structuredClone(c.draft);
+    const id = sj.facts.find((f) => f.provenance?.kind === 'strength').id;
+    draft.blocks.find((b) => (b.fact_ids || []).includes(id)).text += ` ${claim}`;
+    const r = validateRenderingV2(withEngineOpening(draft, sj).rendered, sj, { provider: 'gemini' });
+    const f = r.findings.find((x) => x.check === 'fact.strength_contradiction');
+    assert.ok(f, `v2 must catch: "${claim}" on ${from}`);
+    assert.equal(f.severity, 'hard');
+  }
+});
+
+test('AS §3: a negated verdict word, or both poles, is not a claim', () => {
+  const earth = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }));
+  const id = earth.facts.find((f) => f.provenance?.kind === 'strength').id;
+  const meaning = earth.facts.find((f) => f.id === id).label_meaning;
+  for (const ok of ['Kamu tidak kuat maupun lemah', 'Baganmu bukan kuat, bukan lemah', 'Kamu tidak lemah']) {
+    const r = validateRendering(withBlockText(goodReading(earth), id, `${ok}. ${meaning}`), earth);
+    assert.equal(checksIn(r).includes('fact.strength_contradiction'), false, `"${ok}" is not a contradiction`);
+  }
 });
 
 // ── FIX 3: style.hedging IS CORRECT, and chart 5's 41% IS STALE ──
