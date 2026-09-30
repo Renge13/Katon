@@ -368,3 +368,21 @@ test('AU §2 STATUS LINE: a reopened, already-served reading never shows it', as
     assert.equal(statusIn(m.host), null);
   } finally { m.unmount(); f.restore(); }
 });
+
+// ── A BADGE ON TWO PILLARS NAMES BOTH (the AU §3 card, fixed 2026-09-30) ──
+// The card read `f.palace`, the FIRST hit only, while AU §3 asked for "the pillar(s)
+// from the fact's positions". Chart 4 (1995-06-01 06:00) seats Bintang Penolong at
+// Pilar Kerja AND Pilar Arah; its card said Pilar Kerja. Found by the AV §3 smoke check,
+// where the prose (correctly) named both. 104 of 372 sampled charts carry such a badge.
+test('BADGE CARD: a badge on two pillars names both, in the engine\'s own reading-order phrase', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, chart: viewFor({ birthDate: '1995-06-01', birthTime: '06:00' }) });
+  try {
+    const cards = cardsIn(m.host);
+    assert.deepEqual(cards.map((c) => [c.name, c.pillar]), [
+      ['Bintang Perantau', 'Pilar Kerja'],
+      ['Bintang Cendekia', 'Pilar Arah'],
+      ['Bintang Penolong', 'Pilar Kerja dan Pilar Arah'],
+    ]);
+  } finally { m.unmount(); f.restore(); }
+});
