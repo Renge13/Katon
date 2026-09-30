@@ -291,10 +291,11 @@ export default function Funnel({ salesOpen = false } = {}) {
     // engine - and she used to wait p50 7.6s (up to ~23s at three attempts) with a
     // single static line of copy for facts that already existed.
     //
-    // `pending` is what the reading renders a wordless skeleton for. NO COPY:
+    // `pending` is what the reading renders a skeleton and the status line for.
     // Reyner ruled 2026-08-26 that the loading words are written against what is
-    // actually on screen, after this ships. The old anticipation lines describe
-    // work she can now watch being already done.
+    // actually on screen, after this ships; he wrote them 2026-09-30 (Prompt AU
+    // §2, CHROME_COPY.status_writing). The old anticipation lines described work
+    // she can now watch being already done.
     setReading({
       token: created.token, chart: created.chart, blocks: [], penutup: '',
       pending: true, birthDate, birthTime: resolution.birthTime ?? birthTime, gender: form.gender || null,
@@ -876,6 +877,18 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
           <div data-profile-line style={{ marginTop: 8, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>{profileLine}</div>
         )}
       </Reveal>
+
+      {/* THE STATUS LINE (Prompt AU §2, Reyner's ruling 3, 2026-09-30): header, then
+          this, then Bagan Kelahiran. Tied to `pending` and nothing else, so it leaves
+          the same way on a render and on a floor, and a reopened reading never shows
+          it. role="status" makes it the polite announcement the skeleton's
+          aria-busy region does not carry. */}
+      {pending && (
+        <div data-status-line role="status" style={{ marginTop: 22 }}>
+          <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, lineHeight: 1.4, color: 'var(--tinta)', margin: 0 }}>{CHROME_COPY.status_writing}</p>
+          <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', margin: '4px 0 0' }}>{CHROME_COPY.status_writing_sub}</p>
+        </div>
+      )}
 
       {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
           characters ARE the chart and they are what lets a reader cross-check Katon

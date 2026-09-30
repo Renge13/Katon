@@ -313,3 +313,58 @@ test('AU §3: the cards render on a FLOOR too, and before the reading on the pag
     assert.ok(at('Tanda Istimewamu') < at('Paragraf satu.'), 'the badges before the reading');
   } finally { m.unmount(); f.restore(); }
 });
+
+// ── AU §2: THE STATUS LINE (Reyner's ruling 3, typography ruled 2026-09-30) ──
+// "Bacaanmu sedang ditulis..." with THREE PERIODS (the bank bans the ellipsis
+// character) and the smaller line under it. Shown only while the reading is pending,
+// between the header and Bagan Kelahiran; gone once the prose arrives, render or floor.
+import { CHROME_COPY } from '../lib/site/copy.js';
+
+const statusIn = (host) => host.querySelector('[data-status-line]');
+
+test('AU §2 STATUS LINE: the bank carries the two strings exactly as ruled', () => {
+  assert.equal(CHROME_COPY.status_writing, 'Bacaanmu sedang ditulis...');
+  assert.equal(CHROME_COPY.status_writing_sub, 'Biasanya selesai dalam 20 detik.');
+});
+
+test('AU §2 STATUS LINE: a pending reading shows both lines, after the header and before Bagan Kelahiran', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...IN_SESSION, blocks: [], penutup: '', pending: true });
+  try {
+    const s = statusIn(m.host);
+    assert.ok(s, 'the status line renders while pending');
+    assert.ok(s.textContent.includes(CHROME_COPY.status_writing), 'the main line');
+    assert.ok(s.textContent.includes(CHROME_COPY.status_writing_sub), 'the smaller line under it');
+    const all = m.host.textContent;
+    const at = (x) => all.indexOf(x);
+    assert.ok(at('Refleksimu') < at(CHROME_COPY.status_writing), 'after the header');
+    assert.ok(at(CHROME_COPY.status_writing) < at('Bagan Kelahiran'), 'before Bagan Kelahiran');
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §2 STATUS LINE: gone once the reading arrives, on a render and on a floor alike', async () => {
+  const f = stubFetch();
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  const render = (reading) => act(async () => {
+    root.render(React.createElement(Reading, { reading, onReset() {}, salesOpen: false }));
+  });
+  try {
+    for (const meta of [undefined, { source: 'module_assembly' }]) {
+      await render({ ...IN_SESSION, blocks: [], penutup: '', pending: true });
+      assert.ok(statusIn(host), 'present while pending');
+      await render({ ...IN_SESSION, pending: false, ...(meta ? { meta } : {}) });
+      assert.equal(statusIn(host), null, `gone on arrival (${meta ? 'floor' : 'render'})`);
+      assert.equal(host.textContent.includes(CHROME_COPY.status_writing), false);
+    }
+  } finally { act(() => root.unmount()); host.remove(); f.restore(); }
+});
+
+test('AU §2 STATUS LINE: a reopened, already-served reading never shows it', async () => {
+  const f = stubFetch();
+  const m = await mount(SERVED);
+  try {
+    assert.equal(statusIn(m.host), null);
+  } finally { m.unmount(); f.restore(); }
+});
