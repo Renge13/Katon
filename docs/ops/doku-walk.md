@@ -295,6 +295,18 @@ real sandbox QRIS payment, not only on a check-status probe. The open question f
 specific: **with the QRIS Notify URL prefilled to DOKU's own back office, does a Checkout QRIS payment
 send any HTTP Notification to the merchant, and if so to which URL?**
 
+### WALK 5, 2026-09-30: DOKU NOTIFIED, AND THE NOTIFICATION SETTLED THE ROW (Code, Prompt AS Amendment 1 §A)
+
+After DOKU support set the QRIS sandbox Notify URL on their side (Kezia, 2026-09-29).
+
+1. **`npm run probe:doku`, 04:44:42Z:** QRIS Checkout 200 on sandbox, no `customer` block needed, and a repeated `invoice_number` makes a second session. Same as 2026-09-25.
+2. **Reading created on the `ops/doku-walk` alias in the Browser pane.** `curl` got `rate_limited` because BotID classifies it as a bot. Token `3KwGxdMJClDyqSs4ja6sw`, `paid:false`. `Ambil Complete Edition` then created invoice **`3KwGxdMJClDyqSs4ja6sw.munpk08w`** (IDR 19.000, "Katon - Complete Edition", NMID ID2026092439403).
+3. **The QR string is not the NMID.** The simulator's INPUT QR wants the EMV payload, and the checkout page does not print it: it is in that page's `sessionStorage.qris_data` (`000201...6304` + CRC). The first PAY answered "Duplicate transmission/duplicate QR" again and DOKU held the transaction PENDING (06:20:14Z). A later attempt succeeded: **Success, Amount 19000, Acquirer DOKU, Transaction ID `3KwGxdMJClDyqSs4ja6sw.munpk08w`, Reference Number TW2026093039.**
+4. **The row flipped with nobody on the page:** `GET /api/deliver/<id>` every 10s, `paid:false` through 06:29:48Z, `paid:true` at 06:29:58Z. DOKU check-status: SUCCESS at 06:29:46Z.
+5. **Runtime Logs (Reyner):** `POST /api/doku/notify 200` at 06:29:47.07Z from `Apache-HttpClient/5.2.3 (Java)`; `[doku][capture] headers {"client-id":"BRN-0285-1789959005561","request-id":"214d5796-6cb7-4c68-88af-f74a794db298","request-timestamp":"2026-09-30T06:29:47Z","signature":"HMACSHA256=t+50Ivv+6ZjEHwWg08N3x79+N90wcbR5fWiusgqwSU0="}`; `[doku][capture] body {...}`; `[doku] reading 3KwGxdMJClDyqSs4ja6sw: paid=true reason=ok` at 06:29:47.654Z. The first `/r/<id>` open was 06:29:49Z, after the settle.
+
+**Gate b's notification half is DONE.** The fixture is `tests/fixtures/doku-notification.sandbox.json`, and its bytes reproduce DOKU's signature (its `_bytes` field has the check). The `DOKU_CAPTURE` row in the deferred register can now be acted on: the instrument has done its one job.
+
 ---
 
 ## Part 1 — The pre-sandbox probe, 2026-09-21 (Code)
