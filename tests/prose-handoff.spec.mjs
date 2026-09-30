@@ -107,6 +107,11 @@ function stubMotion(reduce) {
   return () => { window.matchMedia = prev; };
 }
 
+// THE SKELETON'S BAR COUNT. It was four 13px bars; since Prompt AU §2 (Reyner's ruling 3,
+// 2026-09-30) it is shaped like round 6's median reading: three sections, each an eyebrow
+// bar plus its paragraphs (2 + 1 + 1), and the penutup: 3 + 4 + 1 = 8.
+const SKELETON_BARS = 8;
+
 function mount(reading) {
   const host = document.createElement('div');
   document.body.appendChild(host);
@@ -162,7 +167,7 @@ test('the skeleton is still there on the paint the prose arrives', () => {
   const restore = stubMotion(false);
   const ui = mount(PENDING);
   try {
-    assert.equal(ui.skeletonBars().length, 4, 'the skeleton holds the space while pending');
+    assert.equal(ui.skeletonBars().length, SKELETON_BARS, 'the skeleton holds the space while pending');
     assert.equal(ui.proseNodes().length, 0, 'no prose yet');
 
     // THE FLIP. Nothing else happens in between - this is the committed render
@@ -170,7 +175,7 @@ test('the skeleton is still there on the paint the prose arrives', () => {
     ui.render(SERVED);
 
     assert.equal(ui.proseNodes().length, 5, 'the prose is on screen');
-    assert.equal(ui.skeletonBars().length, 4,
+    assert.equal(ui.skeletonBars().length, SKELETON_BARS,
       'the skeleton must not leave before the prose is visibly taking its place '
       + '- that paint is the blank one');
   } finally { ui.unmount(); restore(); }
@@ -227,7 +232,7 @@ test('reduced motion swaps instantly, with no overlap and no gap', () => {
   const restore = stubMotion(true);
   const ui = mount(PENDING);
   try {
-    assert.equal(ui.skeletonBars().length, 4);
+    assert.equal(ui.skeletonBars().length, SKELETON_BARS);
     ui.render(SERVED);
     assert.equal(ui.proseNodes().length, 5, 'the prose is there immediately');
     assert.equal(ui.skeletonBars().length, 0,

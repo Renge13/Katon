@@ -256,3 +256,60 @@ test('§4 THE ROOT LAYOUT PROVIDES THE GLOSSARY LIST, so production has the name
   assert.match(src, /<GlossNamesProvider names=\{GLOSS_NAMES_EN\}>/u);
   assert.match(src, /from '@\/lib\/render\/glossNames(\.js)?'/u);
 });
+
+// ── AU §3: BADGE CARDS, "TANDA ISTIMEWAMU" (Reyner's ruling 4, 2026-09-30) ──
+// Every bintang fact, from the ENGINE: name_id, name_en once (italic), its pillar by
+// the ruled palace name, and its glossary label_meaning. No writer text. On a render
+// and on a floor alike, because it is built from the chart, not the prose.
+const viewFor = (input) => {
+  const c = calculateBaziChart(input);
+  return mirrorChartView(c, buildSemanticJson(c, { voice: 'v2' }));
+};
+const cardsIn = (host) => [...host.querySelectorAll('[data-badge-card]')].map((el) => ({
+  name: el.querySelector('[data-badge-name]')?.textContent,
+  en: el.querySelector('[data-badge-en]')?.textContent,
+  italic: el.querySelector('[data-badge-en]')?.style.fontStyle,
+  pillar: el.querySelector('[data-badge-pillar]')?.textContent,
+  meaning: el.querySelector('[data-badge-meaning]')?.textContent || '',
+}));
+
+test('AU §3: smewTN renders four badge cards with the right pillars, under "Tanda Istimewamu"', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, chart: viewFor({ birthDate: '2001-02-14', birthTime: '13:00' }) });
+  try {
+    assert.ok(m.text().includes('Tanda Istimewamu'), 'the section title renders');
+    const cards = cardsIn(m.host);
+    assert.deepEqual(cards.map((c) => [c.name, c.en, c.pillar]), [
+      ['Tanda Kekosongan', 'Void', 'Pilar Kerja'],
+      ['Bintang Perantau', 'Sky Horse', 'Pilar Kerja'],
+      ['Bintang Cendekia', 'Academic Star', 'Pilar Diri'],
+      ['Bintang Penolong', 'Nobleman', 'Pilar Arah'],
+    ]);
+    assert.ok(cards.every((c) => c.italic === 'italic'), 'the English is italic');
+    assert.ok(cards.every((c) => c.meaning.length > 20), 'each card carries its glossary meaning');
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §3: a chart with no bintang renders no section and no empty title', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, chart: viewFor({ birthDate: '1988-07-10', birthTime: null }) });
+  try {
+    assert.equal(cardsIn(m.host).length, 0);
+    assert.equal(m.text().includes('Tanda Istimewamu'), false);
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §3: the cards render on a FLOOR too, and before the reading on the page', async () => {
+  const f = stubFetch();
+  const chart = viewFor({ birthDate: '2001-02-14', birthTime: '13:00' });
+  const m = await mount({ ...SERVED, chart, meta: { source: 'module_assembly' } });
+  try {
+    assert.equal(cardsIn(m.host).length, 4, 'a floor still shows the engine\'s cards');
+    const all = m.host.textContent;
+    // AU §2's order: Bagan Kelahiran, Sebaran Unsur, Tanda Istimewamu, then the reading.
+    const at = (s) => all.indexOf(s);
+    assert.ok(at('Bagan Kelahiran') > -1 && at('Bagan Kelahiran') < at('Sebaran Unsur'), 'Bagan before Sebaran');
+    assert.ok(at('Sebaran Unsur') < at('Tanda Istimewamu'), 'Sebaran before the badges');
+    assert.ok(at('Tanda Istimewamu') < at('Paragraf satu.'), 'the badges before the reading');
+  } finally { m.unmount(); f.restore(); }
+});
