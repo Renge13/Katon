@@ -21,7 +21,8 @@ seperti ..."). A recurring pattern may be stated with conviction ("hampir selalu
 event may not. Write with conviction about who she is. End on a settled, confident observation about who she is.
 The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.
 Do not open it with "Mungkin menarik untuk...". Never point to facts the reading leaves out or 'has not
-explored yet'. When you write about a cost, end that part with what helps.
+explored yet'. When you write about a cost, end that part with what helps. Advice is a plain, optional suggestion, never an
+imperative or reminder such as 'ingatlah', 'jangan lupa', or 'kamu harus'.
 
 Do not invent means:
 - no chart fact, star, pillar, position or relationship that is not in the JSON;
@@ -38,7 +39,10 @@ room. Tell each as a short story: how it shows up in her days, with one concrete
 when there is a cost, what helps, from its `actionable`, in your own words. `required_points` shows what the
 engine ranks highest.
 
-Every `bintang` fact appears, by name, in one or two sentences of what it means for her.
+Mention a badge only where it belongs in the story; the page shows every badge on its own card.
+Do not restate information already made explicit by the page unless it adds interpretation or context.
+The page already shows her four pillars and Pilar Konsepsi, her element bars, and every badge with its one-line
+meaning.
 
 When the chart has more than one relationship between pillars (Benturan, Gesekan, Simpul, Ikatan and the
 like), do not explain them one by one. Weave them into one story of how that friction or pull feels in her

@@ -32,7 +32,9 @@ export const EDITS = [
     'Interpret freely means: explain why a fact matters to her. Never explain how the chart works: how elements\nfeed, control or combine, how a star is derived, or why the engine concluded something. She reads for what it\nmeans in her life. Connect facts that belong together.'],
   ['5 what helps',
     'Advice is optional, never\nrequired.',
-    'When you write about a cost, end that part with what helps.'],
+    // + AX §1.3, Reyner 2026-09-30, verbatim. "optional" is how the advice is phrased
+    // to her; the writer still ends a cost with what helps.
+    'When you write about a cost, end that part with what helps. Advice is a plain, optional suggestion, never an\nimperative or reminder such as \'ingatlah\', \'jangan lupa\', or \'kamu harus\'.'],
   ['5 never point to what is left out (add)',
     'Do not open it with "Mungkin menarik untuk...".',
     'Do not open it with "Mungkin menarik untuk...". Never point to facts the reading leaves out or \'has not\nexplored yet\'.'],
@@ -42,7 +44,11 @@ export const EDITS = [
   ['2 depth first, 3 badges, 4 relations folded, 6 length',
     'After those, choose the facts that make the strongest reading. `required_points` shows what the engine\nranks highest; beyond the first three it is guidance, not a checklist.',
     'Then choose the facts that matter most for her, three or four in all including the first three, and give each\nroom. Tell each as a short story: how it shows up in her days, with one concrete scene; what it costs her; and,\nwhen there is a cost, what helps, from its `actionable`, in your own words. `required_points` shows what the\nengine ranks highest.\n\n'
-    + 'Every `bintang` fact appears, by name, in one or two sentences of what it means for her.\n\n'
+    // AX §1.1 and §1.4, Reyner 2026-09-30, verbatim, replacing round 6's "Every
+    // `bintang` fact appears, by name, ..."; then AX's one factual sentence.
+    + 'Mention a badge only where it belongs in the story; the page shows every badge on its own card.\n'
+    + 'Do not restate information already made explicit by the page unless it adds interpretation or context.\n'
+    + 'The page already shows her four pillars and Pilar Konsepsi, her element bars, and every badge with its one-line\nmeaning.\n\n'
     + 'When the chart has more than one relationship between pillars (Benturan, Gesekan, Simpul, Ikatan and the\nlike), do not explain them one by one. Weave them into one story of how that friction or pull feels in her\ndaily life. Name each at most once, in passing. If you give a relationship\'s pillars, give all of them exactly\nas `provenance.positions_id` lists them; you may also leave the pillars out.\n\n'
     + 'A full reading is roughly 400-550 words. Be ruthless: cut a fact before you thin every fact.'],
   ['7 brackets',

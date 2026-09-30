@@ -90,7 +90,7 @@ test('THE BUILT MIRROR PROMPT IS TRACED INTO THE LAMBDA: every v2 prompt file is
 
 test('ROUND 6 ON THE MIRROR ONLY: the pair prompt carries none of the round-6 edits', () => {
   const pair = loadPrompt('pair', 'v2');
-  for (const s of ['Every `bintang` fact appears, by name', 'A full reading is roughly 400-550 words', 'a relationship between\npillars gets no bracket']) {
+  for (const s of ['Mention a badge only where it belongs in the story', 'A full reading is roughly 400-550 words', 'a relationship between\npillars gets no bracket']) {
     assert.ok(loadPrompt('mirror', 'v2').includes(s), `mirror lacks: ${s}`);
     assert.equal(pair.includes(s), false, `pair carries: ${s}`);
   }
@@ -169,4 +169,31 @@ test('B33/B34: the v2 prompts carry the confident-close instruction and none of 
       assert.equal(p.includes(gone), false, `${kind} still says: ${gone}`);
     }
   }
+});
+
+// ── AX §1 (Reyner, 2026-09-30, verbatim): badges, imperatives, not restating the page ──
+// The mirror prompt only (the pair was not in round 6). Whitespace-folded because the
+// builder wraps lines; the words are Reyner's exactly.
+test('AX §1: the v2 mirror prompt carries Reyner\'s three lines verbatim, and the pair none of them', () => {
+  const fold = (t) => t.replace(/\s+/gu, ' ');
+  const mirror = fold(loadPrompt('mirror', 'v2'));
+  const pair = fold(loadPrompt('pair', 'v2'));
+  const LINES = [
+    'Mention a badge only where it belongs in the story; the page shows every badge on its own card.',
+    "Advice is a plain, optional suggestion, never an imperative or reminder such as 'ingatlah', 'jangan lupa', or 'kamu harus'.",
+    'Do not restate information already made explicit by the page unless it adds interpretation or context.',
+    'The page already shows her four pillars and Pilar Konsepsi, her element bars, and every badge with its one-line meaning.',
+  ];
+  for (const l of LINES) {
+    assert.ok(mirror.includes(l), `mirror lacks: ${l}`);
+    assert.equal(pair.includes(l), false, `pair carries: ${l}`);
+  }
+  assert.equal(mirror.includes('Every `bintang` fact appears, by name'), false, 'the round-6 badge requirement is gone');
+  // The keyed referent (AX §1.3): "optional" is how advice is phrased; a cost still ends with what helps.
+  assert.ok(mirror.includes('When you write about a cost, end that part with what helps.'));
+});
+
+test('AX §1.2: no example gives a relation an English bracket', () => {
+  const ex = loadPrompt('pair', 'v2'); // the pair prompt carries BOTH example sections
+  assert.equal(/(Ikatan|Gabungan Penuh|Setengah Gabungan|Benturan|Gesekan|Simpul)\s*\(/u.test(ex), false);
 });
