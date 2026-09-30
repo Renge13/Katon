@@ -75,6 +75,16 @@ const PORT = Number(process.argv.includes('--port') ? process.argv[process.argv.
  * the tree before prompt R - the same reference the other four were taken from.
  * It is a real chart that carries the heaviest Card B prose a 癸 can get (空亡 +
  * 驛馬, six tags on three rows); see `npm run audit:card-budget -- --overflow`.
+ *
+ * ── ALL FIVE RE-WRITTEN 2026-09-30, SAME TREE, PRODUCTION'S HOST ──
+ * Until then they were drawn on this page, which sets no line-height, and the card
+ * inherited `normal`. Production mounts it under `body { line-height: 1.6 }`, so
+ * the baselines were of a card no customer receives (tag rows at 37px, not 50).
+ * The card now pins 1.6 on its own object. The five PNGs were re-written on
+ * `892f5e0^`, the same reference tree, with `body{line-height:1.6}` added to this
+ * page for that one run only; they are byte-identical to the same render from
+ * #187's HEAD. Ruled by Reyner. THIS PAGE STAYS NEUTRAL ON PURPOSE: with no rule
+ * here, removing the card's pin fails this gate (5 of 5, 229711-266912 pixels).
  */
 const CHARTS = [
   { label: 'bing-1989-09-13', stem: '丙', birthDate: '1989-09-13', birthTime: '09:00' },
