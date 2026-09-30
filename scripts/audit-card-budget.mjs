@@ -210,8 +210,8 @@ if (process.argv.includes('--overflow')) {
   // The MAX rows above borrow chart 5's fixed tags and pillars, so they are a
   // layout stress case rather than a card anyone receives. On 2026-09-30 MAX 癸
   // overflowed and the first question was whether a customer could ever get it.
-  // A brute-force walk over every 癸 day-master chart 1950-2005 at all twelve
-  // hours answered it: 208 of 26,585 show exactly the two longest badges (空亡 +
+  // A brute-force walk over every 癸 day-master chart 1950-2005 at thirteen
+  // times (the twelve branches, 子 twice: 00:30 and 23:30) answered it: 208 of 26,585 show exactly the two longest badges (空亡 +
   // 驛馬) with six tags. BADGES AND TAG COUNT ARE NOT ENOUGH: tag ORDER decides
   // whether six tags wrap to two rows or three, so most of the 208 fit and a few
   // do not. These three are the ones that clipped by +40px on 2026-09-30 (the

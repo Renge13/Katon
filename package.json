@@ -96,6 +96,7 @@
     "audit:card-contrast": "node scripts/audit-card-contrast.mjs",
     "gate:card-b": "node scripts/gate-card-b-identity.mjs",
     "audit:card-budget": "node scripts/audit-card-budget.mjs",
+    "walk:card-b-heaviest": "node scripts/walk-card-b-heaviest.mjs",
     "probe:card-export": "node scripts/probe-card-export.mjs",
     "probe:card-host": "node scripts/probe-card-host.mjs",
     "serve:reports": "node scripts/serve-reports.mjs",
