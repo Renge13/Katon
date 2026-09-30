@@ -39,10 +39,15 @@ const CLOSE_NEW = 'End on a confident observation that leaves her wanting to loo
 //   "We want a definitive story, not a trailer for a sequel"): the close no longer asks
 //   her to want more. SUPERSEDES B31's kept open ending. Shared by mirror and pair.
 const CLOSE_AV = 'End on a settled, confident observation about who she is.\nThe reading is complete: never hint at more to explore, deeper layers, or what is still waiting.\nDo not open it with "Mungkin menarik untuk...". Advice is optional, never\nrequired.';
+//   AZ §2 (Reyner, 2026-10-01, verbatim: "We don't ban specifics for the writer, just
+//   give overall direction"): the direction that replaces the lifted word bans, as its
+//   own paragraph after the close. Shared by mirror and pair.
+const AZ_DIRECTION = 'Write warm, encouraging and empathetic, as one person writing to another, in plain spoken Indonesian: not an essay, a report or a translation. Stay with the facts in the JSON. You are reading this chart, not acting as an oracle: no fate, no fixed future, no dates.';
 const MIRROR_EDITS = [
   ['makes her want to look further, for instance at the people closest to her. Advice', 'makes her want to look further. Advice'],
   ['You may end a thought on an open observation that\nmakes her want to look further. Advice is optional, never\nrequired.', CLOSE_NEW],
   [CLOSE_NEW, CLOSE_AV],
+  [CLOSE_AV, `${CLOSE_AV}\n\n${AZ_DIRECTION}`],
 ];
 const COMPAT_EDITS = [
   ['The penutup leaves something worth exploring between them. It does not sum the pair up and does not\nassign homework', 'The penutup does not sum the pair up and does not\nassign homework'],
@@ -152,6 +157,15 @@ test('AV §1: both v2 prompts end on a settled close and no longer ask her to wa
     assert.ok(p.includes('End on a settled, confident observation about who she is. The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.'), `${kind} lacks the AV §1 close`);
     assert.equal(p.includes('leaves her wanting to look further'), false, `${kind} still asks for the tease`);
     assert.ok(p.includes('Do not open it with "Mungkin menarik untuk...".'), `${kind} lost the Mungkin menarik clause`);
+  }
+});
+
+test('AZ §2: both v2 prompts carry Reyner\'s direction verbatim, in place of the lifted word bans', () => {
+  // Reyner, 2026-10-01: "We don't ban specifics for the writer, just give overall direction."
+  // In the SHARED base, so the mirror and the pair both carry it.
+  for (const kind of ['mirror', 'pair']) {
+    const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
+    assert.ok(p.includes(AZ_DIRECTION), `${kind} lacks the AZ direction`);
   }
 });
 
