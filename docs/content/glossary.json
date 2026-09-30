@@ -26,7 +26,7 @@
    "label_meaning": "Kamu terbiasa menyelesaikan semuanya sendiri. Meminta tolong terasa lebih berat daripada mengerjakan sesuatu dua kali lipat.",
    "gift_seed": "Kamu tidak runtuh saat tidak ada yang menopang. Orang tahu kamu bisa dititipi hal penting dan tidak akan hilang di tengah jalan.",
    "cost_seed": "Bantuan sering datang terlambat karena kamu tidak pernah memintanya. Orang mengira kamu tidak membutuhkannya.",
-   "actionable_seed": "Orang mengira kamu selalu sanggup sendiri, jadi bantuan jarang ditawarkan. Mintalah bantuan lebih awal sebelum situasinya makin mendesak."
+   "actionable_seed": "Kebiasaan mengurus semuanya sendiri membuat orang lain jarang menawarkan bantuan, padahal menyampaikan kebutuhan lebih awal meringankan beban sebelum menumpuk."
   },
   "劫財": {
    "name_id": "Aspek Pendorong",
@@ -34,7 +34,7 @@
    "label_meaning": "Kamu bergerak lebih cepat saat ada persaingan. Situasi tanpa tantangan terasa datar.",
    "gift_seed": "Kamu berani mengambil langkah yang ditunda orang lain. Keberanian itu sering membukakan pintu lebih dulu.",
    "cost_seed": "Hasil yang datang cepat juga bisa pergi cepat. Kamu sulit menahan sesuatu cukup lama sampai ia benar-benar mengendap.",
-   "actionable_seed": "Tetapkan satu pencapaian utama dan kunci targetnya minimal untuk setahun. Jangan ganti fokus sebelum tenggatnya tiba, semenarik apa pun peluang baru yang muncul."
+   "actionable_seed": "Satu pencapaian utama dengan target yang dikunci minimal setahun sering menjadi jangkar yang kamu butuhkan. Peluang baru, semenarik apa pun, bisa menunggu sampai tenggatnya tiba."
   },
   "食神": {
    "name_id": "Aspek Perajin",
@@ -42,7 +42,7 @@
    "label_meaning": "Kamu senang mengerjakan sesuatu sampai selesai tanpa perlu ditonton. Prosesnya sendiri sudah memberi kepuasan.",
    "gift_seed": "Kamu menikmati pekerjaan tanpa bergantung pada pengakuan orang lain. Ini membuatmu bertahan jauh lebih lama di bidang yang kamu sukai.",
    "cost_seed": "Kamu jarang menagih hakmu. Karyamu sering dipakai orang lain tanpa namamu ikut disebut.",
-   "actionable_seed": "Dokumentasikan dan kirimkan langsung hasil kerjamu ke pemangku kepentingan. Klaim kontribusimu dengan lugas tanpa menunggu orang lain menyatakannya."
+   "actionable_seed": "Kualitas kerja tidak bersuara sendiri, sehingga rekam jejak yang ditunjukkan langsung kepada pihak tepat membuat kontribusi diakui tanpa menunggu pujian."
   },
   "傷官": {
    "name_id": "Aspek Pemijar",
@@ -50,7 +50,7 @@
    "label_meaning": "Kamu cepat melihat cara yang lebih baik dan sulit diam saat melihat hal yang tidak efisien. Mengikuti aturan yang tidak masuk akal terasa menyiksa.",
    "gift_seed": "Kamu paling cepat menemukan celah dan paling berani menyuarakan kebenaran. Ide yang tajam biasanya datang darimu.",
    "cost_seed": "Kejujuranmu mahal harganya. Orang yang kamu koreksi sering mengingat rasa sakitnya, bukan kebenarannya.",
-   "actionable_seed": "Tunda penyampaian kritik saat kamu emosi. Besoknya, sampaikan hanya satu poin perbaikan beserta dampaknya dengan jernih. Satu masukan yang diterima jauh lebih bernilai dibanding lima yang ditolak."
+   "actionable_seed": "Kritik yang ditahan sampai emosi reda jauh lebih didengar, karena satu poin perbaikan jernih esok harinya lebih bermakna daripada banyak perdebatan."
   },
   "正財": {
    "name_id": "Aspek Pengelola",
@@ -58,7 +58,7 @@
    "label_meaning": "Kamu dipercaya memegang hal penting dan merawatnya dengan rapi. Orang merasa tenang saat kamu yang memegang kendali.",
    "gift_seed": "Apa yang kamu urus jarang berantakan. Kepercayaan datang sendiri tanpa perlu kamu minta.",
    "cost_seed": "Semakin banyak yang kamu pegang, semakin sedikit energi yang tersisa untuk dirimu sendiri.",
-   "actionable_seed": "Beban kerja yang kamu pegang akan terus bertambah kalau tidak pernah ada yang kamu bagikan. Pilih satu tugas untuk diserahkan ke orang lain bulan ini. Berikan petunjuk yang jelas, dan biarkan hasilnya berjalan meskipun tidak serapi caramu."
+   "actionable_seed": "Beban kerja menumpuk ketika semuanya dipegang sendiri, sehingga melimpahkan satu tugas kepada orang lain adalah awal baik meski hasilnya tidak sesempurna buatan tanganmu."
   },
   "偏財": {
    "name_id": "Aspek Peraih",
@@ -66,7 +66,7 @@
    "label_meaning": "Kamu melihat peluang di tempat yang dilewati orang lain. Kesempatan dan hasil terasa mudah datang, tetapi juga mudah lepas.",
    "gift_seed": "Kamu tidak takut pada ketidakpastian. Pintu sering terbuka justru karena kamu berani mengetuk lebih dulu.",
    "cost_seed": "Yang datang besar bisa hilang besar. Kamu jarang menyimpannya cukup lama untuk benar-benar merasa aman.",
-   "actionable_seed": "Kunci dan eksekusi tuntas satu peluang di tangan sebelum mengejar yang baru. Peluang yang setengah jalan hanya membuang energi."
+   "actionable_seed": "Peluang yang sudah di tangan layak dieksekusi tuntas sebelum kamu mengejar yang baru. Peluang yang setengah jalan hanya membuang energi."
   },
   "正官": {
    "name_id": "Aspek Pengatur",
@@ -74,7 +74,7 @@
    "label_meaning": "Kamu tahu apa yang seharusnya dilakukan dan tetap menjalankannya meski tidak ada yang melihat. Melanggar aturan terasa lebih melelahkan daripada mematuhinya.",
    "gift_seed": "Orang menaruh tanggung jawab padamu sejak muda. Kamu menjadi tempat bersandar tanpa pernah meminta posisi itu.",
    "cost_seed": "Tuntutan untuk selalu benar tidak pernah berhenti. Kamu jarang memberi izin pada dirimu sendiri untuk bersikap longgar.",
-   "actionable_seed": "Waktu untuk santai tidak akan datang dari orang lain, karena mereka justru bersandar pada disiplinmu. Buat jadwal sendiri untuk santai tanpa tuntutan harus selalu benar, dan jaga jadwal itu seserius kamu menjaga aturan kerja."
+   "actionable_seed": "Waktu untuk santai tidak akan datang dari orang lain, karena mereka justru bersandar pada disiplinmu. Jadwal santai yang kamu buat sendiri, bebas dari tuntutan untuk selalu benar, akan bertahan kalau kamu menjaganya seserius aturan kerja."
   },
   "七殺": {
    "name_id": "Aspek Penantang",
@@ -82,7 +82,7 @@
    "label_meaning": "Kamu tumbuh paling cepat saat berada di bawah tekanan. Keadaan yang terlalu aman justru membuatmu gelisah.",
    "gift_seed": "Kamu tidak lumpuh saat situasi memburuk. Justru di titik itu pikiranmu paling jernih.",
    "cost_seed": "Kamu sering mencari tekanan yang sebenarnya tidak perlu. Istirahat terasa seperti kehilangan arah.",
-   "actionable_seed": "Sebelum mengambil tantangan baru, pastikan tekanannya bukan hasil ciptaanmu sendiri. Masukkan waktu rehat ke dalam jadwal sebelum tubuhmu memaksamu berhenti."
+   "actionable_seed": "Tantangan baru perlu ditimbang apakah memang esensial atau sekadar bentukan pikiran sendiri, agar waktu istirahat terjadi karena pilihan bukan kelelahan."
   },
   "正印": {
    "name_id": "Aspek Pelindung",
@@ -90,7 +90,7 @@
    "label_meaning": "Kamu cepat menyerap ilmu dan orang lain senang membimbingmu. Selalu ada bantuan yang muncul tepat pada waktunya.",
    "gift_seed": "Kamu jarang benar-benar sendirian. Bantuan datang dari tempat yang tidak kamu duga.",
    "cost_seed": "Kenyamanan itu bisa memperlambat langkahmu. Kamu sering terlalu lama bersiap sebelum benar-benar mulai melangkah.",
-   "actionable_seed": "Batasi masa persiapanmu dengan tanggal, bukan dengan menunggu rasa siap. Mulai saja dulu meski rasanya belum sepenuhnya siap; petunjuk atau bantuan berikutnya biasanya baru terlihat setelah kamu mulai melangkah."
+   "actionable_seed": "Tenggat waktu lebih efektif mengakhiri masa persiapan daripada menunggu perasaan siap, karena langkah pertama membuka jalan dan petunjuk baru muncul setelah bergerak."
   },
   "偏印": {
    "name_id": "Aspek Pemikir",
@@ -98,7 +98,7 @@
    "label_meaning": "Kamu memahami sesuatu lewat jalan intuitif yang sulit dijelaskan. Kesimpulanmu sering benar sebelum kamu sempat membuktikannya.",
    "gift_seed": "Kamu melihat pola yang luput dari pandangan orang lain. Firasatmu punya dasar, meski sulit diutarakan dengan kata-kata.",
    "cost_seed": "Kamu sering merasa berjarak dari lingkungan sekitar. Menjelaskan isi kepalamu terasa lebih melelahkan daripada memikirkannya sendiri.",
-   "actionable_seed": "Kamu tidak perlu menjelaskan semua alur pikiranmu. Cukup sampaikan kesimpulannya dan satu alasan paling kuat. Itu sudah cukup untuk membuat orang lain mengerti tanpa membuat energimu terkuras."
+   "actionable_seed": "Penjelasan panjang lebar tidak diperlukan, sebab kesimpulan akhir dan satu alasan terkuat sudah cukup membuat orang lain mengerti tanpa menguras tenaga."
   }
  },
  "bintang": {
@@ -108,7 +108,7 @@
    "label_meaning": "Orang mengingatmu setelah satu pertemuan tanpa kamu perlu berusaha keras. Perhatian datang tanpa harus kamu kejar.",
    "gift_seed": "Pintu terbuka lebih cepat untukmu karena orang penasaran ingin mengenalmu lebih jauh. Kesan pertamamu bekerja sebelum kamu mulai bicara. Pakai kesan itu di awal, jangan disimpan sampai orang sudah membentuk pendapat sendiri.",
    "cost_seed": "Perhatian datang lebih cepat daripada kedekatan. Orang tertarik dulu pada penampilan atau kebiasaanmu, dan jarak menuju kedekatan sungguhan kadang tidak pernah tertutup.",
-   "actionable_seed": "Daya tarik memang membuat orang memperhatikanmu, tapi hubungan yang dekat harus dibangun pelan-pelan. Pilih beberapa orang, lalu bagikan cerita yang jujur dan luangkan waktu bersama mereka. Kesan pertama hanya membuka pintu; kehadiran yang konsisten yang membuat orang bertahan."
+   "actionable_seed": "Pesona alami membuka pintu dengan mudah, tetapi kedekatan nyata butuh waktu, sehingga kehadiran konsisten adalah cara merawat hubungan."
   },
   "天乙貴人": {
    "name_id": "Bintang Penolong",
@@ -116,7 +116,7 @@
    "label_meaning": "Saat kamu benar-benar jalan buntu, selalu ada orang yang muncul membantu. Sering kali orang yang tidak kamu duga dan datang di saat yang tepat.",
    "gift_seed": "Kamu jarang benar-benar sendirian di titik tersempit. Ada jalur bantuan yang terbuka untukmu.",
    "cost_seed": "Bantuan itu perlu kamu jemput. Kamu terbiasa menyelesaikan semuanya sendiri sampai lupa bahwa ada yang bisa dimintai bantuan.",
-   "actionable_seed": "Minta bantuan lebih awal dari yang terasa nyaman. Pertolongan di baganmu ada, bentuknya menunggu diminta."
+   "actionable_seed": "Pertolongan di baganmu ada, tetapi bentuknya menunggu diminta. Meminta lebih awal dari yang terasa nyaman membuatnya lebih cepat sampai kepadamu."
   },
   "驛馬": {
    "name_id": "Bintang Perantau",
@@ -124,7 +124,7 @@
    "label_meaning": "Diam terlalu lama di satu tempat membuatmu gelisah tanpa sebab. Pindah lokasi, bepergian, atau berganti suasana sering menyelesaikan masalah yang tidak selesai lewat berpikir.",
    "gift_seed": "Kamu tidak takut memulai kembali di tempat baru. Perpindahan yang terasa berat bagi orang lain adalah hal wajar bagimu.",
    "cost_seed": "Hubungan atau usaha butuh waktu untuk mengakar, dan kamu sering berpindah sebelum itu terjadi. Hal yang butuh waktu bertahun-tahun kadang terlewat begitu saja.",
-   "actionable_seed": "Pertahankan setidaknya satu jangkar stabil, baik pekerjaan maupun relasi, di tengah perubahan. Saat hasrat berpindah muncul, ubah rutinitas kecil dulu sebelum membongkar hal besar."
+   "actionable_seed": "Di tengah perubahan, satu jangkar yang stabil, entah pekerjaan atau relasi, membuatmu tetap berpijak. Saat hasrat berpindah muncul, mengubah rutinitas kecil lebih dulu memberi ruang untuk menimbang sebelum membongkar hal besar."
   },
   "空亡": {
    "name_id": "Tanda Kekosongan",
@@ -132,7 +132,7 @@
    "label_meaning": "Orang lain melihat kamu berhasil di bidang ini, tetapi kamu sendiri sering merasa belum pantas menyandangnya. Hasilnya tidak pernah kurang, tetapi rasa memilikinya tidak pernah ikut hadir.",
    "gift_seed": "Kamu tidak pernah bersandar pada keberuntungan di bidang ini. Apa pun yang kamu capai di sana, kamu bangun murni dengan kerja keras.",
    "cost_seed": "Pengakuan orang lain tidak pernah menempel di dalam dirimu. Orang sudah menganggapmu ahli, tetapi kamu masih terus menunggu bukti berikutnya.",
-   "actionable_seed": "Pengakuan di bidang ini tidak akan menempel dengan sendirinya. Sebut hasil kerjamu dengan lantang, meskipun rasanya canggung.",
+   "actionable_seed": "Pengakuan atas prestasi sering kali tidak otomatis berbekas, sehingga menyebutkan hasil kerja dengan suara lantang membantu mengakui kemenangan tersebut sebagai milikmu.",
    "note_for_reyner": "[REYNER] 空亡 interpretation varies by school. This framing (present but hard to hold as yours) is the one used in the prove-cell runs. Confirm before it ships."
   },
   "羊刃": {
@@ -141,7 +141,7 @@
    "label_meaning": "Ada titik di mana kamu berhenti menimbang dan langsung mengambil keputusan tegas. Orang di sekitarmu sering kaget dengan seberapa cepat perubahan itu terjadi.",
    "gift_seed": "Kamu sanggup mengambil keputusan sulit yang ditunda orang lain. Ketegasan itu sering menyelamatkan situasi kritis.",
    "cost_seed": "Ketajaman yang sama bisa melukai hubungan atau situasi yang tidak perlu dirusak. Apa yang terputus di titik ini sulit untuk disambung kembali.",
-   "actionable_seed": "Endapkan keputusan memutus hubungan atau komitmen selama semalam sebelum mengeksekusinya. Ketegasan tidak akan luntur hanya karena kamu menundanya sehari.",
+   "actionable_seed": "Keputusan memutus hubungan atau komitmen lebih jernih setelah diendapkan semalam. Ketegasanmu tidak akan luntur hanya karena kamu menundanya sehari.",
    "note_for_reyner": "[REYNER] Yang stems only (甲 -> 卯, 丙/戊 -> 午, 庚 -> 酉, 壬 -> 子). Yin stems never carry this."
   },
   "文昌": {
@@ -150,7 +150,7 @@
    "label_meaning": "Kamu menyerap hal baru lebih cepat daripada orang di sekitarmu, terutama lewat membaca dan mengamati sendiri.",
    "gift_seed": "Proses belajar tidak terasa sebagai beban. Bidang baru terbuka untukmu jauh lebih cepat daripada orang lain.",
    "cost_seed": "Memahami suatu teori membuatmu merasa seolah-olah sudah menyelesaikannya. Jarak antara paham dan benar-benar mengeksekusinya sering kali terulur panjang.",
-   "actionable_seed": "Eksekusi satu penerapan kecil dalam tujuh hari setiap kali selesai mempelajari hal baru. Memahami teori tidak berharga sampai ada wujud nyatanya."
+   "actionable_seed": "Setiap kali selesai mempelajari hal baru, satu penerapan kecil dalam tujuh hari membuat ilmunya benar-benar menempel. Teori baru terasa berharga setelah ada wujud nyatanya."
   },
   "孤辰": {
    "name_id": "Penyendiri",
@@ -158,7 +158,7 @@
    "label_meaning": "Kamu bisa berada di tengah keramaian dan tetap merasa sedang mengamati dari luar. Waktu sendirian tidak pernah terasa sebagai hukuman.",
    "gift_seed": "Kamu tidak membutuhkan persetujuan orang lain untuk merasa utuh. Keputusan besar bisa kamu ambil tanpa perlu ditopang siapa pun.",
    "cost_seed": "Orang mengira kamu sengaja menutup diri. Jarak yang kamu buat untuk kenyamanan pribadi sering dianggap sebagai penolakan oleh orang lain.",
-   "actionable_seed": "Beri kabar singkat saat kamu butuh menyendiri untuk mengisi ulang energi. Satu kalimat pemberitahuan mencegah prasangka tak perlu dari lingkunganmu."
+   "actionable_seed": "Saat kamu butuh menyendiri untuk mengisi ulang energi, satu kalimat kabar singkat ke orang sekitarmu sudah cukup mencegah prasangka yang tak perlu."
   },
   "華蓋": {
    "name_id": "Bintang Sunyi",
@@ -187,7 +187,7 @@
    "label_meaning": "Kehadiranmu langsung terasa sebelum kamu bicara. Kamu menerangi sekitarmu lebih dulu sebelum menghangatkan dirimu sendiri, dan nyala itu memakai tenaga yang tidak mengisi dirinya sendiri.",
    "gift_seed": "Orang-orang berkumpul di sekitarmu tanpa perlu kamu undang. Suasana ruangan berubah saat kamu masuk.",
    "cost_seed": "Api selalu membutuhkan bahan bakar dari luar. Kamu tidak bisa terus menyala hanya dari cadangan energimu sendiri.",
-   "actionable_seed": "Atur jadwal untuk mengisi energimu seserius kamu mengatur jadwal kerja. Sediakan waktu untuk bertemu orang atau mendatangi tempat yang bisa memulihkan tenagamu. Jangan tunggu sampai bateraimu benar-benar habis baru mencari cara untuk pulih.",
+   "actionable_seed": "Waktu pemulihan diri layak diatur seserius jadwal kerja, agar proses pemulihan terjadi sebelum tenaga benar-benar habis.",
    "fed_by": "木",
    "drained_by": "土",
    "controlled_by": "水",
@@ -221,7 +221,7 @@
    "label_meaning": "Kamu menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Orang lain sering kesulitan menebak langkahmu berikutnya.",
    "gift_seed": "Kamu mampu menembus situasi yang buntu bagi orang lain. Jalan selalu ada karena kamu tidak kaku pada satu cara.",
    "cost_seed": "Sesuatu yang mengalir terus sulit untuk diikat. Komitmen jangka panjang pada satu bentuk kaku terasa amat berat bagimu.",
-   "actionable_seed": "Jangan paksa dirimu masuk ke aturan yang terlalu kaku, karena aturan seperti itu sulit kamu pertahankan. Pegang teguh tujuan utamamu, tapi bebaskan cara mencapainya. Komitmenmu bisa bertahan lama selama kamu punya ruang untuk mengubah rute.",
+   "actionable_seed": "Aturan yang terlalu kaku sulit dijalani, sehingga memegang tujuan akhir sambil membebaskan cara mencapainya membuat komitmen bertahan lama.",
    "fed_by": "金",
    "drained_by": "木",
    "controlled_by": "土",
@@ -236,15 +236,15 @@
    "label_meaning": "Lemah di sini bukan berarti tidak mampu. Sumber tenagamu ada di luar dirimu. Tempat yang tepat membuatmu melesat cepat, dan tempat yang salah mengurasmu sampai habis.",
    "gift_seed": "Kamu sangat peka membaca situasi dan tahu cara memanfaatkan dukungan di sekitarmu. Saat berada di lingkungan yang pas, pertumbuhanmu bisa jauh melampaui orang lain.",
    "cost_seed": "Karena sumber tenagamu dari luar, kamu kehabisan energi lebih cepat saat salah menempatkan diri. Tanpa ekosistem yang menopang, kamu menanggung lelah sendirian.",
-   "actionable_seed": "Perhatikan lingkunganmu dengan serius, bukan hanya sebagai latar belakang. Sebelum mengambil peran baru, tanya ke diri sendiri: siapa atau apa yang akan mengisi ulang energiku di sini? Kalau jawabannya tidak ada, kamu sendiri yang akan kehabisan tenaga."
+   "actionable_seed": "Lingkungan sekitar sangat menentukan besar kecilnya energi, sehingga memastikan ada sumber pengisi daya sebelum mengambil peran baru mencegah kehabisan tenaga."
   },
   "balanced": {
    "name_id": "Seimbang",
    "name_en": "Balanced",
    "label_meaning": "Baganmu berdiri di titik tengah yang stabil. Kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar. Situasi berubah, tetapi kamu jarang ikut goyah.",
    "gift_seed": "Kamu memiliki kelenturan yang tinggi. Perubahan mendadak yang membuat orang lain kehilangan arah biasanya hanya menggeser langkahmu sedikit saja.",
-   "cost_seed": "Titik tengah tidak memberi dorongan ekstrem yang memaksa. Arah hidupmu harus kamu tentukan sendiri, karena baganmu tidak akan memaksamu ke satu sudut.",
-   "actionable_seed": "Tentukan satu komitmen untuk enam bulan ke depan dan tuliskan alasannya. Begitu ragu menghampiri, baca ulang catatan itu alih-alih menunggu dorongan luar."
+   "cost_seed": "Arah hidupmu sepenuhnya berada di tanganmu sendiri, karena baganmu tidak mendikte satu jalan ekstrem tertentu.",
+   "actionable_seed": "Komitmen tertulis untuk enam bulan ke depan menjadi pegangan kokoh saat keraguan datang, jauh lebih diandalkan daripada menunggu dorongan luar."
   },
   "strong": {
    "name_id": "Kuat",
@@ -252,7 +252,7 @@
    "label_meaning": "Sumber tenagamu lahir langsung dari dalam dirimu sendiri. Kamu sanggup berjalan mandiri lebih jauh dari kebanyakan orang.",
    "gift_seed": "Daya tahanmu nyata dan solid. Tekanan keras yang membuat orang lain menyerah justru bisa kamu balikkan menjadi bahan bakar untuk maju.",
    "cost_seed": "Energi sebesar ini membutuhkan saluran yang jelas. Tanpa arah dan kesibukan yang tepat, tenaga berlebih itu berbalik menjadi gesekan konstan dengan orang-orang terdekatmu.",
-   "actionable_seed": "Alirkan energi lebihmu ke satu kegiatan fisik atau proyek intensif setiap minggu, agar tak tumpah menjadi konflik dengan orang terdekat."
+   "actionable_seed": "Energi berlebih paling pas disalurkan ke satu kegiatan fisik atau proyek intensif mingguan, agar tenaga tidak meluap menjadi konflik percuma."
   }
  },
  "elemen_hilang": {
@@ -262,7 +262,7 @@
    "label_meaning": "Kamu jarang menunggu inspirasi dan tidak pernah gelisah tanpa alasan. Dorongan untuk berpindah arah tidak pernah muncul otomatis dari dalam diri.",
    "gift_seed": "Kamu tidak butuh alasan besar untuk mulai bergerak. Kamu fokus bekerja dari apa yang ada di depan mata.",
    "cost_seed": "Kamu mudah menyelesaikan apa yang ada di depan mata, tapi susah untuk putar arah. Dorongan untuk berubah tidak pernah muncul dari dalam diri. Karena itu, kamu bisa bertahan bertahun-tahun di situasi yang sudah tidak cocok dan menganggapnya biasa saja.",
-   "actionable_seed": "Jangan menunggu merasa siap untuk pindah, karena rasa itu tidak akan datang. Buat pemicu dari luar: pasang tanggal keputusan di kalender atau buat janji ke orang lain. Begitu tanggalnya tiba dan belum ada perubahan, langsung melangkah."
+   "actionable_seed": "Dorongan berpindah haluan jarang muncul sendiri, sehingga pemicu luar seperti tanda kalender atau janji lebih bisa diandalkan untuk mulai melangkah."
   },
   "火": {
    "name_id": null,
@@ -270,7 +270,7 @@
    "label_meaning": "Kehadiranmu tidak otomatis terlihat oleh orang banyak. Butuh waktu bagi orang lain untuk menyadari peranmu di dalam ruangan.",
    "gift_seed": "Kamu bekerja murni fokus pada hasil tanpa butuh panggung. Pekerjaanmu bebas dari kebutuhan untuk tampil.",
    "cost_seed": "Apa yang sudah kamu kerjakan sering luput dari perhatian orang yang perlu tahu. Kehangatan relasi juga tidak datang sendiri, harus kamu usahakan dengan sengaja.",
-   "actionable_seed": "Kirim pembaruan kerja berkala tanpa diminta dan sesekali bangun obrolan informal. Kehadiran dan ikatan tidak akan terbangun jika kamu terus bersembunyi di balik layar."
+   "actionable_seed": "Kabar pekerjaan berkala yang diselingi obrolan santai membuat kehadiranmu tetap terasa, sebab ikatan sulit terbangun jika kamu terus bersembunyi di balik layar."
   },
   "土": {
    "name_id": null,
@@ -278,7 +278,7 @@
    "label_meaning": "Kamu bergerak ringan dan sulit merasa benar-benar mengakar. Rutinitas harian cepat membuatmu merasa jenuh.",
    "gift_seed": "Kamu tidak terikat pada satu pola hidup kaku. Perubahan besar tidak membuatmu cemas.",
    "cost_seed": "Kamu tidak memiliki jangkar alami. Proses yang membutuhkan waktu bertahun-tahun untuk berbuah sering kamu tinggalkan sebelum waktunya.",
-   "actionable_seed": "Tetapkan satu rutinitas wajib di jam yang sama setiap minggu, sekecil apa pun itu. Konsistensi fisik membangun stabilitas yang tidak dimiliki pikiranmu."
+   "actionable_seed": "Rutinitas kecil yang diulang pada jam sama setiap minggu menjadi pijakan kokoh untuk membangun kestabilan fisik dan pikiran."
   },
   "金": {
    "name_id": null,
@@ -286,7 +286,7 @@
    "label_meaning": "Memutuskan untuk berhenti atau mengakhiri sesuatu terasa jauh lebih sulit bagimu daripada memulainya. Kamu bertahan di situasi yang sudah jelas selesai.",
    "gift_seed": "Kamu memberi kesempatan lebih banyak kepada orang lain. Hubungan atau pekerjaan jarang kamu putus tergesa-gesa.",
    "cost_seed": "Hal-hal yang seharusnya sudah selesai terus menempel dan menguras energi. Batas tegas harus kamu buat dengan sengaja karena tidak akan muncul sendiri.",
-   "actionable_seed": "Beranikan diri mengakhiri urusan yang menggantung lewat satu percakapan tegas. Menggantung masalah jauh lebih menguras energi dibanding ketegangan singkat saat menyelesaikannya."
+   "actionable_seed": "Urusan menggantung selesai lebih efisien lewat percakapan lugas, karena membiarkan masalah berlarut jauh lebih menguras energi daripada ketegangan sesaat."
   },
   "水": {
    "name_id": null,
@@ -294,7 +294,7 @@
    "label_meaning": "Kamu sangat lurus dan konsisten, tetapi kurang lentur saat situasi berubah mendadak.",
    "gift_seed": "Orang tahu persis kualitas dirimu. Tidak ada versi lain dari dirimu yang berubah-ubah di ruangan berbeda.",
    "cost_seed": "Menyesuaikan diri dengan keadaan sering terasa seperti mengkhianati prinsip diri. Situasi yang mengharuskanmu mengalah terasa sangat menguras emosi.",
-   "actionable_seed": "Tentukan tiga prinsip non-negosiasi, lalu beri dirimu fleksibilitas penuh di luar ketiganya. Mempertahankan metode lama bukanlah bagian dari integritas."
+   "actionable_seed": "Tiga prinsip utama yang dipadukan dengan kebebasan penuh memberi pegangan tanpa membuat kaku, sebab mempertahankan metode lama semata kebiasaan bukanlah integritas."
   }
  },
  "elemen_dominan": {
@@ -305,39 +305,39 @@
    "label_meaning": "Unsur dirimu paling banyak muncul di bagan. Kamu melangkah tanpa perlu izin orang lain, dan tak suka ruang pribadimu diatur-atur.",
    "gift_seed": "Pendirianmu kokoh. Saat orang lain ragu, arahmu tetap jelas.",
    "cost_seed": "Kepala keras membuat masukan sukar masuk. Kamu baru sadar salah jalan setelah dampaknya telanjur besar.",
-   "actionable_seed": "Pilih satu orang yang berani menyanggahmu, lalu minta pendapatnya sebelum mengambil keputusan besar. Dengarkan sampai habis tanpa memotong."
+   "actionable_seed": "Satu orang yang berani menyanggahmu sangat berharga sebelum keputusan besar. Pendapatnya paling berguna kalau kamu mendengarkannya sampai habis tanpa memotong."
   },
   "feeds": {
    "name_id": null,
    "name_en": "Dominant Resource",
-   "label_meaning": "Baganmu sarat elemen penopang. Bantuan, ilmu, dan perlindungan mengalir lebih mudah kepadamu dibanding orang lain.",
+   "label_meaning": "Unsur penopangmu paling banyak muncul di bagan. Bantuan, ilmu, dan rasa aman mengalir jauh lebih mudah kepadamu.",
    "gift_seed": "Kamu jarang krisis bekal. Selalu ada yang membimbing atau membukakan jalan.",
    "cost_seed": "Terlalu nyaman ditopang membuatmu terus menunda eksekusi. Kamu terjebak dalam masa persiapan yang tak kunjung usai.",
-   "actionable_seed": "Pakai satu ilmu atau persiapan yang sudah lama kamu tumpuk minggu ini, meski rasanya belum sempurna. Ilmu baru hanya berguna setelah yang lama dipakai."
+   "actionable_seed": "Satu ilmu atau persiapan yang sudah lama kamu tumpuk bisa mulai dipakai minggu ini, meski rasanya belum sempurna. Ilmu baru hanya berguna setelah yang lama dipakai."
   },
   "drains": {
    "name_id": null,
    "name_en": "Dominant Output",
-   "label_meaning": "Baganmu terisi oleh karya dan output. Energi mengucur lewat ide, kreasi, dan kejelian melihat ruang perbaikan.",
+   "label_meaning": "Unsur yang kamu hasilkan paling banyak muncul di bagan. Energimu tercurah melalui ide, karya, dan kejelian melihat ruang perbaikan.",
    "gift_seed": "Ide dan karya mengalir tanpa henti. Kamu tak pernah kehabisan gagasan.",
    "cost_seed": "Output-mu menguras habis input-mu. Kamu terus memberi sampai lupa mengisi ulang daya diri sendiri.",
-   "actionable_seed": "Selesaikan satu tugas sepenuhnya sebelum menyentuh yang baru, dan sisihkan satu hari seminggu bebas dari target output apa pun."
+   "actionable_seed": "Menuntaskan satu tugas sebelum menyentuh yang baru, dan menyisihkan satu hari seminggu tanpa target output apa pun, memberimu waktu untuk mengisi ulang."
   },
   "is_controlled": {
    "name_id": null,
    "name_en": "Dominant Wealth",
-   "label_meaning": "Baganmu dipenuhi hal-hal yang menuntut pengelolaan: peluang, tanggung jawab, dan urusan orang lain.",
+   "label_meaning": "Unsur yang kamu kelola paling banyak muncul di bagan. Keseharianmu berputar pada hal yang menuntut penanganan, dari peluang hingga tanggung jawab orang lain.",
    "gift_seed": "Kesempatan tak pernah habis di tanganmu. Kamu selalu punya objek untuk dikelola.",
    "cost_seed": "Urusan melebihi kapasitas fisikmu. Perhatianmu terpecah dan banyak hal terbengkalai setengah jalan.",
-   "actionable_seed": "Pilih hanya tiga prioritas utama untuk kuartal ini dan parkir sisanya. Fokus selesaikan tiga hal itu sebelum menyentuh daftar tunggu."
+   "actionable_seed": "Tiga prioritas utama untuk kuartal ini, dengan sisanya diparkir dulu, membuat perhatianmu tidak terpecah. Daftar tunggu bisa disentuh setelah tiga hal itu selesai."
   },
   "controls": {
    "name_id": null,
    "name_en": "Dominant Officer",
-   "label_meaning": "Baganmu didominasi tuntutan luar: aturan, beban tanggung jawab, dan ekspektasi publik.",
+   "label_meaning": "Unsur pengendalimu paling banyak muncul di bagan. Hidupmu bersinggungan dengan tuntutan luar seperti aturan yang mengikat dan ekspektasi publik.",
    "gift_seed": "Kamu tangguh di bawah tekanan. Situasi yang menakutkan bagi orang lain adalah arena harianmu.",
    "cost_seed": "Tekanan bertubi-tubi membuatmu tak pernah merasa cukup. Selalu ada standar baru yang menghantuimu.",
-   "actionable_seed": "Lepaskan satu beban yang sebenarnya bukan kewajibanmu bulan ini. Sampaikan batas ini dengan tegas kepada pihak terkait."
+   "actionable_seed": "Bulan ini, melepas satu beban yang sebenarnya bukan tanggunganmu bisa terasa melegakan. Batas itu paling terjaga kalau kamu menyampaikannya dengan tegas kepada pihak terkait."
   }
  },
  "shio": {
@@ -409,7 +409,7 @@
    "label_meaning": "Dua bagian dari baganmu saling mengunci. Area hidup yang diwakili keduanya berjalan berdampingan; saat satu bergerak, yang lain otomatis ikut terpengaruh.",
    "gift_seed": "Ada dua bidang hidupmu yang saling menguatkan dengan sendirinya tanpa perlu kamu atur.",
    "cost_seed": "Saat ada masalah, keduanya ikut terdampak bersamaan. Masalah di satu area jarang berhenti di sana saja.",
-   "actionable_seed": "Saat satu pilar kehidupanmu terguncang, jaga pilar pasangannya tetap berjalan rutin. Menjaga satu pilar tetap stabil mencegah efek domino ke area lainnya.",
+   "actionable_seed": "Saat satu bagian hidup goyang, menjaga rutinitas pasangannya tetap berjalan menjadi penahan efektif agar efek domino tidak menyebar.",
    "pairs": [
     "子丑",
     "寅亥",
@@ -438,7 +438,7 @@
    "label_meaning": "Dua dari tiga bagian sudah saling tarik. Arah geraknya sudah jelas, meski kekuatannya belum sepenuhnya padu.",
    "gift_seed": "Tarikan energi ini sudah bekerja untukmu dan memberi arah yang jelas.",
    "cost_seed": "Dua dari tiga bagian sudah terhubung, jadi tinggal satu lagi yang kurang. Dalam kehidupan sehari-hari, ini terasa seperti rasa 'hampir pas': semuanya sudah jalan dan arahnya jelas, tapi kamu selalu merasa harus menambah satu hal lagi sebelum berani menyebutnya selesai.",
-   "actionable_seed": "Rasa 'belum lengkap' itu hanya bagian dari polamu, bukan tanda ada yang salah. Saat muncul keinginan untuk menambah satu hal lagi, berhenti sejenak dan tanya: apakah yang ada sekarang sudah cukup untuk melangkah? Sering kali, jawabannya sudah lebih dari cukup."
+   "actionable_seed": "Perasaan belum pas sering kali merupakan bagian dari ritme alami, sehingga jeda singkat menunjukkan bahwa apa yang ada di tangan sebenarnya sudah memadai."
   },
   "冲": {
    "name_id": "Benturan",
@@ -446,7 +446,7 @@
    "label_meaning": "Dua bagian baganmu saling berhadapan langsung. Perubahan di area ini biasanya datang mendadak dan membawa guncangan, bukan lewat proses perlahan.",
    "gift_seed": "Kamu terbiasa beradaptasi dengan guncangan cepat. Situasi sulit yang membuat orang lain panik sudah pernah kamu lewati.",
    "cost_seed": "Ketenangan di area ini tidak datang otomatis. Kestabilannya butuh dijaga dengan usaha yang sadar dan terus-menerus.",
-   "actionable_seed": "Perlakukan dinamika di area ini sebagai dorongan untuk naik kelas. Siapkan rencana cadangan sebelum dibutuhkan agar kamu merespons dengan strategi, bukan panik.",
+   "actionable_seed": "Gejolak di area ini berfungsi sebagai dorongan untuk naik kelas, di mana rencana cadangan membuat respons terhadap keadaan berjalan dengan strategi matang.",
    "pairs": [
     "子午",
     "丑未",
@@ -463,7 +463,7 @@
    "label_meaning": "Gesekan kecil yang terjadi terus-menerus, bukan benturan besar. Masalah-masalah sepele yang menumpuk perlahan hingga terasa memberatkan.",
    "gift_seed": "Kamu sangat peka pada detail kecil yang diabaikan orang lain. Masalah jarang membesar tanpa terdeteksi olehmu lebih dulu.",
    "cost_seed": "Gesekan kecil ini jarang selesai total dalam sekali tindakan. Ia sering muncul kembali dalam bentuk lain yang sedikit berbeda.",
-   "actionable_seed": "Bereskan kejanggalan atau masalah kecil begitu terlihat. Membiarkan gesekan kecil menumpuk hanya akan memicu ledakan yang tak perlu di kemudian hari.",
+   "actionable_seed": "Masalah atau kejanggalan kecil lebih mudah diurai begitu terlihat, karena membiarkan masalah menumpuk hanya memicu ledakan emosi tidak perlu.",
    "pairs": [
     "子未",
     "丑午",
@@ -479,7 +479,7 @@
    "label_meaning": "Dua atau lebih bagian baganmu saling mengikat dengan cara yang menyulitkan. Pola ini kamu bawa sendiri, dan tanpa kamu sadari terus kamu ulang.",
    "gift_seed": "Kamu memahami situasi rumit yang tidak punya jawaban sederhana. Orang lain menyerah lebih awal di kondisi seperti ini.",
    "cost_seed": "Kesulitan di area ini sering berawal dari keputusanmu sendiri. Menyalahkan keadaan tidak akan menyelesaikannya.",
-   "actionable_seed": "Urutkan pola rumit di area ini hingga ke keputusan awal yang kamu buat sendiri. Karena kamu yang mengikat simpulnya, hanya kamu yang bisa mengubah arahnya.",
+   "actionable_seed": "Pola rumit dapat ditelusuri kembali ke keputusan awal, dan karena prosesnya dimulai dari diri sendiri, kendali untuk mengubah arah sepenuhnya berada di tanganmu.",
    "types": {
     "self": {
      "label_meaning": "Bagian yang sama muncul dua kali dan bergesekan dengan dirinya sendiri. Kamu justru berlebihan di wilayah yang paling kamu kuasai.",
