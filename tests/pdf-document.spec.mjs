@@ -349,7 +349,9 @@ test('胎元 prints its glossary NAME and no invented meaning', async () => {
   const { chart, semanticJson, rendered } = fixture('chart 1');
   const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
   const text = latinText(buf);
-  assert.match(text, /Pilar Konsepsi/, 'the glossary name');
+  // Case-insensitive since Prompt AW: the conception card's label is set uppercase,
+  // as the web sets it, and the drawn text carries the transform.
+  assert.match(text, /Pilar Konsepsi/iu, 'the glossary name');
   assert.ok(!text.includes('Istana Konsepsi'),
     'that is the string the 08-07 ruling REPLACED');
 });

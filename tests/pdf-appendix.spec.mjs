@@ -253,3 +253,20 @@ test('an hour-less chart lists no hour pillar and still ships', () => {
   assert.ok(pilar.entries.some((e) => e.key === 'year'), 'the pillars it does have still appear');
   assert.doesNotThrow(() => assertEveryMechanicExplained(a));
 });
+
+// ── SHIO IS THE BIRTH-YEAR ANIMAL ONLY (Prompt AW §3 item 1, Reyner 2026-09-30) ──
+// "we usually only know one Shio - the year we born - but the glossary lists 4, it
+// will potentially confuse the reader." The appendix's Shio group is the YEAR branch's
+// animal alone. The other three stay where they are: under each pillar on the chart
+// page, where an animal labels a pillar and is not "your Shio".
+test('AW §3.1: the Shio group holds the year branch\'s animal and nothing else', () => {
+  for (const tc of VALIDATION_CHARTS) {
+    const chart = calculateBaziChart({ birthDate: tc.date, birthTime: tc.time });
+    const semanticJson = buildSemanticJson(chart);
+    const shio = buildAppendix({ chart, semanticJson }).groups.find((g) => g.group === 'Shio');
+    const year = [...(semanticJson.chart.year || '')][1];
+    assert.ok(shio, `chart ${tc.id}: a Shio group`);
+    assert.deepEqual(shio.entries.map((e) => e.key), [year], `chart ${tc.id}: the year's ${year} only`);
+    assert.equal(shio.entries[0].name, GLOSSARY.shio[year].name_id);
+  }
+});

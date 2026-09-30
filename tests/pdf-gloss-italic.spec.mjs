@@ -7,13 +7,15 @@
 // Edition and the Compatibility PDF set "(The Mountain)" the way the web reading
 // does: brackets upright, the glossary English inside them italic.
 //
-// ── THE FACE EXISTS, AND IT IS NOT AN EMBEDDED FILE ────────
-// Reading prose is Helvetica (FAMILY_LATIN), one of the PDF standard 14. Its italic,
-// Helvetica-Oblique, is standard too: react-pdf resolves `fontStyle: 'italic'` on it
-// with no registration and nothing to embed. So these assertions read the DRAWN
-// document: which font resource each run of text was shown with, and which BaseFont
-// that resource names. Not the element tree, which would pass on a style the
-// renderer silently ignored.
+// ── THE BODY FACE IS HANKEN GROTESK SINCE PROMPT AW (2026-09-30) ──
+// Reading prose was Helvetica and its italic Helvetica-Oblique, both standard-14.
+// Since AW the body is the web's sans, Hanken Grotesk, EMBEDDED, and its italic is a
+// registered face of its own (lib/pdf/fonts.js LATIN_FACES). So these assertions read
+// the DRAWN document: which font each run of text was shown with, and which BaseFont
+// that resource names (a subset carries an "ABCDEF+" prefix, stripped). The runs come
+// from textBoxes, which decodes embedded faces through their ToUnicode maps; the old
+// textByFont read hex runs as latin1, which was right only for a simple font. Not the
+// element tree, which would pass on a style the renderer silently ignored.
 // ============================================================
 
 import assert from 'node:assert/strict';
@@ -26,7 +28,7 @@ import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { readingOnly } from '../lib/pdf/document.js';
 import { buildPairPdf } from '../lib/pdf/build.js';
-import { textByFont } from '../lib/pdf/inspect.js';
+import { textBoxes } from '../lib/pdf/inspect.js';
 
 const GLOSS = ' Kamu adalah Gunung (The Mountain), dengan Aspek Tujuh Pembunuh (Seven Killings) dan satu (catatan kecil) yang bukan istilah.';
 
@@ -39,13 +41,16 @@ function baseFonts(pdf) {
   return out;
 }
 
-/** All text drawn in Helvetica-Oblique, and all text drawn in upright Helvetica. */
+/** All text drawn in the body face's italic, and all text drawn in its upright. */
+const BODY_ITALIC = 'HankenGrotesk-Italic';
+const BODY_UPRIGHT = 'HankenGrotesk-Regular';
 function obliqueAndUpright(pdf) {
   const fonts = baseFonts(pdf);
+  const face = (res) => (fonts.get(res) || '').replace(/^[A-Z]{6}\+/u, '');
   let oblique = ''; let upright = '';
-  for (const [res, text] of textByFont(pdf)) {
-    if (fonts.get(res) === 'Helvetica-Oblique') oblique += text;
-    if (fonts.get(res) === 'Helvetica') upright += text;
+  for (const run of textBoxes(pdf).flat()) {
+    if (face(run.font) === BODY_ITALIC) oblique += run.text;
+    if (face(run.font) === BODY_UPRIGHT) upright += run.text;
   }
   // Whitespace is dropped: a line break inside a name leaves no space character in
   // the drawn runs, so "The Mountain" can arrive as "TheMountain".
@@ -53,7 +58,7 @@ function obliqueAndUpright(pdf) {
   return { oblique: squash(oblique), upright: squash(upright) };
 }
 
-test('THE COMPLETE EDITION draws the glossary English in Helvetica-Oblique, and only that', async () => {
+test('THE COMPLETE EDITION draws the glossary English in the body italic (Hanken Grotesk Italic), and only that', async () => {
   const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
   const semanticJson = buildSemanticJson(chart);
   const base = assembleFallback(semanticJson);
