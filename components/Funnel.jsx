@@ -68,6 +68,7 @@ function fireEvent(token, event) {
   } catch { /* a counter never breaks the page */ }
 }
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
+import { ELEMENT_GLOSS, presenceBars } from '../lib/site/elements.js';
 import { priceFor } from '../lib/pricing.js';
 import { SITE_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
@@ -85,19 +86,8 @@ import { FENCE_REFUSALS } from '../lib/paymentFence.js';
 import { formatIdr } from '../lib/site/format.js';
 import { rememberBirth } from '../lib/site/carryBirth.js';
 
-// Neutral, generic element glosses — describe the ELEMENT, not the person.
-//
-// KEYED ON THE GLOSSARY'S NAMES, which is a change: this map used to say `Bumi`
-// and `element_presence` says `Tanah`. lib/semantic/glossary.js flags that exact
-// drift in its own header, and with the legacy view layer gone the glossary is the
-// only source of an element's Indonesian name.
-const ELEMENT_GLOSS = {
-  Kayu: 'tumbuh dan menjangkau',
-  Api: 'menyala dan menghangatkan',
-  Tanah: 'menopang dan menampung',
-  Logam: 'memadat dan menajam',
-  Air: 'mengalir dan meresap',
-};
+// ELEMENT_GLOSS and the bar maths live in lib/site/elements.js since Prompt AW
+// (2026-09-30): the Complete Edition PDF draws the same bars.
 const RANGE = (n, from = 0) => Array.from({ length: n }, (_, i) => i + from);
 // Accepted birth dates: 1900-01-01 through today. The engine supports 1900-2030,
 // so today is always inside it. `max` is built from LOCAL time, not toISOString(),
@@ -197,16 +187,6 @@ function ScaledCard({ spec, max = CARD_SCALE, children }) {
  * them (`element_presence_note`), the same way the PDF prints it, rather than being
  * left to whoever reads the bar.
  */
-function presenceBars(presence) {
-  const entries = Object.entries(presence || {});
-  const max = Math.max(1, ...entries.map(([, v]) => Number(v) || 0));
-  return entries.map(([label, value]) => ({
-    label,
-    element: label,
-    value: Number(value) || 0,
-    pct: Math.round(((Number(value) || 0) / max) * 100),
-  }));
-}
 
 // ── `salesOpen` IS THE FENCE'S ANSWER, READ ON THE SERVER. RULED 2026-09-23 ──
 // `app/page.js` and `app/r/[token]/page.js` pass `checkoutOpen()` from
@@ -811,13 +791,8 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
 
   const element = chart?.day_master?.element;
   const el = elColor(element);
-  const bars = presenceBars(chart?.element_presence);
-
-  let domIdx = -1; let minIdx = -1; let maxPct = -1; let minPct = 101;
-  bars.forEach((b, i) => {
-    if (b.pct > maxPct) { maxPct = b.pct; domIdx = i; }
-    if (b.pct < minPct) { minPct = b.pct; minIdx = i; }
-  });
+  // The bars and which is tagged (first highest, first lowest): lib/site/elements.js.
+  const { bars, dominant: domIdx, thinnest: minIdx } = presenceBars(chart?.element_presence);
 
   const arch = chart?.archetype || {};
   // The card footer's date and gender are the CLIENT's - the free payload carries
@@ -898,7 +873,7 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
         // marginTop 34, THE PERSONA STEP (AQ §3): Bagan is now the first divider under the
         // header (AU §2 moved the reading below it), so it takes the step the prose had.
         <Section eyebrow="Bagan Kelahiran" style={{ marginTop: 34 }}>
-          <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 16px', lineHeight: 1.55 }}>Empat lapisan energi dari tanggal lahirmu. Yang di tengah adalah intinya.</p></Reveal>
+          <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 16px', lineHeight: 1.55 }}>{CHROME_COPY.bagan_intro}</p></Reveal>
           {/* 0/120/240 to match the persona block above. Two different stagger
               rhythms inside one scroll is what this alignment prevents. */}
           <Reveal delay={0.12}>
