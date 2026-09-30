@@ -57,17 +57,35 @@ const WRITE = process.argv.includes('--baseline');
 const PORT = Number(process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 9223);
 
 /**
- * FOUR CHARTS, NOT ONE. Card B's surface varies by Day Master token (seven dark
- * fields, three light), and a single chart would prove one gradient. These four
- * are the ones R's commit 2 names for the recomposition review, minus the two
- * that are not archetype-driven.
+ * FIVE CHARTS, NOT ONE. Card B's surface varies by Day Master token (seven dark
+ * fields, three light), and a single chart would prove one gradient.
+ *
+ * ── THE FIRST FOUR LABELS WERE FALSE UNTIL 2026-09-30 ──
+ * They were written as the archetypes R's commit 2 names (丁 甲 癸 丙), and the
+ * dates were never checked against them: the four charts are 丙 戊 庚 丙. So
+ * "gui-embun IDENTICAL" was a statement about a 庚 card, and the gate had no
+ * 癸 chart at all - the ONE stem whose Card B headline changed under prompt R
+ * commit 2 (`7100f1a`, the §0a fit gate reaching Card B through the shared
+ * <Headline>). It printed IDENTICAL on all four while 癸's paid card clipped
+ * its footer by 40px. The labels are now `<stem pinyin>-<date>` and the stem is
+ * ASSERTED from the chart below, so a label cannot lie again.
+ *
+ * The four baselines are unchanged; only their filenames moved to the truth.
+ * `gui-1954-01-07` was added 2026-09-30 with its baseline written on `892f5e0^`,
+ * the tree before prompt R - the same reference the other four were taken from.
+ * It is a real chart that carries the heaviest Card B prose a 癸 can get (空亡 +
+ * 驛馬, six tags on three rows); see `npm run audit:card-budget -- --overflow`.
  */
 const CHARTS = [
-  { label: 'ding-api-unggun', birthDate: '1989-09-13', birthTime: '09:00' },
-  { label: 'jia-jati', birthDate: '1984-03-15', birthTime: '11:00' },
-  { label: 'gui-embun', birthDate: '1983-11-08', birthTime: '14:00' },
-  { label: 'bing-matahari', birthDate: '1986-06-21', birthTime: '10:00' },
+  { label: 'bing-1989-09-13', stem: '丙', birthDate: '1989-09-13', birthTime: '09:00' },
+  { label: 'wu-1984-03-15', stem: '戊', birthDate: '1984-03-15', birthTime: '11:00' },
+  { label: 'geng-1983-11-08', stem: '庚', birthDate: '1983-11-08', birthTime: '14:00' },
+  { label: 'bing-1986-06-21', stem: '丙', birthDate: '1986-06-21', birthTime: '10:00' },
+  { label: 'gui-1954-01-07', stem: '癸', birthDate: '1954-01-07', birthTime: '10:00' },
 ];
+// `--only <label>` runs one chart. It exists so a baseline for a NEW chart can be
+// written on the pre-change tree without regenerating the ones already there.
+const ONLY = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -122,6 +140,9 @@ async function devtools(port) {
 function pageFor(chart) {
   const c = calculateBaziChart({ birthDate: chart.birthDate, birthTime: chart.birthTime });
   const data = buildCardData({ chart: c, semanticJson: buildSemanticJson(c), birthDate: chart.birthDate });
+  if (data.stem !== chart.stem) {
+    throw new Error(`${chart.label} is labelled ${chart.stem} but the chart's Day Master is ${data.stem}.`);
+  }
   const markup = renderToStaticMarkup(React.createElement(CardB, { data, scale: 1 }));
   return `<!doctype html><meta charset="utf-8">
 <style>*{box-sizing:border-box}html,body{margin:0;padding:0;background:#7a7a7a}</style>
@@ -147,7 +168,7 @@ try {
   const cdp = await CDP.connect(target.webSocketDebuggerUrl);
   await cdp.send('Page.enable');
 
-  for (const chart of CHARTS) {
+  for (const chart of CHARTS.filter((c) => !ONLY || c.label === ONLY)) {
     const html = pageFor(chart);
     await cdp.send('Page.navigate', { url: `data:text/html;base64,${Buffer.from(html).toString('base64')}` });
     // Fonts and the SVG rim need a beat; a screenshot taken mid-layout would make

@@ -54,8 +54,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+
 import { GLOSSARY } from '../lib/semantic/glossary.js';
-import { splitName } from '../components/cards/Card.js';
+import { calculateBaziChart } from '../lib/bazi/buildChart.js';
+import { buildSemanticJson } from '../lib/semantic/index.js';
+import { buildCardData } from '../lib/card/cardData.js';
+import { splitName, CardB } from '../components/cards/Card.js';
+
+const { renderToStaticMarkup } = ReactDOMServer;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
@@ -64,9 +72,19 @@ const RECALIBRATE = 'npm run audit:card-budget -- --overflow   (then serve repor
 /**
  * THE FROZEN CALIBRATION.
  *
- * Every number here was the value when the 2026-08-26 browser sweep measured
- * 0 overflow across 23 cases - 13 fixture charts plus a maximum-prose card for
- * each of the ten stems - with 7px of slack on the tightest.
+ * RE-MEASURED 2026-09-30, and the number is the same 7px for a different reason.
+ * The 2026-08-26 sweep measured 0 overflow across 23 cases (13 fixture charts plus
+ * a maximum-prose card per stem) with 7px on MAX 癸. By 2026-09-30 that line was
+ * false: MAX 癸 overflowed by +40px, and so did three REAL 癸 charts (1954-01-07
+ * 10:00, 1953-01-12 10:00, 1953-05-12 02:00 - two longest badges, six tags on
+ * three rows). No string had grown; every length below still held. The cause was
+ * the headline size (see the headline test below). With Card B's two-line head
+ * back at its 08-26 size the 2026-09-30 sweep reads 0 overflow across 86 cases -
+ * the 23, plus 63 real charts picked as the heaviest per stem from a walk over
+ * every chart 1950-2005 - with 7px on MAX 癸 and on those three real 癸 charts.
+ *
+ * THE 7px IS NOW A REAL CUSTOMER'S MARGIN, not only a synthetic one: 208 of
+ * 26,585 癸 charts in that walk show the two longest badges with six tags.
  *
  * **A FAILURE HERE IS NOT A BUG. It means the measurement is stale.** Re-run the
  * sweep, confirm nothing overflows, and move the number. If the sweep DOES
@@ -74,9 +92,12 @@ const RECALIBRATE = 'npm run audit:card-budget -- --overflow   (then serve repor
  * on 2026-08-26 that the durable fix is a layout that absorbs length.
  */
 const CALIBRATION = {
-  measuredOn: '2026-08-26',
+  measuredOn: '2026-09-30',
   tightestSlackPx: 7,
-  tightestCase: 'MAX 癸 - longest hook for that stem, two longest label_meanings, six tags',
+  tightestCase: 'MAX 癸, and REAL 癸 1954-01-07 10:00 - 空亡 + 驛馬, six tags on three rows',
+  // Card B's headline as DRAWN, export px. 癸 is 139 x 0.80 because it is the one
+  // two-word head; at 139 it costs 47px and the card clips (measured 2026-09-30).
+  cardBHeadlinePx: { 甲: 139, 乙: 139, 丙: 139, 丁: 139, 戊: 139, 己: 139, 庚: 139, 辛: 139, 壬: 139, 癸: 111.2 },
   // Global ceilings: the sweep pairs the two LONGEST label_meanings with every
   // stem, so any entry staying at or under this keeps the worst case unchanged -
   // including a NEW bintang entry, which a per-key table would not cover.
@@ -84,8 +105,9 @@ const CALIBRATION = {
   // RE-MEASURED, not moved: `audit:card-budget -- --overflow` in the browser (Archivo
   // loaded, checked) BEFORE and AFTER the change reads the same: the 13 fixture charts
   // fit, tightest real slack 23px; the synthetic MAX 癸 overflows +40px in BOTH, so the
-  // +2 characters add no line. That +40px is PRE-EXISTING on main and outside this
-  // change: the 2026-08-26 "0 overflow, 7px slack" below no longer holds for MAX 癸.
+  // +2 characters add no line. That +40px was the headline leak (7100f1a), fixed by
+  // CARD_B_STACKED_HEAD_FACTOR; re-measured on the merged tree with the 188-char
+  // sentence in: 0 overflow across 89 cases, 7px tightest (the measurement above).
   bintangMeaningMax: 188,
   bintangNameMax: 16,
   aspekNameMax: 16,
@@ -168,6 +190,37 @@ test('the headline still takes the same number of lines, per stem', () => {
     assert.ok(
       len(GLOSSARY.arketipe?.[stem]?.name_id) <= CALIBRATION.arketipeNameIdMax,
       why(`arketipe.${stem}.name_id is over the measured ${CALIBRATION.arketipeNameIdMax}.`),
+    );
+  }
+});
+
+test('CARD B\'S HEADLINE IS DRAWN AT THE SIZE THE SWEEP MEASURED, per stem', () => {
+  // ── THE EIGHTH SURFACE IS NOT CONTENT, AND IT IS THE ONE THAT SPENT THE 7px ──
+  // Every test above freezes a STRING. On 2026-08-31 `7100f1a` changed no string:
+  // it replaced <Headline>'s word-count reduction with §0a's fit gate - ruled for
+  // Card A's 936 measure - and <Headline> is shared, so 癸's MORNING / DEW went
+  // from 111 to 139 on Card B too. That is +47px of headline against 7 of slack,
+  // and real 癸 cards overflowed by 40px - hairline gone, badges jammed into the
+  // pillars, seal 19px off the edge - while all five tests above stayed green,
+  // because they could not see a size.
+  //
+  // So the size itself is frozen, read off the rendered markup rather than off a
+  // constant, because the defect was a constant that was correct for the card it
+  // was ruled for and wrong for the one it reached.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const base = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  for (const stem of STEMS) {
+    const arche = GLOSSARY.arketipe[stem];
+    const html = renderToStaticMarkup(React.createElement(CardB, {
+      data: { ...base, stem, nameEn: arche.name_en, nameId: arche.name_id },
+    }));
+    const m = html.match(/data-role="headline" style="[^"]*?font-size:([\d.]+)px/);
+    assert.ok(m, `no headline font-size found on Card B for ${stem}`);
+    const drawn = Number(m[1]);
+    assert.ok(
+      Math.abs(drawn - CALIBRATION.cardBHeadlinePx[stem]) < 0.01,
+      why(`Card B draws ${stem}'s headline at ${drawn}px, not the measured ${CALIBRATION.cardBHeadlinePx[stem]}px.`
+        + '\n  The headline is the biggest block on the card; a size change moves every line under it.'),
     );
   }
 });
