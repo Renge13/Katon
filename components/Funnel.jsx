@@ -297,7 +297,7 @@ export default function Funnel({ salesOpen = false } = {}) {
     // work she can now watch being already done.
     setReading({
       token: created.token, chart: created.chart, blocks: [], penutup: '',
-      pending: true, birthDate, gender: form.gender || null,
+      pending: true, birthDate, birthTime: resolution.birthTime ?? birthTime, gender: form.gender || null,
     });
     // Bookmarkable without remounting: swap the URL via history.pushState, NOT
     // router.push, which would mount the /r route and discard this state.
@@ -317,7 +317,7 @@ export default function Funnel({ salesOpen = false } = {}) {
     // The full payload carries `chart` under the same key POST did, from the same
     // `mirrorChartView`, so this merge replaces it with an identical object rather
     // than reconciling two shapes.
-    setReading({ ...served, birthDate, gender: form.gender || null });
+    setReading({ ...served, birthDate, birthTime: resolution.birthTime ?? birthTime, gender: form.gender || null });
   }
 
   async function onSubmit(e) {
@@ -825,13 +825,20 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
   const cardData = reading.card
     ? { ...reading.card, footer: mergeFooter(reading.card.footer, reading.birthDate, reading.gender) }
     : null;
-  // THE HEADER'S PROFILE LINE IS THE CARD FOOTER'S, SAME SOURCE AND SAME WORDS
-  // (Prompt AQ §1, 2026-09-28). The session that created the reading holds the date
-  // and gender; a reopened or shared link holds neither, and then there is no line
-  // at all rather than an empty one. Serving them on the permalink would put a
-  // birth date on every link a reader shares, and that is Reyner's to rule.
-  const profileLine = (reading.birthDate || reading.gender)
-    ? mergeFooter(null, reading.birthDate, reading.gender).left
+  // THE HEADER'S PROFILE LINE (Prompt AQ §1, then AU §1). Same words and format as
+  // the card footer, plus the hour. RULED BY REYNER 2026-09-30: it is "shown on
+  // reopened and shared links too" (ruling 1), and reads "PEREMPUAN | 14 FEB 2001 |
+  // 13.00" when an hour was given, with no third segment when not (ruling 2). The
+  // serve payload's `profile` carries the stored row's three fields; the session's
+  // own values stand in until it arrives. No values at all means no line, never an
+  // empty one.
+  const profile = reading.profile
+    || { birth_date: reading.birthDate ?? null, birth_time: reading.birthTime ?? null, gender: reading.gender ?? null };
+  const hourSegment = typeof profile.birth_time === 'string' && /^\d{2}:\d{2}$/.test(profile.birth_time)
+    ? profile.birth_time.replace(':', '.')
+    : null;
+  const profileLine = (profile.birth_date || profile.gender)
+    ? [mergeFooter(null, profile.birth_date, profile.gender).left, hourSegment].filter(Boolean).join(' | ')
     : '';
 
   return (

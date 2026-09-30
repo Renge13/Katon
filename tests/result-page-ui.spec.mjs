@@ -96,9 +96,37 @@ test('§1 IN SESSION, no gender: the date alone, with no separator', async () =>
   } finally { m.unmount(); f.restore(); }
 });
 
-// A GUARD, NOT A RED-FIRST ASSERTION: it passes before the change too, because
-// before the change nothing rendered at all. It is here so the line cannot come
-// back as an empty row or a bare " | " on a shared link.
+// ── AU §1: THE LINE ON EVERY LOAD, WITH THE HOUR (Reyner's ruling 1 and 2, 2026-09-30) ──
+// The serve payload now carries `profile` from the stored row, so a reopened or shared
+// link shows the line too. The hour is the third segment, as she entered it, "13.00".
+test('AU §1 RE-ACCESS: a served profile shows the line with no session', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, profile: { birth_date: '2001-02-14', birth_time: null, gender: 'female' } });
+  try {
+    const line = m.host.querySelector('[data-profile-line]');
+    assert.ok(line, 'the reopened link shows the profile line');
+    assert.equal(line.textContent, 'PEREMPUAN | 14 Feb 2001', 'no hour: two segments, no trailing separator');
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §1: with an hour the line has three segments, "PEREMPUAN | 14 Feb 2001 | 13.00"', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, profile: { birth_date: '2001-02-14', birth_time: '13:00', gender: 'female' } });
+  try {
+    assert.equal(m.host.querySelector('[data-profile-line]')?.textContent, 'PEREMPUAN | 14 Feb 2001 | 13.00');
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §1: in session, the hour she typed is the third segment too', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...IN_SESSION, birthTime: '07:00' });
+  try {
+    assert.equal(m.host.querySelector('[data-profile-line]')?.textContent, 'PEREMPUAN | 14 Feb 2001 | 07.00');
+  } finally { m.unmount(); f.restore(); }
+});
+
+// A GUARD: a payload with no profile and no session (an old cached client) still shows
+// no empty row or bare " | ".
 test('§1 RE-ACCESS: no date, no gender -> no line, no empty row, no stray separator', async () => {
   const f = stubFetch();
   const m = await mount(SERVED);
