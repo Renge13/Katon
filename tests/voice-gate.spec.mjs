@@ -330,7 +330,7 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.58.0');
+    assert.equal(onV2.stage6_version, '1.59.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
   } finally {
@@ -455,6 +455,62 @@ test('NO NESTED BRACKET: the English goes on the first BARE mention, and nowhere
   const out = validateRenderingV2(onlyInside, sj);
   const all = out.normalized.blocks.map((b) => b.text).join(' ');
   assert.equal(all.includes(`(${en})`), false, 'inserted on a mention inside parentheses');
+});
+
+// ── POST-PROCESSING NEVER NESTS A BRACKET (STAGE6 1.59.0, AS Amendment 1 §B) ──
+// r5-05 was SERVED with "(Aspek Penantang (Seven Killings))" and three more. The
+// writer put the Indonesian name in parentheses and its English in square brackets;
+// brackets.square_normalised made the square gloss round INSIDE the open parenthesis.
+// Cowork's ruling: a square gloss being normalised inside an open parenthesis is
+// removed with its content, never converted. The fixture is that draft, verbatim.
+import NESTING_R5 from './fixtures/bracket-nesting-r5-05.json' with { type: 'json' };
+
+const NESTED_ANY = /\([^()]*\([^()]*\)[^()]*\)/gu;
+const servedText = (out) => [...out.normalized.blocks.map((b) => b.text), out.normalized.penutup || ''].join('\n');
+
+test('NO NESTED BRACKET: r5-05\'s served text, reproduced from its draft, verbatim', () => {
+  assert.equal(NESTING_R5.served_nested.length, 4, 'precondition: the fixture records the four served nests');
+  const sj = buildSemanticJson(calculateBaziChart(NESTING_R5.inputs), { voice: 'v2' });
+  const out = validateRenderingV2(withEngineOpening(NESTING_R5.draft, sj).rendered, sj);
+  const nests = servedText(out).match(NESTED_ANY) || [];
+  assert.deepEqual(nests, [], `nested brackets served: ${nests.join(' ')}`);
+  // The writer's own parenthesis stays, without the English that would have nested.
+  assert.ok(servedText(out).includes('(Aspek Penantang)'), 'the parenthesis is kept as written, minus the gloss');
+});
+
+test('NO NESTED BRACKET CONTROL: a BARE square gloss after a supplied Aspek still becomes round', () => {
+  const sj = buildSemanticJson(calculateBaziChart(NESTING_R5.inputs), { voice: 'v2' });
+  const draft = draftFor(sj);
+  draft.blocks[0].text += ' Aspek Penantang [Seven Killings] menetap di Pilar Kerja.';
+  const t = validateRenderingV2(draft, sj).normalized.blocks[0].text;
+  assert.ok(t.includes('Aspek Penantang (Seven Killings) menetap'), t.slice(-120));
+});
+
+test('NO NESTED BRACKET: an archetype square gloss inside a parenthesis is removed, not converted', () => {
+  const sj = v2(A);
+  const name = sj.core.archetype_name_id;
+  const draft = draftFor(sj);
+  draft.blocks[0].text = `Sebagai Api (${name} [${sj.core.archetype_name_en}]), kamu hangat. ${name} menerangi sekitarmu.`;
+  const t = validateRenderingV2(draft, sj).normalized.blocks[0].text;
+  assert.equal(NESTED_ANY.test(t), false, t.slice(0, 120));
+  NESTED_ANY.lastIndex = 0;
+  assert.ok(t.startsWith(`Sebagai Api (${name}),`), t.slice(0, 120));
+});
+
+test('NO NESTED BRACKET on v1: insertBrackets skips a mention inside parentheses for the next bare one', () => {
+  const sj = buildSemanticJson(A);
+  const aspek = sj.facts.find((f) => f.label === 'Aspek Pengelola');
+  assert.ok(aspek?.label_bracket, 'precondition: chart 1 supplies Aspek Pengelola');
+  const draft = draftFor(sj);
+  const block = draft.blocks.find((b) => b.fact_ids.includes(aspek.id));
+  // Strip the floor's own bracketed mentions so the insertion has work to do.
+  draft.blocks = draft.blocks.map((b) => ({ ...b, text: b.text.split(`${aspek.label} (${aspek.label_bracket})`).join(aspek.label) }));
+  const idx = draft.blocks.indexOf(draft.blocks.find((b) => b.fact_ids.includes(aspek.id)));
+  draft.blocks[idx] = { ...block, text: `Kamu pengatur (${aspek.label}) yang rapi. ${aspek.label} menjaga semuanya.` };
+  const out = validateRendering(draft, sj);
+  const t = out.normalized.blocks[idx].text;
+  assert.equal(/\([^()]*\([^()]*\)[^()]*\)/u.test(t), false, t);
+  assert.ok(t.includes(`${aspek.label} (${aspek.label_bracket}) menjaga`), t);
 });
 
 // ── A SUPPLIED TERM WRITTEN WITH "dan" FOR ITS COMMA IS THAT TERM (STAGE6 1.53.0, AK §1) ──

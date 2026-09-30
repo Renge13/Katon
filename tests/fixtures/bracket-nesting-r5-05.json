@@ -1,0 +1,47 @@
+{
+  "_README": "Prompt AS Amendment 1 §B red-first evidence. reports/voice-v2/round5-data/r5-05-v2.json (gitignored), writer draft 2, VERBATIM: the draft STAGE6 1.57.0 SERVED with four nested brackets after brackets.square_normalised turned an in-parenthesis [English] into (English). Extracted by script 2026-09-30. Evidence, not output.",
+  "from": "r5-05-v2.json#draft2",
+  "inputs": {
+    "birthDate": "2001-02-14",
+    "birthTime": "13:00",
+    "gender": "female"
+  },
+  "draft": {
+    "blocks": [
+      {
+        "fact_ids": [
+          "day_master_Earth",
+          "strength_balanced",
+          "main_profile"
+        ],
+        "heading": "Gunung yang Berdiri Tegak",
+        "text": "Sebagai seseorang dengan batang hari Tanah (Tanah [Earth]), dirimu adalah perwujudan dari Gunung. Orang menaruh hal-hal penting padamu karena kamu tidak mudah goyah, dan dirimu menampung lebih banyak beban dari yang terlihat di permukaan. Karena baganmu berada pada titik Seimbang (Seimbang [Balanced]), kamu memiliki kelenturan yang tinggi; perubahan mendadak yang membuat orang lain kehilangan arah biasanya hanya menggeser langkahmu sedikit saja. Namun, di Pilar Kerja, kamu memiliki Aspek Penantang (Aspek Penantang [Seven Killings]) yang membuatmu tumbuh paling cepat justru saat berada di bawah tekanan. Dalam keseharian, ini terasa seperti dirimu yang secara sadar memilih proyek paling rumit atau tenggat waktu paling ketat karena di sanalah pikiranmu paling jernih. Sayangnya, ini membuatmu sulit beristirahat; bagimu, ketenangan yang terlalu lama justru terasa seperti kehilangan arah."
+      },
+      {
+        "fact_ids": [
+          "void_stack_month",
+          "relation_冲_寅申",
+          "relation_刑_trine_寅巳申"
+        ],
+        "heading": "Dinamika di Balik Pencapaian",
+        "text": "Terdapat Tanda Kekosongan (Tanda Kekosongan [Void]) yang cukup kuat di Pilar Kerja. Meskipun dunia melihatmu berhasil, kamu sering merasa belum pantas menyandangnya dan terus menunggu bukti berikutnya. Ketegangan ini diperparah oleh Benturan (Benturan [Clash]) antara Pilar Kerja dan Pilar Diri, yang membuat perubahan di hidupmu sering datang mendadak. Kamu juga memiliki Simpul (Simpul [Punishment]) yang mengikat Pilar Akar, Kerja, dan Diri menjadi satu kesatuan. Misalnya, saat ada kekacauan di tempat kerja, hal itu otomatis mengusik stabilitas pribadimu. Ini membuatmu memahami situasi rumit yang tidak punya jawaban sederhana, sesuatu yang jarang bisa dilakukan orang lain, namun konsekuensinya adalah dirimu harus terus-menerus siaga membereskan banyak hal sekaligus agar tidak ada yang runtuh."
+      },
+      {
+        "fact_ids": [
+          "spouse_palace",
+          "aspek_convergence_食神",
+          "badge_驛馬"
+        ],
+        "heading": "Kebutuhan akan Ruang dan Gerak",
+        "text": "Di Pilar Diri, terdapat Fondasi Pasangan yang menampung Aspek Perajin (Aspek Perajin [Eating God]). Kamu menikmati pekerjaan tanpa bergantung pada pengakuan orang lain, namun kelemahannya adalah kamu jarang menagih hakmu, membuat karyamu sering terpakai tanpa namamu disebut. Terlebih lagi, kehadiran Bintang Perantau (Bintang Perantau [Sky Horse]) di Pilar Kerja membuatmu merasa gelisah jika harus diam terlalu lama di satu tempat. Kamu tidak takut memulai kembali di lingkungan baru, sebuah keberanian yang sering membuat orang lain terperangah. Namun, perhatikan bahwa hal-hal yang butuh waktu bertahun-tahun untuk mengakar sering terlewat begitu saja olehmu karena hasrat untuk berpindah yang muncul secara tiba-tiba."
+      }
+    ],
+    "penutup": "Kamu memiliki struktur yang sangat tangguh, namun energi yang paling menarik adalah bagaimana kamu terus mencari tantangan untuk membuktikan dirimu sendiri. Mungkin menarik untuk memperhatikan bagaimana dorongan untuk berpindah itu berinteraksi dengan orang-orang di sekitarmu yang sebenarnya sudah menjadi jangkar bagimu."
+  },
+  "served_nested": [
+    "(Aspek Penantang (Seven Killings))",
+    "(Tanda Kekosongan (Void))",
+    "(Aspek Perajin (Eating God))",
+    "(Bintang Perantau (Sky Horse))"
+  ]
+}
