@@ -80,7 +80,13 @@ const CALIBRATION = {
   // Global ceilings: the sweep pairs the two LONGEST label_meanings with every
   // stem, so any entry staying at or under this keeps the worst case unchanged -
   // including a NEW bintang entry, which a per-key table would not cover.
-  bintangMeaningMax: 186,
+  // 188 since 2026-09-30 (Prompt AX §2: Reyner's Tanda Kekosongan sentence, 186 -> 188).
+  // RE-MEASURED, not moved: `audit:card-budget -- --overflow` in the browser (Archivo
+  // loaded, checked) BEFORE and AFTER the change reads the same: the 13 fixture charts
+  // fit, tightest real slack 23px; the synthetic MAX 癸 overflows +40px in BOTH, so the
+  // +2 characters add no line. That +40px is PRE-EXISTING on main and outside this
+  // change: the 2026-08-26 "0 overflow, 7px slack" below no longer holds for MAX 癸.
+  bintangMeaningMax: 188,
   bintangNameMax: 16,
   aspekNameMax: 16,
   arketipeNameIdMax: 10,

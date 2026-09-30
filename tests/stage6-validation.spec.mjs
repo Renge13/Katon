@@ -1376,7 +1376,17 @@ test('NO ENGINE STRING WOULD TRIP THE STYLE GATE', () => {
     'name_id', 'label_meaning', 'gift_seed', 'cost_seed', 'actionable_seed',
     'branch_name_id', 'branch_label_meaning', 'line',
   ]);
-  const EXEMPT = /^glossary\.salah_dikira\./;
+  // `pilar.conception.label_meaning` (Reyner, 2026-09-30, Prompt AX) opens "Dihitung
+  // dari", which `style.arithmetic` bans in PROSE ("names the calculation"). The cell
+  // is an APPENDIX line: lib/semantic never reads it, so no writer payload, floor or
+  // gate ever sees it, and this test's invariant (a string a READING can receive) does
+  // not cover it. Exempted by exact path, with the premise asserted below so the
+  // exemption fails the day that stops being true. Reyner's words are not edited here.
+  const EXEMPT = /^glossary\.salah_dikira\.|^glossary\.pilar\.conception\.label_meaning$/;
+  for (const input of [{ birthDate: '2001-02-14', birthTime: '13:00' }, { birthDate: '1989-09-13', birthTime: '09:00' }]) {
+    const sj = JSON.stringify(buildSemanticJson(calculateBaziChart(input), { voice: 'v2' }));
+    assert.equal(sj.includes('masa pembuahan'), false, 'the conception meaning reached the semantic JSON: its exemption no longer holds');
+  }
   // Compiled with EACH ENTRY'S OWN FLAGS, exactly as lib/validate/style.js#compile
   // does. Hardcoding 'iu' here made this test stricter than the gate it guards, and
   // for a case-sensitive pattern that is not caution but a false alarm: the
