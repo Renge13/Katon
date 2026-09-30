@@ -793,3 +793,15 @@ test('ROUND 6: the v2 writer payload carries no label_bracket on a relation fact
   assert.ok(sj.facts.filter((f) => RELATION.has(f.provenance?.kind)).every((f) => f.label_bracket),
     'the payload is a copy: the semantic JSON the gate reads is untouched');
 });
+
+test('ROUND 6: on v2 a relation\'s English is an unsanctioned bracket, an Aspek\'s is not', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  const draft = draftFor(sj);
+  draft.penutup = 'Benturan (Clash) itu terasa di hari-harimu, dan Aspek Penantang (Seven Killings) menjaga langkahmu.';
+  const r = validateRenderingV2(draft, sj);
+  const hits = r.findings.filter((f) => f.check === 'style.unsanctioned_bracket').map((f) => f.message);
+  assert.ok(hits.some((m) => m.includes('(Clash)')), `relation English not flagged: ${hits.join(' | ')}`);
+  assert.equal(hits.some((m) => m.includes('(Seven Killings)')), false, 'an Aspek bracket stays sanctioned');
+  // Logged, never rejecting: style is a flag on v2.
+  assert.ok(r.findings.filter((f) => f.check === 'style.unsanctioned_bracket').every((f) => f.severity === 'flag'));
+});
