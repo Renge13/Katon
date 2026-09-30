@@ -20,3 +20,33 @@ node --conditions=react-server scripts/smoke-round6-switch.mjs --out reports/voi
 - **No close teases.** Every penutup is a single settled observation about her. Round 6 teased in 6 of 10 closes ("menarik untuk diselami", "banyak hal yang menanti"). A whole-prose scan for the tease phrases Reyner quoted found one hit, and it is not a tease: chart4's "Bintang Penolong ... selalu menantimu" is about the badge.
 - **"ingatlah" (a coaching imperative) appears in 3 of 5** readings (chart1's penutup, chart4 and chart7 in the body). Not an AV target; reported.
 - **chart4 places Bintang Penolong "di Pilar Kerja dan Pilar Arah". That is TRUE** (天乙貴人 hits month 巳 and hour 卯), and it exposed that #177's badge card named only the first pillar. Fixed separately in #182.
+
+## Rerun after Prompt AX §1-§2 (2026-09-30)
+
+```
+node --conditions=react-server scripts/smoke-round6-switch.mjs --out reports/voice-v2/round6-switch/smoke-2.json
+```
+
+Same five charts, same asserted wire, on the amended configuration: v2 mirror prompt `v2-7df61378eede313b` (Reyner's badge, imperative and no-restating lines), the Example 3 bracket removed, the AX glossary lines. Gate 1.62.0. **$0.0132.**
+
+| chart | served | words | relation English | questions | final sentence of the penutup |
+|---|---|---|---|---|---|
+| chart1 | served | 528 | 0 | 0 | "Kehebatanmu tidak terletak pada ketiadaan lelah, melainkan pada bagaimana kamu tetap berdiri tegak dengan memilih lingkungan dan batasan yang tepat bagi dirimu sendiri." |
+| chart4 | served | 388 | 0 | 0 | "Kamu adalah sosok yang terus mengalir, yang kedalaman perannya di dunia justru tumbuh dari keterhubungan yang kamu jalin dengan lingkungan sekitar, dan keberanianmu untuk bergerak melampaui apa yang dianggap batas oleh orang lain." |
+| chart7 | served | 427 | 0 | 0 | "Kamu adalah sosok yang terus tumbuh dengan kepekaan tinggi terhadap lingkungan, yang mampu mengelola tanggung jawab besar namun tetap memiliki akses pada dukungan yang tak terduga." |
+| chart13 | served | 357 | 0 | 0 | "Kamu adalah seseorang yang tumbuh melalui keberanian untuk terus menembus batas, dengan kemampuan alami untuk menjaga keseimbangan di tengah arus yang selalu berubah." |
+| smewTN | served | 386 | 0 | 0 | "Kekuatanmu tidak terletak pada ketiadaan masalah, melainkan pada kemampuanmu untuk tetap berdiri teguh saat semua bagian hidupmu saling tarik satu sama lain." |
+
+**No close teases.** Two closes (chart1, smewTN) use "tidak terletak pada X, melainkan pada Y", a not-X-but-Y turn.
+
+**Imperatives and reminders addressed to her: FOUR SURVIVE, so AX §3 stops here.**
+- chart1: "Rasa belum lengkap ini hanyalah bagian dari polamu; saat keinginan untuk menambah satu hal lagi muncul, **cobalah** berhenti sejenak dan bertanya apakah hasil yang ada sekarang sebenarnya sudah lebih dari cukup untuk melangkah."
+- chart1: "Namun, **ingatlah** bahwa waktu untuk santai tidak akan datang dengan sendirinya dari pihak lain; kamu perlu memberi izin pada dirimu sendiri untuk sesekali tidak selalu benar dan tidak harus selalu dalam kendali penuh."
+- chart13: "Namun, titik tengah ini tidak memberi dorongan ekstrem, sehingga **kamu harus** menjadi penentu arah hidupmu sendiri."
+- smewTN: "Untuk mengatasinya, **cobalah** mendokumentasikan dan mengirimkan hasil kerjamu langsung kepada pemangku kepentingan tanpa menunggu orang lain menyatakannya."
+
+Listed by the script but NOT imperatives (a descriptive "harus"): chart4 "kapan harus berhenti dan melangkah", "ada harga yang harus dibayar"; chart13 "merasa harus terus berlari"; smewTN "membuatmu harus sering beradaptasi".
+
+**The likely cause, upstream (CHECK 3).** The mirror prompt says a cost ends with "what helps, from its `actionable`, in your own words", and at least 20 of the glossary's 37 actionable cells are written as commands ("Pilih satu tugas ...", "Buat jadwal ...", "Mintalah bantuan ..."). Both `cobalah` sentences paraphrase such a seed. The new line forbids the imperative while the source it points at is one.
+
+**Restating the page (5+ shared words).** chart4: "Beruntung, kamu memiliki Aspek Pelindung (Direct Resource) di Pilar Kerja, yang menjamin bahwa kamu tidak benar-benar sendirian; bantuan justru sering datang di saat yang tepat, ..." shares "datang di saat yang tepat" with Bintang Penolong's card meaning, and attaches it to Aspek Pelindung.
