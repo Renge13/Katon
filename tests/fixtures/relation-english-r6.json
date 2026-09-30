@@ -1,0 +1,143 @@
+{
+  "_README": "Prompt AV §2 item 3 red-first evidence. reports/voice-v2/round6-data/<id>-v2.json (gitignored): the writer draft each reading was SERVED from, VERBATIM, and the relation-English brackets its served text carried (a parenthetical directly after a relation's Indonesian name from glossary relasi_cabang). Extracted by script 2026-09-30. Evidence, not output.",
+  "readings": [
+    {
+      "id": "r6-01",
+      "subject": "chart4",
+      "inputs": {
+        "birthDate": "1995-06-01",
+        "birthTime": "06:00",
+        "gender": "female"
+      },
+      "from": "r6-01-v2.json#draft1",
+      "served_relation_english": [
+        "Setengah Gabungan (half-combination)",
+        "Benturan (clash)",
+        "Simpul (self-punishment)"
+      ],
+      "draft": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Water",
+              "strength_weak",
+              "main_profile"
+            ],
+            "heading": "Diri yang Mengalir",
+            "text": "Sebagai Embun (The Morning Dew), kamu adalah Air yang menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Kapasitas energimu tergolong Lemah, yang berarti sumber tenagamu murni berada di luar dirimu; kamu sangat peka membaca situasi dan tahu cara memanfaatkan dukungan di sekitarmu. Di Pilar Kerja, kamu memiliki Aspek Pelindung (Direct Resource) yang membuatmu cepat menyerap ilmu dan selalu mendapati bantuan muncul tepat pada waktunya. Namun, kenyamanan dari bantuan ini sering kali memperlambat langkahmu, membuatmu terlalu lama bersiap sebelum benar-benar mulai melangkah. Ingatlah untuk membatasi masa persiapanmu dengan tanggal, bukan menunggu rasa siap, karena petunjuk berikutnya biasanya baru terlihat setelah kamu mulai bergerak."
+          },
+          {
+            "fact_ids": [
+              "relation_刑_self_亥",
+              "relation_半合_亥卯",
+              "relation_冲_巳亥"
+            ],
+            "heading": "Dinamika yang Beradu",
+            "text": "Dalam keseharian, kamu merasakan tarikan yang kompleks antara Pilar Akar, Pilar Kerja, dan Pilar Diri. Adanya Simpul (self-punishment) di Pilar Akar dan Pilar Diri membuatmu cenderung berlebihan di wilayah yang paling kamu kuasai, sementara Benturan (clash) antara Pilar Akar, Pilar Kerja, dan Pilar Diri membawa guncangan yang menuntutmu untuk selalu siap beradaptasi. Di saat yang sama, Setengah Gabungan (half-combination) antara Pilar Akar, Pilar Diri, dan Pilar Arah menciptakan rasa 'hampir pas' yang konstan—semuanya sudah berjalan, namun kamu selalu merasa harus menambah satu hal lagi sebelum berani menyebutnya selesai. Rasa 'belum lengkap' ini hanyalah bagian dari polamu; saat keinginan itu muncul, berhentilah sejenak dan tanyakan apakah yang ada sekarang sudah cukup untuk melangkah."
+          },
+          {
+            "fact_ids": [
+              "spouse_palace",
+              "aspek_convergence_劫財"
+            ],
+            "heading": "Fondasi yang Menantang",
+            "text": "Fondasi Pasangan di Pilar Diri-mu menyimpan Aspek Pendorong (Rob Wealth), yang menjelaskan mengapa kamu bergerak jauh lebih cepat saat ada persaingan atau tantangan. Situasi yang datar justru membuatmu gelisah. Ini adalah tekstur relasi yang terasa wajar bagimu, meski orang lain mungkin menganggapnya berat. Keberanianmu untuk mengambil langkah yang ditunda orang lain adalah hadiah terbesarmu, namun hasilnya sering kali sulit untuk dipertahankan karena kamu cenderung sulit menahan sesuatu cukup lama sampai ia benar-benar mengendap. Untuk membantu kestabilan ini, tetapkan satu pencapaian utama dan kunci targetnya minimal untuk setahun tanpa mengganti fokus sebelum tenggatnya tiba."
+          }
+        ],
+        "penutup": "Kamu memiliki kemampuan untuk menembus situasi yang buntu bagi orang lain, namun kekuatanmu di area ini bisa berbalik menekan dirimu sendiri jika tidak dibatasi. Ada pola-pola yang menarik untuk diselami lebih dalam, terutama bagaimana kamu menyeimbangkan dorongan untuk terus berpindah dengan kebutuhan untuk memiliki jangkar yang stabil."
+      }
+    },
+    {
+      "id": "r6-05",
+      "subject": "smewTNtzNaoQmWysi6mYU",
+      "inputs": {
+        "birthDate": "2001-02-14",
+        "birthTime": "13:00",
+        "gender": "female"
+      },
+      "from": "r6-05-v2.json#draft1",
+      "served_relation_english": [
+        "Ikatan (combination)",
+        "Benturan (clash)",
+        "Simpul (trine)"
+      ],
+      "draft": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Earth",
+              "strength_balanced",
+              "main_profile"
+            ],
+            "heading": "Gunung yang Menantang",
+            "text": "Sebagai Gunung (Tanah), kamu adalah tempat orang lain berpijak. Kamu menampung lebih banyak beban dari yang terlihat di permukaan, dan orang menaruh hal-hal penting padamu karena kamu tidak mudah goyah. Baganmu berada di titik Seimbang, yang berarti kamu sanggup menopang dirimu sendiri sekaligus tetap terbuka menerima dari luar. Namun, di balik ketenangan itu, ada Aspek Penantang (Seven Killings) yang bersarang di Pilar Kerja. Ini menjelaskan mengapa kamu tumbuh paling cepat saat berada di bawah tekanan. Dalam keseharian, ini bisa terasa seperti kamu yang justru mencari-cari tantangan baru saat keadaan mulai terasa terlalu tenang atau aman. Kamu tidak lumpuh saat situasi memburuk; justru di titik itulah pikiranmu paling jernih. Sayangnya, ini ada harganya: kamu sering mencari tekanan yang sebenarnya tidak perlu, dan istirahat sering kali terasa seperti kehilangan arah. Untuk membantu, masukkan waktu rehat ke dalam jadwal sebelum tubuhmu memaksamu berhenti."
+          },
+          {
+            "fact_ids": [
+              "void_stack_month",
+              "relation_刑_trine_寅巳申",
+              "relation_六合_巳申",
+              "relation_冲_寅申",
+              "relation_害_寅巳"
+            ],
+            "heading": "Simpul yang Saling Mengunci",
+            "text": "Ada dinamika yang cukup intens dalam baganmu, di mana Pilar Akar, Pilar Kerja, dan Pilar Diri terikat dalam satu Simpul (trine). Persoalan di sini jarang melibatkan satu pihak saja; menyelesaikan satu sisi biasanya menggeser masalahnya ke sisi lain. Ini diperumit oleh Benturan (clash) antara Pilar Kerja dan Pilar Diri, serta Ikatan (combination) antara Pilar Akar dan Pilar Diri. Dalam keseharian, ini bisa terasa seperti efek domino: saat satu area hidupmu terguncang, area lain otomatis ikut terpengaruh. Kamu terbiasa dengan guncangan cepat ini, namun ketenangannya tidak datang otomatis. Di tengah semua ini, terdapat Tanda Kekosongan (Void) di Pilar Kerja. Orang lain melihat kamu berhasil di bidang ini, tetapi kamu sendiri sering merasa belum pantas menyandangnya. Pengakuan orang lain tidak pernah menempel di dalam dirimu, sehingga kamu terus menunggu bukti berikutnya. Untuk membantu, sebut hasil kerjamu dengan lantang, meskipun rasanya canggung, dan jaga pilar kehidupan yang stabil saat yang lain sedang terguncang."
+          },
+          {
+            "fact_ids": [
+              "aspek_convergence_食神",
+              "badge_驛馬"
+            ],
+            "heading": "Karya yang Sunyi",
+            "text": "Kamu memiliki Aspek Perajin (Eating God) yang menonjol, membuatmu senang mengerjakan sesuatu sampai selesai tanpa perlu ditonton. Prosesnya sendiri sudah memberi kepuasan, namun kamu jarang menagih hakmu, sehingga karyamu sering dipakai orang lain tanpa namamu ikut disebut. Ini diperkuat oleh Bintang Perantau (Sky Horse) di Pilar Kerja yang membuatmu gelisah jika diam terlalu lama di satu tempat. Kamu tidak takut memulai kembali di tempat baru, namun hubungan atau usaha butuh waktu untuk mengakar, dan kamu sering berpindah sebelum itu terjadi. Untuk membantu, dokumentasikan dan kirimkan langsung hasil kerjamu ke pemangku kepentingan, serta pertahankan setidaknya satu jangkar stabil di tengah hasratmu untuk berpindah."
+          }
+        ],
+        "penutup": "Kamu memiliki ketangguhan yang jarang dimiliki orang lain, namun ada pola di mana kamu terus menantang diri sendiri untuk membuktikan sesuatu yang sebenarnya sudah kamu miliki. Mungkin menarik untuk melihat bagaimana kamu bisa mulai mengklaim hasil kerjamu tanpa harus selalu mencari tekanan baru sebagai validasi."
+      }
+    },
+    {
+      "id": "r6-10",
+      "subject": "chart4",
+      "inputs": {
+        "birthDate": "1995-06-01",
+        "birthTime": "06:00",
+        "gender": "female"
+      },
+      "from": "r6-10-v2.json#draft2",
+      "served_relation_english": [
+        "Setengah Gabungan (half combination)",
+        "Benturan (clash)",
+        "Simpul (punishment)"
+      ],
+      "draft": {
+        "blocks": [
+          {
+            "fact_ids": [
+              "day_master_Water",
+              "strength_weak",
+              "main_profile"
+            ],
+            "heading": "Aliran Embun yang Peka",
+            "text": "Sebagai Embun (Water) yang memiliki kapasitas energi Lemah, kamu adalah pribadi yang sangat adaptif, namun sangat bergantung pada lingkungan untuk tetap bercahaya. Sifat dasar Air-mu membuatmu mampu menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan, meski orang sering salah mengira kamu acuh tak acuh karena caramu menyerap detail secara diam-diam. Kekuatanmu tidak terletak pada dorongan fisik yang keras, melainkan pada kepekaanmu membaca situasi. Di dalam Pilar Kerja, hadir Aspek Pelindung (Direct Resource) yang membimbingmu; kamu cepat menyerap ilmu dan hampir selalu ada bantuan yang datang tepat pada waktunya. Namun, karena energimu bersifat Lemah, kenyamanan dari bantuan ini sering membuatmu terlalu lama bersiap sebelum benar-benar melangkah. Ingatlah bahwa bantuan ini ada untuk mempercepat langkahmu, bukan alasan untuk menunda eksekusi."
+          },
+          {
+            "fact_ids": [
+              "relation_刑_self_亥",
+              "relation_冲_巳亥"
+            ],
+            "heading": "Dinamika Internal yang Menantang",
+            "text": "Di balik ketenanganmu, terdapat Simpul (punishment) yang menghubungkan Pilar Akar dan Pilar Diri, menciptakan gesekan di wilayah yang sebenarnya paling kamu kuasai. Kamu memahami situasi rumit yang tidak punya jawaban sederhana, namun kekuatanmu di area ini bisa berbalik menekan diri sendiri jika tidak dibatasi. Hal ini diperumit oleh adanya Benturan (clash) antara Pilar Akar, Pilar Kerja, dan Pilar Diri. Dalam keseharian, perubahan di area karier dan hubunganmu sering datang mendadak, membawa guncangan yang tidak bisa diproses secara perlahan. Kamu terbiasa beradaptasi dengan guncangan cepat, namun kestabilan di area ini tidak datang otomatis; ia butuh dijaga dengan kesadaran penuh. Jangan menunggu guncangan terjadi, siapkan rencana cadangan agar kamu bisa merespons dengan strategi alih-alih panik."
+          },
+          {
+            "fact_ids": [
+              "relation_半合_亥卯"
+            ],
+            "heading": "Rasa Hampir Pas yang Menjadi Pola",
+            "text": "Hubungan antara Pilar Akar, Pilar Diri, dan Pilar Arah membentuk Setengah Gabungan (half combination) yang menarik elemen Kayu. Arah gerakmu sudah sangat jelas, namun energinya belum sepenuhnya padu. Dalam keseharian, ini terasa seperti rasa 'hampir pas': semuanya sudah berjalan, namun kamu selalu merasa harus menambah satu hal lagi sebelum berani menyebutnya selesai. Rasa 'belum lengkap' itu hanyalah bagian dari polamu, bukan tanda ada yang salah. Saat keinginan itu muncul, berhenti sejenak dan bertanyalah apakah yang ada sekarang sebenarnya sudah cukup untuk melangkah. Sering kali, jawabannya adalah sudah lebih dari cukup."
+          }
+        ],
+        "penutup": "Jejak-jejak ini baru permukaan dari bagaimana energimu berinteraksi dengan dunia; masih ada lapisan lain mengenai bagaimana kamu menempatkan dirimu di tengah keramaian yang menarik untuk ditelisik lebih jauh."
+      }
+    }
+  ]
+}
