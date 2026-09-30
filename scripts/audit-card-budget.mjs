@@ -206,6 +206,41 @@ if (process.argv.includes('--overflow')) {
   }
   void worstHookStem;
 
+  // ── AND THE WORST CORNER AS A REAL CHART, BECAUSE IT IS ONE ──
+  // The MAX rows above borrow chart 5's fixed tags and pillars, so they are a
+  // layout stress case rather than a card anyone receives. On 2026-09-30 MAX 癸
+  // overflowed and the first question was whether a customer could ever get it.
+  // A brute-force walk over every 癸 day-master chart 1950-2005 at all twelve
+  // hours answered it: 208 of 26,585 show exactly the two longest badges (空亡 +
+  // 驛馬) with six tags. BADGES AND TAG COUNT ARE NOT ENOUGH: tag ORDER decides
+  // whether six tags wrap to two rows or three, so most of the 208 fit and a few
+  // do not. These three are the ones that clipped by +40px on 2026-09-30 (the
+  // first of the 208, 1953-09-29 08:00, fit by 7px while they clipped, which is
+  // why a default of "any chart with the worst badges" would have stayed green).
+  // Rendered through the real pipeline end to end: if these and MAX disagree,
+  // trust these.
+  // CARD_OVERFLOW_REAL="1953-09-29T08:00,1960-01-02T10:00" replaces the list, which
+  // is how a candidate list from a chart search is measured without editing this file.
+  const REAL = (process.env.CARD_OVERFLOW_REAL || '1954-01-07T10:00,1953-01-12T10:00,1953-05-12T02:00').split(',').filter(Boolean)
+    .map((s) => { const [date, time] = s.trim().split('T'); return { id: `REAL ${date} ${time}`, date, time }; });
+  for (const real of REAL) {
+    const chart = calculateBaziChart({ birthDate: real.date, birthTime: real.time });
+    const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart), birthDate: real.date, gender: 'female' });
+    const badges = (data.badges || []).slice(0, CARD_B_BADGE_LIMIT);
+    const tags = [...(data.tags?.fixed || []), ...(data.tags?.dynamic || [])];
+    const domId = `ovf-real-${real.date}-${real.time.replace(":", "")}`;
+    cards.push({
+      id: real.id, stem: data.stem, domId,
+      prose: {
+        hook: (data.hook || '').length, badges: badges.length,
+        meaning: badges.reduce((a, b) => a + (b.meaning || '').length, 0),
+        tags: tags.length,
+        total: (data.hook || '').length + badges.reduce((a, b) => a + (b.meaning || '').length, 0) + tags.join('').length,
+      },
+      html: renderToStaticMarkup(React.createElement(CardB, { data, scale: 1, id: domId })),
+    });
+  }
+
   const meta = cards.map(({ id, stem, domId, prose }) => ({ id, stem, domId, prose }));
   const DISPLAY = 0.26;
 
