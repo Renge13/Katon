@@ -29,6 +29,16 @@
 // signature tests below re-point at it. THIS FILE SAYS SO RATHER THAN IMPLYING THE
 // QUESTION IS CLOSED.
 //
+// ── THE CAPTURE LANDED, 2026-09-30 (Prompt AS Amendment 1 §A) ──
+// `tests/fixtures/doku-notification.sandbox.json` is the first notification DOKU ever
+// sent Katon: sandbox QRIS Checkout, Rp 19.000, delivered to the ops/doku-walk alias
+// and settled there through settleReading. Its bytes were checked against DOKU's own
+// signature with the sandbox secret before it was committed (the fixture's `_bytes`).
+// The three signature tests below now sign THOSE bytes, and two tests at the end read
+// the three fields off it and settle a mirror reading with it. The composed `bodyFor`
+// stays for the pair tests, whose price (39.000) the captured mirror body does not
+// carry.
+//
 // ── WHY THIS MERGED WITHOUT THE CAPTURE, 2026-09-21 ───────
 // Not an exemption quietly taken. THREE sandbox walks produced three payments DOKU
 // recorded as SUCCESS and ZERO notification attempts in its own Notification Center,
@@ -51,6 +61,16 @@ import { handleDokuNotification, NOTIFY_TARGET } from '../lib/doku/notify.js';
 import { createPair, getPair } from '../lib/pairStore.js';
 import { digestOf, signComponents } from '../lib/doku/signature.js';
 import { priceFor } from '../lib/pricing.js';
+import { createReading, getReading, setInvoice } from '../lib/readingStore.js';
+import CAPTURED from './fixtures/doku-notification.sandbox.json' with { type: 'json' };
+
+/** The captured notification's exact bytes, addressed to another invoice. */
+const CAPTURED_INVOICE = '3KwGxdMJClDyqSs4ja6sw.munpk08w';
+const capturedRawFor = (invoice) => {
+  const raw = CAPTURED.raw_body.replace(CAPTURED_INVOICE, invoice);
+  if (raw === CAPTURED.raw_body) throw new Error('the captured invoice number was not found');
+  return raw;
+};
 
 const pairMem = (globalThis.__katonPairMem ??= new Map());
 
@@ -107,9 +127,9 @@ const bodyFor = (invoiceNumber, { amount = String(priceFor('compat')), status = 
  * @param {string[]} [opts.drop] header names to omit
  */
 function signedRequest(body, {
-  secret = SECRET, target = NOTIFY_TARGET, tamperedRaw = null, drop = [],
+  secret = SECRET, target = NOTIFY_TARGET, tamperedRaw = null, drop = [], raw: rawBytes = null,
 } = {}) {
-  const raw = JSON.stringify(body);
+  const raw = rawBytes ?? JSON.stringify(body);
   const requestId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
   const timestamp = '2026-09-21T03:00:00Z';
   const headers = {
@@ -136,13 +156,14 @@ function signedRequest(body, {
 test('A TAMPERED BODY IS REJECTED', async () => {
   const id = await newPair();
   const invoice = `${id}.abc123`;
-  const honest = JSON.stringify(bodyFor(invoice));
+  // DOKU's CAPTURED bytes (the fixture), addressed to this pair.
+  const honest = capturedRawFor(invoice);
   // One byte: the amount's last digit. A body that still parses, still names a real
   // pair, and still says SUCCESS - so nothing but the digest can catch it.
-  const tampered = honest.replace('"39000"', '"39001"');
+  const tampered = honest.replace('19000.00', '19000.01');
   assert.notEqual(tampered, honest, 'the tamper really changed the bytes');
 
-  const res = await handleDokuNotification(signedRequest(bodyFor(invoice), { tamperedRaw: tampered }));
+  const res = await handleDokuNotification(signedRequest(null, { raw: honest, tamperedRaw: tampered }));
   assert.equal(res.status, 401);
   assert.equal((await getPair(id)).paid, false, 'and nothing settled');
 });
@@ -150,7 +171,7 @@ test('A TAMPERED BODY IS REJECTED', async () => {
 test('A WRONG SECRET IS REJECTED', async () => {
   const id = await newPair();
   const res = await handleDokuNotification(
-    signedRequest(bodyFor(`${id}.abc123`), { secret: `${SECRET}-WRONG` }),
+    signedRequest(null, { raw: capturedRawFor(`${id}.abc123`), secret: `${SECRET}-WRONG` }),
   );
   assert.equal(res.status, 401);
   assert.equal((await getPair(id)).paid, false);
@@ -163,7 +184,7 @@ test('A WRONG REQUEST-TARGET IS REJECTED', async () => {
   // into the DOKU Back Office can never quietly work.
   const id = await newPair();
   const res = await handleDokuNotification(
-    signedRequest(bodyFor(`${id}.abc123`), { target: '/api/webhook/xendit' }),
+    signedRequest(null, { raw: capturedRawFor(`${id}.abc123`), target: '/api/webhook/xendit' }),
   );
   assert.equal(res.status, 401);
   assert.equal((await getPair(id)).paid, false);
@@ -514,4 +535,42 @@ test('THE NOTIFY HANDLER READS RAW BYTES, AND PARSES ONLY AFTER VERIFYING', asyn
   const parseAt = src.indexOf('JSON.parse');
   assert.ok(rawAt > -1 && verifyAt > rawAt, 'the bytes are read before they are verified');
   assert.ok(parseAt > verifyAt, 'and nothing is parsed until the signature has passed');
+});
+
+// ── THE CAPTURED NOTIFICATION (Prompt AS Amendment 1 §A, 2026-09-30) ──
+
+test('THE CAPTURE: the three fields sit where lib/doku/notify.js reads them', () => {
+  const body = JSON.parse(CAPTURED.raw_body);
+  assert.equal(body.order?.invoice_number, CAPTURED_INVOICE, 'order.invoice_number');
+  // A NUMBER with two decimals on the wire ("19000.00"), which JSON reads as 19000.
+  assert.equal(body.order?.amount, 19000, 'order.amount');
+  assert.match(CAPTURED.raw_body, /"amount": 19000\.00,/u, 'the decimal form is what DOKU sent');
+  assert.equal(body.transaction?.status, 'SUCCESS', 'transaction.status');
+  assert.equal(CAPTURED.request_target, NOTIFY_TARGET, 'DOKU signed the literal target the route verifies against');
+});
+
+test('THE CAPTURE SETTLES A MIRROR READING through settleReading, and a wrong-amount copy does not', async () => {
+  const saved = process.env.PAYMENTS_PROVIDER;
+  process.env.PAYMENTS_PROVIDER = 'doku';
+  try {
+    const make = async () => {
+      const id = `rd${Math.random().toString(36).slice(2, 12)}`;
+      await createReading({ id, day_master: '戊', paid: false, sku: 'artifact' });
+      await setInvoice(id, { invoiceId: `${id}.munpk08w`, sku: 'artifact' });
+      return id;
+    };
+    const ok = await make();
+    const res = await handleDokuNotification(signedRequest(null, { raw: capturedRawFor(`${ok}.munpk08w`) }));
+    assert.equal(res.status, 200);
+    assert.equal((await getReading(ok)).paid, true, 'DOKU\'s own body, re-signed, settles the Rp 19.000 row');
+
+    // Control: the same bytes with the amount changed, SIGNED (so it verifies), must not settle.
+    const bad = await make();
+    const wrong = capturedRawFor(`${bad}.munpk08w`).replace('19000.00', '1000.00');
+    const res2 = await handleDokuNotification(signedRequest(null, { raw: wrong }));
+    assert.equal(res2.status, 200);
+    assert.equal((await getReading(bad)).paid, false, 'a verified body for the wrong amount settles nothing');
+  } finally {
+    if (saved === undefined) delete process.env.PAYMENTS_PROVIDER; else process.env.PAYMENTS_PROVIDER = saved;
+  }
 });
