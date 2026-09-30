@@ -213,6 +213,17 @@ test('an hour-less birthdate is accepted, and the chart says the hour is unknown
 
 // ── the row ────────────────────────────────────────────────
 
+test('AU §1: the SERVE carries the header profile from the row; the card footer still carries no date', async () => {
+  // Reyner's ruling 1, 2026-09-30: the profile line shows on reopened and shared links.
+  // The page line only: the free card is an image shared publicly and stays date-less.
+  const token = await createOk({ ...CHART_B, gender: 'female' });
+  const body = await (await serve(token)).json();
+  assert.deepEqual(body.profile, { birth_date: CHART_B.birthDate, birth_time: CHART_B.birthTime, gender: 'female' });
+  assert.equal(JSON.stringify(body.card).includes(CHART_B.birthDate), false, 'the free card footer stays date-less');
+  const d = CHART_B.birthDate.split('-');
+  assert.equal(JSON.stringify(body.card).includes(`${Number(d[2])} `), false, 'nor as "21 Nov 1994"');
+});
+
 test('the POST persists birth data server-side and never echoes it back', async () => {
   const res = await create(CHART_A);
   const body = await res.json();
@@ -822,13 +833,17 @@ test('the serve payload carries Card A, and WITHHOLDS Card B\'s appendix', async
   assert.equal(body.card.appendix, undefined,
     'the free payload must not carry the paid card\'s appendix');
 
-  // AND NO BIRTH DATE LEAVES THE SERVER on the free path. That is this view layer's
-  // standing invariant, and the card footer is the one place it could slip out - so
-  // the footer is built with `birthDate: null` and the client merges its own.
+  // AND NO BIRTH DATE LEAVES THE SERVER on the free path OUTSIDE `profile`. AMENDED
+  // 2026-09-30 (Prompt AU §1): Reyner's ruling 1 serves the header's profile line on
+  // reopened and shared links, so `profile` carries the row's date, time and gender.
+  // Everywhere else the invariant stands, and the card footer is the one place it
+  // could slip out - so the footer is built with `birthDate: null`.
   assert.equal(body.card.footer.date, '', 'the free footer carries no date');
   assert.equal(body.card.footer.gender, null);
-  assert.equal(JSON.stringify(body).includes(CHART_A.birthDate), false,
-    'the birth date must not appear anywhere in the payload');
+  const { profile, ...rest } = body;
+  assert.equal(profile.birth_date, CHART_A.birthDate, 'the date is in `profile`, by ruling');
+  assert.equal(JSON.stringify(rest).includes(CHART_A.birthDate), false,
+    'the birth date must not appear anywhere else in the payload');
 });
 
 test('the reading and its card name the SAME archetype - the 08-13 divergence, closed', async () => {

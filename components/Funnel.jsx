@@ -291,13 +291,14 @@ export default function Funnel({ salesOpen = false } = {}) {
     // engine - and she used to wait p50 7.6s (up to ~23s at three attempts) with a
     // single static line of copy for facts that already existed.
     //
-    // `pending` is what the reading renders a wordless skeleton for. NO COPY:
+    // `pending` is what the reading renders a skeleton and the status line for.
     // Reyner ruled 2026-08-26 that the loading words are written against what is
-    // actually on screen, after this ships. The old anticipation lines describe
-    // work she can now watch being already done.
+    // actually on screen, after this ships; he wrote them 2026-09-30 (Prompt AU
+    // §2, CHROME_COPY.status_writing). The old anticipation lines described work
+    // she can now watch being already done.
     setReading({
       token: created.token, chart: created.chart, blocks: [], penutup: '',
-      pending: true, birthDate, gender: form.gender || null,
+      pending: true, birthDate, birthTime: resolution.birthTime ?? birthTime, gender: form.gender || null,
     });
     // Bookmarkable without remounting: swap the URL via history.pushState, NOT
     // router.push, which would mount the /r route and discard this state.
@@ -317,7 +318,7 @@ export default function Funnel({ salesOpen = false } = {}) {
     // The full payload carries `chart` under the same key POST did, from the same
     // `mirrorChartView`, so this merge replaces it with an identical object rather
     // than reconciling two shapes.
-    setReading({ ...served, birthDate, gender: form.gender || null });
+    setReading({ ...served, birthDate, birthTime: resolution.birthTime ?? birthTime, gender: form.gender || null });
   }
 
   async function onSubmit(e) {
@@ -825,13 +826,20 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
   const cardData = reading.card
     ? { ...reading.card, footer: mergeFooter(reading.card.footer, reading.birthDate, reading.gender) }
     : null;
-  // THE HEADER'S PROFILE LINE IS THE CARD FOOTER'S, SAME SOURCE AND SAME WORDS
-  // (Prompt AQ §1, 2026-09-28). The session that created the reading holds the date
-  // and gender; a reopened or shared link holds neither, and then there is no line
-  // at all rather than an empty one. Serving them on the permalink would put a
-  // birth date on every link a reader shares, and that is Reyner's to rule.
-  const profileLine = (reading.birthDate || reading.gender)
-    ? mergeFooter(null, reading.birthDate, reading.gender).left
+  // THE HEADER'S PROFILE LINE (Prompt AQ §1, then AU §1). Same words and format as
+  // the card footer, plus the hour. RULED BY REYNER 2026-09-30: it is "shown on
+  // reopened and shared links too" (ruling 1), and reads "PEREMPUAN | 14 FEB 2001 |
+  // 13.00" when an hour was given, with no third segment when not (ruling 2). The
+  // serve payload's `profile` carries the stored row's three fields; the session's
+  // own values stand in until it arrives. No values at all means no line, never an
+  // empty one.
+  const profile = reading.profile
+    || { birth_date: reading.birthDate ?? null, birth_time: reading.birthTime ?? null, gender: reading.gender ?? null };
+  const hourSegment = typeof profile.birth_time === 'string' && /^\d{2}:\d{2}$/.test(profile.birth_time)
+    ? profile.birth_time.replace(':', '.')
+    : null;
+  const profileLine = (profile.birth_date || profile.gender)
+    ? [mergeFooter(null, profile.birth_date, profile.gender).left, hourSegment].filter(Boolean).join(' | ')
     : '';
 
   return (
@@ -870,67 +878,26 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
         )}
       </Reveal>
 
-      {/* THE PROSE, AND THE SKELETON THAT HANDS THE SPACE OVER TO IT.
-          Wordless on purpose - see .k-skel in globals.css and the ruling behind
-          it. The bar widths are uneven so the block reads as paragraphs rather
-          than as a progress meter, which would imply a completion it cannot
-          know. `aria-hidden` with a polite live region carrying nothing: a screen
-          reader is told the reading is loading by the region appearing, not by a
-          decorative bar it would otherwise read as content.
-
-          `display: flow-root` IS LOAD-BEARING AND NOT A TIDY-UP. It stops the
-          children's top margins collapsing THROUGH this wrapper, which is what
-          makes `top: 0` on the departing skeleton land in exactly the same place
-          as its in-flow position: both the skeleton and the first Section carry
-          marginTop 34 inside the same block formatting context. Without it the
-          wrapper's edge moves with its first child and the overlay jumps 34px on
-          the frame it goes absolute. */}
-      <div style={{ position: 'relative', display: 'flow-root' }}>
-        {showSkeleton && (
-          // WHILE CROSSING IT IS OUT OF FLOW. The prose is far taller than four
-          // 13px bars; a departing skeleton still taking layout would push the
-          // whole reading down and let it snap back on unmount - a jump in the
-          // middle of the cross-fade. `aria-busy` is dropped the moment the prose
-          // is real, so a screen reader is not told a finished reading is loading.
-          //
-          // NO marginTop ON THIS BOX, IN EITHER STATE, AND IT IS NOT AN OVERSIGHT.
-          // The 38 lives on the first bar and is the only offset in play. When this
-          // box is static that margin collapses out through it (no border, no
-          // padding) and the bar lands 38px below the wrapper; when it is absolute
-          // the box establishes a block formatting context, the margin STOPS
-          // collapsing, and it lands 38px below `top: 0` - the same place. A
-          // marginTop of 34 here read identically in the source and moved the bars
-          // 34px on the frame they went absolute, because only one of the two
-          // states collapsed it away.
-          <div data-prose-skeleton
-            className={crossing ? 'k-skel-exit' : undefined}
-            aria-busy={pending ? 'true' : undefined}
-            aria-hidden={crossing ? 'true' : undefined}
-            style={crossing
-              ? { position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none' }
-              : undefined}>
-            {[[38, 92], [0, 100], [0, 86], [0, 64]].map(([mt, w], i) => (
-              <div key={i} aria-hidden="true" className="k-skel"
-                style={{ height: 13, width: `${w}%`, marginTop: i ? 12 : mt }} />
-            ))}
-          </div>
-        )}
-
-        {/* ── THE PROSE RENDERER IS SHARED WITH THE COMPAT REPORT ──────
-            Extracted 2026-09-08 to components/ProseBlocks.jsx, unchanged. The
-            reveal cadence is a ruled behaviour - a fixed per-item delay was
-            REPLACED by a budget, and the running index was made global after a
-            block-local one started nine first paragraphs at once - and a second
-            copy of that is a second place the ruling can rot. */}
-        <ProseBlocks reading={reading} />
-      </div>
+      {/* THE STATUS LINE (Prompt AU §2, Reyner's ruling 3, 2026-09-30): header, then
+          this, then Bagan Kelahiran. Tied to `pending` and nothing else, so it leaves
+          the same way on a render and on a floor, and a reopened reading never shows
+          it. role="status" makes it the polite announcement the skeleton's
+          aria-busy region does not carry. */}
+      {pending && (
+        <div data-status-line role="status" style={{ marginTop: 22 }}>
+          <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, lineHeight: 1.4, color: 'var(--tinta)', margin: 0 }}>{CHROME_COPY.status_writing}</p>
+          <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', margin: '4px 0 0' }}>{CHROME_COPY.status_writing_sub}</p>
+        </div>
+      )}
 
       {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
           characters ARE the chart and they are what lets a reader cross-check Katon
           against any other calculator. Never bare - each carries its animal and
           element. */}
       {chart?.pillars?.length > 0 && (
-        <Section eyebrow="Bagan Kelahiran">
+        // marginTop 34, THE PERSONA STEP (AQ §3): Bagan is now the first divider under the
+        // header (AU §2 moved the reading below it), so it takes the step the prose had.
+        <Section eyebrow="Bagan Kelahiran" style={{ marginTop: 34 }}>
           <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 16px', lineHeight: 1.55 }}>Empat lapisan energi dari tanggal lahirmu. Yang di tengah adalah intinya.</p></Reveal>
           {/* 0/120/240 to match the persona block above. Two different stagger
               rhythms inside one scroll is what this alignment prevents. */}
@@ -990,6 +957,105 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
           </div>
         </Section>
       )}
+
+      {/* TANDA ISTIMEWAMU (Prompt AU §3, Reyner's ruling 4, 2026-09-30). One card per
+          bintang fact, straight from the engine (`chart.badge_cards`, lib/mirror/view.js):
+          the name, its English once in italic, its pillar, and the glossary's own
+          meaning. No writer text, so it is the same on a render and on a floor, and it
+          arrives with the pillars rather than with the prose. No badges, no section. */}
+      {chart?.badge_cards?.length > 0 && (
+        <Section eyebrow={CHROME_COPY.badges_title}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {chart.badge_cards.map((b, i) => (
+              <Reveal key={b.id} delay={i * 0.04}>
+                <div data-badge-card style={{ border: '1px solid var(--divider)', borderRadius: 16, padding: '16px 16px 14px', background: 'var(--kertas-2)' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+                    <div data-badge-name style={{ fontFamily: 'var(--font-serif)', fontSize: 19, lineHeight: 1.25, color: 'var(--tinta)' }}>{b.name_id}</div>
+                    <div data-badge-pillar style={{ fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted-warm)', whiteSpace: 'nowrap' }}>{b.palace}</div>
+                  </div>
+                  <div data-badge-en style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 14.5, color: 'var(--kayu)', marginTop: 2 }}>{b.name_en}</div>
+                  <p data-badge-meaning style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '8px 0 0' }}>{b.meaning}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ── THE READING COMES AFTER THE CHART, THE BARS AND THE BADGES (Prompt AU §2) ──
+          Reyner's ruling 3, 2026-09-30: header, status line, Bagan Kelahiran, Sebaran
+          Unsur, then the reading. Everything above is the engine's and is on screen at
+          once; the prose is the only part that waits, so it waits at the bottom. */}
+      {/* THE PROSE, AND THE SKELETON THAT HANDS THE SPACE OVER TO IT.
+          Wordless on purpose - see .k-skel in globals.css and the ruling behind
+          it. The bar widths are uneven so the block reads as paragraphs rather
+          than as a progress meter, which would imply a completion it cannot
+          know. `aria-hidden` with a polite live region carrying nothing: a screen
+          reader is told the reading is loading by the region appearing, not by a
+          decorative bar it would otherwise read as content.
+
+          `display: flow-root` IS LOAD-BEARING AND NOT A TIDY-UP. It stops the
+          children's top margins collapsing THROUGH this wrapper, which is what
+          makes `top: 0` on the departing skeleton land in exactly the same place
+          as its in-flow position: both the skeleton and the first Section carry
+          marginTop 34 inside the same block formatting context. Without it the
+          wrapper's edge moves with its first child and the overlay jumps 34px on
+          the frame it goes absolute. */}
+      <div style={{ position: 'relative', display: 'flow-root' }}>
+        {showSkeleton && (
+          // WHILE CROSSING IT IS OUT OF FLOW. The prose is far taller than four
+          // 13px bars; a departing skeleton still taking layout would push the
+          // whole reading down and let it snap back on unmount - a jump in the
+          // middle of the cross-fade. `aria-busy` is dropped the moment the prose
+          // is real, so a screen reader is not told a finished reading is loading.
+          //
+          // NO marginTop ON THIS BOX, IN EITHER STATE, AND IT IS NOT AN OVERSIGHT.
+          // The 38 lives on the first bar and is the only offset in play. When this
+          // box is static that margin collapses out through it (no border, no
+          // padding) and the bar lands 38px below the wrapper; when it is absolute
+          // the box establishes a block formatting context, the margin STOPS
+          // collapsing, and it lands 38px below `top: 0` - the same place. A
+          // marginTop of 34 here read identically in the source and moved the bars
+          // 34px on the frame they went absolute, because only one of the two
+          // states collapsed it away.
+          <div data-prose-skeleton
+            className={crossing ? 'k-skel-exit' : undefined}
+            aria-busy={pending ? 'true' : undefined}
+            aria-hidden={crossing ? 'true' : undefined}
+            style={crossing
+              ? { position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none' }
+              : undefined}>
+            {/* ── THE SKELETON TAKES A TYPICAL READING'S HEIGHT (Prompt AU §2) ──
+                Reyner's ruling 3, 2026-09-30. Four 13px bars held ~70px for a
+                reading that lands at ~2,200px, so everything below it jumped. It
+                is now built like the reading itself: the same section spacing
+                (34/40 top, 34 padding, the divider, an eyebrow) and paragraph-
+                shaped blocks whose TRANSPARENT filler wraps like real prose, so
+                the height follows the column width the way the text will. The
+                shape is round-6's median reading (r6-08: paragraphs of 68+83,
+                125 and 95 words, penutup 33), measured 2026-09-30 in Chrome:
+                median 2,248px at 375 and 1,853px at 1280, this skeleton
+                within a few percent of both (docs/qa/2026-09-30-result-page-au). */}
+            {SKELETON_SHAPE.blocks.map((paras, i) => (
+              <div key={i} aria-hidden="true" style={{ marginTop: i ? 40 : 34, paddingTop: 34, borderTop: '1px solid var(--divider)' }}>
+                <Eyebrow style={{ marginBottom: 16 }}><span className="k-skel" style={{ color: 'transparent', display: 'inline-block', width: '38%' }}>x</span></Eyebrow>
+                {paras.map((words, j) => (
+                  <p key={j} className="k-skel" style={{ fontFamily: 'var(--font-sans)', fontSize: 15.5, lineHeight: 1.75, color: 'transparent', margin: 0, marginTop: j ? 14 : 0 }}>{skeletonFiller(words)}</p>
+                ))}
+              </div>
+            ))}
+            <p aria-hidden="true" className="k-skel" style={{ fontFamily: 'var(--font-sans)', fontSize: 15.5, lineHeight: 1.75, color: 'transparent', margin: '40px 0 0' }}>{skeletonFiller(SKELETON_SHAPE.penutup)}</p>
+          </div>
+        )}
+
+        {/* ── THE PROSE RENDERER IS SHARED WITH THE COMPAT REPORT ──────
+            Extracted 2026-09-08 to components/ProseBlocks.jsx, unchanged. The
+            reveal cadence is a ruled behaviour - a fixed per-item delay was
+            REPLACED by a budget, and the running index was made global after a
+            block-local one started nine first paragraphs at once - and a second
+            copy of that is a second place the ruling can rot. */}
+        <ProseBlocks reading={reading} />
+      </div>
 
       {/* the free shareable — Card A. It replaces the retired <Sharecard>, and the
           reason it can sit beside the reading now is that both name her archetype
@@ -1087,6 +1153,14 @@ function mergeFooter(footer, birthDate, gender) {
  * two ever disagree the card's footer disagrees with the paid card's footer, which
  * is why they are named for each other here.
  */
+/**
+ * The prose skeleton's shape: round-6's median reading (Prompt AU §2), as words per
+ * paragraph per block, and the penutup. Structure only; no reading's text is kept.
+ */
+const SKELETON_SHAPE = { blocks: [[68, 83], [125], [95]], penutup: 33 };
+/** Transparent filler that wraps like prose: six-letter words, round 6's mean length. */
+const skeletonFiller = (words) => Array(words).fill('xxxxxx').join(' ');
+
 const ID_MONTHS_CLIENT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 function formatCardDate(iso) {
   if (!iso || typeof iso !== 'string') return '';

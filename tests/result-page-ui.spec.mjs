@@ -96,9 +96,37 @@ test('§1 IN SESSION, no gender: the date alone, with no separator', async () =>
   } finally { m.unmount(); f.restore(); }
 });
 
-// A GUARD, NOT A RED-FIRST ASSERTION: it passes before the change too, because
-// before the change nothing rendered at all. It is here so the line cannot come
-// back as an empty row or a bare " | " on a shared link.
+// ── AU §1: THE LINE ON EVERY LOAD, WITH THE HOUR (Reyner's ruling 1 and 2, 2026-09-30) ──
+// The serve payload now carries `profile` from the stored row, so a reopened or shared
+// link shows the line too. The hour is the third segment, as she entered it, "13.00".
+test('AU §1 RE-ACCESS: a served profile shows the line with no session', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, profile: { birth_date: '2001-02-14', birth_time: null, gender: 'female' } });
+  try {
+    const line = m.host.querySelector('[data-profile-line]');
+    assert.ok(line, 'the reopened link shows the profile line');
+    assert.equal(line.textContent, 'PEREMPUAN | 14 Feb 2001', 'no hour: two segments, no trailing separator');
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §1: with an hour the line has three segments, "PEREMPUAN | 14 Feb 2001 | 13.00"', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, profile: { birth_date: '2001-02-14', birth_time: '13:00', gender: 'female' } });
+  try {
+    assert.equal(m.host.querySelector('[data-profile-line]')?.textContent, 'PEREMPUAN | 14 Feb 2001 | 13.00');
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §1: in session, the hour she typed is the third segment too', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...IN_SESSION, birthTime: '07:00' });
+  try {
+    assert.equal(m.host.querySelector('[data-profile-line]')?.textContent, 'PEREMPUAN | 14 Feb 2001 | 07.00');
+  } finally { m.unmount(); f.restore(); }
+});
+
+// A GUARD: a payload with no profile and no session (an old cached client) still shows
+// no empty row or bare " | ".
 test('§1 RE-ACCESS: no date, no gender -> no line, no empty row, no stray separator', async () => {
   const f = stubFetch();
   const m = await mount(SERVED);
@@ -227,4 +255,116 @@ test('§4 THE ROOT LAYOUT PROVIDES THE GLOSSARY LIST, so production has the name
   const src = readFileSync(new URL('../app/layout.js', import.meta.url), 'utf8');
   assert.match(src, /<GlossNamesProvider names=\{GLOSS_NAMES_EN\}>/u);
   assert.match(src, /from '@\/lib\/render\/glossNames(\.js)?'/u);
+});
+
+// ── AU §3: BADGE CARDS, "TANDA ISTIMEWAMU" (Reyner's ruling 4, 2026-09-30) ──
+// Every bintang fact, from the ENGINE: name_id, name_en once (italic), its pillar by
+// the ruled palace name, and its glossary label_meaning. No writer text. On a render
+// and on a floor alike, because it is built from the chart, not the prose.
+const viewFor = (input) => {
+  const c = calculateBaziChart(input);
+  return mirrorChartView(c, buildSemanticJson(c, { voice: 'v2' }));
+};
+const cardsIn = (host) => [...host.querySelectorAll('[data-badge-card]')].map((el) => ({
+  name: el.querySelector('[data-badge-name]')?.textContent,
+  en: el.querySelector('[data-badge-en]')?.textContent,
+  italic: el.querySelector('[data-badge-en]')?.style.fontStyle,
+  pillar: el.querySelector('[data-badge-pillar]')?.textContent,
+  meaning: el.querySelector('[data-badge-meaning]')?.textContent || '',
+}));
+
+test('AU §3: smewTN renders four badge cards with the right pillars, under "Tanda Istimewamu"', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, chart: viewFor({ birthDate: '2001-02-14', birthTime: '13:00' }) });
+  try {
+    assert.ok(m.text().includes('Tanda Istimewamu'), 'the section title renders');
+    const cards = cardsIn(m.host);
+    assert.deepEqual(cards.map((c) => [c.name, c.en, c.pillar]), [
+      ['Tanda Kekosongan', 'Void', 'Pilar Kerja'],
+      ['Bintang Perantau', 'Sky Horse', 'Pilar Kerja'],
+      ['Bintang Cendekia', 'Academic Star', 'Pilar Diri'],
+      ['Bintang Penolong', 'Nobleman', 'Pilar Arah'],
+    ]);
+    assert.ok(cards.every((c) => c.italic === 'italic'), 'the English is italic');
+    assert.ok(cards.every((c) => c.meaning.length > 20), 'each card carries its glossary meaning');
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §3: a chart with no bintang renders no section and no empty title', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...SERVED, chart: viewFor({ birthDate: '1988-07-10', birthTime: null }) });
+  try {
+    assert.equal(cardsIn(m.host).length, 0);
+    assert.equal(m.text().includes('Tanda Istimewamu'), false);
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §3: the cards render on a FLOOR too, and before the reading on the page', async () => {
+  const f = stubFetch();
+  const chart = viewFor({ birthDate: '2001-02-14', birthTime: '13:00' });
+  const m = await mount({ ...SERVED, chart, meta: { source: 'module_assembly' } });
+  try {
+    assert.equal(cardsIn(m.host).length, 4, 'a floor still shows the engine\'s cards');
+    const all = m.host.textContent;
+    // AU §2's order: Bagan Kelahiran, Sebaran Unsur, Tanda Istimewamu, then the reading.
+    const at = (s) => all.indexOf(s);
+    assert.ok(at('Bagan Kelahiran') > -1 && at('Bagan Kelahiran') < at('Sebaran Unsur'), 'Bagan before Sebaran');
+    assert.ok(at('Sebaran Unsur') < at('Tanda Istimewamu'), 'Sebaran before the badges');
+    assert.ok(at('Tanda Istimewamu') < at('Paragraf satu.'), 'the badges before the reading');
+  } finally { m.unmount(); f.restore(); }
+});
+
+// ── AU §2: THE STATUS LINE (Reyner's ruling 3, typography ruled 2026-09-30) ──
+// "Bacaanmu sedang ditulis..." with THREE PERIODS (the bank bans the ellipsis
+// character) and the smaller line under it. Shown only while the reading is pending,
+// between the header and Bagan Kelahiran; gone once the prose arrives, render or floor.
+import { CHROME_COPY } from '../lib/site/copy.js';
+
+const statusIn = (host) => host.querySelector('[data-status-line]');
+
+test('AU §2 STATUS LINE: the bank carries the two strings exactly as ruled', () => {
+  assert.equal(CHROME_COPY.status_writing, 'Bacaanmu sedang ditulis...');
+  assert.equal(CHROME_COPY.status_writing_sub, 'Biasanya selesai dalam 20 detik.');
+});
+
+test('AU §2 STATUS LINE: a pending reading shows both lines, after the header and before Bagan Kelahiran', async () => {
+  const f = stubFetch();
+  const m = await mount({ ...IN_SESSION, blocks: [], penutup: '', pending: true });
+  try {
+    const s = statusIn(m.host);
+    assert.ok(s, 'the status line renders while pending');
+    assert.ok(s.textContent.includes(CHROME_COPY.status_writing), 'the main line');
+    assert.ok(s.textContent.includes(CHROME_COPY.status_writing_sub), 'the smaller line under it');
+    const all = m.host.textContent;
+    const at = (x) => all.indexOf(x);
+    assert.ok(at('Refleksimu') < at(CHROME_COPY.status_writing), 'after the header');
+    assert.ok(at(CHROME_COPY.status_writing) < at('Bagan Kelahiran'), 'before Bagan Kelahiran');
+  } finally { m.unmount(); f.restore(); }
+});
+
+test('AU §2 STATUS LINE: gone once the reading arrives, on a render and on a floor alike', async () => {
+  const f = stubFetch();
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  const render = (reading) => act(async () => {
+    root.render(React.createElement(Reading, { reading, onReset() {}, salesOpen: false }));
+  });
+  try {
+    for (const meta of [undefined, { source: 'module_assembly' }]) {
+      await render({ ...IN_SESSION, blocks: [], penutup: '', pending: true });
+      assert.ok(statusIn(host), 'present while pending');
+      await render({ ...IN_SESSION, pending: false, ...(meta ? { meta } : {}) });
+      assert.equal(statusIn(host), null, `gone on arrival (${meta ? 'floor' : 'render'})`);
+      assert.equal(host.textContent.includes(CHROME_COPY.status_writing), false);
+    }
+  } finally { act(() => root.unmount()); host.remove(); f.restore(); }
+});
+
+test('AU §2 STATUS LINE: a reopened, already-served reading never shows it', async () => {
+  const f = stubFetch();
+  const m = await mount(SERVED);
+  try {
+    assert.equal(statusIn(m.host), null);
+  } finally { m.unmount(); f.restore(); }
 });
