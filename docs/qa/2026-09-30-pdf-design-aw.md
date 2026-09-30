@@ -59,3 +59,12 @@ Median characters per line on the reading pages: **68** (smewTN) and **69** (cha
    - **"Fondasi Pasangan"** in the reading: its only explanation is inside Pilar Diri's appendix row ("cabangnya adalah Fondasi Pasangan").
    - **Compatibility, "Data di Balik Bacaan Ini"**: "Senggolan Halus" and "Saling Tarik" print a branch, an animal and a pillar with no line of meaning of their own; "Kursi" (seat) is used without saying what a seat is.
    - **Compatibility, the appendix**: after AW, the partner's month, day and hour animals print in the facts table and under his pillars but are no longer in the glossary (by the Shio ruling).
+
+## The Preview walk (Prompt AX §6), before #183
+
+Both Preview PDFs fetched from the #186 Preview at `f4767dc` and every page rasterised: `2026-09-30-pdf-design-aw/walk-preview/` (`ce-NN.jpg` 7 pages, `compat-NN.jpg` 8 pages).
+- Complete Edition: `/api/deliver/Pez1Ggq5SL311dsTIEtc6/pdf` (a KNOWN TEST ROW). Compatibility: `/api/pair/rVe4ca-FOhsprfGUucTxA/pdf` (a KNOWN TEST ROW).
+- **Present:** "Shio (tahun lahirmu)" (mirror); "PALING BANYAK" / "PALING SEDIKIT" on every chart, no old tag word.
+- **No page ends on a heading**, in either document (scanned page by page).
+- **The pair page holds both charts**, both Sebaran Unsur sections and all ten bars (page 4).
+- **NOT YET PRESENT, by design:** the AX glossary lines (Tanda Kekosongan, Dominan, Pilar Konsepsi) are in #183, which is not merged. The walk repeats after #183 and the rebase.
