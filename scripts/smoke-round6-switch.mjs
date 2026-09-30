@@ -18,6 +18,7 @@
 // ============================================================
 
 import fs from 'node:fs';
+import path from 'node:path';
 
 const OUT = (() => { const i = process.argv.indexOf('--out'); return i > -1 ? process.argv[i + 1] : null; })();
 const SUBJECTS = [
@@ -50,6 +51,11 @@ const { STAGE6_VERSION } = await import('../lib/validate/index.js');
 const { MASTER_PROMPTS_V2, promptVersionFor } = await import('../lib/render/prompt.js');
 const { V2_MIRROR_TEMPERATURE } = await import('../lib/render/config.js');
 const { sentences } = await import('../lib/validate/text.js');
+// The element glosses, read from where they live on this branch (a client component
+// Node cannot import); #186 moves them to lib/site/elements.js. Parsed, not copied.
+const ELEMENT_GLOSS = Object.fromEntries([...fs.readFileSync('components/Funnel.jsx', 'utf8')
+  .slice(0, 20000).matchAll(/^\s+(Kayu|Api|Tanah|Logam|Air): '([^']+)',$/gmu)].map((m) => [m[1], m[2]]));
+if (Object.keys(ELEMENT_GLOSS).length !== 5) throw new Error(`element glosses not found (${Object.keys(ELEMENT_GLOSS).length})`);
 const G = JSON.parse(fs.readFileSync('docs/content/glossary.json', 'utf8'));
 
 const REL_KIND = new Set(['branch_relation', 'punishment']);
@@ -98,6 +104,29 @@ for (const s of SUBJECTS) {
     ...[...prose.matchAll(/\(([^()]{1,60})\)/gu)].map((m) => m[1].trim()).filter((b) => REL_EN.has(b.toLowerCase()) || /\b(trine|clash|harm|punishment|combination)\b/iu.test(b)).map((b) => `(${b})`),
   ];
   const penutupSentences = sentences(out.penutup || '');
+  // ── AX §3's two reads (a list for a person, not a gate) ──
+  // Imperatives and reminders addressed to her: the three Reyner named, "harus" in a
+  // sentence about her, and AX's "pastikan" / "cobalah".
+  const IMPERATIVE = /(?<![\p{L}])(ingatlah|jangan lupa|kamu harus|pastikan|cobalah)(?![\p{L}])|(?<![\p{L}])harus(?![\p{L}])/iu;
+  const ABOUT_HER = /(?<![\p{L}])(kamu|dirimu)(?![\p{L}])|\p{L}+mu(?![\p{L}])/iu;
+  const allSent = sentences(prose.replace(/\n+/g, ' '));
+  const imperatives = allSent.filter((x) => {
+    const m = IMPERATIVE.exec(x);
+    return m && (m[1] || ABOUT_HER.test(x));
+  });
+  // Restating the page: five or more consecutive words shared with a badge's
+  // label_meaning, the element glosses, or the presence note.
+  const wordsOf = (t) => t.toLowerCase().replace(/[^\p{L}\s-]/gu, ' ').split(/\s+/u).filter(Boolean);
+  const grams = (t, n = 5) => { const w = wordsOf(t); return new Set(w.slice(0, Math.max(0, w.length - n + 1)).map((_, i) => w.slice(i, i + n).join(' '))); };
+  const pageTexts = [
+    ...sj.facts.filter((f) => BINTANG.has(f.label)).map((f) => [`badge ${f.label}`, f.label_meaning || '']),
+    ...Object.entries(ELEMENT_GLOSS).map(([k, v]) => [`bar ${k}`, `${k} ${v}`]),
+    ['presence note', sj.chart?.element_presence_note || ''],
+  ];
+  const restated = allSent.flatMap((x) => {
+    const g = grams(x);
+    return pageTexts.filter(([, t]) => [...grams(t)].some((y) => g.has(y))).map(([what]) => `${what} :: ${x}`);
+  });
   const rec = {
     id: s.id, source: out.source, floored: out.source === 'module_assembly', floor: out.source === 'module_assembly' ? floorReason(out) : null,
     words: allText.split(/\s+/u).filter(Boolean).length,
@@ -105,6 +134,8 @@ for (const s of SUBJECTS) {
     badges_named: sj.facts.filter((f) => BINTANG.has(f.label)).map((f) => `${f.label}${allText.includes(f.label) ? '' : ' (not named)'}`),
     questions: sentences(prose.replace(/\n+/g, ' ')).filter((x) => /\?\s*$/u.test(x)),
     final_sentence: penutupSentences.at(-1) || '',
+    imperatives,
+    restated,
     penutup: out.penutup || '',
     stage6_version: out.stage6_version ?? STAGE6_VERSION,
     prompt_version: out.prompt_version ?? promptVersionFor('mirror', 'v2'),
@@ -116,6 +147,13 @@ for (const s of SUBJECTS) {
   records.push(rec);
   console.log(`${s.id.padEnd(22)} ${rec.source.padEnd(15)} words ${String(rec.words).padStart(4)} regen ${rec.regenerations} relEN ${rec.relation_english.length} q ${rec.questions.length} $${rec.cost_usd.toFixed(4)}${rec.floor ? ` FLOOR ${JSON.stringify(rec.floor)}` : ''}`);
   console.log(`  final: ${rec.final_sentence}`);
+  for (const x of rec.imperatives) console.log(`  IMPERATIVE: ${x}`);
+  for (const x of rec.restated) console.log(`  RESTATES: ${x}`);
 }
 console.log(`TOTAL $${records.reduce((n, r) => n + r.cost_usd, 0).toFixed(4)}  prompt ${promptVersionFor('mirror', 'v2')}  stage6 ${STAGE6_VERSION}  temperature ${V2_MIRROR_TEMPERATURE}`);
-if (OUT) fs.writeFileSync(OUT, `${JSON.stringify(records, null, 2)}\n`);
+// The directory is gitignored and absent in a fresh worktree: smoke-3 (2026-09-30) paid
+// for five renders and lost its record to ENOENT here, after the console had printed.
+if (OUT) {
+  fs.mkdirSync(path.dirname(OUT), { recursive: true });
+  fs.writeFileSync(OUT, `${JSON.stringify(records, null, 2)}\n`);
+}

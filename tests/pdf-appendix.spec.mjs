@@ -224,55 +224,26 @@ test('the appendix ships on every fixture chart, with no duplicate entry', () =>
   }
 });
 
-test('胎元 SHIPS DISPLAY-ONLY, and no invented meaning travels with it', () => {
-  // An earlier prompt M supplied a descriptive 胎元 sentence and said to ship it
-  // without waiting for Reyner. Reversed by that prompt's own correction 4 (ruled
-  // 2026-08-21): a repo ruling beats a Cowork build prompt, always. The ruling:
-  //
-  //   glossary.json -> pilar.conception._note, ruled 2026-08-07 - "It has NO
-  //   label_meaning on purpose: nothing downstream interprets it, and inventing one
-  //   would be unreviewed interpretive copy ... replacing the hand-authored 'Istana
-  //   Konsepsi' that lived in lib/readingView.js and in no glossary entry."
-  //
-  // The line prompt M hands over is that exact thing a second time.
-  assert.equal(GLOSSARY.pilar.conception.label_meaning, undefined,
-    'fixture assumption: the ruling holds and conception carries no label_meaning');
-
-  // ── 胎元 LEAVES THE APPENDIX, 2026-09-22 (P2 markup A7) ──
-  // This used to assert the entry was PRESENT with an empty meaning. On the real
-  // PDF that printed as a group heading `Pilar Konsepsi`, then a row labelled
-  // `Pilar Konsepsi`, then nothing - an empty cell in a document she paid for.
-  // Reyner ruled it out of the appendix.
-  //
-  // THE 2026-08-07 RULING IS UNTOUCHED AND IS STILL WHAT THIS TEST GUARDS: no
-  // meaning may be invented for 胎元. The old test enforced that by shipping an
-  // empty cell; this one enforces it by shipping no cell. Both refuse the invented
-  // sentence prompt M's correction 4 threw out, and only one of them also refuses
-  // to show a buyer a blank.
-  //
-  // IT STILL REACHES HER. The CHART PAGE prints 胎元 with its animal - Joey prints
-  // it and a cross-checking reader looks for it - so what left is a legend row that
-  // explained nothing, not the fact.
-  const entry = flat(buildAppendix(CHART_1)).find((e) => e.key === 'conception');
-  assert.equal(entry, undefined,
-    'a row with no meaning does not print, and 胎元 is the row that has none');
-
-  // AND THE GROUP GOES WITH IT rather than printing a heading over nothing.
-  assert.equal(
-    buildAppendix(CHART_1).groups.some((g) => g.group === 'Pilar Konsepsi'),
-    false,
-    'no group heading survives its only row',
-  );
-  // "Istana Konsepsi" is the string the 08-07 ruling replaced, and prompt M's group
-  // order still used it. It must not come back through any route, including this one.
+test('胎元 PRINTS REYNER\'S MEANING (Prompt AX, 2026-09-30), and no invented one', () => {
+  // ── THE 2026-08-07 DISPLAY-ONLY RULING IS LIFTED BY ITS AUTHOR ──
+  // It said `pilar.conception` carries no label_meaning on purpose, and prompt M's
+  // correction 4 threw out a Cowork-drafted sentence for it. Reyner wrote one himself
+  // on 2026-09-30 (Prompt AX, verbatim in the glossary `_note`). So the test that
+  // guarded "no meaning" now guards "exactly HIS meaning": the row prints it, the
+  // group comes back with it, and it is the glossary's string, not code's.
+  const RULED = 'Dihitung dari perkiraan masa pembuahan, sekitar sepuluh bulan sebelum kelahiranmu. Pilar ini melengkapi bagan dan tidak dibaca sendiri.';
+  assert.equal(GLOSSARY.pilar.conception.label_meaning, RULED, 'the glossary carries Reyner\'s AX line');
+  assert.match(GLOSSARY.pilar.conception._note, /LIFTED by Reyner 2026-09-30/u, 'the _note records the lifted ruling');
   const a = buildAppendix(CHART_1);
-  assert.ok(!JSON.stringify(a).includes('Istana Konsepsi'),
-    'the replaced name must not come back through the PDF');
-  // The ship gate still passes - it always did, by exempting `display_only`. Now
-  // there is no entry for it to exempt, which is a simpler way to be right.
+  const entry = flat(a).find((e) => e.key === 'conception');
+  assert.ok(entry, 'the conception row prints now that it has a meaning');
+  assert.equal(entry.meaning, RULED);
+  assert.equal(entry.display_only, false, 'no longer exempt from correction 2');
+  assert.ok(a.groups.some((g) => g.group === 'Pilar Konsepsi'), 'its group heading returns with its row');
+  // "Istana Konsepsi" is the string the 08-07 ruling replaced; it must not come back.
+  assert.ok(!JSON.stringify(a).includes('Istana Konsepsi'), 'the replaced name must not come back through the PDF');
   assert.doesNotThrow(() => assertEveryMechanicExplained(a));
 });
-
 test('an hour-less chart lists no hour pillar and still ships', () => {
   const chart = calculateBaziChart({ birthDate: '1989-02-04', birthTime: null });
   const a = buildAppendix({ chart, semanticJson: buildSemanticJson(chart) });

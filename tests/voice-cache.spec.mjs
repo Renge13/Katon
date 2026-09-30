@@ -42,8 +42,11 @@ const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 // (pilar.day.branch_label_meaning), which every mirror's semantic JSON carries, so
 // the v1 mirror key moves with it; it was b38088d0... The v1 PAIR key did not move:
 // the v1 pair semantic JSON does not carry that line.
+// RE-PINNED the MIRROR again in the same PR (Prompt AX §2, 2026-09-30), so saved
+// readings are rewritten once: Reyner's Tanda Kekosongan sentence is in chart 1's
+// semantic JSON (its 空亡 badge); it was 9514960e... The pair key still does not move.
 const V1_KEYS = {
-  mirror: '9514960e81ca7152c929ad645e75caa46c8f027a3cb1c80c14733f6d8143eb94',
+  mirror: 'a60fc58e8e7821ce6e76071ac170aa039276d8e66f2d4da2cc1825d396235dcb',
   pair: '423d02fd8465f31e67470b092239981b91e34e07e59d36a5fa050fac898add00',
 };
 
