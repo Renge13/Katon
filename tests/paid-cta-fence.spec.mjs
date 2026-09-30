@@ -29,7 +29,10 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
 import { checkoutOpen } from '../lib/paymentFence.js';
 import { navKeys } from '../lib/site/nav.js';
-import { PASANGAN_COPY } from '../lib/site/copy.js';
+import { PASANGAN_COPY, CHROME_COPY } from '../lib/site/copy.js';
+import { COMPAT_ROUTE } from '../lib/site/routes.js';
+import { priceFor } from '../lib/pricing.js';
+import { formatIdr } from '../lib/site/format.js';
 import Funnel, { Reading } from '../components/Funnel.jsx';
 
 const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '04:00' });
@@ -172,6 +175,54 @@ test('THE HEADER NAV DROPS COMPAT UNDER A CLOSED FENCE, and keeps it under an op
   assert.deepEqual(navKeys({ salesOpen: true }), ['mirror', 'compat']);
   const header = readFileSync(new URL('../components/SiteHeader.jsx', import.meta.url), 'utf8');
   assert.match(header, /navKeys\(/u, 'SiteHeader draws its links through navKeys');
+});
+
+// ── PROMPT AY §2: THE OFFER'S RULED BODY, AND THE COMPATIBILITY BLOCK ──
+// REYNER-RULED 2026-10-01. Both read from the copy bank; the compat block sits
+// directly after the offer and, like it, is not rendered under a closed fence.
+
+test('AY §2: the offer carries the ruled headline and its three labelled lines, and not the old body', async () => {
+  const f = stubFetch({});
+  try {
+    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
+    const t = open.text();
+    assert.ok(t.includes(CHROME_COPY.offer_headline), 'the ruled headline');
+    for (const item of CHROME_COPY.offer_items) {
+      assert.ok(t.includes(item.label) && t.includes(item.text), `the line "${item.label}"`);
+    }
+    assert.ok(!t.includes('Kartu resolusi tinggi dan PDF dari bacaanmu'), 'the replaced body is gone from the offer');
+    assert.ok(!/[—–]/u.test(t), 'no dash printed between a label and its text (rule 20)');
+    await open.unmount();
+  } finally { f.restore(); }
+});
+
+test('AY §2: THE COMPATIBILITY BLOCK renders after the offer under an open fence, and not at all under a closed one', async () => {
+  const f = stubFetch({});
+  try {
+    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
+    const t = open.text();
+    assert.ok(t.includes(CHROME_COPY.compat_cta), 'open fence: the compat CTA renders');
+    assert.ok(t.includes(CHROME_COPY.compat_eyebrow) && t.includes(CHROME_COPY.compat_headline));
+    for (const item of CHROME_COPY.compat_items) assert.ok(t.includes(item.label) && t.includes(item.text), `the line "${item.label}"`);
+    assert.ok(t.includes(formatIdr(priceFor('compat'))), 'the compat price, from lib/pricing.js');
+    assert.ok(t.indexOf(OFFER_CTA) < t.indexOf(CHROME_COPY.compat_eyebrow), 'directly AFTER the Complete Edition offer');
+    const link = [...open.host.querySelectorAll('a')].find((a) => a.textContent.includes(CHROME_COPY.compat_cta));
+    assert.equal(link?.getAttribute('href'), COMPAT_ROUTE, 'the button goes to the compatibility page');
+    await open.unmount();
+
+    const closed = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: false }));
+    assert.ok(!closed.text().includes(CHROME_COPY.compat_cta), 'closed fence: no compat CTA');
+    assert.ok(!closed.text().includes(CHROME_COPY.compat_headline), 'closed fence: no compat block at all');
+    assert.ok(!closed.text().includes(formatIdr(priceFor('compat'))), 'closed fence: no compat price');
+    await closed.unmount();
+
+    // A buyer inside HER purchase still sees her delivery, but not a new product.
+    const bought = await mount(React.createElement(Reading, {
+      reading: SERVED, onReset() {}, salesOpen: false, initialStage: 'delivered',
+    }));
+    assert.ok(!bought.text().includes(CHROME_COPY.compat_cta), 'closed fence + delivered: still no compat block');
+    await bought.unmount();
+  } finally { f.restore(); }
 });
 
 // ── ONE SOURCE: THE FENCE, READ BY THE SERVER PAGES ────────
