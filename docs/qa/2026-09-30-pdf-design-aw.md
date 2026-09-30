@@ -91,3 +91,21 @@ Both Preview PDFs fetched from the #186 Preview at `f4767dc` and every page rast
 - **Complete Edition p8 is one row.** The Pilar Konsepsi group, its heading "Pilar Konsepsi" over a row also named "Pilar Konsepsi" and its three-line meaning, flows onto a page of its own: the 8th page is that and nothing else. The doubled name is the "Pilar Konsepsi Pilar Konsepsi" that 2026-09-22's A7 removed while the row was empty; the new meaning brings it back.
 - **An imperative in a served reading.** Complete Edition p2: "Jika kamu merasa kewalahan, ingatlah bahwa kamu bisa memilih satu tugas untuk diserahkan ke orang lain bulan ini, dan berikan izin bagi hasil tersebut ...". Smoke-3 had none of the listed words in five renders; this sixth render on the same prompt has one.
 - **A bracket split across a line.** Complete Edition p2: "(*Peach Blossom-*" ends a line and ")" starts the next.
+
+## The walk after Reyner's two fixes (2026-09-30), the one he gives the final go on
+
+Reyner, 2026-09-30: fold Pilar Konsepsi into the Pilar group as its last row (both PDFs), and treat every bracketed gloss as one unbreakable unit (`892ec80`). Both PDFs fetched from `e9b4226`'s own deployment, `https://katon-ils781l5f-renge13s-projects.vercel.app`, same two KNOWN TEST ROWS, every page at 90 dpi: `2026-09-30-pdf-design-aw/walk-final/` (`ce-NN.jpg` 7 pages, `compat-NN.jpg` 8 pages). The prose is the render cached by the previous walk, so only layout moved.
+
+| check | Complete Edition | Compatibility |
+|---|---|---|
+| pages (after #183 / now) | 8 -> **7** | 8 -> 8 |
+| "Pilar Konsepsi" heading over a row of the same name | **absent** (was present) | **absent** (was present) |
+| Pilar Konsepsi | the Pilar group's last row, p7 | the Pilar group's last row, p8 |
+| bracketed glosses broken across a line | **0 of 4** (was 1: "(Peach Blossom-") | 0 of 2 |
+| ruled copy (Shio label, PALING BANYAK / SEDIKIT, Tanda Kekosongan, Dominan Tanah, Pilar Konsepsi) | present as before; no old string | present as before; no old string |
+| a page ending on a heading | none | none |
+| the pair page holds both charts | - | yes, p4 |
+
+**The two new checks were shown able to fail first:** run on the previous walk's PDFs they read "heading over a row of the same name: PRESENT" in both documents and "broken across a line: 1" in the Complete Edition.
+
+**Still on the pages, routed elsewhere by Reyner:** the "ingatlah" sentence on p2 and "Dominan Air" (p7) go to a coming glossary batch (PROGRESS MEASUREMENTS, 2026-09-30).
