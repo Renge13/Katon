@@ -114,11 +114,24 @@ test('blank contact normalises to null, not to an empty string', async () => {
 
 // ── 5. THE EVENT LIST IS CLOSED ─────────────────────────────
 
-test('the eight events are fixed, and a typo cannot invent a ninth', async () => {
-  assert.equal(FUNNEL_EVENTS.length, 8);
+test('the nine events are fixed, and a typo cannot invent a tenth', async () => {
+  // Nine since Prompt AV §5 (2026-09-30): pair_served, keyed by a pair id.
+  assert.equal(FUNNEL_EVENTS.length, 9);
+  assert.ok(FUNNEL_EVENTS.includes('pair_served'));
   assert.ok(Object.isFrozen(FUNNEL_EVENTS));
   assert.deepEqual(INTEREST_PRODUCTS, ['compat', 'annual']);
   // A near-miss is rejected. Without the closed list this would create a silent
   // ninth event and halve whatever denominator it was meant to feed.
   assert.equal(await recordEvent(R, 'mirror_serve'), false);
+});
+
+// ── THE READOUT KNOWS EXACTLY THESE EVENTS (Prompt AV §5) ──
+// scripts/demand-readout.mjs runs in plain node and cannot import this server-only
+// module, so it keeps its own list of known names to flag a typo. A second copy of a
+// list is how the two drift: adding pair_served here alone would have made every pair
+// serve an "UNKNOWN EVENT" anomaly. So the copy is asserted equal to the source.
+import { KNOWN_EVENTS } from '../scripts/demand-readout.mjs';
+
+test('the demand readout\'s known events ARE FUNNEL_EVENTS', () => {
+  assert.deepEqual([...KNOWN_EVENTS].sort(), [...FUNNEL_EVENTS].sort());
 });
