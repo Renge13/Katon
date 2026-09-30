@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 import {
   loadPrompt, MASTER_PROMPTS, PROMPT_VERSIONS, promptVersionFor,
 } from '../lib/render/prompt.js';
+import { buildMirrorPrompt, BASE, OUT } from '../scripts/build-mirror-prompt-v2.mjs';
 
 const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8').replace(/\r\n?/g, '\n');
 
@@ -34,9 +35,14 @@ function fenceAfter(heading) {
 //   instruction - a confident observation, not "Mungkin menarik untuk..." - and the
 //   pair prompt's own close line, which invited an open musing, goes.
 const CLOSE_NEW = 'End on a confident observation that leaves her wanting to look\nfurther; do not open it with "Mungkin menarik untuk...". Advice is optional, never\nrequired.';
+//   AV §1 (Cowork's technical ruling, 2026-09-30, on Reyner's blind read of round 6:
+//   "We want a definitive story, not a trailer for a sequel"): the close no longer asks
+//   her to want more. SUPERSEDES B31's kept open ending. Shared by mirror and pair.
+const CLOSE_AV = 'End on a settled, confident observation about who she is.\nThe reading is complete: never hint at more to explore, deeper layers, or what is still waiting.\nDo not open it with "Mungkin menarik untuk...". Advice is optional, never\nrequired.';
 const MIRROR_EDITS = [
   ['makes her want to look further, for instance at the people closest to her. Advice', 'makes her want to look further. Advice'],
   ['You may end a thought on an open observation that\nmakes her want to look further. Advice is optional, never\nrequired.', CLOSE_NEW],
+  [CLOSE_NEW, CLOSE_AV],
 ];
 const COMPAT_EDITS = [
   ['The penutup leaves something worth exploring between them. It does not sum the pair up and does not\nassign homework', 'The penutup does not sum the pair up and does not\nassign homework'],
@@ -61,8 +67,33 @@ test('V1 PROMPTS ARE UNTOUCHED', () => {
   assert.equal(loadPrompt('pair', 'v1'), MASTER_PROMPTS.pair);
 });
 
-test('THE v2 MIRROR PROMPT IS AE §1 VERBATIM, THEN THE MIRROR EXAMPLES', () => {
-  assert.equal(loadPrompt('mirror', 'v2'), `${AE_MIRROR}\n${MIRROR_EXAMPLES.trimEnd()}\n`);
+// ── THE ROUND-6 SWITCH (Prompt AV §2 item 1): THE MIRROR'S PROMPT IS DERIVED ──
+// The v2 mirror sends AE §1 (as edited above) PLUS AT §2's round-6 changes, built by
+// scripts/build-mirror-prompt-v2.mjs into renderer-prompt-v2-mirror.txt. The pair keeps
+// AE §1 unchanged at its head: it was not tested in round 6.
+test('THE v2 MIRROR PROMPT IS AE §1 WITH THE ROUND-6 EDITS, THEN THE MIRROR EXAMPLES', () => {
+  assert.equal(loadPrompt('mirror', 'v2'), `${buildMirrorPrompt(AE_MIRROR)}\n${MIRROR_EXAMPLES.trimEnd()}\n`);
+});
+
+test('THE BUILT MIRROR PROMPT IS CURRENT: the committed file is what the builder makes from the base', () => {
+  assert.equal(read(OUT), buildMirrorPrompt(read(BASE)));
+});
+
+test('THE BUILT MIRROR PROMPT IS TRACED INTO THE LAMBDA: every v2 prompt file is in outputFileTracingIncludes', () => {
+  // Read at module load with readFileSync, which no bundler follows: untraced, every
+  // render route throws ENOENT in production while dev works (next.config.mjs).
+  const config = read('next.config.mjs');
+  for (const f of [BASE, OUT, 'docs/content/compat-renderer-prompt-v2.txt', 'docs/content/voice-examples-v2.txt']) {
+    assert.ok(config.includes(`'./${f}'`), `next.config.mjs does not trace ${f}`);
+  }
+});
+
+test('ROUND 6 ON THE MIRROR ONLY: the pair prompt carries none of the round-6 edits', () => {
+  const pair = loadPrompt('pair', 'v2');
+  for (const s of ['Every `bintang` fact appears, by name', 'A full reading is roughly 400-550 words', 'a relationship between\npillars gets no bracket']) {
+    assert.ok(loadPrompt('mirror', 'v2').includes(s), `mirror lacks: ${s}`);
+    assert.equal(pair.includes(s), false, `pair carries: ${s}`);
+  }
 });
 
 test('THE v2 PAIR PROMPT IS AE §1, THEN §2, THEN BOTH EXAMPLE SECTIONS, and nothing else', () => {
@@ -102,18 +133,25 @@ test('A v2 ROW CARRIES A v2 PROMPT VERSION, distinct from every v1 version', () 
   }
 });
 
-// ── B31 (Reyner, 2026-09-28): KEEP THE OPEN-ENDED CLOSE, REMOVE THE EXAMPLE PHRASE ──
+// ── B31 (Reyner, 2026-09-28): REMOVE THE EXAMPLE PHRASE. Its kept open ending is
+// SUPERSEDED by AV §1 (2026-09-30), tested below. ──
 // Round 4 ended a thought with "Mungkin menarik untuk melihat/memperhatikan ..." in
 // 7 of 7 readings, most of them pointing at the people closest to her: the prompt's
 // own example, followed. The permission stays; the example goes
 // (docs/content/voice-constraint-rulings-2026-09-26.md B31).
-test('B31: the v2 prompts carry the open-ended close WITHOUT its example phrase', () => {
+test('B31: the v2 prompts carry no example phrase for the close', () => {
   for (const kind of ['mirror', 'pair']) {
     const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
     assert.equal(p.includes('for instance at the people closest to her'), false, `${kind} still has the example`);
-    // The permission to end open is kept; since B33/B34 it is worded as the
-    // confident-close instruction (tested below), so this checks the open ending.
-    assert.ok(p.includes('leaves her wanting to look further'), `${kind} lost the open-ended ending itself`);
+  }
+});
+
+test('AV §1: both v2 prompts end on a settled close and no longer ask her to want more', () => {
+  for (const kind of ['mirror', 'pair']) {
+    const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
+    assert.ok(p.includes('End on a settled, confident observation about who she is. The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.'), `${kind} lacks the AV §1 close`);
+    assert.equal(p.includes('leaves her wanting to look further'), false, `${kind} still asks for the tease`);
+    assert.ok(p.includes('Do not open it with "Mungkin menarik untuk...".'), `${kind} lost the Mungkin menarik clause`);
   }
 });
 
@@ -125,8 +163,8 @@ test('B31: the v2 prompts carry the open-ended close WITHOUT its example phrase'
 test('B33/B34: the v2 prompts carry the confident-close instruction and none of the removed wording', () => {
   for (const kind of ['mirror', 'pair']) {
     const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
-    assert.ok(p.includes('End on a confident observation that leaves her wanting to look further; do not open it with "Mungkin menarik untuk...".'),
-      `${kind} lacks the new close instruction`);
+    assert.ok(p.includes('End on a settled, confident observation') && p.includes('Do not open it with "Mungkin menarik untuk...".'),
+      `${kind} lacks the close instruction`);
     for (const gone of ['You may end a thought on an open observation', 'The penutup leaves something worth exploring between them']) {
       assert.equal(p.includes(gone), false, `${kind} still says: ${gone}`);
     }
