@@ -33,7 +33,6 @@ import { VALIDATION_CHARTS, HOUR_UNKNOWN_CHARTS } from './bazi-validation.fixtur
 import GLOSSARY from '../docs/content/glossary.json' with { type: 'json' };
 import { fillPairTemplate } from '../lib/semantic/glossary.js';
 import { readFileSync } from 'node:fs';
-import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
 
 const ALL = [...VALIDATION_CHARTS, ...HOUR_UNKNOWN_CHARTS];
 const chartOf = (id) => {
@@ -190,18 +189,14 @@ test('NO RAW KEY REACHES THE PAGE - the 2026-09-08 defect, in its next consumer'
   }
 });
 
-test('RULE 25: no score, no axis number, no verdict word in the table or the chrome', async () => {
-  const verdict = (BLOCKLIST.verdict?.patterns || [])
-    .map((e) => ({ regex: new RegExp(e.pattern, e.flags || 'iu'), source: e.pattern }));
-  assert.ok(verdict.length >= 3, 'precondition: the verdict patterns exist to run');
-
+test('RULE 25: no score and no axis number in the table or the chrome', async () => {
+  // The verdict-word half of this test read BLOCKLIST.verdict.patterns, which Reyner
+  // retired 2026-10-01 with every other word ban (Prompt AZ, STAGE6 1.64.0), on every
+  // surface including copy checks. What is left is not a word list: the engine's own
+  // axis values and percentages, which a page must never print.
   for (const name of names) {
     const { texts, semanticJson } = await build(name);
     const all = texts.join('\n');
-    for (const { regex, source } of verdict) {
-      const hit = regex.exec(all);
-      assert.equal(hit, null, `${name}: /${source}/ matched "${hit?.[0]}"`);
-    }
     // The engine HANDS US the ammunition, so its absence is a decision and is
     // asserted as one: p5 carries pull/fit and p3 carries a presence percentage.
     const p5 = semanticJson.facts.find((f) => f.id === 'p5_pull_fit');

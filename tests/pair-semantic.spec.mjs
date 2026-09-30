@@ -360,16 +360,12 @@ test('variantKeysFor NAMES THE CELL THE FACT ACTUALLY CARRIES', () => {
   assert.ok(checked >= 40, `exercised ${checked} facts`);
 });
 
-test('EVERY scoped key is a real cell, and the two lists do not overlap', () => {
-  // A typo in either list would silently make a block unclassified - scanned,
-  // which is the safe direction, and therefore invisible. This is the check that
-  // makes the silence audible.
-  const scope = BLOCKLIST.style._pair_scope.tension_collapse;
-  for (const k of [...scope.banned_in, ...scope.permitted_in]) {
-    assert.ok(GLOSSARY.kompatibilitas[k], `"${k}" is a kompatibilitas cell`);
-  }
-  const both = scope.banned_in.filter((k) => scope.permitted_in.includes(k));
-  assert.deepEqual(both, [], 'no key is both banned and permitted');
+test('THE PAIR SCOPE IS RETIRED with the register bans it scoped (AZ, 1.64.0)', () => {
+  // This checked the per-block scope lists of style.tension_collapse for typos. Both
+  // the category and its scope left the gate 2026-10-01 (Reyner, Prompt AZ), so there
+  // is nothing for a typo to misclassify; the lists are archived, unread.
+  assert.equal(BLOCKLIST.style._pair_scope, undefined);
+  assert.ok(BLOCKLIST['_retired_2026-10-01']['style._pair_scope'].tension_collapse.banned_in.length > 0);
 });
 
 test('THE VARIANT IS THE RELATION, so two seats do not read alike', () => {

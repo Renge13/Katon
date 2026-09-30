@@ -504,11 +504,11 @@ test('A FLOOR THAT FAILS THE GATE IS REFUSED, NOT SERVED', () => {
 
   const poisoned = {
     ...floor,
-    penutup: 'Pada tahun 2027 kamu akan menemukan arah yang kamu cari.',
+    penutup: 'Minum obat penenang setiap pagi.',
   };
   const reason = floorRefusalReason(poisoned, semantic);
   assert.match(reason, /^floor_failed_gate:/);
-  assert.match(reason, /forbidden\.fatalism/,
+  assert.match(reason, /forbidden\.medical/,
     'the reason names the check, so a 503 in the logs is diagnosable');
 
   // Provider output is NOT re-checked here - it already passed the gate inside
@@ -613,10 +613,11 @@ test('the feedback endpoint rejects an unknown reading and a bad vote', async ()
 async function plantHardFailingRow(key) {
   await writeCache(key, {
     engineVersion: 'planted',
-    // "ramalan" names the thing rule 25 forbids the product from being, and it
-    // is a HARD reject in lib/validate/blocklist.json. Everything else about
-    // this row is well-formed, so only the hard check can be what fires.
-    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Ini ramalan untuk kamu.' }],
+    // A medical instruction is a HARD reject (forbidden.medical, one of the three
+    // checks Reyner kept 2026-10-01; this planted "ramalan" until fatalism was
+    // lifted). Everything else about this row is well-formed, so only the hard
+    // check can be what fires.
+    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Minum obat penenang setiap pagi.' }],
     penutup: 'Penutup.',
     source: 'gemini',
     model: 'planted-model',
@@ -639,7 +640,7 @@ test('a cached reading that fails a HARD check falls back immediately', async ()
   assert.equal(body.meta.source, 'module_assembly');
   assert.equal(body.meta.hard_fail_fallback, true);
   assert.equal(body.meta.cached, false, 'the served text is not the cached row');
-  assert.ok(!JSON.stringify(body.blocks).includes('ramalan'));
+  assert.ok(!JSON.stringify(body.blocks).includes('obat penenang'));
 });
 
 test('the fallback does NOT overwrite the row it refused to serve', async () => {
@@ -654,7 +655,7 @@ test('the fallback does NOT overwrite the row it refused to serve', async () => 
   // QA surface reads it: the prose is still there, it just no longer serves.
   const row = await readCache(key, { includeUnvalidated: true });
   assert.equal(row.source, 'gemini');
-  assert.equal(row.blocks[0].text, 'Ini ramalan untuk kamu.');
+  assert.equal(row.blocks[0].text, 'Minum obat penenang setiap pagi.');
 });
 
 // ── A SERVE-TIME HARD FAIL MUST NOT FLOOR A CHART FOREVER (Prompt AI §2) ──
@@ -682,7 +683,7 @@ test('A SERVE-TIME HARD FAIL DROPS THE ROW, SO THE NEXT VISIT RE-RENDERS', async
   assert.equal(second.meta.source, 'gemini', 'the second visit re-rendered');
   assert.ok(fetchCalls > 0);
   const row = await readCache(key);
-  assert.ok(row && !JSON.stringify(row.blocks).includes('ramalan'), 'the re-render replaced the bad row');
+  assert.ok(row && !JSON.stringify(row.blocks).includes('obat penenang'), 'the re-render replaced the bad row');
 });
 
 test('a SOFT failure keeps serving; only hard checks pull a reading', async () => {

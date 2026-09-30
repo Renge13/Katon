@@ -200,36 +200,43 @@ test('D3: hanzi outside a bracket and a percentage are each HARD', () => {
   }
 });
 
-test('D4: fatalism is HARD; a pair verdict is HARD', () => {
+test('D4 AFTER AZ (1.64.0): fatalism and a pair verdict no longer gate; medical still does', () => {
+  // THIS TEST ASSERTED THE OPPOSITE until 2026-10-01: fatalism and the pair verdict
+  // were HARD on v2. Reyner lifted both ("don't be an oracle", "no fatalism" as
+  // direction, "not by banning word A, B, or C"); the gate keeps three checks.
   const sj = v2(A);
   const r = validateRenderingV2(plant(draftFor(sj), 'Nasibmu sudah ditakdirkan dan tidak bisa diubah.'), sj);
-  assert.ok(checks(r).some((c) => c === 'forbidden.fatalism'), JSON.stringify(checks(r)));
+  assert.equal(checks(r).includes('forbidden.fatalism'), false, JSON.stringify(checks(r)));
+  assert.equal(r.ok, true, JSON.stringify(checks(r)));
   const pj = buildPairSemantic(A, B, { voice: 'v2' });
   const pr = validateRenderingV2(plant(draftFor(pj), 'Kalian sangat cocok.'), pj);
-  assert.ok(checks(pr).includes('v2.d4_verdict'), JSON.stringify(checks(pr)));
-  // And v1's own pair.verdict still only LOGS it, so the promotion is v2's alone.
+  assert.equal(checks(pr).includes('v2.d4_verdict'), false, JSON.stringify(checks(pr)));
   const pj1 = buildPairSemantic(A, B, { voice: 'v1' });
   const v1r = validateRendering(plant(draftFor(pj1), 'Kalian sangat cocok.'), pj1);
-  assert.equal(v1r.findings.find((f) => f.check === 'pair.verdict')?.severity, 'flag');
+  assert.equal(v1r.findings.some((f) => f.check === 'pair.verdict'), false, 'v1 no longer logs it either');
+  // A KEPT category, same plant: still HARD on v2.
+  const med = validateRenderingV2(plant(draftFor(sj), 'Minum obat yang tepat akan membantumu.'), sj);
+  assert.ok(checks(med).includes('forbidden.medical'), JSON.stringify(checks(med)));
+  assert.equal(med.ok, false);
 });
 
-test('D4: ranking and self_harm are HARD under v2 too (spec §4a, corrected 2026-09-24)', () => {
+test('D4: self_harm is HARD under v2; ranking is lifted (AZ, 1.64.0)', () => {
   const sj = v2(A);
   const ranked = validateRenderingV2(plant(draftFor(sj), 'Ini aspek terbaik yang bisa dimiliki seseorang.'), sj);
-  assert.ok(checks(ranked).includes('forbidden.ranking'), JSON.stringify(checks(ranked)));
-  assert.equal(ranked.ok, false);
+  assert.equal(checks(ranked).includes('forbidden.ranking'), false, JSON.stringify(checks(ranked)));
+  assert.equal(ranked.ok, true, 'ranking is direction now, not a ban');
   const harm = validateRenderingV2(plant(draftFor(sj), 'Kadang rasanya tidak ada gunanya mencoba lagi.'), sj);
   assert.ok(checks(harm).includes('forbidden.self_harm'), JSON.stringify(checks(harm)));
   assert.equal(harm.ok, false);
 });
 
 test('LOGGED, NOT GATING: a style.* hit rejects under v1 and passes under v2', () => {
-  // `slang` is a style category (blocklist.json style.slang). v1 rejects it; v2
-  // records it at severity `flag` and accepts - the spec's "removed from the gate".
-  const sentence = 'Kamu sering ngerasa capek setelah bekerja.';
+  // A KEPT style category (style.code_leak): `slang`, which this used, was retired
+  // 2026-10-01 (AZ). v1 rejects the leak; v2 records it at severity `flag` and accepts.
+  const sentence = 'Kamu sering merasa lelah, nilaimu null setelah bekerja.';
   const v1json = buildSemanticJson(A, { voice: 'v1' });
   const v1 = validateRendering(plant(draftFor(v1json), sentence), v1json);
-  assert.equal(v1.ok, false, 'precondition: v1 rejects slang');
+  assert.equal(v1.ok, false, 'precondition: v1 rejects the leak');
   const sj = v2(A);
   const r = validateRenderingV2(plant(draftFor(sj), sentence), sj);
   assert.equal(r.ok, true, JSON.stringify(checks(r)));
@@ -313,11 +320,12 @@ test('FIX (ii): a hanzi-only bracket is removed; hanzi outside a bracket still r
 import { renderReading, __clearInFlight } from '../lib/render/index.js';
 import { __clearMemCache } from '../lib/render/cache.js';
 
-test('ROUTING: the same slang draft is served under v2 and floors under v1', async () => {
+test('ROUTING: the same leaking draft is served under v2 and floors under v1', async () => {
+  // Was a slang draft; slang is retired (AZ, 1.64.0), so a kept style group routes it.
   const prev = { fetch: globalThis.fetch, key: process.env.GEMINI_API_KEY };
   process.env.GEMINI_API_KEY = 'test-key-never-sent-anywhere';
   const slangDraft = (sj) => {
-    const d = plant(draftFor(sj), 'Kamu sering ngerasa capek setelah bekerja.');
+    const d = plant(draftFor(sj), 'Kamu sering merasa lelah, nilaimu null setelah bekerja.');
     return { blocks: d.blocks, penutup: 'Penutup yang cukup panjang untuk sebuah bacaan.' };
   };
   const serve = async (sj) => {
@@ -330,9 +338,9 @@ test('ROUTING: the same slang draft is served under v2 and floors under v1', asy
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.63.0');
+    assert.equal(onV2.stage6_version, '1.64.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
-    assert.equal(onV1.source, 'module_assembly', 'v1 rejects the slang draft and floors');
+    assert.equal(onV1.source, 'module_assembly', 'v1 rejects the leaking draft and floors');
   } finally {
     globalThis.fetch = prev.fetch;
     if (prev.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = prev.key;
