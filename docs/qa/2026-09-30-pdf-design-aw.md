@@ -68,3 +68,26 @@ Both Preview PDFs fetched from the #186 Preview at `f4767dc` and every page rast
 - **No page ends on a heading**, in either document (scanned page by page).
 - **The pair page holds both charts**, both Sebaran Unsur sections and all ten bars (page 4).
 - **NOT YET PRESENT, by design:** the AX glossary lines (Tanda Kekosongan, Dominan, Pilar Konsepsi) are in #183, which is not merged. The walk repeats after #183 and the rebase.
+
+## The Preview walk after #183 (Prompt AX §6 item 3), 2026-09-30
+
+#186 rebased on main after #180, #181, #183, #184 and #185 merged; the chart-1 snapshot repinned with its proof (`075ee42`). Both PDFs fetched from that commit's own deployment, `https://katon-9mzjhcost-renge13s-projects.vercel.app`, same two KNOWN TEST ROWS, every page rasterised at 90 dpi (walk-preview's size): `2026-09-30-pdf-design-aw/walk-after-183/` (`ce-NN.jpg` 8 pages, `compat-NN.jpg` 8 pages).
+
+**Both were re-rendered on the merged configuration**, as #183's re-key says every reading is: the covers read `prompt v2-9bef2ec0b0533039 - gate 1.63.0` (Complete Edition) and `prompt v2-3fdacdca5b04cd46 - gate 1.63.0` (Compatibility). So the reading pages carry NEW prose, and a pixel comparison with walk-preview moves most there (Complete Edition p2 8.9%, p3 5.6%; Compatibility p2 6.5%, p3 1.4%) and barely elsewhere (0.00-0.49%, the cover's provenance line and the ruled glossary lines).
+
+| check | Complete Edition | Compatibility |
+|---|---|---|
+| pages (walk-preview) | **8** (7) | 8 (8) |
+| Shio | "Shio (tahun lahirmu)" | plain "Shio", one year animal per person, by design |
+| Sebaran tags | PALING BANYAK / PALING SEDIKIT; no old tag word | the same, on both charts |
+| Tanda Kekosongan (AX §2) | the ruled sentence, 2x (chart-page card, appendix); old sentence absent | not on this pair's charts |
+| Dominan (AX §2) | not on this chart: its cell is **Dominan Air**, which still reads "Baganmu didominasi tuntutan luar: ..." (the ruling rewrote the self-element cell only) | "Dominan Tanah: Unsur dirimu paling banyak muncul di bagan. ..." |
+| Pilar Konsepsi (AX §2) | the ruled meaning, in the appendix | the same |
+| Fondasi's old clause | absent | absent |
+| a page ending on a heading | none (each page's last lines read) | none |
+| the pair page holds both charts | - | **yes**, page 4: both pillar rows with INTI DIRI, both Sebaran Unsur, all ten bars |
+
+**Seen on the pages, for Reyner's walk (not fixed):**
+- **Complete Edition p8 is one row.** The Pilar Konsepsi group, its heading "Pilar Konsepsi" over a row also named "Pilar Konsepsi" and its three-line meaning, flows onto a page of its own: the 8th page is that and nothing else. The doubled name is the "Pilar Konsepsi Pilar Konsepsi" that 2026-09-22's A7 removed while the row was empty; the new meaning brings it back.
+- **An imperative in a served reading.** Complete Edition p2: "Jika kamu merasa kewalahan, ingatlah bahwa kamu bisa memilih satu tugas untuk diserahkan ke orang lain bulan ini, dan berikan izin bagi hasil tersebut ...". Smoke-3 had none of the listed words in five renders; this sixth render on the same prompt has one.
+- **A bracket split across a line.** Complete Edition p2: "(*Peach Blossom-*" ends a line and ")" starts the next.
