@@ -117,6 +117,30 @@ test('the ruled size is the BORDER box, declared by the card and not borrowed', 
   }
 });
 
+test('the line-height is the OBJECT\'s own, declared by the card and not borrowed from the page', () => {
+  // THE SAME BUG AS border-box, one property over, found 2026-09-30
+  // (docs/qa/2026-09-30-card-b-headline.md §5). The tags, badge labels, Aspek line,
+  // kicker, `nameId` and footer lines set no line-height and inherited the host's.
+  // Production's body is 1.6; a page with no rule drew Card B's tag rows at a 37px
+  // pitch instead of 50 and read 0px overflow where production read +40.
+  //
+  // THIS IS THE CHEAP GUARD, NOT THE PROOF. It asserts the declaration sits on the
+  // OBJECT - the node both export targets crop to - and not merely somewhere in the
+  // markup, where a child's own line-height would satisfy a looser match. Whether
+  // the layout is actually host-independent is a browser question:
+  // `npm run probe:card-host` lays both cards out under two host pages and compares
+  // every box. 1.6 is asserted exactly because it is the value production drew
+  // before the pin; any other number re-lays the paid card.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const data = buildCardData({ chart, semanticJson: buildSemanticJson(chart) });
+  for (const [name, Card, id] of [['CardA', CardA, 'card-a'], ['CardB', CardB, 'card-b']]) {
+    const html = renderToStaticMarkup(React.createElement(Card, { data }));
+    const tag = html.match(new RegExp(`<div id="${id}${OBJECT_ID_SUFFIX}" style="([^"]*)"`));
+    assert.ok(tag, `${name}: object node #${id}${OBJECT_ID_SUFFIX} not found in the markup`);
+    assert.match(tag[1], /(^|;)line-height:1\.6(;|$)/, `${name}'s object must declare line-height:1.6, got style="${tag[1]}"`);
+  }
+});
+
 test('THE 3:4 CANVAS IS SUPERSEDED, and this is the guard running in reverse', () => {
   // ── THIS TEST IS THE MIRROR OF THE ONE IT REPLACES, NOT ITS DELETION ──
   // It read: `assert.notEqual(CARD_A.canvas.h, 1350)`, with the comment "1080x1350

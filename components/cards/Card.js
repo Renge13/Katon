@@ -1171,6 +1171,17 @@ function Canvas({ spec, token, scale, stem, foil, rimId, id, watermarkOffset, ch
         // §10 removes, reintroduced four corners at a time.
         borderRadius: bleeds ? 0 : px(RADIUS), position: 'relative', overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
+        // LINE-HEIGHT IS THE CARD'S OWN, NOT THE HOST PAGE'S (2026-09-30).
+        // The tags, badge labels, Aspek line, kicker, `nameId` and footer lines set
+        // none, so they inherited whatever page mounted the card. The app's body is
+        // 1.6 (app/globals.css), and a capture from a page with no rule drew Card B
+        // with tag rows at a 37px pitch instead of 50 and read 0px overflow where
+        // production read +40. 1.6 is the value production has always drawn, so
+        // this pins the card at its shipped layout rather than changing it.
+        // Unitless on purpose: each element multiplies it by its OWN font size,
+        // exactly as the inherited body value did. `npm run probe:card-host`
+        // lays both cards out under two host pages and fails if any box moves.
+        lineHeight: 1.6,
         // VERTICAL PADDING IS PER-SPEC; HORIZONTAL IS NOT. `spec.padY` lets Card B
         // buy back frame space without narrowing the text measure - a narrower
         // measure would re-break every line and change the very thing being

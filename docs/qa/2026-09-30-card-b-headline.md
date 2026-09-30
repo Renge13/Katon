@@ -24,6 +24,15 @@ CARD_OVERFLOW_REAL="<list>" npm run audit:card-budget -- --overflow
 npm run serve:reports    # then read window.__overflow
 ```
 
+**The 63 real charts are committed** (added 2026-09-30 in #188): `2026-09-30-card-b-headline/real-charts.txt`, produced by `npm run walk:card-b-heaviest`.
+The thirteen times are the twelve branches with 子 twice (00:30 and 23:30). Re-run on the tree that
+committed it, the walk reproduced the list byte for byte, with 癸 at 26,585 charts (the denominator
+in section 2). To reproduce the sweep:
+
+```
+CARD_OVERFLOW_REAL="$(cat docs/qa/2026-09-30-card-b-headline/real-charts.txt)" npm run audit:card-budget -- --overflow
+```
+
 ## 1. NOTHING IN THE CONTENT GREW
 
 `node --test tests/card-budget.spec.mjs` was green on main: every string that reaches Card B was at or
