@@ -21,8 +21,8 @@ import { test } from 'node:test';
 import React from 'react';
 import { Document, Page, Text, renderToBuffer } from '@react-pdf/renderer';
 
-import { registerPdfFonts, FAMILY_SERIF, FAMILY_HAN } from '../lib/pdf/fonts.js';
-import { pageTexts, textBoxes } from '../lib/pdf/inspect.js';
+import { registerPdfFonts, FAMILY_SERIF, FAMILY_HAN, FAMILY_SANS } from '../lib/pdf/fonts.js';
+import { pageTexts, textBoxes, drawnCodePoints } from '../lib/pdf/inspect.js';
 
 const E = React.createElement;
 
@@ -57,4 +57,21 @@ test('textBoxes DECODES THE SAME RUNS, with their sizes', async () => {
   const serif = runs.find((r) => r.text.includes('Istilah dalam Bacaanmu'));
   assert.ok(serif, `no serif run; runs were ${JSON.stringify(runs.map((r) => r.text))}`);
   assert.equal(serif.size, 20);
+});
+
+// ── A LIGATURE IN THE CMAP DOES NOT SHIFT EVERY GLYPH AFTER IT (Prompt AW) ──
+// Hanken Grotesk, the body face since AW, draws "fl" and "fi" as ligatures, and its
+// ToUnicode maps each such glyph to TWO characters: `<0066 006c>`, a space inside the
+// hex string. The array-form parser matched `<([0-9a-fA-F]*)>`, skipped that entry,
+// and decoded every later glyph one place off: "refleksi" read back as "resek,i".
+// A reader's copy-paste (and every page-text test) reads the ToUnicode map, so this
+// is the inspector reading the page wrong, not the page being wrong.
+test('pageTexts READS HANKEN GROTESK WITH ITS fi / fl LIGATURES, every glyph in place', async () => {
+  registerPdfFonts();
+  const LINE = 'Katon adalah cermin refleksi diri. Konflik kecil, fisik, dan finansial.';
+  const buf = await renderToBuffer(E(Document, null,
+    E(Page, { size: 'A4' }, E(Text, { style: { fontFamily: FAMILY_SANS, fontSize: 11 } }, LINE))));
+  const [page] = pageTexts(buf);
+  assert.ok(page.includes(LINE), `read back as ${JSON.stringify(page)}`);
+  assert.ok(drawnCodePoints(buf).has('f'.codePointAt(0)), 'drawnCodePoints sees the f inside a ligature');
 });
