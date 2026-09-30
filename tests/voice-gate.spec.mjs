@@ -771,3 +771,25 @@ test('ASPEK@PILLAR on a v2 PAIR: "-nya" is B (Pengelola at Pilar Diri only)', ()
   assert.equal(aspekHard(validateRenderingV2(plant(draftFor(sj), 'Aspek Pengelola-nya menonjol di Pilar Kerja.'), sj)).length, 1);
   assert.equal(aspekHard(validateRenderingV2(plant(draftFor(sj), 'Aspek Pengelola-nya menonjol di Pilar Diri.'), sj)).length, 0);
 });
+
+// ── ROUND 6 (EXPERIMENT BRANCH): A RELATION CARRIES NO ENGLISH TO COPY (Prompt AT §2 item 7) ──
+// Reyner, 2026-09-30: brackets only for Arketipe, Aspek and Bintang; "Drop them entirely
+// for relations like Benturan and Gesekan". Fixed upstream, not only in the prompt: the
+// v2 writer payload stops carrying `label_bracket` for relation facts.
+import { writerPayload } from '../lib/render/payload.js';
+
+test('ROUND 6: the v2 writer payload carries no label_bracket on a relation fact, and keeps Aspek and Bintang', () => {
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' }), { voice: 'v2' });
+  const RELATION = new Set(['branch_relation', 'punishment']);
+  const rel = sj.facts.filter((f) => RELATION.has(f.provenance?.kind));
+  assert.equal(rel.length, 4, 'precondition: smew carries four relation facts');
+  assert.ok(rel.every((f) => f.label_bracket), 'precondition: Stage 3 itself still carries the English');
+  const payload = writerPayload(sj);
+  for (const f of payload.facts.filter((x) => RELATION.has(x.provenance?.kind))) {
+    assert.equal('label_bracket' in f, false, `${f.id} still hands the writer "${f.label_bracket}"`);
+  }
+  const kept = payload.facts.filter((x) => /^(aspek|badge)_|^main_profile$|^void_stack/u.test(x.id));
+  assert.ok(kept.length > 0 && kept.every((x) => x.label_bracket), 'Aspek and Bintang keep their English');
+  assert.ok(sj.facts.filter((f) => RELATION.has(f.provenance?.kind)).every((f) => f.label_bracket),
+    'the payload is a copy: the semantic JSON the gate reads is untouched');
+});
