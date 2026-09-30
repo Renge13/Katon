@@ -54,23 +54,22 @@ import {
  * `recordMirrorEvent`. This function does not need to know that list; it just
  * must not be relied upon.
  */
-function fireEvent(token, event, extra = null) {
+function fireEvent(token, event) {
   if (!token) return;
   try {
     fetch(`/api/mirror/${token}/event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // `extra` carries the ONE payload any client event has: the product on
-      // `interest_registered`. The server validates it against INTEREST_PRODUCTS
-      // and refuses anything else, so this is a convenience, not a trust boundary.
-      body: JSON.stringify({ event, ...(extra || {}) }),
+      // No payload. The one client event that carried one, `interest_registered`,
+      // left with the upcoming block (Prompt AQ §2, 2026-09-28).
+      body: JSON.stringify({ event }),
       keepalive: true,
     }).catch(() => {});
   } catch { /* a counter never breaks the page */ }
 }
 import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { priceFor } from '../lib/pricing.js';
-import { SITE_COPY, UPCOMING_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
+import { SITE_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
 // MOVED OUT 2026-09-08 and re-exported. It is a pure function over an error
 // body, and living in a component made it unreachable from any test running
@@ -826,6 +825,14 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
   const cardData = reading.card
     ? { ...reading.card, footer: mergeFooter(reading.card.footer, reading.birthDate, reading.gender) }
     : null;
+  // THE HEADER'S PROFILE LINE IS THE CARD FOOTER'S, SAME SOURCE AND SAME WORDS
+  // (Prompt AQ §1, 2026-09-28). The session that created the reading holds the date
+  // and gender; a reopened or shared link holds neither, and then there is no line
+  // at all rather than an empty one. Serving them on the permalink would put a
+  // birth date on every link a reader shares, and that is Reyner's to rule.
+  const profileLine = (reading.birthDate || reading.gender)
+    ? mergeFooter(null, reading.birthDate, reading.gender).left
+    : '';
 
   return (
     // `--k-rise-dur` SCOPED TO THE READING, 2026-09-05. Reyner ruled the persona
@@ -841,7 +848,11 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
     // inheriting the fallback. Everything inside this root gets .45s, which
     // includes the Sebaran Unsur bars - that is the ruled scope, not an oversight.
     <div className="k-fade" style={{ ...wrap, ...themeVars(element), '--k-rise-dur': '.45s' }}>
-      <button onClick={onReset} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '18px 0 0', fontFamily: 'var(--font-sans)' }}>← Ganti tanggal</button>
+      {/* marginBottom 34 IS THE PAGE'S OWN STEP, not a new number (Prompt AQ §3):
+          the one between the persona block and the first divider (ProseBlocks'
+          first Section, marginTop 34). Reyner, 2026-09-28: the back link and
+          REFLEKSIMU sat 4px apart and read as one line. */}
+      <button onClick={onReset} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '18px 0 0', margin: '0 0 34px', fontFamily: 'var(--font-sans)' }}>← Ganti tanggal</button>
 
       {/* persona. RULE 23's BRACKET-ONCE: the Indonesian name leads and the English
           pair appears once, here, and never again in the body. */}
@@ -852,6 +863,11 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--tinta-soft)' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: el.mid }} /> {element}{chart?.day_master?.stem ? ` · ${chart.day_master.stem}` : ''}
         </div>
+        {/* Inside the 360ms reveal, not a fifth step: the persona stagger is ruled
+            at four (0/120/240/360). Uppercased by CSS, as the card footer is. */}
+        {profileLine && (
+          <div data-profile-line style={{ marginTop: 8, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>{profileLine}</div>
+        )}
       </Reveal>
 
       {/* THE PROSE, AND THE SKELETON THAT HANDS THE SPACE OVER TO IT.
@@ -997,11 +1013,13 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
         <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
       )}
 
-      {/* THE UPCOMING BLOCK, AND IT SITS BELOW THE ARTIFACT DECISION ON PURPOSE.
-          Ruled order: Mirror -> Artifact decision -> Compat / Annual interest.
-          One live purchase CTA per moment; these two are secondary signals and
-          must never read as a second thing to buy. */}
-      <div style={{ marginTop: 44 }}><Upcoming reading={reading} /></div>
+      {/* THE SLOT AFTER THE CARD AND THE OFFER IS EMPTY ON PURPOSE (Prompt AQ §2).
+          The upcoming block ("Yang sedang dikerjakan", the Setahun ke Depan card and
+          its interest link) was removed on Reyner's note of 2026-09-28. By the
+          product-boundary ruling the Compat CTA goes here when payments open; its
+          copy is Reyner's and it is not built. The events it recorded
+          (`upcoming_seen`, `interest_registered`) are kept in the database and the
+          event route still accepts them; nothing on this page fires them now. */}
 
       {/* ── THE LINK IS THE ACCESS HERE TOO (Y-2 commit 4) ────────
           Nothing structural changes in the funnel; this is the compat report's
@@ -1391,249 +1409,6 @@ function Offer({ reading, initialStage }) {
               SITE_COPY.harga.artifact.noteAfter, which is where it already carries
               Reyner's approval. */}
           <div style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(234,241,242,.7)', marginTop: 14, textAlign: 'center' }}>Melewatinya tidak mengurangi apa pun dari bacaan gratismu.</div>
-        </div>
-      </div>
-    </Reveal>
-  );
-}
-
-/* ---------------- Upcoming: two products, no checkout ---------------- */
-/**
- * THE SECOND DENOMINATOR, AND IT IS NOT A STORE.
- *
- * Prompt Q commit 4. Compat and Annual are priced (lib/pricing.js) and NOT
- * sellable (SELLABLE_SKUS is ['artifact']). Nothing here calls /api/pay, and if a
- * future edit makes either product reachable by that route, that edit is wrong -
- * taking money for an unbuilt product is the failure the sellable list exists to
- * prevent.
- *
- * ── EVERY STRING HERE IS UNRULED ──
- * They come from UPCOMING_COPY and each one is currently a visible
- * `@@UNRULED: ...@@` placeholder. Reyner is the sole authority on Indonesian
- * register and had not ruled this block; the structure ships so commits 5 and 6
- * are not blocked, and scripts/check-unruled-copy.mjs refuses a PRODUCTION build
- * while a placeholder survives. Preview builds pass, because he has to see it to
- * rule it.
- *
- * ── THE TAP IS THE METRIC ──
- * `interest_registered` fires on the tap itself, BEFORE any contact field
- * appears. Requiring a contact first would measure willingness to hand over a
- * phone number, which is a different question from wanting the product, and it is
- * not the question September is asking. The contact box is optional, appears
- * after the signal is already recorded, and skipping it costs nothing.
- *
- * ── VISUALLY SECONDARY, DELIBERATELY ──
- * A flat bordered surface on the page background, not the Artifact offer's dark
- * panel, and no primary Button. Ruled: one live purchase CTA per moment. Two
- * buttons of equal weight would make the free reading feel like a shop.
- *
- * ── EXPORTED FOR `tests/contact-submit.spec.mjs`, AND ONLY FOR IT ──
- * Nothing else imports it; `Reading` renders it directly one scope away. The
- * confirmation below is a claim about the server (see `UPCOMING_COPY.contactSent`),
- * so the assertion that guards it has to press the real button and read the real
- * DOM. A test of an extracted helper would keep passing if this component went back
- * to confirming unconditionally, which is the failure CLAUDE.md's 2026-08-26 entry
- * describes: a test that passes whether the feature exists or not.
- */
-export function Upcoming({ reading }) {
-  // Which product the reader has already tapped, if any. One at a time: the
-  // contact box belongs to the product she just tapped, and two open boxes would
-  // ask her to answer the same question twice.
-  const [tapped, setTapped] = useState(null);
-  const [contact, setContact] = useState('');
-  const [sent, setSent] = useState(false);
-
-  // `upcoming_seen` IS THE SECOND DENOMINATOR, AND IT IS GATED ON VISIBILITY -
-  // not on mount, which is what `offer_seen` does one component above.
-  //
-  // THE DIFFERENCE IS NOT COSMETIC AND IT IS THE WHOLE POINT OF THE METRIC.
-  // Prompt Q defines compat and annual interest as interest / `upcoming_seen`
-  // rather than interest / completed readers, precisely so that "a reader who
-  // never scrolled to the block never had the chance and must not sit in the
-  // denominator". Firing on mount would count every completed reader, which
-  // makes `upcoming_seen` a slower spelling of "completed" and silently deletes
-  // the distinction the second denominator exists to draw. Both rates would then
-  // read LOW for a reason that has nothing to do with either product.
-  //
-  // Threshold 0.5 rather than a single pixel: half the block on screen is the
-  // cheapest honest reading of "she had the chance to see it".
-  const seenRef = useRef(false);
-  const blockRef = useRef(null);
-  useEffect(() => {
-    if (seenRef.current) return undefined;
-    const node = blockRef.current;
-    if (!node) return undefined;
-
-    // No IntersectionObserver (old browser, jsdom): fall back to firing, because
-    // undercounting the DENOMINATOR inflates every rate divided by it. An
-    // over-counted denominator is conservative; an under-counted one flatters.
-    if (typeof IntersectionObserver !== 'function') {
-      seenRef.current = true;
-      fireEvent(reading?.token, 'upcoming_seen');
-      return undefined;
-    }
-
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting || seenRef.current) continue;
-        seenRef.current = true;
-        fireEvent(reading?.token, 'upcoming_seen');
-        io.disconnect();
-      }
-    }, { threshold: 0.5 });
-    io.observe(node);
-    return () => io.disconnect();
-  }, [reading?.token]);
-
-  function tap(product) {
-    // Recorded FIRST, with no contact. See the header: the tap is the metric.
-    if (tapped !== product) fireEvent(reading?.token, 'interest_registered', { product });
-    setTapped(product);
-    setSent(false);
-    setContact('');
-  }
-
-  /**
-   * THE ONE AWAITED EVENT ON THIS PAGE, and the exception is deliberate.
-   *
-   * ── WHY IT CANNOT USE `fireEvent` ──────────────────────────
-   * `fireEvent` is fire-and-forget BY DESIGN - "a counter never breaks the page" -
-   * and the other seven events keep that contract exactly as it is. This one is
-   * not a counter. `UPCOMING_COPY.contactSent` says "Emailmu sudah masuk.", which
-   * is a claim that the server RECEIVED something, and `fireEvent` swallows every
-   * failure. `setSent(true)` also sat outside the `if (contact.trim())` guard, so
-   * the confirmation appeared on an empty box, on a failed POST, and on a 410-gone
-   * reading. A wrong confirmation looks exactly like a right one, which is why
-   * nothing on screen ever showed this.
-   *
-   * ── `res.ok` AND THE BODY, NOT EITHER ALONE ────────────────
-   * `recordMirrorEvent` answers `{ ok: true }` at 200 and an `{ error }` shape at
-   * 400/404/410/429. A 200 whose body does not say ok is not a success, so the
-   * status by itself is not enough to make the claim true.
-   *
-   * ── ON FAILURE, NOTHING VISIBLE CHANGES, AND THERE IS NO ERROR STRING ──
-   * Ruled 2026-09-01. `product_interest` is unique on (reading_id, product) and
-   * upserts, so pressing Kirim again is harmless - the input stays visible with
-   * its value intact, which says "not yet" without a twelfth slot nobody ruled.
-   * That same upsert is why posting the contact as a SECOND `interest_registered`
-   * for the same product attaches it to the signal already recorded rather than
-   * creating a second one.
-   */
-  async function submitContact() {
-    const value = contact.trim();
-    // An empty box sends nothing and confirms nothing. The tap is already
-    // recorded and is the metric; there is no second signal here to lose.
-    if (!value) return;
-
-    const token = reading?.token;
-    if (!token) return;
-
-    try {
-      const res = await fetch(`/api/mirror/${token}/event`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'interest_registered', product: tapped, contact: value }),
-      });
-      if (!res.ok) return;
-      const body = await res.json().catch(() => null);
-      if (body?.ok !== true) return;
-      setSent(true);
-    } catch {
-      // Offline, aborted, or a body that would not parse. Leave the input and its
-      // value exactly where they are; she can press Kirim again at no cost.
-    }
-  }
-
-  // ── COMPAT LEFT THIS BLOCK, 2026-09-08 ────────────────────
-  // `Upcoming` advertises what is NOT for sale. Compatibility is for sale now -
-  // it has a route, a price and a checkout - so a row here would tell a reader
-  // the product she can buy is unavailable. The tap that measured demand for it
-  // goes with the row: demand is measured by PURCHASES from here on, which is a
-  // stronger instrument than a tap and is why the DEFERRED REGISTER row citing
-  // the tap is updated in the same commit.
-  const products = [
-    { key: 'annual', copy: UPCOMING_COPY.annual },
-  ];
-
-  return (
-    <Reveal>
-      <div ref={blockRef} style={{ borderTop: '1px solid var(--divider)', paddingTop: 28 }}>
-        {/* SENTENCE CASE, RULED 2026-08-31 (upcoming-copy-rulings.md, AMENDED section).
-            `Eyebrow` is SHARED - 3 other call sites - and is NOT edited: it spreads
-            `...style` last, so overriding here wins with no component change and no
-            effect on any other eyebrow on the site.
-
-            THE TRACKING GOES WITH THE CASE. `.16em` is tuned for capitals; sentence
-            case at caps tracking is spaced-out lowercase, which reads worse than
-            either end state and looks like a bug rather than a decision. `normal` is
-            the neutral default rather than a new tracking value chosen here - the
-            ruling is sentence case, and picking a bespoke number would be composing. */}
-        <Eyebrow style={{ marginBottom: 10, textTransform: 'none', letterSpacing: 'normal' }}>{UPCOMING_COPY.eyebrow}</Eyebrow>
-        <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--muted-warm)', margin: '0 0 18px' }}>{UPCOMING_COPY.lead}</p>
-
-        <div style={{ display: 'grid', gap: 12 }}>
-          {products.map(({ key, copy }) => (
-            <div key={key} style={{ border: '1px solid var(--divider)', borderRadius: 16, padding: '16px 16px 14px', background: 'var(--surface-quiet, transparent)' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: 'var(--tinta)' }}>{copy.label}</div>
-                {/* Resolved from lib/pricing.js, never hardcoded - same rule the
-                    Artifact offer follows. A price typed here would be a second
-                    source of truth for what a thing costs. */}
-                <div style={{ fontSize: 14, color: 'var(--muted-warm)', whiteSpace: 'nowrap' }}>{formatIdr(priceFor(key))}</div>
-              </div>
-              <p style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '8px 0 0' }}>{copy.sub}</p>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
-                {/* SENTENCE CASE, same ruling. This `textTransform` was mine, added in
-                    `7cec498` while the content was still an `@@UNRULED@@` placeholder -
-                    a styling choice made before the words existed, which is exactly the
-                    kind that survives unexamined. Reyner ruled it out. Tracking relaxed
-                    with it, for the reason above. */}
-                <span style={{ fontSize: 11, letterSpacing: 'normal', color: 'var(--muted-warm)', border: '1px solid var(--divider)', borderRadius: 999, padding: '4px 10px' }}>{UPCOMING_COPY.availability}</span>
-                {/* A TEXT BUTTON, NOT A <Button>. Equal visual weight with the
-                    Artifact CTA is the thing the ruled order forbids. */}
-                <button
-                  type="button"
-                  onClick={() => tap(key)}
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', fontSize: 13.5, fontWeight: 600, color: 'var(--el-glow-ink, var(--tinta))', textDecoration: 'underline', textUnderlineOffset: 3 }}
-                >
-                  {UPCOMING_COPY.interestCta}
-                </button>
-              </div>
-
-              {tapped === key && (
-                <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--divider)' }}>
-                  {/* TWO RECEIPTS FOR TWO MOMENTS, ruled 2026-09-01. The tap and
-                      the optional contact submit are things this block keeps
-                      apart on purpose, and one string confirming both meant the
-                      submit was never acknowledged at all. `contactSent` is a
-                      claim that the POST landed, so it renders off `sent`, which
-                      submitContact only sets on a verified success. */}
-                  <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--tinta-soft)', margin: '0 0 10px' }}>
-                    {sent ? UPCOMING_COPY.contactSent : UPCOMING_COPY.interestNoted}
-                  </p>
-                  {!sent && (
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <input
-                        type="text"
-                        value={contact}
-                        onChange={(e) => setContact(e.target.value)}
-                        placeholder={UPCOMING_COPY.contactLabel}
-                        style={{ flex: '1 1 200px', minWidth: 0, font: 'inherit', fontSize: 13.5, padding: '9px 11px', borderRadius: 10, border: '1px solid var(--divider)', background: 'transparent', color: 'var(--tinta)' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={submitContact}
-                        style={{ font: 'inherit', fontSize: 13.5, fontWeight: 600, padding: '9px 14px', borderRadius: 10, border: '1px solid var(--divider)', background: 'transparent', cursor: 'pointer', color: 'var(--tinta)' }}
-                      >
-                        {UPCOMING_COPY.contactSubmit}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
         </div>
       </div>
     </Reveal>

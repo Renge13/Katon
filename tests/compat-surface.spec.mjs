@@ -15,7 +15,7 @@ import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { PASANGAN_COPY, SITE_COPY, UPCOMING_COPY, COPY_BANKS } from '../lib/site/copy.js';
+import { PASANGAN_COPY, SITE_COPY, COPY_BANKS } from '../lib/site/copy.js';
 import { UNRULED_SOURCES } from '../lib/site/unruledScan.js';
 import { SENTINEL, scanUnruled } from '../scripts/check-unruled-copy.mjs';
 import { COMPAT_ROUTE, compatPairRoute } from '../lib/site/routes.js';
@@ -207,18 +207,11 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {
-  // Same rule UPCOMING_COPY carries: the price resolves from lib/pricing.js at
+  // Same rule UPCOMING_COPY carried until it was deleted: the price resolves from lib/pricing.js at
   // render time. `price_note` is the sentence AROUND the number.
   assert.ok(!/\d{2}[.,]?\d{3}/u.test(JSON.stringify(PASANGAN_COPY)),
     'a price-shaped number is in PASANGAN_COPY; resolve it from lib/pricing.js');
   assert.match(read('components/Pasangan.jsx'), /priceFor\('compat'\)/u);
-});
-
-test('THE UPCOMING BLOCK NO LONGER OFFERS COMPAT', () => {
-  // It advertises what is NOT for sale, and compat is for sale.
-  assert.equal('compat' in UPCOMING_COPY, false);
-  assert.ok(UPCOMING_COPY.annual, 'annual keeps its row and its Belum tersedia');
-  assert.equal(read('components/Funnel.jsx').includes('UPCOMING_COPY.compat'), false);
 });
 
 // ── THE SHARED BIRTH FIELDS ────────────────────────────────

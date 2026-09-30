@@ -3,6 +3,8 @@ import './globals.css';
 import SiteFooter from '@/components/SiteFooter.jsx';
 import SiteHeader from '@/components/SiteHeader.jsx';
 import { checkoutOpen } from '@/lib/paymentFence';
+import { GlossNamesProvider } from '@/components/GlossNames.jsx';
+import { GLOSS_NAMES_EN } from '@/lib/render/glossNames.js';
 
 // Root layout for the Katon Next.js App Router app.
 // Fonts: Spectral (display/serif) + Hanken Grotesk (sans/UI), self-hosted via
@@ -33,6 +35,10 @@ const spectral = Spectral({
 const hanken = Hanken_Grotesk({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
+  // Italic since Prompt AQ §4: reading prose sets its bracketed English gloss in
+  // italic, and without the face the browser slants the upright one. The italic
+  // files are fetched only on a page that draws italic Hanken.
+  style: ['normal', 'italic'],
   variable: '--font-hanken',
   display: 'swap',
 });
@@ -71,7 +77,10 @@ export default function RootLayout({ children }) {
             is no nested layout that could shadow it, and a test walks the route
             table rather than a list to keep that true. */}
         <SiteHeader salesOpen={checkoutOpen()} />
-        <div style={{ flex: '1 0 auto' }}>{children}</div>
+        {/* The glossary's ~60 English names, for the italic gloss in reading prose
+            (Prompt AQ §4). Read here on the server so the client never imports the
+            glossary itself; a list under 1KB rides in the page payload instead. */}
+        <div style={{ flex: '1 0 auto' }}><GlossNamesProvider names={GLOSS_NAMES_EN}>{children}</GlossNamesProvider></div>
         <SiteFooter />
       </body>
     </html>

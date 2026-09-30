@@ -24,7 +24,7 @@
 // the gate is on the image.
 //
 // ── WHY headless Chrome AND NO NEW DEPENDENCY ──
-// Same reason as `scripts/verify-upcoming-seen.mjs`: Node 24 ships a global
+// Same reason the deleted `scripts/verify-upcoming-seen.mjs` gave (2026-09-28, Prompt AQ §2): Node 24 ships a global
 // WebSocket and Chrome ships the DevTools Protocol, so a real screenshot costs an
 // import of neither puppeteer nor a PNG library. `Page.captureScreenshot` returns
 // base64 PNG; the comparison is done on the DECODED RGBA surface via
