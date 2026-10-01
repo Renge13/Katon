@@ -85,7 +85,8 @@ const num = (n) => String(n).padStart(6);
  * by a PAIR id and enters no mirror denominator below: those count readers by name.
  */
 export const KNOWN_EVENTS = new Set(['reading_created', 'mirror_served', 'card_downloaded', 'offer_seen',
-  'checkout_started', 'purchase_confirmed', 'upcoming_seen', 'interest_registered', 'pair_served']);
+  'checkout_started', 'purchase_confirmed', 'upcoming_seen', 'interest_registered', 'pair_served',
+  'compat_cta_seen', 'compat_cta_click']);
 
 /** Funnel rows only: `system:` rows (AK §3.4) are facts about the service, not a reader. */
 const funnelOnly = (events) => (events ?? []).filter((e) => !String(e.reading_id ?? '').startsWith('system:'));
@@ -126,7 +127,7 @@ export function anomalies(allEvents, interest) {
 
   // 4. Any reader who did something later in the funnel than she ever completed.
   const completed = readersWith(events, 'mirror_served');
-  for (const name of ['card_downloaded', 'offer_seen', 'upcoming_seen', 'purchase_confirmed']) {
+  for (const name of ['card_downloaded', 'offer_seen', 'upcoming_seen', 'purchase_confirmed', 'compat_cta_seen', 'compat_cta_click']) {
     for (const r of readersWith(events, name)) {
       if (!completed.has(r)) out.push(`${name.toUpperCase()} WITHOUT mirror_served: reading ${r} is missing from the primary denominator.`);
     }

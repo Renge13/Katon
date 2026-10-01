@@ -1083,12 +1083,16 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
       {(salesOpen || initialStage) && (
         <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
       )}
+      {/* The Compatibility block (Prompt AY §2): directly after the offer, and only
+          while the fence is open. See CompatOffer. */}
+      {salesOpen && (
+        <div style={{ marginTop: 20 }}><CompatOffer token={reading.token} /></div>
+      )}
 
-      {/* THE SLOT AFTER THE CARD AND THE OFFER IS EMPTY ON PURPOSE (Prompt AQ §2).
-          The upcoming block ("Yang sedang dikerjakan", the Setahun ke Depan card and
-          its interest link) was removed on Reyner's note of 2026-09-28. By the
-          product-boundary ruling the Compat CTA goes here when payments open; its
-          copy is Reyner's and it is not built. The events it recorded
+      {/* THE UPCOMING BLOCK IS GONE (Prompt AQ §2). "Yang sedang dikerjakan", the
+          Setahun ke Depan card and its interest link were removed on Reyner's note of
+          2026-09-28. The slot it left is the Compat CTA's, by the product-boundary
+          ruling, and it is built now (CompatOffer above, Prompt AY §2). The events it recorded
           (`upcoming_seen`, `interest_registered`) are kept in the database and the
           event route still accepts them; nothing on this page fires them now. */}
 
@@ -1422,12 +1426,12 @@ function Offer({ reading, initialStage }) {
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.22em', textTransform: 'uppercase', color: GLOW, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Icon.sparkle size={14} /> Complete Edition
         </div>
-        {/* REYNER-APPROVED, and RESTORED rather than written. This is the artifact
-            body from before 2026-08-05, when it was replaced because the paid path
-            delivered a 7-beat reading and there was no card and no PDF behind it.
-            The delivery exists now, so the string it was replaced FOR is the string
-            that comes back. */}
-        <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '20px 0 0' }}>Kartu resolusi tinggi dan PDF dari bacaanmu, siap disimpan atau dicetak.</p>
+        {/* REYNER-RULED 2026-10-01 (Prompt AY §2): the headline and the three lines,
+            from the copy bank. It replaced "Kartu resolusi tinggi dan PDF dari
+            bacaanmu, siap disimpan atau dicetak.", itself restored on 2026-08-05. */}
+        <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: '#F2F6F6', margin: '20px 0 0' }}>{CHROME_COPY.offer_headline}</p>
+        <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(234,241,242,.82)', margin: '10px 0 0' }}>{CHROME_COPY.offer_description}</p>
+        <SalesItems items={CHROME_COPY.offer_items} dark />
 
         <div style={{ height: 24 }} />
         <div style={{ background: 'rgba(9,18,21,.4)', border: '1px solid var(--el-g22)', borderRadius: 16, padding: 18 }}>
@@ -1484,11 +1488,85 @@ function Offer({ reading, initialStage }) {
             </Button>
           </div>
           )}
-          {/* THE GUARANTEE, AND IT IS NOT OPTIONAL. Verbatim from
-              SITE_COPY.harga.artifact.noteAfter, which is where it already carries
-              Reyner's approval. */}
-          <div style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(234,241,242,.7)', marginTop: 14, textAlign: 'center' }}>Melewatinya tidak mengurangi apa pun dari bacaan gratismu.</div>
+          {/* THE LINE UNDER THE BUTTON IS GONE (Reyner, 2026-10-01, Prompt AZ §4):
+              "Melewatinya tidak mengurangi apa pun dari bacaan gratismu." The
+              description above now says the same thing first ("Isi bacaannya sama
+              dengan yang bisa kamu baca gratis di atas."). The sentence still closes
+              the /harga Complete Edition note (SITE_COPY.harga.artifact.noteAfter). */}
         </div>
+      </div>
+    </Reveal>
+  );
+}
+
+/**
+ * A sales block's lines: each LABEL on its own line over its text (Prompt AY §2).
+ * The prompt separates them with a dash only for writing; nothing between them is
+ * printed, because rule 20 bans the em-dash in user-facing strings.
+ */
+function SalesItems({ items, dark = false }) {
+  return (
+    <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
+      {items.map((item) => (
+        <div key={item.label}>
+          <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4, color: dark ? '#F2F6F6' : 'var(--tinta)' }}>{item.label}</div>
+          <div style={{ fontSize: 13.5, lineHeight: 1.6, color: dark ? 'rgba(234,241,242,.78)' : 'var(--muted-warm)', marginTop: 3 }}>{item.text}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---------------- The Compatibility block (Prompt AY §2) ---------------- */
+/**
+ * DIRECTLY AFTER THE COMPLETE EDITION OFFER, in the slot AQ §2 left empty for it
+ * ("the Compat CTA goes here when payments open; its copy is Reyner's"). Copy
+ * REYNER-RULED 2026-10-01, from the bank. The price is `priceFor('compat')`, never
+ * a literal, so it shows what the compat invoice charges; the button is a LINK to
+ * COMPAT_ROUTE, the same door the home page's compat link uses, because it starts a
+ * new reading rather than paying for this one.
+ *
+ * NOT RENDERED WHILE THE FENCE IS CLOSED (the 2026-09-23 ruling): the caller gates
+ * it on `salesOpen` alone. Unlike the offer it has no `initialStage` exception,
+ * because nothing about THIS reading's purchase lives in it.
+ *
+ * TWO EVENTS (Reyner, 2026-10-01, Prompt AZ §4), allowlisted server-side like the
+ * other client events (lib/mirror/handlers.js CLIENT_EVENTS, FUNNEL_EVENTS):
+ *   compat_cta_seen   when the block is displayed - it renders only while the fence
+ *                     is open, so mounting IS being displayed; the ref keeps a
+ *                     re-render from re-firing, as offer_seen's does.
+ *   compat_cta_click  on the button. fireEvent sends with `keepalive`, so the
+ *                     request outlives the navigation to /kompatibilitas.
+ */
+function CompatOffer({ token }) {
+  const seenRef = useRef(false);
+  useEffect(() => {
+    if (seenRef.current) return;
+    seenRef.current = true;
+    fireEvent(token, 'compat_cta_seen');
+  }, [token]);
+  return (
+    <Reveal>
+      <div style={{ background: 'var(--kertas)', border: '1px solid var(--border)', borderRadius: 26, padding: '30px 24px 26px' }}>
+        <Eyebrow>{CHROME_COPY.compat_eyebrow}</Eyebrow>
+        <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: 'var(--tinta)', margin: '16px 0 0' }}>{CHROME_COPY.compat_headline}</p>
+        <SalesItems items={CHROME_COPY.compat_items} />
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginTop: 22 }}>
+          {/* `nowrap` on both for the reasons the offer's price row records. */}
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--tinta)', whiteSpace: 'nowrap' }}>{formatIdr(priceFor('compat'))}</div>
+          <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--clay)', whiteSpace: 'nowrap' }}>sekali bayar</div>
+        </div>
+        <a
+          href={COMPAT_ROUTE}
+          onClick={() => fireEvent(token, 'compat_cta_click')}
+          style={{
+            marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 16, borderRadius: 16, padding: '15px 22px',
+            background: 'var(--clay)', color: '#fff', boxShadow: 'var(--shadow-cta)', textDecoration: 'none',
+          }}
+        >
+          {CHROME_COPY.compat_cta} <Icon.arrow size={17} />
+        </a>
       </div>
     </Reveal>
   );

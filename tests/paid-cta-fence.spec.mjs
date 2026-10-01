@@ -29,7 +29,10 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
 import { checkoutOpen } from '../lib/paymentFence.js';
 import { navKeys } from '../lib/site/nav.js';
-import { PASANGAN_COPY } from '../lib/site/copy.js';
+import { PASANGAN_COPY, CHROME_COPY, SITE_COPY } from '../lib/site/copy.js';
+import { COMPAT_ROUTE } from '../lib/site/routes.js';
+import { priceFor } from '../lib/pricing.js';
+import { formatIdr } from '../lib/site/format.js';
 import Funnel, { Reading } from '../components/Funnel.jsx';
 
 const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '04:00' });
@@ -174,12 +177,127 @@ test('THE HEADER NAV DROPS COMPAT UNDER A CLOSED FENCE, and keeps it under an op
   assert.match(header, /navKeys\(/u, 'SiteHeader draws its links through navKeys');
 });
 
+// ── PROMPT AY §2: THE OFFER'S RULED BODY, AND THE COMPATIBILITY BLOCK ──
+// REYNER-RULED 2026-10-01. Both read from the copy bank; the compat block sits
+// directly after the offer and, like it, is not rendered under a closed fence.
+
+test('AY §2: the offer carries the ruled headline and its three labelled lines, and not the old body', async () => {
+  const f = stubFetch({});
+  try {
+    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
+    const t = open.text();
+    assert.ok(t.includes(CHROME_COPY.offer_headline), 'the ruled headline');
+    assert.ok(t.includes(CHROME_COPY.offer_description), 'the AZ description under it');
+    assert.ok(t.indexOf(CHROME_COPY.offer_headline) < t.indexOf(CHROME_COPY.offer_description), 'directly under the headline');
+    assert.ok(t.includes('Kartu Edisi Lengkap') && !t.includes('Kartu Ringkasan Visual'), 'line 3 is AZ\'s');
+    assert.ok(!t.includes('Melewatinya tidak mengurangi'), 'the line under the button is gone (AZ §4)');
+    for (const item of CHROME_COPY.offer_items) {
+      assert.ok(t.includes(item.label) && t.includes(item.text), `the line "${item.label}"`);
+    }
+    assert.ok(!t.includes('Kartu resolusi tinggi dan PDF dari bacaanmu'), 'the replaced body is gone from the offer');
+    assert.ok(!/[—–]/u.test(t), 'no dash printed between a label and its text (rule 20)');
+    await open.unmount();
+  } finally { f.restore(); }
+});
+
+test('AY §2: THE COMPATIBILITY BLOCK renders after the offer under an open fence, and not at all under a closed one', async () => {
+  const f = stubFetch({});
+  try {
+    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
+    const t = open.text();
+    assert.ok(t.includes(CHROME_COPY.compat_cta), 'open fence: the compat CTA renders');
+    assert.ok(t.includes(CHROME_COPY.compat_eyebrow) && t.includes(CHROME_COPY.compat_headline));
+    for (const item of CHROME_COPY.compat_items) assert.ok(t.includes(item.label) && t.includes(item.text), `the line "${item.label}"`);
+    assert.ok(t.includes(formatIdr(priceFor('compat'))), 'the compat price, from lib/pricing.js');
+    assert.ok(t.indexOf(OFFER_CTA) < t.indexOf(CHROME_COPY.compat_eyebrow), 'directly AFTER the Complete Edition offer');
+    const link = [...open.host.querySelectorAll('a')].find((a) => a.textContent.includes(CHROME_COPY.compat_cta));
+    assert.equal(link?.getAttribute('href'), COMPAT_ROUTE, 'the button goes to the compatibility page');
+    await open.unmount();
+
+    const closed = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: false }));
+    assert.ok(!closed.text().includes(CHROME_COPY.compat_cta), 'closed fence: no compat CTA');
+    assert.ok(!closed.text().includes(CHROME_COPY.compat_headline), 'closed fence: no compat block at all');
+    assert.ok(!closed.text().includes(formatIdr(priceFor('compat'))), 'closed fence: no compat price');
+    await closed.unmount();
+
+    // A buyer inside HER purchase still sees her delivery, but not a new product.
+    const bought = await mount(React.createElement(Reading, {
+      reading: SERVED, onReset() {}, salesOpen: false, initialStage: 'delivered',
+    }));
+    assert.ok(!bought.text().includes(CHROME_COPY.compat_cta), 'closed fence + delivered: still no compat block');
+    await bought.unmount();
+  } finally { f.restore(); }
+});
+
+test('AZ §4: THE COMPAT BLOCK FIRES compat_cta_seen when displayed and compat_cta_click on its button; nothing when hidden', async () => {
+  const prev = globalThis.fetch;
+  const sent = [];
+  globalThis.fetch = async (url, init) => {
+    if (String(url).endsWith('/event')) sent.push(JSON.parse(init.body).event);
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  try {
+    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
+    assert.ok(sent.includes('compat_cta_seen'), `displayed: ${sent.join(', ')}`);
+    const link = [...open.host.querySelectorAll('a')].find((a) => a.textContent.includes(CHROME_COPY.compat_cta));
+    // Stop jsdom navigating; the handler still runs.
+    link.addEventListener('click', (e) => e.preventDefault());
+    await act(async () => { link.click(); });
+    assert.ok(sent.includes('compat_cta_click'), `clicked: ${sent.join(', ')}`);
+    assert.equal(sent.filter((e) => e === 'compat_cta_seen').length, 1, 'seen fires once');
+    await open.unmount();
+
+    sent.length = 0;
+    const closed = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: false }));
+    assert.ok(!sent.includes('compat_cta_seen'), 'hidden: no seen event');
+    await closed.unmount();
+  } finally { globalThis.fetch = prev; }
+});
+
+test('AZ §4: /harga\'s Complete Edition body IS the offer\'s copy-bank entries, not a duplicate', () => {
+  // A source guard: app/ pages are not rendered under node --test (the @/ alias). The
+  // screenshots in docs/qa/2026-10-01-sales-blocks-az/ show the rendered page.
+  const page = readFileSync(new URL('../app/harga/page.js', import.meta.url), 'utf8');
+  // The headline and the three lines stay shared. The description is /harga's own
+  // since BA §3 (below).
+  for (const key of ['offer_headline', 'offer_items']) {
+    assert.match(page, new RegExp(`CHROME_COPY\\.${key}`, 'u'), `/harga reads CHROME_COPY.${key}`);
+  }
+  assert.equal(SITE_COPY.harga.artifact.body, undefined, 'the duplicated /harga body string is gone');
+});
+
+test('BA §3: /harga has its own Complete Edition description, and the compat row is sellable copy behind the fence', () => {
+  // REYNER-RULED 2026-10-01 (Prompt BA §3 and his amendment: "Agree on all 3 proposals
+  // on copy"). A source guard plus the copy bank: app/ pages are not rendered under
+  // node --test. The screenshots in docs/qa/2026-10-01-harga-ba/ show the page.
+  const page = readFileSync(new URL('../app/harga/page.js', import.meta.url), 'utf8');
+  const h = SITE_COPY.harga;
+  assert.equal(h.artifact.description,
+    'Satu refleksi lengkap tentang dirimu, disusun dari bagan lahirmu dan bisa kamu unduh sebagai PDF pribadi.');
+  assert.match(page, /q\.artifact\.description/u, '/harga renders its own description');
+  assert.doesNotMatch(page, /CHROME_COPY\.offer_description/u, '/harga no longer shows the "gratis di atas" line');
+  assert.match(CHROME_COPY.offer_description, /gratis di atas/u, 'the result-page offer keeps AZ\'s description');
+
+  assert.equal(h.compat.name, 'Bacaan Kompatibilitas');
+  assert.equal(h.compat.body,
+    'Lihat bagaimana pola kalian saling bertemu, apa yang terasa alami, dan di mana hubungan ini mungkin membutuhkan lebih banyak pengertian.');
+  assert.equal(h.compat.link, 'Baca pola kalian berdua');
+  assert.equal(h.compat.note, undefined, 'the "Belum bisa dibeli" note is retired');
+  assert.doesNotMatch(JSON.stringify(h), /Belum bisa dibeli/u);
+  // The link follows the payment fence exactly as the result page's compat block does.
+  assert.match(page, /checkoutOpen\(\)/u, '/harga reads the fence');
+  assert.match(page, /COMPAT_ROUTE/u, 'the link goes to the compatibility page');
+  assert.doesNotMatch(page, /Rp\s?\d/u, 'no typed price');
+  // Kept: the CE row's purchase-path note and its closing guarantee.
+  assert.match(h.artifact.noteAfter, /Melewatinya tidak mengurangi apa pun dari bacaan gratismu\.$/u);
+});
+
 // ── ONE SOURCE: THE FENCE, READ BY THE SERVER PAGES ────────
 
 test('EVERY PAGE THAT CARRIES A PAID ENTRY POINT PASSES checkoutOpen(), and no component reads the env', () => {
   const src = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
   for (const page of ['app/page.js', 'app/r/[token]/page.js', 'app/layout.js',
-    'app/kompatibilitas/page.js', 'app/kompatibilitas/[id]/page.js']) {
+    'app/kompatibilitas/page.js', 'app/kompatibilitas/[id]/page.js', 'app/harga/page.js']) {
     assert.match(src(page), /checkoutOpen\(\)/u, `${page} reads the fence's own export`);
     assert.doesNotMatch(src(page), /paymentsProvider\(\) === 'closed'/u,
       `${page} must not carry a second copy of the rule`);

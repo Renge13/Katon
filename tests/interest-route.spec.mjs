@@ -145,6 +145,16 @@ test('a contact supplied after the tap attaches to the same signal', async () =>
   assert.equal(rows[0].contact, 'someone@example.com');
 });
 
+test('AZ §4: compat_cta_seen and compat_cta_click are ACCEPTED client events; a near-miss name is refused', async () => {
+  const token = await readyReading();
+  assert.equal((await post(token, { event: 'compat_cta_seen' })).status, 200);
+  assert.equal((await post(token, { event: 'compat_cta_click' })).status, 200);
+  const names = (await readEvents()).map((e) => e.event);
+  assert.ok(names.includes('compat_cta_seen') && names.includes('compat_cta_click'), names.join(', '));
+  // The allowlist is exact: a typo'd name is a 400, never a new event.
+  assert.equal((await post(token, { event: 'compat_cta_opened' })).status, 400);
+});
+
 test('upcoming_seen needs no payload and stays one row across refreshes', async () => {
   const token = await readyReading();
   for (let i = 0; i < 5; i += 1) {
