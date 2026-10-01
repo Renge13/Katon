@@ -47,12 +47,16 @@ const AZ_DIRECTION = 'Write warm, encouraging and empathetic, as one person writ
 //   all the threads beautifully at the end to a cohesive epilogue"): the close becomes
 //   the epilogue line and the "Mungkin menarik untuk..." phrase rule goes. Shared.
 const CLOSE_BA = "End with a short epilogue that gathers the reading's threads into one cohesive closing reflection: not a recap list, not a teaser that invites her to keep reading, and not a new piece of advice.\nThe reading is complete: never hint at more to explore, deeper layers, or what is still waiting.\nAdvice is optional, never\nrequired.";
+const BA_EPILOGUE_TAIL = 'and no advice, including advice the body already gave. The epilogue describes; it does not tell her what to do, not even softly.';
 const MIRROR_EDITS = [
   ['makes her want to look further, for instance at the people closest to her. Advice', 'makes her want to look further. Advice'],
   ['You may end a thought on an open observation that\nmakes her want to look further. Advice is optional, never\nrequired.', CLOSE_NEW],
   [CLOSE_NEW, CLOSE_AV],
   [CLOSE_AV, `${CLOSE_AV}\n\n${AZ_DIRECTION}`],
   [CLOSE_AV, CLOSE_BA],
+  // BA §4's one adjustment (Reyner, 2026-10-01, verbatim), after the smoke stopped on
+  // advice-shaped closes: the epilogue line itself, not the AX line, is replaced.
+  ['and not a new piece of advice.', BA_EPILOGUE_TAIL],
 ];
 const COMPAT_EDITS = [
   ['The penutup leaves something worth exploring between them. It does not sum the pair up and does not\nassign homework', 'The penutup does not sum the pair up and does not\nassign homework'],
@@ -200,8 +204,9 @@ test('B33/B34: the v2 prompts carry the confident-close instruction and none of 
 // Cowork's line from that, keyed, in the SHARED base so both prompts carry it once. On
 // the stop BA §2 named, the pair's own close line ("a suggestion is allowed") is
 // deleted: Reyner, "The shared epilogue line governs the pair too; the verdict guard
-// stays in the pair must-nots as it is."
-const BA_EPILOGUE = "End with a short epilogue that gathers the reading's threads into one cohesive closing reflection: not a recap list, not a teaser that invites her to keep reading, and not a new piece of advice.";
+// stays in the pair must-nots as it is." Then BA §4's one adjustment, Reyner verbatim,
+// after the smoke's advice-shaped closes: the line's tail is his.
+const BA_EPILOGUE = "End with a short epilogue that gathers the reading's threads into one cohesive closing reflection: not a recap list, not a teaser that invites her to keep reading, and no advice, including advice the body already gave. The epilogue describes; it does not tell her what to do, not even softly.";
 test('BA §2: both v2 prompts close on the epilogue line, with no phrase rule and no competing close', () => {
   for (const kind of ['mirror', 'pair']) {
     const full = loadPrompt(kind, 'v2');
