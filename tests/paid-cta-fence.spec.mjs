@@ -258,10 +258,38 @@ test('AZ §4: /harga\'s Complete Edition body IS the offer\'s copy-bank entries,
   // A source guard: app/ pages are not rendered under node --test (the @/ alias). The
   // screenshots in docs/qa/2026-10-01-sales-blocks-az/ show the rendered page.
   const page = readFileSync(new URL('../app/harga/page.js', import.meta.url), 'utf8');
-  for (const key of ['offer_headline', 'offer_description', 'offer_items']) {
+  // The headline and the three lines stay shared. The description is /harga's own
+  // since BA §3 (below).
+  for (const key of ['offer_headline', 'offer_items']) {
     assert.match(page, new RegExp(`CHROME_COPY\\.${key}`, 'u'), `/harga reads CHROME_COPY.${key}`);
   }
   assert.equal(SITE_COPY.harga.artifact.body, undefined, 'the duplicated /harga body string is gone');
+});
+
+test('BA §3: /harga has its own Complete Edition description, and the compat row is sellable copy behind the fence', () => {
+  // REYNER-RULED 2026-10-01 (Prompt BA §3 and his amendment: "Agree on all 3 proposals
+  // on copy"). A source guard plus the copy bank: app/ pages are not rendered under
+  // node --test. The screenshots in docs/qa/2026-10-01-harga-ba/ show the page.
+  const page = readFileSync(new URL('../app/harga/page.js', import.meta.url), 'utf8');
+  const h = SITE_COPY.harga;
+  assert.equal(h.artifact.description,
+    'Satu refleksi lengkap tentang dirimu, disusun dari bagan lahirmu dan bisa kamu unduh sebagai PDF pribadi.');
+  assert.match(page, /q\.artifact\.description/u, '/harga renders its own description');
+  assert.doesNotMatch(page, /CHROME_COPY\.offer_description/u, '/harga no longer shows the "gratis di atas" line');
+  assert.match(CHROME_COPY.offer_description, /gratis di atas/u, 'the result-page offer keeps AZ\'s description');
+
+  assert.equal(h.compat.name, 'Bacaan Kompatibilitas');
+  assert.equal(h.compat.body,
+    'Lihat bagaimana pola kalian saling bertemu, apa yang terasa alami, dan di mana hubungan ini mungkin membutuhkan lebih banyak pengertian.');
+  assert.equal(h.compat.link, 'Baca pola kalian berdua');
+  assert.equal(h.compat.note, undefined, 'the "Belum bisa dibeli" note is retired');
+  assert.doesNotMatch(JSON.stringify(h), /Belum bisa dibeli/u);
+  // The link follows the payment fence exactly as the result page's compat block does.
+  assert.match(page, /checkoutOpen\(\)/u, '/harga reads the fence');
+  assert.match(page, /COMPAT_ROUTE/u, 'the link goes to the compatibility page');
+  assert.doesNotMatch(page, /Rp\s?\d/u, 'no typed price');
+  // Kept: the CE row's purchase-path note and its closing guarantee.
+  assert.match(h.artifact.noteAfter, /Melewatinya tidak mengurangi apa pun dari bacaan gratismu\.$/u);
 });
 
 // ── ONE SOURCE: THE FENCE, READ BY THE SERVER PAGES ────────
@@ -269,7 +297,7 @@ test('AZ §4: /harga\'s Complete Edition body IS the offer\'s copy-bank entries,
 test('EVERY PAGE THAT CARRIES A PAID ENTRY POINT PASSES checkoutOpen(), and no component reads the env', () => {
   const src = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
   for (const page of ['app/page.js', 'app/r/[token]/page.js', 'app/layout.js',
-    'app/kompatibilitas/page.js', 'app/kompatibilitas/[id]/page.js']) {
+    'app/kompatibilitas/page.js', 'app/kompatibilitas/[id]/page.js', 'app/harga/page.js']) {
     assert.match(src(page), /checkoutOpen\(\)/u, `${page} reads the fence's own export`);
     assert.doesNotMatch(src(page), /paymentsProvider\(\) === 'closed'/u,
       `${page} must not carry a second copy of the rule`);
