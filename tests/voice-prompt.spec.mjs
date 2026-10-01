@@ -43,14 +43,22 @@ const CLOSE_AV = 'End on a settled, confident observation about who she is.\nThe
 //   give overall direction"): the direction that replaces the lifted word bans, as its
 //   own paragraph after the close. Shared by mirror and pair.
 const AZ_DIRECTION = 'Write warm, encouraging and empathetic, as one person writing to another, in plain spoken Indonesian: not an essay, a report or a translation. Stay with the facts in the JSON. You are reading this chart, not acting as an oracle: no fate, no fixed future, no dates.';
+//   BA §2 (Reyner, 2026-10-01: "Remove the exact phrase rule", amended "just summarize
+//   all the threads beautifully at the end to a cohesive epilogue"): the close becomes
+//   the epilogue line and the "Mungkin menarik untuk..." phrase rule goes. Shared.
+const CLOSE_BA = "End with a short epilogue that gathers the reading's threads into one cohesive closing reflection: not a recap list, not a teaser that invites her to keep reading, and not a new piece of advice.\nThe reading is complete: never hint at more to explore, deeper layers, or what is still waiting.\nAdvice is optional, never\nrequired.";
 const MIRROR_EDITS = [
   ['makes her want to look further, for instance at the people closest to her. Advice', 'makes her want to look further. Advice'],
   ['You may end a thought on an open observation that\nmakes her want to look further. Advice is optional, never\nrequired.', CLOSE_NEW],
   [CLOSE_NEW, CLOSE_AV],
   [CLOSE_AV, `${CLOSE_AV}\n\n${AZ_DIRECTION}`],
+  [CLOSE_AV, CLOSE_BA],
 ];
 const COMPAT_EDITS = [
   ['The penutup leaves something worth exploring between them. It does not sum the pair up and does not\nassign homework', 'The penutup does not sum the pair up and does not\nassign homework'],
+  // BA §2 (Reyner, 2026-10-01, on the stop): "delete the pair's penutup line. The shared
+  // epilogue line governs the pair too; the verdict guard stays in the pair must-nots."
+  ['The penutup does not sum the pair up and does not\nassign homework; a suggestion is allowed, never required.\n\n', ''],
 ];
 const applyEdits = (text, edits, where) => edits.reduce((t, [from, to]) => {
   assert.ok(t.includes(from), `${where} no longer carries: ${from.slice(0, 50)}`);
@@ -151,12 +159,13 @@ test('B31: the v2 prompts carry no example phrase for the close', () => {
   }
 });
 
-test('AV §1: both v2 prompts end on a settled close and no longer ask her to want more', () => {
+test('AV §1, as amended by BA §2: both v2 prompts no longer ask her to want more', () => {
+  // AV §1's "End on a settled, confident observation" and the "Mungkin menarik" clause
+  // are replaced by BA §2's epilogue line (tested below); the anti-teaser line stays.
   for (const kind of ['mirror', 'pair']) {
     const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
-    assert.ok(p.includes('End on a settled, confident observation about who she is. The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.'), `${kind} lacks the AV §1 close`);
+    assert.ok(p.includes('The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.'), `${kind} lacks the AV §1 line`);
     assert.equal(p.includes('leaves her wanting to look further'), false, `${kind} still asks for the tease`);
-    assert.ok(p.includes('Do not open it with "Mungkin menarik untuk...".'), `${kind} lost the Mungkin menarik clause`);
   }
 });
 
@@ -177,12 +186,36 @@ test('AZ §2: both v2 prompts carry Reyner\'s direction verbatim, in place of th
 test('B33/B34: the v2 prompts carry the confident-close instruction and none of the removed wording', () => {
   for (const kind of ['mirror', 'pair']) {
     const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
-    assert.ok(p.includes('End on a settled, confident observation') && p.includes('Do not open it with "Mungkin menarik untuk...".'),
-      `${kind} lacks the close instruction`);
+    // ONE close instruction since BA §2: the epilogue line (its own test, below).
+    assert.ok(p.includes("End with a short epilogue that gathers the reading's threads"), `${kind} lacks the close instruction`);
     for (const gone of ['You may end a thought on an open observation', 'The penutup leaves something worth exploring between them']) {
       assert.equal(p.includes(gone), false, `${kind} still says: ${gone}`);
     }
   }
+});
+
+// ── BA §2 (Reyner, 2026-10-01): THE CLOSE IS AN EPILOGUE; THE EXACT-PHRASE RULE GOES ──
+// Reyner: "Remove the exact phrase rule." Amended the same day: "no concrete suggestion
+// then, just summarize all the threads beautifully at the end to a cohesive epilogue."
+// Cowork's line from that, keyed, in the SHARED base so both prompts carry it once. On
+// the stop BA §2 named, the pair's own close line ("a suggestion is allowed") is
+// deleted: Reyner, "The shared epilogue line governs the pair too; the verdict guard
+// stays in the pair must-nots as it is."
+const BA_EPILOGUE = "End with a short epilogue that gathers the reading's threads into one cohesive closing reflection: not a recap list, not a teaser that invites her to keep reading, and not a new piece of advice.";
+test('BA §2: both v2 prompts close on the epilogue line, with no phrase rule and no competing close', () => {
+  for (const kind of ['mirror', 'pair']) {
+    const full = loadPrompt(kind, 'v2');
+    const instr = full.slice(0, full.indexOf('=== MIRROR EXAMPLES ===')).replace(/\s+/gu, ' ');
+    assert.equal(instr.split(BA_EPILOGUE).length - 1, 1, `${kind}: the epilogue line, verbatim, exactly once`);
+    for (const gone of ['Mungkin menarik', 'End on a settled', 'a suggestion is allowed', 'The penutup does not sum the pair up']) {
+      assert.equal(instr.includes(gone), false, `${kind} still says: ${gone}`);
+    }
+    // Kept: the anti-teaser line, and the pair's verdict guard.
+    assert.ok(instr.includes('The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.'));
+  }
+  assert.ok(loadPrompt('pair', 'v2').replace(/\s+/gu, ' ').includes('no score and no overall verdict (never "cocok" or "tidak cocok" as a conclusion)'));
+  // Kept unchanged (BA §2.3): the imperative line, a behavioural rule with examples.
+  assert.ok(loadPrompt('mirror', 'v2').replace(/\s+/gu, ' ').includes("Advice is a plain, optional suggestion, never an imperative or reminder such as 'ingatlah', 'jangan lupa', or 'kamu harus'."));
 });
 
 // ── AX §1 (Reyner, 2026-09-30, verbatim): badges, imperatives, not restating the page ──
