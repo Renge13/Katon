@@ -859,93 +859,126 @@ test('THE BRACKET SCOPE IS READ FROM THE GLOSSARY, so no category can be missed'
 
 // ── 3. FORBIDDEN CONTENT ───────────────────────────────────
 
-test('every forbidden category hard-rejects', () => {
-  const cases = {
-    fatalism: 'Pada tahun 2027 kamu akan menemukan arah yang kamu cari.',
+/** The same block, replaced with a sentence carrying none of the words under test. */
+const NEUTRAL = () => withBlockText(goodReading(), 'day_master_Fire',
+  'Kamu hadir dengan tenang. Kalimat tambahan supaya blok ini cukup panjang untuk diperiksa.');
+
+test('the three kept forbidden categories hard-reject; fatalism and ranking no longer do (AZ, 1.64.0)', () => {
+  // Reyner, 2026-10-01 (Prompt AZ): "Keep 3 checks." Self-harm, medical and
+  // financial protect the reader and stay HARD. Fatalism and ranking were word
+  // bans; they are direction in the prompt now ("no fate, no fixed future, no
+  // dates"), and a sentence that trips only them is no longer rejected.
+  const kept = {
     medical: 'Pola ini sering muncul sebagai gejala penyakit yang perlu kamu periksa.',
     financial: 'Waktu yang tepat untuk masuk ke investasi saham sudah dekat.',
-    ranking: 'Aspek Pengatur adalah aspek terbaik yang bisa dimiliki seseorang.',
     self_harm: 'Kalau terasa berat, menyerah saja lebih ringan.',
   };
-  for (const [category, sentence] of Object.entries(cases)) {
+  for (const [category, sentence] of Object.entries(kept)) {
     const bad = withBlockText(goodReading(), 'day_master_Fire',
       `${sentence} Kalimat tambahan supaya blok ini cukup panjang untuk diperiksa.`);
     const result = validateRendering(bad, CHART_1);
     assert.ok(result.hard, `${category} did not hard-reject`);
     assert.ok(checksIn(result).includes(`forbidden.${category}`), `${category} not caught`);
   }
+  // Ranking without naming a term, so the bracket rule (not under test) stays quiet.
+  const lifted = {
+    fatalism: 'Pada tahun 2027 kamu akan menemukan arah yang kamu cari.',
+    ranking: 'Kamu punya aspek terbaik yang bisa dimiliki seseorang.',
+  };
+  for (const [category, sentence] of Object.entries(lifted)) {
+    const draft = withBlockText(goodReading(), 'day_master_Fire',
+      `${sentence} Kalimat tambahan supaya blok ini cukup panjang untuk diperiksa.`);
+    const result = validateRendering(draft, CHART_1);
+    assert.ok(!checksIn(result).includes(`forbidden.${category}`), `${category} still fires`);
+    assert.equal(result.hard, false, `${category}: still a hard reject`);
+    assert.deepEqual(checksIn(result).sort(), checksIn(validateRendering(NEUTRAL(), CHART_1)).sort(),
+      `${category}: the sentence adds a finding the same block without it does not have`);
+  }
 });
 
 // ── 4. STYLE GUARD ─────────────────────────────────────────
 
-test('the bukan-X-tapi-Y construction is caught, in prose and in the penutup', () => {
-  // THE load-bearing regex. It has escaped an explicit prompt ban three times:
-  // renderer-prompt-notes run 5 (twice) and PROGRESS gate-check run 2, where it
-  // appeared in the penutup - which is why the penutup is checked too.
+test('AZ RED FIRST: the lifted words pass; a pipeline leak, self-harm, medical or financial still fails', () => {
+  // Reyner, 2026-10-01: "Lift the ban on A and B. We don't ban specifics for the
+  // writer, just give overall direction." The first draft carries every construction
+  // AZ §1 names; under 1.63.0 it was rejected (hedge_construction, essay_connectives,
+  // hedging, tension_collapse, fatalism). Now it passes, on v1.
+  const lifted = withBlockText(goodReading(), 'day_master_Fire',
+    'Hal ini membuatmu cenderung tenang. Kamu bukan orang yang lambat, tapi orang yang '
+    + 'menunggu pemicunya. Dua sisi itu selaras, bukan takdir, dan kalian cocok bekerja bersama.');
+  const r = validateRendering(lifted, CHART_1);
+  // The block is replaced, so it carries the coverage findings any replaced block does;
+  // what is asserted is that the lifted words add NOTHING to them.
+  assert.deepEqual(checksIn(r).sort(), checksIn(validateRendering(NEUTRAL(), CHART_1)).sort(),
+    `the lifted constructions still add a finding: ${checksIn(r).join(', ')}`);
+  assert.equal(r.hard, false);
+
+  // Each kept category, one at a time, still fails the same reading.
+  for (const [what, sentence, check] of [
+    ['a literal null', 'Nilaimu null di sini.', 'style.code_leak'],
+    ['sebagai AI', 'Sebagai AI, saya membaca petamu.', 'style.meta'],
+    ['bunuh diri', 'Jangan pernah berpikir bunuh diri.', 'forbidden.self_harm'],
+    ['obat', 'Minum obat yang tepat akan membantumu.', 'forbidden.medical'],
+    ['investasi', 'Mulailah investasi sekarang juga.', 'forbidden.financial'],
+  ]) {
+    const bad = withBlockText(goodReading(), 'day_master_Fire',
+      `${sentence} Kalimat tambahan supaya blok ini cukup panjang untuk diperiksa.`);
+    const result = validateRendering(bad, CHART_1);
+    assert.equal(result.ok, false, `${what} passed`);
+    assert.ok(checksIn(result).includes(check), `${what}: ${check} not caught (${checksIn(result).join(', ')})`);
+  }
+});
+
+test('the bukan-X-tapi-Y construction and tension-collapse words are no longer caught (AZ, 1.64.0)', () => {
+  // THIS PAIR OF TESTS ASSERTED THE OPPOSITE until 2026-10-01. hedge_construction was
+  // "the load-bearing regex" and the largest rejection cause; tension_collapse caught
+  // "menyatu ... identitas utuh". Both were word bans, and Reyner lifted them in favour
+  // of direction. The carve-out test for "bukan berarti" went with the check it carved.
   const inProse = withBlockText(goodReading(), 'day_master_Fire',
     'Pengakuan sulit menempel, bukan karena hasilnya kurang, melainkan karena rasa '
     + 'memilikinya jarang ikut datang.');
-  assert.ok(checksIn(validateRendering(inProse, CHART_1)).includes('style.hedge_construction'));
-
   const inPenutup = goodReading();
   inPenutup.penutup = 'Kamu bukan orang yang lambat, tapi orang yang menunggu pemicunya.';
-  assert.ok(checksIn(validateRendering(inPenutup, CHART_1)).includes('style.hedge_construction'));
-});
-
-test('"BUKAN BERARTI" IS CARVED OUT - it negates a misreading, it does not hedge', () => {
-  // Reyner's ruling A on the 2026-08-06 rejection gallery. hedge_construction was
-  // the largest rejection cause in the pipeline, and the gallery showed its most
-  // common trigger was this exact sentence - which is the resolve-in-the-same-breath
-  // move rule 21 REQUIRES, not the hedge the ban was written for.
-  //
-  //   "bukan berarti X"  negates a MISREADING the label invites   -> allowed
-  //   "bukan X tapi Y"   substitutes one claim for another        -> banned
-  const carved = withBlockText(goodReading(), 'strength_weak',
-    'Kamu Api Lemah. Lemah di sini bukan berarti tidak mampu, melainkan sumber '
-    + 'tenagamu ada di luar dirimu. Tempat yang tepat membuatmu melesat, dan tempat '
-    + 'yang salah menguras habis cadanganmu.');
-  assert.ok(!checksIn(validateRendering(carved, CHART_1)).includes('style.hedge_construction'),
-    'the sentence rule 21 asks for must not be rejected');
-
-  // The ban still catches what it was built for, INCLUDING when a carved-out
-  // phrase appears earlier in the same breath - the lookahead skips that one
-  // occurrence, it does not disarm the check.
-  const stillBanned = goodReading();
-  stillBanned.penutup = 'Bukan berarti mudah. Kamu bukan penunggu, tapi penggerak.';
-  assert.ok(checksIn(validateRendering(stillBanned, CHART_1))
-    .includes('style.hedge_construction'), 'a real hedge after a carve-out still fails');
-});
-
-test('tension-collapse vocabulary is caught', () => {
-  // Run 1 turned the steward/self-reliant tension into "menyatu secara selaras
-  // ... membentuk identitas utuh" - neutering the one fact Reyner confirms he
-  // lives.
-  const bad = withBlockText(goodReading(), 'profile_vs_favorable',
+  const collapse = withBlockText(goodReading(), 'profile_vs_favorable',
     'Pilar Kerja. Dua sisi ini akhirnya menyatu dan membentuk identitas utuh yang khas milikmu.');
-  assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('style.tension_collapse'));
+  for (const [what, draft] of [['in prose', inProse], ['in the penutup', inPenutup], ['tension collapse', collapse]]) {
+    const checks = checksIn(validateRendering(draft, CHART_1));
+    assert.ok(!checks.includes('style.hedge_construction') && !checks.includes('style.tension_collapse'),
+      `${what}: a lifted check still fires (${checks.join(', ')})`);
+  }
 });
 
-test('typography, hanzi, questions and arithmetic are all caught', () => {
-  const cases = [
+test('typography, hanzi, questions and machine talk are still caught; the lifted groups and the hedge about her are not', () => {
+  // KEPT: none of these is a blocklist word ban except style.meta's machine-naming
+  // entries, which AZ keeps as a pipeline-leak alarm. `style.hedging`'s "mungkin"
+  // half (hedgeAboutReader, outside the blocklist, which AZ did not name) is DROPPED
+  // by BA (1.65.0), on Reyner's ruling: "I agree that this is effectively a word ban."
+  const kept = [
     ['style.typography', 'Kamu tahu arahmu — dan kamu tetap berjalan pelan setiap harinya.'],
     ['style.hanzi', 'Cabang bulanmu adalah 酉, dan itu menentukan tekanan yang kamu rasakan.'],
     ['style.rhetorical_question', 'Bagian mana dari dirimu yang paling butuh ruang sekarang?'],
+    ['style.meta', 'Sebagai AI, saya membaca petamu dan menemukan pola yang menarik.'],
+  ];
+  for (const [check, sentence] of kept) {
+    const bad = withBlockText(goodReading(), 'day_master_Fire',
+      `${sentence} Satu kalimat lagi supaya blok ini punya panjang yang wajar.`);
+    assert.ok(checksIn(validateRendering(bad, CHART_1)).includes(check), `${check} not caught`);
+  }
+  // LIFTED 2026-10-01 (AZ §1): each of these was caught under 1.63.0.
+  const lifted = [
     ['style.arithmetic', 'Air mengisi 37% dari petamu, jadi apimu jarang menyala penuh.'],
     ['style.bare_polarity', 'Kamu Api Yang, dan itu membuat caramu hadir terasa terbuka.'],
     ['style.slang', 'Kamu ngerasa capek terus padahal kerjanya tidak seberapa berat.'],
     ['style.particles', 'Itu tuh yang bikin kamu bertahan lama di tempat yang sama.'],
-    // `mungkin` about the READER still fires - see the split test below.
-    ['style.hedging', 'Kamu mungkin akan merasa lebih ringan setelah membaca ini semua.'],
-    // `style.adverbial` was DELETED 2026-08-17. It is deliberately not replaced
-    // here: the check is gone, so a case asserting it fires would assert the
-    // opposite of the ruling.
-    ['style.meta', 'Sebagai AI, saya membaca petamu dan menemukan pola yang menarik.'],
     ['style.essay_connectives', 'Hal ini membuat kamu terlihat tenang di mata orang lain.'],
+    ['style.hedging', 'Kamu cenderung menunggu sampai semuanya jelas.'],
+    // DROPPED 2026-10-01 (BA §1, 1.65.0): caught under 1.64.0 by hedgeAboutReader.
+    ['style.hedging', 'Kamu mungkin akan merasa lebih ringan setelah membaca ini semua.'],
   ];
-  for (const [check, sentence] of cases) {
-    const bad = withBlockText(goodReading(), 'day_master_Fire',
+  for (const [check, sentence] of lifted) {
+    const draft = withBlockText(goodReading(), 'day_master_Fire',
       `${sentence} Satu kalimat lagi supaya blok ini punya panjang yang wajar.`);
-    assert.ok(checksIn(validateRendering(bad, CHART_1)).includes(check), `${check} not caught`);
+    assert.ok(!checksIn(validateRendering(draft, CHART_1)).includes(check), `${check} still fires on "${sentence}"`);
   }
 });
 
@@ -1006,11 +1039,12 @@ test('the style allowance is per-provider, and there is only ONE provider now', 
   // The openai arm went with the provider on 2026-08-22, and removing it changed
   // nothing: its allowance was 0, IDENTICAL to gemini, so the "own knob" was never
   // actually looser. module_assembly is the other live value and is also 0.
+  // A KEPT style group (AZ 1.64.0 lifted hedge_construction, which this used).
   const bad = withBlockText(goodReading(), 'day_master_Fire',
-    'Kamu bukan orang yang lambat, tapi orang yang menunggu pemicunya dari luar.');
+    'Nilaimu null di sini, dan kamu tetap menunggu pemicunya dari luar.');
   for (const provider of ['gemini', 'module_assembly']) {
     const result = validateRendering(bad, CHART_1, { provider });
-    assert.ok(checksIn(result).includes('style.hedge_construction'), provider);
+    assert.ok(checksIn(result).includes('style.code_leak'), provider);
   }
   assert.deepEqual(Object.keys(STYLE_PARAMS.allowance).sort(), ['gemini', 'module_assembly'],
     'a provider key here that cannot occur is an availability illusion');
@@ -1220,7 +1254,10 @@ test('the code-leak check does not fire on a correct reading', () => {
   }
 });
 
-test('THE RAW PILLAR IS REJECTED; THE PALACE NAME IS NOT', () => {
+test('THE RAW PILLAR IS NO LONGER A WORD BAN (AZ, 1.64.0); THE PALACE NAME STILL PASSES', () => {
+  // style.raw_pillar was retired 2026-10-01 with the other word bans (Reyner, Prompt AZ).
+  // The truth about a pillar is fact.relation_positions' and fact.aspek_pillar's, which
+  // are not word bans and are unchanged.
   // Added 2026-08-06 with the prompt fix it enforces. renderer-prompt used to BAN
   // "pilar hari" in one section and ENCOURAGE "ini datang dari pilar harimu" in
   // another; the renderer followed the encouragement and wrote "Fondasi Pasanganmu
@@ -1232,8 +1269,8 @@ test('THE RAW PILLAR IS REJECTED; THE PALACE NAME IS NOT', () => {
   for (const raw of ['pilar hari', 'pilar harimu', 'pilar bulan', 'pilar tahun', 'pilar jam']) {
     const bad = withBlockText(goodReading(), 'spouse_palace',
       `Fondasi Pasanganmu berada di ${raw}. ${tail}`);
-    assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('style.raw_pillar'),
-      `not caught: ${raw}`);
+    assert.ok(!checksIn(validateRendering(bad, CHART_1)).includes('style.raw_pillar'),
+      `still caught: ${raw}`);
   }
 
   // The four palace names must survive. They are capital-P and never followed by a
@@ -1253,19 +1290,21 @@ test('THE RAW PILLAR IS REJECTED; THE PALACE NAME IS NOT', () => {
   }
 });
 
-test('a mid-reading system disclaimer is rejected', () => {
-  const disclaimers = [
+test('the machine naming itself is still caught; the other disclaimers are lifted (AZ, 1.64.0)', () => {
+  // AZ keeps "the parts of style.meta that name the machine" as a pipeline-leak alarm.
+  const machine = withBlockText(goodReading(), 'day_master_Fire',
+    'Api (Fire). Sebagai model bahasa, saya membaca pola dari bagan.');
+  assert.ok(checksIn(validateRendering(machine, CHART_1)).includes('style.meta'), 'machine talk not caught');
+  // Retired 2026-10-01: a disclaimer is register, and the prompt carries direction.
+  for (const text of [
     'Ini bukan nasihat medis untuk kondisimu.',
     'Catatan: pembacaan berikut bersifat umum.',
     'Perlu diingat bahwa setiap orang berbeda.',
     'Bacaan ini hanya menggambarkan kecenderungan umum.',
-    'Sebagai model bahasa, saya membaca pola dari bagan.',
     'Uraian di atas tidak dimaksudkan sebagai kepastian.',
-  ];
-  for (const text of disclaimers) {
-    const bad = withBlockText(goodReading(), 'day_master_Fire', `Api (Fire). ${text}`);
-    assert.ok(checksIn(validateRendering(bad, CHART_1)).includes('style.meta'),
-      `not caught: ${text}`);
+  ]) {
+    const draft = withBlockText(goodReading(), 'day_master_Fire', `Api (Fire). ${text}`);
+    assert.ok(!checksIn(validateRendering(draft, CHART_1)).includes('style.meta'), `still caught: ${text}`);
   }
 });
 
@@ -1347,8 +1386,12 @@ test('every blocklist pattern compiles and carries a note', () => {
       }
     }
   }
-  assert.ok(count > 30, `only ${count} patterns loaded`);
-  assert.ok(CATEGORIES.forbidden.length >= 5 && CATEGORIES.style.length >= 8);
+  // EXACTLY the three kept checks (Reyner, Prompt AZ, "Keep 3 checks"): 8 forbidden
+  // (medical 3, financial 3, self_harm 2) + 10 style (meta 4, code_leak 6). A pattern
+  // added here is a new word ban, which that ruling says the writer gets as direction.
+  assert.equal(count, 18, `${count} patterns loaded`);
+  assert.deepEqual([...CATEGORIES.forbidden].sort(), ['financial', 'medical', 'self_harm']);
+  assert.deepEqual([...CATEGORIES.style].sort(), ['code_leak', 'meta']);
 });
 
 test('NO ENGINE STRING WOULD TRIP THE STYLE GATE', () => {
@@ -1675,10 +1718,11 @@ test('bare_polarity does not fire on the relative pronoun "yang"', () => {
       `false positive on: ${sentence}`);
   }
 
-  // The real violation still fires: capitalised polarity as a label.
+  // The capitalised label was the real violation; since 2026-10-01 (AZ) it is
+  // direction, not a ban, so it no longer fires either.
   const real = withBlockText(goodReading(), 'day_master_Fire',
     'Kamu Api Yang, dan itu membuat caramu hadir terasa terbuka sejak awal.');
-  assert.ok(checksIn(validateRendering(real, CHART_1)).includes('style.bare_polarity'));
+  assert.ok(!checksIn(validateRendering(real, CHART_1)).includes('style.bare_polarity'));
 });
 
 test('english_leakage ignores words inside a SANCTIONED bracket', () => {
@@ -1696,9 +1740,48 @@ test('english_leakage ignores words inside a SANCTIONED bracket', () => {
   assert.ok(checksIn(validateRendering(leaked, CHART_1)).includes('style.english_leakage'));
 });
 
+test('BA (1.65.0): "mungkin" about her is no longer a check; the question mark and English leakage still are', () => {
+  // Reyner, 2026-10-01 (Prompt BA item 2): "Keep the question-mark check. Keep the
+  // English-leakage check. Drop the "mungkin"-about-her check. I agree that this is
+  // effectively a word ban." Each draft below carries exactly one planted defect,
+  // appended to the floor's own block so no coverage check moves.
+  const own = goodReading().blocks.find((b) => b.fact_ids.includes('day_master_Fire')).text;
+  const plant = (sentence) => withBlockText(goodReading(), 'day_master_Fire', `${own} ${sentence}`);
+  const clean = plant('Kamu menunda hal yang paling penting bagimu.');
+  const hedged = plant('Kamu mungkin menunda hal yang paling penting bagimu.');
+  const question = plant('Bagian mana dari dirimu yang paling butuh ruang sekarang?');
+  const english = plant('This is the pattern that shapes how you move through a room.');
+
+  // v1: the gate that rejects on a soft finding.
+  assert.equal(validateRendering(clean, CHART_1).ok, true, 'precondition: the unplanted draft passes v1');
+  const h1 = validateRendering(hedged, CHART_1);
+  assert.equal(checksIn(h1).includes('style.hedging'), false, 'v1: "mungkin" about her still fires');
+  assert.equal(h1.ok, true, `v1: the hedge-only draft still fails (${checksIn(h1).join(', ')})`);
+  const q1 = validateRendering(question, CHART_1);
+  assert.ok(checksIn(q1).includes('style.rhetorical_question') && !q1.ok, 'v1: a "?" no longer fails');
+  const e1 = validateRendering(english, CHART_1);
+  assert.ok(checksIn(e1).includes('style.english_leakage') && !e1.ok, 'v1: English leakage no longer fails');
+
+  // v2: style findings are LOGGED there (never gating), so the proof is the log.
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: VALIDATION_CHARTS[0].date, birthTime: VALIDATION_CHARTS[0].time }), { voice: 'v2' });
+  const plant2 = (sentence) => {
+    const d = structuredClone(assembleFallback(sj));
+    d.blocks[0].text = `${d.blocks[0].text} ${sentence}`;
+    return validateRenderingV2(d, sj);
+  };
+  assert.equal(checksIn(plant2('Kamu mungkin menunda hal yang paling penting bagimu.')).includes('style.hedging'), false,
+    'v2: "mungkin" about her is still logged');
+  assert.ok(checksIn(plant2('Bagian mana dari dirimu yang paling butuh ruang sekarang?')).includes('style.rhetorical_question'),
+    'v2: a "?" is no longer logged');
+  assert.ok(checksIn(plant2('This is the pattern that shapes how you move through a room.')).includes('style.english_leakage'),
+    'v2: English leakage is no longer logged');
+});
+
 test('a blocklist entry may override the default regex flags', () => {
-  const entry = BLOCKLIST.style.bare_polarity[0];
-  assert.equal(entry.flags, 'u', 'bare_polarity must stay case-sensitive');
+  // bare_polarity was the first override and was retired 2026-10-01 (AZ); code_leak's
+  // camelCase entry is the one that needs it now.
+  const entry = BLOCKLIST.style.code_leak.find((e) => e.flags);
+  assert.equal(entry.flags, 'u', 'the camelCase leak check must stay case-sensitive');
   assert.ok(entry.note.includes('CASE-SENSITIVE'), 'and must say why in its note');
 });
 
@@ -1737,7 +1820,7 @@ test('style.adverbial IS GONE, and `secara lengkap` is sayable again', () => {
   assert.ok(!checks.some((c) => c === 'style.adverbial'), 'no adverbial finding may be produced');
 });
 
-test('style.hedging IS SPLIT: `mungkin` fires on the reader, not on a third party', () => {
+test('style.hedging IS GONE (BA, 1.65.0): `mungkin` fires on no subject, the reader included', () => {
   // RULED 2026-08-17. Golden rule 7 bans hedging INSIDE A CLAIM. `mungkin` in a
   // clause about someone else's PERCEPTION hedges their guess, and the claim about
   // her stays committed - which is also the `salah_dikira` shape the product's own
@@ -1761,19 +1844,20 @@ test('style.hedging IS SPLIT: `mungkin` fires on the reader, not on a third part
   assert.ok(!fires('Mereka mungkin menilai hasilmu terlalu cepat.'),
     'mereka is a third party too');
 
-  // STILL FIRES - the hedge is inside a claim about her.
-  assert.ok(fires('Kamu mungkin menunda hal yang paling penting bagimu.'),
-    'mungkin about the reader is the case the ban exists for');
-  assert.ok(fires('Jalanmu mungkin tidak selalu lurus, namun arahnya tetap sama.'),
-    'a possessive about the reader is still the reader');
+  // NO LONGER FIRES, 2026-10-01 (Prompt BA §1, 1.65.0). These were the case the
+  // check existed for until Reyner dropped it: "I agree that this is effectively a
+  // word ban." Conviction about her is now the writer prompt's direction.
+  assert.ok(!fires('Kamu mungkin menunda hal yang paling penting bagimu.'),
+    'mungkin about the reader no longer fires');
+  assert.ok(!fires('Jalanmu mungkin tidak selalu lurus, namun arahnya tetap sama.'),
+    'a possessive about the reader no longer fires');
 
-  // UNTOUCHED - cenderung, agak and sepertinya stay in the blocklist.
-  assert.ok(fires('Kamu cenderung bertahan di situasi yang sudah jelas.'),
-    'cenderung was explicitly left as-is');
-  assert.ok(fires('Kamu agak menahan diri ketika orang lain sedang bicara.'),
-    'agak was explicitly left as-is');
-  assert.ok(fires('Sepertinya kamu menunggu izin yang tidak akan datang.'),
-    'sepertinya was explicitly left as-is');
+  // LIFTED 2026-10-01 (AZ): cenderung, agak and sepertinya were the blocklist's
+  // style.hedging group. The "mungkin" half above was hedgeAboutReader, outside the
+  // blocklist; AZ did not name it, and BA (1.65.0) deleted it.
+  assert.ok(!fires('Kamu cenderung bertahan di situasi yang sudah jelas.'), 'cenderung is lifted');
+  assert.ok(!fires('Kamu agak menahan diri ketika orang lain sedang bicara.'), 'agak is lifted');
+  assert.ok(!fires('Sepertinya kamu menunggu izin yang tidak akan datang.'), 'sepertinya is lifted');
 });
 
 // ── THE FUSED OPENING: COUNTED, NOT GATED (ruled 2026-08-21) ──
@@ -2109,7 +2193,7 @@ test('TWO OF THE FOUR OBSERVED HEDGE REJECTIONS ALREADY PASS', () => {
   }
 });
 
-test('and the two that SHOULD still fire, do', () => {
+test('and the two that fired then: neither fires since AZ (cenderung) and BA (mungkin)', () => {
   // `mungkin` about the READER is a real hedge and stays caught. `cenderung` is the
   // interesting one: it fired on 4 separate runs, always attempt 1, always on the same
   // sentence - and the glossary cell it comes from says it FLAT:
@@ -2122,15 +2206,17 @@ test('and the two that SHOULD still fire, do', () => {
   // is why NOTHING IS CHANGED here. This test is the evidence for that decision.
   const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
   const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
-  const stillCaught = [
-    'Kamu cenderung bertahan di situasi yang sudah jelas selesai.',
+  // Since 2026-10-01 neither: cenderung was a blocklist word and is lifted (AZ), and
+  // hedgeAboutReader is deleted (BA, 1.65.0). The model softening a flat cell is now
+  // the prompt's to prevent ("Write with conviction about who she is").
+  const noLongerCaught = [
     'Kamu mungkin merasa belum pantas menyandang keberhasilanmu sendiri meskipun orang '
       + 'lain melihatmu berhasil.',
   ];
-  for (const text of stillCaught) {
+  for (const text of noLongerCaught) {
     const reading = withBlockText(goodReading(), dmId, `${text} ${meaning}`);
-    assert.ok(checksIn(validateRendering(reading, CHART_1)).includes('style.hedging'),
-      `must still be caught: ${JSON.stringify(text.slice(0, 60))}`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('style.hedging'),
+      `must no longer be caught: ${JSON.stringify(text.slice(0, 60))}`);
   }
 });
 
@@ -2174,7 +2260,9 @@ test('ALL SIX raw_pillar HITS WERE THE HOUR SENTENCE, so fix 1 covers them', () 
 
   const checks = checksIn(validateRendering(
     withBlockText(goodReading(), dmId, `${observed} ${meaning}`), CHART_1));
-  assert.ok(checks.includes('style.raw_pillar'), 'the raw pillar form is still banned');
+  // Lifted 2026-10-01 (AZ): the word ban is gone; the FALSEHOOD is still caught by the
+  // fact check below, which is the check that was always about truth.
+  assert.ok(!checks.includes('style.raw_pillar'), 'style.raw_pillar is retired');
   assert.ok(checks.includes('fact.hour_known_contradiction'),
     'and the SAME sentence still trips the hour check - one defect, two findings');
 });

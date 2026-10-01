@@ -28,6 +28,9 @@ const SUBJECTS = [
   { id: 'chart7', a: { birthDate: '1993-06-12', birthTime: '23:30', gender: 'female' } },
   { id: 'chart13', a: { birthDate: '1989-02-04', birthTime: '04:00', gender: 'male' } },
   { id: 'smewTNtzNaoQmWysi6mYU', a: { birthDate: '2001-02-14', birthTime: '13:00', gender: 'female' } },
+  // Prompt BA §4, Reyner 2026-10-01: "render at least one pair reading in the smoke and
+  // report its final sentences." PZ0t, the births of every stored v2 pair round.
+  { id: 'PZ0t_B3YDnzdXc2LWV38D', kind: 'pair', a: { birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' }, b: { birthDate: '1990-03-04', birthTime: '14:00', gender: 'male' } },
 ];
 const PRICE = { in: 0.25, out: 1.5 }; // flash-lite per 1M, as round 6
 const costOf = (u) => (u ? ((u.promptTokenCount || 0) * PRICE.in + ((u.candidatesTokenCount || 0) + (u.thoughtsTokenCount || 0)) * PRICE.out) / 1e6 : 0);
@@ -49,7 +52,8 @@ const { renderReading, __clearInFlight, floorReason } = await import('../lib/ren
 const { __clearMemCache } = await import('../lib/render/cache.js');
 const { STAGE6_VERSION } = await import('../lib/validate/index.js');
 const { MASTER_PROMPTS_V2, promptVersionFor } = await import('../lib/render/prompt.js');
-const { V2_MIRROR_TEMPERATURE } = await import('../lib/render/config.js');
+const { V2_MIRROR_TEMPERATURE, GENERATION } = await import('../lib/render/config.js');
+const { buildPairSemantic } = await import('../lib/semantic/pair.js');
 const { sentences } = await import('../lib/validate/text.js');
 // The element glosses, read from where they live on this branch (a client component
 // Node cannot import); #186 moves them to lib/site/elements.js. Parsed, not copied.
@@ -66,14 +70,17 @@ const BINTANG = new Set(Object.entries(G.bintang).filter(([k]) => !k.startsWith(
 const fatal = (msg) => { console.error(`FATAL ${msg}`); process.exit(2); };
 let wire = [];
 let current = null;
+let currentKind = 'mirror';
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, opts) => {
   if (/:generateContent/.test(String(url)) && current) {
     const body = JSON.parse(opts.body);
-    if (!body.systemInstruction.parts[0].text.startsWith(MASTER_PROMPTS_V2.mirror)) fatal(`${current}: the v2 mirror prompt is not at the head of the system prompt`);
-    if (body.generationConfig.temperature !== V2_MIRROR_TEMPERATURE) fatal(`${current}: temperature ${body.generationConfig.temperature} on the wire`);
+    if (!body.systemInstruction.parts[0].text.startsWith(MASTER_PROMPTS_V2[currentKind])) fatal(`${current}: the v2 ${currentKind} prompt is not at the head of the system prompt`);
+    // The v2 pair keeps GENERATION.temperature (lib/render/config.js V2_MIRROR_TEMPERATURE note).
+    const wantT = currentKind === 'mirror' ? V2_MIRROR_TEMPERATURE : GENERATION.temperature;
+    if (body.generationConfig.temperature !== wantT) fatal(`${current}: temperature ${body.generationConfig.temperature} on the wire`);
     const payload = JSON.parse(body.contents[0].parts[0].text);
-    if ((payload.facts || []).some((f) => REL_KIND.has(f.provenance?.kind) && f.label_bracket)) fatal(`${current}: a relation label_bracket reached the writer`);
+    if (currentKind === 'mirror' && (payload.facts || []).some((f) => REL_KIND.has(f.provenance?.kind) && f.label_bracket)) fatal(`${current}: a relation label_bracket reached the writer`);
   }
   const res = await realFetch(url, opts);
   let usage = null;
@@ -84,8 +91,10 @@ globalThis.fetch = async (url, opts) => {
 
 const records = [];
 for (const s of SUBJECTS) {
-  __clearMemCache(); __clearInFlight(); wire = []; current = s.id;
-  const sj = buildSemanticJson(calculateBaziChart(s.a), { voice: 'v2' });
+  __clearMemCache(); __clearInFlight(); wire = []; current = s.id; currentKind = s.kind || 'mirror';
+  const sj = currentKind === 'pair'
+    ? buildPairSemantic(calculateBaziChart(s.a), calculateBaziChart(s.b), { voice: 'v2' })
+    : buildSemanticJson(calculateBaziChart(s.a), { voice: 'v2' });
   const out = await renderReading(sj, { spendGuards: false, dedupeInFlight: false, captureProse: true });
   current = null;
   const blocks = out.blocks || [];
@@ -127,18 +136,31 @@ for (const s of SUBJECTS) {
     const g = grams(x);
     return pageTexts.filter(([, t]) => [...grams(t)].some((y) => g.has(y))).map(([what]) => `${what} :: ${x}`);
   });
+  // ── BA §4's epilogue read aids (a list for a person, not a gate) ──
+  // Which blocks the penutup draws on: content words (5+ letters) it shares with each
+  // block. Advice-shaped and verdict-shaped words in the penutup, for the stop read.
+  const content = (t) => new Set(wordsOf(t).filter((w) => w.length >= 5));
+  const penutupWords = content(out.penutup || '');
+  const threads = blocks.map((b, i) => ({ block: i + 1, heading: b.heading || '', shared: [...content(`${b.heading || ''} ${b.text || ''}`)].filter((w) => penutupWords.has(w)) }))
+    .filter((t) => t.shared.length >= 2);
+  const ADVICE = /(?<![\p{L}])(bisa|cobalah|coba|sebaiknya|perlu|jangan|mulailah|luangkan|berikan|biarkan|izinkan)(?![\p{L}])/iu;
+  const VERDICT = /(?<![\p{L}])(cocok|tidak cocok|pasangan yang|skor|nilai)(?![\p{L}])|\d+\s*%/iu;
   const rec = {
-    id: s.id, source: out.source, floored: out.source === 'module_assembly', floor: out.source === 'module_assembly' ? floorReason(out) : null,
+    id: s.id, kind: currentKind, source: out.source, floored: out.source === 'module_assembly', floor: out.source === 'module_assembly' ? floorReason(out) : null,
     words: allText.split(/\s+/u).filter(Boolean).length,
     relation_english: [...new Set(relationEnglish)],
     badges_named: sj.facts.filter((f) => BINTANG.has(f.label)).map((f) => `${f.label}${allText.includes(f.label) ? '' : ' (not named)'}`),
     questions: sentences(prose.replace(/\n+/g, ' ')).filter((x) => /\?\s*$/u.test(x)),
     final_sentence: penutupSentences.at(-1) || '',
+    epilogue_sentences: penutupSentences.length,
+    epilogue_threads: threads,
+    epilogue_advice_words: penutupSentences.filter((x) => ADVICE.test(x)),
+    epilogue_verdict_words: penutupSentences.filter((x) => VERDICT.test(x)),
     imperatives,
     restated,
     penutup: out.penutup || '',
     stage6_version: out.stage6_version ?? STAGE6_VERSION,
-    prompt_version: out.prompt_version ?? promptVersionFor('mirror', 'v2'),
+    prompt_version: out.prompt_version ?? promptVersionFor(currentKind, 'v2'),
     regenerations: Math.max(0, wire.filter((w) => w.status === 200).length - 1),
     findings_logged: (out.findings || []).filter((f) => f.severity === 'flag').map((f) => f.check),
     cost_usd: wire.reduce((n, w) => n + costOf(w.usage), 0),
@@ -147,10 +169,13 @@ for (const s of SUBJECTS) {
   records.push(rec);
   console.log(`${s.id.padEnd(22)} ${rec.source.padEnd(15)} words ${String(rec.words).padStart(4)} regen ${rec.regenerations} relEN ${rec.relation_english.length} q ${rec.questions.length} $${rec.cost_usd.toFixed(4)}${rec.floor ? ` FLOOR ${JSON.stringify(rec.floor)}` : ''}`);
   console.log(`  final: ${rec.final_sentence}`);
+  console.log(`  epilogue: ${rec.epilogue_sentences} sentences; draws on blocks ${rec.epilogue_threads.map((t) => t.block).join(",") || "none"}`);
+  for (const x of rec.epilogue_advice_words) console.log(`  EPILOGUE ADVICE WORD: ${x}`);
+  for (const x of rec.epilogue_verdict_words) console.log(`  EPILOGUE VERDICT WORD: ${x}`);
   for (const x of rec.imperatives) console.log(`  IMPERATIVE: ${x}`);
   for (const x of rec.restated) console.log(`  RESTATES: ${x}`);
 }
-console.log(`TOTAL $${records.reduce((n, r) => n + r.cost_usd, 0).toFixed(4)}  prompt ${promptVersionFor('mirror', 'v2')}  stage6 ${STAGE6_VERSION}  temperature ${V2_MIRROR_TEMPERATURE}`);
+console.log(`TOTAL $${records.reduce((n, r) => n + r.cost_usd, 0).toFixed(4)}  prompt mirror ${promptVersionFor('mirror', 'v2')} pair ${promptVersionFor('pair', 'v2')}  stage6 ${STAGE6_VERSION}  temperature ${V2_MIRROR_TEMPERATURE}`);
 // The directory is gitignored and absent in a fresh worktree: smoke-3 (2026-09-30) paid
 // for five renders and lost its record to ENOENT here, after the console had printed.
 if (OUT) {

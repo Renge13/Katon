@@ -14,16 +14,13 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
-import { buildPairSemantic, variantKeysFor } from '../lib/semantic/pair.js';
+import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { validateRendering, STAGE6_VERSION } from '../lib/validate/index.js';
 import { pairGuard, REFRAME_OVERLAP } from '../lib/validate/pair.js';
 import { stricterDirective } from '../lib/validate/directive.js';
-import { styleGuard } from '../lib/validate/style.js';
-import { renderedText } from '../lib/validate/text.js';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
-import { GLOSSARY, sweepableGlossary } from '../lib/semantic/glossary.js';
 
 const c = (d, t) => calculateBaziChart({ birthDate: d, birthTime: t });
 const A = c('1989-09-13', '09:00');
@@ -68,7 +65,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // 1.45.0: main's 1.39.0-1.41.0 merged onto v2 (AG item 1).
   // 1.46.0: fact.element_dominance is hard on v2 (AG item 1).
   // 1.47.0: a cached pair row is re-gated on serve (main, AI §2). 1.48.0: that, merged onto v2.
-  assert.equal(STAGE6_VERSION, '1.63.0');
+  // 1.64.0: the word bans lifted (AZ). 1.65.0: hedgeAboutReader deleted (BA).
+  assert.equal(STAGE6_VERSION, '1.65.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
@@ -263,556 +261,43 @@ test('A PAIR FINDING IS ATTRIBUTABLE, in the tape and in the directive', () => {
 });
 
 // ============================================================
-// THE VERDICT PATTERNS (Reyner, 2026-09-08)
+// RETIRED 2026-10-01: THE VERDICT PATTERNS, AND THE PAIR SCOPE OF THE REGISTER BANS
+// ============================================================
+// Reyner (Prompt AZ, STAGE6 1.64.0): "Lift the ban on A and B. We don't ban
+// specifics for the writer, just give overall direction." This section used to pin
+// the five verdict patterns (2026-09-08), the per-block pair scope of
+// style.tension_collapse and style.hedge_construction, and the negation carve-out
+// shared by them. All of that left the gate the same day. The patterns and the scope
+// are kept, with their notes, under blocklist.json `_retired_2026-10-01`, which
+// nothing reads; these tests pin that it is retired rather than lost, and that a pair
+// reading carrying the retired words is no longer flagged or rejected for them.
 // ============================================================
 
-/** Compiled the way lib/validate/style.js#compile does. Never reconstructed. */
-const VERDICT = BLOCKLIST.verdict.patterns
-  .map((e) => ({ regex: new RegExp(e.pattern, e.flags || 'iu'), source: e.pattern }));
-
-test("the five ruled patterns are present, and they are Reyner's", () => {
-  assert.deepEqual(BLOCKLIST.verdict.patterns.map((e) => e.pattern), [
+test('THE VERDICT PATTERNS ARE RETIRED, not lost', () => {
+  assert.equal(BLOCKLIST.verdict, undefined, 'nothing gates on verdict.patterns any more');
+  const retired = BLOCKLIST['_retired_2026-10-01'];
+  assert.deepEqual(retired.verdict.patterns.map((e) => e.pattern), [
     String.raw`\b(tidak |kurang |sangat )?cocok\b`,
     String.raw`\bberjodoh\b|\bjodoh\b`,
     String.raw`\bpasangan (ideal|sempurna|tepat)\b`,
     String.raw`\b(layak|pantas) (dipertahankan|dilanjutkan|ditinggalkan)\b`,
     String.raw`\b(harus|sebaiknya) (putus|pisah|bertahan)\b`,
-  ]);
-  for (const e of BLOCKLIST.verdict.patterns) {
-    assert.ok(e.note && e.note.length > 40, `${e.pattern} carries its reason`);
-  }
+  ], 'the five ruled patterns, archived with their notes');
+  for (const e of retired.verdict.patterns) assert.ok(e.note && e.note.length > 40, `${e.pattern} keeps its reason`);
+  assert.ok(retired['style._pair_scope'], 'the pair scope is archived with them');
+  assert.equal(BLOCKLIST.style._pair_scope, undefined, 'and nothing reads it');
 });
 
-test('EACH PATTERN FIRES on a sentence carrying it', () => {
-  // An instrument that cannot fail means nothing. Every one is shown hitting
-  // before any of them is trusted, and each probe is the construction the pattern
-  // was ruled for rather than a copy of the regex written back as prose.
-  const PROBES = [
-    [0, 'Kalian sangat cocok satu sama lain.'],
-    [0, 'Hubungan ini tidak cocok.'],
-    [0, 'Menurut bagan, kalian cocok.'],
-    [1, 'Kalian memang berjodoh.'],
-    [1, 'Ini soal jodoh, bukan usaha.'],
-    [2, 'Dia pasangan ideal untukmu.'],
-    [2, 'Kalian pasangan sempurna.'],
-    [3, 'Hubungan ini layak dipertahankan.'],
-    [3, 'Hubungan ini tidak pantas dilanjutkan.'],
-    [4, 'Sebaiknya putus saja.'],
-    [4, 'Kalian harus bertahan.'],
-  ];
-  for (const [i, text] of PROBES) {
-    assert.ok(VERDICT[i].regex.test(text), `/${VERDICT[i].source}/ fires on "${text}"`);
-  }
-
-  // And through the guard, which is the thing that ships.
+test('A PAIR READING SAYING "cocok" OR "saling melengkapi dan tetap selaras" IS NO LONGER FLAGGED FOR IT', () => {
   const sj = buildPairSemantic(A, HARD_SEAT);
-  const rendered = renderingFor(sj);
-  const found = pairGuard(rendered, sj, 'Menurut bagan ini kalian sangat cocok dan berjodoh.');
-  const verdicts = found.filter((f) => f.check === 'pair.verdict');
-  assert.equal(verdicts.length, 2, 'both patterns in that sentence are reported');
-  assert.ok(verdicts.every((f) => f.severity === 'flag'));
-});
-
-test('THEY FLAG AND REJECT NOTHING, which is what lets them travel', () => {
-  // Ruled: land the patterns at `flag` first, fit them against real renders, then
-  // decide escalation on the count. A flag cannot fail a reading, so no floor rate
-  // can move on this commit and the n=20 run measures the patterns rather than
-  // being confounded by them.
-  //
-  // OWED, and written into NEXT.md rather than left as "a later ruling":
-  // escalate the verdict category to REJECT for pairs, decided on the n=20
-  // per-pattern flag count, as its own isolated gate change.
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const rendered = { ...renderingFor(sj), penutup: 'Kalian sangat cocok dan berjodoh.' };
+  const sentence = 'Menurut bagan ini kalian sangat cocok dan berjodoh. Keduanya saling melengkapi dan tetap selaras.';
+  assert.deepEqual(codes(pairGuard(renderingFor(sj), sj, sentence)).filter((c) => c === 'pair.verdict'), []);
+  const rendered = { ...renderingFor(sj), penutup: sentence };
   const gate = validateRendering(rendered, sj, { provider: 'module_assembly' });
-
-  const verdicts = gate.findings.filter((f) => f.check === 'pair.verdict');
-  assert.ok(verdicts.length >= 1, 'it sees the verdict');
-  assert.ok(verdicts.every((f) => f.severity === 'flag'), 'and only flags it');
-  assert.equal(gate.hard, false, 'nothing hard');
-  assert.equal(gate.ok, true, 'and the reading still passes, deliberately');
-});
-
-test('THE MIRROR IS EXEMPT BY SCOPE, and these two ruled strings prove it', () => {
-  // ── THE KNOWN COLLISION, PINNED ────────────────────────────
-  // `cocok` also means "suitable", and two RULED MIRROR strings use it that way.
-  // Reyner ruled the pattern lands UNCHANGED, because the check is pair-scoped and
-  // neither string can reach a pair reading - 240 fixture pair floors swept clean.
-  // THIS TEST IS THE TRIPWIRE ON THAT REASONING: the day anyone widens the scope,
-  // it goes red before a reader meets a false rejection of Reyner's own copy.
-  const collisions = [
-    GLOSSARY.bintang['華蓋'].gift_seed,
-    GLOSSARY.elemen_hilang['木'].cost_seed,
-  ];
-  for (const text of collisions) {
-    assert.ok(VERDICT[0].regex.test(text),
-      'precondition: this ruled mirror string really does hit pattern 0');
-  }
-
-  // AND THE GUARD NEVER SEES THEM. Not "does not currently fire" - returns []
-  // for a mirror, whatever the text.
-  const mirror = buildSemanticJson(A);
-  assert.equal(mirror.kind, 'mirror');
-  for (const text of collisions) {
-    assert.deepEqual(pairGuard(renderingFor(mirror), mirror, text), []);
-  }
-
-  // And through the real entry point, on a mirror reading that CONTAINS them.
-  const rendered = renderingFor(mirror, (b, i) => (i === 0
-    ? { ...b, text: `${b.text} ${collisions.join(' ')}` } : b));
-  const gate = validateRendering(rendered, mirror, { provider: 'module_assembly' });
-  assert.equal(gate.findings.some((f) => String(f.check).startsWith('pair.')), false,
-    'no pair check ever runs on a mirror reading');
-});
-
-test('NO RULED kompatibilitas CELL HITS A VERDICT PATTERN', () => {
-  // The pair-side half of the sweep, and the one that would be a real defect: a
-  // pattern firing on ruled compat copy would punish the renderer for carrying the
-  // glossary faithfully. Swept clean across all 25 cells before the patterns
-  // landed; asserted here so it stays true as cells are added.
-  const cells = Object.entries(sweepableGlossary().kompatibilitas)
-    .filter(([k]) => !k.startsWith('_'));
-  assert.ok(cells.length >= 25);
-  const offenders = [];
-  for (const [key, cell] of cells) {
-    for (const [field, value] of Object.entries(cell)) {
-      if (field.startsWith('_') || typeof value !== 'string') continue;
-      for (const { regex, source } of VERDICT) {
-        if (regex.test(value)) offenders.push(`${key}.${field} [/${source}/]`);
-      }
-    }
-  }
-  assert.deepEqual(offenders, []);
-});
-
-test('THE READER IS NOT BROKEN, which the empty period could never have shown', () => {
-  // RENAMED 2026-09-08. It was "no_verdict SHIPS WITH NO PATTERNS", and that
-  // claim is now false by design. What survives is the half that mattered.
-  assert.equal(BLOCKLIST.verdict.patterns.length, 5);
-  assert.ok(BLOCKLIST.verdict._rule.includes('STAGE6_VERSION'), 'the rule says what adding one costs');
-
-  // It reports, and every report is a FLAG. Ruled: nothing rejects until the
-  // n=20 flag count says which patterns earn it.
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const rendered = renderingFor(sj);
-  const found = pairGuard(rendered, sj, 'cocok sekali 95%');
-  assert.ok(codes(found).includes('pair.verdict'), 'a live pattern is reported');
-  assert.ok(found.every((f) => f.severity === 'flag'), 'and only ever flagged');
-
-  // ── AND IT WOULD ACTUALLY FIRE ONCE A PATTERN EXISTS ──
-  // The first version read `blocklist?.verdict?.filter?.(...)`, and `verdict` is
-  // an OBJECT with no `.filter`, so the optional call yielded undefined and the
-  // `?? []` swallowed it. The check could never have fired even after the
-  // patterns were ruled, and would have looked armed the whole time. This
-  // exercises the reader against a synthetic category so that cannot recur.
-  const synthetic = { verdict: { patterns: [{ pattern: '\\bcocok\\b' }] } };
-  const hits = [];
-  for (const e of (synthetic.verdict.patterns ?? []).filter((x) => x?.pattern)) {
-    if (new RegExp(e.pattern, e.flags || 'iu').test('mereka cocok sekali')) hits.push(e.pattern);
-  }
-  assert.deepEqual(hits, ['\\bcocok\\b'], 'the reader shape used in pair.js finds a real pattern');
-});
-
-// ============================================================
-// style.tension_collapse, SCOPED PER BLOCK FOR A PAIR
-// ============================================================
-// Ruled by Reyner 2026-09-08 on docs/qa/2026-09-08-compat-renders-n10.md, where
-// this one category was 16 of 18 rejections. The red run is four REAL Gemini
-// renders, re-gated byte-for-byte before and after; it is in the commit message.
-// ============================================================
-
-const PHRASE = 'Keduanya saling melengkapi dan tetap selaras.';
-
-/** Read from the ruled data, never retyped. */
-const TENSION = new Set(BLOCKLIST.style._pair_scope.tension_collapse.banned_in);
-
-/** Append text to the block carrying `factId`. Fails loudly if there is none. */
-const into = (rendering, factId, extra) => {
-  const idx = rendering.blocks.findIndex((b) => (b.fact_ids || []).includes(factId));
-  assert.notEqual(idx, -1, `precondition: a block carries ${factId}`);
-  return {
-    ...rendering,
-    blocks: rendering.blocks.map((b, i) => (i === idx ? { ...b, text: `${b.text} ${extra}` } : b)),
-  };
-};
-
-const tension = (rendering, sj) => styleGuard(rendering, renderedText(rendering), 'gemini', sj)
-  .filter((f) => f.check === 'style.tension_collapse');
-
-test("Reyner's scope lists are what he ruled, and they live in the DATA file", () => {
-  // A silent edit to either list is a change to what Stage 6 accepts. Asserting
-  // the literal sets means such an edit cannot land without also landing here,
-  // where STAGE6_VERSION is asserted one screen up.
-  const scope = BLOCKLIST.style._pair_scope.tension_collapse;
-  // The four `p2_frame_*` keys (2026-09-26, Prompt AD) are NOT a scope change: a
-  // frame hit used to derive its seat key, and each frame key sits in exactly the
-  // list its seat key does, so every block scans as it did before.
-  // The same for `p3_reader_gives` (2026-09-28, Prompt AM): it used to be keyed
-  // `p3_supplies`, and it sits beside it.
-  assert.deepEqual(scope.banned_in,
-    ['p2_clash', 'p2_harm', 'p2_punishment', 'p2_frame_clash', 'p2_frame_harm', 'p2_frame_punishment',
-      'p3_same_imbalance', 'p1_controls', 'p5_q2', 'p5_q4']);
-  assert.deepEqual(scope.permitted_in,
-    ['p3_supplies', 'p3_reader_gives', 'p2_harmony', 'p2_frame_harmony', 'p1_combination', 'p5_q1', 'p5_q3']);
-  // `_`-prefixed keys are skipped by style.js's compile filter, so the scope
-  // block cannot be mistaken for a pattern category.
-  assert.equal(Object.keys(BLOCKLIST.style).includes('_pair_scope'), true);
-});
-
-test('THE MIRROR IS UNTOUCHED: the whole reading is still one haystack', () => {
-  const mirror = buildSemanticJson(A);
-  const rendered = into(renderingFor(mirror), mirror.facts[0].id, PHRASE);
-  const text = renderedText(rendered);
-
-  // Rejected, as it always was.
-  assert.equal(tension(rendered, mirror).length, 1);
-
-  // And byte-identical to the pre-scope call, which passed no semanticJson at
-  // all. This is the assertion that would catch a scope leaking onto the mirror.
-  assert.deepEqual(
-    styleGuard(rendered, text, 'gemini', mirror),
-    styleGuard(rendered, text, 'gemini'),
-  );
-});
-
-test('PERMITTED: harmony vocabulary in the P3 supply block passes', () => {
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const p3 = sj.facts.find((f) => f.id === 'p3_supply');
-  assert.equal(variantKeysFor(p3)[0], 'p3_supplies', 'precondition: this pair has a supply');
-
-  const rendered = into(renderingFor(sj), 'p3_supply', PHRASE);
-  assert.deepEqual(tension(rendered, sj), [],
-    'p3_supplies is a complementarity block and the phrase states the fact');
-});
-
-test('PERMITTED: the same phrase in the P3 block when only the READER gives (p3_reader_gives, Prompt AM)', async () => {
-  // NOT A SCOPE CHANGE, the p2_frame_* reasoning above: this block was keyed
-  // `p3_supplies` until the reader-side cell existed, so it sits in the list its
-  // parent key does and every block scans exactly as it did before.
-  const { VALIDATION_CHARTS } = await import('./bazi-validation.fixture.js');
-  const chart = (id) => { const r = VALIDATION_CHARTS.find((x) => x.id === id); return c(r.date, r.time); };
-  const sj = buildPairSemantic(chart(9), chart(11));
-  const p3 = sj.facts.find((f) => f.id === 'p3_supply');
-  assert.equal(variantKeysFor(p3)[0], 'p3_reader_gives', 'precondition: only the reader gives');
-  assert.deepEqual(tension(into(renderingFor(sj), 'p3_supply', PHRASE), sj), [],
-    'p3_reader_gives is the same complementarity fact from the reader\'s side');
-});
-
-test('BANNED: the same phrase in the P2 tension block still rejects', () => {
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const p2 = sj.facts.find((f) => f.id === 'p2_day_pair');
-  assert.equal(variantKeysFor(p2)[0], 'p2_punishment', 'precondition: a difficult seat');
-
-  const rendered = into(renderingFor(sj), 'p2_day_pair', PHRASE);
-  const found = tension(rendered, sj);
-  assert.equal(found.length, 1, 'a tension dissolved into harmony is still the failure');
-  assert.match(found[0].message, /saling melengkapi/);
-});
-
-test('BANNED: a low-fit quadrant block is a tension block', () => {
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const q = variantKeysFor(sj.facts.find((f) => f.id === 'p5_pull_fit'))[0];
-  assert.equal(q, 'p5_q2');
-  assert.equal(tension(into(renderingFor(sj), 'p5_pull_fit', PHRASE), sj).length, 1);
-});
-
-// ── THE PENUTUP, SCOPED BY THE READING (Reyner, 2026-09-08, second ruling) ──
-// The first ruling scoped BLOCKS, and measuring it found the collision was not
-// in a block: 4 of 4 real renders closed on "saling melengkapi" in the penutup
-// and still rejected, so block scoping moved the floor rate by zero. The penutup
-// carries no fact, so it is scoped by the WHOLE READING - scanned when any
-// tension fact is present, permitted only when none is.
-
-/** A pair with no tension key at all. 26 of 240 fixture pairs qualify. */
-const CALM_A = c('1995-06-01', '06:00');   // chart 4
-const CALM_B = c('1989-02-04', '04:00');   // chart 13
-
-test('THE PENUTUP IS SCANNED when the reading carries a tension', () => {
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  assert.ok(sj.facts.flatMap(variantKeysFor).some((k) => TENSION.has(k)),
-    'precondition: this pair carries a tension');
-  const rendered = { ...renderingFor(sj), penutup: `${PENUTUP} ${PHRASE}` };
-  assert.equal(tension(rendered, sj).length, 1, 'harmony vocabulary in the close is the collapse');
-});
-
-test('THE PENUTUP IS PERMITTED when the reading carries none', () => {
-  const sj = buildPairSemantic(CALM_A, CALM_B);
-  const keys = sj.facts.flatMap(variantKeysFor);
-  assert.equal(keys.some((k) => TENSION.has(k)), false,
-    `precondition: no tension key in [${keys.join(' ')}]`);
-
-  const rendered = { ...renderingFor(sj), penutup: `${PENUTUP} ${PHRASE}` };
-  assert.deepEqual(tension(rendered, sj), [],
-    'there is no tension in this reading for the close to dissolve');
-});
-
-test('IT IS NOT SCOPED BY QUADRANT: a calm quadrant with a clashed seat is scanned', () => {
-  // The ruling says "any tension fact", not "a low-fit quadrant", and this is
-  // why: q1 and q3 are permitted BLOCK keys, so scoping the close by quadrant
-  // alone would permit harmony vocabulary over a clashed seat.
-  const pairs = [[A, HARD_SEAT], [c('1978-02-16', '14:30'), c('1984-04-21', '18:45')]];
-  let checked = 0;
-  for (const [x, y] of pairs) {
-    const sj = buildPairSemantic(x, y);
-    const keys = sj.facts.flatMap(variantKeysFor);
-    const seat = keys.find((k) => ['p2_clash', 'p2_harm', 'p2_punishment'].includes(k));
-    if (!seat) continue;
-    const rendered = { ...renderingFor(sj), penutup: `${PENUTUP} ${PHRASE}` };
-    assert.equal(tension(rendered, sj).length, 1, `${seat} keeps the close scanned`);
-    checked += 1;
-  }
-  assert.ok(checked > 0, 'at least one pair carried a difficult seat');
-});
-
-test('THE TENSION SET IS banned_in ITSELF, so the two cannot drift', () => {
-  // The penutup rule and the block rule read ONE list. A key added to banned_in
-  // becomes a tension for both at once, which is the only way to keep a
-  // "scanned when there is a tension" rule honest.
-  assert.deepEqual([...TENSION].sort(),
-    BLOCKLIST.style._pair_scope.tension_collapse.banned_in.slice().sort());
-  assert.ok(BLOCKLIST.style._pair_scope._penutup.includes('banned_in'),
-    'the data says so as well as the code');
-});
-
-test('A BLOCK CARRYING BOTH KEYS IS SCANNED: tension wins', () => {
-  // Not hypothetical - p2_palace_frame carries the frame plus every relation
-  // found, so one block can hold a harmony and a punishment at once.
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const keys = variantKeysFor(sj.facts.find((f) => f.id === 'p2_palace_frame'));
-  assert.ok(keys.includes('p2_clash') || keys.includes('p2_punishment'),
-    'precondition: this pair\'s palace scan found a tension');
-
-  // Hand the block a permitted key as well, the way a renderer merging two facts
-  // into one block would.
-  const base = renderingFor(sj);
-  const idx = base.blocks.findIndex((b) => (b.fact_ids || []).includes('p2_palace_frame'));
-  const merged = {
-    ...base,
-    blocks: base.blocks.map((b, i) => (i === idx
-      ? { ...b, fact_ids: [...b.fact_ids, 'p3_supply'], text: `${b.text} ${PHRASE}` }
-      : b)),
-  };
-  assert.equal(tension(merged, sj).length, 1, 'the permitted key does not launder the tension');
-});
-
-// ============================================================
-// THE NEGATION CARVE-OUT (Reyner, 2026-09-08, third ruling)
-// ============================================================
-// `tidak `, `belum ` or `kurang ` IMMEDIATELY before a tension_collapse token
-// exempts the match. hedge_construction's carve-out shape with the direction
-// reversed: its negation FOLLOWS the token (`bukan X tapi Y`, a lookahead), these
-// PRECEDE it (`tidak selaras`, a lookbehind).
-// ============================================================
-
-/** RENDER 12 x 6's penutup, verbatim from docs/qa/2026-09-08-compat-penutup-cause.md. */
-const RENDER_12x6_PENUTUP = 'Hubungan ini meminta kamu untuk melatih kesabaran saat ritme '
-  + 'harian kalian tidak selaras. Bagi dia, hubungan ini meminta keterbukaan untuk '
-  + 'menerima dorongan energi yang kamu berikan agar langkahnya lebih mantap.';
-
-test('RENDER 12x6 PASSES, and it is the sentence the ruling was made on', () => {
-  // ── THE RED THIS COMMIT WAS WRITTEN AGAINST ────────────────
-  // `tidak selaras` is "NOT in harmony". The sentence names the friction and asks
-  // for patience with it - the opposite of a tension collapse, and arguably the
-  // check's own purpose stated out loud. It rejected because `\bselaras\b` bans a
-  // TOKEN where the defect is a CONSTRUCTION.
-  //
-  // Gated through the whole of `validateRendering` on a real pair, not just the
-  // regex, because the penutup's scope is itself conditional (it is scanned when
-  // the reading carries a tension) and 12x6 does carry one - so this asserts the
-  // carve-out where it actually has to work.
-  const sj = buildPairSemantic(c('1990-06-07', '12:00'), c('1984-04-21', '18:45'));
-  assert.ok(sj.facts.flatMap(variantKeysFor).some((k) => TENSION.has(k)),
-    'precondition: 12x6 carries a tension, so its penutup IS scanned');
-
-  const rendered = { ...renderingFor(sj), penutup: RENDER_12x6_PENUTUP };
-  assert.deepEqual(tension(rendered, sj), [], 'a named friction is not a collapsed one');
-});
-
-test('THE COLLAPSE THE CHECK EXISTS FOR STILL REJECTS', () => {
-  // Run 1's own sentence, quoted in the `menyatu` entry's note: "turned the
-  // steward/self-reliant tension into 'menyatu secara selaras'". If this ever
-  // passes, the carve-out has eaten the check.
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const rendered = { ...renderingFor(sj), penutup: 'Keduanya menyatu secara selaras.' };
-  const found = tension(rendered, sj);
-  assert.equal(found.length, 1);
-  assert.match(found[0].message, /menyatu/u);
-  assert.match(found[0].message, /selaras/u);
-});
-
-test('EVERY NEGATION x EVERY TOKEN, both directions', () => {
-  // The alternation entry is the one worth enumerating: a carve-out written as a
-  // prefix on `\bberpadu\b|\bperpaduan\b` would exempt only the FIRST branch and
-  // leave the second live - a half-applied edit that looks complete in a diff.
-  const NEGATIONS = ['tidak', 'belum', 'kurang'];
-  const TOKENS = ['menyatu', 'selaras', 'saling melengkapi', 'identitas utuh',
-    'membentuk kesatuan', 'membentuk satu kesatuan', 'berpadu', 'perpaduan'];
-
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const fire = (penutup) => tension({ ...renderingFor(sj), penutup }, sj).length;
-
-  for (const t of TOKENS) {
-    assert.equal(fire(`Mereka ${t} di titik itu.`), 1, `bare "${t}" is still banned`);
-    for (const n of NEGATIONS) {
-      assert.equal(fire(`Mereka ${n} ${t} di titik itu.`), 0, `"${n} ${t}" is exempt`);
-    }
-  }
-});
-
-test('IMMEDIATELY BEFORE, AND NOTHING LOOSER', () => {
-  // `tidak selalu selaras` still rejects. A negation two words away is not
-  // negating the token - it is qualifying a claim that still asserts harmony, and
-  // "not always in harmony" said of a clashed seat is the softening the check was
-  // written for. This is the assertion that keeps the carve-out narrow.
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  const fire = (penutup) => tension({ ...renderingFor(sj), penutup }, sj).length;
-
-  assert.equal(fire('Mereka tidak selalu selaras.'), 1);
-  assert.equal(fire('Mereka belum sepenuhnya menyatu.'), 1);
-  assert.equal(fire('Bukan selaras, tapi cukup.'), 1, 'only the three ruled negations exempt');
-});
-
-test('THE CARVE-OUT IS ON EVERY PATTERN, alternation branches included', () => {
-  // Read off the data rather than off the behaviour above, so a pattern added
-  // later without the prefix fails here with a name rather than silently widening
-  // the ban back out.
-  const NEG = '(?<!\\b(?:tidak|belum|kurang) )';
-  for (const entry of BLOCKLIST.style.tension_collapse) {
-    // The carve-out is punched out FIRST, then the remainder is split. Splitting
-    // the raw pattern on `|` also splits the alternation INSIDE the lookbehind
-    // (`tidak|belum|kurang`) and reports three phantom branches - which is what
-    // the first version of this assertion did.
-    const branches = entry.pattern.replaceAll(NEG, '@').split('|');
-    for (const branch of branches) {
-      assert.ok(branch.startsWith('@'),
-        `every top-level branch of ${entry.pattern} carries the carve-out; "${branch}" does not`);
-    }
-  }
-  assert.ok(BLOCKLIST.style._negation.includes('tidak selalu selaras'),
-    'the data records what the carve-out deliberately does NOT cover');
-});
-
-test('THE MIRROR SEES THE SAME CARVE-OUT, and that is intended', () => {
-  // `tension_collapse` is not pair-scoped as a CATEGORY - only WHERE it is scanned
-  // is. So this changes what a MIRROR reading may say too, and that is correct
-  // rather than incidental: "kamu belum menyatu dengan sisi itu" names a tension
-  // in a mirror reading exactly as it does in a pair one. Stated here because a
-  // mirror floor-rate comparison across this commit has to know.
-  const mirror = buildSemanticJson(A);
-  const bare = renderingFor(mirror, (b, i) => (i === 0 ? { ...b, text: `${b.text} Semua menyatu.` } : b));
-  const negated = renderingFor(mirror, (b, i) => (i === 0 ? { ...b, text: `${b.text} Semua belum menyatu.` } : b));
-
-  assert.equal(styleGuard(bare, renderedText(bare), 'gemini', mirror)
-    .filter((f) => f.check === 'style.tension_collapse').length, 1);
-  assert.equal(styleGuard(negated, renderedText(negated), 'gemini', mirror)
-    .filter((f) => f.check === 'style.tension_collapse').length, 0);
-});
-
-// ============================================================
-// style.hedge_construction, EXEMPT FOR PAIRS ONLY
-// ============================================================
-// Ruled by Reyner 2026-09-13 (R2 and R2-SCOPE, verbatim in
-// `lib/validate/blocklist.json#style._hedge_construction_pair` and in
-// `docs/prompts/Z-close-2026-09-13.md`): `bukan X, melainkan Y` is ordinary
-// precise Indonesian contrast, not a hedge, and the reason clash pairs floor is
-// the validator rather than the sentence.
-//
-// THE CONFLICT THIS CLOSES IS BETWEEN TWO RULED THINGS. The compat prompt
-// MANDATES the p2_reframe move - a clash is a map, not a verdict - and the most
-// natural Indonesian for it is the shape the 2026-08-06 gallery ruling banned
-// on the mirror. So the ban is scoped by reading kind, not lifted: the mirror
-// keeps it, because the AI-copy trope it was written for is a single-person
-// failure.
-//
-// THE RED THAT PRECEDED IT: the two `fires` literals below were run against the
-// 1.24.0 gate and both rejected. The run is in the commit message.
-// ============================================================
-
-// The literals, taken off the walk artifact rather than off the prompt's
-// summary of it, which matters because the two disagree:
-//
-//  - SERVED_2X6 is what 2x6 actually served
-//    (`docs/qa/2026-09-13-compat-three-pair-walk-v2.md:171`). It carries no
-//    `tapi` and no `melainkan`, so it NEVER tripped this check and the
-//    exemption is not what saves it. It is asserted anyway, and asserted to
-//    pass on the MIRROR too, so nobody later reads the served 2x6 text as
-//    evidence for or against the exemption.
-//  - Y1_FIRES is the Y-1 floored draw's literal (`:219`, `:220`, `:248`).
-//  - CLASH_2X6_FIRES is 2x6's REJECTED attempt (`:162`) - the one the prompt's
-//    (a) confused with the served sentence above.
-//
-// Each `_FIRES` string is the artifact's recorded excerpt verbatim up to where
-// the 40-character window cuts, then completed to a sentence. The recorded part
-// is the part the regex matched, so the completion cannot change the verdict.
-const SERVED_2X6 = 'Kursi pasangan kalian saling berbenturan, yang menandakan titik tuntutan kesadaran ekstra, bukan vonis ketidakcocokan.';
-const Y1_FIRES = 'Ini bukan penentu kegagalan, melainkan tanda bahwa hubungan ini menuntut kesadaran ekstra.';
-const CLASH_2X6_FIRES = 'Benturan ini bukan vonis ketidakcocokan, melainkan titik yang menuntut kesadaran ekstra.';
-
-const hedge = (rendering, sj) => styleGuard(rendering, renderedText(rendering), 'gemini', sj)
-  .filter((f) => f.check === 'style.hedge_construction');
-
-test('THE REFRAME SHAPE PASSES IN A PAIR P2 BLOCK, which is where the prompt asks for it', () => {
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  assert.ok(sj.safety_flags.includes('p2_reframe_required'),
-    'precondition: this pair is one the prompt MANDATES the reframe for');
-
-  for (const literal of [SERVED_2X6, Y1_FIRES, CLASH_2X6_FIRES]) {
-    const rendered = into(renderingFor(sj), 'p2_day_pair', literal);
-    assert.deepEqual(hedge(rendered, sj), [], `pair P2: ${literal}`);
-
-    // And through the real door, not just the category function: the finding
-    // must be absent from what the gate actually returns.
-    const gate = validateRendering(rendered, sj, { provider: 'gemini' });
-    assert.equal(codes(gate.findings).includes('style.hedge_construction'), false,
-      `validateRendering, pair: ${literal}`);
-  }
-});
-
-test('THE MIRROR STILL REJECTS THE SAME TWO SENTENCES, which is the whole scope', () => {
-  const mirror = buildSemanticJson(A);
-  assert.equal(mirror.kind, 'mirror');
-
-  for (const literal of [Y1_FIRES, CLASH_2X6_FIRES]) {
-    const rendered = into(renderingFor(mirror), mirror.facts[0].id, literal);
-    assert.equal(hedge(rendered, mirror).length, 1, `mirror rejects: ${literal}`);
-
-    // Byte-identical to the call that passes no semanticJson at all. This is the
-    // assertion that catches the exemption leaking onto the mirror - a `kind`
-    // check that defaulted the wrong way would show up here and nowhere else.
-    const text = renderedText(rendered);
-    assert.deepEqual(
-      styleGuard(rendered, text, 'gemini', mirror),
-      styleGuard(rendered, text, 'gemini'),
-    );
-  }
-
-  // The served 2x6 sentence has no `tapi`/`melainkan`, so it passes on the
-  // mirror too. Asserted so the three literals are not read as one class.
-  const served = into(renderingFor(mirror), mirror.facts[0].id, SERVED_2X6);
-  assert.deepEqual(hedge(served, mirror), []);
-});
-
-test('THE CARVE-OUT AND THE PATTERN ARE UNTOUCHED, only where it is scanned moved', () => {
-  // R2-SCOPE changes the HAYSTACK for one reading kind. It does not edit the
-  // regex and it does not edit the `bukan berarti` carve-out, and a later commit
-  // that quietly did either would pass every assertion above.
-  const [entry, ...rest] = BLOCKLIST.style.hedge_construction;
-  assert.deepEqual(rest, [], 'still exactly one pattern');
-  assert.equal(entry.pattern, '\\bbukan\\b(?!\\s+berarti\\b)[^.!?]{0,140}?\\b(tapi|melainkan)\\b');
-
-  // `bukan berarti ..., melainkan ...` is rule 21's resolve-in-the-same-breath
-  // move and it passed on the mirror before this commit. It still does.
-  const mirror = buildSemanticJson(A);
-  const carved = into(renderingFor(mirror), mirror.facts[0].id,
-    'Lemah di sini bukan berarti tidak mampu, melainkan sumber tenagamu ada di luar dirimu.');
-  assert.deepEqual(hedge(carved, mirror), []);
-});
-
-test('THE EXEMPTION IS RULED DATA, read from blocklist.json and not hardcoded', () => {
-  // Same discipline as the tension_collapse scope one screen up: the accept
-  // decision lives in the data file Reyner rules, so a silent edit to it cannot
-  // land without landing here, next to the STAGE6_VERSION assertion.
-  assert.equal(BLOCKLIST.style._pair_scope.hedge_construction.exempt_for_pair, true);
-  assert.ok(BLOCKLIST.style._hedge_construction_pair.includes('PAIR-ONLY'),
-    'R2-SCOPE is recorded verbatim beside the rule it produced');
+  const lifted = codes(gate.findings).filter((c) => ['pair.verdict', 'style.tension_collapse', 'style.hedge_construction'].includes(c));
+  assert.deepEqual(lifted, [], `a retired check still fires: ${lifted.join(', ')}`);
+  // The kept categories still reach a pair: a medical claim is HARD.
+  const med = validateRendering({ ...renderingFor(sj), penutup: 'Minum obat yang tepat akan membantu kalian.' }, sj, { provider: 'module_assembly' });
+  assert.ok(codes(med.findings).includes('forbidden.medical'));
+  assert.equal(med.hard, true);
 });

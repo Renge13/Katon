@@ -305,10 +305,11 @@ test('A PRE-BUMP MIRROR BUYER GETS A PDF: the old-engine row is warmed through t
 test('THE CE PDF NEVER PRINTS A HARD-FAILING READING, even when the PDF is asked for first', async () => {
   const { semanticJson, key } = semanticFromRow({ ...BIRTH });
   const id = await seed({ paid: true, cacheKey: key });
-  // "ramalan" is a HARD reject (forbidden.fatalism, rule 25) - the planted row the
-  // page-path test uses in tests/mirror-route.spec.mjs. Written as a real model row.
+  // A medical instruction is a HARD reject (forbidden.medical, kept 2026-10-01; this
+  // planted "ramalan" until fatalism was lifted) - the planted row the page-path test
+  // uses in tests/mirror-route.spec.mjs. Written as a real model row.
   await writeCache(key, {
-    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Ini ramalan untuk kamu.' }],
+    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Minum obat penenang setiap pagi.' }],
     penutup: 'Penutup.', engineVersion: semanticJson.engine_version,
     source: 'gemini', model: 'planted-model', promptVersion: 'planted', stage6Version: STAGE6_VERSION,
   });
@@ -325,7 +326,7 @@ test('THE CE PDF NEVER PRINTS A HARD-FAILING READING, even when the PDF is asked
     },
   });
   const printed = JSON.stringify(calls[0]?.rendered?.blocks ?? []);
-  assert.equal(printed.includes('ramalan'), false, 'the CE PDF printed the hard-failing reading');
+  assert.equal(printed.includes('obat penenang'), false, 'the CE PDF printed the hard-failing reading');
   assert.equal(res.status, 200);
   assert.equal(warmed, 1, 'the bad row was dropped and re-rendered through the reading door');
   assert.equal(calls[0].rendered.prompt_version, 'rerendered000');

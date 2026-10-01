@@ -39,9 +39,11 @@ export const EDITS = [
     // `actionable` seed (docs/qa/2026-09-30-round6-switch-smoke.md).
     'When you write about a cost, end that part with what helps. Advice is a plain, optional suggestion, never an\nimperative or reminder such as \'ingatlah\', \'jangan lupa\', or \'kamu harus\'.\n'
     + 'When you draw on an `actionable`, rewrite it as a possibility in your own words, for example \'Yang bisa\nmembantu adalah …\' or \'Kamu bisa …\', never in its command form.'],
+  // Anchored on the anti-teaser line since BA §2 (2026-10-01) removed the
+  // "Mungkin menarik untuk..." phrase rule it used to follow.
   ['5 never point to what is left out (add)',
-    'Do not open it with "Mungkin menarik untuk...".',
-    'Do not open it with "Mungkin menarik untuk...". Never point to facts the reading leaves out or \'has not\nexplored yet\'.'],
+    'The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.',
+    'The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.\nNever point to facts the reading leaves out or \'has not\nexplored yet\'.'],
   ['5 no questions',
     '- no coaching or reflection questions aimed at her ("Bagian mana dari dirimu ...").',
     '- no questions addressed to her at all, rhetorical or reflective, anywhere in the reading.'],
