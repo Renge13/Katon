@@ -109,3 +109,18 @@ Reyner, 2026-09-30: fold Pilar Konsepsi into the Pilar group as its last row (bo
 **The two new checks were shown able to fail first:** run on the previous walk's PDFs they read "heading over a row of the same name: PRESENT" in both documents and "broken across a line: 1" in the Complete Edition.
 
 **Still on the pages, routed elsewhere by Reyner:** the "ingatlah" sentence on p2 and "Dominan Air" (p7) go to a coming glossary batch (PROGRESS MEASUREMENTS, 2026-09-30).
+
+## The walk after #190 (Prompt BA §6), 2026-10-01: prepared for Reyner's final go
+
+#186 rebased on main after #190 (AY glossary, AZ, BA; STAGE6 1.65.0) and #189 merged; the chart-1 snapshot repinned with its changed-as-ruled proof (`3097b47`). Both PDFs fetched from that commit's own deployment, `https://katon-ha93zdek1-renge13s-projects.vercel.app`, same two KNOWN TEST ROWS, every page at 90 dpi: `2026-09-30-pdf-design-aw/walk-after-190/` (`ce-NN.jpg` 7 pages, `compat-NN.jpg` 8 pages).
+
+Both re-rendered on the merged configuration (#190's single re-key): the covers read `prompt v2-4b264c0d16bb43c1 - gate 1.65.0` (Complete Edition) and `prompt v2-0534aee7743e9574 - gate 1.65.0` (Compatibility).
+
+| check | Complete Edition | Compatibility |
+|---|---|---|
+| pages (walk-final / now) | 7 -> 7 | 8 -> 8 |
+| a page ending on a heading | none (each page's last three lines read) | none (p4 ends on the last element bar and its "PALING SEDIKIT" tag) |
+| listed imperatives in the reading ("ingatlah", "jangan lupa", "kamu harus", "pastikan", "cobalah") | **0** (walk-final had the p2 "ingatlah") | 0 |
+| Dominan Air (p7) | the AY cell: "Unsur pengendalimu paling banyak muncul di bagan. ..." (was "Baganmu didominasi tuntutan luar: ...") | - |
+| the reading's close | the BA epilogue: "Dirimu adalah perpaduan antara ketangguhan yang tenang di bawah tekanan dan ritme kerja yang terus berdenyut. ..." (p3) | the BA epilogue (p3) |
+| the pair page holds both charts | - | yes, p4 |
