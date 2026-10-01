@@ -65,7 +65,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // 1.45.0: main's 1.39.0-1.41.0 merged onto v2 (AG item 1).
   // 1.46.0: fact.element_dominance is hard on v2 (AG item 1).
   // 1.47.0: a cached pair row is re-gated on serve (main, AI §2). 1.48.0: that, merged onto v2.
-  assert.equal(STAGE6_VERSION, '1.64.0');
+  // 1.64.0: the word bans lifted (AZ). 1.65.0: hedgeAboutReader deleted (BA).
+  assert.equal(STAGE6_VERSION, '1.65.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {

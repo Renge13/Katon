@@ -948,16 +948,15 @@ test('the bukan-X-tapi-Y construction and tension-collapse words are no longer c
   }
 });
 
-test('typography, hanzi, questions, a hedge about her and machine talk are still caught; the lifted groups are not', () => {
+test('typography, hanzi, questions and machine talk are still caught; the lifted groups and the hedge about her are not', () => {
   // KEPT: none of these is a blocklist word ban except style.meta's machine-naming
-  // entries, which AZ keeps as a pipeline-leak alarm. `style.hedging` here is
-  // hedgeAboutReader ("mungkin" in a claim about her), a function outside the
-  // blocklist, which AZ's ruling did not name; it stays until Reyner says otherwise.
+  // entries, which AZ keeps as a pipeline-leak alarm. `style.hedging`'s "mungkin"
+  // half (hedgeAboutReader, outside the blocklist, which AZ did not name) is DROPPED
+  // by BA (1.65.0), on Reyner's ruling: "I agree that this is effectively a word ban."
   const kept = [
     ['style.typography', 'Kamu tahu arahmu — dan kamu tetap berjalan pelan setiap harinya.'],
     ['style.hanzi', 'Cabang bulanmu adalah 酉, dan itu menentukan tekanan yang kamu rasakan.'],
     ['style.rhetorical_question', 'Bagian mana dari dirimu yang paling butuh ruang sekarang?'],
-    ['style.hedging', 'Kamu mungkin akan merasa lebih ringan setelah membaca ini semua.'],
     ['style.meta', 'Sebagai AI, saya membaca petamu dan menemukan pola yang menarik.'],
   ];
   for (const [check, sentence] of kept) {
@@ -973,6 +972,8 @@ test('typography, hanzi, questions, a hedge about her and machine talk are still
     ['style.particles', 'Itu tuh yang bikin kamu bertahan lama di tempat yang sama.'],
     ['style.essay_connectives', 'Hal ini membuat kamu terlihat tenang di mata orang lain.'],
     ['style.hedging', 'Kamu cenderung menunggu sampai semuanya jelas.'],
+    // DROPPED 2026-10-01 (BA §1, 1.65.0): caught under 1.64.0 by hedgeAboutReader.
+    ['style.hedging', 'Kamu mungkin akan merasa lebih ringan setelah membaca ini semua.'],
   ];
   for (const [check, sentence] of lifted) {
     const draft = withBlockText(goodReading(), 'day_master_Fire',
@@ -1739,6 +1740,43 @@ test('english_leakage ignores words inside a SANCTIONED bracket', () => {
   assert.ok(checksIn(validateRendering(leaked, CHART_1)).includes('style.english_leakage'));
 });
 
+test('BA (1.65.0): "mungkin" about her is no longer a check; the question mark and English leakage still are', () => {
+  // Reyner, 2026-10-01 (Prompt BA item 2): "Keep the question-mark check. Keep the
+  // English-leakage check. Drop the "mungkin"-about-her check. I agree that this is
+  // effectively a word ban." Each draft below carries exactly one planted defect,
+  // appended to the floor's own block so no coverage check moves.
+  const own = goodReading().blocks.find((b) => b.fact_ids.includes('day_master_Fire')).text;
+  const plant = (sentence) => withBlockText(goodReading(), 'day_master_Fire', `${own} ${sentence}`);
+  const clean = plant('Kamu menunda hal yang paling penting bagimu.');
+  const hedged = plant('Kamu mungkin menunda hal yang paling penting bagimu.');
+  const question = plant('Bagian mana dari dirimu yang paling butuh ruang sekarang?');
+  const english = plant('This is the pattern that shapes how you move through a room.');
+
+  // v1: the gate that rejects on a soft finding.
+  assert.equal(validateRendering(clean, CHART_1).ok, true, 'precondition: the unplanted draft passes v1');
+  const h1 = validateRendering(hedged, CHART_1);
+  assert.equal(checksIn(h1).includes('style.hedging'), false, 'v1: "mungkin" about her still fires');
+  assert.equal(h1.ok, true, `v1: the hedge-only draft still fails (${checksIn(h1).join(', ')})`);
+  const q1 = validateRendering(question, CHART_1);
+  assert.ok(checksIn(q1).includes('style.rhetorical_question') && !q1.ok, 'v1: a "?" no longer fails');
+  const e1 = validateRendering(english, CHART_1);
+  assert.ok(checksIn(e1).includes('style.english_leakage') && !e1.ok, 'v1: English leakage no longer fails');
+
+  // v2: style findings are LOGGED there (never gating), so the proof is the log.
+  const sj = buildSemanticJson(calculateBaziChart({ birthDate: VALIDATION_CHARTS[0].date, birthTime: VALIDATION_CHARTS[0].time }), { voice: 'v2' });
+  const plant2 = (sentence) => {
+    const d = structuredClone(assembleFallback(sj));
+    d.blocks[0].text = `${d.blocks[0].text} ${sentence}`;
+    return validateRenderingV2(d, sj);
+  };
+  assert.equal(checksIn(plant2('Kamu mungkin menunda hal yang paling penting bagimu.')).includes('style.hedging'), false,
+    'v2: "mungkin" about her is still logged');
+  assert.ok(checksIn(plant2('Bagian mana dari dirimu yang paling butuh ruang sekarang?')).includes('style.rhetorical_question'),
+    'v2: a "?" is no longer logged');
+  assert.ok(checksIn(plant2('This is the pattern that shapes how you move through a room.')).includes('style.english_leakage'),
+    'v2: English leakage is no longer logged');
+});
+
 test('a blocklist entry may override the default regex flags', () => {
   // bare_polarity was the first override and was retired 2026-10-01 (AZ); code_leak's
   // camelCase entry is the one that needs it now.
@@ -1782,7 +1820,7 @@ test('style.adverbial IS GONE, and `secara lengkap` is sayable again', () => {
   assert.ok(!checks.some((c) => c === 'style.adverbial'), 'no adverbial finding may be produced');
 });
 
-test('style.hedging IS SPLIT: `mungkin` fires on the reader, not on a third party', () => {
+test('style.hedging IS GONE (BA, 1.65.0): `mungkin` fires on no subject, the reader included', () => {
   // RULED 2026-08-17. Golden rule 7 bans hedging INSIDE A CLAIM. `mungkin` in a
   // clause about someone else's PERCEPTION hedges their guess, and the claim about
   // her stays committed - which is also the `salah_dikira` shape the product's own
@@ -1806,15 +1844,17 @@ test('style.hedging IS SPLIT: `mungkin` fires on the reader, not on a third part
   assert.ok(!fires('Mereka mungkin menilai hasilmu terlalu cepat.'),
     'mereka is a third party too');
 
-  // STILL FIRES - the hedge is inside a claim about her.
-  assert.ok(fires('Kamu mungkin menunda hal yang paling penting bagimu.'),
-    'mungkin about the reader is the case the ban exists for');
-  assert.ok(fires('Jalanmu mungkin tidak selalu lurus, namun arahnya tetap sama.'),
-    'a possessive about the reader is still the reader');
+  // NO LONGER FIRES, 2026-10-01 (Prompt BA §1, 1.65.0). These were the case the
+  // check existed for until Reyner dropped it: "I agree that this is effectively a
+  // word ban." Conviction about her is now the writer prompt's direction.
+  assert.ok(!fires('Kamu mungkin menunda hal yang paling penting bagimu.'),
+    'mungkin about the reader no longer fires');
+  assert.ok(!fires('Jalanmu mungkin tidak selalu lurus, namun arahnya tetap sama.'),
+    'a possessive about the reader no longer fires');
 
   // LIFTED 2026-10-01 (AZ): cenderung, agak and sepertinya were the blocklist's
-  // style.hedging group. The "mungkin" half above is hedgeAboutReader, outside the
-  // blocklist, and AZ did not name it.
+  // style.hedging group. The "mungkin" half above was hedgeAboutReader, outside the
+  // blocklist; AZ did not name it, and BA (1.65.0) deleted it.
   assert.ok(!fires('Kamu cenderung bertahan di situasi yang sudah jelas.'), 'cenderung is lifted');
   assert.ok(!fires('Kamu agak menahan diri ketika orang lain sedang bicara.'), 'agak is lifted');
   assert.ok(!fires('Sepertinya kamu menunggu izin yang tidak akan datang.'), 'sepertinya is lifted');
@@ -2153,7 +2193,7 @@ test('TWO OF THE FOUR OBSERVED HEDGE REJECTIONS ALREADY PASS', () => {
   }
 });
 
-test('and the two that SHOULD still fire, do', () => {
+test('and the two that fired then: neither fires since AZ (cenderung) and BA (mungkin)', () => {
   // `mungkin` about the READER is a real hedge and stays caught. `cenderung` is the
   // interesting one: it fired on 4 separate runs, always attempt 1, always on the same
   // sentence - and the glossary cell it comes from says it FLAT:
@@ -2166,16 +2206,17 @@ test('and the two that SHOULD still fire, do', () => {
   // is why NOTHING IS CHANGED here. This test is the evidence for that decision.
   const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
   const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
-  // Since 2026-10-01 (AZ) only the "mungkin" one: cenderung was a blocklist word and
-  // is lifted; the model softening a flat cell is now the prompt's to prevent.
-  const stillCaught = [
+  // Since 2026-10-01 neither: cenderung was a blocklist word and is lifted (AZ), and
+  // hedgeAboutReader is deleted (BA, 1.65.0). The model softening a flat cell is now
+  // the prompt's to prevent ("Write with conviction about who she is").
+  const noLongerCaught = [
     'Kamu mungkin merasa belum pantas menyandang keberhasilanmu sendiri meskipun orang '
       + 'lain melihatmu berhasil.',
   ];
-  for (const text of stillCaught) {
+  for (const text of noLongerCaught) {
     const reading = withBlockText(goodReading(), dmId, `${text} ${meaning}`);
-    assert.ok(checksIn(validateRendering(reading, CHART_1)).includes('style.hedging'),
-      `must still be caught: ${JSON.stringify(text.slice(0, 60))}`);
+    assert.ok(!checksIn(validateRendering(reading, CHART_1)).includes('style.hedging'),
+      `must no longer be caught: ${JSON.stringify(text.slice(0, 60))}`);
   }
 });
 
