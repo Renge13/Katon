@@ -121,6 +121,7 @@
     "test:pdf-gloss-italic": "node --test tests/pdf-gloss-italic.spec.mjs",
     "test:prose-handoff": "node --import ./scripts/jsx-register.mjs --test tests/prose-handoff.spec.mjs",
     "test:pdf-font-lambda": "node --test tests/pdf-font-lambda.spec.mjs",
+    "test:pdf-wordmark": "node --test tests/pdf-wordmark.spec.mjs",
     "test:doku-signature": "node --test tests/doku-signature.spec.mjs",
     "probe:doku": "node --env-file-if-exists=.env.local scripts/doku-probe.mjs",
     "test:doku": "node --conditions=react-server --test tests/doku.spec.mjs",
@@ -144,7 +145,8 @@
     "test:voice-judge": "node --conditions=react-server --test tests/voice-judge.spec.mjs",
     "test:voice-pair-opening": "node --conditions=react-server --test tests/voice-pair-opening.spec.mjs",
     "test:pdf-passable": "node --test tests/pdf-passable.spec.mjs",
-    "build:spectral-ttf": "node scripts/build-spectral-ttf.mjs"
+    "build:spectral-ttf": "node scripts/build-pdf-fonts.mjs",
+    "build:pdf-fonts": "node scripts/build-pdf-fonts.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.6.1",
@@ -161,6 +163,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@napi-rs/canvas": "^1.0.9",
     "@types/node": "^25.7.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -170,6 +173,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
     "jsdom": "^30.0.1",
+    "pdfjs-dist": "^6.3.289",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.65.0"
   }

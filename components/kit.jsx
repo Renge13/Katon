@@ -3,28 +3,16 @@
 // "Sunyi" kit. Inline styles + tokens from globals.css. Motion via CSS classes
 // (k-rise etc.) so it is reliable and respects prefers-reduced-motion.
 
-// ── element → pigment map: THE single source of truth for element theming ──
+// ── element → pigment map (now lib/site/elements.js, the single source) ──
 // deep/mid/wash (pigment) + bar fill + glow (dark-surface accent) + label (ID) +
 // bg (element-tinted "sanctuary" dark canvas). Every element-themed surface —
 // persona, pillars, bars, bridge, paywall, deep-read, sharecard — resolves its
 // accent from here (directly, or via the --el-* CSS vars threaded in Funnel).
-const EL = {
-  water: { deep: '#173039', mid: '#3C6C7A', wash: '#CFE1E8', bar: 'var(--senja)', glow: '#6FA0AE', label: 'Air',   bg: 'radial-gradient(120% 85% at 50% -10%, #2C545F 0%, #16333B 46%, #0A161A 100%)' },
-  fire:  { deep: '#8B3A1A', mid: '#C4622A', wash: '#FADEC2', bar: 'var(--clay)',  glow: '#E08A54', label: 'Api',   bg: 'radial-gradient(120% 85% at 50% -10%, #7A3218 0%, #3A1A0D 46%, #160B06 100%)' },
-  wood:  { deep: '#2E5C2E', mid: '#5A8F4E', wash: '#D6EACD', bar: 'var(--sage)',  glow: '#8DBE80', label: 'Kayu',  bg: 'radial-gradient(120% 85% at 50% -10%, #2C5730 0%, #16301A 46%, #0A140C 100%)' },
-  earth: { deep: '#5A4E3A', mid: '#8A7A5E', wash: '#EAE1D1', bar: 'var(--emas)',  glow: '#C6AC7E', label: 'Bumi',  bg: 'radial-gradient(120% 85% at 50% -10%, #5A4D38 0%, #302818 46%, #14100A 100%)' },
-  metal: { deep: '#454A52', mid: '#7C808A', wash: '#DEE2E8', bar: '#9DA1A8',      glow: '#AEB2BB', label: 'Logam', bg: 'radial-gradient(120% 85% at 50% -10%, #4A4E56 0%, #26282E 46%, #101114 100%)' },
-};
-function elKey(name) {
-  const n = (name || '').toLowerCase();
-  if (/(water|air)/.test(n)) return 'water';
-  if (/(fire|api)/.test(n)) return 'fire';
-  if (/(wood|kayu)/.test(n)) return 'wood';
-  if (/(earth|bumi|tanah)/.test(n)) return 'earth';
-  if (/(metal|logam)/.test(n)) return 'metal';
-  return 'earth';
-}
-export const elColor = (name) => EL[elKey(name)];
+// The palette lives in lib/site/elements.js since Prompt AW (2026-09-30), so the PDF
+// reads the same one. Re-exported: every existing import of elColor stays as it is.
+import { elColor } from '../lib/site/elements.js';
+import { CHROME_COPY } from '../lib/site/copy.js';
+export { elColor };
 
 // hex → rgba string (for building element-tinted alpha values).
 export function alpha(hex, a) {
@@ -88,7 +76,7 @@ export function Rule({ light, width = '100%', style }) {
 }
 
 // One "Komposisi Energimu" bar — width = pct (max-normalized). NEUTRAL: no raw
-// numbers; gloss describes the ELEMENT; badges mark dominant/thinnest only.
+// numbers; gloss describes the ELEMENT; badges mark the most / least (every tied bar).
 export function BalanceBar({ label, gloss, pct, element, isDominant, isMissing }) {
   const c = elColor(element);
   return (
@@ -98,8 +86,8 @@ export function BalanceBar({ label, gloss, pct, element, isDominant, isMissing }
           <span style={{ fontFamily: 'var(--font-serif)', fontSize: 16, color: 'var(--tinta)' }}>{label}</span>
           <span style={{ fontSize: 12.5, color: 'var(--muted-warm)' }}>{gloss}</span>
         </div>
-        {isDominant && <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: c.mid }}>Paling kuat</span>}
-        {isMissing && <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--clay)' }}>Paling tipis</span>}
+        {isDominant && <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: c.mid }}>{CHROME_COPY.presence_tag_most}</span>}
+        {isMissing && <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--clay)' }}>{CHROME_COPY.presence_tag_least}</span>}
       </div>
       <div style={{ height: 8, borderRadius: 6, background: 'var(--kertas-3)', overflow: 'hidden', border: '1px solid var(--divider)' }}>
         <div className="k-bar" style={{ height: '100%', width: `${pct}%`, borderRadius: 6, background: `linear-gradient(90deg, ${c.mid}, ${c.deep})`, transformOrigin: 'left' }} />
@@ -118,7 +106,7 @@ export function PillarCell({ label, stem, branch, elementId, element, polarity, 
       border: `1px solid ${isDayMaster ? c.mid : 'var(--border)'}`,
       boxShadow: isDayMaster ? '0 10px 24px -14px rgba(60,42,24,.4)' : 'none',
     }}>
-      {isDayMaster && <div style={{ position: 'absolute', top: -9, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 9, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#fff', background: c.mid, borderRadius: 999, padding: '3px 9px' }}>Inti diri</div>}
+      {isDayMaster && <div style={{ position: 'absolute', top: -9, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 9, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#fff', background: c.mid, borderRadius: 999, padding: '3px 9px' }}>{CHROME_COPY.pillar_core_pill}</div>}
       <div style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', marginBottom: 6 }}>{label}</div>
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 30, lineHeight: 1, color: c.deep }}>{stem || '·'}</div>
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, lineHeight: 1, color: c.mid, marginTop: 3 }}>{branch || '·'}</div>

@@ -371,6 +371,14 @@ test('C5 BOTH COMPAT CHARTS SHARE ONE PAGE', async () => {
   const both = c.texts.filter((t) => t.includes(PASANGAN_COPY.pdf_chart_a_heading)
     && t.includes(PASANGAN_COPY.pdf_chart_b_heading));
   assert.equal(both.length, 1, 'the two chart blocks are not on one page');
+  // THE WHOLE OF BOTH BLOCKS, not their headings (Prompt AW). With the web-sized chart
+  // the two headings shared a page while person B's last bars spilled onto the next,
+  // and the heading-only check above stayed green. So: both Sebaran Unsur sections and
+  // all ten bars on that one page.
+  const page = both[0];
+  assert.equal(page.split('SEBARAN UNSUR').length - 1, 2, 'both Sebaran Unsur sections on the chart page');
+  const bars = page.split('\n').map((l) => l.trim()).filter((l) => ['Kayu', 'Api', 'Tanah', 'Logam', 'Air'].includes(l));
+  assert.equal(bars.length, 10, `all ten bars on the chart page, got ${bars.length}`);
 });
 
 test('A10 THE ELEMENTS ARE BARS, NOT A "Kayu: 0" LIST', async () => {
@@ -449,7 +457,10 @@ test('R2 THE COMPAT GLOSSARY CARRIES NO TERM FROM THE PARTNER\'S CHART ALONE, an
   for (const g of own.groups) {
     for (const e of g.entries) if (e.name) assert.ok(printed.has(e.name), `the reader's "${e.name}" (${g.group}) is missing`);
   }
-  for (const name of ['Kursi Independen', 'Kuda', 'Naga']) {
+  // The partner's Shio is his BIRTH-YEAR animal only since AW §3.1 (it was every
+  // animal in his chart, 'Kuda' and 'Naga' here). The year's is derived, not typed.
+  const partnerYear = GLOSSARY.shio[[...buildSemanticJson(c.chartB).chart.year][1]].name_id;
+  for (const name of ['Kursi Independen', partnerYear]) {
     assert.ok(printed.has(name), `"${name}" is missing`);
   }
 });
@@ -460,13 +471,17 @@ test('R2 THE COMPAT GLOSSARY CARRIES NO TERM FROM THE PARTNER\'S CHART ALONE, an
 // `pairLine` - full months, gender first. Both now print `birthSummary` output
 // UNCHANGED, gender included; the compat one line per person, reader first.
 
-test('R3 BOTH COVERS PRINT birthSummary UNCHANGED, gender included, one line per person', async () => {
+// ── AW §2 item 5 (2026-09-30): THE COMPLETE EDITION COVER TAKES #177's PROFILE LINE ──
+// "PEREMPUAN | 13 SEP 1989 | 09.00", the web header's line, replaces birthSummary on
+// the MIRROR cover. The compat cover keeps birthSummary, one line per person.
+test('R3 + AW: the mirror cover prints the profile line; the compat cover birthSummary, one line per person', async () => {
   const [m, c] = await docs();
   const lines = (t) => t.split('\n').map((l) => l.trim());
   // Read with runs joined: react-pdf may split a line into runs at a digit.
   const joined = (t) => t.replace(/\s*\n\s*/gu, ' ');
-  assert.ok(joined(m.texts[0]).includes('13 Sep 1989, 09.00, Perempuan'),
+  assert.ok(joined(m.texts[0]).includes('PEREMPUAN | 13 SEP 1989 | 09.00'),
     `mirror cover: ${JSON.stringify(lines(m.texts[0]))}`);
+  assert.equal(joined(m.texts[0]).includes('13 Sep 1989, 09.00, Perempuan'), false, 'the mirror cover no longer prints birthSummary');
   const cover = joined(c.texts[0]);
   assert.ok(cover.includes('13 Sep 1989, 09.00, Perempuan'), `compat cover, reader: ${cover}`);
   assert.ok(cover.includes('4 Mar 1990, 14.00, Laki-laki'), `compat cover, partner: ${cover}`);
@@ -474,14 +489,23 @@ test('R3 BOTH COVERS PRINT birthSummary UNCHANGED, gender included, one line per
   assert.ok(cover.indexOf('13 Sep 1989') < cover.indexOf('4 Mar 1990'), 'the reader comes first');
 });
 
-// ── R4 (round-1 markup, 2026-09-24): Indonesian decimals on the bars ──
-test('R4 THE ELEMENT VALUES USE A DECIMAL COMMA (27,5), never a point', async () => {
-  const [m] = await docs();
-  const chartPage = m.texts.find((t) => t.includes('Sebaran Unsur'));
-  const values = chartPage.split('\n').map((l) => l.trim()).filter((l) => /^\d+([.,]\d+)?$/u.test(l));
-  assert.ok(values.length >= 5, `precondition: five values on the chart page, got ${JSON.stringify(values)}`);
-  assert.deepEqual(values.filter((v) => v.includes('.')), [], 'a decimal point on an Indonesian page');
-  assert.ok(values.includes('27,5'), `Api's 27.5 prints as 27,5: ${JSON.stringify(values)}`);
+// ── ~~R4 (2026-09-24): Indonesian decimals on the bars~~ SUPERSEDED BY AW §3 item 3 ──
+// The values printed (27,5) under "Sebaran visual, bukan ukuran kekuatan." and read as
+// scores; the web shows none. Cowork's AW default, built: no numbers. So the assertion
+// is inverted rather than deleted: the five bars are there, and not one value is.
+test('AW §3.3: SEBARAN UNSUR PRINTS NO NUMBERS, in either document, and all five bars are there', async () => {
+  const [m, c] = await docs();
+  for (const [doc, name] of [[m, 'mirror'], [c, 'compat']]) {
+    const pages = doc.texts.filter((t) => /SEBARAN UNSUR/u.test(t));
+    assert.ok(pages.length >= 1, `${name}: precondition, a chart page`);
+    for (const page of pages) {
+      const block = page.slice(page.indexOf('SEBARAN UNSUR'));
+      const lines = block.split('\n').map((l) => l.trim());
+      for (const el of ['Kayu', 'Api', 'Tanah', 'Logam', 'Air']) assert.ok(lines.includes(el), `${name}: the ${el} bar`);
+      const values = lines.filter((l) => /^\d+([.,]\d+)?$/u.test(l));
+      assert.deepEqual(values, [], `${name}: a value printed under Sebaran Unsur`);
+    }
+  }
 });
 
 // ── THE FACTS TABLE BREATHES (Reyner, 2026-09-24) ───────────
@@ -560,4 +584,34 @@ test('F1 A FRAME ROW NAMES THE PILLAR THAT CREATES IT, so no two facts rows read
   const { buffer } = await compatG4();
   const facts = pageTexts(buffer).find((t) => t.includes(PASANGAN_COPY.pdf_facts_heading));
   for (const p of ['Pilar Akar', 'Pilar Arah']) assert.ok(facts.includes(p), `the facts page prints ${p}`);
+});
+
+// ── AW §3.1 IN PRINT: one Shio, labelled as her birth-year Shio; the pair, one per person ──
+test('AW §3.1: the Complete Edition prints ONE Shio under "Shio (tahun lahirmu)"; the compat one per person', async () => {
+  const [m, c] = await docs();
+  const appendixOf = (texts) => texts.slice(texts.findIndex((t) => t.includes('Istilah dalam Bacaanmu'))).join('\n');
+  const mText = appendixOf(m.texts);
+  assert.ok(mText.includes(RENDER_COPY.pdfShioGroupMirror), `the mirror's Shio label: ${RENDER_COPY.pdfShioGroupMirror}`);
+  assert.equal(RENDER_COPY.pdfShioGroupMirror, 'Shio (tahun lahirmu)', 'AW §3.1 default, until Reyner rules it');
+  const after = mText.slice(mText.indexOf(RENDER_COPY.pdfShioGroupMirror));
+  const animals = Object.values(GLOSSARY.shio).map((v) => v?.name_id).filter(Boolean);
+  const printed = animals.filter((a) => new RegExp(`(^|\n)${a}\n`, 'u').test(after.split('Pilar Konsepsi')[0]));
+  assert.equal(printed.length, 1, `one animal under the mirror's Shio group, got ${printed.join(', ')}`);
+  const cText = appendixOf(c.texts);
+  const cAfter = cText.slice(cText.lastIndexOf('\nShio\n')).split('Pilar Konsepsi')[0];
+  const cPrinted = animals.filter((a) => new RegExp(`\n${a}\n`, 'u').test(cAfter));
+  assert.ok(cPrinted.length >= 1 && cPrinted.length <= 2, `the compat Shio: one per person (deduplicated), got ${cPrinted.join(', ')}`);
+});
+
+// ── AX §6 IN PRINT: the ruled tags, and a tie tags every tied bar (smewTN) ──
+test('AX §6: the Complete Edition tags smewTN\'s tied Tanah and Logam "PALING BANYAK", Air "PALING SEDIKIT"', async () => {
+  const { buildCompleteEditionPdf } = await import('../lib/pdf/build.js');
+  const { assembleFallback } = await import('../lib/render/fallback.js');
+  const chart = calculateBaziChart({ birthDate: '2001-02-14', birthTime: '13:00' });
+  const semanticJson = buildSemanticJson(chart);
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered: { ...assembleFallback(semanticJson), prompt_version: 't', stage6_version: 't' } });
+  const page = pageTexts(buffer).find((t) => t.includes('SEBARAN UNSUR'));
+  assert.equal(page.split('PALING BANYAK').length - 1, 2, 'Tanah and Logam');
+  assert.equal(page.split('PALING SEDIKIT').length - 1, 1, 'Air');
+  assert.equal(/PALING KUAT|PALING TIPIS/u.test(page), false);
 });

@@ -239,7 +239,12 @@ test('胎元 PRINTS REYNER\'S MEANING (Prompt AX, 2026-09-30), and no invented o
   assert.ok(entry, 'the conception row prints now that it has a meaning');
   assert.equal(entry.meaning, RULED);
   assert.equal(entry.display_only, false, 'no longer exempt from correction 2');
-  assert.ok(a.groups.some((g) => g.group === 'Pilar Konsepsi'), 'its group heading returns with its row');
+  // FOLDED INTO 'Pilar' AS ITS LAST ROW (Reyner, 2026-09-30, #186): its own group
+  // printed "Pilar Konsepsi" as a heading over a row of the same name, alone on a page.
+  assert.equal(a.groups.some((g) => g.group === 'Pilar Konsepsi'), false, 'no group of its own');
+  const pilar = a.groups.find((g) => g.group === 'Pilar');
+  assert.equal(pilar.entries.at(-1).key, 'conception', 'the Pilar group\'s last row');
+  assert.deepEqual(pilar.entries.map((e) => e.key), ['year', 'month', 'day', 'hour', 'conception']);
   // "Istana Konsepsi" is the string the 08-07 ruling replaced; it must not come back.
   assert.ok(!JSON.stringify(a).includes('Istana Konsepsi'), 'the replaced name must not come back through the PDF');
   assert.doesNotThrow(() => assertEveryMechanicExplained(a));
@@ -252,4 +257,21 @@ test('an hour-less chart lists no hour pillar and still ships', () => {
     'a chart with no hour must not explain a pillar it does not have');
   assert.ok(pilar.entries.some((e) => e.key === 'year'), 'the pillars it does have still appear');
   assert.doesNotThrow(() => assertEveryMechanicExplained(a));
+});
+
+// ── SHIO IS THE BIRTH-YEAR ANIMAL ONLY (Prompt AW §3 item 1, Reyner 2026-09-30) ──
+// "we usually only know one Shio - the year we born - but the glossary lists 4, it
+// will potentially confuse the reader." The appendix's Shio group is the YEAR branch's
+// animal alone. The other three stay where they are: under each pillar on the chart
+// page, where an animal labels a pillar and is not "your Shio".
+test('AW §3.1: the Shio group holds the year branch\'s animal and nothing else', () => {
+  for (const tc of VALIDATION_CHARTS) {
+    const chart = calculateBaziChart({ birthDate: tc.date, birthTime: tc.time });
+    const semanticJson = buildSemanticJson(chart);
+    const shio = buildAppendix({ chart, semanticJson }).groups.find((g) => g.group === 'Shio');
+    const year = [...(semanticJson.chart.year || '')][1];
+    assert.ok(shio, `chart ${tc.id}: a Shio group`);
+    assert.deepEqual(shio.entries.map((e) => e.key), [year], `chart ${tc.id}: the year's ${year} only`);
+    assert.equal(shio.entries[0].name, GLOSSARY.shio[year].name_id);
+  }
 });

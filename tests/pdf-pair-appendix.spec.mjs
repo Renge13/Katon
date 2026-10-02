@@ -14,6 +14,7 @@ import { test } from 'node:test';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
+import { buildSemanticJson } from '../lib/semantic/index.js';
 import { factRows } from '../lib/pdf/pairDocument.js';
 import {
   assertEveryMechanicExplained, assertAnchorsUnique, anchorIds, anchorId, GROUP_ORDER,
@@ -47,6 +48,13 @@ const Y1 = {
 const PAIRS = {
   'Y-1 fixture': Y1,
   '2x6': { a: chartOf(2), b: chartOf(6) },
+  // AW §3.1 made Shio the birth-year animal only, so two people share a Shio entry
+  // only when born in the same Shio year. This pair is (1989, 己巳 Ular), which keeps
+  // the de-duplication below exercised rather than vacuous.
+  'same Shio year': {
+    a: calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' }),
+    b: calculateBaziChart({ birthDate: '1989-11-02', birthTime: '10:00' }),
+  },
 };
 
 const appendixFor = ({ a, b }) => {
@@ -176,11 +184,15 @@ test('the two charts merge into ONE legend: shared terms are deduped, anchors un
 
     // The dedupe is real rather than incidental: both charts DO share entries, and
     // the merged count is smaller than the two lists laid end to end.
-    const both = appendix.chartA.length + appendix.chartB.length;
     const shared = appendix.chartA.filter((e) => appendix.chartB.includes(e));
-    assert.ok(shared.length > 0, `${name}: expected the two charts to share Pilar entries`);
-    assert.ok(appendix.count < both + appendix.compat.length,
-      `${name}: nothing was deduped, so two charts produced two legends`);
+    // Since AW §3.1 the partner contributes his birth-year Shio alone, so the two
+    // share an entry exactly when their year animals match.
+    const yearOf = (c) => [...buildSemanticJson(c).chart.year][1];
+    const sameYear = yearOf(pair.a) === yearOf(pair.b);
+    assert.equal(shared.length > 0, sameYear, `${name}: shared entries iff the same Shio year`);
+    // The dedupe itself is the "anchored once" check below, on the shared objects. The
+    // old proxy (count < chartA + chartB + compat) broke once the partner contributed a single
+    // entry: the reader's unnamed condition entries count in `count` and not in `both`.
     // SHARED ENTRIES ARE THE SAME OBJECT, which is what lets both chart pages'
     // reference lists resolve to one anchor instead of two. `anchorId` is CALLED
     // rather than reimplemented here - a second copy of its sanitiser would be a
@@ -215,7 +227,8 @@ test('the group order is prompt M\'s ENTIRE list, with Kompatibilitas first', ()
   // reversal.
   assert.equal(PAIR_GROUP_ORDER[0], PAIR_GROUP);
   assert.deepEqual(PER_CHART_GROUPS, [
-    'Aspek', 'Bintang', 'Elemen dan Kekuatan', 'Relasi Cabang', 'Pilar', 'Shio', 'Pilar Konsepsi',
+    // No 'Pilar Konsepsi' group since 2026-09-30: it is the Pilar group's last row (#186).
+    'Aspek', 'Bintang', 'Elemen dan Kekuatan', 'Relasi Cabang', 'Pilar', 'Shio',
   ]);
   assert.deepEqual(PER_CHART_GROUPS, GROUP_ORDER,
     'every mirror group is in the compat legend now');
