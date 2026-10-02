@@ -68,8 +68,9 @@ test('§1 PRECONDITION: the header renders the archetype this line sits under', 
   const f = stubFetch();
   const m = await mount(SERVED);
   try {
-    assert.ok(CHART_VIEW.archetype?.name_id, 'the fixture chart has an archetype');
-    assert.ok(m.text().includes(CHART_VIEW.archetype.name_id));
+    assert.ok(CHART_VIEW.archetype?.name_en, 'the fixture chart has an archetype');
+    // The English title alone since G1 (2026-10-02); the Indonesian name is not shown.
+    assert.ok(m.text().includes(CHART_VIEW.archetype.name_en));
   } finally { m.unmount(); f.restore(); }
 });
 

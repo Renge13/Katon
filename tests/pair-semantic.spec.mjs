@@ -281,8 +281,9 @@ test('THE OPENING FACT NAMES BOTH PEOPLE, and p0_names stays dropped', () => {
   assert.ok(p0, 'the opening is a fact, so the FLOOR carries it too');
   assert.equal(p0.hierarchy.role, 'spine');
 
-  const { archetype_name_id: a } = pj.core.a;
-  const { archetype_name_id: b } = pj.core.b;
+  // English titles since G1 (2026-10-02): the opening and both_named use name_en.
+  const { archetype_name_en: a } = pj.core.a;
+  const { archetype_name_en: b } = pj.core.b;
   assert.notEqual(a, b);
   assert.ok(p0.label_meaning.includes(a), 'A is named in the opening');
   assert.ok(p0.label_meaning.includes(b), 'and B is');
@@ -355,7 +356,7 @@ test('variantKeysFor NAMES THE CELL THE FACT ACTUALLY CARRIES', () => {
       // design - and comparing raw would have made this assertion unfalsifiable
       // for exactly the cell the substitution exists for.
       const cellText = (k) => (K[k]._template
-        ? fillPairTemplate(K[k].label_meaning, pj.core.a.archetype_name_id, pj.core.b.archetype_name_id)
+        ? fillPairTemplate(K[k].label_meaning, pj.core.a.archetype_name_en, pj.core.b.archetype_name_en)
         : K[k].label_meaning);
       assert.ok(keys.some((k) => cellText(k) === f.label_meaning),
         `${x}x${y} ${f.id}: derived [${keys.join(', ')}] but the fact carries another cell`);
@@ -452,8 +453,9 @@ test('THE OPENING NAMES TWO PEOPLE, NOT THREE', async () => {
     calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00', gender: 'female' }),
   );
   const p0 = sj.facts.find((f) => f.id === 'p0_opening');
-  const a = sj.core.a.archetype_name_id;
-  const b = sj.core.b.archetype_name_id;
+  // English titles since G1 (2026-10-02): the opening and both_named use name_en.
+  const a = sj.core.a.archetype_name_en;
+  const b = sj.core.b.archetype_name_en;
 
   // READ FROM THE RULING, NOT RETYPED (2026-09-28, Prompt AI amendment 1). This
   // held its own copy of the 2026-09-09 sentence, a second source of truth that

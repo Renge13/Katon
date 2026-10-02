@@ -844,17 +844,20 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
           REFLEKSIMU sat 4px apart and read as one line. */}
       <button onClick={onReset} style={{ background: 'none', border: 'none', color: 'var(--muted-warm)', fontSize: 13, cursor: 'pointer', padding: '18px 0 0', margin: '0 0 34px', fontFamily: 'var(--font-sans)' }}>← Ganti tanggal</button>
 
-      {/* persona. RULE 23's BRACKET-ONCE: the Indonesian name leads and the English
-          pair appears once, here, and never again in the body. */}
+      {/* persona. THE ENGLISH TITLE ALONE (G1, Reyner 2026-10-02; rule 23 amended):
+          the archetype is shown by name_en everywhere and the Indonesian name is no
+          longer shown to readers. It was name_id here with name_en in italic under it. */}
       <Reveal><Eyebrow>Refleksimu</Eyebrow></Reveal>
-      <Reveal delay={0.12}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 44, lineHeight: 1, color: el.deep, margin: '16px 0 0' }}>{arch.name_id}</div></Reveal>
-      {arch.name_en && <Reveal delay={0.24}><p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--kayu)', margin: '12px 0 0' }}>{arch.name_en}</p></Reveal>}
-      <Reveal delay={0.36}>
+      <Reveal delay={0.12}><div style={{ fontFamily: 'var(--font-serif)', fontSize: 44, lineHeight: 1, color: el.deep, margin: '16px 0 0' }}>{arch.name_en || arch.name_id}</div></Reveal>
+      {/* 240ms since G1 (2026-10-02): the italic English line that held 240 is gone,
+          so the element row moves up one step instead of leaving a gap. */}
+      <Reveal delay={0.24}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--tinta-soft)' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: el.mid }} /> {element}{chart?.day_master?.stem ? ` · ${chart.day_master.stem}` : ''}
         </div>
-        {/* Inside the 360ms reveal, not a fifth step: the persona stagger is ruled
-            at four (0/120/240/360). Uppercased by CSS, as the card footer is. */}
+        {/* Inside the element row's reveal, not a step of its own: the persona stagger
+            was ruled at four (0/120/240/360) and is three since G1 (0/120/240), the
+            same cadence as the Bagan block. Uppercased by CSS, as the card footer is. */}
         {profileLine && (
           <div data-profile-line style={{ marginTop: 8, fontSize: 11.5, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>{profileLine}</div>
         )}
@@ -1618,7 +1621,7 @@ function Delivery({ token, view = 'ready' }) {
   async function saveCard() {
     setSaving('card');
     try {
-      await downloadCard('download', 'B', { id: 'card-b', filename: `katon-${(paidCard?.nameId || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
+      await downloadCard('download', 'B', { id: 'card-b', filename: `katon-${(paidCard?.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
     } catch { /* the button re-enables; the PDF is unaffected */ }
     setSaving(null);
   }

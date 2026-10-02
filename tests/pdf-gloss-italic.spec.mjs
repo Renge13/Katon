@@ -69,10 +69,13 @@ test('THE COMPLETE EDITION draws the glossary English in the body italic (Hanken
   const pdf = await renderToBuffer(readingOnly({ chart, semanticJson, rendered }));
   const { oblique, upright } = obliqueAndUpright(pdf);
 
-  // The floor puts "(The Sun)" on this chart's archetype itself, so the real
-  // pipeline's own bracket is covered as well as the injected ones.
-  assert.ok(base.blocks[0].text.includes('(The Sun)'), 'precondition: the floor brackets the archetype');
-  for (const n of ['The Sun', 'The Mountain', 'Seven Killings']) {
+  // Since G1 (2026-10-02) the floor writes this chart's archetype as its English title
+  // ALONE ("Kamu adalah The Sun"), with no bracket, so the bracket italics are covered
+  // by the injected glosses. A bare title is not a bracketed gloss and stays upright.
+  assert.ok(base.blocks[0].text.includes('The Sun') && !base.blocks[0].text.includes('(The Sun)'),
+    'precondition: the floor writes the archetype as its bare English title');
+  assert.ok(upright.includes('KamuadalahTheSun'), 'the bare title is drawn upright');
+  for (const n of ['The Mountain', 'Seven Killings']) {
     assert.ok(oblique.includes(n.replace(/ /gu, '')), `"${n}" is drawn italic`);
   }
   assert.equal(oblique.includes('catatankecil'), false, 'a non-glossary bracket stays upright');

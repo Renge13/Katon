@@ -14,6 +14,10 @@
         "note": "Medical claim. Rule 25."
       },
       {
+        "pattern": "\\b(minum|meminum|konsumsi|mengonsumsi)\\s+obat\\b|\\bobat\\s+(penenang|tidur|antidepresan)\\b",
+        "note": "Medication instructions. Added 2026-10-02 (Reyner, after D1 freed the bare word `obat` and \"Minum obat penenang setiap pagi.\" passed): \"add one pattern to forbidden_content.medical for medication instructions\". The metaphor (\"Dia adalah obat untuk lelahmu.\") stays free. STAGE6 1.72.0."
+      },
+      {
         "pattern": "\\b(resep dokter|ke dokter|pengobatan)\\b",
         "note": "Medical advice. `obat` and `terapi` removed 2026-10-02 (Reyner, D1: \"allow dramatic metaphors like 'obat' while keeping the clinical bans\"); STAGE6 1.67.0."
       },

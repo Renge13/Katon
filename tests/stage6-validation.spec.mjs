@@ -717,17 +717,31 @@ test('the HEADING does not satisfy the opening rule; the sentence must', () => {
 
 // ── RULE 23 BRACKETS: A REPORTER, NOT A GATE ───────────────
 
+// The ARCHETYPE left rule 23's bracket scope 2026-10-02 (G1, STAGE6 1.71.0): it is
+// written as its English title alone (lib/validate/archetypeTitles.js). Insertion still
+// binds Aspek and Bintang, so these tests now use the chart's main-profile Aspek, with
+// every bracket the floor gave it stripped first.
+/** The first Aspek / Bintang term the floor prints bracketed, with its English. */
+const boundTerm = () => {
+  const prose = goodReading().blocks.map((b) => b.text).join('\n');
+  const fact = CHART_1.facts.find((x) => x.label && x.label_bracket && prose.includes(`${x.label} (${x.label_bracket})`)
+    && !/^Unsur|^Pilar|^Elemen/u.test(x.label));
+  return { term: fact.label, en: fact.label_bracket };
+};
+/** A reading in which `term` carries no bracket anywhere. */
+const unbracketed = (reading, term, en) => {
+  for (const b of reading.blocks) b.text = b.text.split(`${term} (${en})`).join(term);
+  return reading;
+};
+
 test('THE PIPELINE INSERTS THE BRACKET, so an unbracketed model output still passes', () => {
   // Ruled 2026-08-21 after enforcement was measured: floor rate 0/4 -> 2/4, and under
   // the STRICT precondition 3 a floored chart FAILS, so that gate cost the launch gate
   // rather than one chart. Compliance moved into the pipeline.
-  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
-  const arche = CHART_1.core.archetype_name_id;
-  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
-
-  // The exact sentence that floored chart 1 under enforcement.
-  const fused = withBlockText(goodReading(), dmId, `Kamu adalah Api ${arche} yang Lemah. ${meaning}`);
-  const result = validateRendering(fused, CHART_1);
+  const { term, en } = boundTerm();
+  const bare = unbracketed(goodReading(), term, en);
+  assert.ok(bare.blocks.some((b) => b.text.includes(term)), 'precondition: the Aspek is in the prose');
+  const result = validateRendering(bare, CHART_1);
 
   assert.ok(!checksIn(result).includes('brackets.unbracketed'),
     `insertion must have fixed it, not rejected it: ${checksIn(result).join(', ')}`);
@@ -735,17 +749,25 @@ test('THE PIPELINE INSERTS THE BRACKET, so an unbracketed model output still pas
 
   // AND THE INSERTED TEXT IS WHAT GETS CACHED. `...gate.normalized` is spread into the
   // served result, so validating one string and storing another would validate nothing.
+  const served = result.normalized.blocks.map((b) => b.text).join('\n');
+  assert.ok(served.includes(`${term} (${en})`), `the served text must carry the bracket: ${served.slice(0, 90)}`);
+});
+
+test('THE ARCHETYPE IS NOT BRACKETED: it is served as its English title (G1, 1.71.0)', () => {
+  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
+  const id = CHART_1.core.archetype_name_id;
+  const en = CHART_1.core.archetype_name_en;
+  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
+  const result = validateRendering(withBlockText(goodReading(), dmId, `Kamu adalah Api ${id} yang Lemah. ${meaning}`), CHART_1);
   const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId)).text;
-  assert.ok(served.includes(`${arche} (${CHART_1.core.archetype_name_en})`),
-    `the served text must carry the bracket: ${served.slice(0, 90)}`);
+  assert.ok(served.startsWith(`Kamu adalah Api ${en} yang Lemah.`), served.slice(0, 80));
+  assert.ok(!served.includes(`(${en})`), 'no bracket beside the title');
+  assert.equal(result.metrics.archetype_titles_normalised, 1, 'the rewrite is counted');
 });
 
 test('every insertion is REPORTED with its context, because reading badly is not assertable', () => {
-  const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
-  const arche = CHART_1.core.archetype_name_id;
-  const meaning = CHART_1.facts.find((f) => f.id === dmId).label_meaning;
-  const result = validateRendering(
-    withBlockText(goodReading(), dmId, `Kamu adalah Api ${arche} yang Lemah. ${meaning}`), CHART_1);
+  const { term, en } = boundTerm();
+  const result = validateRendering(unbracketed(goodReading(), term, en), CHART_1);
 
   const inserted = result.findings.filter((f) => f.check === 'brackets.inserted');
   assert.ok(inserted.length > 0, 'an insertion must be visible to QA');
@@ -801,6 +823,7 @@ test('the assertion CANNOT FLOOR A READER even when insertion is bypassed', () =
 });
 
 test('EVERY in-scope term already has its English in the payload - no_pair is empty', () => {
+  let exercised = 0;
   // THIS TEST REPLACES ONE THAT PINNED A BUG AS CORRECT BEHAVIOUR. The first
   // version of brackets.js read `f.name_en`, found it absent on every fact, and
   // concluded Stage 3 forwarded English for the archetype and main profile alone -
@@ -818,8 +841,12 @@ test('EVERY in-scope term already has its English in the payload - no_pair is em
     const noPair = result.metrics.brackets.filter((b) => b.verdict === 'no_pair');
     assert.deepEqual(noPair.map((b) => b.term), [],
       `chart ${tc.id}: the payload supplies English for every in-scope term`);
-    assert.ok(result.metrics.brackets.length > 0, `chart ${tc.id} exercised no scoped term`);
+    // Since G1 (2026-10-02) the archetype is out of scope, so a chart whose only
+    // scoped term was its archetype exercises none; the instrument is asserted to have
+    // run across the fixture instead.
+    exercised += result.metrics.brackets.length;
   }
+  assert.ok(exercised > 0, 'the fixture exercised no scoped term at all');
 });
 
 test('THE BRACKET SCOPE IS READ FROM THE GLOSSARY, so no category can be missed', () => {
@@ -1388,11 +1415,12 @@ test('every blocklist pattern compiles and carries a note', () => {
       }
     }
   }
-  // EXACTLY the three kept checks (Reyner, Prompt AZ, "Keep 3 checks"): 7 forbidden
-  // (medical 3, financial 3, self_harm 1 - its despair pattern left 2026-10-02, D2)
+  // EXACTLY the three kept checks (Reyner, Prompt AZ, "Keep 3 checks"): 8 forbidden
+  // (medical 4 - the medication-instruction pattern Reyner added 2026-10-02 after D1;
+  // financial 3; self_harm 1 - its despair pattern left 2026-10-02, D2)
   // + 10 style (meta 4, code_leak 6). A pattern added here is a new word ban, which
-  // that ruling says the writer gets as direction.
-  assert.equal(count, 17, `${count} patterns loaded`);
+  // that ruling says the writer gets as direction - unless Reyner rules it, as here.
+  assert.equal(count, 18, `${count} patterns loaded`);
   assert.deepEqual([...CATEGORIES.forbidden].sort(), ['financial', 'medical', 'self_harm']);
   assert.deepEqual([...CATEGORIES.style].sort(), ['code_leak', 'meta']);
 });
@@ -2289,26 +2317,22 @@ test('a PALACE name is never mistaken for a raw pillar', () => {
 
 test('A TERM THE MODEL BRACKETED LATER IS LEFT ALONE ENTIRELY', () => {
   // Demonstrated defect, and invisible to style.unsanctioned_bracket because BOTH
-  // values are sanctioned:
+  // values are sanctioned (first seen on the archetype, before G1 took it out of scope):
   //
   //   before  "Kamu adalah Matahari yang tenang. Dan Matahari (The Sun) selalu terlihat."
   //   after   "Kamu adalah Matahari (The Sun) yang tenang. Dan Matahari (The Sun) ..."
   //
-  // Two bracketed mentions is rule 23 BROKEN, not kept. Insertion only checked whether
-  // a bracket followed the FIRST occurrence, so a correctly-bracketed later mention did
-  // not stop it.
+  // Two bracketed mentions is rule 23 BROKEN, not kept. Asserted on an Aspek since G1.
   const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
-  const arche = CHART_1.core.archetype_name_id;
-  const en = CHART_1.core.archetype_name_en;
-  const reading = withBlockText(goodReading(), dmId,
-    `Kamu adalah ${arche} yang tenang. Dan ${arche} (${en}) selalu terlihat.`);
+  const { term, en } = boundTerm();
+  const reading = withBlockText(unbracketed(goodReading(), term, en), dmId,
+    `Kamu punya ${term} yang tenang. Dan ${term} (${en}) selalu terlihat.`);
+  for (const b of reading.blocks) if (!b.fact_ids.includes(dmId)) b.text = b.text.split(term).join('');
 
   const result = validateRendering(reading, CHART_1);
   const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId)).text;
-  // Counted by splitting rather than by a built regex: the term is glossary data and
-  // may carry regex metacharacters, and a heredoc has already eaten the backslashes in
-  // this file's escapes three times today.
-  const bracketed = served.split(`${arche} (`).length - 1;
+  // Counted by splitting rather than by a built regex: the term is glossary data.
+  const bracketed = served.split(`${term} (`).length - 1;
   assert.equal(bracketed, 1, `bracket-ONCE means once, got ${bracketed}: ${served.slice(0, 110)}`);
   assert.equal(result.metrics.bracket_inserts, 0, 'and nothing should have been inserted');
 });
@@ -2334,27 +2358,23 @@ test('INSERTION CANNOT CREATE AN UNSANCTIONED BRACKET, on any fixture chart', ()
 });
 
 test('AN INVENTED GLOSS IS NORMALISED, not skipped and not rejected', () => {
-  // CHANGED 2026-08-22 on Reyner's ruling, and this test used to assert the opposite -
-  // that the invented gloss fires the check while insertion stands aside. That was the
-  // defect: skipping meant the bad value survived, `style.unsanctioned_bracket` fired
-  // SOFT, and a regeneration was spent on a formatting rule the engine already owns.
+  // CHANGED 2026-08-22 on Reyner's ruling: skipping meant the bad value survived,
+  // `style.unsanctioned_bracket` fired SOFT, and a regeneration was spent on a
+  // formatting rule the engine already owns. Asserted on an Aspek since G1 (2026-10-02).
   const dmId = CHART_1.facts.find((f) => f.id.startsWith('day_master_')).id;
-  const arche = CHART_1.core.archetype_name_id;
-  const en = CHART_1.core.archetype_name_en;
-  const invented = withBlockText(goodReading(), dmId,
-    `Kamu adalah ${arche} (Sun) yang tenang. Arahmu jelas dan langkahmu jarang goyah.`);
+  const { term, en } = boundTerm();
+  const invented = withBlockText(unbracketed(goodReading(), term, en), dmId,
+    `Kamu punya ${term} (Something Else) yang tenang. Arahmu jelas dan langkahmu jarang goyah.`);
 
   const result = validateRendering(invented, CHART_1);
   const served = result.normalized.blocks.find((b) => b.fact_ids.includes(dmId)).text;
 
-  assert.ok(served.includes(`${arche} (${en})`), `the value must be corrected: ${served.slice(0, 90)}`);
-  assert.ok(!served.includes('(Sun)'), 'and the paraphrase must be gone');
+  assert.ok(served.includes(`${term} (${en})`), `the value must be corrected: ${served.slice(0, 90)}`);
+  assert.ok(!served.includes('(Something Else)'), 'and the paraphrase must be gone');
   assert.ok(!checksIn(result).includes('style.unsanctioned_bracket'),
     'so the check has nothing left to fire on, and no regeneration is spent');
   assert.equal(result.metrics.bracket_normalised, 1, 'the correction must be counted');
-  assert.equal(result.metrics.bracket_inserts, 0, 'and must not also insert a second bracket');
-  // Surfaced for a human, because a corrected paraphrase is louder than an insertion:
-  // the model was GIVEN the value and wrote something else.
+  // Surfaced for a human: the model was GIVEN the value and wrote something else.
   assert.ok(result.findings.some((f) => f.check === 'brackets.normalised'),
     'and it must be visible to QA');
 });
