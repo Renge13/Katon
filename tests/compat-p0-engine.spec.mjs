@@ -89,11 +89,11 @@ const RULED_P0 = (() => {
   return m[1];
 })();
 
-/** The RULED line, filled, exactly as `lib/semantic/pair.js` fills the cell. */
+/** The RULED line, filled, exactly as `lib/semantic/pair.js` fills the cell (English titles since G1, 2026-10-02). */
 const ruledOpening = (sj) => fillPairTemplate(
   RULED_P0,
-  sj.core.a.archetype_name_id,
-  sj.core.b.archetype_name_id,
+  sj.core.a.archetype_name_en,
+  sj.core.b.archetype_name_en,
 );
 
 test('EXACTLY ONE FINAL FULL STOP on the served opening, floor path and model path', async () => {
@@ -166,7 +166,8 @@ test('THE OPENING CANNOT TRIP block_too_short, for ANY pair of archetypes', () =
   // because the failure would be a NAME-LENGTH failure and the eleven do not
   // contain the shortest two names. 40 is unfitted and may move; if it ever moves
   // past the shortest opening, this goes red before a reader sees a floor.
-  const names = Object.values(GLOSSARY.arketipe).map((v) => v.name_id).filter(Boolean);
+  // The English titles since G1 (2026-10-02): the opening is filled with name_en.
+  const names = Object.values(GLOSSARY.arketipe).map((v) => v.name_en).filter(Boolean);
   assert.equal(names.length, 10, 'rule 24: exactly ten archetypes');
 
   let shortest = Infinity;
@@ -191,7 +192,7 @@ test("E2's own paraphrase is replaced, and does not survive anywhere", () => {
   // The literal round-1 Y-1 opening from the walk artifact, with this pair's
   // names. Verbatim from the artifact rather than invented, so the test is about
   // the render that was actually rejected.
-  const paraphrase = `Bacaan ini menyoroti dinamika antara dua individu dengan arketipe ${sj.core.a.archetype_name_id} dan ${sj.core.b.archetype_name_id}.`;
+  const paraphrase = `Bacaan ini menyoroti dinamika antara dua individu dengan arketipe ${sj.core.a.archetype_name_en} dan ${sj.core.b.archetype_name_en}.`;
   const model = renderingFor(sj, (b) => (
     b.fact_ids[0] === OPENING_FACT_ID ? { ...b, text: paraphrase } : b
   ));
@@ -268,14 +269,14 @@ test('THE MODEL PATH: a paraphrased opening is replaced before the gate, and cou
       spendGuards: false,
       fetchImpl: async () => geminiSays(modelResponse(sj, (b) => (
         b.fact_ids[0] === OPENING_FACT_ID
-          ? { ...b, text: `Dua individu: ${sj.core.a.archetype_name_id} dan ${sj.core.b.archetype_name_id}.` }
+          ? { ...b, text: `Dua individu: ${sj.core.a.archetype_name_en} dan ${sj.core.b.archetype_name_en}.` }
           : b
       ))),
     });
 
     assert.equal(out.source, 'gemini', `floored instead: ${JSON.stringify(out.findings)}`);
     assert.equal(out.blocks[0].text, ruledOpening(sj));
-    assert.equal(out.stage6_version, '1.70.0'); // 1.26.0-1.38.0, 1.42.0-1.46.0, 1.48.0: the voice-v2 gate; 1.47.0: main's pair serve re-gate; 1.39.0-1.41.0: main's truth checks
+    assert.equal(out.stage6_version, '1.72.0'); // 1.26.0-1.38.0, 1.42.0-1.46.0, 1.48.0: the voice-v2 gate; 1.47.0: main's pair serve re-gate; 1.39.0-1.41.0: main's truth checks
     // LOG ONLY, on the attempt record the QA tape already reads.
     assert.equal(out.attempts.at(-1).p0_model_wrote_anyway, true);
   });

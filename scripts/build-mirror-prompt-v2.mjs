@@ -58,9 +58,12 @@ export const EDITS = [
     + 'The page already shows her pillars and Pilar Konsepsi, her element bars, and every badge with its one-line\nmeaning.\n\n'
     + 'When the chart has more than one relationship between pillars (Benturan, Gesekan, Simpul, Ikatan and the\nlike), do not explain them one by one. Weave them into one story of how that friction or pull feels in her\ndaily life. Name each at most once, in passing. If you give a relationship\'s pillars, give all of them exactly\nas `provenance.positions_id` lists them; you may also leave the pillars out.\n\n'
     + 'A full reading is roughly 400-550 words. Be ruthless: cut a fact before you thin every fact.'],
+  // "Arketipe," dropped 2026-10-02 (Reyner, G1): the archetype is written as its English
+  // title, never in brackets (the shared base's own line says so), so naming it here
+  // contradicted that line.
   ['7 brackets',
     'A named term is written as its Indonesian name with `label_bracket` in\nbrackets once, at first mention (`Bunga Persik (Peach Blossom)`);',
-    'An Arketipe, Aspek or Bintang name is written as its Indonesian name with\n`label_bracket` in brackets once, at first mention (`Bunga Persik (Peach Blossom)`); a relationship between\npillars gets no bracket;'],
+    'An Aspek or Bintang name is written as its Indonesian name with\n`label_bracket` in brackets once, at first mention (`Bunga Persik (Peach Blossom)`); a relationship between\npillars gets no bracket;'],
 ];
 
 /** The mirror prompt from the shared base. Throws when any edit does not match exactly once. */

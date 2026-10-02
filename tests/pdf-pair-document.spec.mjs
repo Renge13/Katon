@@ -87,7 +87,8 @@ const RULED_P0 = (() => {
     .replace(/\r\n?/g, '\n');
   return /^- label_meaning: "(.*)"$/mu.exec(md.slice(md.indexOf('## kompatibilitas.p0_opening')))[1];
 })();
-const p0Sentence = (sj) => fillPairTemplate(RULED_P0, sj.core.a.archetype_name_id, sj.core.b.archetype_name_id);
+// Filled with the English titles since G1 (2026-10-02), as lib/semantic/pair.js fills it.
+const p0Sentence = (sj) => fillPairTemplate(RULED_P0, sj.core.a.archetype_name_en, sj.core.b.archetype_name_en);
 const names = Object.keys(PAIRS);
 
 test('THE PDF AUTHORS NOTHING: every block is the cached prose, ON THE READING PAGE', async () => {
@@ -122,8 +123,8 @@ test('THE PDF AUTHORS NOTHING: every block is the cached prose, ON THE READING P
 test('the engine P0 sentence is on the reading page, ONCE', async () => {
   for (const name of names) {
     const { texts, semanticJson } = await build(name);
-    const a = semanticJson.core.a.archetype_name_id;
-    const b = semanticJson.core.b.archetype_name_id;
+    const a = semanticJson.core.a.archetype_name_en;
+    const b = semanticJson.core.b.archetype_name_en;
     const sentence = p0Sentence(semanticJson);
     assert.ok(sentence.includes(a) && sentence.includes(b));
     const hits = texts.filter((t) => flat(t).includes(sentence));
@@ -451,47 +452,40 @@ test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () =>
 
 // ── THE COVER (Reyner, 2026-09-14, ruling 2) ───────────────
 
-test('THE COVER LEADS WITH THE INDONESIAN NAMES, English once underneath', async () => {
-  // ── REVERSED 2026-09-22 (P2 markup A3, Reyner "ok") ──────────
-  // Was the 2026-09-14 ruling 2, English first. Rule 23: Indonesian first, English
-  // pair once. `tests/pdf-document.spec.mjs` asserts the mirror's half.
-  //
-  // THE SEPARATOR STAYS ` - `. Reyner's example wrote "The Sun · The Garden" with a
-  // middle dot; rule 20 is keyboard characters only, and `·` is not one. Read as an
-  // illustration of the CONTENT (both English names, English first) rather than a
-  // ruling on the separator, so the existing keyboard hyphen is kept and the
-  // question is flagged rather than decided silently.
+test('THE COVER IS THE TWO ENGLISH TITLES, nothing under them (G1)', async () => {
+  // ── REVERSED AGAIN 2026-10-02 (G1, Reyner: "Accept English titles", "Everywhere") ──
+  // A3 (2026-09-22) made the cover "<id> dan <id>" with "<en> - <en>" under it. Rule 23
+  // as amended shows the archetype by name_en everywhere and no Indonesian name, so the
+  // title is "<en> dan <en>" and the sub-line goes. `tests/pdf-document.spec.mjs`
+  // asserts the mirror's half.
   for (const name of names) {
     const { texts, semanticJson } = await build(name);
     const cover = texts[0].split('\n').map((l) => l.trim()).filter(Boolean);
     const a = semanticJson.core.a;
     const b = semanticJson.core.b;
-
-    const at = cover.indexOf(`${a.archetype_name_id} dan ${b.archetype_name_id}`);
-    assert.ok(at > -1, `${name}: the Indonesian pair is not a title line on the cover`);
-    assert.equal(cover[at + 1], `${a.archetype_name_en} - ${b.archetype_name_en}`,
-      `${name}: the English pair is not the line directly under it`);
-    // ORDER IS THE ASSERTION, not mere presence: both strings were on the cover
-    // before this ruling too, the other way round.
-    assert.ok(texts[0].indexOf(a.archetype_name_id) < texts[0].indexOf(a.archetype_name_en),
-      `${name}: the English name still comes first`);
+    // Two lines, broken before "dan" so a long title never splits a name.
+    const at = cover.indexOf(a.archetype_name_en);
+    assert.ok(at > -1, `${name}: A's English title is not a line of its own`);
+    assert.equal(cover[at + 1], `dan ${b.archetype_name_en}`, `${name}: "dan <B>" is not the line under it`);
+    assert.equal(texts[0].includes(a.archetype_name_id) || texts[0].includes(b.archetype_name_id), false,
+      `${name}: an Indonesian archetype name is on the cover`);
+    assert.equal(cover.some((l) => l === `${a.archetype_name_en} - ${b.archetype_name_en}`), false, `${name}: the old sub-line is gone`);
   }
 });
 
-test('THE DOCUMENT METADATA TITLE IS UNCHANGED by the cover ruling', async () => {
-  // Explicitly ruled: the cover flips, the metadata does not. It is the filename a
-  // reader sees in a PDF viewer's tab and in her downloads folder, and it is
-  // Indonesian because the document is.
+test('THE DOCUMENT METADATA TITLE IS THE ENGLISH PAIR (G1)', async () => {
+  // Was "explicitly ruled: the cover flips, the metadata does not" (A3, 2026-09-22),
+  // Indonesian. It is what a reader sees in a PDF viewer's tab and her downloads
+  // folder, so G1's "Everywhere" (2026-10-02) reaches it.
   for (const name of names) {
     const { buffer, semanticJson } = await build(name);
-    const want = `Katon - ${semanticJson.core.a.archetype_name_id} dan ${semanticJson.core.b.archetype_name_id}`;
+    const want = `Katon - ${semanticJson.core.a.archetype_name_en} dan ${semanticJson.core.b.archetype_name_en}`;
     assert.ok(buffer.toString('latin1').includes(want)
       || buffer.toString('utf16le').includes(want)
       || buffer.includes(Buffer.from(want, 'utf8')),
     `${name}: the metadata title is not "${want}"`);
   }
 });
-
 // ── NOTHING OVERLAPS (Reyner, 2026-09-14, ruling 3) ────────
 
 test('NO TEXT IS DRAWN ON TOP OF OTHER TEXT, on any page of either pair', async () => {
@@ -572,8 +566,8 @@ test('THE QUADRANT NAME IS THE READING\'S TITLE LINE, after the P0 sentence', as
     const footer = `Katon - ${RENDER_COPY.pdfEditionCompat}`;
     const lines = texts[1].split('\n').map((l) => l.trim()).filter((l) => l && l !== footer);
 
-    const a = semanticJson.core.a.archetype_name_id;
-    const b = semanticJson.core.b.archetype_name_id;
+    const a = semanticJson.core.a.archetype_name_en;
+    const b = semanticJson.core.b.archetype_name_en;
     // ── THE ORDER IS REVERSED, RULED 2026-09-22 (P2 markup C1) ──
     // Was: P0 sentence on line 1, quadrant title on line 2. A body-size sentence
     // standing above the headline is the defect Reyner marked ok to fix - the

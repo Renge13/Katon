@@ -49,9 +49,13 @@ const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 // deploy with STAGE6 1.64.0 and the prompt direction): chart 1's semantic JSON carries
 // rewritten actionable / cost / Dominan cells; it was a60fc58e... The pair key still
 // does not move: the v1 pair semantic JSON carries none of those cells.
+// RE-PINNED BOTH on the English archetype titles (Prompt BB §3, G1, 2026-10-02): the
+// semantic JSON marks core.archetype_name_id internal_only (the writer gets the English
+// title only) and the pair opening is filled with the English titles, so both keys move
+// and every saved reading is rewritten once; they were c318c80b... and 423d02fd....
 const V1_KEYS = {
-  mirror: 'c318c80bc05794bc17b036f7682d95c13678ba7abcb63330138c2bb416e1771e',
-  pair: '423d02fd8465f31e67470b092239981b91e34e07e59d36a5fa050fac898add00',
+  mirror: 'd8d3ffaa08954236ecb222a1c3f8b5fa834c776e2fb657cdf69eddb5016dba29',
+  pair: '96987362e7021de7dc86c47b9365d1440b41173ec92d4b333aaf07a21150eba0',
 };
 
 const ENV = ['VOICE', 'VERCEL_ENV', 'GEMINI_API_KEY'];

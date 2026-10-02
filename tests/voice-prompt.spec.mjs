@@ -57,6 +57,11 @@ const MIRROR_EDITS = [
   // BA §4's one adjustment (Reyner, 2026-10-01, verbatim), after the smoke stopped on
   // advice-shaped closes: the epilogue line itself, not the AX line, is replaced.
   ['and not a new piece of advice.', BA_EPILOGUE_TAIL],
+  // G1's title fix (Reyner, 2026-10-02, verbatim, in #194): one line in the shared base, after
+  // the writer translated the English title back ("The Morning Dew Pagi") in the BB smoke.
+  ['each block draws on. Headings are short and plain. Paragraph breaks are two newlines.\n',
+    'each block draws on. Headings are short and plain. Paragraph breaks are two newlines.\n'
+    + 'Write the archetype exactly as its English title: never translated, never paired with an Indonesian word, never in brackets.\n'],
 ];
 const COMPAT_EDITS = [
   ['The penutup leaves something worth exploring between them. It does not sum the pair up and does not\nassign homework', 'The penutup does not sum the pair up and does not\nassign homework'],
@@ -119,7 +124,8 @@ test('THE v2 PAIR PROMPT IS AE §1, THEN §2, THEN BOTH EXAMPLE SECTIONS, and no
 
 test('THE EXAMPLES LOAD ON v2 ONLY: no v1 prompt carries the preamble or any example', () => {
   const preamble = 'The examples that follow come from other people\'s charts.';
-  const exampleLine = 'Sebagai Samudra, elemen Air di dalam dirimu';
+  // "Samudra" became its English title in the examples (G1, Reyner 2026-10-02).
+  const exampleLine = 'Sebagai The Ocean, elemen Air di dalam dirimu';
   const pairLine = 'Di antara kalian mengalir dinamika Inti Menghidupi';
   for (const kind of ['mirror', 'pair']) {
     const v1 = loadPrompt(kind, 'v1');
@@ -252,4 +258,14 @@ test('AX §1: the v2 mirror prompt carries Reyner\'s three lines verbatim, and t
 test('AX §1.2: no example gives a relation an English bracket', () => {
   const ex = loadPrompt('pair', 'v2'); // the pair prompt carries BOTH example sections
   assert.equal(/(Ikatan|Gabungan Penuh|Setengah Gabungan|Benturan|Gesekan|Simpul)\s*\(/u.test(ex), false);
+});
+
+test('G1: the v2 mirror prompt names no Arketipe in its bracket rule (Reyner, 2026-10-02)', () => {
+  // The archetype is written as its English title, never in brackets (the shared base's
+  // line). The mirror's built Form line used to say "An Arketipe, Aspek or Bintang name is
+  // written as its Indonesian name with label_bracket in brackets once", which contradicted it.
+  const mirror = loadPrompt('mirror', 'v2');
+  assert.equal(mirror.includes('Arketipe, Aspek'), false, 'the bracket rule still names the archetype');
+  assert.ok(mirror.includes('An Aspek or Bintang name is written as its Indonesian name'));
+  assert.ok(mirror.includes('Write the archetype exactly as its English title: never translated, never paired with an Indonesian word, never in brackets.'));
 });

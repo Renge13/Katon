@@ -260,39 +260,42 @@ const lead = (draft, sentence) => {
 };
 const prose = (r) => [...r.normalized.blocks.map((b) => b.text), r.normalized.penutup].join('\n');
 
-test('FIX (i): a wrong archetype bracket is replaced with core.archetype_name_en', () => {
+// ── FIX (i) IS REPLACED BY THE ENGLISH TITLE (G1, STAGE6 1.71.0, 2026-10-02) ──
+// Rule 23 as amended: the archetype is its English title, never with the Indonesian
+// name or a bracket beside it. Whatever the writer put after the Indonesian name -
+// a wrong gloss, a hanzi, a square gloss - goes with it (lib/validate/archetypeTitles.js).
+test('G1: an Indonesian archetype name with a wrong bracket is served as the English title', () => {
   const sj = v2(A);
   assert.equal(sj.core.archetype_name_en, 'The Sun', 'precondition');
   const r = validateRenderingV2(lead(draftFor(sj), 'Kamu adalah Matahari (Bing), unsur Api.'), sj);
-  assert.ok(prose(r).startsWith('Kamu adalah Matahari (The Sun), unsur Api.'), prose(r).slice(0, 80));
+  assert.ok(prose(r).startsWith('Kamu adalah The Sun, unsur Api.'), prose(r).slice(0, 80));
   assert.equal(prose(r).includes('(Bing)'), false);
+  assert.equal(prose(r).includes('Matahari'), false, 'no Indonesian archetype name is served');
 });
 
-test('FIX (i): a hanzi archetype bracket no longer rejects on D3 - the bracket is the engine\'s', () => {
+test('G1: a hanzi archetype bracket does not reject on D3 - it goes with the Indonesian name', () => {
   const sj = v2(A);
   const r = validateRenderingV2(lead(draftFor(sj), 'Kamu adalah Matahari (丙), unsur Api.'), sj);
   assert.deepEqual(checks(r), [], JSON.stringify(checks(r)));
-  assert.ok(prose(r).startsWith('Kamu adalah Matahari (The Sun)'));
+  assert.ok(prose(r).startsWith('Kamu adalah The Sun, unsur Api.'), prose(r).slice(0, 80));
 });
 
-test('FIX (i): a square-bracket gloss after the archetype is replaced, not doubled; an element loses its own (1.37.0)', () => {
+test('G1: a square-bracket gloss after the archetype goes too; an element loses its own (1.37.0)', () => {
   const sj = v2(A);
   const r = validateRenderingV2(lead(draftFor(sj), 'Kamu adalah Api [Fire] dengan arketipe Matahari [Sun].'), sj);
-  // Until 1.37.0 fix (i) left "Api [Fire]" as written (its scope was the archetype);
-  // AD amendment 2 item 4 removes an unbound term's square gloss.
-  assert.ok(prose(r).startsWith('Kamu adalah Api dengan arketipe Matahari (The Sun).'), prose(r).slice(0, 90));
+  assert.ok(prose(r).startsWith('Kamu adalah Api dengan arketipe The Sun.'), prose(r).slice(0, 90));
 });
 
-test('FIX (i): a pair brackets BOTH archetypes and leaves the ruled opening untouched', () => {
+test('G1: a pair writes BOTH archetypes as English titles and leaves the engine opening untouched', () => {
   const pj = buildPairSemantic(A, B, { voice: 'v2' });
   assert.deepEqual([pj.core.a.archetype_name_en, pj.core.b.archetype_name_en], ['The Sun', 'The Mountain'], 'precondition');
   const d = draftFor(pj);
-  const opening = { fact_ids: ['p0_opening'], heading: '', text: 'Ini adalah bacaan tentang dua individu: Matahari dan Gunung.' };
+  const opening = { fact_ids: ['p0_opening'], heading: '', text: 'Ini adalah bacaan tentang dua individu: The Sun dan The Mountain.' };
   const body = lead({ ...d, blocks: d.blocks.filter((b) => !(b.fact_ids || []).includes('p0_opening')) },
     'Kamu adalah Matahari (Bing). Dia adalah Gunung (戊).');
   const r = validateRenderingV2({ ...body, blocks: [opening, ...body.blocks] }, pj);
   assert.equal(r.normalized.blocks[0].text, opening.text, 'the opening is byte-identical');
-  assert.ok(r.normalized.blocks[1].text.startsWith('Kamu adalah Matahari (The Sun). Dia adalah Gunung (The Mountain).'),
+  assert.ok(r.normalized.blocks[1].text.startsWith('Kamu adalah The Sun. Dia adalah The Mountain.'),
     r.normalized.blocks[1].text.slice(0, 90));
   assert.deepEqual(checks(r), [], JSON.stringify(checks(r)));
 });
@@ -345,7 +348,7 @@ test('ROUTING: the same style-flagged draft is served under v2 and floors under 
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.70.0');
+    assert.equal(onV2.stage6_version, '1.72.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the question and floors');
   } finally {
@@ -450,26 +453,23 @@ for (const c of NESTED.cases) {
     const out = validateRenderingV2(draft, sj);
     const served = out.normalized.blocks[0].text;
     assert.equal(NESTED_RE.test(served), false, `nested bracket served: ${served.slice(0, 80)}`);
-    const name = sj.core.archetype_name_id;
-    assert.ok(served.includes(`(${name})`), 'the writer\'s own parenthesis is kept as written');
+    // The writer's own parenthesis is kept, holding the English title since G1.
+    assert.ok(served.includes(`(${sj.core.archetype_name_en})`), 'the writer\'s parenthesis is kept, with the title');
+    assert.equal(served.includes(sj.core.archetype_name_id), false, 'and no Indonesian archetype name');
   });
 }
 
-test('NO NESTED BRACKET: the English goes on the first BARE mention, and nowhere when there is none', () => {
+test('NO NESTED BRACKET: every archetype mention becomes the title, inside a parenthesis or not (G1)', () => {
+  // Was "the English goes on the first BARE mention" (1.51.0). Since G1 there is no
+  // insertion to place: each mention is the English title, so nothing can nest.
   const sj = v2(A);
   const name = sj.core.archetype_name_id;
   const en = sj.core.archetype_name_en;
-  const withBare = draftFor(sj);
-  withBare.blocks[0].text = `Sebagai Api (${name}), kamu hangat. ${name} menerangi sekitarmu.`;
-  const t1 = validateRenderingV2(withBare, sj).normalized.blocks[0].text;
-  assert.ok(t1.includes(`${name} (${en}) menerangi`), t1.slice(0, 120));
+  const d = draftFor(sj);
+  d.blocks[0].text = `Sebagai Api (${name}), kamu hangat. ${name} menerangi sekitarmu.`;
+  const t1 = validateRenderingV2(d, sj).normalized.blocks[0].text;
+  assert.ok(t1.startsWith(`Sebagai Api (${en}), kamu hangat. ${en} menerangi sekitarmu.`), t1.slice(0, 120));
   assert.equal(NESTED_RE.test(t1), false);
-  const onlyInside = draftFor(sj);
-  onlyInside.blocks = onlyInside.blocks.map((b) => ({ ...b, text: b.text.split(name).join('dia') }));
-  onlyInside.blocks[0].text = `Sebagai Api (${name}), kamu hangat.`;
-  const out = validateRenderingV2(onlyInside, sj);
-  const all = out.normalized.blocks.map((b) => b.text).join(' ');
-  assert.equal(all.includes(`(${en})`), false, 'inserted on a mention inside parentheses');
 });
 
 // ── POST-PROCESSING NEVER NESTS A BRACKET (STAGE6 1.59.0, AS Amendment 1 §B) ──
@@ -501,15 +501,16 @@ test('NO NESTED BRACKET CONTROL: a BARE square gloss after a supplied Aspek stil
   assert.ok(t.includes('Aspek Penantang (Seven Killings) menetap'), t.slice(-120));
 });
 
-test('NO NESTED BRACKET: an archetype square gloss inside a parenthesis is removed, not converted', () => {
+test('NO NESTED BRACKET: an archetype square gloss inside a parenthesis goes with the name (G1)', () => {
   const sj = v2(A);
   const name = sj.core.archetype_name_id;
+  const en = sj.core.archetype_name_en;
   const draft = draftFor(sj);
-  draft.blocks[0].text = `Sebagai Api (${name} [${sj.core.archetype_name_en}]), kamu hangat. ${name} menerangi sekitarmu.`;
+  draft.blocks[0].text = `Sebagai Api (${name} [${en}]), kamu hangat. ${name} menerangi sekitarmu.`;
   const t = validateRenderingV2(draft, sj).normalized.blocks[0].text;
   assert.equal(NESTED_ANY.test(t), false, t.slice(0, 120));
   NESTED_ANY.lastIndex = 0;
-  assert.ok(t.startsWith(`Sebagai Api (${name}),`), t.slice(0, 120));
+  assert.ok(t.startsWith(`Sebagai Api (${en}), kamu hangat. ${en} menerangi`), t.slice(0, 120));
 });
 
 test('NO NESTED BRACKET on v1: insertBrackets skips a mention inside parentheses for the next bare one', () => {
@@ -690,8 +691,9 @@ test('KEPT: when dropping the hedge would make a rejecting check fail, the sente
   // The example check is `pair.both_named` since 2026-10-02: it used to be
   // `pair.reframe_missing`, which A4 removed (STAGE6 1.66.0).
   const sj = buildPairSemantic(A, B, { voice: 'v2' });
-  const { archetype_name_id: nameA } = sj.core.a;
-  const { archetype_name_id: nameB } = sj.core.b;
+  // The English titles since G1 (2026-10-02): both_named reads name_en.
+  const { archetype_name_en: nameA } = sj.core.a;
+  const { archetype_name_en: nameB } = sj.core.b;
   const draft = draftFor(sj);
   const idx = 0;
   // Both names live ONLY in the final, hedged sentence of the opening block.
