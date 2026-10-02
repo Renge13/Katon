@@ -55,10 +55,10 @@ const { MASTER_PROMPTS_V2, promptVersionFor } = await import('../lib/render/prom
 const { V2_MIRROR_TEMPERATURE, GENERATION } = await import('../lib/render/config.js');
 const { buildPairSemantic } = await import('../lib/semantic/pair.js');
 const { sentences } = await import('../lib/validate/text.js');
-// The element glosses, read from where they live on this branch (a client component
-// Node cannot import); #186 moves them to lib/site/elements.js. Parsed, not copied.
-const ELEMENT_GLOSS = Object.fromEntries([...fs.readFileSync('components/Funnel.jsx', 'utf8')
-  .slice(0, 20000).matchAll(/^\s+(Kayu|Api|Tanah|Logam|Air): '([^']+)',$/gmu)].map((m) => [m[1], m[2]]));
+// The element glosses, imported from where #186 moved them (lib/site/elements.js). This
+// parsed them out of components/Funnel.jsx until 2026-10-02, and stopped finding them
+// the day #186 merged.
+const { ELEMENT_GLOSS } = await import('../lib/site/elements.js');
 if (Object.keys(ELEMENT_GLOSS).length !== 5) throw new Error(`element glosses not found (${Object.keys(ELEMENT_GLOSS).length})`);
 const G = JSON.parse(fs.readFileSync('docs/content/glossary.json', 'utf8'));
 
