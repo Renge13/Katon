@@ -85,6 +85,9 @@ async function fillStep(ui, side, { date, time = '', gender = '' }) {
   ui.setField(`#${side}-date`, date);
   if (time) ui.setField(`#${side}-time`, time);
   if (gender) ui.setField(`#${side}-gender`, gender);
+  // Step 2 carries the REQUIRED status since Prompt BC §1 (2026-10-02): one tap.
+  const st = side === 'b' && ui.host.querySelector('[data-status="Pacaran"]');
+  if (st) act(() => { st.click(); });
   ui.submit();
   await ui.settle();
 }
@@ -122,6 +125,10 @@ test('A STEP CANNOT BE LEFT WITHOUT ITS ONE REQUIRED FIELD', async () => {
   // it is a styling choice and a predicate with no button is unreachable.
   assert.equal(stepComplete(1, { a: { date: '' }, b: {}, email: '' }), false);
   assert.equal(stepComplete(1, { a: { date: '1989-09-13' }, b: {}, email: '' }), true);
+  // Step 2 needs the relationship status too (Prompt BC §1, required, 2026-10-02).
+  assert.equal(stepComplete(2, { a: {}, b: { date: '1990-03-04' }, email: '' }), false, 'a date alone no longer completes step 2');
+  assert.equal(stepComplete(2, { a: {}, b: { date: '1990-03-04' }, email: '', status: 'Menikah' }), true);
+  assert.equal(stepComplete(2, { a: {}, b: { date: '1990-03-04' }, email: '', status: 'Tunangan' }), false);
   assert.equal(stepComplete(3, { a: {}, b: {}, email: '' }), false);
   assert.equal(stepComplete(3, { a: {}, b: {}, email: 'x@y.z' }), true);
 

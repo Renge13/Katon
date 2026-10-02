@@ -625,9 +625,15 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
             </h2>
           </Reveal>
         )}
+        {/* ── v2: THE WRITER'S CHAPTER HEADINGS (Prompt BC §2.5, I4, Reyner 2026-10-02:
+            "un-hide the chapter headings") ── as the PDF prints them, in the same big
+            serif line the engine's names use. The server decides (`chapter_headings`);
+            a floor or a v1 reading keeps the engine's two-level section labels. */}
         <ProseBlocks
           reading={reading.reading}
-          labelFor={labelFor(reading.facts, reading.names)}
+          labelFor={reading.chapter_headings === true
+            ? (b) => (b.heading ? { eyebrow: null, name: b.heading } : null)
+            : labelFor(reading.facts, reading.names)}
           modelHeadings={false}
           closeEyebrow={PASANGAN_COPY.section_close}
         />

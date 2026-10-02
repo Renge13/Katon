@@ -40,6 +40,7 @@ import { BirthFields, FieldLabel, GENDER_WORDS } from './BirthFields.jsx';
 import { SeasonGate } from './Funnel.jsx';
 import { Reveal, Eyebrow, Button, Icon } from './kit.jsx';
 import { CHROME_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
+import { PAIR_STATUSES } from '../lib/pair/names.js';
 import { birthSummary } from '../lib/site/birthSummary.js';
 
 /** The three steps, in order. `side` is null for the one that is not a person. */
@@ -58,9 +59,10 @@ export const STEPS = [
  * which is what a Lanjut button needs to know. The date input is native and
  * range-limited, so anything it yields is already a plausible date.
  */
-export function stepComplete(step, { a, b, email }) {
+export function stepComplete(step, { a, b, email, status }) {
   if (step === 1) return Boolean(a.date);
-  if (step === 2) return Boolean(b.date);
+  // The status is asked once, in step 2, and is required (Reyner, 2026-10-02).
+  if (step === 2) return Boolean(b.date) && PAIR_STATUSES.includes(status);
   return Boolean(email);
 }
 
@@ -189,12 +191,62 @@ export default function PasanganSteps({
                       intro={s.side === 'b' ? PASANGAN_COPY.season_gate_b_intro : null}
                     />
                   ) : s.side ? (
-                    <BirthFields
-                      value={value[s.side]}
-                      onChange={(k, v) => onChange(s.side, { ...value[s.side], [k]: v })}
-                      idPrefix={s.side}
-                      personLabel={s.side.toUpperCase()}
-                    />
+                    <>
+                      <BirthFields
+                        value={value[s.side]}
+                        onChange={(k, v) => onChange(s.side, { ...value[s.side], [k]: v })}
+                        idPrefix={s.side}
+                        personLabel={s.side.toUpperCase()}
+                      />
+                      {/* ── NICKNAME, OPTIONAL (Prompt BC §1) ── the server sanitises it
+                          (lib/pair/names.js); maxLength is only a typing aid. */}
+                      <div style={{ height: 16 }} />
+                      <FieldLabel>{PASANGAN_COPY.nickname_label}</FieldLabel>
+                      <input
+                        id={`${s.side}-nickname`}
+                        type="text"
+                        value={value[s.side].nickname || ''}
+                        maxLength={20}
+                        autoComplete="off"
+                        onChange={(e) => onChange(s.side, { ...value[s.side], nickname: e.target.value })}
+                        aria-label={`${PASANGAN_COPY.nickname_label} ${s.side.toUpperCase()}`}
+                      />
+                      <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>
+                        {PASANGAN_COPY.nickname_help}
+                      </div>
+                      {/* ── STATUS, REQUIRED, ONCE, IN THE PARTNER'S STEP (Reyner 2026-10-02:
+                          "One tap, three options (PDKT / Pacaran / Menikah)") ── */}
+                      {s.side === 'b' && (
+                        <>
+                          <div style={{ height: 16 }} />
+                          <FieldLabel>{PASANGAN_COPY.status_label}</FieldLabel>
+                          <div role="radiogroup" aria-label={PASANGAN_COPY.status_label} style={{ display: 'flex', gap: 8 }}>
+                            {PAIR_STATUSES.map((st) => {
+                              const on = value.status === st;
+                              return (
+                                <button
+                                  key={st}
+                                  type="button"
+                                  role="radio"
+                                  aria-checked={on}
+                                  data-status={st}
+                                  onClick={() => onChange('status', st)}
+                                  style={{
+                                    flex: 1, padding: '11px 0', borderRadius: 12, cursor: 'pointer',
+                                    fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600,
+                                    border: `1px solid ${on ? 'var(--senja)' : 'var(--divider)'}`,
+                                    background: on ? 'var(--senja)' : 'transparent',
+                                    color: on ? 'var(--kertas-2)' : 'var(--tinta-soft)',
+                                  }}
+                                >
+                                  {st}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                    </>
                   ) : (
                     <>
                       <FieldLabel>{PASANGAN_COPY.form_email_label}</FieldLabel>

@@ -46,7 +46,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { COMPAT_COPY, PENDING, COPY_BANKS } from '../lib/site/copy.js';
+import { COMPAT_COPY, PENDING, COPY_BANKS, PROPOSED_SLOTS } from '../lib/site/copy.js';
 import * as copyModule from '../lib/site/copy.js';
 import { UNRULED_SOURCES } from '../lib/site/unruledScan.js';
 import { scanUnruled, SENTINEL } from '../scripts/check-unruled-copy.mjs';
@@ -185,7 +185,9 @@ function pendingByRawSearch() {
     Object.values(UNRULED_SOURCES),
     (key, value) => (key.startsWith('_') ? undefined : value),
   );
-  return stripped.split(SENTINEL).length - 1;
+  // PLUS EVERY PROPOSED() STRING (Prompt BC §1, 2026-10-02): displayed for Reyner to rule
+  // in place, and counted by the gate exactly as a sentinel is.
+  return stripped.split(SENTINEL).length - 1 + PROPOSED_SLOTS.length;
 }
 
 

@@ -45,8 +45,11 @@ function restatingWriter(captured) {
     const payload = JSON.parse(user);
     const facts = payload.facts || [];
     const text = facts.map((f) => f.label_meaning).filter(Boolean).join(' ');
+    // Since BC §2.4 (I3) the writer's first chapter opens a v2 pair, and pair.both_named
+    // requires it to name both people: the writer names both English titles first.
+    const names = `Kalian berdua, ${payload.core?.a?.archetype_name_en} dan ${payload.core?.b?.archetype_name_en}.`;
     const draft = {
-      blocks: [{ fact_ids: facts.map((f) => f.id), heading: 'Semua', text: `${text}\n\nKamu dan dia berjalan bersama.` }],
+      blocks: [{ fact_ids: facts.map((f) => f.id), heading: 'Semua', text: `${names} ${text}\n\nKamu dan dia berjalan bersama.` }],
       penutup: 'Penutup yang cukup panjang untuk kalian berdua, dan untukmu.',
     };
     return ok(JSON.stringify(draft));
@@ -74,17 +77,18 @@ test('THE v2 PAIR WRITER IS NEVER HANDED THE OPENING: no p0_opening text in what
   assert.equal(sent.includes(opening(sj).slice(0, 40)), false, 'the opening text reached the writer');
 });
 
-test('A WRITER THAT RESTATES EVERY FACT IT IS GIVEN: exactly ONE opening sentence is served', async () => {
+test('A WRITER THAT RESTATES EVERY FACT IT IS GIVEN: the engine opening is served ZERO times, the writer leads (BC I3)', async () => {
+  // Was "exactly ONE opening sentence is served" with the engine opening leading. Since
+  // Prompt BC §2.4 (I3, 2026-10-02) the writer opens a v2 pair and nothing is prepended,
+  // so the engine's sentence must not appear at all: the writer was never handed it.
   const sj = pairV2();
   const out = await render(sj, restatingWriter([]));
   assert.equal(out.source, 'gemini', 'the stub draft must be SERVED, or the count below is the floor\'s');
-  // The words BEFORE the names. A copy inside a braided block gets "(The Sun)"
-  // inserted after the archetype (round 4, PZ0t), so a needle that includes the
-  // names cannot see the copy - the first draft of this test passed on the defect.
-  const first = opening(sj).slice(0, opening(sj).indexOf(sj.core.a.archetype_name_id));
+  // The words BEFORE the names, so a copy with any name form after it is still seen.
+  const first = opening(sj).slice(0, opening(sj).indexOf(sj.core.a.archetype_name_en));
   const served = [...out.blocks.map((b) => b.text), out.penutup].join('\n');
-  assert.equal(served.split(first).length - 1, 1, `the opening appears ${served.split(first).length - 1} times`);
-  assert.deepEqual(out.blocks[0].fact_ids, ['p0_opening'], 'the engine opening still leads');
+  assert.equal(served.split(first).length - 1, 0, `the engine opening appears ${served.split(first).length - 1} times`);
+  assert.equal(out.blocks[0].heading, 'Semua', 'the writer\'s own block leads');
 });
 
 test('v1 IS UNCHANGED: the v1 pair payload still carries p0_opening (this is v2-only)', async () => {

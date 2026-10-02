@@ -63,18 +63,14 @@ const MIRROR_EDITS = [
     'each block draws on. Headings are short and plain. Paragraph breaks are two newlines.\n'
     + 'Write the archetype exactly as its English title: never translated, never paired with an Indonesian word, never in brackets.\n'],
 ];
-const COMPAT_EDITS = [
-  ['The penutup leaves something worth exploring between them. It does not sum the pair up and does not\nassign homework', 'The penutup does not sum the pair up and does not\nassign homework'],
-  // BA §2 (Reyner, 2026-10-01, on the stop): "delete the pair's penutup line. The shared
-  // epilogue line governs the pair too; the verdict guard stays in the pair must-nots."
-  ['The penutup does not sum the pair up and does not\nassign homework; a suggestion is allowed, never required.\n\n', ''],
-];
+// COMPAT_EDITS and AE_COMPAT (AE §2 plus its ruled edits) are gone since Prompt BC §2.1
+// (2026-10-02): the v2 pair prompt is BC's own text, read from
+// docs/content/compat-renderer-prompt-v2.txt, not AE §2 rebuilt.
 const applyEdits = (text, edits, where) => edits.reduce((t, [from, to]) => {
   assert.ok(t.includes(from), `${where} no longer carries: ${from.slice(0, 50)}`);
   return t.replace(from, to);
 }, text);
 const AE_MIRROR = applyEdits(fenceAfter('## 1. Replace `docs/content/renderer-prompt-v2.txt`'), MIRROR_EDITS, 'AE §1');
-const AE_COMPAT = applyEdits(fenceAfter('## 2. Replace `docs/content/compat-renderer-prompt-v2.txt`'), COMPAT_EDITS, 'AE §2');
 
 const EXAMPLES = read('docs/content/voice-examples-v2.txt');
 const MIRROR_EXAMPLES = EXAMPLES.slice(0, EXAMPLES.indexOf('=== PAIR EXAMPLES ==='));
@@ -118,8 +114,10 @@ test('ROUND 6 ON THE MIRROR ONLY: the pair prompt carries none of the round-6 ed
   }
 });
 
-test('THE v2 PAIR PROMPT IS AE §1, THEN §2, THEN BOTH EXAMPLE SECTIONS, and nothing else', () => {
-  assert.equal(loadPrompt('pair', 'v2'), `${AE_MIRROR}\n${AE_COMPAT}\n${EXAMPLES}`);
+test('THE v2 PAIR PROMPT IS BC\'S PAIR PROMPT, THEN THE PAIR EXAMPLE, and nothing else', () => {
+  // Repinned for Prompt BC §2.1 (2026-10-02): it was AE §1 (the shared base) + AE §2 +
+  // both example sections; several base lines contradicted Reyner's compat rulings.
+  assert.equal(loadPrompt('pair', 'v2'), `${read('docs/content/compat-renderer-prompt-v2.txt')}\n${PAIR_ONLY}`);
 });
 
 test('THE EXAMPLES LOAD ON v2 ONLY: no v1 prompt carries the preamble or any example', () => {
@@ -129,16 +127,20 @@ test('THE EXAMPLES LOAD ON v2 ONLY: no v1 prompt carries the preamble or any exa
   const pairLine = 'Di antara kalian mengalir dinamika Inti Menghidupi';
   for (const kind of ['mirror', 'pair']) {
     const v1 = loadPrompt(kind, 'v1');
-    const v2 = loadPrompt(kind, 'v2');
     for (const s of [preamble, exampleLine, pairLine, '=== MIRROR EXAMPLES ===']) {
       assert.ok(!v1.includes(s), `v1 ${kind} carries "${s}"`);
     }
-    assert.ok(v2.includes(preamble), `v2 ${kind} lacks the example preamble`);
-    assert.ok(v2.includes(exampleLine), `v2 ${kind} lacks the mirror examples`);
   }
-  // The pair section is the pair's alone.
-  assert.ok(!loadPrompt('mirror', 'v2').includes(PAIR_ONLY.trim().split('\n')[0]));
-  assert.ok(loadPrompt('pair', 'v2').includes(pairLine));
+  const mirror = loadPrompt('mirror', 'v2');
+  assert.ok(mirror.includes(preamble), 'v2 mirror lacks the example preamble');
+  assert.ok(mirror.includes(exampleLine), 'v2 mirror lacks the mirror examples');
+  // The pair section is the pair's alone, and since BC §2 (2026-10-02) the pair gets ONLY
+  // it: its prompt introduces the example itself, so the file's preamble and the mirror
+  // examples no longer reach it. Its example is Reyner's approved sample.
+  assert.ok(!mirror.includes(PAIR_ONLY.trim().split('\n')[0]));
+  const pair = loadPrompt('pair', 'v2');
+  for (const s of [preamble, exampleLine, '=== MIRROR EXAMPLES ===', pairLine]) assert.equal(pair.includes(s), false, `v2 pair carries "${s}"`);
+  assert.ok(pair.includes('Kalian berdua ibarat The Garden yang tenang dan The Forge yang kokoh.'));
 });
 
 test('v2 INSTRUCTIONS ARE SHORTER THAN v1 (spec: "v2 is smaller than v1, not larger")', () => {
@@ -169,20 +171,25 @@ test('B31: the v2 prompts carry no example phrase for the close', () => {
   }
 });
 
-test('AV §1, as amended by BA §2: both v2 prompts no longer ask her to want more', () => {
+test('AV §1, as amended by BA §2: the v2 mirror no longer asks her to want more; the pair carries BC\'s no-teaser close', () => {
   // AV §1's "End on a settled, confident observation" and the "Mungkin menarik" clause
   // are replaced by BA §2's epilogue line (tested below); the anti-teaser line stays.
-  for (const kind of ['mirror', 'pair']) {
+  // Prompt BC §2 (2026-10-02): the pair prompt is its OWN text now (no shared-base line
+  // reaches it), so this shared-base line is the MIRROR's; the pair carries BC's own.
+  assert.ok(loadPrompt('pair', 'v2').replace(/\s+/gu, ' ').includes('No advice, no recap list, no teaser.'));
+  for (const kind of ['mirror']) {
     const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
     assert.ok(p.includes('The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.'), `${kind} lacks the AV §1 line`);
     assert.equal(p.includes('leaves her wanting to look further'), false, `${kind} still asks for the tease`);
   }
 });
 
-test('AZ §2: both v2 prompts carry Reyner\'s direction verbatim, in place of the lifted word bans', () => {
+test('AZ §2: the v2 mirror carries Reyner\'s direction verbatim; the pair carries BC\'s voice line', () => {
   // Reyner, 2026-10-01: "We don't ban specifics for the writer, just give overall direction."
-  // In the SHARED base, so the mirror and the pair both carry it.
-  for (const kind of ['mirror', 'pair']) {
+  // Prompt BC §2 (2026-10-02): the pair prompt is its OWN text now (no shared-base line
+  // reaches it), so this shared-base line is the MIRROR's; the pair carries BC's own.
+  assert.ok(loadPrompt('pair', 'v2').replace(/\s+/gu, ' ').includes('Voice: warm, bold and emotionally vivid; plain words, never purple; no slang and no chat particles.'));
+  for (const kind of ['mirror']) {
     const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
     assert.ok(p.includes(AZ_DIRECTION), `${kind} lacks the AZ direction`);
   }
@@ -193,8 +200,15 @@ test('AZ §2: both v2 prompts carry Reyner\'s direction verbatim, in place of th
 // it once: end on a confident observation, not "Mungkin menarik untuk...". Questions
 // are neither banned nor asked for; the old wording that invited an open musing goes.
 // Prompt only: no gate, no blocklist entry (docs/content/voice-constraint-rulings B33, B34).
-test('B33/B34: the v2 prompts carry the confident-close instruction and none of the removed wording', () => {
-  for (const kind of ['mirror', 'pair']) {
+test('B33/B34: the v2 mirror carries the confident-close instruction; the pair carries BC\'s close', () => {
+  // Prompt BC §2 (2026-10-02): the pair prompt is its OWN text now (no shared-base line
+  // reaches it), so this shared-base line is the MIRROR's; the pair carries BC's own.
+  const pairText = loadPrompt('pair', 'v2').replace(/\s+/gu, ' ');
+  assert.ok(pairText.includes('The close: the penutup is a short epilogue about what this relationship could become.'));
+  for (const gone of ['You may end a thought on an open observation', 'The penutup leaves something worth exploring between them']) {
+    assert.equal(pairText.includes(gone), false, `pair still says: ${gone}`);
+  }
+  for (const kind of ['mirror']) {
     const p = loadPrompt(kind, 'v2').replace(/\s+/gu, ' ');
     // ONE close instruction since BA §2: the epilogue line (its own test, below).
     assert.ok(p.includes("End with a short epilogue that gathers the reading's threads"), `${kind} lacks the close instruction`);
@@ -213,8 +227,10 @@ test('B33/B34: the v2 prompts carry the confident-close instruction and none of 
 // stays in the pair must-nots as it is." Then BA §4's one adjustment, Reyner verbatim,
 // after the smoke's advice-shaped closes: the line's tail is his.
 const BA_EPILOGUE = "End with a short epilogue that gathers the reading's threads into one cohesive closing reflection: not a recap list, not a teaser that invites her to keep reading, and no advice, including advice the body already gave. The epilogue describes; it does not tell her what to do, not even softly.";
-test('BA §2: both v2 prompts close on the epilogue line, with no phrase rule and no competing close', () => {
-  for (const kind of ['mirror', 'pair']) {
+test('BA §2: the v2 mirror closes on the epilogue line; the pair on BC\'s, with its verdict guard', () => {
+  // Prompt BC §2 (2026-10-02): the pair prompt is its OWN text now (no shared-base line
+  // reaches it), so this shared-base line is the MIRROR's; the pair carries BC's own.
+  for (const kind of ['mirror']) {
     const full = loadPrompt(kind, 'v2');
     const instr = full.slice(0, full.indexOf('=== MIRROR EXAMPLES ===')).replace(/\s+/gu, ' ');
     assert.equal(instr.split(BA_EPILOGUE).length - 1, 1, `${kind}: the epilogue line, verbatim, exactly once`);
@@ -224,7 +240,8 @@ test('BA §2: both v2 prompts close on the epilogue line, with no phrase rule an
     // Kept: the anti-teaser line, and the pair's verdict guard.
     assert.ok(instr.includes('The reading is complete: never hint at more to explore, deeper layers, or what is still waiting.'));
   }
-  assert.ok(loadPrompt('pair', 'v2').replace(/\s+/gu, ' ').includes('no score and no overall verdict (never "cocok" or "tidak cocok" as a conclusion)'));
+  // The pair's verdict guard, in BC's words since 2026-10-02.
+  assert.ok(loadPrompt('pair', 'v2').replace(/\s+/gu, ' ').includes('an overall verdict on the pair ("cocok" or "tidak cocok" as a conclusion, a score, a percentage)'));
   // Kept unchanged (BA §2.3): the imperative line, a behavioural rule with examples.
   assert.ok(loadPrompt('mirror', 'v2').replace(/\s+/gu, ' ').includes("Advice is a plain, optional suggestion, never an imperative or reminder such as 'ingatlah', 'jangan lupa', or 'kamu harus'."));
 });
