@@ -215,7 +215,8 @@ test('D4 AFTER AZ (1.64.0): fatalism and a pair verdict no longer gate; medical 
   const v1r = validateRendering(plant(draftFor(pj1), 'Kalian sangat cocok.'), pj1);
   assert.equal(v1r.findings.some((f) => f.check === 'pair.verdict'), false, 'v1 no longer logs it either');
   // A KEPT category, same plant: still HARD on v2.
-  const med = validateRenderingV2(plant(draftFor(sj), 'Minum obat yang tepat akan membantumu.'), sj);
+  // `obat` left the ban 2026-10-02 (D1); `resep dokter` is kept.
+  const med = validateRenderingV2(plant(draftFor(sj), 'Mintalah resep dokter yang tepat untukmu.'), sj);
   assert.ok(checks(med).includes('forbidden.medical'), JSON.stringify(checks(med)));
   assert.equal(med.ok, false);
 });
@@ -338,7 +339,7 @@ test('ROUTING: the same leaking draft is served under v2 and floors under v1', a
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.66.0');
+    assert.equal(onV2.stage6_version, '1.67.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the leaking draft and floors');
   } finally {

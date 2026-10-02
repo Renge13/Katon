@@ -72,3 +72,16 @@ test('A4: a difficult seat whose reframe block carries none of the reframe\'s wo
   const code = src('lib/validate/pair.js').replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
   assert.doesNotMatch(code, /REFRAME_OVERLAP|reframe_missing/u);
 });
+
+// ── D1: `obat` and `terapi` leave the medical ban; the clinical bans stay ──
+
+test('D1: "obat" and "terapi" as metaphor pass; resep dokter, gejala, depresi and the rest still reject', () => {
+  for (const s of ['Dia adalah obat untuk lelahmu.', 'Kehadirannya terasa seperti terapi bagimu.']) {
+    assert.deepEqual(rejecting(planted(s)), [], s);
+  }
+  for (const s of ['Kamu butuh resep dokter.', 'Ada gejala depresi di sini.', 'Sebaiknya kamu ke dokter.',
+    'Ini butuh pengobatan.', 'Ini seperti penyakit lama.', 'Diagnosa ini jelas.', 'Itu gangguan kecemasan.',
+    'Jaga kesehatan mentalmu.']) {
+    assert.ok(rejecting(planted(s)).includes('forbidden.medical'), s);
+  }
+});

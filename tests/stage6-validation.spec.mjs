@@ -918,7 +918,8 @@ test('AZ RED FIRST: the lifted words pass; a pipeline leak, self-harm, medical o
     ['a literal null', 'Nilaimu null di sini.', 'style.code_leak'],
     ['sebagai AI', 'Sebagai AI, saya membaca petamu.', 'style.meta'],
     ['bunuh diri', 'Jangan pernah berpikir bunuh diri.', 'forbidden.self_harm'],
-    ['obat', 'Minum obat yang tepat akan membantumu.', 'forbidden.medical'],
+    // `obat` left the ban 2026-10-02 (D1); `resep dokter` is kept.
+    ['resep dokter', 'Mintalah resep dokter yang tepat untukmu.', 'forbidden.medical'],
     ['investasi', 'Mulailah investasi sekarang juga.', 'forbidden.financial'],
   ]) {
     const bad = withBlockText(goodReading(), 'day_master_Fire',

@@ -504,7 +504,7 @@ test('A FLOOR THAT FAILS THE GATE IS REFUSED, NOT SERVED', () => {
 
   const poisoned = {
     ...floor,
-    penutup: 'Minum obat penenang setiap pagi.',
+    penutup: 'Mintalah resep dokter setiap pagi.',
   };
   const reason = floorRefusalReason(poisoned, semantic);
   assert.match(reason, /^floor_failed_gate:/);
@@ -617,7 +617,7 @@ async function plantHardFailingRow(key) {
     // checks Reyner kept 2026-10-01; this planted "ramalan" until fatalism was
     // lifted). Everything else about this row is well-formed, so only the hard
     // check can be what fires.
-    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Minum obat penenang setiap pagi.' }],
+    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Mintalah resep dokter setiap pagi.' }],
     penutup: 'Penutup.',
     source: 'gemini',
     model: 'planted-model',
@@ -640,7 +640,7 @@ test('a cached reading that fails a HARD check falls back immediately', async ()
   assert.equal(body.meta.source, 'module_assembly');
   assert.equal(body.meta.hard_fail_fallback, true);
   assert.equal(body.meta.cached, false, 'the served text is not the cached row');
-  assert.ok(!JSON.stringify(body.blocks).includes('obat penenang'));
+  assert.ok(!JSON.stringify(body.blocks).includes('resep dokter'));
 });
 
 test('the fallback does NOT overwrite the row it refused to serve', async () => {
@@ -655,7 +655,7 @@ test('the fallback does NOT overwrite the row it refused to serve', async () => 
   // QA surface reads it: the prose is still there, it just no longer serves.
   const row = await readCache(key, { includeUnvalidated: true });
   assert.equal(row.source, 'gemini');
-  assert.equal(row.blocks[0].text, 'Minum obat penenang setiap pagi.');
+  assert.equal(row.blocks[0].text, 'Mintalah resep dokter setiap pagi.');
 });
 
 // ── A SERVE-TIME HARD FAIL MUST NOT FLOOR A CHART FOREVER (Prompt AI §2) ──
@@ -683,7 +683,7 @@ test('A SERVE-TIME HARD FAIL DROPS THE ROW, SO THE NEXT VISIT RE-RENDERS', async
   assert.equal(second.meta.source, 'gemini', 'the second visit re-rendered');
   assert.ok(fetchCalls > 0);
   const row = await readCache(key);
-  assert.ok(row && !JSON.stringify(row.blocks).includes('obat penenang'), 'the re-render replaced the bad row');
+  assert.ok(row && !JSON.stringify(row.blocks).includes('resep dokter'), 'the re-render replaced the bad row');
 });
 
 test('a SOFT failure keeps serving; only hard checks pull a reading', async () => {

@@ -14,8 +14,8 @@
         "note": "Medical claim. Rule 25."
       },
       {
-        "pattern": "\\b(obat|resep dokter|ke dokter|terapi|pengobatan)\\b",
-        "note": "Medical advice."
+        "pattern": "\\b(resep dokter|ke dokter|pengobatan)\\b",
+        "note": "Medical advice. `obat` and `terapi` removed 2026-10-02 (Reyner, D1: \"allow dramatic metaphors like 'obat' while keeping the clinical bans\"); STAGE6 1.67.0."
       },
       {
         "pattern": "\\b(depresi|gangguan (mental|kecemasan)|kesehatan mentalmu)\\b",

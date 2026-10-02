@@ -309,7 +309,7 @@ test('THE CE PDF NEVER PRINTS A HARD-FAILING READING, even when the PDF is asked
   // planted "ramalan" until fatalism was lifted) - the planted row the page-path test
   // uses in tests/mirror-route.spec.mjs. Written as a real model row.
   await writeCache(key, {
-    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Minum obat penenang setiap pagi.' }],
+    blocks: [{ fact_ids: ['planted'], heading: 'Planted', text: 'Mintalah resep dokter setiap pagi.' }],
     penutup: 'Penutup.', engineVersion: semanticJson.engine_version,
     source: 'gemini', model: 'planted-model', promptVersion: 'planted', stage6Version: STAGE6_VERSION,
   });
@@ -326,7 +326,7 @@ test('THE CE PDF NEVER PRINTS A HARD-FAILING READING, even when the PDF is asked
     },
   });
   const printed = JSON.stringify(calls[0]?.rendered?.blocks ?? []);
-  assert.equal(printed.includes('obat penenang'), false, 'the CE PDF printed the hard-failing reading');
+  assert.equal(printed.includes('resep dokter'), false, 'the CE PDF printed the hard-failing reading');
   assert.equal(res.status, 200);
   assert.equal(warmed, 1, 'the bad row was dropped and re-rendered through the reading door');
   assert.equal(calls[0].rendered.prompt_version, 'rerendered000');

@@ -66,7 +66,7 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // 1.47.0: a cached pair row is re-gated on serve (main, AI §2). 1.48.0: that, merged onto v2.
   // 1.64.0: the word bans lifted (AZ). 1.65.0: hedgeAboutReader deleted (BA).
   // 1.66.0: pair.reframe_missing removed (A4, Prompt BB §2.2).
-  assert.equal(STAGE6_VERSION, '1.66.0');
+  assert.equal(STAGE6_VERSION, '1.67.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
@@ -253,7 +253,7 @@ test('A PAIR READING SAYING "cocok" OR "saling melengkapi dan tetap selaras" IS 
   const lifted = codes(gate.findings).filter((c) => ['pair.verdict', 'style.tension_collapse', 'style.hedge_construction'].includes(c));
   assert.deepEqual(lifted, [], `a retired check still fires: ${lifted.join(', ')}`);
   // The kept categories still reach a pair: a medical claim is HARD.
-  const med = validateRendering({ ...renderingFor(sj), penutup: 'Minum obat yang tepat akan membantu kalian.' }, sj, { provider: 'module_assembly' });
+  const med = validateRendering({ ...renderingFor(sj), penutup: 'Mintalah resep dokter yang tepat untuk kalian.' }, sj, { provider: 'module_assembly' });
   assert.ok(codes(med.findings).includes('forbidden.medical'));
   assert.equal(med.hard, true);
 });
