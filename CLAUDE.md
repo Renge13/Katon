@@ -290,9 +290,10 @@ docs/archive/                 superseded, kept for history only
   Reyner's ruling to leave outright rather than wait for the funnel data. The fence is `mock |
   closed`, a stale `xendit` reads as `closed`, and there is no dev bypass: development with no
   provider REFUSES. `doku` arrives in Prompt V and is ADDED to the set, not swapped in.
-  **Xendit still appears in two places on purpose and neither is a leftover.** Reader-visible
-  Indonesian in `lib/site/copy.js` (the privacy policy and terms name the processor that actually
-  handled those payments) is Reyner's to rule and its replacement has to name DOKU. Dated history in
+  **Xendit now appears only in code comments, on purpose.** The reader-facing text (privacy policy,
+  terms, refunds, /harga, /tentang) names DOKU since `195a601` (2026-09-21, "Reyner's six ruled
+  strings: the site names DOKU, not Xendit"). Checked 2026-10-02 (Prompt BB §1.3):
+  `grep -rn -i "xendit" app components lib/site` returns comments only. Dated history in
   comments - why `/tentang` exists, why the footer is a server component, the X-b1 record - records
   what was true when written and rule "ledger rows are not edited" covers it.
   **UNSET THE TWO KEYS IN VERCEL.** They are inert, and this file already carries two entries about
