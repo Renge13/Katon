@@ -63,6 +63,7 @@ name, so describe it instead. Use palace names as given, and `provenance.positio
 list positions. Keyboard characters only, no Chinese characters, no percentages or scores. Return only JSON:
 `{"blocks":[{"fact_ids":[...],"heading":"...","text":"..."}],"penutup":"..."}`. `fact_ids` lists the facts
 each block draws on. Headings are short and plain. Paragraph breaks are two newlines.
+Write the archetype exactly as its English title: never translated, never paired with an Indonesian word, never in brackets.
 
 The examples that follow come from other people's charts. They show the experience a Katon reading
 gives. Never reuse their facts, names or sentences: the JSON above is the only source of facts for this
