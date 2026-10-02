@@ -24,13 +24,16 @@ import Funnel from '../components/Funnel.jsx';
 import { COMPAT_ROUTE } from '../lib/site/routes.js';
 import { SITE_COPY } from '../lib/site/copy.js';
 
+// `compatOpen` follows `salesOpen` here: since K2 (2026-10-02) the home compat link reads
+// the compat switch, and this spec is about the link, not about which fence opens it
+// (tests/compat-sales-switch.spec.mjs owns that).
 async function mountHome(salesOpen) {
   const prev = globalThis.fetch;
   globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}) });
   const host = document.createElement('div');
   document.body.appendChild(host);
   const root = createRoot(host);
-  await act(async () => { root.render(React.createElement(Funnel, { salesOpen })); });
+  await act(async () => { root.render(React.createElement(Funnel, { salesOpen, compatOpen: salesOpen })); });
   return {
     host,
     compatLinks: () => [...host.querySelectorAll('a')].filter((a) => a.getAttribute('href') === COMPAT_ROUTE),

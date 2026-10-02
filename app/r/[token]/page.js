@@ -1,5 +1,5 @@
 import { ReadingByToken } from '@/components/Funnel.jsx';
-import { checkoutOpen } from '@/lib/paymentFence';
+import { checkoutOpen, compatCheckoutOpen } from '@/lib/paymentFence';
 
 // Persistent re-access route. The [token] is the reading id (nanoid PK) — the same
 // value sendReadingLink builds into katon.app/r/<token> and the funnel pushes to the
@@ -8,5 +8,5 @@ import { checkoutOpen } from '@/lib/paymentFence';
 // invalid token → a clean not-found state). No gating lives here — it stays in /full.
 export default async function ReadingPage({ params }) {
   const { token } = await params; // Next 15: params is async
-  return <ReadingByToken token={token} salesOpen={checkoutOpen()} />;
+  return <ReadingByToken token={token} salesOpen={checkoutOpen()} compatOpen={compatCheckoutOpen()} />;
 }

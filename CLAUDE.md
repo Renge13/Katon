@@ -158,6 +158,11 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
     grep for curly quotes across `components/` now returns nothing. COWORK-BRIEF error 13. Audit by
     grep, never from memory; a violation note in this file must carry its grep and close with its
     fixing commit.)
+    **AMENDED 2026-10-02 (Reyner), for the whole product:** the voice is "warm, bold, and emotionally
+    vivid; plain words, never purple; no slang". This replaces "Composed and direct. Accessible words,
+    short sentences, no verbosity. Warmth through precision." Unchanged: plain everyday Indonesian, no
+    slang, no chat particles, not bureaucratic-baku, keyboard characters only. Applied to compat in
+    Prompt BC and to the mirror prompt in a later round. Record: `docs/product/compat-rulings-2026-10-02.md`.
 21. **"lemah"/"kuat" ARE permitted.** The friction ("what do you mean I'm weak?") pulls the reader
     deeper. Condition: the explanation lands in the same breath, and never bare on the sharecard.
 22. **Never use Joey Yap's trademarked profile names** (Director, Diplomat, Warrior — his IP).
@@ -180,9 +185,17 @@ Repo `Renge13/Katon`, trunk `main`. Domain katon.app.
       names, button labels. `八字` as a heading is decoration with a comprehension tax — write
       "Bagan Kelahiran" or similar.
     - Rule of thumb: hanzi you can *point at* is fine. Hanzi you must *read* is not.
+
+    **AMENDED 2026-10-02 (Reyner): archetype titles are English everywhere** ("The Garden", "The
+    Forge"): reading prose, result page, PDFs and cards. The Indonesian archetype name is no longer
+    shown to readers and is never bracketed beside the English. The rest of this rule (Aspek and
+    Bintang: Indonesian name first, English in brackets once; Chinese characters) is unchanged.
+    Record: `docs/product/compat-rulings-2026-10-02.md`.
 24. Exactly **10 archetypes**, one per Day Master stem. Pure BaZi — no Weton, no Javanese pasaran.
 25. Ethics: no fatalism, no dated prophecy, no medical or financial advice, no ranking of gods or
     strength states as good/bad. Timing is *cuaca*, never *ramalan*.
+    **AMENDED 2026-10-02 (Reyner):** financial advice and financial prediction stay banned; a wealth
+    identity is allowed only where an engine fact supports it (C1). Record: `docs/product/compat-rulings-2026-10-02.md`.
 
 ---
 
@@ -290,9 +303,10 @@ docs/archive/                 superseded, kept for history only
   Reyner's ruling to leave outright rather than wait for the funnel data. The fence is `mock |
   closed`, a stale `xendit` reads as `closed`, and there is no dev bypass: development with no
   provider REFUSES. `doku` arrives in Prompt V and is ADDED to the set, not swapped in.
-  **Xendit still appears in two places on purpose and neither is a leftover.** Reader-visible
-  Indonesian in `lib/site/copy.js` (the privacy policy and terms name the processor that actually
-  handled those payments) is Reyner's to rule and its replacement has to name DOKU. Dated history in
+  **Xendit now appears only in code comments, on purpose.** The reader-facing text (privacy policy,
+  terms, refunds, /harga, /tentang) names DOKU since `195a601` (2026-09-21, "Reyner's six ruled
+  strings: the site names DOKU, not Xendit"). Checked 2026-10-02 (Prompt BB §1.3):
+  `grep -rn -i "xendit" app components lib/site` returns comments only. Dated history in
   comments - why `/tentang` exists, why the footer is a server component, the X-b1 record - records
   what was true when written and rule "ledger rows are not edited" covers it.
   **UNSET THE TWO KEYS IN VERCEL.** They are inert, and this file already carries two entries about

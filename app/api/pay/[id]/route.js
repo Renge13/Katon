@@ -5,7 +5,7 @@ import { compatEmail, resolveCheckoutTarget } from '@/lib/pair/checkout';
 import { isSellable, DEFAULT_SKU, SELLABLE_SKUS, priceFor } from '@/lib/pricing';
 import { recordEvent } from '@/lib/analytics/events';
 import { json, notFound, badRequest, notConfigured } from '@/lib/http';
-import { paymentFenceReason, paymentsProvider } from '@/lib/paymentFence';
+import { paymentFenceReason, paymentsProvider, compatFenceReason } from '@/lib/paymentFence';
 import { compatPairRoute } from '@/lib/site/routes';
 import { pairUrl, readingUrl } from '@/lib/site/baseUrl';
 import { createCheckout } from '@/lib/doku/client';
@@ -149,6 +149,13 @@ export async function POST(request, { params }) {
   // both and taking whatever answers - a reading id presented with `sku=compat`
   // is a caller error and is refused, not silently resolved as a reading.
   const isCompat = sku === 'compat';
+
+  // ── COMPAT HAS ITS OWN SWITCH, K2 (Reyner, 2026-10-02) ────
+  // The CE can sell while compat is off sale (COMPAT_SALES unset). Refused with the
+  // same `payment_closed` the fence uses, because that is what it is for a compat
+  // buyer and the compat client already renders it as its sales-closed state.
+  // Before the pair lookup and before either branch below, mock included.
+  if (isCompat && compatFenceReason()) return notConfigured('payment_closed');
 
   // The decision is in lib/pair/checkout.js so it is testable - no spec here
   // imports an app/api route, because Next's `@/` alias does not resolve under

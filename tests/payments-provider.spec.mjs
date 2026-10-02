@@ -319,8 +319,11 @@ test('THE SALES-CLOSED STATE IS DECIDED ON THE SERVER', () => {
     // `paymentsProvider() === 'closed'`, a second copy of the rule that called a
     // misconfigured DOKU "open" and would have hung the form the way the mirror
     // offer hung in production.
-    assert.match(src, /checkoutOpen\(\)/u, `${page} asks the server-side fence`);
-    assert.match(src, /salesClosed=\{!checkoutOpen\(\)\}/u, `${page} passes it down`);
+    // COMPAT'S OWN ANSWER SINCE K2 (2026-10-02): `compatCheckoutOpen()`, the payment
+    // fence AND the COMPAT_SALES switch, false in exactly the cases `POST /api/pay`
+    // refuses `sku=compat`.
+    assert.match(src, /compatCheckoutOpen\(\)/u, `${page} asks the server-side fence`);
+    assert.match(src, /salesClosed=\{!compatCheckoutOpen\(\)\}/u, `${page} passes it down`);
   }
   // And the components render the ruled strings rather than composing a sentence.
   assert.match(read('components/Pasangan.jsx'), /sales_closed_title/u);

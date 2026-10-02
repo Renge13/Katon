@@ -2,7 +2,7 @@ import { Spectral, Hanken_Grotesk, Archivo } from 'next/font/google';
 import './globals.css';
 import SiteFooter from '@/components/SiteFooter.jsx';
 import SiteHeader from '@/components/SiteHeader.jsx';
-import { checkoutOpen } from '@/lib/paymentFence';
+import { compatCheckoutOpen } from '@/lib/paymentFence';
 import { GlossNamesProvider } from '@/components/GlossNames.jsx';
 import { GLOSS_NAMES_EN } from '@/lib/render/glossNames.js';
 
@@ -76,7 +76,7 @@ export default function RootLayout({ children }) {
             `app/` has exactly one layout.js, so this covers every route - there
             is no nested layout that could shadow it, and a test walks the route
             table rather than a list to keep that true. */}
-        <SiteHeader salesOpen={checkoutOpen()} />
+        <SiteHeader compatOpen={compatCheckoutOpen()} />
         {/* The glossary's ~60 English names, for the italic gloss in reading prose
             (Prompt AQ §4). Read here on the server so the client never imports the
             glossary itself; a list under 1KB rides in the page payload instead. */}

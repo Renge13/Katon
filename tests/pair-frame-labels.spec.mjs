@@ -18,7 +18,7 @@ import { test } from 'node:test';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { compatBranchRelations } from '../lib/compat/branchRelations.js';
-import { buildPairSemantic, variantKeysFor } from '../lib/semantic/pair.js';
+import { buildPairSemantic, variantKeysFor, p2FrameKey } from '../lib/semantic/pair.js';
 import { buildPairAppendix } from '../lib/pdf/pairAppendix.js';
 import { factRows } from '../lib/pdf/pairDocument.js';
 import FIXTURE from './fixtures/pair-frame-hits.fixture.json' with { type: 'json' };
@@ -139,4 +139,65 @@ test('EVERY GLOSSARY LABEL IS UNIQUE', () => {
     assert.ok(!seen.has(label) || bothVariants, `"${label}" is the label of both ${seen.get(label)} and ${at}`);
     seen.set(label, at);
   }
+});
+
+// ── E13: THE FRAME TEXT FOLLOWS THE HIT'S DIRECTION (Prompt BB §1.2, 2026-10-02) ──
+// `p2_palace_frame` was written for one direction only: "Salah satu pilar di bagan
+// dia terhubung langsung dengan kursi pasanganmu" - a pillar of B (dia) reaching A's
+// (kamu) seat. For the BB pair the only non-day hit is A's month 寅 clashing B's day
+// 申 (a_hits_b), so the printed text stated the reverse of the fact. The A->B words
+// are Reyner-confirmed (his message with Prompt BB, 2026-10-02) and live in
+// `p2_palace_frame_reader`.
+//
+// A day-to-day hit is the day pair mirrored and appears in BOTH lists (here 六合
+// 巳-申), so it says nothing about direction and is ignored when choosing.
+const BB_A = calculateBaziChart({ birthDate: '2005-02-14', birthTime: '07:00' });
+const BB_B = calculateBaziChart({ birthDate: '1999-07-07', birthTime: '17:00' });
+const frameOf = (sj) => sj.facts.find((f) => f.id === 'p2_palace_frame');
+
+test('E13 premise: the BB pair\'s only non-day frame hit is A month 寅 -> B day 申 (冲)', () => {
+  const p = frameOf(buildPairSemantic(BB_A, BB_B)).provenance;
+  const nonDay = (xs) => xs.filter((h) => !isDayDay(h));
+  assert.deepEqual(nonDay(p.b_hits_a), [], 'no B->A non-day hit');
+  assert.deepEqual(nonDay(p.a_hits_b).map((h) => [h.from.position, h.relation, ...h.branches]), [['month', '冲', '寅', '申']]);
+});
+
+test('E13: AN A->B-ONLY FRAME carries the reader-side words, in the fact, its keys and the PDF', () => {
+  const sj = buildPairSemantic(BB_A, BB_B);
+  const frame = frameOf(sj);
+  const R = K.p2_palace_frame_reader;
+  assert.ok(R, 'the A->B cell exists');
+  assert.equal(R.label_meaning, 'Salah satu pilar di baganmu terhubung langsung dengan kursi pasangannya. Elemen hidupmu memengaruhi ranah terdekatnya.');
+  assert.equal(R.meaning_seed, 'Salah satu pilar kehidupanmu menyentuh langsung ruang privat pasanganmu, membuat dinamika dari area hidupmu berdampak langsung ke suasana hubungan.');
+  assert.equal(R.daily_seed, 'Saat area hidupmu itu mengalami tekanan, suasananya langsung terbawa ke rumah dan dia merasakannya sebelum kamu sempat cerita.');
+  for (const field of ['label_meaning', 'meaning_seed', 'daily_seed']) {
+    assert.equal(frame[field], R[field], `the fact's ${field} is the A->B text`);
+  }
+  assert.ok(variantKeysFor(frame).includes('p2_palace_frame_reader'));
+  assert.ok(!variantKeysFor(frame).includes('p2_palace_frame'), 'and not the B->A cell');
+  const lead = factRows(sj).find((r) => r.frame)?.lead;
+  assert.equal(lead, R.label_meaning, 'the PDF frame group leads with the A->B sentence');
+});
+
+test('E13: A B->A-ONLY FRAME (the same pair swapped) keeps the existing words', () => {
+  const sj = buildPairSemantic(BB_B, BB_A);
+  const frame = frameOf(sj);
+  for (const field of ['label_meaning', 'meaning_seed', 'daily_seed']) {
+    assert.equal(frame[field], K.p2_palace_frame[field], `the fact's ${field} is the B->A text`);
+  }
+  assert.ok(variantKeysFor(frame).includes('p2_palace_frame'));
+  assert.equal(factRows(sj).find((r) => r.frame)?.lead, K.p2_palace_frame.label_meaning);
+});
+
+test('E13: WHEN BOTH DIRECTIONS HIT, the existing B->A words stay (true: a B->A hit exists)', () => {
+  // Asserted on the chooser itself, because no fixture pair is guaranteed to hit both
+  // ways and a test that returns early when it finds none can pass on anything.
+  const hit = (fromChart, fromPos, toPos = 'day') => ({ from: { chart: fromChart, position: fromPos }, to: { position: toPos } });
+  const dayDay = [hit('A', 'day'), hit('B', 'day')];
+  assert.equal(p2FrameKey({ a_hits_b: [hit('A', 'month')], b_hits_a: [hit('B', 'year')] }), 'p2_palace_frame', 'both ways');
+  assert.equal(p2FrameKey({ a_hits_b: [hit('A', 'month')], b_hits_a: [] }), 'p2_palace_frame_reader', 'A->B only');
+  assert.equal(p2FrameKey({ a_hits_b: [hit('A', 'month'), dayDay[0]], b_hits_a: [dayDay[1]] }), 'p2_palace_frame_reader',
+    'A->B plus the mirrored day pair is still A->B only');
+  assert.equal(p2FrameKey({ a_hits_b: [], b_hits_a: [hit('B', 'hour')] }), 'p2_palace_frame', 'B->A only');
+  assert.equal(p2FrameKey({ a_hits_b: [dayDay[0]], b_hits_a: [dayDay[1]] }), 'p2_palace_frame', 'day pair alone');
 });
