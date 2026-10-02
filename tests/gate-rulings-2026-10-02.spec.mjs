@@ -161,3 +161,45 @@ test('D1 AMENDED: a medication instruction rejects; "obat" as a metaphor still p
     assert.deepEqual(rejecting(planted(s)), [], s);
   }
 });
+
+// ── E4 extended to names (Prompt BC §1.6, ruled 2026-10-02) ──
+// The pair truth checks read a side only from kamu / dia words, so with names in the
+// reading (BC's address mode: both people by name, third person) an inverted supply
+// sentence passed. Every pair truth check now also reads each person's nickname and
+// English archetype title as that person's side. The sample pair: A = Nadia (The
+// Garden, Tanah, supplies Api), B = Bima (The Forge, Logam).
+const NAMED = buildPairSemantic(A, B, { voice: 'v2', status: 'Menikah', nicknames: { a: 'Nadia', b: 'Bima' } });
+const namedPlant = (sentence, factId = 'p3_supply') => {
+  const d = structuredClone(assembleFallback(NAMED));
+  const i = d.blocks.findIndex((b) => (b.fact_ids || []).includes(factId));
+  assert.notEqual(i, -1, `precondition: a block cites ${factId}`);
+  d.blocks[i].text = `${d.blocks[i].text} ${sentence}`;
+  return validateRenderingV2(d, NAMED);
+};
+
+test('E4 NAMES: the named pair floor passes, and A is the one who supplies Api', () => {
+  assert.deepEqual(rejecting(validateRenderingV2(structuredClone(assembleFallback(NAMED)), NAMED)), []);
+  const p3 = NAMED.facts.find((f) => f.id === 'p3_supply');
+  assert.deepEqual(p3.provenance.supplies.map((s) => [s.from, s.element]), [['a', 'Fire']]);
+});
+
+test('E4 NAMES: a supply stated by name is checked against the engine, by nickname and by English title', () => {
+  assert.ok(rejecting(namedPlant('Bima membawa unsur Api yang Nadia butuhkan.')).includes('pair.supply_inverted'));
+  assert.ok(rejecting(namedPlant('The Forge membawa unsur Api untuk pasangannya.')).includes('pair.supply_inverted'));
+  assert.deepEqual(rejecting(namedPlant('Nadia membawa unsur Api yang Bima butuhkan.')), []);
+  assert.deepEqual(rejecting(namedPlant('The Garden membawa unsur Api ke rumah ini.')), []);
+});
+
+test('E4 NAMES: a wrong Day Master element stated by name is HARD; the true one passes', () => {
+  for (const s of ['Nadia adalah Logam yang tegas.', 'Bima adalah Tanah yang tenang.', 'The Garden adalah Air.']) {
+    assert.ok(rejecting(namedPlant(s, 'p2_day_pair')).includes('fact.day_master'), s);
+  }
+  for (const s of ['Nadia adalah Tanah yang sabar.', 'Bima adalah Logam yang tegas.']) {
+    assert.deepEqual(rejecting(namedPlant(s, 'p2_day_pair')), [], s);
+  }
+});
+
+test('E4 NAMES: two non-day pillars joined across the charts BY NAME are caught like the -mu / -nya form', () => {
+  assert.ok(rejecting(namedPlant('Pilar Kerja Nadia dan Pilar Akar Bima saling berbenturan.', 'p2_day_pair')).includes('pair.cross_chart_seat'));
+  assert.deepEqual(rejecting(namedPlant('Pilar Kerja Nadia dan Pilar Akar Nadia saling berbenturan.', 'p2_day_pair')), [], 'one person\'s own two pillars');
+});
