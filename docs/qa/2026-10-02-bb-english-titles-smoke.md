@@ -41,3 +41,20 @@ The cause is the writer's input, not the gate (check 3): one direction line in t
 - `ce-chart4.pdf`, `ce-pages/ce-01.png` (cover: "The Morning Dew" alone), `ce-pages/ce-02.png` (first reading page, with the "The Morning Dew Pagi" sentence): built from this smoke's chart4 render.
 - `compat-PZ0t.pdf`, `compat-pages/compat-01.png`: the compat cover, "The Sun" / "dan The Mountain", from this smoke's PZ0t render.
 - `card-b-before/`, `card-b-after/`: Card B on the five gate charts, before and after the Indonesian eyebrow left.
+
+## Run 2, the result of record, after the fix at the cause (Reyner, 2026-10-02)
+
+Two changes, both Reyner's: the examples' one Indonesian archetype name ("Samudra", four times) became "The Ocean", and the shared base prompt gained his line, verbatim: "Write the archetype exactly as its English title: never translated, never paired with an Indonesian word, never in brackets." Mirror `v2-e36d5da77db78235`, pair `v2-17da4acd4c576b50`, gate **1.72.0** (the medication-instruction pattern, which no reading here touches). **6/6 served, 0 regenerations, $0.0184.**
+
+| reading | first two sentences | gate rewrites |
+|---|---|---|
+| chart1 (The Sun) | "Sebagai The Sun, elemen Api dalam dirimu membuat kehadiranmu terasa jelas bahkan sebelum kamu sempat berkata apa pun. Kamu adalah sosok yang menerangi sekitarmu, namun nyala ini membutuhkan bahan bakar yang tidak selalu tersedia dari dalam dirimu sendiri." | 0 |
+| chart4 (The Morning Dew) | "Kamu adalah The Morning Dew, elemen Air yang menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Sebagai seseorang dengan kapasitas energi yang Lemah, sumber tenagamu sebenarnya ada di luar dirimu." | 0 |
+| chart7 (The Teak) | "Sebagai The Teak, kamu adalah sosok yang tumbuh dengan menjangkau hal baru; bagimu, berhenti berkembang terasa jauh lebih buruk daripada salah arah. Kamu memiliki dorongan alami untuk maju dan seringkali orang di sekitarmu ikut terdorong oleh semangatmu." | 0 |
+| chart13 (The Bamboo) | "Sebagai The Bamboo, kamu tumbuh dengan terus menjangkau hal baru; berhenti berkembang terasa jauh lebih menyesakkan daripada mengambil arah yang salah. Kamu memiliki dorongan alami untuk selalu memperbaiki keadaan, dan semangat ini sering kali menjadi motor yang menggerakkan orang-orang di sekitarmu." | 0 |
+| smewTN (The Mountain) | "Sebagai The Mountain, kamu memiliki elemen Tanah yang menempatkanmu sebagai sosok yang kokoh. Orang sering menaruh hal penting padamu karena kamu tidak mudah goyah, namun sering kali mereka salah mengira kamu tidak pernah terguncang." | 0 |
+| PZ0t (The Sun, The Mountain) | "Ini adalah bacaan tentang dinamika dua individu: The Sun dan The Mountain. Lewat bacaan ini, kita akan melihat bagaimana cara kalian merespons satu sama lain di keseharian, ..." | 0 |
+
+Every archetype sentence is the first one listed (PZ0t: the engine opening only). **No compound, no bracketed title, no Indonesian archetype name; the gate rewrote nothing**: the writer wrote the titles itself. chart1 now names its archetype. Run 1's three findings are closed.
+
+Still open, flagged: the mirror prompt's built Form line reads "An Arketipe, Aspek or Bintang name is written as its Indonesian name with `label_bracket` in brackets once", which the new line contradicts for the archetype. The writer followed the new line on all five mirrors; dropping "Arketipe," there is Reyner's call.
