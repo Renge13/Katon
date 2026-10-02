@@ -87,7 +87,8 @@ const RULED_P0 = (() => {
     .replace(/\r\n?/g, '\n');
   return /^- label_meaning: "(.*)"$/mu.exec(md.slice(md.indexOf('## kompatibilitas.p0_opening')))[1];
 })();
-const p0Sentence = (sj) => fillPairTemplate(RULED_P0, sj.core.a.archetype_name_id, sj.core.b.archetype_name_id);
+// Filled with the English titles since G1 (2026-10-02), as lib/semantic/pair.js fills it.
+const p0Sentence = (sj) => fillPairTemplate(RULED_P0, sj.core.a.archetype_name_en, sj.core.b.archetype_name_en);
 const names = Object.keys(PAIRS);
 
 test('THE PDF AUTHORS NOTHING: every block is the cached prose, ON THE READING PAGE', async () => {
@@ -122,8 +123,8 @@ test('THE PDF AUTHORS NOTHING: every block is the cached prose, ON THE READING P
 test('the engine P0 sentence is on the reading page, ONCE', async () => {
   for (const name of names) {
     const { texts, semanticJson } = await build(name);
-    const a = semanticJson.core.a.archetype_name_id;
-    const b = semanticJson.core.b.archetype_name_id;
+    const a = semanticJson.core.a.archetype_name_en;
+    const b = semanticJson.core.b.archetype_name_en;
     const sentence = p0Sentence(semanticJson);
     assert.ok(sentence.includes(a) && sentence.includes(b));
     const hits = texts.filter((t) => flat(t).includes(sentence));
@@ -572,8 +573,8 @@ test('THE QUADRANT NAME IS THE READING\'S TITLE LINE, after the P0 sentence', as
     const footer = `Katon - ${RENDER_COPY.pdfEditionCompat}`;
     const lines = texts[1].split('\n').map((l) => l.trim()).filter((l) => l && l !== footer);
 
-    const a = semanticJson.core.a.archetype_name_id;
-    const b = semanticJson.core.b.archetype_name_id;
+    const a = semanticJson.core.a.archetype_name_en;
+    const b = semanticJson.core.b.archetype_name_en;
     // ── THE ORDER IS REVERSED, RULED 2026-09-22 (P2 markup C1) ──
     // Was: P0 sentence on line 1, quadrant title on line 2. A body-size sentence
     // standing above the headline is the defect Reyner marked ok to fix - the

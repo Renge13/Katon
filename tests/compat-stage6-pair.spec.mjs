@@ -66,7 +66,7 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // 1.47.0: a cached pair row is re-gated on serve (main, AI §2). 1.48.0: that, merged onto v2.
   // 1.64.0: the word bans lifted (AZ). 1.65.0: hedgeAboutReader deleted (BA).
   // 1.66.0: pair.reframe_missing removed (A4, Prompt BB §2.2).
-  assert.equal(STAGE6_VERSION, '1.70.0');
+  assert.equal(STAGE6_VERSION, '1.71.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
@@ -85,8 +85,9 @@ test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
 
 test('both_named REJECTS a model render that names only one person', () => {
   const sj = buildPairSemantic(A, HARD_SEAT);
-  const nameA = sj.core.a.archetype_name_id;
-  const nameB = sj.core.b.archetype_name_id;
+  // English titles since G1 (2026-10-02): the opening and both_named use name_en.
+  const nameA = sj.core.a.archetype_name_en;
+  const nameB = sj.core.b.archetype_name_en;
   assert.notEqual(nameA, nameB);
 
   // An opening that names both passes.
@@ -121,8 +122,9 @@ test('THE FLOOR NAMES BOTH PEOPLE, so both_named now runs on it too', () => {
   // 2026-09-08 and the gap closed, so the exemption went with it.
   const sj = buildPairSemantic(A, HARD_SEAT);
   const floor = renderingFor(sj);
-  const nameA = sj.core.a.archetype_name_id;
-  const nameB = sj.core.b.archetype_name_id;
+  // English titles since G1 (2026-10-02): the opening and both_named use name_en.
+  const nameA = sj.core.a.archetype_name_en;
+  const nameB = sj.core.b.archetype_name_en;
 
   // The opening block is the one that changed. It is the FLOOR's own prose, from
   // Reyner's ruled template - nothing here was authored to make a test pass.

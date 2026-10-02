@@ -124,7 +124,8 @@ test('DOES NOT LOG: the 1x2 baseline penutup, which talks to her', () => {
 test('a penutup that says kamu AND names her still logs', () => {
   // Both conditions are one finding on purpose. This is the case that would slip
   // through if they had been split and only the cheaper one were satisfied.
-  const text = `Hubungan ini meminta kamu untuk melambat. ${P_1x2.core.a.archetype_name_id} diminta untuk lebih terbuka.`;
+  // Her English title since G1 (2026-10-02), the name the reading uses.
+  const text = `Hubungan ini meminta kamu untuk melambat. ${P_1x2.core.a.archetype_name_en} diminta untuk lebih terbuka.`;
   assert.equal(has(penutupOf(text), P_1x2, 'pair.penutup_register'), true);
 });
 
@@ -149,5 +150,5 @@ test('THE MIRROR IS UNTOUCHED, and neither check is a gate change', () => {
   ).filter((f) => f.check.startsWith('pair.direction') || f.check.startsWith('pair.penutup'));
   assert.ok(logged.length > 0);
   for (const f of logged) assert.equal(f.severity, 'flag');
-  assert.equal(STAGE6_VERSION, '1.70.0'); // 1.26.0-1.38.0, 1.42.0-1.46.0, 1.48.0: the voice-v2 gate; 1.47.0: main's pair serve re-gate; 1.39.0-1.41.0: main's truth checks
+  assert.equal(STAGE6_VERSION, '1.71.0'); // 1.26.0-1.38.0, 1.42.0-1.46.0, 1.48.0: the voice-v2 gate; 1.47.0: main's pair serve re-gate; 1.39.0-1.41.0: main's truth checks
 });

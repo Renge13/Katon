@@ -972,11 +972,14 @@ test('THE FLOOR OPENS WITH ONE CLAUSE, not two bare label-sentences', () => {
     const semantic = jsonFor(tc);
     const first = assembleFallback(semantic).blocks[0];
     const opening = sentences(first.text)[0];
-    const arche = semantic.core.archetype_name_id;
+    // The English title, alone, since G1 (2026-10-02).
+    const arche = semantic.core.archetype_name_en;
     const element = semantic.facts.find((f) => f.id.startsWith('day_master_'))?.label;
 
     // ONE sentence carries both, and it carries a verb from the copy bank.
     assert.ok(opening.includes(arche), `chart ${tc.id}: the opening must name the archetype`);
+    assert.ok(!opening.includes(`${arche} (`) && !opening.includes(semantic.core.archetype_name_id),
+      `chart ${tc.id}: no bracket and no Indonesian name beside the title`);
     assert.ok(opening.includes(element), `chart ${tc.id}: and the element, in the SAME sentence`);
     assert.ok(opening.includes(RENDER_COPY.floorIdentity.lead),
       `chart ${tc.id}: the clause must come from the audited bank, not from punctuation`);
