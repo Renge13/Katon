@@ -111,3 +111,36 @@ test('E5: on a pair, a wrong Day Master element is HARD for either person; true 
     assert.deepEqual(rejecting(planted(s)), [], s);
   }
 });
+
+// ── G6: style.meta and style.code_leak reject on v2, mirror and pair ──
+
+test('G6: a pipeline leak rejects a v2 PAIR (style.meta, style.code_leak); before 1.70.0 it was only logged', () => {
+  const meta = planted('Berdasarkan data yang diberikan, ini adalah prompt JSON.');
+  assert.ok(rejecting(meta).includes('style.meta'), JSON.stringify(rejecting(meta)));
+  const leak = planted('Lihat fact_id p2_day_pair di provenance.');
+  assert.ok(rejecting(leak).includes('style.code_leak'), JSON.stringify(rejecting(leak)));
+  assert.equal(leak.ok, false);
+});
+
+test('G6: the same leak rejects a v2 MIRROR', async () => {
+  const { buildSemanticJson } = await import('../lib/semantic/index.js');
+  const sj = buildSemanticJson(A, { voice: 'v2' });
+  const d = structuredClone(assembleFallback(sj));
+  assert.deepEqual(rejecting(validateRenderingV2(structuredClone(d), sj)), [], 'precondition: the floor passes');
+  d.blocks[0].text = `${d.blocks[0].text} Nilaimu null di sini.`;
+  assert.ok(rejecting(validateRenderingV2(d, sj)).includes('style.code_leak'));
+});
+
+test('G6 SAFETY: a square-bracket English gloss ("Kayu [Wood]") is normalised BEFORE code_leak reads it, so it never rejects', () => {
+  // The replay's 20 v1 code_leak hits on stored v2 drafts were ALL this shape. On v2
+  // the square-bracket normaliser runs first; this pins that order.
+  const r = planted('Kamu adalah Tanah [Earth] yang sabar, dan dia Logam [Metal].');
+  assert.equal(r.findings.some((f) => f.check === 'style.code_leak'), false, JSON.stringify(r.findings.map((f) => f.check)));
+  assert.deepEqual(rejecting(r), []);
+  assert.ok(r.findings.some((f) => f.check === 'brackets.square_normalised'), 'the normaliser handled it');
+});
+
+test('G6: every other style.* finding stays LOGGED on v2', () => {
+  const r = planted('Apa yang membuat kalian bertahan?');
+  assert.deepEqual(rejecting(r), [], JSON.stringify(rejecting(r)));
+});

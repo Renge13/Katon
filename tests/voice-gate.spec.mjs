@@ -233,16 +233,20 @@ test('D4: self_harm is HARD under v2; ranking is lifted (AZ, 1.64.0)', () => {
 });
 
 test('LOGGED, NOT GATING: a style.* hit rejects under v1 and passes under v2', () => {
-  // A KEPT style category (style.code_leak): `slang`, which this used, was retired
-  // 2026-10-01 (AZ). v1 rejects the leak; v2 records it at severity `flag` and accepts.
-  const sentence = 'Kamu sering merasa lelah, nilaimu null setelah bekerja.';
+  // `slang`, which this first used, was retired 2026-10-01 (AZ); `style.code_leak`,
+  // which replaced it, REJECTS on v2 since 1.70.0 (G6, 2026-10-02). The question mark
+  // (style.rhetorical_question, kept by BA) is soft on v1 and logged on v2.
+  const sentence = 'Apa yang membuatmu bertahan selama ini?';
   const v1json = buildSemanticJson(A, { voice: 'v1' });
   const v1 = validateRendering(plant(draftFor(v1json), sentence), v1json);
-  assert.equal(v1.ok, false, 'precondition: v1 rejects the leak');
+  assert.equal(v1.ok, false, 'precondition: v1 rejects the question');
   const sj = v2(A);
   const r = validateRenderingV2(plant(draftFor(sj), sentence), sj);
   assert.equal(r.ok, true, JSON.stringify(checks(r)));
-  assert.ok(r.findings.some((f) => f.check.startsWith('style.') && f.severity === 'flag'), 'but it is logged');
+  assert.ok(r.findings.some((f) => f.check === 'style.rhetorical_question' && f.severity === 'flag'), 'but it is logged');
+  // And the leak this test used to carry is now the exception: it rejects on v2 too.
+  const leak = validateRenderingV2(plant(draftFor(sj), 'Kamu sering merasa lelah, nilaimu null setelah bekerja.'), sj);
+  assert.ok(checks(leak).includes('style.code_leak'), JSON.stringify(checks(leak)));
 });
 
 // ── FIX (i), ROUND 3: THE ARCHETYPE BRACKET IS THE ENGINE'S (1.31.0) ──
@@ -322,12 +326,13 @@ test('FIX (ii): a hanzi-only bracket is removed; hanzi outside a bracket still r
 import { renderReading, __clearInFlight } from '../lib/render/index.js';
 import { __clearMemCache } from '../lib/render/cache.js';
 
-test('ROUTING: the same leaking draft is served under v2 and floors under v1', async () => {
-  // Was a slang draft; slang is retired (AZ, 1.64.0), so a kept style group routes it.
+test('ROUTING: the same style-flagged draft is served under v2 and floors under v1', async () => {
+  // Was a slang draft (retired, AZ 1.64.0), then a code_leak draft, which rejects on v2
+  // since 1.70.0 (G6). A question mark is still soft on v1 and logged on v2.
   const prev = { fetch: globalThis.fetch, key: process.env.GEMINI_API_KEY };
   process.env.GEMINI_API_KEY = 'test-key-never-sent-anywhere';
   const slangDraft = (sj) => {
-    const d = plant(draftFor(sj), 'Kamu sering merasa lelah, nilaimu null setelah bekerja.');
+    const d = plant(draftFor(sj), 'Apa yang membuatmu bertahan selama ini?');
     return { blocks: d.blocks, penutup: 'Penutup yang cukup panjang untuk sebuah bacaan.' };
   };
   const serve = async (sj) => {
@@ -340,9 +345,9 @@ test('ROUTING: the same leaking draft is served under v2 and floors under v1', a
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.69.0');
+    assert.equal(onV2.stage6_version, '1.70.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
-    assert.equal(onV1.source, 'module_assembly', 'v1 rejects the leaking draft and floors');
+    assert.equal(onV1.source, 'module_assembly', 'v1 rejects the question and floors');
   } finally {
     globalThis.fetch = prev.fetch;
     if (prev.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = prev.key;
