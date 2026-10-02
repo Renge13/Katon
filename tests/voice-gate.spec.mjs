@@ -338,7 +338,7 @@ test('ROUTING: the same leaking draft is served under v2 and floors under v1', a
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.65.0');
+    assert.equal(onV2.stage6_version, '1.66.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the leaking draft and floors');
   } finally {
@@ -680,19 +680,19 @@ test('A LONE SENTENCE: a block that is only the hedge keeps it, because one sent
 });
 
 test('KEPT: when dropping the hedge would make a rejecting check fail, the sentence stays (close.hedge_kept)', () => {
-  const HARD_SEAT = calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' });
-  const sj = buildPairSemantic(A, HARD_SEAT, { voice: 'v2' });
-  assert.ok(sj.safety_flags.includes('p2_reframe_required'), 'precondition: the reframe is required');
-  const reframe = sj.facts.find((f) => f.id === 'p2_reframe').label_meaning;
+  // The example check is `pair.both_named` since 2026-10-02: it used to be
+  // `pair.reframe_missing`, which A4 removed (STAGE6 1.66.0).
+  const sj = buildPairSemantic(A, B, { voice: 'v2' });
+  const { archetype_name_id: nameA } = sj.core.a;
+  const { archetype_name_id: nameB } = sj.core.b;
   const draft = draftFor(sj);
-  const idx = draft.blocks.findIndex((b) => (b.fact_ids || []).includes('p2_reframe'));
-  assert.notEqual(idx, -1);
-  // The reframe lives ONLY in the final, hedged sentence of its block.
-  const text = `Kalian berdua sama-sama cepat membaca suasana. Mungkin menarik untuk melihat bahwa ${reframe.replace(/[.!?]+\s*/gu, ', ').replace(/,\s*$/u, '')}.`;
+  const idx = 0;
+  // Both names live ONLY in the final, hedged sentence of the opening block.
+  const text = `Kalian berdua sama-sama cepat membaca suasana. Mungkin menarik untuk melihat bahwa ${nameA} dan ${nameB} saling melengkapi.`;
   draft.blocks[idx].text = text;
   const r = validateRenderingV2(draft, sj);
-  assert.equal(r.normalized.blocks[idx].text, text, 'the hedged sentence is kept');
-  assert.equal(r.findings.some((f) => f.check === 'pair.reframe_missing'), false, 'the kept reading carries the reframe');
+  assert.equal(r.normalized.blocks[idx].text.includes(nameA) && r.normalized.blocks[idx].text.includes(nameB), true, 'the hedged sentence is kept');
+  assert.equal(r.findings.some((f) => f.check === 'pair.both_named'), false, 'the kept reading names both');
   assert.equal(logOf(r, 'close.hedge_kept').length, 1);
   assert.equal(logOf(r, 'close.hedge_dropped').length, 0);
 });

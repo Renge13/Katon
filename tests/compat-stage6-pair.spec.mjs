@@ -18,7 +18,7 @@ import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { validateRendering, STAGE6_VERSION } from '../lib/validate/index.js';
-import { pairGuard, REFRAME_OVERLAP } from '../lib/validate/pair.js';
+import { pairGuard } from '../lib/validate/pair.js';
 import { stricterDirective } from '../lib/validate/directive.js';
 import BLOCKLIST from '../lib/validate/blocklist.json' with { type: 'json' };
 
@@ -26,7 +26,6 @@ const c = (d, t) => calculateBaziChart({ birthDate: d, birthTime: t });
 const A = c('1989-09-13', '09:00');
 // chart 12: the 子卯 punishment on the day pair, so p2_reframe_required is raised.
 const HARD_SEAT = c('1990-06-07', '12:00');
-const EASY_SEAT = c('1993-06-12', '23:30');
 
 const PENUTUP = 'Peta ini sudah cukup jelas untuk kamu jalani mulai sekarang.';
 
@@ -66,7 +65,8 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // 1.46.0: fact.element_dominance is hard on v2 (AG item 1).
   // 1.47.0: a cached pair row is re-gated on serve (main, AI §2). 1.48.0: that, merged onto v2.
   // 1.64.0: the word bans lifted (AZ). 1.65.0: hedgeAboutReader deleted (BA).
-  assert.equal(STAGE6_VERSION, '1.65.0');
+  // 1.66.0: pair.reframe_missing removed (A4, Prompt BB §2.2).
+  assert.equal(STAGE6_VERSION, '1.66.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {
@@ -171,54 +171,10 @@ test('A FLOOR THAT LOST THE OPENING IS REJECTED, provider notwithstanding', () =
   assert.equal(gate.hard, true, 'a floor that lost the opening is HARD-rejected');
 });
 
-test('reframe_present REJECTS a difficult seat whose block drops the reframe', () => {
-  const sj = buildPairSemantic(A, HARD_SEAT);
-  assert.ok(sj.safety_flags.includes('p2_reframe_required'), 'precondition: the flag is raised');
-
-  // The floor carries the reframe verbatim, so it passes.
-  const carried = renderingFor(sj);
-  assert.equal(
-    codes(pairGuard(carried, sj, JSON.stringify(carried))).includes('pair.reframe_missing'),
-    false,
-  );
-
-  // Replace the reframe block's text with another block's - real prose, wrong
-  // content. This is the shape the real-render red used.
-  const idx = carried.blocks.findIndex((b) => (b.fact_ids || []).includes('p2_reframe'));
-  assert.notEqual(idx, -1, 'the reframe has its own block');
-  const donor = carried.blocks[carried.blocks.length - 1].text;
-  const dropped = {
-    ...carried,
-    blocks: carried.blocks.map((b, i) => (i === idx ? { ...b, text: donor } : b)),
-  };
-  const found = pairGuard(dropped, sj, JSON.stringify(dropped));
-  assert.ok(codes(found).includes('pair.reframe_missing'));
-  assert.equal(found.find((f) => f.check === 'pair.reframe_missing').severity, 'hard');
-});
-
-test('reframe_present is SILENT when the seat is easy', () => {
-  // It reads `safety_flags`, so a pair with a clean day pair is never asked for
-  // a reframe it has no cell for.
-  const sj = buildPairSemantic(A, EASY_SEAT);
-  assert.equal(sj.safety_flags.includes('p2_reframe_required'), false);
-  const rendered = renderingFor(sj);
-  assert.equal(
-    codes(pairGuard(rendered, sj, JSON.stringify(rendered))).includes('pair.reframe_missing'),
-    false,
-  );
-});
-
-test('the reframe threshold uses stemOverlap, ABOVE the coverage floor', () => {
-  // The first version compared 4-plus-letter words and passed on a real render
-  // with every reframe sentence stripped, because the reframe's words - `pada`,
-  // `yang`, `hubungan`, `pasangan`, `kursi` - are all over a compat reading. It
-  // was measuring its own vocabulary.
-  //
-  // `stemOverlap` drops stopwords and stems tails, and it is what `coverage.js`
-  // uses, so this is one definition of "did the idea survive" rather than two.
-  assert.ok(REFRAME_OVERLAP > 0.2, 'above COVERAGE_PARAMS.fieldOverlap');
-  assert.ok(REFRAME_OVERLAP <= 1);
-});
+// reframe_present (pair.reframe_missing) was REMOVED 2026-10-02 (A4, STAGE6 1.66.0):
+// its three tests - rejects a dropped reframe, silent on an easy seat, the threshold
+// sits above the coverage floor - went with it. tests/gate-rulings-2026-10-02.spec.mjs
+// asserts the same dropped-reframe draft is now accepted.
 
 test('A PAIR FINDING IS ATTRIBUTABLE, in the tape and in the directive', () => {
   // ── THE DEFECT THIS ASSERTS AGAINST WAS LIVE FOR A DAY ─────

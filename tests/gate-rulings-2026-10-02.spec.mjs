@@ -50,3 +50,25 @@ test('A1: v2.js holds no verdict check (verdictHits / v2.d4_verdict), and a verd
   // since 2026-10-01), so the verdict rule lives in the compat prompt only.
   assert.deepEqual(rejecting(planted('Kalian sangat cocok satu sama lain.')), []);
 });
+
+// ── A4: pair.reframe_missing is removed ────────────────────
+
+test('A4: a difficult seat whose reframe block carries none of the reframe\'s words is ACCEPTED; the check is gone', () => {
+  // tests/voice-gate.spec.mjs's hard-seat pair. The same shape compat-stage6-pair's old red used: replace the reframe block's
+  // text with another block's real prose. Reyner 2026-10-02: "Drop the 50% word-overlap
+  // check in A4"; "a clash is a map, never a judgement" stays as prompt direction.
+  const HARD_SEAT = calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' });
+  const READER = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00' });
+  const sj = buildPairSemantic(READER, HARD_SEAT, { voice: 'v2' });
+  assert.ok(sj.safety_flags.includes('p2_reframe_required'), 'precondition: the reframe is required');
+  const d = structuredClone(assembleFallback(sj));
+  assert.deepEqual(rejecting(validateRenderingV2(d, sj)), [], 'precondition: the floor passes');
+  const idx = d.blocks.findIndex((b) => (b.fact_ids || []).includes('p2_reframe'));
+  assert.notEqual(idx, -1, 'the reframe has its own block');
+  d.blocks[idx].text = d.blocks[d.blocks.length - 1].text;
+  const r = validateRenderingV2(d, sj);
+  assert.equal(r.findings.some((f) => f.check === 'pair.reframe_missing'), false, 'no reframe check, at any severity');
+  assert.deepEqual(rejecting(r), [], 'and nothing else rejects it');
+  const code = src('lib/validate/pair.js').replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
+  assert.doesNotMatch(code, /REFRAME_OVERLAP|reframe_missing/u);
+});
