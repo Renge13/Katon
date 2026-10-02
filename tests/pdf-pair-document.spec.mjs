@@ -466,7 +466,9 @@ test('THE COVER IS THE TWO ENGLISH TITLES, nothing under them (G1)', async () =>
     // Two lines, broken before "dan" so a long title never splits a name.
     const at = cover.indexOf(a.archetype_name_en);
     assert.ok(at > -1, `${name}: A's English title is not a line of its own`);
-    assert.equal(cover[at + 1], `dan ${b.archetype_name_en}`, `${name}: "dan <B>" is not the line under it`);
+    // Since Prompt BC §4 (2026-10-02) each title is its own coloured run, so "dan" and
+    // B's title extract as two runs on the second line.
+    assert.deepEqual(cover.slice(at + 1, at + 3), ['dan', b.archetype_name_en], `${name}: "dan <B>" is not the line under it`);
     assert.equal(texts[0].includes(a.archetype_name_id) || texts[0].includes(b.archetype_name_id), false,
       `${name}: an Indonesian archetype name is on the cover`);
     assert.equal(cover.some((l) => l === `${a.archetype_name_en} - ${b.archetype_name_en}`), false, `${name}: the old sub-line is gone`);
@@ -581,4 +583,27 @@ test('THE QUADRANT NAME IS THE READING\'S TITLE LINE, after the P0 sentence', as
     assert.equal(lines.filter((l) => l === title).length, 1,
       `${name}: the title line is repeated on the reading page`);
   }
+});
+
+// ── BC §4 (2026-10-02): EVERY DATA ROW HAS A LABEL ────────────
+// Reyner, 2026-10-01: "the data part need better layouting". The palace-frame sentence
+// printed as a lead line with nothing on its left. It is now a row labelled with the
+// ruled chrome string `section_seat` ("Kursi Pasangan"), its sentence beside the label.
+test('BC §4: the palace-frame sentence is a LABELLED row on the data page', async () => {
+  let checked = 0;
+  for (const name of names) {
+    const { texts, semanticJson } = await build(name);
+    const frame = semanticJson.facts.find((f) => f.id === 'p2_palace_frame');
+    // Only a pair whose table HAS a frame row (a day-to-day hit alone is the day pair, no row).
+    const lead = factRows(semanticJson).find((r) => r.frame)?.lead;
+    if (!frame || !lead) continue;
+    checked += 1;
+    const page = texts.find((t) => t.includes(PASANGAN_COPY.pdf_facts_heading));
+    assert.ok(page, `${name}: the data page`);
+    const lines = page.split('\n').map((l) => l.trim()).filter(Boolean);
+    const at = lines.indexOf(PASANGAN_COPY.section_seat);
+    assert.ok(at > -1, `${name}: no "${PASANGAN_COPY.section_seat}" label on the data page`);
+    assert.ok(lines[at + 1] && lead.startsWith(lines[at + 1].slice(0, 20)), `${name}: the frame sentence is not beside its label: ${lines[at + 1]}`);
+  }
+  assert.ok(checked > 0, 'precondition: at least one fixture pair has a frame row');
 });
