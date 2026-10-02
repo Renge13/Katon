@@ -367,9 +367,11 @@ test('PAIR SHAPE: a block citing a supplied mirror fact is served under v2, refu
   process.env.GEMINI_API_KEY = 'test-key-never-sent-anywhere';
   const serve = async (sj) => {
     const d = draftFor(sj);
+    // Since BC §2.4 (I3) this block OPENS a v2 pair (nothing is prepended), and
+    // pair.both_named requires the opening to name both people's English titles.
     const portrait = {
       fact_ids: ['day_master_Fire'], heading: 'Kamu dalam Hubungan Ini',
-      text: 'Kamu adalah Matahari, dan tenagamu harus terus diisi dari luar.',
+      text: `Kamu adalah ${sj.core.a.archetype_name_en} dan dia ${sj.core.b.archetype_name_en}; tenagamu harus terus diisi dari luar.`,
     };
     const body = { blocks: [portrait, ...d.blocks], penutup: 'Penutup yang cukup panjang untuk sebuah bacaan.' };
     globalThis.fetch = async () => new Response(JSON.stringify({
@@ -959,9 +961,11 @@ test('ROUND-6 SWITCH: the v2 mirror writer runs at 0.9 and is handed no relation
   assert.ok(w.relationFacts.every((f) => f.label), 'the Indonesian name is still handed over');
 });
 
-test('ROUND-6 SWITCH CONTROLS: the v2 pair and the v1 mirror are unchanged (0.2, relation English kept)', async () => {
+test('ROUND-6 SWITCH CONTROLS: the v1 mirror is unchanged (0.2, relation English kept); the v2 pair has its own temperature (BC)', async () => {
   const pair = await onTheWire(buildPairSemantic(SMEW, B, { voice: 'v2' }));
-  assert.equal(pair.temperature, 0.2);
+  // 0.2 until Prompt BC §2.6 (I6, 2026-10-02): the v2 pair writer has its own,
+  // V2_PAIR_TEMPERATURE, provisional at 0.7 until Reyner picks from BC §3's round.
+  assert.equal(pair.temperature, 0.7);
   assert.ok(pair.relationFacts.some((f) => f.label_bracket), 'the pair payload keeps its relation English');
   const v1 = await onTheWire(buildSemanticJson(SMEW, { voice: 'v1' }));
   assert.equal(v1.temperature, 0.2);
