@@ -85,3 +85,14 @@ test('D1: "obat" and "terapi" as metaphor pass; resep dokter, gejala, depresi an
     assert.ok(rejecting(planted(s)).includes('forbidden.medical'), s);
   }
 });
+
+// ── D2: the despair phrases leave the self-harm ban; the first pattern stays ──
+
+test('D2: "tidak ada gunanya" and "menyerah saja" pass; bunuh diri, menyakiti diri, melukai diri still reject', () => {
+  for (const s of ['Tidak ada gunanya menebak isi kepalanya.', 'Kadang kamu ingin menyerah saja pada perdebatan kecil.']) {
+    assert.deepEqual(rejecting(planted(s)), [], s);
+  }
+  for (const s of ['Jangan pernah berpikir bunuh diri.', 'Kadang terpikir untuk menyakiti diri.', 'Ia tidak ingin melukai diri.']) {
+    assert.ok(rejecting(planted(s)).includes('forbidden.self_harm'), s);
+  }
+});

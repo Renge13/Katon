@@ -39,11 +39,7 @@
     "self_harm": [
       {
         "pattern": "\\b(bunuh diri|menyakiti diri|melukai diri)\\b",
-        "note": "Never, under any framing."
-      },
-      {
-        "pattern": "\\bmenyerah saja\\b|\\btidak ada gunanya\\b",
-        "note": "Despair framing adjacent to the above."
+        "note": "Never, under any framing. The second self_harm pattern (\\bmenyerah saja\\b|\\btidak ada gunanya\\b, 'Despair framing adjacent to the above.') was removed 2026-10-02 (Reyner, D2: narrow to allow dramatic phrasing while keeping the clinical bans); STAGE6 1.68.0."
       }
     ]
   },

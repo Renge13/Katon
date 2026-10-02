@@ -226,7 +226,8 @@ test('D4: self_harm is HARD under v2; ranking is lifted (AZ, 1.64.0)', () => {
   const ranked = validateRenderingV2(plant(draftFor(sj), 'Ini aspek terbaik yang bisa dimiliki seseorang.'), sj);
   assert.equal(checks(ranked).includes('forbidden.ranking'), false, JSON.stringify(checks(ranked)));
   assert.equal(ranked.ok, true, 'ranking is direction now, not a ban');
-  const harm = validateRenderingV2(plant(draftFor(sj), 'Kadang rasanya tidak ada gunanya mencoba lagi.'), sj);
+  // `tidak ada gunanya` left the ban 2026-10-02 (D2); the first pattern is kept.
+  const harm = validateRenderingV2(plant(draftFor(sj), 'Kadang terpikir untuk menyakiti diri.'), sj);
   assert.ok(checks(harm).includes('forbidden.self_harm'), JSON.stringify(checks(harm)));
   assert.equal(harm.ok, false);
 });
@@ -339,7 +340,7 @@ test('ROUTING: the same leaking draft is served under v2 and floors under v1', a
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.67.0');
+    assert.equal(onV2.stage6_version, '1.68.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the leaking draft and floors');
   } finally {
