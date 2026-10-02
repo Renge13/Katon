@@ -259,3 +259,13 @@ test('AX §1.2: no example gives a relation an English bracket', () => {
   const ex = loadPrompt('pair', 'v2'); // the pair prompt carries BOTH example sections
   assert.equal(/(Ikatan|Gabungan Penuh|Setengah Gabungan|Benturan|Gesekan|Simpul)\s*\(/u.test(ex), false);
 });
+
+test('G1: the v2 mirror prompt names no Arketipe in its bracket rule (Reyner, 2026-10-02)', () => {
+  // The archetype is written as its English title, never in brackets (the shared base's
+  // line). The mirror's built Form line used to say "An Arketipe, Aspek or Bintang name is
+  // written as its Indonesian name with label_bracket in brackets once", which contradicted it.
+  const mirror = loadPrompt('mirror', 'v2');
+  assert.equal(mirror.includes('Arketipe, Aspek'), false, 'the bracket rule still names the archetype');
+  assert.ok(mirror.includes('An Aspek or Bintang name is written as its Indonesian name'));
+  assert.ok(mirror.includes('Write the archetype exactly as its English title: never translated, never paired with an Indonesian word, never in brackets.'));
+});

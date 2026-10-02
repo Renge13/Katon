@@ -56,7 +56,7 @@ as `provenance.positions_id` lists them; you may also leave the pillars out.
 
 A full reading is roughly 400-550 words. Be ruthless: cut a fact before you thin every fact.
 
-Form: address her as `kamu`. An Arketipe, Aspek or Bintang name is written as its Indonesian name with
+Form: address her as `kamu`. An Aspek or Bintang name is written as its Indonesian name with
 `label_bracket` in brackets once, at first mention (`Bunga Persik (Peach Blossom)`); a relationship between
 pillars gets no bracket; a fact whose `label` is null has no
 name, so describe it instead. Use palace names as given, and `provenance.positions_id` verbatim when you
