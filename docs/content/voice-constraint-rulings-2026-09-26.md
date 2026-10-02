@@ -16,6 +16,17 @@ Source audit: Cowork's writing-constraints audit (Claude project `claude/KATON-w
 - **Target: the reading behaves like the first turn of a conversation.** Answer the curiosity. Explain the why. Make it recognizable. Leave something worth exploring. This is a direction, not stages: no new mandatory writing stages and no new hard writing rules follow from it. Reyner's acceptance question: does it make someone want to ask the next question? "Why" explanations use only the engine's reasons (provenance), never invented chart causes.
 - **Product (not decided):** launch keeps the reading/PDF surface. Whether Katon becomes a conversational interpreter is not decided; demand is tested separately. The loop the voice optimises for: understand myself -> become curious -> test it against someone I know -> compare -> explore the relationship -> come back with another person or question.
 
+## REYNER-RULED 2026-10-02: the three principles
+Verbatim, Reyner, 2026-10-02. Record with every ruling keyed by ID: `docs/product/compat-rulings-2026-10-02.md`.
+
+> "Be fearless in interpretation. Be disciplined about the underlying facts."
+
+> "If the product wants to interpret something important, make the engine capable of establishing the fact properly. Don't weaken the reading just because today's engine can't express it."
+
+> "Stop writing from the facts outward. Start writing from the human experience inward, and use the facts to make that experience specific."
+
+- **Consequence (from the record):** when a desired interpretation has no engine fact, the answer is engine work (a written rule in `docs/`, a second source per CLAUDE.md rule 4, then code), never a weaker reading and never a writer allowed to assert it unbacked.
+
 ## REYNER-RULED 2026-10-01: direction, not word bans
 - **AZ (Prompt AZ, verbatim):** "We don't ban specifics for the writer, just give overall direction."
 - **BA (Prompt BA, verbatim):** "prefer behavioral/intent instructions over word bans."
