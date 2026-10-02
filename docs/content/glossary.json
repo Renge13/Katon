@@ -787,6 +787,12 @@
    "meaning_seed": "Salah satu pilar kehidupan pasangan menyentuh langsung ruang privatmu, membuat dinamika dari area hidupnya berdampak langsung ke suasana hubungan.",
    "daily_seed": "Saat area hidup pasangan tersebut mengalami tekanan, suasananya langsung terbawa ke rumah dan kamu merasakannya sebelum dia sempat cerita."
   },
+  "p2_palace_frame_reader": {
+    "_note": "The A->B twin of p2_palace_frame (E13, Prompt BB, 2026-10-02; words Reyner-confirmed in his message with BB). Chosen by lib/semantic/pair.js p2FrameKey when the only NON-DAY frame hits are a pillar of the reader (A, kamu) reaching the partner's seat (a_hits_b). Direction-fixed like p3_reader_gives: kamu is the reader, dia and -nya the partner. A day-to-day hit is the day pair mirrored, sits in both lists, and never decides the direction. Both directions, or B->A alone, stay p2_palace_frame.",
+    "label_meaning": "Salah satu pilar di baganmu terhubung langsung dengan kursi pasangannya. Elemen hidupmu memengaruhi ranah terdekatnya.",
+    "meaning_seed": "Salah satu pilar kehidupanmu menyentuh langsung ruang privat pasanganmu, membuat dinamika dari area hidupmu berdampak langsung ke suasana hubungan.",
+    "daily_seed": "Saat area hidupmu itu mengalami tekanan, suasananya langsung terbawa ke rumah dan dia merasakannya sebelum kamu sempat cerita."
+  },
   "p2_frame_harmony": {
    "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 六合 with the other person's day branch. Never used for the day pair, which is p2_harmony. Ruled by Reyner 2026-09-26.",
    "name_id": "Saling Tarik",
