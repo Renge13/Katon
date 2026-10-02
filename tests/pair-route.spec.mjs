@@ -37,7 +37,9 @@ import { createPairRow } from '../lib/pair/handlers.js';
 const post = (body) => createPairRow(new Request('http://localhost/api/pair', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(body),
+  // The relationship status is REQUIRED since Prompt BC §1 (2026-10-02); these tests are
+  // about births, so every post carries one unless it names its own.
+  body: JSON.stringify({ status: 'PDKT', ...body }),
 }));
 
 // A boundary birth: 1985-02-04 carries 立春, which is why it is fixture chart 10

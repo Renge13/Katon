@@ -53,9 +53,12 @@ const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 // semantic JSON marks core.archetype_name_id internal_only (the writer gets the English
 // title only) and the pair opening is filled with the English titles, so both keys move
 // and every saved reading is rewritten once; they were c318c80b... and 423d02fd....
+// RE-PINNED the PAIR on Prompt BC §1 (2026-10-02): every pair semantic JSON now carries
+// core.status and each person's core.x.nickname (null when absent), so the v1 pair key
+// moves; it was 96987362.... The mirror key does not move.
 const V1_KEYS = {
   mirror: 'd8d3ffaa08954236ecb222a1c3f8b5fa834c776e2fb657cdf69eddb5016dba29',
-  pair: '96987362e7021de7dc86c47b9365d1440b41173ec92d4b333aaf07a21150eba0',
+  pair: '7a567f519ff5aedffb669b3480cbd7cad508faed063df6a073fe4eaca906a503',
 };
 
 const ENV = ['VOICE', 'VERCEL_ENV', 'GEMINI_API_KEY'];
