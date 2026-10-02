@@ -194,7 +194,13 @@ function ScaledCard({ spec, max = CARD_SCALE, children }) {
 // Rp 19.000 offer and the home compat card - because production answered
 // `payment_closed` and the offer spun forever. It DEFAULTS TO FALSE so a caller
 // that forgets to pass it fails closed, which is the fence's own direction.
-export default function Funnel({ salesOpen = false } = {}) {
+//
+// `compatOpen` IS THE COMPAT SWITCH'S ANSWER (K2, ruled 2026-10-02): the pages pass
+// `compatCheckoutOpen()`, true only when payments are open AND COMPAT_SALES=open, so
+// the CE can sell while compat is off sale. It gates the home compat link and the
+// result page's compat block; `salesOpen` keeps gating the CE offer. Also false by
+// default.
+export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
   // THE PHASE IS THE SCREEN. `calculating` used to be one of these values and it
   // was never a screen of its own - it was a full-screen TAKEOVER that replaced
   // whichever screen the reader was on, which is exactly what commit 1 deletes.
@@ -402,9 +408,9 @@ export default function Funnel({ salesOpen = false } = {}) {
   // 22s funnel. Removing this is the ruling, not an accident, and it is recorded
   // here because a deletion this fresh reads like a botched merge otherwise.
 
-  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} salesOpen={salesOpen} />;
+  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} compatOpen={compatOpen} />;
   if (phase === 'season') return <SeasonGate season={season} onAnswer={onSeasonAnswer} />;
-  return <Reading reading={reading} onReset={reset} salesOpen={salesOpen} />;
+  return <Reading reading={reading} onReset={reset} salesOpen={salesOpen} compatOpen={compatOpen} />;
 }
 
 
@@ -422,7 +428,7 @@ function Para({ children, style }) {
 }
 
 /* ---------------- Home (input) ---------------- */
-function Home({ form, setForm, error, onSubmit, busy, salesOpen = false }) {
+function Home({ form, setForm, error, onSubmit, busy, compatOpen = false }) {
   return (
     <div style={wrap}>
       <div style={{ paddingTop: 60 }}>
@@ -515,9 +521,10 @@ function Home({ form, setForm, error, onSubmit, busy, salesOpen = false }) {
                 One text link to compat, in the lock line's quiet register. HIDDEN
                 WHILE THE FENCE IS CLOSED, the #127 ruling of 2026-09-23 applied to
                 this link: it is the door to a paid product, and with payments closed
-                /kompatibilitas has nothing to sell. `salesOpen` is the server's
-                `checkoutOpen()`; this component holds no copy of that rule. */}
-            {salesOpen && (
+                /kompatibilitas has nothing to sell. `compatOpen` is the server's
+                `compatCheckoutOpen()` (K2, 2026-10-02: the compat-only switch);
+                this component holds no copy of that rule. */}
+            {compatOpen && (
               <div style={{ textAlign: 'center', marginTop: 18 }}>
                 <a
                   href={COMPAT_ROUTE}
@@ -743,7 +750,7 @@ function prefersReducedMotion() {
   catch { return false; }
 }
 
-export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
+export function Reading({ reading, onReset, initialStage, salesOpen = false, compatOpen = false }) {
   const chart = reading.chart;
   // ── THE PROSE HANDOFF ──────────────────────────────────
   //
@@ -1059,8 +1066,9 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false }) {
         <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
       )}
       {/* The Compatibility block (Prompt AY §2): directly after the offer, and only
-          while the fence is open. See CompatOffer. */}
-      {salesOpen && (
+          while COMPAT is on sale (K2, 2026-10-02: `compatOpen`, not the payment
+          fence alone). See CompatOffer. */}
+      {compatOpen && (
         <div style={{ marginTop: 20 }}><CompatOffer token={reading.token} /></div>
       )}
 
@@ -1501,8 +1509,8 @@ function SalesItems({ items, dark = false }) {
  * COMPAT_ROUTE, the same door the home page's compat link uses, because it starts a
  * new reading rather than paying for this one.
  *
- * NOT RENDERED WHILE THE FENCE IS CLOSED (the 2026-09-23 ruling): the caller gates
- * it on `salesOpen` alone. Unlike the offer it has no `initialStage` exception,
+ * NOT RENDERED WHILE THE FENCE IS CLOSED (the 2026-09-23 ruling), NOR WHILE COMPAT
+ * IS OFF SALE (K2, 2026-10-02): the caller gates it on `compatOpen` alone. Unlike the offer it has no `initialStage` exception,
  * because nothing about THIS reading's purchase lives in it.
  *
  * TWO EVENTS (Reyner, 2026-10-01, Prompt AZ §4), allowlisted server-side like the
@@ -1683,7 +1691,7 @@ function Delivery({ token, view = 'ready' }) {
      GET /api/deliver/[token]   whether the card + PDF are hers yet
    The reading is shown either way, because it is free. The delivery opens beneath it
    when it is ready. */
-export function ReadingByToken({ token, salesOpen = false }) {
+export function ReadingByToken({ token, salesOpen = false, compatOpen = false }) {
   const [status, setStatus] = useState('loading'); // loading | notfound | ready
   const [reading, setReading] = useState(null);
   const [delivered, setDelivered] = useState(false);
@@ -1750,6 +1758,7 @@ export function ReadingByToken({ token, salesOpen = false }) {
       onReset={goHome}
       initialStage={delivered ? 'delivered' : (fromCheckout ? 'pending' : undefined)}
       salesOpen={salesOpen}
+      compatOpen={compatOpen}
     />
   );
 }

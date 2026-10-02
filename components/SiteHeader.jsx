@@ -39,10 +39,11 @@ const NAV = {
   compat: { href: NAV_HREFS.compat, label: CHROME_COPY.nav_compat },
 };
 
-// `salesOpen` comes from `app/layout.js`, which reads `checkoutOpen()`. While the
-// fence is closed the compat link is not drawn (ruled 2026-09-23): it is a door to
-// a paid product with nothing to sell behind it.
-export default function SiteHeader({ salesOpen = false } = {}) {
+// `compatOpen` comes from `app/layout.js`, which reads `compatCheckoutOpen()`. While
+// compat is not on sale the compat link is not drawn (ruled 2026-09-23 for the
+// payment fence; K2, 2026-10-02, for the compat-only switch): it is a door to a paid
+// product with nothing to sell behind it.
+export default function SiteHeader({ compatOpen = false } = {}) {
   const pathname = usePathname() || '/';
 
   return (
@@ -105,7 +106,7 @@ export default function SiteHeader({ salesOpen = false } = {}) {
         </Link>
 
         <nav style={{ display: 'flex', gap: 16 }}>
-          {navKeys({ salesOpen }).map((k) => NAV[k]).map((item) => {
+          {navKeys({ compatOpen }).map((k) => NAV[k]).map((item) => {
             const current = isCurrent(pathname, item.href);
             return (
               <Link

@@ -1,5 +1,5 @@
 import { PasanganFromQuery } from '@/components/Pasangan.jsx';
-import { checkoutOpen } from '@/lib/paymentFence';
+import { compatCheckoutOpen } from '@/lib/paymentFence';
 
 // `/kompatibilitas` — RULED BY REYNER 2026-09-08. The path is the reader-facing
 // name; the internal identifiers stay `PASANGAN_COPY` / `pasangan_*`.
@@ -20,5 +20,5 @@ import { checkoutOpen } from '@/lib/paymentFence';
 // CTA HIDDEN WHILE FENCE CLOSED"). This page still answers an old link with its
 // closed state, which is the honest reply to someone who already has the URL.
 export default function KompatibilitasPage() {
-  return <PasanganFromQuery salesClosed={!checkoutOpen()} />;
+  return <PasanganFromQuery salesClosed={!compatCheckoutOpen()} />;
 }
