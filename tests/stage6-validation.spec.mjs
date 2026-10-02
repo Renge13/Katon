@@ -871,7 +871,8 @@ test('the three kept forbidden categories hard-reject; fatalism and ranking no l
   const kept = {
     medical: 'Pola ini sering muncul sebagai gejala penyakit yang perlu kamu periksa.',
     financial: 'Waktu yang tepat untuk masuk ke investasi saham sudah dekat.',
-    self_harm: 'Kalau terasa berat, menyerah saja lebih ringan.',
+    // `menyerah saja` left the ban 2026-10-02 (D2); the first pattern is kept.
+    self_harm: 'Kalau terasa berat, jangan berpikir untuk menyakiti diri.',
   };
   for (const [category, sentence] of Object.entries(kept)) {
     const bad = withBlockText(goodReading(), 'day_master_Fire',
@@ -918,7 +919,8 @@ test('AZ RED FIRST: the lifted words pass; a pipeline leak, self-harm, medical o
     ['a literal null', 'Nilaimu null di sini.', 'style.code_leak'],
     ['sebagai AI', 'Sebagai AI, saya membaca petamu.', 'style.meta'],
     ['bunuh diri', 'Jangan pernah berpikir bunuh diri.', 'forbidden.self_harm'],
-    ['obat', 'Minum obat yang tepat akan membantumu.', 'forbidden.medical'],
+    // `obat` left the ban 2026-10-02 (D1); `resep dokter` is kept.
+    ['resep dokter', 'Mintalah resep dokter yang tepat untukmu.', 'forbidden.medical'],
     ['investasi', 'Mulailah investasi sekarang juga.', 'forbidden.financial'],
   ]) {
     const bad = withBlockText(goodReading(), 'day_master_Fire',
@@ -1386,10 +1388,11 @@ test('every blocklist pattern compiles and carries a note', () => {
       }
     }
   }
-  // EXACTLY the three kept checks (Reyner, Prompt AZ, "Keep 3 checks"): 8 forbidden
-  // (medical 3, financial 3, self_harm 2) + 10 style (meta 4, code_leak 6). A pattern
-  // added here is a new word ban, which that ruling says the writer gets as direction.
-  assert.equal(count, 18, `${count} patterns loaded`);
+  // EXACTLY the three kept checks (Reyner, Prompt AZ, "Keep 3 checks"): 7 forbidden
+  // (medical 3, financial 3, self_harm 1 - its despair pattern left 2026-10-02, D2)
+  // + 10 style (meta 4, code_leak 6). A pattern added here is a new word ban, which
+  // that ruling says the writer gets as direction.
+  assert.equal(count, 17, `${count} patterns loaded`);
   assert.deepEqual([...CATEGORIES.forbidden].sort(), ['financial', 'medical', 'self_harm']);
   assert.deepEqual([...CATEGORIES.style].sort(), ['code_leak', 'meta']);
 });

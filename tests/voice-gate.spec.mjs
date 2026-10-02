@@ -215,7 +215,8 @@ test('D4 AFTER AZ (1.64.0): fatalism and a pair verdict no longer gate; medical 
   const v1r = validateRendering(plant(draftFor(pj1), 'Kalian sangat cocok.'), pj1);
   assert.equal(v1r.findings.some((f) => f.check === 'pair.verdict'), false, 'v1 no longer logs it either');
   // A KEPT category, same plant: still HARD on v2.
-  const med = validateRenderingV2(plant(draftFor(sj), 'Minum obat yang tepat akan membantumu.'), sj);
+  // `obat` left the ban 2026-10-02 (D1); `resep dokter` is kept.
+  const med = validateRenderingV2(plant(draftFor(sj), 'Mintalah resep dokter yang tepat untukmu.'), sj);
   assert.ok(checks(med).includes('forbidden.medical'), JSON.stringify(checks(med)));
   assert.equal(med.ok, false);
 });
@@ -225,22 +226,27 @@ test('D4: self_harm is HARD under v2; ranking is lifted (AZ, 1.64.0)', () => {
   const ranked = validateRenderingV2(plant(draftFor(sj), 'Ini aspek terbaik yang bisa dimiliki seseorang.'), sj);
   assert.equal(checks(ranked).includes('forbidden.ranking'), false, JSON.stringify(checks(ranked)));
   assert.equal(ranked.ok, true, 'ranking is direction now, not a ban');
-  const harm = validateRenderingV2(plant(draftFor(sj), 'Kadang rasanya tidak ada gunanya mencoba lagi.'), sj);
+  // `tidak ada gunanya` left the ban 2026-10-02 (D2); the first pattern is kept.
+  const harm = validateRenderingV2(plant(draftFor(sj), 'Kadang terpikir untuk menyakiti diri.'), sj);
   assert.ok(checks(harm).includes('forbidden.self_harm'), JSON.stringify(checks(harm)));
   assert.equal(harm.ok, false);
 });
 
 test('LOGGED, NOT GATING: a style.* hit rejects under v1 and passes under v2', () => {
-  // A KEPT style category (style.code_leak): `slang`, which this used, was retired
-  // 2026-10-01 (AZ). v1 rejects the leak; v2 records it at severity `flag` and accepts.
-  const sentence = 'Kamu sering merasa lelah, nilaimu null setelah bekerja.';
+  // `slang`, which this first used, was retired 2026-10-01 (AZ); `style.code_leak`,
+  // which replaced it, REJECTS on v2 since 1.70.0 (G6, 2026-10-02). The question mark
+  // (style.rhetorical_question, kept by BA) is soft on v1 and logged on v2.
+  const sentence = 'Apa yang membuatmu bertahan selama ini?';
   const v1json = buildSemanticJson(A, { voice: 'v1' });
   const v1 = validateRendering(plant(draftFor(v1json), sentence), v1json);
-  assert.equal(v1.ok, false, 'precondition: v1 rejects the leak');
+  assert.equal(v1.ok, false, 'precondition: v1 rejects the question');
   const sj = v2(A);
   const r = validateRenderingV2(plant(draftFor(sj), sentence), sj);
   assert.equal(r.ok, true, JSON.stringify(checks(r)));
-  assert.ok(r.findings.some((f) => f.check.startsWith('style.') && f.severity === 'flag'), 'but it is logged');
+  assert.ok(r.findings.some((f) => f.check === 'style.rhetorical_question' && f.severity === 'flag'), 'but it is logged');
+  // And the leak this test used to carry is now the exception: it rejects on v2 too.
+  const leak = validateRenderingV2(plant(draftFor(sj), 'Kamu sering merasa lelah, nilaimu null setelah bekerja.'), sj);
+  assert.ok(checks(leak).includes('style.code_leak'), JSON.stringify(checks(leak)));
 });
 
 // ── FIX (i), ROUND 3: THE ARCHETYPE BRACKET IS THE ENGINE'S (1.31.0) ──
@@ -320,12 +326,13 @@ test('FIX (ii): a hanzi-only bracket is removed; hanzi outside a bracket still r
 import { renderReading, __clearInFlight } from '../lib/render/index.js';
 import { __clearMemCache } from '../lib/render/cache.js';
 
-test('ROUTING: the same leaking draft is served under v2 and floors under v1', async () => {
-  // Was a slang draft; slang is retired (AZ, 1.64.0), so a kept style group routes it.
+test('ROUTING: the same style-flagged draft is served under v2 and floors under v1', async () => {
+  // Was a slang draft (retired, AZ 1.64.0), then a code_leak draft, which rejects on v2
+  // since 1.70.0 (G6). A question mark is still soft on v1 and logged on v2.
   const prev = { fetch: globalThis.fetch, key: process.env.GEMINI_API_KEY };
   process.env.GEMINI_API_KEY = 'test-key-never-sent-anywhere';
   const slangDraft = (sj) => {
-    const d = plant(draftFor(sj), 'Kamu sering merasa lelah, nilaimu null setelah bekerja.');
+    const d = plant(draftFor(sj), 'Apa yang membuatmu bertahan selama ini?');
     return { blocks: d.blocks, penutup: 'Penutup yang cukup panjang untuk sebuah bacaan.' };
   };
   const serve = async (sj) => {
@@ -338,9 +345,9 @@ test('ROUTING: the same leaking draft is served under v2 and floors under v1', a
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.65.0');
+    assert.equal(onV2.stage6_version, '1.70.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
-    assert.equal(onV1.source, 'module_assembly', 'v1 rejects the leaking draft and floors');
+    assert.equal(onV1.source, 'module_assembly', 'v1 rejects the question and floors');
   } finally {
     globalThis.fetch = prev.fetch;
     if (prev.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = prev.key;
@@ -680,19 +687,19 @@ test('A LONE SENTENCE: a block that is only the hedge keeps it, because one sent
 });
 
 test('KEPT: when dropping the hedge would make a rejecting check fail, the sentence stays (close.hedge_kept)', () => {
-  const HARD_SEAT = calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' });
-  const sj = buildPairSemantic(A, HARD_SEAT, { voice: 'v2' });
-  assert.ok(sj.safety_flags.includes('p2_reframe_required'), 'precondition: the reframe is required');
-  const reframe = sj.facts.find((f) => f.id === 'p2_reframe').label_meaning;
+  // The example check is `pair.both_named` since 2026-10-02: it used to be
+  // `pair.reframe_missing`, which A4 removed (STAGE6 1.66.0).
+  const sj = buildPairSemantic(A, B, { voice: 'v2' });
+  const { archetype_name_id: nameA } = sj.core.a;
+  const { archetype_name_id: nameB } = sj.core.b;
   const draft = draftFor(sj);
-  const idx = draft.blocks.findIndex((b) => (b.fact_ids || []).includes('p2_reframe'));
-  assert.notEqual(idx, -1);
-  // The reframe lives ONLY in the final, hedged sentence of its block.
-  const text = `Kalian berdua sama-sama cepat membaca suasana. Mungkin menarik untuk melihat bahwa ${reframe.replace(/[.!?]+\s*/gu, ', ').replace(/,\s*$/u, '')}.`;
+  const idx = 0;
+  // Both names live ONLY in the final, hedged sentence of the opening block.
+  const text = `Kalian berdua sama-sama cepat membaca suasana. Mungkin menarik untuk melihat bahwa ${nameA} dan ${nameB} saling melengkapi.`;
   draft.blocks[idx].text = text;
   const r = validateRenderingV2(draft, sj);
-  assert.equal(r.normalized.blocks[idx].text, text, 'the hedged sentence is kept');
-  assert.equal(r.findings.some((f) => f.check === 'pair.reframe_missing'), false, 'the kept reading carries the reframe');
+  assert.equal(r.normalized.blocks[idx].text.includes(nameA) && r.normalized.blocks[idx].text.includes(nameB), true, 'the hedged sentence is kept');
+  assert.equal(r.findings.some((f) => f.check === 'pair.both_named'), false, 'the kept reading names both');
   assert.equal(logOf(r, 'close.hedge_kept').length, 1);
   assert.equal(logOf(r, 'close.hedge_dropped').length, 0);
 });
