@@ -1,0 +1,65 @@
+BRANCH_ELEMENTS vs main-qi element disagreements: none (12/12 agree)
+guards: V0 and P4 reproduce the harness run; option partitions sum to 5000
+
+per-chart family marginal (2000 charts): officer 19.8%, wealth 19.6%, resource 21.5%, output 19.4%, companion 19.7%
+per-chart god marginal: 正印 10.8%, 偏印 10.8%, 傷官 10.4%, 七殺 10.2%, 劫財 10.1%, 正財 10.0%, 正官 9.7%, 偏財 9.7%, 比肩 9.6%, 食神 9.0%
+per-chart main-profile root element: Water 20.2%, Earth 20.4%, Fire 15.7%, Wood 23.7%, Metal 20.0%
+expected same-family rate from marginals: 20.0%
+
+all counters:
+  E11.a.both                         170    3.4%
+  E11.a.dirAtoB                      980   19.6%
+  E11.a.dirBtoA                      981   19.6%
+  E11.a.either                      1791   35.8%
+  E11.a_stem.either                  912   18.2%
+  E11.b.A                           1009   20.2%
+  E11.b.B                           1024   20.5%
+  E11.b.either                      1839   36.8%
+  E11.b_anyqi.either                3450   69.0%
+  E11.c.controlling                 1902   38.0%
+  E11.c.generating                  1960   39.2%
+  E11.c.same                        1138   22.8%
+  E11.c2.either                     1764   35.3%
+  E11.d.favList.either              3569   71.4%
+  E11.d.rank0.either                1834   36.7%
+  E11.d.unfavList.either            3911   78.2%
+  E11.e.either                      2123   42.5%
+  E11.f.either                       427    8.5%
+  E11.g.either                      1104   22.1%
+  E11.i.sameSeatBranch               448    9.0%
+  P4.contrasting                    4029   80.6%
+  P4.matching                        526   10.5%
+  P4.related                         445    8.9%
+  P4.sameFamily                      971   19.4%
+  P5.fitHigh                        2121   42.4%
+  P5.pullHigh                       2358   47.2%
+  P5.q1                             1074   21.5%
+  P5.q2                             1284   25.7%
+  P5.q3                             1047   20.9%
+  P5.q4                             1595   31.9%
+  fitHeld.2.2.b                     4960   99.2%
+  fitHeld.2.2.c                     2137   42.7%
+  old.2.1.d.anyPalace               3607   72.1%
+  old.2.2.a.either                  4911   98.2%
+  optA.contrasting_controlling      2055   41.1%
+  optA.contrasting_generating       1974   39.5%
+  optA.matching                      526   10.5%
+  optA.related                       445    8.9%
+  optB.controlling_family           2055   41.1%
+  optB.generating_family            1974   39.5%
+  optB.same_family                   971   19.4%
+  optC.controlling                  2015   40.3%
+  optC.generating                   1941   38.8%
+  optC.same                         1044   20.9%
+  optD.contrasting_diffpol          2047   40.9%
+  optD.contrasting_samepol          1982   39.6%
+  optD.matching                      526   10.5%
+  optD.related                       445    8.9%
+  pull.2.1.a                         404    8.1%
+  pull.2.1.b                         436    8.7%
+  pull.2.1.c                         478    9.6%
+  pull.2.1.d                        1508   30.2%
+  pullAlone.2.1.a                    227    4.5%
+  pullAlone.2.1.b                    298    6.0%
+  pullAlone.2.1.c                    268    5.4%
+  pullAlone.2.1.d                   1121   22.4%
