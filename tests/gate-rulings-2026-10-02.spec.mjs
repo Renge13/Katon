@@ -96,3 +96,18 @@ test('D2: "tidak ada gunanya" and "menyerah saja" pass; bunuh diri, menyakiti di
     assert.ok(rejecting(planted(s)).includes('forbidden.self_harm'), s);
   }
 });
+
+// ── E5: a pair reading that misstates either person's Day Master element ──
+
+test('E5: on a pair, a wrong Day Master element is HARD for either person; true statements pass', () => {
+  // A (kamu) is Tanah, B (dia) is Logam.
+  for (const [s, who] of [['Kamu adalah Logam yang tegas.', 'A'], ['Dia adalah Tanah yang tenang.', 'B'],
+    ['Inti dirimu adalah Api.', 'A'], ['Ia adalah Kayu yang lentur.', 'B']]) {
+    const r = planted(s);
+    assert.ok(rejecting(r).includes('fact.day_master'), `${who}: ${s} -> ${JSON.stringify(rejecting(r))}`);
+    assert.equal(r.findings.find((f) => f.check === 'fact.day_master').severity, 'hard');
+  }
+  for (const s of ['Kamu adalah Tanah yang sabar.', 'Dia adalah Logam yang tegas.', 'Kamu Tanah, dia Logam.']) {
+    assert.deepEqual(rejecting(planted(s)), [], s);
+  }
+});
