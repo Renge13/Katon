@@ -1415,11 +1415,12 @@ test('every blocklist pattern compiles and carries a note', () => {
       }
     }
   }
-  // EXACTLY the three kept checks (Reyner, Prompt AZ, "Keep 3 checks"): 7 forbidden
-  // (medical 3, financial 3, self_harm 1 - its despair pattern left 2026-10-02, D2)
+  // EXACTLY the three kept checks (Reyner, Prompt AZ, "Keep 3 checks"): 8 forbidden
+  // (medical 4 - the medication-instruction pattern Reyner added 2026-10-02 after D1;
+  // financial 3; self_harm 1 - its despair pattern left 2026-10-02, D2)
   // + 10 style (meta 4, code_leak 6). A pattern added here is a new word ban, which
-  // that ruling says the writer gets as direction.
-  assert.equal(count, 17, `${count} patterns loaded`);
+  // that ruling says the writer gets as direction - unless Reyner rules it, as here.
+  assert.equal(count, 18, `${count} patterns loaded`);
   assert.deepEqual([...CATEGORIES.forbidden].sort(), ['financial', 'medical', 'self_harm']);
   assert.deepEqual([...CATEGORIES.style].sort(), ['code_leak', 'meta']);
 });

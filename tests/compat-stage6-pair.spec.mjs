@@ -66,7 +66,7 @@ test('STAGE6_VERSION moved, once, for this commit', () => {
   // 1.47.0: a cached pair row is re-gated on serve (main, AI §2). 1.48.0: that, merged onto v2.
   // 1.64.0: the word bans lifted (AZ). 1.65.0: hedgeAboutReader deleted (BA).
   // 1.66.0: pair.reframe_missing removed (A4, Prompt BB §2.2).
-  assert.equal(STAGE6_VERSION, '1.71.0');
+  assert.equal(STAGE6_VERSION, '1.72.0');
 });
 
 test('THE MIRROR IS UNTOUCHED: pairGuard returns [] for kind mirror', () => {

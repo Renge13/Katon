@@ -348,7 +348,7 @@ test('ROUTING: the same style-flagged draft is served under v2 and floors under 
   try {
     const onV2 = await serve(v2(A));
     assert.equal(onV2.source, 'gemini', `v2 floored: ${JSON.stringify(onV2.qa_flag)}`);
-    assert.equal(onV2.stage6_version, '1.71.0');
+    assert.equal(onV2.stage6_version, '1.72.0');
     const onV1 = await serve(buildSemanticJson(A, { voice: 'v1' }));
     assert.equal(onV1.source, 'module_assembly', 'v1 rejects the question and floors');
   } finally {

@@ -144,3 +144,20 @@ test('G6: every other style.* finding stays LOGGED on v2', () => {
   const r = planted('Apa yang membuat kalian bertahan?');
   assert.deepEqual(rejecting(r), [], JSON.stringify(rejecting(r)));
 });
+
+// ── D1, AMENDED: medication instructions are back in the medical ban (Reyner 2026-10-02) ──
+// After D1 freed the bare word, literal advice passed too. Reyner, the same day: "add one
+// pattern to forbidden_content.medical for medication instructions (minum / meminum /
+// konsumsi / mengonsumsi obat; obat penenang / tidur / antidepresan)". The metaphor stays free.
+
+test('D1 AMENDED: a medication instruction rejects; "obat" as a metaphor still passes', () => {
+  for (const s of ['Minum obat penenang setiap pagi.', 'Kamu perlu meminum obat secara rutin.',
+    'Sebaiknya konsumsi obat ini.', 'Ia mengonsumsi obat sebelum tidur.', 'Obat tidur bisa membantu.',
+    'Coba obat antidepresan.']) {
+    assert.ok(rejecting(planted(s)).includes('forbidden.medical'), s);
+  }
+  for (const s of ['Dia adalah obat untuk lelahmu.', 'Kehadirannya terasa seperti terapi bagimu.',
+    'Tawa kalian adalah obat paling ampuh.']) {
+    assert.deepEqual(rejecting(planted(s)), [], s);
+  }
+});
