@@ -1603,7 +1603,10 @@ export function CardB({ data, scale = 1, id = 'card-b' }) {
 
   return E(Canvas, { spec: CARD_B, token, scale, stem: data.stem, foil: true, rimId, id },
     E(Headline, {
-      key: 'h', data, palette, px, sc, showNameId: true, brassHair,
+      // showNameId OFF since G1 (Reyner 2026-10-02, rule 23 amended): the Indonesian
+      // archetype name is no longer shown to readers, on cards included. Card B printed
+      // it as a brass eyebrow with a hairline above the English headline.
+      key: 'h', data, palette, px, sc, showNameId: false, brassHair,
       nameGap: RECLAIMED_B.headNameGap, kickerGap: RECLAIMED_B.headKickerGap, aspekGap: RECLAIMED_B.headAspekGap,
       stackedFactor: CARD_B_STACKED_HEAD_FACTOR,
     }),

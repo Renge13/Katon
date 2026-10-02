@@ -136,15 +136,18 @@ async function readingScreen() {
 
 // ── 1 and 2: the two blocks, on one cadence ────────────────
 
-test('PROPOSITION 1 and 2: persona is 0/120/240/360ms and Bagan matches at 0/120/240', async () => {
+test('PROPOSITION 1 and 2: persona is 0/120/240ms and Bagan matches at 0/120/240', async () => {
   const { ui, restore } = await readingScreen();
   try {
     const delays = delaysIn(ui.host);
     assert.ok(delays.length > 12, `expected the reading to render; got ${delays.length} .k-rise nodes`);
 
-    // The persona block is the first four Reveals in the reading root.
-    assert.deepEqual(delays.slice(0, 4), ['0s', '0.12s', '0.24s', '0.36s'],
-      'the persona block must run 0/120/240/360ms');
+    // The persona block is the first THREE Reveals in the reading root since G1
+    // (2026-10-02): the italic English line under the title is gone, and the element
+    // row took its 240ms. It was four, 0/120/240/360.
+    assert.deepEqual(delays.slice(0, 3), ['0s', '0.12s', '0.24s'],
+      'the persona block must run 0/120/240ms');
+    assert.notEqual(delays[3], '0.36s', 'no fourth persona step is left behind');
 
     // Bagan: located by its own copy rather than by index, so an inserted block
     // above it does not silently repoint this assertion at something else.

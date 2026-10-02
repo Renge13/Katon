@@ -169,7 +169,8 @@ test('the full document has all five sections and more than one page', async () 
   const pages = (buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
   assert.ok(pages >= 5, `expected at least one page per section, got ${pages}`);
 
-  assert.match(text, /Matahari/, 'the cover names her archetype');
+  // Her English title since G1 (2026-10-02).
+  assert.match(text, /The Sun/, 'the cover names her archetype');
   assert.match(text, /Bacaanmu/, 'the reading section');
   assert.match(text, /Bagan Kelahiran/, 'the chart page, and NOT a hanzi heading');
   assert.match(text, /Istilah dalam Bacaanmu/, 'the appendix');
@@ -562,7 +563,7 @@ test('pageTexts attributes each page its OWN text', async () => {
   const texts = pageTexts(buffer);
   assert.equal(texts.length, pageObjectOrder(buffer).length, 'one text per page');
   assert.equal(texts.length, report.pages);
-  assert.ok(texts[0].includes(semanticJson.core.archetype_name_id), 'page 1 is the cover');
+  assert.ok(texts[0].includes(semanticJson.core.archetype_name_en), 'page 1 is the cover');
   // THE LAST PAGE IS THE APPENDIX NOW. It was the colophon until 2026-08-22; the
   // document deliberately ends on her own material. Asserted by CONSTRUCTION rather
   // than by a substring that happens to be there: the appendix's final entry is the
@@ -657,35 +658,24 @@ test('THE MIRROR DOCUMENT IS BYTE-FOR-BYTE THE SAME DOCUMENT after the refactor'
 
 // ── THE COVER (Reyner, 2026-09-14, ruling 2) ───────────────
 
-test('THE COVER LEADS WITH THE INDONESIAN NAME, English once underneath', async () => {
-  // ── REVERSED 2026-09-22 (P2 markup A3, Reyner "ok") ──────────
-  // This asserted the 2026-09-14 ruling 2 - English title, Indonesian under it.
-  // Reyner's later mark reverses it on CLAUDE.md rule 23's terms: Indonesian name
-  // first, English pair ONCE, smaller. Rewritten rather than deleted, so the order
-  // stays asserted in the direction that is now ruled.
-  //
-  // The cover also gained the wordmark and the `Edisi Lengkap` eyebrow above the
-  // title (A1), so the title is found by content, not by line index.
+test('THE COVER IS THE ENGLISH TITLE ALONE, and so is the metadata title (G1)', async () => {
+  // ── REVERSED AGAIN 2026-10-02 (G1, Reyner: "Accept English titles", "Everywhere") ──
+  // 2026-09-14 ruling 2 put English first; A3 (2026-09-22) reversed it to Indonesian
+  // first with the English under it, and kept the metadata title Indonesian. Rule 23
+  // as amended 2026-10-02 shows the archetype by name_en everywhere and the Indonesian
+  // name is no longer shown to readers, so the title is name_en and nothing sits under
+  // it. The metadata title is what a reader sees in a viewer tab and her downloads
+  // folder, so it is English too.
   const { chart, semanticJson, rendered } = fixture('chart 1');
   const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
   const cover = pageTexts(buffer)[0].split('\n').map((l) => l.trim()).filter(Boolean);
   const core = semanticJson.core;
 
-  const at = cover.indexOf(core.archetype_name_id);
-  assert.ok(at > -1, 'the Indonesian name is not a line of its own on the cover');
-  assert.equal(cover[at + 1], core.archetype_name_en,
-    'the English name is not the line directly under the Indonesian title');
-  assert.equal(cover.filter((l) => l.includes(core.archetype_name_en)).length, 1,
-    'the English name prints ONCE');
-  // ORDER, not presence: both were on the cover before, the other way round.
-  const page = pageTexts(buffer)[0];
-  assert.ok(page.indexOf(core.archetype_name_id) < page.indexOf(core.archetype_name_en),
-    'the English name still comes first');
-
-  // THE METADATA TITLE IS UNCHANGED, explicitly ruled. It is what a reader sees in
-  // a viewer tab and in her downloads folder, and it stays Indonesian.
-  assert.ok(buffer.includes(Buffer.from(`Katon - ${core.archetype_name_id}`, 'utf8')),
-    'the metadata title moved with the cover');
+  assert.ok(cover.includes(core.archetype_name_en), 'the English title is a line of its own on the cover');
+  assert.equal(cover.filter((l) => l.includes(core.archetype_name_en)).length, 1, 'printed ONCE');
+  assert.equal(pageTexts(buffer)[0].includes(core.archetype_name_id), false, 'the Indonesian name is not on the cover');
+  assert.ok(buffer.includes(Buffer.from(`Katon - ${core.archetype_name_en}`, 'utf8')), 'the metadata title is English');
+  assert.equal(buffer.includes(Buffer.from(`Katon - ${core.archetype_name_id}`, 'utf8')), false);
 });
 
 // ── NOTHING OVERLAPS (Reyner, 2026-09-14, ruling 3) ────────
