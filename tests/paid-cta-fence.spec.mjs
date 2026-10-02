@@ -161,18 +161,18 @@ test('THE HOME COMPAT CARD IS NOT RENDERED UNDER A CLOSED FENCE, and is under an
   try {
     const hasCompatLink = (host) => [...host.querySelectorAll('a')]
       .some((a) => a.getAttribute('href') === '/kompatibilitas');
-    const closed = await mount(React.createElement(Funnel, { salesOpen: false }));
+    const closed = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
     assert.equal(hasCompatLink(closed.host), false, 'closed fence: no door to a paid product');
     await closed.unmount();
-    const open = await mount(React.createElement(Funnel, { salesOpen: true }));
+    const open = await mount(React.createElement(Funnel, { salesOpen: true, compatOpen: true }));
     assert.equal(hasCompatLink(open.host), true, 'open fence: the compat card is back');
     await open.unmount();
   } finally { f.restore(); }
 });
 
 test('THE HEADER NAV DROPS COMPAT UNDER A CLOSED FENCE, and keeps it under an open one', () => {
-  assert.deepEqual(navKeys({ salesOpen: false }), ['mirror']);
-  assert.deepEqual(navKeys({ salesOpen: true }), ['mirror', 'compat']);
+  assert.deepEqual(navKeys({ compatOpen: false }), ['mirror']);
+  assert.deepEqual(navKeys({ compatOpen: true }), ['mirror', 'compat']);
   const header = readFileSync(new URL('../components/SiteHeader.jsx', import.meta.url), 'utf8');
   assert.match(header, /navKeys\(/u, 'SiteHeader draws its links through navKeys');
 });
@@ -203,7 +203,7 @@ test('AY §2: the offer carries the ruled headline and its three labelled lines,
 test('AY §2: THE COMPATIBILITY BLOCK renders after the offer under an open fence, and not at all under a closed one', async () => {
   const f = stubFetch({});
   try {
-    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
+    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true, compatOpen: true }));
     const t = open.text();
     assert.ok(t.includes(CHROME_COPY.compat_cta), 'open fence: the compat CTA renders');
     assert.ok(t.includes(CHROME_COPY.compat_eyebrow) && t.includes(CHROME_COPY.compat_headline));
@@ -237,7 +237,7 @@ test('AZ §4: THE COMPAT BLOCK FIRES compat_cta_seen when displayed and compat_c
     return { ok: true, status: 200, json: async () => ({}) };
   };
   try {
-    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true }));
+    const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true, compatOpen: true }));
     assert.ok(sent.includes('compat_cta_seen'), `displayed: ${sent.join(', ')}`);
     const link = [...open.host.querySelectorAll('a')].find((a) => a.textContent.includes(CHROME_COPY.compat_cta));
     // Stop jsdom navigating; the handler still runs.
@@ -284,8 +284,9 @@ test('BA §3: /harga has its own Complete Edition description, and the compat ro
   assert.equal(h.compat.link, 'Baca pola kalian berdua');
   assert.equal(h.compat.note, undefined, 'the "Belum bisa dibeli" note is retired');
   assert.doesNotMatch(JSON.stringify(h), /Belum bisa dibeli/u);
-  // The link follows the payment fence exactly as the result page's compat block does.
-  assert.match(page, /checkoutOpen\(\)/u, '/harga reads the fence');
+  // The link follows the compat answer exactly as the result page's compat block does
+  // (the payment fence AND the COMPAT_SALES switch since K2, 2026-10-02).
+  assert.match(page, /compatCheckoutOpen\(\)/u, '/harga reads the fence');
   assert.match(page, /COMPAT_ROUTE/u, 'the link goes to the compatibility page');
   assert.doesNotMatch(page, /Rp\s?\d/u, 'no typed price');
   // Kept: the CE row's purchase-path note and its closing guarantee.
@@ -294,16 +295,19 @@ test('BA §3: /harga has its own Complete Edition description, and the compat ro
 
 // ── ONE SOURCE: THE FENCE, READ BY THE SERVER PAGES ────────
 
-test('EVERY PAGE THAT CARRIES A PAID ENTRY POINT PASSES checkoutOpen(), and no component reads the env', () => {
+test('EVERY PAGE THAT CARRIES A PAID ENTRY POINT PASSES checkoutOpen() or compatCheckoutOpen(), and no component reads the env', () => {
   const src = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
+  // `checkoutOpen()` for the CE offer, `compatCheckoutOpen()` for compat's entry
+  // points (K2, 2026-10-02). Both are the fence module's own exports; the second
+  // contains the first, so either regex below matches the fence's word.
   for (const page of ['app/page.js', 'app/r/[token]/page.js', 'app/layout.js',
     'app/kompatibilitas/page.js', 'app/kompatibilitas/[id]/page.js', 'app/harga/page.js']) {
-    assert.match(src(page), /checkoutOpen\(\)/u, `${page} reads the fence's own export`);
+    assert.match(src(page), /(?:checkoutOpen|compatCheckoutOpen)\(\)/u, `${page} reads the fence's own export`);
     assert.doesNotMatch(src(page), /paymentsProvider\(\) === 'closed'/u,
       `${page} must not carry a second copy of the rule`);
   }
   for (const c of ['components/Funnel.jsx', 'components/SiteHeader.jsx',
     'components/Pasangan.jsx', 'components/PasanganReport.jsx']) {
-    assert.doesNotMatch(src(c), /process\.env\.PAYMENTS_PROVIDER/u, `${c} reads no env`);
+    assert.doesNotMatch(src(c), /process\.env\.(?:PAYMENTS_PROVIDER|COMPAT_SALES)/u, `${c} reads no env`);
   }
 });

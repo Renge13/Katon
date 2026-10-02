@@ -2,7 +2,7 @@ import { getPair } from '@/lib/pairStore';
 import { getReading, markReadingPaid } from '@/lib/readingStore';
 import { settlePair } from '@/lib/pair/settle';
 import { json, notFound, notConfigured } from '@/lib/http';
-import { mockPaymentsAllowed } from '@/lib/paymentFence';
+import { mockPaymentsAllowed, compatCheckoutOpen } from '@/lib/paymentFence';
 
 export const runtime = 'nodejs';
 
@@ -44,6 +44,9 @@ export async function POST(request, { params }) {
 
   const pairRow = await getPair(id);
   if (pairRow) {
+    // K2 (2026-10-02): while compat is off sale the pay route refuses a compat
+    // checkout, so the free unlock refuses a pair too - one answer, not two.
+    if (!compatCheckoutOpen()) return notConfigured('payment_closed');
     const result = await settlePair(id, pairRow, true, null);
     return json({ ok: true, paid: true, transitioned: result.paid, reason: result.reason });
   }

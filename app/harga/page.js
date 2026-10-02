@@ -3,7 +3,7 @@ import StaticPage, { Card, P } from '@/components/StaticPage.jsx';
 import { SITE_COPY, CHROME_COPY } from '@/lib/site/copy';
 import { SKUS, priceFor, isSellable } from '@/lib/pricing';
 import { formatIdr } from '@/lib/site/format';
-import { checkoutOpen } from '@/lib/paymentFence';
+import { compatCheckoutOpen } from '@/lib/paymentFence';
 import { COMPAT_ROUTE } from '@/lib/site/routes';
 
 // /harga — the product catalogue. Xendit's review asks for products with
@@ -177,13 +177,14 @@ function PaidRow({ sku, copy, salesOpen }) {
 }
 
 export default function HargaPage() {
-  // Read once, on the server: the one answer every paid CTA renders from.
-  const salesOpen = checkoutOpen();
+  // Read once, on the server. The compat row's link is the only paid CTA on this page,
+  // so it reads the compat answer (K2, 2026-10-02): payments open AND COMPAT_SALES=open.
+  const compatOpen = compatCheckoutOpen();
   return (
     <StaticPage title={q.title} lead={q.lead}>
       <Row name={q.free.name} price={q.free.price} body={q.free.body} />
       <PaidRow sku="artifact" copy={q.artifact} />
-      <PaidRow sku="compat" copy={q.compat} salesOpen={salesOpen} />
+      <PaidRow sku="compat" copy={q.compat} salesOpen={compatOpen} />
 
       <P style={{ marginTop: 24, fontSize: 13.5 }}>{q.payment}</P>
 

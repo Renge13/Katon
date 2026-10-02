@@ -64,9 +64,10 @@ test('EVERY ROUTE IS UNDER THE ONE LAYOUT THAT MOUNTS THE HEADER', () => {
 
   const layout = readFileSync(path.join(ROOT, 'app', 'layout.js'), 'utf8');
   assert.match(layout, /import SiteHeader from '@\/components\/SiteHeader\.jsx'/u);
-  // The fence's answer rides in as a prop (ruled 2026-09-23): the compat link is
-  // not drawn while payments are closed. `tests/paid-cta-fence.spec.mjs` owns that.
-  assert.match(layout, /<SiteHeader salesOpen=\{checkoutOpen\(\)\} \/>/u, 'the root layout renders the header');
+  // The compat answer rides in as a prop (ruled 2026-09-23; compat-only since K2,
+  // 2026-10-02): the compat link is not drawn while compat is off sale.
+  // `tests/compat-sales-switch.spec.mjs` owns that.
+  assert.match(layout, /<SiteHeader compatOpen=\{compatCheckoutOpen\(\)\} \/>/u, 'the root layout renders the header');
   assert.match(layout, /<SiteFooter \/>/u, 'and still renders the footer');
 });
 
