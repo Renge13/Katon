@@ -97,3 +97,32 @@ test('THE SEMANTIC JSON carries core.status and each nickname, and they are part
   const wire = JSON.stringify(writerPayload(sj));
   assert.ok(wire.includes('"nickname":"Nadia"') && wire.includes('"status":"Menikah"'));
 });
+
+test('BC AMENDMENT 1 item 4: on a v2 pair, p3_supply names the element in Indonesian and both people, so the writer maps nothing (PZ0t)', () => {
+  // PZ0t floored at both temperatures in BC §3 on pair.supply_inverted: the writer wrote
+  // "Sari membawa elemen Api ..." (Sari's own Day Master element) where the engine says
+  // A supplies Water. The fact gave the element in English and the people as A/B only.
+  const pz = buildPairSemantic(
+    calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' }),
+    calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00', gender: 'male' }),
+    { voice: 'v2', status: 'Pacaran', nicknames: { a: 'Sari', b: 'Dimas' } },
+  );
+  const supplies = pz.facts.find((f) => f.id === 'p3_supply').provenance.supplies;
+  const pick = (s) => ({ from: s.from, element_id: s.element_id, supplier_name: s.supplier_name, receiver_name: s.receiver_name });
+  assert.deepEqual(supplies.map(pick), [
+    { from: 'a', element_id: 'Air', supplier_name: 'Sari', receiver_name: 'Dimas' },
+    { from: 'b', element_id: 'Kayu', supplier_name: 'Dimas', receiver_name: 'Sari' },
+  ]);
+  // It reaches the writer: provenance is not scrubbed.
+  const sent = writerPayload(pz).facts.find((f) => f.id === 'p3_supply').provenance.supplies;
+  assert.equal(sent[0].element_id, 'Air');
+
+  // No nickname: the person's English archetype title is their name, as the address mode says.
+  const anon = buildPairSemantic(
+    calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' }),
+    calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00', gender: 'male' }),
+    { voice: 'v2', status: 'Pacaran', nicknames: {} },
+  );
+  const s0 = anon.facts.find((f) => f.id === 'p3_supply').provenance.supplies[0];
+  assert.deepEqual([s0.supplier_name, s0.receiver_name], ['The Sun', 'The Mountain']);
+});
