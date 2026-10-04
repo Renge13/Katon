@@ -51,7 +51,8 @@ test('BC AMENDMENT 1: the pair prompt asks for both titles in the first chapter,
   const p = loadPrompt('pair', 'v2');
   for (const line of [
     'In the first chapter, name both archetype titles once alongside their names.',
-    'six to eight chapters, each two or three paragraphs',
+    // Capitalised by amendment 2 item 2c, which put "About as long as the example" before it.
+    'Six to eight chapters, each two or three paragraphs',
     'Write with deep intimacy and warmth, removing the invisible wall between the expert and the reader. Use plain, everyday Indonesian (Bahasa Indonesia sehari-hari) but strictly NO slang (tanpa bahasa gaul) and no chat particles. Do not use clinical, abstract, or bureaucratic terms (e.g., avoid \'dinamika\', \'menopang\', \'ruang personal\'). Ground the emotion in vivid, real-world human situations.',
   ]) assert.ok(p.includes(line), `the pair prompt lacks: ${line.slice(0, 70)}`);
 });
@@ -65,6 +66,27 @@ test('BC AMENDMENT 1 item 6: the pair example says "hubungan kalian", not "dinam
     assert.ok(text.includes(fixed), `${where} lacks the fixed sentence`);
     assert.equal(text.includes('dari dinamika ini'), false, `${where} still says "dari dinamika ini"`);
   }
+});
+
+// Reyner, 2026-10-04 (docs/prompts/BC-amendment-2-names-close-privacy.md item 2). One test
+// per line, so each line's absence is its own red.
+test('BC AMENDMENT 2 item 2a: "kamu"/"dia" in the facts are the two people, written by name', () => {
+  const p = loadPrompt('pair', 'v2');
+  assert.ok(p.includes('In the first chapter, name both archetype titles once alongside their names. The facts\' texts are written to a reader: "kamu", "-mu", "dia", "ia" and "-nya" in them refer to the two people. Work out who each one is from the fact\'s provenance (supplier and receiver, `from`/`to`, `a_hits_b`, `b_hits_a`) and write that person\'s name. Never address either person as "kamu" or "-mu".'),
+    'a: the names line is missing from "Who is who"');
+});
+
+test('BC AMENDMENT 2 item 2b: the penutup sets no conditions and gives no advice', () => {
+  const p = loadPrompt('pair', 'v2');
+  assert.ok(p.includes('No advice, no recap list, no teaser. The penutup sets no conditions and gives no advice: no "jika kalian ..." and no "dengan menyadari ...".'),
+    'b: the close line is missing');
+});
+
+test('BC AMENDMENT 2 item 2c: about as long as the example, no word-count target', () => {
+  const p = loadPrompt('pair', 'v2');
+  assert.ok(p.includes('Form: About as long as the example; never pad to reach a length. Six to eight chapters, each two or three paragraphs. Write each archetype'),
+    'c: the Form line is not "about as long as the example" (with the space before "Write" restored)');
+  assert.equal(p.includes('800 to 1,000'), false, 'c: the word-count target is still in the prompt');
 });
 
 const okBody = (json) => ({ ok: true, status: 200, json: async () => json, text: async () => '' });
