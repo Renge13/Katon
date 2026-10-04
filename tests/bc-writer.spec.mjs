@@ -10,6 +10,7 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { readFileSync } from 'node:fs';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
@@ -55,7 +56,18 @@ test('BC AMENDMENT 1: the pair prompt asks for both titles in the first chapter,
   ]) assert.ok(p.includes(line), `the pair prompt lacks: ${line.slice(0, 70)}`);
 });
 
-const okBody = (json) =>({ ok: true, status: 200, json: async () => json, text: async () => '' });
+test('BC AMENDMENT 1 item 6: the pair example says "hubungan kalian", not "dinamika ini", in the prompt and in the approved sample', () => {
+  // The voice line now asks the writer to avoid "dinamika", so the example may not model
+  // it. Reyner changed exactly one sentence (2026-10-02); both copies carry it.
+  const fixed = 'Keajaiban sesungguhnya dari hubungan kalian ada pada elemen Api yang Nadia bawa.';
+  const sample = readFileSync(new URL('../docs/content/compat-target-sample-2026-10-02.md', import.meta.url), 'utf8');
+  for (const [where, text] of [['the pair prompt', loadPrompt('pair', 'v2')], ['the sample', sample]]) {
+    assert.ok(text.includes(fixed), `${where} lacks the fixed sentence`);
+    assert.equal(text.includes('dari dinamika ini'), false, `${where} still says "dari dinamika ini"`);
+  }
+});
+
+const okBody = (json) => ({ ok: true, status: 200, json: async () => json, text: async () => '' });
 const geminiSays = (text) => okBody({ candidates: [{ content: { parts: [{ text }] } }] });
 
 test('I3: ON A v2 PAIR THE WRITER OPENS - the engine opening is not prepended', async () => {
