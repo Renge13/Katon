@@ -152,3 +152,9 @@ test('BC AMENDMENT 1 item 7: Reyner\'s form labels and privacy sentences, ruled,
   assert.ok(gemini.endsWith('Yang dikirim ke penyedia ini hanya hasil hitungan bagan. Untuk bacaan kompatibilitas, ikut dikirim juga nama panggilan dan status hubungan yang kamu isi. Tanggal lahir mentah dan email tidak pernah dikirim.'), gemini);
   assert.equal(gemini.includes('tanpa nama'), false, 'the processor line still says no name is sent');
 });
+
+test('BC AMENDMENT 2 item 1: the privacy note says Katon does not ask for a FULL name (the compat form asks for a nickname)', async () => {
+  const { SITE_COPY } = await import('../lib/site/copy.js');
+  assert.equal(SITE_COPY.privasi.collectNote,
+    'Katon tidak meminta nama lengkap, tidak memakai akun, dan tidak memasang cookie pelacak atau alat analitik pihak ketiga.');
+});
