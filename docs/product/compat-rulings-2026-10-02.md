@@ -54,3 +54,11 @@ A2 never rank the two people · A3 no stay-or-leave advice · A5 no percentage o
 3. **E12 target spread.** Default: no P5 quadrant and no P4 pattern above 40% of random pairs; Reyner reads the label meaning of any pair that changes label.
 4. **D5 advice line for compat.** Default: compat gets the mirror's line (advice in the body as a plain, optional possibility, never "ingatlah" / "jangan lupa" / "kamu harus").
 5. **H5 rarity and hype.** Default: rarity claims only where a base rate supports them (q1 is 66% of pairs, so "langka" is false for it today).
+
+## Prompt BC decisions (Reyner, 2026-10-02)
+Verbatim, from `docs/prompts/BC-compat-voice-rework.md` §0.2.
+
+- **Address mode:** "Write about both people by name, in the third person, and about the pair as 'kalian'. Each person's name is their nickname (`core.a.nickname`, `core.b.nickname`); when a nickname is empty, use that person's English archetype title as their name."
+- **Status:** "Status is REQUIRED. One tap, three options (PDKT / Pacaran / Menikah)."
+- **Sample:** "I approve v2 in its entirety, including all the [FIX] corrections ... and the [+COWORK] structural additions."
+- **Length:** "Keep the 800-1,000 word target as drafted in Prompt BC."
