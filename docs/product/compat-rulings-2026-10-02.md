@@ -62,3 +62,7 @@ Verbatim, from `docs/prompts/BC-compat-voice-rework.md` §0.2.
 - **Status:** "Status is REQUIRED. One tap, three options (PDKT / Pacaran / Menikah)."
 - **Sample:** "I approve v2 in its entirety, including all the [FIX] corrections ... and the [+COWORK] structural additions."
 - **Length:** "Keep the 800-1,000 word target as drafted in Prompt BC."
+- **Adjustment round:** "Temperature 0.7. Keep `pair.both_named`; the prompt asks for both titles in the first chapter. Six to eight chapters, each two or three paragraphs. Harmony frame hits get their own text; clash, harm and punishment keep the pressure text."
+- **Voice principle, product-wide:** "We can be premium by our design, but warm and use everyday voice for tone and manner." Plain, everyday Indonesian with no slang and no chat particles; never casual chat register (the "old friend" register stays dead, CLAUDE.md rule 20). Compat gets it in this round; the mirror gets it in the mirror round.
+
+Recorded verbatim from `docs/prompts/BC-amendment-1-adjustment-round.md` §0.
