@@ -77,3 +77,15 @@ Recorded from `docs/prompts/BC-amendment-2-names-close-privacy.md` §0; Reyner's
 - **The close:** the penutup "sets no conditions and gives no advice".
 - **Watch items, no gates or checks:** "Keep the wrong-direction sentence and the "Sari, dengan elemen Api yang dominan" issue as watch items for now. Do not add gates or extra checks for either." Both are rows in `docs/PROGRESS.md`'s WATCH list.
 - **Pending, not in this round:** the compat glossary lines that hand the writer "dinamika" and "menopang". Reyner rules the rewrites first.
+
+### Amendment 2c (Reyner, 2026-10-04)
+Verbatim, from `docs/prompts/BC-amendment-2c-paragraphs.md` §0.
+
+- "Give each chapter 2 or 3 paragraph entries rather than one text field."
+- "The first paragraph explains the chart/fact in the reading's voice."
+- "The second paragraph is specifically a concrete, ordinary-life scene showing how that pattern can appear between the two people."
+- "A third paragraph is allowed only when it genuinely adds something; do not pad."
+- "Preserve the final rendered output format by joining the paragraphs downstream. Nothing else in the product should change."
+- "Add the one prompt line for `membawa elemen`: use that wording only when describing what one partner brings to the other; describe a person's own element in another way."
+- "Keep the existing check. Do not create a new gate."
+- "Do not treat 800-1,000 words as a target. The objective is restoring the missing scene paragraph and the resulting reading depth."
