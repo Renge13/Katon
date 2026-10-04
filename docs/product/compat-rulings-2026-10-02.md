@@ -66,3 +66,14 @@ Verbatim, from `docs/prompts/BC-compat-voice-rework.md` §0.2.
 - **Voice principle, product-wide:** "We can be premium by our design, but warm and use everyday voice for tone and manner." Plain, everyday Indonesian with no slang and no chat particles; never casual chat register (the "old friend" register stays dead, CLAUDE.md rule 20). Compat gets it in this round; the mirror gets it in the mirror round.
 
 Recorded verbatim from `docs/prompts/BC-amendment-1-adjustment-round.md` §0.
+
+### Amendment 2 (Reyner, 2026-10-04)
+Recorded from `docs/prompts/BC-amendment-2-names-close-privacy.md` §0; Reyner's words in quotes.
+
+- **Length:** "Accept the approved gold sample as the practical target. I care about the reading feeling substantial and worth Rp39,000, not hitting a word-count target. Do not add padding just to reach 800 words."
+- **Harmony first:** "Start with what draws the two people together, then introduce the strain where both apply." (Already implemented in `433a98a`; this records the ruling.)
+- **Privacy:** "Katon tidak meminta nama lengkap, tidak memakai akun, dan tidak memasang cookie pelacak atau alat analitik pihak ketiga."
+- **Names:** "when facts say "kamu" or "dia", those are references to the two people, and the reading should address them by the names supplied to the writer." Fixed upstream in the prompt, not by a gate.
+- **The close:** the penutup "sets no conditions and gives no advice".
+- **Watch items, no gates or checks:** "Keep the wrong-direction sentence and the "Sari, dengan elemen Api yang dominan" issue as watch items for now. Do not add gates or extra checks for either." Both are rows in `docs/PROGRESS.md`'s WATCH list.
+- **Pending, not in this round:** the compat glossary lines that hand the writer "dinamika" and "menopang". Reyner rules the rewrites first.
