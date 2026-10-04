@@ -51,8 +51,8 @@ test('BC AMENDMENT 1: the pair prompt asks for both titles in the first chapter,
   const p = loadPrompt('pair', 'v2');
   for (const line of [
     'In the first chapter, name both archetype titles once alongside their names.',
-    // Capitalised by amendment 2 item 2c, which put "About as long as the example" before it.
-    'Six to eight chapters, each two or three paragraphs',
+    // Reworded by amendment 2 item 2c, then by 2c item 2a (paragraphs in `paragraphs`).
+    'Six to eight chapters. Each chapter is two or three paragraphs',
     'Write with deep intimacy and warmth, removing the invisible wall between the expert and the reader. Use plain, everyday Indonesian (Bahasa Indonesia sehari-hari) but strictly NO slang (tanpa bahasa gaul) and no chat particles. Do not use clinical, abstract, or bureaucratic terms (e.g., avoid \'dinamika\', \'menopang\', \'ruang personal\'). Ground the emotion in vivid, real-world human situations.',
   ]) assert.ok(p.includes(line), `the pair prompt lacks: ${line.slice(0, 70)}`);
 });
@@ -84,8 +84,10 @@ test('BC AMENDMENT 2 item 2b: the penutup sets no conditions and gives no advice
 
 test('BC AMENDMENT 2 item 2c: about as long as the example, no word-count target', () => {
   const p = loadPrompt('pair', 'v2');
-  assert.ok(p.includes('Form: About as long as the example; never pad to reach a length. Six to eight chapters, each two or three paragraphs. Write each archetype'),
-    'c: the Form line is not "about as long as the example" (with the space before "Write" restored)');
+  // The chapter sentence after it was reworded by 2c item 2a; this pins only 2c's own words.
+  assert.ok(p.includes('Form: About as long as the example; never pad to reach a length. Six to eight chapters.'),
+    'c: the Form line is not "about as long as the example"');
+  assert.ok(p.includes('Never pad. Write each archetype'), 'c: the space before "Write" is missing');
   assert.equal(p.includes('800 to 1,000'), false, 'c: the word-count target is still in the prompt');
 });
 
@@ -121,6 +123,22 @@ test('I3: ON A v2 PAIR THE WRITER OPENS - the engine opening is not prepended', 
 test('I3: THE FLOOR still opens with the engine sentence (it has no writer to open it)', () => {
   const floor = assembleFallback(PAIR);
   assert.deepEqual(floor.blocks[0].fact_ids, [OPENING_FACT_ID]);
+});
+
+// ── BC AMENDMENT 2c item 2 (Reyner, 2026-10-04): the two prompt edits, one test each ──
+test('2c item 2a: the Form line asks for paragraphs (meaning, then a scene) and the JSON shape is paragraphs', () => {
+  const p = loadPrompt('pair', 'v2');
+  assert.ok(p.includes('Six to eight chapters. Each chapter is two or three paragraphs in `paragraphs`: the first says what the fact means for these two people, in the reading\'s voice; the second is a concrete, ordinary-life scene showing how that pattern can appear between them; a third only when it adds something new. Never pad.'),
+    'a: the paragraphs instruction is missing from Form');
+  assert.ok(p.includes('{"blocks":[{"fact_ids":[...],"heading":"...","paragraphs":["...","..."]}],"penutup":"..."}'), 'a: the JSON shape is not paragraphs');
+  assert.equal(p.includes('"text":"..."'), false, 'a: the old text shape is still in the prompt');
+  assert.equal(p.includes('Paragraph breaks are two newlines.'), false, 'a: the paragraph-break line is still there');
+});
+
+test('2c item 2b: "membawa elemen" only for what one partner brings the other', () => {
+  const p = loadPrompt('pair', 'v2');
+  assert.ok(p.includes('Do not present one chart fact as the chart cause of another unless the JSON says so. Write "membawa elemen" only for what one partner brings to the other (`p3_supply`). Describe a person\'s own element in another way.'),
+    'b: the membawa elemen line is missing from Facts');
 });
 
 // ── BC AMENDMENT 2c item 1 (Reyner, 2026-10-04): A v2 PAIR CHAPTER IS `paragraphs` ──
