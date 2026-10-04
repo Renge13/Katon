@@ -126,3 +126,29 @@ test('BC AMENDMENT 1 item 4: on a v2 pair, p3_supply names the element in Indone
   const s0 = anon.facts.find((f) => f.id === 'p3_supply').provenance.supplies[0];
   assert.deepEqual([s0.supplier_name, s0.receiver_name], ['The Sun', 'The Mountain']);
 });
+
+test('BC AMENDMENT 1 item 7: Reyner\'s form labels and privacy sentences, ruled, exactly', async () => {
+  // Reyner, 2026-10-02 (docs/prompts/BC-amendment-1-adjustment-round.md item 7). The five
+  // form strings were PROPOSED() in BC §1 and are now ruled with the same words; the two
+  // privacy sentences are new.
+  const { PASANGAN_COPY, SITE_COPY, PROPOSED_SLOTS } = await import('../lib/site/copy.js');
+  assert.deepEqual(
+    ['nickname_label', 'nickname_help', 'status_label', 'nickname_invalid', 'status_invalid'].map((k) => PASANGAN_COPY[k]),
+    [
+      'Nama panggilan (opsional)',
+      'Dipakai untuk menyebut kalian di dalam bacaan.',
+      'Status hubungan kalian',
+      'Nama panggilan hanya boleh berisi huruf, spasi, tanda petik, atau tanda hubung, paling banyak 20 karakter.',
+      'Pilih status hubungan kalian.',
+    ],
+  );
+  assert.deepEqual(PROPOSED_SLOTS.filter((p) => p.slot.startsWith('pasangan.')), [], 'a ruled form string is still PROPOSED');
+
+  const q = SITE_COPY.privasi;
+  assert.equal(q.privasi_names, 'Nama panggilan yang kamu isi, untuk dirimu dan untuk orang kedua, beserta status hubungan kalian, disimpan bersama bacaan ini dan hanya dipakai untuk menyusunnya.');
+  const { readFileSync } = await import('node:fs');
+  assert.ok(readFileSync(new URL('../app/privasi/page.js', import.meta.url), 'utf8').includes('q.privasi_names'), 'the names disclosure is not rendered');
+  const gemini = q.processors.find((s) => s.includes('Gemini'));
+  assert.ok(gemini.endsWith('Yang dikirim ke penyedia ini hanya hasil hitungan bagan. Untuk bacaan kompatibilitas, ikut dikirim juga nama panggilan dan status hubungan yang kamu isi. Tanggal lahir mentah dan email tidak pernah dikirim.'), gemini);
+  assert.equal(gemini.includes('tanpa nama'), false, 'the processor line still says no name is sent');
+});
