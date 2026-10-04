@@ -168,7 +168,9 @@ test('E13: AN A->B-ONLY FRAME carries the reader-side words, in the fact, its ke
   const R = K.p2_palace_frame_reader;
   assert.ok(R, 'the A->B cell exists');
   assert.equal(R.label_meaning, 'Salah satu pilar di baganmu terhubung langsung dengan kursi pasangannya. Elemen hidupmu memengaruhi ranah terdekatnya.');
-  assert.equal(R.meaning_seed, 'Salah satu pilar kehidupanmu menyentuh langsung ruang privat pasanganmu, membuat dinamika dari area hidupmu berdampak langsung ke suasana hubungan.');
+  // Re-ruled 2026-10-04 (BC amendment 2b, docs/content/glossary-voice-rulings-2026-10-04.md):
+  // the E13 seed carried "dinamika".
+  assert.equal(R.meaning_seed, 'Salah satu pilar kehidupanmu menyentuh langsung ruang privat pasanganmu. Apa yang sedang kamu hadapi di area hidup itu ikut masuk ke dalam hubungan kalian dan mewarnai suasananya.');
   assert.equal(R.daily_seed, 'Saat area hidupmu itu mengalami tekanan, suasananya langsung terbawa ke rumah dan dia merasakannya sebelum kamu sempat cerita.');
   for (const field of ['label_meaning', 'meaning_seed', 'daily_seed']) {
     assert.equal(frame[field], R[field], `the fact's ${field} is the A->B text`);

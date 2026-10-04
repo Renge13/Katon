@@ -472,7 +472,8 @@ test('THE OPENING NAMES TWO PEOPLE, NOT THREE', async () => {
   // READ FROM THE RULING, NOT RETYPED (2026-09-28, Prompt AI amendment 1). This
   // held its own copy of the 2026-09-09 sentence, a second source of truth that
   // goes stale the day Reyner rules again - and he did.
-  const rulings = readFileSync(new URL('../docs/content/compat-glossary-rulings-2.md', import.meta.url), 'utf8')
+  // Re-ruled 2026-10-04 (BC amendment 2b): the sentence lives in the newer rulings file now.
+  const rulings = readFileSync(new URL('../docs/content/glossary-voice-rulings-2026-10-04.md', import.meta.url), 'utf8')
     .replace(/\r\n?/g, '\n');
   const ruled = /^- label_meaning: "(.*)"$/mu.exec(rulings.slice(rulings.indexOf('## kompatibilitas.p0_opening')))[1];
   assert.equal(p0.label_meaning, fillPairTemplate(ruled, a, b));
@@ -485,12 +486,29 @@ test('THE OPENING NAMES TWO PEOPLE, NOT THREE', async () => {
   assert.equal(/\bkamu\b/u.test(p0.label_meaning), false,
     'the reader must not be listed alongside the two archetypes');
 
-  // "dua", not the digit. Reyner amended that himself on Cowork's flag.
-  assert.ok(p0.label_meaning.includes('dua individu'));
-  assert.equal(p0.label_meaning.includes('2 individu'), false);
+  // "dua", not the digit. Reyner amended that himself on Cowork's flag. "dua orang" since
+  // 2026-10-04 (BC amendment 2b), which dropped "dinamika dua individu".
+  assert.ok(p0.label_meaning.includes('dua orang'));
+  assert.equal(p0.label_meaning.includes('2 orang'), false);
 
   // AND THE HARD GATE STILL PASSES. `pair.both_named` requires the opening block
   // to contain both archetype names; the ruled sentence contains both, which is
   // why this is a data change and not a gate change - no STAGE6_VERSION move.
   assert.ok(p0.label_meaning.includes(a) && p0.label_meaning.includes(b));
+});
+
+test('BC AMENDMENT 2b: no kompatibilitas string hands the writer "dinamika" or "menopang" (Reyner, 2026-10-04)', () => {
+  // docs/content/glossary-voice-rulings-2026-10-04.md: twelve strings replaced verbatim. The
+  // four mirror strings with the same words wait for the mirror round and are not in scope.
+  const K = GLOSSARY.kompatibilitas;
+  const carrying = [];
+  for (const [key, cell] of Object.entries(K)) {
+    if (key.startsWith('_')) continue;
+    for (const [field, value] of Object.entries(cell)) {
+      if (!field.startsWith('_') && typeof value === 'string' && /dinamika|menopang/iu.test(value)) carrying.push(`${key}.${field}`);
+    }
+  }
+  assert.deepEqual(carrying, [], 'a compat glossary string still carries dinamika or menopang');
+  assert.equal(K.p5_q2.meaning_seed, 'Kalian sulit saling melepaskan, tetapi sulit juga berjalan dengan langkah yang sama. Hubungan ini terasa pekat, intens, dan kadang melelahkan.');
+  assert.equal(K.p0_opening.label_meaning, 'Ini adalah bacaan tentang dua orang: {A} dan {B}. Di sini kita melihat cara kalian saling menanggapi dalam keseharian, di mana kalian bertemu dan di mana kalian berbeda, dan apa yang sebenarnya menggerakkan hubungan ini.');
 });

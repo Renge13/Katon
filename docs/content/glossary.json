@@ -710,7 +710,7 @@
   "p0_opening": {
    "_note": "THE OPENING. Ruled 2026-09-08 in docs/content/compat-glossary-rulings-2.md and AMENDED 2026-09-09 (amendment h: it named the reader alongside the two archetypes, so it read as three people) and again 2026-09-28 (Prompt AI amendment 1: two sentences, ending in its own full stop), and it closes the gap that made both_named exempt on the floor: with no ruled opening cell the module-assembly floor named neither person. A TEMPLATE - {A} and {B} are the two archetype name_id values, substituted by lib/semantic/pair.js at fact-build time. Braces trip style.code_leak, so _template: true tells every glossary sweep to test the SUBSTITUTED text. The template itself is never served.",
    "_template": true,
-   "label_meaning": "Ini adalah bacaan tentang dinamika dua individu: {A} dan {B}. Lewat bacaan ini, kita akan melihat bagaimana cara kalian merespons satu sama lain di keseharian, di mana fokus kalian bertemu atau berbeda, dan apa yang sebenarnya menggerakkan ritme di balik hubungan ini."
+   "label_meaning": "Ini adalah bacaan tentang dua orang: {A} dan {B}. Di sini kita melihat cara kalian saling menanggapi dalam keseharian, di mana kalian bertemu dan di mana kalian berbeda, dan apa yang sebenarnya menggerakkan hubungan ini."
   },
   "p1_same": {
    "_note": "stemRelation.cycle === same",
@@ -722,14 +722,14 @@
   "p1_produces": {
    "_note": "cycle is a_produces_b or b_produces_a. Direction-neutral: the renderer names who.",
    "name_id": "Inti Menghidupi",
-   "label_meaning": "Unsur salah satu dari kalian memberi energi ke yang lain. Ada dinamika pengayom dan yang diayomi dengan alur yang konsisten.",
+   "label_meaning": "Unsur salah satu dari kalian menghidupi unsur yang lain. Satu orang mengayomi, yang lain merasa diayomi, dan arah ini jarang berbalik.",
    "meaning_seed": "Alur energi berjalan searah dan stabil dari satu pihak ke pihak lain. Yang memberi menjadi sumber dorongan, yang menerima mendapat rasa aman; peran ini konsisten dan jarang berbalik.",
    "daily_seed": "Keputusan dan inisiatif baru hampir selalu dipicu oleh orang yang sama. Yang lain menyambut, mengeksekusi, dan merasa aman bergerak dalam alur tersebut."
   },
   "p1_controls": {
    "_note": "cycle is a_controls_b or b_controls_a. Direction-neutral.",
    "name_id": "Inti Menekan",
-   "label_meaning": "Salah satu elemen membatasi atau mengarahkan yang lain. Bisa menghadirkan struktur, tapi juga tekanan, tergantung dinamika kendali di antara kalian.",
+   "label_meaning": "Unsur salah satu dari kalian mengarahkan dan membatasi yang lain. Dari sini lahir keteraturan, dan dari sini pula lahir tekanan, tergantung siapa yang memegang kendali dan bagaimana caranya.",
    "meaning_seed": "Yang satu memberi batas dan arah, yang lain menjadi sasaran pembentukan. Terasa menenangkan saat butuh pegangan, tapi terasa menekan jika kendali dipaksakan.",
    "daily_seed": "Satu orang rutin mengingatkan jadwal atau janji. Di hari baik ini terasa seperti keteraturan, di hari buruk ini memicu perdebatan soal siapa yang berhak mengatur siapa."
   },
@@ -744,13 +744,13 @@
    "_note": "dayBranchPair carries 六合.",
    "name_id": "Kursi Terikat",
    "label_meaning": "Kursi pasangan kalian saling mengunci. Tercipta daya tarik alami sejak awal yang bekerja secara spontan.",
-   "meaning_seed": "Tarikan alami bekerja di ruang paling privat. Ada rasa aman dan tempat pulang yang selalu menarik kalian berdua kembali, terlepas dari dinamika di luar.",
+   "meaning_seed": "Tarikan alami bekerja di ruang paling privat. Ada rasa aman dan tempat pulang yang selalu menarik kalian berdua kembali, seramai apa pun hari di luar sana.",
    "daily_seed": "Setelah pertengkaran atau hari yang berat di luar, kalian secara otomatis mencari keberadaan satu sama lain tanpa perlu dorongan kata-kata."
   },
   "p2_clash": {
    "_note": "dayBranchPair carries 冲. Raises p2_reframe_required.",
    "name_id": "Kursi Berbenturan",
-   "label_meaning": "Kursi pasangan kalian saling bertolak belakang. Dinamika berjalan intens, di mana gesekan kecil bisa terasa jauh lebih tajam.",
+   "label_meaning": "Kursi pasangan kalian saling bertolak belakang. Hubungan ini jarang terasa datar, dan gesekan kecil bisa terasa jauh lebih tajam dari ukurannya.",
    "meaning_seed": "Kebutuhan privat kalian berbenturan langsung. Gesekan terasa intens karena menyenggol area paling sensitif, membuat hal kecil cepat membesar.",
    "daily_seed": "Perbedaan kebiasaan rumah tangga atau ruang pribadi cepat berubah menjadi adu argumen panas yang skalanya terasa berlebihan dibanding topik aslinya."
   },
@@ -777,33 +777,33 @@
   "p2_none": {
    "_note": "dayBranchPair is empty. Not a deficiency; the seats simply do not interact.",
    "name_id": "Kursi Independen",
-   "label_meaning": "Kursi pasangan kalian berjalan terpisah tanpa tarik-menarik khusus. Dinamika utama kalian berasal dari aspek bagan lainnya.",
+   "label_meaning": "Kursi pasangan kalian berjalan sendiri-sendiri, tanpa tarik-menarik khusus. Yang paling mewarnai hubungan kalian datang dari bagian bagan yang lain.",
    "meaning_seed": "Ruang pribadi berjalan independen tanpa daya tarik atau gesekan otomatis dari pilar ini. Kedekatan tidak terjadi spontan, melainkan dibangun dari area lain.",
    "daily_seed": "Kalian bisa berada di ruang yang sama dalam kesibukan masing-masing tanpa gangguan, namun jarak emosional cepat terasa jika tidak ada kegiatan bersama."
   },
   "p2_palace_frame": {
    "_note": "A FRAME for the palace scans. The renderer names the pillar; the relation it found is named by the p2_frame_* cells below (Reyner, 2026-09-26). The seat names (p2_harmony, p2_clash, p2_harm, p2_punishment) describe BOTH seats and are never used for a frame hit.",
    "label_meaning": "Salah satu pilar di bagan dia terhubung langsung dengan kursi pasanganmu. Elemen hidupnya memengaruhi ranah terdekatmu.",
-   "meaning_seed": "Salah satu pilar kehidupan pasangan menyentuh langsung ruang privatmu, membuat dinamika dari area hidupnya berdampak langsung ke suasana hubungan.",
+   "meaning_seed": "Salah satu pilar kehidupan pasanganmu menyentuh langsung ruang privatmu. Apa yang sedang ia hadapi di area hidup itu ikut masuk ke dalam hubungan kalian dan mewarnai suasananya.",
    "daily_seed": "Saat area hidup pasangan tersebut mengalami tekanan, suasananya langsung terbawa ke rumah dan kamu merasakannya sebelum dia sempat cerita."
   },
   "p2_palace_frame_reader": {
-    "_note": "The A->B twin of p2_palace_frame (E13, Prompt BB, 2026-10-02; words Reyner-confirmed in his message with BB). Chosen by lib/semantic/pair.js p2FrameKey when the only NON-DAY frame hits are a pillar of the reader (A, kamu) reaching the partner's seat (a_hits_b). Direction-fixed like p3_reader_gives: kamu is the reader, dia and -nya the partner. A day-to-day hit is the day pair mirrored, sits in both lists, and never decides the direction. Both directions, or B->A alone, stay p2_palace_frame.",
-    "label_meaning": "Salah satu pilar di baganmu terhubung langsung dengan kursi pasangannya. Elemen hidupmu memengaruhi ranah terdekatnya.",
-    "meaning_seed": "Salah satu pilar kehidupanmu menyentuh langsung ruang privat pasanganmu, membuat dinamika dari area hidupmu berdampak langsung ke suasana hubungan.",
-    "daily_seed": "Saat area hidupmu itu mengalami tekanan, suasananya langsung terbawa ke rumah dan dia merasakannya sebelum kamu sempat cerita."
+   "_note": "The A->B twin of p2_palace_frame (E13, Prompt BB, 2026-10-02; words Reyner-confirmed in his message with BB). Chosen by lib/semantic/pair.js p2FrameKey when the only NON-DAY frame hits are a pillar of the reader (A, kamu) reaching the partner's seat (a_hits_b). Direction-fixed like p3_reader_gives: kamu is the reader, dia and -nya the partner. A day-to-day hit is the day pair mirrored, sits in both lists, and never decides the direction. Both directions, or B->A alone, stay p2_palace_frame.",
+   "label_meaning": "Salah satu pilar di baganmu terhubung langsung dengan kursi pasangannya. Elemen hidupmu memengaruhi ranah terdekatnya.",
+   "meaning_seed": "Salah satu pilar kehidupanmu menyentuh langsung ruang privat pasanganmu. Apa yang sedang kamu hadapi di area hidup itu ikut masuk ke dalam hubungan kalian dan mewarnai suasananya.",
+   "daily_seed": "Saat area hidupmu itu mengalami tekanan, suasananya langsung terbawa ke rumah dan dia merasakannya sebelum kamu sempat cerita."
   },
   "p2_palace_frame_harmony": {
-    "_note": "The HARMONY twin of p2_palace_frame, B->A (BC amendment 1 item 5, Reyner 2026-10-02; docs/content/compat-frame-harmony-rulings.md). The two cells above are pressure text. Chosen by lib/semantic/pair.js p2FrameKeys when the direction E13 picked carries a 六合 hit; clash, harm and punishment keep the pressure cell, and a direction carrying both gets both texts, harmony first.",
-    "label_meaning": "Sisi kehidupannya terhubung langsung dengan ruang amanmu. Apa pun pencapaiannya di luar sana, hal itu menjadi jangkar yang membuatmu merasa lebih tenang.",
-    "meaning_seed": "Dunianya di luar bukanlah ancaman untuk waktu kalian berdua. Justru, setiap kali ia melewati hari yang baik, hawa positif itu ikut terbawa pulang dan membuatmu lega.",
-    "daily_seed": "Saat urusannya sedang lancar, ia akan pulang membawa energi yang sangat nyaman. Tanpa perlu banyak kata, kehadirannya saja sudah cukup untuk melunturkan lelahmu seharian."
+   "_note": "The HARMONY twin of p2_palace_frame, B->A (BC amendment 1 item 5, Reyner 2026-10-02; docs/content/compat-frame-harmony-rulings.md). The two cells above are pressure text. Chosen by lib/semantic/pair.js p2FrameKeys when the direction E13 picked carries a 六合 hit; clash, harm and punishment keep the pressure cell, and a direction carrying both gets both texts, harmony first.",
+   "label_meaning": "Sisi kehidupannya terhubung langsung dengan ruang amanmu. Apa pun pencapaiannya di luar sana, hal itu menjadi jangkar yang membuatmu merasa lebih tenang.",
+   "meaning_seed": "Dunianya di luar bukanlah ancaman untuk waktu kalian berdua. Justru, setiap kali ia melewati hari yang baik, hawa positif itu ikut terbawa pulang dan membuatmu lega.",
+   "daily_seed": "Saat urusannya sedang lancar, ia akan pulang membawa energi yang sangat nyaman. Tanpa perlu banyak kata, kehadirannya saja sudah cukup untuk melunturkan lelahmu seharian."
   },
   "p2_palace_frame_reader_harmony": {
-    "_note": "The HARMONY twin of p2_palace_frame_reader, A->B (BC amendment 1 item 5, Reyner 2026-10-02; docs/content/compat-frame-harmony-rulings.md). Direction-fixed: kamu is the reader, ia and -nya the partner.",
-    "label_meaning": "Sisi kehidupanmu terhubung langsung dengan ruang amannya. Apa pun pencapaianmu di luar sana, hal itu menjadi jangkar yang membuatnya merasa lebih tenang.",
-    "meaning_seed": "Duniamu di luar bukanlah ancaman untuk waktu kalian berdua. Justru, setiap kali kamu melewati hari yang baik, hawa positif itu ikut terbawa pulang dan membuatnya lega.",
-    "daily_seed": "Saat urusanmu sedang lancar, kamu akan pulang membawa energi yang sangat nyaman. Tanpa perlu banyak kata, kehadiranmu saja sudah cukup untuk melunturkan lelahnya seharian."
+   "_note": "The HARMONY twin of p2_palace_frame_reader, A->B (BC amendment 1 item 5, Reyner 2026-10-02; docs/content/compat-frame-harmony-rulings.md). Direction-fixed: kamu is the reader, ia and -nya the partner.",
+   "label_meaning": "Sisi kehidupanmu terhubung langsung dengan ruang amannya. Apa pun pencapaianmu di luar sana, hal itu menjadi jangkar yang membuatnya merasa lebih tenang.",
+   "meaning_seed": "Duniamu di luar bukanlah ancaman untuk waktu kalian berdua. Justru, setiap kali kamu melewati hari yang baik, hawa positif itu ikut terbawa pulang dan membuatnya lega.",
+   "daily_seed": "Saat urusanmu sedang lancar, kamu akan pulang membawa energi yang sangat nyaman. Tanpa perlu banyak kata, kehadiranmu saja sudah cukup untuk melunturkan lelahnya seharian."
   },
   "p2_frame_harmony": {
    "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 六合 with the other person's day branch. Never used for the day pair, which is p2_harmony. Ruled by Reyner 2026-09-26.",
@@ -813,7 +813,7 @@
   "p2_frame_clash": {
    "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 冲 with the other person's day branch. Never used for the day pair, which is p2_clash. Ruled by Reyner 2026-09-26.",
    "name_id": "Berseberangan",
-   "label_meaning": "Salah satu pilar berhadapan langsung dengan kursi pasangan. Karena posisinya berseberangan persis, dinamikanya menjadi lebih intens dan mudah memanas."
+   "label_meaning": "Salah satu pilar berhadapan langsung dengan kursi pasangan. Karena posisinya berseberangan persis, tekanan dari sana terasa lebih keras dan lebih cepat memanas."
   },
   "p2_frame_harm": {
    "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 害 with the other person's day branch. Never used for the day pair, which is p2_harm. Ruled by Reyner 2026-09-26.",
@@ -880,15 +880,15 @@
   "p5_q1": {
    "_note": "pullFit.quadrant === q1. No score is ever shown beside these (rule doc 2.4).",
    "name_id": "Tarikan Kuat, Ritme Seirama",
-   "label_meaning": "Chemistry terasa kuat dan rutinitas harian saling menopang. Kuncinya adalah menjaga keterbukaan agar kenyamanan tidak dianggap biasa.",
+   "label_meaning": "Chemistry terasa kuat dan keseharian kalian saling mengisi. Kenyamanan datang dengan mudah, dan justru karena itu ia mudah dianggap biasa.",
    "meaning_seed": "Chemistry tinggi dan ritme harian berjalan seiring, menciptakan hubungan yang terasa ringan sekaligus tetap menarik secara emosional.",
    "daily_seed": "Rutinitas harian mengalir tanpa hambatan dan waktu berkualitas tercipta alami, membuat hubungan jarang diterpa gejolak."
   },
   "p5_q2": {
    "_note": "quadrant === q2.",
    "name_id": "Tarikan Kuat, Ritme Bergesek",
-   "label_meaning": "Magnet hubungan sangat kuat, namun pola keseharian sering bersimpangan. Dinamika terasa pekat dan menuntut kompromi jelas dalam rutinitas.",
-   "meaning_seed": "Magnet emosional kuat bertemu dengan ritme harian yang sering bersimpangan, menghasilkan dinamika yang pekat, intens, sekaligus melelahkan.",
+   "label_meaning": "Magnet hubungan sangat kuat, namun pola keseharian sering bersimpangan. Rasanya pekat dan dekat, tetapi rutinitas bersama menuntut banyak kompromi.",
+   "meaning_seed": "Kalian sulit saling melepaskan, tetapi sulit juga berjalan dengan langkah yang sama. Hubungan ini terasa pekat, intens, dan kadang melelahkan.",
    "daily_seed": "Momen berdua terasa sangat dekat, tapi urusan ritme harian dan kebiasaan kecil berulang kali memicu gesekan teknis."
   },
   "p5_q3": {

@@ -83,7 +83,8 @@ const flat = (t) => t.replace(/\s+/gu, ' ').trim();
 // The ruled line ends in its own full stop, and it is two sentences now, so it
 // wraps: a page is matched on its FLATTENED text, never line by line.
 const RULED_P0 = (() => {
-  const md = readFileSync(new URL('../docs/content/compat-glossary-rulings-2.md', import.meta.url), 'utf8')
+  // Re-ruled 2026-10-04 (BC amendment 2b): the opening's current ruling is in the newer file.
+  const md = readFileSync(new URL('../docs/content/glossary-voice-rulings-2026-10-04.md', import.meta.url), 'utf8')
     .replace(/\r\n?/g, '\n');
   return /^- label_meaning: "(.*)"$/mu.exec(md.slice(md.indexOf('## kompatibilitas.p0_opening')))[1];
 })();
