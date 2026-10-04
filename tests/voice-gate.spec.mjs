@@ -373,7 +373,12 @@ test('PAIR SHAPE: a block citing a supplied mirror fact is served under v2, refu
       fact_ids: ['day_master_Fire'], heading: 'Kamu dalam Hubungan Ini',
       text: `Kamu adalah ${sj.core.a.archetype_name_en} dan dia ${sj.core.b.archetype_name_en}; tenagamu harus terus diisi dari luar.`,
     };
-    const body = { blocks: [portrait, ...d.blocks], penutup: 'Penutup yang cukup panjang untuk sebuah bacaan.' };
+    const blocks = [portrait, ...d.blocks];
+    // A v2 pair answers in `paragraphs` since BC amendment 2c; a v1 pair still in `text`.
+    const body = {
+      blocks: sj.voice === 'v2' ? blocks.map(({ text, ...b }) => ({ ...b, paragraphs: [text] })) : blocks,
+      penutup: 'Penutup yang cukup panjang untuk sebuah bacaan.',
+    };
     globalThis.fetch = async () => new Response(JSON.stringify({
       candidates: [{ content: { parts: [{ text: JSON.stringify(body) }] } }],
     }), { status: 200 });
