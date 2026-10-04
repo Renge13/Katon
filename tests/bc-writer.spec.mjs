@@ -44,7 +44,18 @@ test('THE PAIR PROMPT IS ITS OWN TEXT: BC\'s block, then the pair example, and n
   }
 });
 
-const okBody = (json) => ({ ok: true, status: 200, json: async () => json, text: async () => '' });
+test('BC AMENDMENT 1: the pair prompt asks for both titles in the first chapter, six to eight chapters, and the everyday voice', () => {
+  // Reyner, 2026-10-02 (docs/prompts/BC-amendment-1-adjustment-round.md items 2-3). The
+  // three lines are his, quoted; a paraphrase is not the ruling.
+  const p = loadPrompt('pair', 'v2');
+  for (const line of [
+    'In the first chapter, name both archetype titles once alongside their names.',
+    'six to eight chapters, each two or three paragraphs',
+    'Write with deep intimacy and warmth, removing the invisible wall between the expert and the reader. Use plain, everyday Indonesian (Bahasa Indonesia sehari-hari) but strictly NO slang (tanpa bahasa gaul) and no chat particles. Do not use clinical, abstract, or bureaucratic terms (e.g., avoid \'dinamika\', \'menopang\', \'ruang personal\'). Ground the emotion in vivid, real-world human situations.',
+  ]) assert.ok(p.includes(line), `the pair prompt lacks: ${line.slice(0, 70)}`);
+});
+
+const okBody = (json) =>({ ok: true, status: 200, json: async () => json, text: async () => '' });
 const geminiSays = (text) => okBody({ candidates: [{ content: { parts: [{ text }] } }] });
 
 test('I3: ON A v2 PAIR THE WRITER OPENS - the engine opening is not prepended', async () => {
