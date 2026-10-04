@@ -67,8 +67,15 @@ globalThis.fetch = async (url, opts) => {
   }
   const res = await realFetch(url, opts);
   let usage = null;
-  try { usage = (await res.clone().json()).usageMetadata ?? null; } catch { /* non-JSON */ }
-  wire.push({ status: res.status, usage });
+  // The model's raw JSON text as well (BC amendment 2c): a v2 pair's `paragraphs` arrays are
+  // joined at parse, so this is the only place their own count survives.
+  let rawText = null;
+  try {
+    const j = await res.clone().json();
+    usage = j.usageMetadata ?? null;
+    rawText = (j.candidates?.[0]?.content?.parts || []).map((x) => x.text || '').join('') || null;
+  } catch { /* non-JSON */ }
+  wire.push({ status: res.status, usage, raw: rawText });
   return res;
 };
 
@@ -109,6 +116,7 @@ for (const p of PAIRS) {
       first_chapter_titles: { a: first.includes(titles.a), b: first.includes(titles.b) },
       findings: (out.attempts || []).map((a, i) => ({ attempt: i + 1, ok: a.ok ?? null, error: a.error ?? null, rejecting: a.stage6_detail ?? null, draft: a.prose ?? null })),
       output_tokens: usage.map((u) => u.candidatesTokenCount ?? null),
+      raw_responses: wire.map((w) => w.raw).filter(Boolean),
       reads: {
         verdict: all.filter((s) => READS.verdict.test(s)),
         fixed: all.filter((s) => READS.fixed.test(s)),
