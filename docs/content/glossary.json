@@ -793,6 +793,18 @@
     "meaning_seed": "Salah satu pilar kehidupanmu menyentuh langsung ruang privat pasanganmu, membuat dinamika dari area hidupmu berdampak langsung ke suasana hubungan.",
     "daily_seed": "Saat area hidupmu itu mengalami tekanan, suasananya langsung terbawa ke rumah dan dia merasakannya sebelum kamu sempat cerita."
   },
+  "p2_palace_frame_harmony": {
+    "_note": "The HARMONY twin of p2_palace_frame, B->A (BC amendment 1 item 5, Reyner 2026-10-02; docs/content/compat-frame-harmony-rulings.md). The two cells above are pressure text. Chosen by lib/semantic/pair.js p2FrameKeys when the direction E13 picked carries a 六合 hit; clash, harm and punishment keep the pressure cell, and a direction carrying both gets both texts, harmony first.",
+    "label_meaning": "Sisi kehidupannya terhubung langsung dengan ruang amanmu. Apa pun pencapaiannya di luar sana, hal itu menjadi jangkar yang membuatmu merasa lebih tenang.",
+    "meaning_seed": "Dunianya di luar bukanlah ancaman untuk waktu kalian berdua. Justru, setiap kali ia melewati hari yang baik, hawa positif itu ikut terbawa pulang dan membuatmu lega.",
+    "daily_seed": "Saat urusannya sedang lancar, ia akan pulang membawa energi yang sangat nyaman. Tanpa perlu banyak kata, kehadirannya saja sudah cukup untuk melunturkan lelahmu seharian."
+  },
+  "p2_palace_frame_reader_harmony": {
+    "_note": "The HARMONY twin of p2_palace_frame_reader, A->B (BC amendment 1 item 5, Reyner 2026-10-02; docs/content/compat-frame-harmony-rulings.md). Direction-fixed: kamu is the reader, ia and -nya the partner.",
+    "label_meaning": "Sisi kehidupanmu terhubung langsung dengan ruang amannya. Apa pun pencapaianmu di luar sana, hal itu menjadi jangkar yang membuatnya merasa lebih tenang.",
+    "meaning_seed": "Duniamu di luar bukanlah ancaman untuk waktu kalian berdua. Justru, setiap kali kamu melewati hari yang baik, hawa positif itu ikut terbawa pulang dan membuatnya lega.",
+    "daily_seed": "Saat urusanmu sedang lancar, kamu akan pulang membawa energi yang sangat nyaman. Tanpa perlu banyak kata, kehadiranmu saja sudah cukup untuk melunturkan lelahnya seharian."
+  },
   "p2_frame_harmony": {
    "_note": "Frame hit: one person's non-day pillar (year/month/hour) forms 六合 with the other person's day branch. Never used for the day pair, which is p2_harmony. Ruled by Reyner 2026-09-26.",
    "name_id": "Saling Tarik",

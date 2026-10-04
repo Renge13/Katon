@@ -17,7 +17,7 @@ import { test } from 'node:test';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
-import { buildPairSemantic, variantKeysFor } from '../lib/semantic/pair.js';
+import { buildPairSemantic, variantKeysFor, p2FrameKeys } from '../lib/semantic/pair.js';
 import { GLOSSARY, fillPairTemplate } from '../lib/semantic/glossary.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { validateRendering } from '../lib/validate/index.js';
@@ -186,7 +186,7 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // The fourth file is the frame-hit tranche of 2026-09-26 (Prompt AD): four NEW
   // cells, `name_id` + `label_meaning` each, no seeds.
   const md = ['compat-glossary-rulings.md', 'compat-glossary-rulings-2.md', 'compat-seeds-rulings.md',
-    'compat-frame-rulings.md', 'compat-frame-direction-rulings.md']
+    'compat-frame-rulings.md', 'compat-frame-direction-rulings.md', 'compat-frame-harmony-rulings.md']
     .map((f) => readFileSync(path.join(ROOT, 'docs', 'content', f), 'utf8'))
     .join('\n');
   const ruled = {};
@@ -207,13 +207,15 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
     if (m) ruled[heading].push(m[1]);
   }
 
+  // 33 since BC amendment 1 item 5 (Reyner 2026-10-02): `p2_palace_frame_harmony` and
+  // `p2_palace_frame_reader_harmony`, ruled in compat-frame-harmony-rulings.md.
   // 31 since 2026-10-02 (Prompt BB §1.2, E13): `p2_palace_frame_reader`, the A->B
   // frame, ruled in compat-frame-direction-rulings.md.
   // 30 since 2026-09-28 (Prompt AM): `p3_reader_gives`, ruled in the first and
   // third files, is the only new cell. The amendment's own record sits under a
   // `###` heading so neither this parser nor scripts/apply-rulings.mjs reads it.
-  assert.equal(Object.keys(ruled).length, 31,
-    'the rulings files have 31 cells (25 + the 4 frame cells + p3_reader_gives + p2_palace_frame_reader)');
+  assert.equal(Object.keys(ruled).length, 33,
+    'the rulings files have 33 cells (25 + the 4 frame cells + p3_reader_gives + p2_palace_frame_reader + the 2 harmony frames)');
 
   const cells = Object.keys(GLOSSARY.kompatibilitas).filter((k) => !k.startsWith('_'));
   assert.deepEqual(cells.slice().sort(), Object.keys(ruled).sort(),
@@ -243,10 +245,13 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // Plus Prompt BB §1.2, 2026-10-02: `p2_palace_frame_reader` x (label_meaning +
   // meaning_seed + daily_seed) = 3.
   //
-  // 46 + 1 + 42 + 8 + 4 + 3 = 104, and the arithmetic is written out because this number
+  // Plus BC amendment 1 item 5, 2026-10-02: `p2_palace_frame_harmony` and
+  // `p2_palace_frame_reader_harmony` x (label_meaning + meaning_seed + daily_seed) = 6.
+  //
+  // 46 + 1 + 42 + 8 + 4 + 3 + 6 = 110, and the arithmetic is written out because this number
   // is the one a later tranche has to update deliberately rather than by reading a
   // failure and typing whatever the actual was.
-  assert.equal(total, 104, '104 assignments across the six tranches');
+  assert.equal(total, 110, '110 assignments across the seven tranches');
 
   // NO SEEDS. Nothing was ruled for gift/cost/actionable, and a placeholder for a
   // string nobody has ruled is an invitation to invent one.
@@ -345,6 +350,7 @@ test('variantKeysFor NAMES THE CELL THE FACT ACTUALLY CARRIES', () => {
   // and fail in production - the exact class of bug this file exists to catch.
   const K = GLOSSARY.kompatibilitas;
   let checked = 0;
+  let sideBySideSeen = 0;
   for (const [x, y] of [[1, 2], [1, 12], [2, 6], [3, 7], [1, 3], [1, 101], [13, 11], [12, 6]]) {
     const pj = pair(x, y);
     for (const f of pj.facts) {
@@ -358,12 +364,18 @@ test('variantKeysFor NAMES THE CELL THE FACT ACTUALLY CARRIES', () => {
       const cellText = (k) => (K[k]._template
         ? fillPairTemplate(K[k].label_meaning, pj.core.a.archetype_name_en, pj.core.b.archetype_name_en)
         : K[k].label_meaning);
-      assert.ok(keys.some((k) => cellText(k) === f.label_meaning),
+      // A FRAME CARRYING HARMONY AND PRESSURE IN ONE DIRECTION carries both cells' texts
+      // side by side (BC amendment 1 item 5): compared as the frame keys' texts joined.
+      const sideBySide = f.id === 'p2_palace_frame' && p2FrameKeys(f.provenance).length > 1
+        && p2FrameKeys(f.provenance).map(cellText).join(' ') === f.label_meaning;
+      if (sideBySide) sideBySideSeen += 1;
+      assert.ok(sideBySide || keys.some((k) => cellText(k) === f.label_meaning),
         `${x}x${y} ${f.id}: derived [${keys.join(', ')}] but the fact carries another cell`);
       checked += 1;
     }
   }
   assert.ok(checked >= 40, `exercised ${checked} facts`);
+  assert.ok(sideBySideSeen >= 1, `a side-by-side frame was exercised (13x11), saw ${sideBySideSeen}`);
 });
 
 test('THE PAIR SCOPE IS RETIRED with the register bans it scoped (AZ, 1.64.0)', () => {

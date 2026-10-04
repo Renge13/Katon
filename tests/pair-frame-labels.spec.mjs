@@ -18,7 +18,7 @@ import { test } from 'node:test';
 
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { compatBranchRelations } from '../lib/compat/branchRelations.js';
-import { buildPairSemantic, variantKeysFor, p2FrameKey } from '../lib/semantic/pair.js';
+import { buildPairSemantic, variantKeysFor, p2FrameKey, p2FrameKeys } from '../lib/semantic/pair.js';
 import { buildPairAppendix } from '../lib/pdf/pairAppendix.js';
 import { factRows } from '../lib/pdf/pairDocument.js';
 import FIXTURE from './fixtures/pair-frame-hits.fixture.json' with { type: 'json' };
@@ -200,4 +200,57 @@ test('E13: WHEN BOTH DIRECTIONS HIT, the existing B->A words stay (true: a B->A 
     'A->B plus the mirrored day pair is still A->B only');
   assert.equal(p2FrameKey({ a_hits_b: [], b_hits_a: [hit('B', 'hour')] }), 'p2_palace_frame', 'B->A only');
   assert.equal(p2FrameKey({ a_hits_b: [dayDay[0]], b_hits_a: [dayDay[1]] }), 'p2_palace_frame', 'day pair alone');
+});
+
+// ── BC AMENDMENT 1 item 5: A HARMONY HIT GETS THE HARMONY TEXT (Reyner, 2026-10-02) ──
+// Both frame cells above are PRESSURE text, and until this ruling every frame hit got one
+// of them whatever its relation. Harmony (六合) hits now take Reyner's harmony strings
+// (docs/content/compat-frame-harmony-rulings.md), by the same direction E13 chose; clash,
+// harm and punishment keep the pressure text. The worked example is the clash pair: its
+// day seats clash (冲 子-午), and B's month and hour 未 each form 六合 with A's day 午.
+const CLASH_A = calculateBaziChart({ birthDate: '1973-05-10', birthTime: '00:00', gender: 'female' });
+const CLASH_B = calculateBaziChart({ birthDate: '1971-08-07', birthTime: '13:00', gender: 'male' });
+const FIELDS = ['label_meaning', 'meaning_seed', 'daily_seed'];
+
+test('HARMONY premise: the clash pair\'s B->A non-day frame hits are all 六合 (B month and hour 未 -> A day 午)', () => {
+  const p = frameOf(buildPairSemantic(CLASH_A, CLASH_B)).provenance;
+  assert.deepEqual(p.b_hits_a.filter((h) => !isDayDay(h)).map((h) => [h.from.position, h.relation, ...h.branches]),
+    [['month', '六合', '午', '未'], ['hour', '六合', '午', '未']]);
+});
+
+test('HARMONY: THE CLASH PAIR\'S B->A 六合 FRAME DOES NOT GET THE PRESSURE TEXT, in the fact, its keys or the PDF', () => {
+  const sj = buildPairSemantic(CLASH_A, CLASH_B, { voice: 'v2', status: 'PDKT', nicknames: { a: 'Ayu', b: 'Raka' } });
+  const frame = frameOf(sj);
+  for (const field of FIELDS) {
+    assert.notEqual(frame[field], K.p2_palace_frame[field], `the fact's ${field} is still the B->A pressure text`);
+  }
+  const H = K.p2_palace_frame_harmony;
+  assert.ok(H, 'the B->A harmony cell exists');
+  assert.equal(H.label_meaning, 'Sisi kehidupannya terhubung langsung dengan ruang amanmu. Apa pun pencapaiannya di luar sana, hal itu menjadi jangkar yang membuatmu merasa lebih tenang.');
+  for (const field of FIELDS) assert.equal(frame[field], H[field], `the fact's ${field} is the B->A harmony text`);
+  assert.ok(variantKeysFor(frame).includes('p2_palace_frame_harmony'));
+  assert.ok(!variantKeysFor(frame).includes('p2_palace_frame'), 'and not the pressure cell');
+  assert.equal(factRows(sj).find((r) => r.frame)?.lead, H.label_meaning, 'the PDF frame group leads with the harmony sentence');
+});
+
+test('HARMONY: the chooser, by direction and relation (harmony first, then pressure, when one direction carries both)', () => {
+  const hit = (fromChart, fromPos, relation, toPos = 'day') => ({ relation, from: { chart: fromChart, position: fromPos }, to: { position: toPos } });
+  const R = K.p2_palace_frame_reader_harmony;
+  assert.ok(R, 'the A->B harmony cell exists');
+  assert.equal(R.daily_seed, 'Saat urusanmu sedang lancar, kamu akan pulang membawa energi yang sangat nyaman. Tanpa perlu banyak kata, kehadiranmu saja sudah cukup untuk melunturkan lelahnya seharian.');
+  const rows = [
+    [{ a_hits_b: [], b_hits_a: [hit('B', 'month', '六合')] }, ['p2_palace_frame_harmony'], 'B->A harmony'],
+    [{ a_hits_b: [hit('A', 'year', '六合')], b_hits_a: [] }, ['p2_palace_frame_reader_harmony'], 'A->B harmony'],
+    [{ a_hits_b: [], b_hits_a: [hit('B', 'year', '冲')] }, ['p2_palace_frame'], 'B->A clash keeps pressure'],
+    [{ a_hits_b: [hit('A', 'hour', '害')], b_hits_a: [] }, ['p2_palace_frame_reader'], 'A->B harm keeps pressure'],
+    [{ a_hits_b: [], b_hits_a: [hit('B', 'hour', '刑')] }, ['p2_palace_frame'], 'B->A punishment keeps pressure'],
+    [{ a_hits_b: [], b_hits_a: [hit('B', 'month', '六合'), hit('B', 'hour', '冲')] }, ['p2_palace_frame_harmony', 'p2_palace_frame'], 'B->A both: side by side'],
+    [{ a_hits_b: [hit('A', 'day', '六合', 'day')], b_hits_a: [hit('B', 'day', '六合', 'day')] }, ['p2_palace_frame_harmony'], 'day pair alone, 六合'],
+    [{ a_hits_b: [hit('A', 'day', '冲', 'day')], b_hits_a: [hit('B', 'day', '冲', 'day')] }, ['p2_palace_frame'], 'day pair alone, 冲'],
+    // A day-to-day hit says nothing about the frame once a non-day hit exists (E13).
+    [{ a_hits_b: [hit('A', 'day', '冲', 'day')], b_hits_a: [hit('B', 'month', '六合'), hit('B', 'day', '冲', 'day')] }, ['p2_palace_frame_harmony'], 'non-day 六合 beside the mirrored clashed seat'],
+    // E13's direction rule is unchanged: both directions read B->A.
+    [{ a_hits_b: [hit('A', 'year', '冲')], b_hits_a: [hit('B', 'month', '六合')] }, ['p2_palace_frame_harmony'], 'both directions read B->A'],
+  ];
+  for (const [prov, want, label] of rows) assert.deepEqual(p2FrameKeys(prov), want, label);
 });

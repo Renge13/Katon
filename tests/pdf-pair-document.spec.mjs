@@ -410,8 +410,13 @@ test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () =>
 
   assert.equal(factsPage.includes(flat(K.p2_harmony.label_meaning)), false,
     'the day-pair variant\'s meaning is printed on a frame row');
-  assert.ok(factsPage.includes(flat(K.p2_palace_frame.label_meaning)),
+  // The frame's own meaning is its HARMONY sentence since BC amendment 1 item 5 (Reyner,
+  // 2026-10-02): this frame's only relation is a 六合, and the pressure sentence
+  // ("Salah satu pilar di bagan dia ...") is for clash, harm and punishment.
+  assert.ok(factsPage.includes(flat(K.p2_palace_frame_harmony.label_meaning)),
     'the frame row does not carry the frame\'s own meaning');
+  assert.equal(factsPage.includes(flat(K.p2_palace_frame.label_meaning)), false,
+    'a 六合-only frame still prints the pressure sentence');
   // The term is the relation's FRAME name, which is what makes the row findable
   // against the legend entry for it. The seat name must not be on the page at all:
   // this pair's seats are not bound (2026-09-26).
