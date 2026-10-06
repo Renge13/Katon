@@ -1,0 +1,16 @@
+== katon-be-mock (local dev :3002, GEMINI_API_KEY unset, no Supabase: every reading is the FLOOR), 2026-10-06
+== node scripts/bf-amendment-2-shots.mjs http://localhost:3002 docs/qa/2026-10-06-bf-amendment-2
+reading without hour yVEYS6ObhrvRoeioDKnCZ
+bagan, no hour: {"intro":"Empat pilar dari tanggal lahirmu. Pilar yang bertanda Inti Diri adalah intinya.","pillars":["Pilar Akar","Pilar Kerja","Pilar Diri","Pilar Kerja","Pilar Kerja","Pilar Kerja"],"konsepsi":false,"caption":false,"hourMissing":"Jam lahir belum diisi, jadi Pilar Arah belum dihitung. Tambahkan jam lahir"}
+wrote bagan-no-hour-375.png
+H3 arrival at 375x812: {"path":"/","resumeCard":false,"bukaBacaanku":false,"remembered":true,"date":"1989-09-13","gender":"female","marked":true,"scrollY":0,"viewport":"375x812","hourTop":458,"hourBottom":504}
+wrote h3-arrival-no-card-375x812.png
+H3 arrival at 375x667: {"path":"/","resumeCard":false,"bukaBacaanku":false,"remembered":true,"date":"1989-09-13","gender":"female","marked":true,"scrollY":0,"viewport":"375x667","hourTop":458,"hourBottom":504}
+wrote h3-arrival-no-card-375x667.png
+plain visit to / afterwards: {"path":"/","resumeCard":true,"hourTop":683}
+wrote front-door-card-after-arrival-375.png
+reading with hour Lbe72_AqB1D_k2B31Vzcb
+bagan, with hour: {"intro":"Empat pilar dari tanggal lahirmu. Pilar yang bertanda Inti Diri adalah intinya.","pillars":["Pilar Akar","Pilar Kerja","Pilar Diri","Pilar Arah","Pilar Kerja","Pilar Kerja","Pilar Kerja"],"konsepsi":false,"caption":false,"hourMissing":null}
+wrote bagan-with-hour-375.png
+CE chart page: {"page":5,"of":9,"konsepsi":true,"han":true,"conception":"甲子"}
+wrote ce-chart-page-05.png
