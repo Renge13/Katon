@@ -179,7 +179,10 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
           fields say which part is which. `data-value` is the composed date, for tests. */}
       <div id={`${idPrefix}-date`} role="group" aria-labelledby={`${idPrefix}-date-label`} data-date-group data-value={value.date}>
         <span id={`${idPrefix}-date-label`} className="k-sr-only">{aria('Tanggal lahir')}</span>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.65fr 1.15fr', gap: 8 }}>
+        {/* The tracks are sized so "Tanggal" fits its select beside the arrow at 375px
+            (measured: 1.1fr truncated it to "Tang..."), "September" fits its own, and
+            the year, which has no arrow, takes what is left. */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1.6fr 1fr', gap: 8 }}>
           <FloatField id={`${idPrefix}-day`} label="Tanggal" filled={Boolean(parts.day)}>
             <select id={`${idPrefix}-day`} value={parts.day} onChange={setPart('day')} autoComplete="bday-day">
               <option value=""></option>

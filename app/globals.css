@@ -234,8 +234,11 @@ input[type="number"]:focus {
   padding-top: 20px;
   padding-bottom: 6px;
 }
+/* A text input has no arrow, so its label may run to the field's own padding. */
+.k-float:has(> input) > label { right: 15px; }
 @media (max-width: 400px) {
   .k-float > label { left: 11px; right: 24px; font-size: 14px; }
+  .k-float:has(> input) > label { right: 11px; }
   .k-float:focus-within > label,
   .k-float[data-filled] > label { font-size: 10.5px; }
 }
