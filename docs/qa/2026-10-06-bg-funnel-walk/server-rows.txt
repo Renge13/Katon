@@ -1,0 +1,19 @@
+== node --conditions=react-server --env-file=<local .env.local, SANDBOX DOKU pair> scripts/funnel-walk.mjs   (2026-10-06, in-process, no Supabase, no Gemini: the reading is the FLOOR)
+POST /api/mirror -> kq-RK1fXRIAUZoS_Nnext    201
+GET  /api/mirror/<token>                     200
+POST /event offer_seen (first view)          200
+POST /event offer_seen (after a reload)      200
+POST /event offer_seen (after a re-scroll)   200
+POST /api/pay/<token>                        200
+  checkout url  https://staging.doku.com/checkout-link-v2/e8798f75ad4641bb9f8debed1416a92d20260706170727157
+[doku] reading kq-RK1fXRIAUZoS_Nnext: paid=true reason=ok
+POST /api/doku/notify (invoice kq-RK1fXRIAUZoS_Nnext.muwilyu8) 200
+  paid now      true
+POST /event offer_seen (paid reading)        200
+
+funnel_event rows for this reading:
+  reading_created      count 1   detail {"has_hour":true}
+  mirror_served        count 2   detail {"source":"module_assembly","floor":{"kind":"no_key"}}
+  offer_seen           count 3   detail null
+  checkout_started     count 1   detail {"sku":"artifact","provider":"doku"}
+  purchase_confirmed   count 1   detail {"sku":"artifact"}
