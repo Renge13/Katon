@@ -21,33 +21,11 @@
 // and GEMINI_API_KEY is removed before anything loads, so the reading is the FLOOR and the
 // run costs nothing.
 //
-// The route files import through the bundler alias `@/`; the resolve hook below maps it to
+// The route files import through the bundler alias `@/`; scripts/alias-register.mjs maps it to
 // the repo root, the only thing that stands between plain Node and those modules.
 // ============================================================
 
-import { register } from 'node:module';
-import { pathToFileURL } from 'node:url';
-import path from 'node:path';
-
-const ROOT = path.resolve(import.meta.dirname, '..');
-const HOOK = `
-import { existsSync } from 'node:fs';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-const ROOT = ${JSON.stringify(ROOT)};
-export async function resolve(specifier, context, next) {
-  if (specifier.startsWith('@/')) {
-    const base = ROOT + '/' + specifier.slice(2);
-    for (const candidate of [base, base + '.js', base + '.jsx', base + '/index.js']) {
-      if (existsSync(candidate) && !candidate.endsWith('/')) {
-        try { if (!(await import('node:fs')).statSync(candidate).isDirectory()) return next(pathToFileURL(candidate).href, context); } catch {}
-      }
-    }
-  }
-  // next has no exports map, so 'next/server' needs its extension outside the bundler.
-  if (/^next\\/[a-z-]+$/.test(specifier)) return next(specifier + '.js', context);
-  return next(specifier, context);
-}`;
-register(`data:text/javascript,${encodeURIComponent(HOOK)}`, pathToFileURL('./'));
+import './alias-register.mjs'; // the bundler's @/ alias, one shared copy of the rule
 
 if (!process.env.DOKU_SANDBOX || !process.env.DOKU_CLIENT_ID || !process.env.DOKU_SECRET_KEY) {
   console.error('funnel-walk: needs the SANDBOX DOKU pair (DOKU_SANDBOX, DOKU_CLIENT_ID, DOKU_SECRET_KEY).');
