@@ -863,17 +863,9 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
         )}
       </Reveal>
 
-      {/* THE STATUS LINE (Prompt AU §2, Reyner's ruling 3, 2026-09-30): header, then
-          this, then Bagan Kelahiran. Tied to `pending` and nothing else, so it leaves
-          the same way on a render and on a floor, and a reopened reading never shows
-          it. role="status" makes it the polite announcement the skeleton's
-          aria-busy region does not carry. */}
-      {pending && (
-        <div data-status-line role="status" style={{ marginTop: 22 }}>
-          <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, lineHeight: 1.4, color: 'var(--tinta)', margin: 0 }}>{CHROME_COPY.status_writing}</p>
-          <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', margin: '4px 0 0' }}>{CHROME_COPY.status_writing_sub}</p>
-        </div>
-      )}
+      {/* THE STATUS LINE MOVED (Prompt BE §2, Reyner 2026-10-06): it no longer sits
+          here under the title; it is at the top of the prose skeleton below, where the
+          reading text appears. */}
 
       {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
           characters ARE the chart and they are what lets a reader cross-check Katon
@@ -1026,6 +1018,23 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
                 125 and 95 words, penutup 33), measured 2026-09-30 in Chrome:
                 median 2,248px at 375 and 1,853px at 1280, this skeleton
                 within a few percent of both (docs/qa/2026-09-30-result-page-au). */}
+            {/* THE STATUS LINE, WHERE THE READING WILL APPEAR (Prompt BE §2, Reyner
+                2026-10-06; wording AU §2, ruling 3, 2026-09-30). Tied to `pending` and
+                nothing else, so it leaves the same way on a render and on a floor, and a
+                reopened reading never shows it. role="status" makes it the polite
+                announcement the aria-busy region does not carry. THE SLOT KEEPS ITS
+                HEIGHT while the skeleton cross-fades out, so the fading bars do not jump
+                up when the line leaves; the text itself goes the moment the prose lands. */}
+            <div data-status-slot style={{ paddingTop: 34 }}>
+              <div style={{ minHeight: 48 }}>
+                {pending && (
+                  <div data-status-line role="status">
+                    <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, lineHeight: 1.4, color: 'var(--tinta)', margin: 0 }}>{CHROME_COPY.status_writing}</p>
+                    <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', margin: '4px 0 0' }}>{CHROME_COPY.status_writing_sub}</p>
+                  </div>
+                )}
+              </div>
+            </div>
             {SKELETON_SHAPE.blocks.map((paras, i) => (
               <div key={i} aria-hidden="true" style={{ marginTop: i ? 40 : 34, paddingTop: 34, borderTop: '1px solid var(--divider)' }}>
                 <Eyebrow style={{ marginBottom: 16 }}><span className="k-skel" style={{ color: 'transparent', display: 'inline-block', width: '38%' }}>x</span></Eyebrow>
