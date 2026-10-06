@@ -105,9 +105,20 @@ test('THE PDF AUTHORS NOTHING: every block is the cached prose, ON THE READING P
   // and the route answers 409. So the duplication is a property of the fixture, not
   // of the product; the assertion is narrowed because a check that a fixture quirk
   // can satisfy is not a check.
+  //
+  // ── THE READING MAY RUN OVER MORE THAN ONE PAGE (2026-10-06, merging #198 onto #197) ──
+  // This read `texts[1]` alone, which assumed the whole floor fits on one page. With
+  // #198's chapter headings and dividers and 2b's ruled strings, Y-1's last block lands on
+  // the next page. The reading is every page between the cover and the facts table, which
+  // still leaves out the facts and legend copies this test was narrowed against: shown by
+  // removing block 6 from the reading - it is then absent from these pages and still
+  // present in the document.
   for (const name of names) {
     const { texts, rendered } = await build(name);
-    const readingPage = flat(texts[1]);
+    const factsAt = texts.findIndex((t) => t.replace(/\s+/gu, '')
+      .includes(PASANGAN_COPY.pdf_facts_heading.replace(/\s+/gu, '')));
+    assert.ok(factsAt > 1, `${name}: the facts page was not found after the reading`);
+    const readingPage = flat(texts.slice(1, factsAt).join(' '));
     for (const [i, b] of (rendered.blocks || []).entries()) {
       if (!b.text) continue;
       assert.ok(readingPage.includes(flat(b.text)),
