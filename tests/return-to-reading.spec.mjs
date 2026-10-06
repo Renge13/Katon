@@ -231,7 +231,7 @@ test('§1b: creating a reading remembers its token and title on this device', as
   const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
   try {
     const setField = makeSetField(ui.host, act, window);
-    setField('input[type="date"]', '1989-09-13');
+    setField('#mirror-date', '1989-09-13');
     await act(async () => {
       ui.host.querySelector('form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
     });
@@ -375,7 +375,9 @@ function assertOneHintPerHourField(host, where) {
   assert.ok(hourFields.length >= 1, `${where}: an hour field renders`);
   assert.equal(text.split(RULED.hour_hint).length - 1, hourFields.length, `${where}: H1 exactly once per hour field`);
   for (const select of hourFields) {
-    const next = select.nextElementSibling;
+    // The hint sits under the FIELD, which since Prompt BG §4 is the floating-label
+    // wrapper around the select.
+    const next = select.closest('[data-float]').nextElementSibling;
     assert.ok(next?.hasAttribute('data-hour-hint'), `${where}: H1 sits directly under #${select.id}`);
     assert.equal(next.textContent, RULED.hour_hint);
   }
@@ -462,7 +464,7 @@ test('amendment 2 §1: the H3 arrival shows no resume card and keeps the memory;
     mounted.push(arrival);
     await flush();
     // The arrival happened (control): prefilled and marked, as before.
-    assert.equal(arrival.host.querySelector('input[type="date"]').value, '1989-09-13', 'date prefilled');
+    assert.equal(arrival.host.querySelector('#mirror-date').getAttribute('data-value'), '1989-09-13', 'date prefilled');
     assert.equal(arrival.host.querySelector('#mirror-gender').value, 'female', 'gender prefilled');
     assert.equal(arrival.host.querySelector('#mirror-time').hasAttribute(TARGET), true, 'hour field marked');
     assert.equal(arrival.host.querySelector('[data-resume-card]') === null, true, 'no resume card on the H3 arrival');
@@ -521,29 +523,65 @@ test('amendment 2 §1: the same instance shows the card again once the address m
   }
 });
 
-test('§3b: no hour given, H2 and H3 under the Bagan cards; hour given, nothing extra', async () => {
+// PROMPT BG §5 (Reyner, 2026-10-06), which replaced BF §3b's layout: with no hour, the row
+// still shows FOUR cells, the fourth an empty Pilar Arah cell (its label, no hanzi) with
+// H3 inside it; H2 stays one line under the row. Hour known: unchanged.
+/** The cells of the Bagan row, in order: the grid that holds the PillarCells. */
+const pillarRow = (host) => {
+  const intro = [...host.querySelectorAll('p')].find((p) => p.textContent === RULED.bagan_intro);
+  const grid = [...intro.closest('div').parentElement.querySelectorAll('div')].find((d) => d.style.display === 'grid');
+  return { grid, cells: [...grid.children] };
+};
+
+test('§3b + BG §5: no hour, four cells, the fourth an empty Pilar Arah with H3 inside, H2 under the row; hour given, four computed cells', async () => {
   const f = stubFetch();
   try {
     const reading = served(viewOf(noHour), { birthDate: '1989-09-13', gender: 'female' });
     assert.equal(reading.chart.hour_known, false);
+    assert.equal(reading.chart.pillars.length, 3, 'precondition: the engine sends three pillars');
     const without = await mount(React.createElement(Reading, { reading, onReset() {} }));
-    const line = without.host.querySelector('[data-hour-missing]');
-    assert.ok(line, 'H2 renders');
-    assert.ok(line.textContent.includes(RULED.hour_missing));
-    const add = [...line.querySelectorAll('a')].find((a) => a.textContent.includes(RULED.hour_add));
-    assert.ok(add, 'H3 renders');
+    const { grid, cells } = pillarRow(without.host);
+    assert.equal(cells.length, 4, 'four cells with no hour');
+    assert.equal(grid.style.gridTemplateColumns, 'repeat(4,1fr)');
+    const empty = cells[3];
+    assert.ok(empty.hasAttribute('data-pillar-empty'), 'the fourth is the empty cell');
+    assert.equal(without.host.querySelectorAll('[data-pillar-empty]').length, 1);
+    assert.ok(/^Pilar Arah/u.test(empty.textContent), 'labelled PILAR ARAH like the other cards (upper-cased by CSS)');
+    assert.equal(/[一-鿿]/u.test(empty.textContent), false, 'no hanzi in the empty cell');
+    assert.ok(cells.slice(0, 3).every((c) => !c.hasAttribute('data-pillar-empty')), 'the three computed cells are real cells');
+    // Reyner 2026-10-06 (on #203): the empty cell takes the other cards' FILL, keeps its
+    // dashed edge, and its border is the other cards' border colour. Compared with Pilar
+    // Akar, a plain computed card (Pilar Diri carries the Inti Diri treatment).
+    assert.equal(empty.style.background, cells[0].style.background, 'the empty cell has the other cards\' fill');
+    assert.ok(empty.style.border.includes('dashed'), 'and keeps its dashed edge');
+    assert.ok(empty.style.border.includes('var(--border)') && cells[0].style.border.includes('var(--border)'),
+      'in the other cards\' border colour');
+    assert.ok(cells[2].textContent.includes(CHROME_COPY.pillar_core_pill), 'Inti Diri stays on Pilar Diri');
+
+    const add = [...empty.querySelectorAll('a')].find((a) => a.textContent === RULED.hour_add);
+    assert.ok(add, 'H3 sits inside the empty cell');
     const href = add.getAttribute('href');
     assert.ok(href.startsWith('/'), 'to the front door');
     assert.ok(!href.includes('1989'), 'no birth date in the address');
-    // Carried in this tab, the way lib/site/carryBirth.js already carries it to compat.
     await act(async () => { add.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })); });
-    assert.deepEqual(recallBirth(), { date: '1989-09-13', time: '', gender: 'female' });
+    assert.deepEqual(recallBirth(), { date: '1989-09-13', time: '', gender: 'female' }, 'carried in this tab');
+
+    const line = without.host.querySelector('[data-hour-missing]');
+    assert.ok(line, 'H2 renders');
+    assert.equal(line.textContent, RULED.hour_missing, 'H2 alone, one line: H3 is no longer in it');
+    assert.ok(grid.compareDocumentPosition(line) & window.Node.DOCUMENT_POSITION_FOLLOWING, 'H2 is under the row');
+    assert.equal(without.text().split(RULED.hour_add).length - 1, 1, 'H3 once on the page');
+    assert.equal(without.text().split(RULED.hour_missing).length - 1, 1, 'H2 once on the page');
     await without.unmount();
 
     const withH = await mount(React.createElement(Reading, { reading: SERVED, onReset() {} }));
     assert.equal(SERVED.chart.hour_known, true);
+    const row = pillarRow(withH.host);
+    assert.equal(row.cells.length, 4, 'four computed cells with an hour');
+    assert.equal(withH.host.querySelector('[data-pillar-empty]') === null, true, 'no empty cell');
     assert.equal(withH.host.querySelector('[data-hour-missing]') === null, true, 'hour given: nothing extra');
     assert.ok(!withH.text().includes(RULED.hour_missing));
+    assert.ok(!withH.text().includes(RULED.hour_add));
     await withH.unmount();
   } finally { f.restore(); }
 });
@@ -552,7 +590,8 @@ test('§3b: H3 lands on the front door with the date and gender prefilled and th
   const f = stubFetch();
   // The address H3 actually links to, read off the rendered reading.
   const page = await mount(React.createElement(Reading, { reading: served(viewOf(noHour), { birthDate: '1989-09-13', gender: 'female' }), onReset() {} }));
-  const add = [...page.host.querySelectorAll('[data-hour-missing] a')].find((a) => a.textContent.includes(RULED.hour_add));
+  // H3 sits inside the empty Pilar Arah cell since Prompt BG §5.
+  const add = [...page.host.querySelectorAll('[data-pillar-empty] a')].find((a) => a.textContent.includes(RULED.hour_add));
   assert.ok(add, 'H3 renders');
   await act(async () => { add.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })); });
   const h3 = add.getAttribute('href');
@@ -561,7 +600,7 @@ test('§3b: H3 lands on the front door with the date and gender prefilled and th
   const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
   try {
     await flush();
-    assert.equal(ui.host.querySelector('input[type="date"]').value, '1989-09-13', 'date prefilled');
+    assert.equal(ui.host.querySelector('#mirror-date').getAttribute('data-value'), '1989-09-13', 'date prefilled');
     assert.equal(ui.host.querySelector('#mirror-gender').value, 'female', 'gender prefilled');
     assert.equal(document.activeElement?.id, 'mirror-time', 'the hour field is focused');
     assert.equal(window.location.pathname + window.location.search, '/', 'the address is cleaned');
@@ -574,6 +613,6 @@ test('§3b: a plain front door visit does not prefill from the carry', async () 
   const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
   try {
     await flush();
-    assert.equal(ui.host.querySelector('input[type="date"]').value, '', 'a fresh visit starts empty');
+    assert.equal(ui.host.querySelector('#mirror-date').getAttribute('data-value'), '', 'a fresh visit starts empty');
   } finally { await ui.unmount(); f.restore(); }
 });

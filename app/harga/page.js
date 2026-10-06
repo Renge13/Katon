@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import StaticPage, { Card, P } from '@/components/StaticPage.jsx';
-import { SITE_COPY, CHROME_COPY } from '@/lib/site/copy';
+import { SITE_COPY, CHROME_COPY, PASANGAN_COPY } from '@/lib/site/copy';
 import { SKUS, priceFor, isSellable } from '@/lib/pricing';
 import { formatIdr } from '@/lib/site/format';
 import { compatCheckoutOpen } from '@/lib/paymentFence';
@@ -154,16 +154,22 @@ function PaidRow({ sku, copy, salesOpen }) {
   // Show the anchor only while the launch price is actually below list. With
   // LAUNCH_PRICING off there is no discount to anchor and no cohort to label.
   const discounted = price < list;
+  // ── COMPAT CLOSED, MARKED AS /kompatibilitas MARKS IT (Prompt BG §6, 2026-10-06) ──
+  // While compat is off sale the row says so in the compat page's own closed strings,
+  // READ from PASANGAN_COPY (never copied into this bank, lib/site/copy.js says why),
+  // and nothing on it looks buyable: no launch badge, no struck-through list price, no
+  // link. The name, body and price stay, because this page is the catalogue.
+  const closed = sku === 'compat' && !salesOpen;
 
   return (
     <Row
       name={copy.name}
       price={formatIdr(price)}
-      badge={sellable ? (discounted ? q.launchLabel : null) : q.soonLabel}
-      badgeTone={sellable ? 'accent' : 'quiet'}
-      anchor={discounted ? formatIdr(list) : null}
+      badge={closed ? PASANGAN_COPY.sales_closed_title : sellable ? (discounted ? q.launchLabel : null) : q.soonLabel}
+      badgeTone={sellable && !closed ? 'accent' : 'quiet'}
+      anchor={discounted && !closed ? formatIdr(list) : null}
       body={sku === 'artifact' ? <ArtifactBody /> : copy.body}
-      note={noteNode(copy)}
+      note={closed ? PASANGAN_COPY.sales_closed_body : noteNode(copy)}
       action={copy.link && salesOpen ? (
         <Link
           href={COMPAT_ROUTE}

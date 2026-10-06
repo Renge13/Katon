@@ -131,7 +131,7 @@ test('HER BIRTH CARRIES FROM THE MIRROR FUNNEL INTO COMPAT STEP 1', async () => 
     try {
       // THE FIELDS, not a storage key. What the reader sees is the proposition;
       // the key is an implementation detail neither side should be tested on.
-      assert.equal(ui.host.querySelector('#a-date')?.value, BIRTH.date, 'her date is there');
+      assert.equal(ui.host.querySelector('#a-date')?.getAttribute('data-value'), BIRTH.date, 'her date is there');
       assert.equal(ui.host.querySelector('#a-time')?.value, BIRTH.time, 'and her hour');
       assert.equal(ui.host.querySelector('#a-gender')?.value, BIRTH.gender, 'and her gender');
     } finally { ui.unmount(); }
@@ -167,7 +167,7 @@ test('ONLY HER SIDE IS PREFILLED - THE OTHER PERSON IS STILL A STRANGER', async 
       ui.submit();
       await ui.settle();
       assert.ok(ui.host.querySelector('#b-date'), 'step 2 opened off the prefilled step 1');
-      assert.equal(ui.host.querySelector('#b-date').value, '', "B's date is empty");
+      assert.equal(ui.host.querySelector('#b-date').getAttribute('data-value'), '', "B's date is empty");
       assert.equal(ui.host.querySelector('#b-time')?.value ?? '', '', "B's hour is empty");
     } finally { ui.unmount(); }
   } finally { f.restore(); clearStorage(); }
@@ -185,7 +185,7 @@ test('NOTHING CARRIED MEANS AN EMPTY FORM, NOT A BROKEN ONE', async () => {
     const ui = mount(Pasangan, { initialA: { readingId: 'tok1' } });
     try {
       assert.ok(ui.host.querySelector('#a-date'), 'step 1 is open');
-      assert.equal(ui.host.querySelector('#a-date').value, '', 'and empty');
+      assert.equal(ui.host.querySelector('#a-date').getAttribute('data-value'), '', 'and empty');
       assert.equal(ui.host.querySelector('#b-date'), null, 'step 2 not jumped to');
     } finally { ui.unmount(); }
   } finally { f.restore(); clearStorage(); }
@@ -207,7 +207,7 @@ test('A SESSION STORE THAT THROWS IS AN EMPTY FORM, NOT A BLANK PAGE', async () 
     const ui = mount(Pasangan, { initialA: { readingId: 'tok1' } });
     try {
       assert.ok(ui.host.querySelector('#a-date'), 'the form still renders');
-      assert.equal(ui.host.querySelector('#a-date').value, '', 'empty, and nothing threw');
+      assert.equal(ui.host.querySelector('#a-date').getAttribute('data-value'), '', 'empty, and nothing threw');
     } finally { ui.unmount(); }
   } finally {
     if (real) Object.defineProperty(window, 'sessionStorage', real);

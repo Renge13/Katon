@@ -97,11 +97,15 @@ try {
   await go(`${BASE}/`);
   await js(`(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} })()`);
   await go(`${BASE}/`);
-  await js(`(() => {
+  await js(`(async () => {
     const set = (el, v) => { Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value').set.call(el, v);
       el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); };
-    set(document.querySelector('#mirror-date'), '1989-09-13');
-    set(document.querySelector('#mirror-gender'), 'female');
+    const tick = () => new Promise((r) => setTimeout(r, 60));
+    // Three fields since Prompt BG §3: year, month, day, each its own event and render.
+    set(document.querySelector('#mirror-year'), '1989'); await tick();
+    set(document.querySelector('#mirror-month'), '9'); await tick();
+    set(document.querySelector('#mirror-day'), '13'); await tick();
+    set(document.querySelector('#mirror-gender'), 'female'); await tick();
   })()`);
   await js(`document.querySelector('button[type="submit"]').click()`);
   await until(`location.pathname.startsWith('/r/') && !document.querySelector('[data-prose-skeleton][aria-busy]')`);

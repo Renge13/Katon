@@ -31,16 +31,35 @@ import assert from 'node:assert/strict';
  * @param {Window} win     the window whose `Event` constructor to use (jsdom's)
  */
 export function makeSetField(host, act, win) {
-  return (sel, value) => act(() => {
+  const setOne = (el, value) => act(() => {
+    const proto = Object.getPrototypeOf(el);
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, value);
+    el.dispatchEvent(new win.Event('input', { bubbles: true }));
+    el.dispatchEvent(new win.Event('change', { bubbles: true }));
+  });
+  return (sel, value) => {
     const el = host.querySelector(sel);
     // A selector that matches nothing used to throw `Cannot convert undefined or
     // null to object` from deep inside `Object.getPrototypeOf`, which names
     // neither the selector nor the field. That is a real cost: it is exactly the
     // error a renamed control produces, and it tells you nothing about which one.
     assert.ok(el, `setField: no element matches ${sel}`);
-    const proto = Object.getPrototypeOf(el);
-    Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, value);
-    el.dispatchEvent(new win.Event('input', { bubbles: true }));
-    el.dispatchEvent(new win.Event('change', { bubbles: true }));
-  });
+    // ── A DATE IS THREE FIELDS SINCE PROMPT BG §3 ──
+    // `#<prefix>-date` is the group around Tanggal / Bulan / Tahun. Given a
+    // `YYYY-MM-DD` (or '' to clear), set the three the way a reader does: year, month,
+    // then day, EACH IN ITS OWN act() so each re-renders before the next, as separate
+    // taps do. One act() for all three would hand every change the same stale parts.
+    if (el.hasAttribute('data-date-group')) {
+      const [year = '', month = '', day = ''] = value ? value.split('-') : [];
+      const field = (part) => el.querySelector(`[id$="-${part}"]`);
+      setOne(field('year'), year);
+      setOne(field('month'), month ? String(Number(month)) : '');
+      setOne(field('day'), day ? String(Number(day)) : '');
+      return;
+    }
+    setOne(el, value);
+  };
 }
+
+/** The composed `YYYY-MM-DD` a BirthFields date group currently holds ('' when none). */
+export const dateValue = (host, prefix) => host.querySelector(`#${prefix}-date`)?.getAttribute('data-value') ?? null;

@@ -198,6 +198,57 @@ input[type="number"]:focus {
   box-shadow: 0 0 0 3px var(--emas-dim);
 }
 
+/* ── FLOATING LABELS (Prompt BG §4, 2026-10-06) ──────────────
+   components/BirthFields.jsx#FloatField. The label sits inside the field at the
+   field's own text size and moves to the top-left, smaller, when the field is focused
+   (:focus-within) or filled ([data-filled], set from the value). A real <label>
+   always. Existing colours only. The control keeps its 48px box: the top padding
+   makes room for the floated label and the bottom padding gives it back. */
+.k-float { position: relative; }
+.k-float > label {
+  position: absolute;
+  left: 15px;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted-warm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transition: top .18s var(--ease-out), font-size .18s var(--ease-out), transform .18s var(--ease-out);
+}
+.k-float:focus-within > label,
+.k-float[data-filled] > label {
+  top: 7px;
+  transform: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.k-float > select,
+.k-float > input {
+  padding-top: 20px;
+  padding-bottom: 6px;
+}
+/* A text input has no arrow, so its label may run to the field's own padding. */
+.k-float:has(> input) > label { right: 15px; }
+@media (max-width: 400px) {
+  .k-float > label { left: 11px; right: 24px; font-size: 14px; }
+  .k-float:has(> input) > label { right: 11px; }
+  .k-float:focus-within > label,
+  .k-float[data-filled] > label { font-size: 10.5px; }
+}
+
+/* Read by a screen reader, not drawn. The group label of the three date fields. */
+.k-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
 /* ── Motion keyframes ──────────────────────────────────────── */
 .k-fade { animation: kFadeIn .5s var(--ease-quiet) both; }
 @keyframes kFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

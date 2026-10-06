@@ -132,7 +132,7 @@ const delaysIn = (node) => [...node.querySelectorAll('.k-rise')]
 async function readingScreen() {
   const restore = stubFetch();
   const ui = mount();
-  ui.setField('input[type="date"]', '1989-09-13');
+  ui.setField('#mirror-date', '1989-09-13');
   // `#birth-time`: the hour picker is a `<select>` since 2026-09-09.
   ui.setField('#mirror-time', '04:00');
   ui.submit();

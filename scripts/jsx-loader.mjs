@@ -28,7 +28,15 @@ import ts from 'typescript';
 
 export async function load(url, context, nextLoad) {
   if (!url.endsWith('.jsx')) return nextLoad(url, context);
+  return transpileJsx(url);
+}
 
+/**
+ * The transform itself, exported so scripts/alias-register.mjs can apply it to the
+ * `app/` route files that carry JSX in a `.js` file (an App Router page). THIS loader's
+ * scope is unchanged: `.jsx` and nothing else.
+ */
+export async function transpileJsx(url) {
   const source = await readFile(fileURLToPath(url), 'utf8');
   const { outputText } = ts.transpileModule(source, {
     fileName: fileURLToPath(url),

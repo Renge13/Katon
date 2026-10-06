@@ -131,6 +131,8 @@
     "test:offer-seen-route": "node --conditions=react-server --test tests/offer-seen-route.spec.mjs",
     "test:offer-seen": "node --import ./scripts/jsx-register.mjs --test tests/offer-seen.spec.mjs",
     "test:page-analytics": "node --test tests/page-analytics.spec.mjs",
+    "test:birth-fields": "node --import ./scripts/jsx-register.mjs --test tests/birth-fields.spec.mjs",
+    "test:compat-navigation": "node --import ./scripts/jsx-register.mjs --import ./scripts/alias-register.mjs --test tests/compat-navigation.spec.mjs",
     "probe:reconcile": "node --conditions=react-server --env-file-if-exists=.env.local scripts/probe-reconcile.mjs",
     "doku:status": "node --conditions=react-server --env-file-if-exists=.env.local scripts/doku-status.mjs",
     "test:carry-birth": "node --import ./scripts/jsx-register.mjs --test tests/carry-birth.spec.mjs",

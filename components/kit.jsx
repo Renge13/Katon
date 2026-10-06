@@ -96,6 +96,27 @@ export function BalanceBar({ label, gloss, pct, element, isDominant, isMissing }
   );
 }
 
+/**
+ * The pillar that has not been computed yet: Pilar Arah when no birth hour was given
+ * (Prompt BG §5, Reyner 2026-10-06). The same box and label as PillarCell, no hanzi,
+ * a dashed edge and the other cards' fill, so it reads as a missing piece of the chart,
+ * not an error.
+ * `children` is what sits inside it (H3, "Tambahkan jam lahir").
+ */
+export function EmptyPillarCell({ label, children }) {
+  return (
+    <div data-pillar-empty style={{
+      position: 'relative', borderRadius: 16, padding: '15px 8px 13px', textAlign: 'center',
+      // The other cards' fill (Reyner 2026-10-06, on #203); the border was already their colour.
+      border: '1px dashed var(--border)', background: 'var(--kertas-2)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+    }}>
+      <div style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', marginBottom: 6 }}>{label}</div>
+      <div style={{ flex: '1 0 auto', display: 'flex', alignItems: 'center', fontSize: 11, lineHeight: 1.35 }}>{children}</div>
+    </div>
+  );
+}
+
 // One "Empat Pilarmu" cell. Neutral: stem/branch + element·polarity label only.
 export function PillarCell({ label, stem, branch, elementId, element, polarity, isDayMaster }) {
   const c = elColor(element || elementId);
