@@ -200,8 +200,9 @@ test('THE PDF AUTHORS NOTHING: the reading is the cached prose, verbatim', async
   // paragraph that crosses a page has `Katon - Edisi Lengkap` between its halves in
   // the concatenated text - exactly like a line break, and removed for the same
   // reason. Removed as the footer's own string, never by pattern.
-  const footer = `Katon - ${RENDER_COPY.pdfEditionMirror}`;
-  const text = strip(latinText(buf).split(footer).join(''));
+  // F1 since Prompt BE §5b. Removed after stripping whitespace, because its text extracts
+  // in two runs; still the footer's own string, never a pattern.
+  const text = strip(latinText(buf)).split(strip(RENDER_COPY.pdfFooter)).join('');
 
   for (const block of rendered.blocks) {
     const want = strip(block.text);
@@ -211,17 +212,18 @@ test('THE PDF AUTHORS NOTHING: the reading is the cached prose, verbatim', async
   assert.ok(text.includes(strip(rendered.penutup)), 'the penutup too');
 });
 
-test('the provenance survived the colophon it used to live on', async () => {
-  // The ruling was about the ToS text and said nothing about these two lines. They
-  // moved to the chart-page foot rather than dying with the page, because a document
-  // in someone's downloads folder still has to be traceable to the engine, prompt and
-  // gate that produced it - and `stage6_version` is the gate that CLEARED this prose.
+test('the provenance survives, OFF THE PAGE and in the metadata (Prompt BE §5a)', async () => {
+  // A document in someone's downloads folder still has to be traceable to the engine,
+  // prompt and gate that produced it - and `stage6_version` is the gate that CLEARED this
+  // prose. Since 2026-10-06 (Reyner) no reader sees it: it is the info dictionary's
+  // Subject, an uncompressed string object, and is drawn on no page.
   const { chart, semanticJson, rendered } = fixture('chart 1');
   const buf = (await buildCompleteEditionPdf({ chart, semanticJson, rendered })).buffer;
+  const line = `katon.app - ${semanticJson.engine_version} - prompt testprompt00 - gate 1.17.0`;
+  assert.ok(buf.toString('latin1').includes(`(${line})`), 'the provenance is in the file, as a metadata string');
   const text = latinText(buf);
-  assert.match(text, /testprompt00/, 'the prompt version that produced the prose');
-  assert.match(text, /1\.17\.0/, 'and the gate that cleared it');
-  assert.match(text, /katon\.app/);
+  assert.doesNotMatch(text, /testprompt00/, 'the prompt version is drawn on no page');
+  assert.doesNotMatch(text, /gate 1\.17\.0/, 'nor the gate');
 });
 
 // ── CORRECTION 1: a condition is never named, in any language ──
@@ -564,14 +566,16 @@ test('pageTexts attributes each page its OWN text', async () => {
   assert.equal(texts.length, pageObjectOrder(buffer).length, 'one text per page');
   assert.equal(texts.length, report.pages);
   assert.ok(texts[0].includes(semanticJson.core.archetype_name_en), 'page 1 is the cover');
-  // THE LAST PAGE IS THE APPENDIX NOW. It was the colophon until 2026-08-22; the
-  // document deliberately ends on her own material. Asserted by CONSTRUCTION rather
-  // than by a substring that happens to be there: the appendix's final entry is the
-  // last thing the document emits, so its name must be on the last page.
+  // THE LAST PAGE IS THE CLOSING PAGE SINCE PROMPT BE §5c (Reyner 2026-10-06), and the
+  // appendix ends on the page before it. (It was the colophon until 2026-08-22, then the
+  // appendix.) Asserted by CONSTRUCTION rather than by a substring that happens to be
+  // there: the appendix's final entry is the last thing the appendix emits.
   const entries = buildAppendix({ chart, semanticJson }).groups.flatMap((g) => g.entries);
   const last = entries[entries.length - 1];
-  assert.ok(texts[report.pages - 1].includes(last.name || last.meaning.slice(0, 24)),
-    'the last page must carry the appendix\'s final entry');
+  assert.ok(texts[report.pages - 2].includes(last.name || last.meaning.slice(0, 24)),
+    'the page before the closing page must carry the appendix\'s final entry');
+  assert.ok(texts[report.pages - 1].includes(RENDER_COPY.pdfClosingSections.at(-1).label),
+    'the last page is the closing page');
   assert.equal(texts[report.pages - 1].includes('Batas layanan'), false,
     'and it must not carry the ToS text the ruling removed');
   assert.ok(!texts[0].includes(APPENDIX_HEADING), 'the cover does not carry the appendix heading');
