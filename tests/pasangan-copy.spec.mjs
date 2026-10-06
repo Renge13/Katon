@@ -338,11 +338,15 @@ test('THE SHARED JSX STRINGS ARE THE RULED ONES, IN EVERY FILE THAT CARRIES THEM
   // THREE SINCE 2026-09-09. The third is the season gate's hour helper, ruled
   // with the hour picker (Y-2 Addendum 2 item 4) - #112 flagged it as the one
   // "Jamnya saja" no ruling covered and left it, which is why it is here now.
-  assert.equal(rows.length, 3, 'the shared table has three ruled strings');
+  // TWO SINCE 2026-10-06: the hour helper in BirthFields.jsx was superseded by Prompt BF
+  // amendment 1 §1 (Reyner) and left the table; its replacement, H1, is CHROME_COPY.hour_hint
+  // and is pinned verbatim by tests/return-to-reading.spec.mjs, which also asserts the old
+  // line renders on neither form.
+  assert.equal(rows.length, 2, 'the shared table has two ruled strings');
   // THE UNDER-CTA LINE IS THE STEPPER'S ALONE SINCE 2026-09-24: Home prints
   // SITE_COPY.home_lock_line (amendment k), which carries "Gratis".
   assert.deepEqual(rows.flatMap((r) => r.files),
-    ['components/BirthFields.jsx', 'components/PasanganSteps.jsx', 'components/Funnel.jsx'],
+    ['components/PasanganSteps.jsx', 'components/Funnel.jsx'],
     'the under-CTA line is the compat stepper\'s; Funnel carries the season-gate string');
 
   for (const { files, was, now } of rows) {

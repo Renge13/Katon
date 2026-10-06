@@ -182,7 +182,11 @@ input[type="time"]:hover,
 input[type="text"]:hover,
 input[type="email"]:hover,
 input[type="tel"]:hover { border-color: var(--muted-warm); }
+/* `select[data-focus-target]`: the field a link sent her to (the hour, after "Tambahkan
+   jam lahir"), shown with the focus treatment even where a programmatic focus() is not
+   honoured (iOS Safari, an unfocused window). Prompt BF amendment 1 §3. */
 select:focus,
+select[data-focus-target],
 input[type="date"]:focus,
 input[type="time"]:focus,
 input[type="text"]:focus,

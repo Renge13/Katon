@@ -1,0 +1,23 @@
+== compat closed (katon-be-mock, :3002)
+front door: {"path":"/","hourFields":1,"hints":["Tidak tahu? Lewati saja."],"oldLine":false}
+wrote front-door-one-hint-compat-closed-375.png
+compat form: {"path":"/kompatibilitas","hourFields":0,"hints":[],"oldLine":false}
+wrote compat-form-one-hint-compat-closed-375.png
+reading n6qQI-08MPFQUusYH2axB
+end (compat-closed): {"links":["Baca tanggal lain -> /"],"compatCard":false}
+wrote end-of-reading-compat-closed-375.png
+H3 arrival: {"path":"/","date":"1989-09-13","time":"","active":"mirror-time","windowFocused":false,"matchesFocus":false,"marked":true,"border":"rgb(174, 132, 63)","ring":"rgba(174, 132, 63, 0.12) 0px 0px 0px 3px"}
+wrote h3-arrival-marked-compat-closed-375.png
+after picking 09.00: {"path":"/","date":"1989-09-13","time":"09:00","active":"mirror-time","windowFocused":false,"matchesFocus":false,"marked":false,"border":"rgb(231, 221, 206)","ring":"none"}
+
+== compat open (COMPAT_SALES=open, GEMINI_API_KEY unset, :3004)
+front door: {"path":"/","hourFields":1,"hints":["Tidak tahu? Lewati saja."],"oldLine":false}
+wrote front-door-one-hint-compat-open-375.png
+compat form: {"path":"/kompatibilitas","hourFields":1,"hints":["Tidak tahu? Lewati saja."],"oldLine":false}
+wrote compat-form-one-hint-compat-open-375.png
+reading zKMjsFscpYBXxbnAu315X
+end (compat-open): {"links":["Baca tanggal lain -> /"],"compatCard":true}
+wrote end-of-reading-compat-open-375.png
+H3 arrival: {"path":"/","date":"1989-09-13","time":"","active":"mirror-time","windowFocused":false,"matchesFocus":false,"marked":true,"border":"rgb(174, 132, 63)","ring":"rgba(174, 132, 63, 0.12) 0px 0px 0px 3px"}
+wrote h3-arrival-marked-compat-open-375.png
+after picking 09.00: {"path":"/","date":"1989-09-13","time":"09:00","active":"mirror-time","windowFocused":false,"matchesFocus":false,"marked":false,"border":"rgb(231, 221, 206)","ring":"none"}

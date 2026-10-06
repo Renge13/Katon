@@ -80,6 +80,10 @@ function stubFetch({ needsHour = false } = {}) {
 }
 
 function mount(Component, props = {}) {
+  // Each mount starts at the front door. A create earlier in this file pushed
+  // /r/<token> into jsdom's shared history, and since Prompt BF a funnel mounted
+  // at /r/<token> opens that reading (the back-button restore), not the form.
+  window.history.replaceState(null, '', '/');
   const host = document.createElement('div');
   document.body.appendChild(host);
   const root = createRoot(host);

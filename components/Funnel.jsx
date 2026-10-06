@@ -35,8 +35,11 @@
 // Nothing here writes a sentence about it.
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
+// `.js` ON PURPOSE: `next` has no exports map, so plain Node (the jsdom specs) resolves
+// only the file name; Next resolves either spelling to the same module.
+import { usePathname } from 'next/navigation.js';
 import { CardA, CardB, CARD_A, exportSize } from './cards/Card.js';
 import {
   downloadCard, captureCard, dataUrlToFile, canSharePngFiles, shareOrSave, SHARE_CANCELLED,
@@ -85,7 +88,39 @@ import { CHROME_COPY } from '../lib/site/copy.js';
 import { ProseBlocks } from './ProseBlocks.jsx';
 import { FENCE_REFUSALS } from '../lib/paymentFence.js';
 import { formatIdr } from '../lib/site/format.js';
-import { rememberBirth } from '../lib/site/carryBirth.js';
+import { rememberBirth, recallBirth } from '../lib/site/carryBirth.js';
+import {
+  rememberReading, forgetReading, subscribeLastReading, lastReadingSnapshot, parseLastReading,
+} from '../lib/site/lastReading.js';
+
+const noSnapshot = () => null;
+const subscribeNothing = () => () => {};
+
+/**
+ * H3's arrival as a snapshot string: the carried birth as JSON ('{}' when the tab
+ * carries none) on `/?jam=tambah`, else null. A string, so two reads compare equal.
+ */
+function arrivalSnapshot() {
+  try {
+    if (new URLSearchParams(window.location.search).get('jam') !== 'tambah') return null;
+    return JSON.stringify(recallBirth() || {});
+  } catch {
+    return null;
+  }
+}
+
+/** The reading token in a `/r/<token>` address, or null. */
+function tokenFromPath(pathname) {
+  const m = /^\/r\/([A-Za-z0-9_-]+)\/?$/u.exec(pathname || '');
+  return m ? m[1] : null;
+}
+
+/**
+ * H3's destination (Prompt BF §3b): the front door, asked to prefill the birth this
+ * tab carries and focus the hour field. The birth itself travels in sessionStorage
+ * (lib/site/carryBirth.js), never in the address.
+ */
+const ADD_HOUR_HREF = '/?jam=tambah';
 
 // ELEMENT_GLOSS and the bar maths live in lib/site/elements.js since Prompt AW
 // (2026-09-30): the Complete Edition PDF draws the same bars.
@@ -223,8 +258,108 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
   // turn is actually unresolved: { birthDate, term, at, birthHour }.
   const [season, setSeason] = useState(null);
 
+  // ── THE BACK BUTTON (Prompt BF §1a, Reyner's walk of 2026-10-06) ──
+  // `createReading` swaps the address to /r/<token> with `history.pushState`. Next 15
+  // patches pushState and copies the CURRENT entry's router tree into the new one
+  // (`copyNextJsInternalHistoryState`, node_modules/next/dist/client/components/
+  // app-router.js), so the /r/<token> entry carries the tree of `/`. Back from /harga
+  // restores that tree: this component mounts FRESH at /r/<token> with `phase` at
+  // 'input', and she saw the empty form instead of her reading.
+  //
+  // So the address this mounts at is read once. The /r/[token] route renders
+  // ReadingByToken, never this component, so a mount here at /r/<token> only ever
+  // means that restore, and the answer is the reading the address names. Read in
+  // the initialiser rather than an effect so the form never paints first; on the
+  // server, and on a normal load of `/`, it is null.
+  //
+  // THE ROUTER'S PATHNAME FIRST, `window.location` ONLY OUTSIDE THE APP ROUTER (the
+  // unit tests, where `usePathname` is null). On a client navigation Next renders the
+  // new tree BEFORE it writes the address, so a fresh mount for `/` reached from
+  // /r/<token> still finds /r/<token> in `window.location` - the walk caught exactly
+  // that, the header's "Bacaan Diri" opening the reading again at `/`.
+  const pathname = usePathname();
+  const [restored, setRestored] = useState(() => tokenFromPath(
+    pathname ?? (typeof window === 'undefined' ? null : window.location.pathname),
+  ));
+
+  // ── AND THE ADDRESS IS FOLLOWED AFTER THAT ──
+  // The same instance survives client navigation between `/` and /r/<token> (it is one
+  // page tree), so a mount-time read is not enough: the header's "Bacaan Diri" from a
+  // restored reading changed the address to `/` and kept showing the reading. Found by
+  // the walk (scripts/bf-shots.mjs), not by reasoning. So a move to `/` is the front
+  // door, and a move to /r/<token> for a reading not on screen opens it. Adjusted during
+  // render, the pattern `armed` uses in <Reading>. `usePathname` is null outside the
+  // App Router (the unit tests), where only the mount-time read applies.
+  const [seenPath, setSeenPath] = useState(pathname);
+  if (pathname !== seenPath) {
+    setSeenPath(pathname);
+    const moved = tokenFromPath(pathname);
+    if (moved) {
+      if (moved !== reading?.token && moved !== restored) setRestored(moved);
+    } else if (pathname === '/' && (restored || phase !== 'input')) {
+      setRestored(null); setReading(null); setError(null); setSeason(null); setPhase('input');
+    }
+  }
+
+  // ── THE RESUME CARD (Prompt BF §1c) ──
+  // The reading this device remembers, read as an external store (lib/site/lastReading.js
+  // says why): null on the server and through hydration, the stored value after it,
+  // and re-read whenever a create, R3 or the check below writes to it.
+  const resumeRaw = useSyncExternalStore(subscribeLastReading, lastReadingSnapshot, noSnapshot);
+  const resume = useMemo(() => parseLastReading(resumeRaw), [resumeRaw]);
+  const resumeToken = resume?.token ?? null;
+  const checkedResume = useRef(null);
+
+  // SHOWN AT ONCE AND CHECKED BEHIND IT, once per token. The delivery manifest is the
+  // cheap lookup: one row read, no render and no `mirror_served` event, 404 when the
+  // reading is gone. Only a 404 clears the memory; a network failure keeps it, because
+  // a reading she still has must not be forgotten over a dropped connection.
+  useEffect(() => {
+    if (restored || phase !== 'input' || !resumeToken || checkedResume.current === resumeToken) return;
+    checkedResume.current = resumeToken;
+    fetch(`/api/deliver/${encodeURIComponent(resumeToken)}`)
+      .then((r) => { if (r.status === 404) forgetReading(); })
+      .catch(() => {});
+  }, [restored, phase, resumeToken]);
+
+  // ── H3's ARRIVAL (Prompt BF §3b) ──
+  // The reading had no hour and she asked to add one: `/?jam=tambah`, with the birth
+  // in this tab's carry. The form takes the date and gender during render (the pattern
+  // `armed` uses in <Reading>), once; the effect then focuses the hour field and puts
+  // the address back to `/`, so a reload is a plain front door.
+  const arrival = useSyncExternalStore(subscribeNothing, arrivalSnapshot, noSnapshot);
+  const [arrived, setArrived] = useState(null);
+  // THE HOUR FIELD IS MARKED AS THE TARGET (Prompt BF amendment 1 §3, Reyner 2026-10-06).
+  // focus() below stays, but it cannot be relied on: iOS Safari ignores a programmatic
+  // focus, and an unfocused window never matches `:focus` (measured in headless Chrome:
+  // `activeElement` was the select, `:focus` false, no ring). The mark is styled by the
+  // same `select:focus` rule, so the field shows that treatment either way. It goes as
+  // soon as she picks an hour.
+  const [hourTarget, setHourTarget] = useState(false);
+  // NO RESUME CARD ON THIS ARRIVAL (Prompt BF amendment 2 §1, Reyner 2026-10-06). She
+  // asked to add an hour, so the screen offers that one action: with the card above the
+  // form, "Buka bacaanku" was the dominant button and the marked hour field sat below
+  // the fold at 375x812. The memory is NOT cleared, only not shown here, and only on
+  // this arrival: a fresh mount of `/` starts without the flag, and the same instance
+  // drops it once the address moves or she submits (the header is a client `<Link>`,
+  // so a later visit to `/` can be this instance).
+  const [hideResume, setHideResume] = useState(false);
+  if (hideResume && (pathname !== seenPath || phase !== 'input')) setHideResume(false);
+  if (arrival && arrival !== arrived) {
+    setArrived(arrival);
+    setHourTarget(true);
+    setHideResume(true);
+    const carried = JSON.parse(arrival);
+    if (carried.date) setForm({ date: carried.date, time: '', gender: carried.gender || '' });
+  }
+  useEffect(() => {
+    if (!arrived) return;
+    window.history.replaceState(null, '', '/');
+    document.getElementById('mirror-time')?.focus();
+  }, [arrived]);
+
   function reset() {
-    setReading(null); setError(null); setSeason(null); setBusy(false); setPhase('input');
+    setReading(null); setError(null); setSeason(null); setBusy(false); setPhase('input'); setRestored(null);
     if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
   }
 
@@ -269,6 +404,15 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
       time: resolution.birthTime ?? birthTime,
       gender: form.gender,
     });
+
+    // ── AND REMEMBER THE READING ON THIS DEVICE (Prompt BF §1b) ──
+    // The token and the archetype title only; never the birth. Only this path writes
+    // it, so a link someone else sent her is never offered back as "bacaanmu".
+    const remembered = {
+      token: created.token,
+      title: created.chart?.archetype?.name_en || created.chart?.archetype?.name_id || '',
+    };
+    rememberReading(remembered);
 
     // ── THE CHART GOES UP NOW. THE PROSE ARRIVES UNDER IT. ──
     //
@@ -409,7 +553,8 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
   // 22s funnel. Removing this is the ruling, not an accident, and it is recorded
   // here because a deletion this fresh reads like a botched merge otherwise.
 
-  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} compatOpen={compatOpen} />;
+  if (restored) return <ReadingByToken key={restored} token={restored} salesOpen={salesOpen} compatOpen={compatOpen} />;
+  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} compatOpen={compatOpen} resume={hideResume ? null : resume} onForgetResume={forgetReading} hourTarget={hourTarget} onHourPicked={() => setHourTarget(false)} />;
   if (phase === 'season') return <SeasonGate season={season} onAnswer={onSeasonAnswer} />;
   return <Reading reading={reading} onReset={reset} salesOpen={salesOpen} compatOpen={compatOpen} />;
 }
@@ -429,7 +574,7 @@ function Para({ children, style }) {
 }
 
 /* ---------------- Home (input) ---------------- */
-function Home({ form, setForm, error, onSubmit, busy, compatOpen = false }) {
+function Home({ form, setForm, error, onSubmit, busy, compatOpen = false, resume = null, onForgetResume, hourTarget = false, onHourPicked }) {
   return (
     <div style={wrap}>
       <div style={{ paddingTop: 60 }}>
@@ -461,6 +606,35 @@ function Home({ form, setForm, error, onSubmit, busy, compatOpen = false }) {
             never a stage of this form, and the mirror stays above it - the link now
             sits under the button, so the free reading is the first and only thing
             the page asks of her. */}
+        {/* ── HER LAST READING, ABOVE THE FORM (Prompt BF §1c, Reyner 2026-10-06) ──
+            The header's "Bacaan Diri" still links here (§1d), and this card is what
+            makes that link find her reading. R2 opens it; R3 forgets it and leaves the
+            plain form. Strings R1-R3 are Reyner's, verbatim, in CHROME_COPY. */}
+        {resume && (
+          <div data-resume-card style={{ marginTop: 30, background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 16px', boxShadow: 'var(--shadow-card)' }}>
+            {resume.title && <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, lineHeight: 1.15, color: 'var(--tinta)' }}>{resume.title}</div>}
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, lineHeight: 1.55, color: 'var(--tinta-soft)', margin: resume.title ? '6px 0 0' : 0 }}>{CHROME_COPY.resume_line}</p>
+            <a
+              href={`/r/${resume.token}`}
+              style={{
+                marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 16, borderRadius: 16, padding: '13px 22px',
+                background: 'var(--clay)', color: '#fff', boxShadow: 'var(--shadow-cta)', textDecoration: 'none',
+              }}
+            >
+              {CHROME_COPY.resume_open} <Icon.arrow size={16} />
+            </a>
+            <div style={{ textAlign: 'center', marginTop: 12 }}>
+              <button
+                type="button"
+                onClick={onForgetResume}
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--muted-warm)', textDecoration: 'underline', textUnderlineOffset: 3 }}
+              >
+                {CHROME_COPY.resume_new}
+              </button>
+            </div>
+          </div>
+        )}
         <form onSubmit={onSubmit}>
           <Reveal delay={0.14} style={{ marginTop: 30 }}>
             <div style={{ background: 'var(--kertas-2)', border: '1px solid var(--divider)', borderRadius: 20, padding: '18px 18px 20px', boxShadow: 'var(--shadow-card)' }}>
@@ -472,8 +646,12 @@ function Home({ form, setForm, error, onSubmit, busy, compatOpen = false }) {
                   components/BirthFields.jsx with them. */}
               <BirthFields
                 value={form}
-                onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
+                onChange={(k, v) => {
+                  setForm((f) => ({ ...f, [k]: v }));
+                  if (k === 'time' && v) onHourPicked?.();
+                }}
                 idPrefix="mirror"
+                hourTarget={hourTarget}
               />
             </div>
           </Reveal>
@@ -887,21 +1065,39 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
               ))}
             </div>
           </Reveal>
-          {/* 胎元 — display only, no interpretation, and no invented label. Reyner
-              ruled `pilar.conception` carries NO label_meaning on purpose (2026-08-07);
-              it prints because Joey prints it and a cross-checking reader notices its
-              absence. 命宮 is deliberately absent: two candidate conventions score
-              4/5 and 3/5 against Joey's own printed values, and in a block whose only
-              job is to be checkable a wrong value is worse than a missing one. */}
-          {chart.conception_pillar && (
-            <Reveal delay={0.24} style={{ marginTop: 14 }}>
-              <div style={{ textAlign: 'center', border: '1px solid var(--divider)', borderRadius: 12, padding: '10px 4px', background: 'var(--kertas-2)', maxWidth: 180, margin: '0 auto' }}>
-                <div style={{ fontSize: 9.5, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>{chart.conception_pillar.label}</div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--tinta)', margin: '5px 0 2px' }}>{chart.conception_pillar.hanzi}</div>
-                <div style={{ fontSize: 10.5, color: 'var(--muted-warm)' }}>{chart.conception_pillar.element} · {chart.conception_pillar.animal}</div>
-              </div>
+          {/* ── NO HOUR GIVEN: SAY WHAT THE HOUR DID (Prompt BF §3b, Reyner 2026-10-06) ──
+              Without an hour the engine sends three pillars and `hour_known: false`
+              (lib/mirror/view.js), so Pilar Arah is simply missing from the row. H2
+              says why, and H3 takes her to the front door with this birth prefilled
+              and the hour field focused. The birth travels in this tab's sessionStorage
+              (lib/site/carryBirth.js), never in the address. Deterministic UI text,
+              never writer prose (rule 14). An hour given: nothing here. */}
+          {chart.hour_known === false && (
+            <Reveal delay={0.12}>
+              <p data-hour-missing style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '14px 0 0', lineHeight: 1.55 }}>
+                {CHROME_COPY.hour_missing}{' '}
+                <a
+                  href={ADD_HOUR_HREF}
+                  onClick={() => rememberBirth({
+                    date: profile.birth_date,
+                    time: null,
+                    gender: profile.gender,
+                  })}
+                  style={{ color: 'var(--tinta-soft)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3, whiteSpace: 'nowrap' }}
+                >
+                  {CHROME_COPY.hour_add}
+                </a>
+              </p>
             </Reveal>
           )}
+          {/* NO 胎元 HERE (Prompt BF amendment 2 §2). Reyner 2026-10-06: "Pilar
+              Konsepsi off the web reading; stays in the PDF chart page and glossary."
+              The card and its BF §3 caption confused the reader, and nothing in the
+              reading uses them: 胎元 is display only and never in the semantic JSON.
+              `chart.conception_pillar` is still served, because the view is shared and
+              lib/pdf/document.js prints it on the Complete Edition chart page. The
+              engine is untouched (CLAUDE.md rule 4). 命宮 stays absent as before: two
+              candidate conventions score 4/5 and 3/5 against Joey's own values. */}
         </Section>
       )}
 
@@ -1131,6 +1327,19 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
           </Reveal>
         </div>
       )}
+
+      {/* ── WHAT NEXT (Prompt BF §2, Reyner 2026-10-06) ──────────
+          The last thing on the free reading, after the offer and the card. R4 is a
+          plain link to `/`: the memory stays, so the front door shows this reading's
+          resume card above an empty form ready for another date.
+          ONE NEXT ACTION (amendment 1 §2, Reyner 2026-10-06): the compat link that sat
+          here while compat was on sale is removed, whatever COMPAT_SALES says. The
+          compat card above (CompatOffer) is unchanged. */}
+      <div data-next-block style={{ marginTop: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+        <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, color: 'var(--tinta-soft)', textDecoration: 'none' }}>
+          {CHROME_COPY.next_other_date} <Icon.arrow size={13} />
+        </a>
+      </div>
     </div>
   );
 }

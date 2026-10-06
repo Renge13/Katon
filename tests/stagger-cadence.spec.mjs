@@ -55,7 +55,8 @@
 // ── THE PROPOSITIONS ───────────────────────────────────────
 //   1. The persona block is 0/120/240/360ms.
 //   2. The Bagan block is 0/120/240ms, matching it. Two stagger rhythms inside
-//      one scroll is the defect this alignment prevents.
+//      one scroll is the defect this alignment prevents. (0/120 since BF amendment
+//      2, 2026-10-06: its 240ms step was the Pilar Konsepsi card, now off the web.)
 //   3. The reading root sets --k-rise-dur to .45s.
 //   4. `.k-rise` reads that property with a .8s FALLBACK, and carries no literal
 //      duration of its own. This is what makes proposition 5 true by construction
@@ -80,6 +81,7 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
 import Funnel from '../components/Funnel.jsx';
+import { CHROME_COPY } from '../lib/site/copy.js';
 
 const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '04:00' });
 const CHART_VIEW = mirrorChartView(chart, buildSemanticJson(chart));
@@ -102,6 +104,10 @@ function stubFetch() {
 }
 
 function mount() {
+  // Each mount starts at the front door. A create earlier in this file pushed
+  // /r/<token> into jsdom's shared history, and since Prompt BF a funnel mounted
+  // at /r/<token> opens that reading (the back-button restore), not the form.
+  window.history.replaceState(null, '', '/');
   const host = document.createElement('div');
   document.body.appendChild(host);
   const root = createRoot(host);
@@ -136,7 +142,7 @@ async function readingScreen() {
 
 // ── 1 and 2: the two blocks, on one cadence ────────────────
 
-test('PROPOSITION 1 and 2: persona is 0/120/240ms and Bagan matches at 0/120/240', async () => {
+test('PROPOSITION 1 and 2: persona is 0/120/240ms and Bagan runs on the same cadence, 0/120', async () => {
   const { ui, restore } = await readingScreen();
   try {
     const delays = delaysIn(ui.host);
@@ -152,11 +158,19 @@ test('PROPOSITION 1 and 2: persona is 0/120/240ms and Bagan matches at 0/120/240
     // Bagan: located by its own copy rather than by index, so an inserted block
     // above it does not silently repoint this assertion at something else.
     const nodes = [...ui.host.querySelectorAll('.k-rise')];
-    const lead = nodes.findIndex((n) => /Empat lapisan energi/.test(n.textContent || ''));
+    // Read from the bank, not retyped: Prompt BF (2026-10-06) replaced the line and a
+    // literal here went stale with it.
+    const lead = nodes.findIndex((n) => (n.textContent || '').includes(CHROME_COPY.bagan_intro));
     assert.ok(lead > 0, 'the Bagan Kelahiran block was not found by its copy');
+    // TWO STEPS SINCE BF AMENDMENT 2 (Reyner 2026-10-06): the 240ms step was the Pilar
+    // Konsepsi card, now off the web reading. Read from the Bagan section itself rather
+    // than as lead+N, so the next section's eyebrow is never counted as a Bagan step.
+    const section = nodes[lead].parentElement;
+    assert.ok((section.textContent || '').includes('Bagan Kelahiran'), 'the Bagan section, by its eyebrow');
+    const steps = [...section.querySelectorAll('.k-rise')];
     assert.deepEqual(
-      [nodes[lead], nodes[lead + 1], nodes[lead + 2]].map((n) => n.style.animationDelay),
-      ['0s', '0.12s', '0.24s'],
+      steps.slice(steps.indexOf(nodes[lead])).map((n) => n.style.animationDelay),
+      ['0s', '0.12s'],
       'the Bagan block must share the persona cadence, not run its own',
     );
   } finally { ui.unmount(); restore(); }

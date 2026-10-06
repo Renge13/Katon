@@ -1,0 +1,12 @@
+§3a diagnosis, run BEFORE amendment 1 on branch bf-return-to-reading at b5f042b (the
+#200 head that shot h3-arrival-hour-focused-375.png), against local dev :3002:
+  node docs/qa/2026-10-06-bf-amendment-1/focus-diag.mjs http://localhost:3002
+
+focus emulation OFF: {"active":"mirror-time","hasFocus":false,"matchesFocus":false,"border":"rgb(231, 221, 206)","shadow":"none","marked":null}
+focus emulation ON : {"active":"mirror-time","hasFocus":true,"matchesFocus":true,"border":"rgb(174, 132, 63)","shadow":"rgba(174, 132, 63, 0.12) 0px 0px 0px 3px","marked":null}
+
+Reading: focus() DID land (activeElement is the hour select). The headless window has
+no focus, Chrome does not match :focus in an unfocused document, so the existing gold
+ring never painted. With page focus emulated, the same rule paints. After amendment 1
+(walk.txt, "H3 arrival"): windowFocused false, matchesFocus false, marked true, and the
+border and ring are the gold ones, from the data-focus-target selector alone.

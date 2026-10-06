@@ -1,0 +1,22 @@
+
+A. same date, same hour, same gender
+  first  {"token":"sXV8jHkEiZiCSIlV-LtMv","providerCalls":1,"cached":false,"source":"gemini"}
+  second {"token":"W9Yy1m7NnMADiWHogCCvv","providerCalls":0,"cached":true,"source":"gemini"}
+
+B. same date, no hour both times
+  first  {"token":"3sd9z7QOlz1rHQ3M8GiNM","providerCalls":1,"cached":false,"source":"gemini"}
+  second {"token":"q1ae8vQ0hngKkzNVvYbJ7","providerCalls":0,"cached":true,"source":"gemini"}
+
+C. same date and hour, different gender
+  first  {"token":"mOAGGwO8p9XVGwxinPdm4","providerCalls":1,"cached":false,"source":"gemini"}
+  second {"token":"6M-7CTgYyPVLooiJ7CsW3","providerCalls":0,"cached":true,"source":"gemini"}
+
+D. same date, hour added the second time (H3 path)
+  first  {"token":"P10xbWKEV1UIft1O51vMH","providerCalls":1,"cached":false,"source":"gemini"}
+  second {"token":"1VrZ_eLVeD-IgTOI3JGDW","providerCalls":1,"cached":false,"source":"gemini"}
+
+E. same date, the first render FLOORED (provider down)
+  first  {"token":"NHHZhTEM2lCW8L9XLr1J6","providerCalls":2,"cached":false,"source":"module_assembly"}
+  second {"token":"gp_xfOAoDwKzhIPH7s588","providerCalls":1,"cached":false,"source":"gemini"}
+
+control: scenario A first serve must show providerCalls >= 1 and cached false, or this check proves nothing.
