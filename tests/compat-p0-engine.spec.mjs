@@ -81,7 +81,8 @@ const PAIRS = [
 // served block is the ruled text exactly - `sentence()` in lib/render/fallback.js
 // adds one only when none is there.
 const RULED_P0 = (() => {
-  const md = readFileSync(new URL('../docs/content/compat-glossary-rulings-2.md', import.meta.url), 'utf8')
+  // Re-ruled 2026-10-04 (BC amendment 2b): the opening's current ruling is in the newer file.
+  const md = readFileSync(new URL('../docs/content/glossary-voice-rulings-2026-10-04.md', import.meta.url), 'utf8')
     .replace(/\r\n?/g, '\n');
   const section = md.slice(md.indexOf('## kompatibilitas.p0_opening'));
   const m = /^- label_meaning: "(.*)"$/mu.exec(section);

@@ -1,0 +1,802 @@
+{
+  "meta": {
+    "stage6": "1.73.0",
+    "prompt_pair": "v2-4be5c646319c62ff",
+    "prompt_mirror": "v2-fea0decb8c52e0c1",
+    "temperature": 0.7
+  },
+  "records": [
+    {
+      "pair": "rina",
+      "render": 1,
+      "status": "Menikah",
+      "nicknames": {
+        "a": "Rina",
+        "b": "Adit"
+      },
+      "temperature": 0.7,
+      "titles": {
+        "a": "The Morning Dew",
+        "b": "The Morning Dew"
+      },
+      "source": "gemini",
+      "floor": null,
+      "words": 492,
+      "regenerations": 0,
+      "chapters": 5,
+      "paragraphs_per_chapter": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "first_chapter_titles": {
+        "a": true,
+        "b": true
+      },
+      "findings": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null,
+          "draft": "### Cermin yang Sama\n\nRina dan Adit, keduanya adalah The Morning Dew dengan inti diri yang sama. Kalian memiliki cara pandang yang serupa, sebuah kejernihan yang membuat kalian bisa saling mengerti tanpa perlu banyak penjelasan. Namun, karena kalian dibangun dari elemen yang sama, tidak ada yang berdiri di luar pola untuk menjadi penyeimbang saat keadaan sedang sulit.\n\nDalam keseharian, ini berarti kalian sering kali merespons masalah dengan strategi yang sama. Saat tekanan datang, kalian berdua cenderung bertahan dengan cara yang identik, membuat suasana rumah bisa menjadi kaku karena tidak ada yang mencairkan kekakuan tersebut secara spontan.\n\n### Dua Cara Memandang Dunia\n\nKalian berada dalam Pola Kontras. Rina membawa Aspek Pendorong yang selalu ingin bergerak cepat dan menantang keadaan, sementara Adit membawa Aspek Pengatur yang lebih mengutamakan keteraturan dan tanggung jawab. Perbedaan ini bisa menjadi sumber gesekan, namun juga merupakan kekayaan perspektif jika kalian bersedia saling mendengarkan.\n\nIni sering muncul dalam pengambilan keputusan. Rina mungkin sudah ingin mengambil langkah baru, sementara Adit masih memikirkan konsekuensi dan struktur yang harus dijaga. Jika tidak dikomunikasikan, interpretasi kalian terhadap satu peristiwa bisa menjadi sangat berseberangan.\n\n### Saling Menjadi Penyeimbang\n\nHubungan kalian mendapatkan kekuatan dari elemen yang dibawa masing-masing. Adit membawa elemen Tanah yang memberikan pijakan bagi Rina, meredakan kegelisahan yang sering muncul dari sifat air yang terus mengalir. Sebaliknya, Rina membawa elemen Api yang menghangatkan bagan Adit, memberikan dorongan semangat saat Adit terjebak dalam rutinitas yang terlalu kaku.\n\nKehadiran satu sama lain menjadi penawar bagi area yang paling rentan dalam diri masing-masing. Ketika salah satu merasa tidak stabil, keberadaan pasangannya secara alami memberikan rasa tenang dan keseimbangan yang tidak bisa didapatkan dari tempat lain.\n\n### Saat Tekanan dari Luar Terbawa ke Rumah\n\nTerdapat sebuah kerentanan unik di mana pilar kehidupan Adit menyentuh langsung ruang privat Rina. Apa yang sedang dihadapi Adit di luar sana, dalam urusan pekerjaan atau tanggung jawab, sering kali masuk ke dalam rumah dan mewarnai suasana pribadi Rina.\n\nDalam praktiknya, Rina sering kali bisa merasakan tekanan atau kegelisahan yang sedang dipikul Adit bahkan sebelum Adit sempat menceritakannya. Ini menciptakan suasana di mana kalian berdua saling terhubung secara emosional, namun juga berarti bahwa stres di satu sisi bisa langsung memengaruhi ketenangan di sisi lainnya.\n\n### Menjaga Kedekatan dengan Pilihan\n\nKursi pasangan kalian berjalan secara independen, yang berarti tidak ada tarikan otomatis yang membuat kalian selalu menempel. Hubungan ini tidak berjalan dengan sendirinya; ia membutuhkan komitmen sadar dan niat dari kalian berdua untuk terus terhubung.\n\nDalam kehidupan pernikahan, ini berarti kalian bisa saja sibuk dengan dunia masing-masing di rumah yang sama. Tanpa inisiatif untuk menjadwalkan waktu berdua atau berbagi kegiatan, jarak emosional dapat terasa cukup cepat. Kedekatan kalian adalah hasil dari keputusan untuk selalu memilih satu sama lain setiap harinya.\n\nRina dan Adit adalah dua individu yang kokoh dengan cara masing-masing. Hubungan ini memiliki bahan untuk menjadi sebuah kemitraan yang seimbang, di mana kalian saling melengkapi melalui elemen yang dibawa dan saling memahami melalui inti diri yang serupa. Jika kalian terus memilih untuk menjembatani perbedaan sudut pandang dan menjaga ritme kebersamaan dengan sengaja, hubungan ini bisa menjadi rumah yang stabil bagi dua jiwa yang mandiri untuk saling bersandar dan tumbuh bersama."
+        }
+      ],
+      "output_tokens": [
+        1027
+      ],
+      "raw_responses": [
+        "{\n  \"blocks\": [\n    {\n      \"fact_ids\": [\n        \"p1_stem_relation\",\n        \"p5_pull_fit\"\n      ],\n      \"heading\": \"Cermin yang Sama\",\n      \"paragraphs\": [\n        \"Rina dan Adit, keduanya adalah The Morning Dew dengan inti diri yang sama. Kalian memiliki cara pandang yang serupa, sebuah kejernihan yang membuat kalian bisa saling mengerti tanpa perlu banyak penjelasan. Namun, karena kalian dibangun dari elemen yang sama, tidak ada yang berdiri di luar pola untuk menjadi penyeimbang saat keadaan sedang sulit.\",\n        \"Dalam keseharian, ini berarti kalian sering kali merespons masalah dengan strategi yang sama. Saat tekanan datang, kalian berdua cenderung bertahan dengan cara yang identik, membuat suasana rumah bisa menjadi kaku karena tidak ada yang mencairkan kekakuan tersebut secara spontan.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p4_temperament\"\n      ],\n      \"heading\": \"Dua Cara Memandang Dunia\",\n      \"paragraphs\": [\n        \"Kalian berada dalam Pola Kontras. Rina membawa Aspek Pendorong yang selalu ingin bergerak cepat dan menantang keadaan, sementara Adit membawa Aspek Pengatur yang lebih mengutamakan keteraturan dan tanggung jawab. Perbedaan ini bisa menjadi sumber gesekan, namun juga merupakan kekayaan perspektif jika kalian bersedia saling mendengarkan.\",\n        \"Ini sering muncul dalam pengambilan keputusan. Rina mungkin sudah ingin mengambil langkah baru, sementara Adit masih memikirkan konsekuensi dan struktur yang harus dijaga. Jika tidak dikomunikasikan, interpretasi kalian terhadap satu peristiwa bisa menjadi sangat berseberangan.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p3_supply\"\n      ],\n      \"heading\": \"Saling Menjadi Penyeimbang\",\n      \"paragraphs\": [\n        \"Hubungan kalian mendapatkan kekuatan dari elemen yang dibawa masing-masing. Adit membawa elemen Tanah yang memberikan pijakan bagi Rina, meredakan kegelisahan yang sering muncul dari sifat air yang terus mengalir. Sebaliknya, Rina membawa elemen Api yang menghangatkan bagan Adit, memberikan dorongan semangat saat Adit terjebak dalam rutinitas yang terlalu kaku.\",\n        \"Kehadiran satu sama lain menjadi penawar bagi area yang paling rentan dalam diri masing-masing. Ketika salah satu merasa tidak stabil, keberadaan pasangannya secara alami memberikan rasa tenang dan keseimbangan yang tidak bisa didapatkan dari tempat lain.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p2_palace_frame\"\n      ],\n      \"heading\": \"Saat Tekanan dari Luar Terbawa ke Rumah\",\n      \"paragraphs\": [\n        \"Terdapat sebuah kerentanan unik di mana pilar kehidupan Adit menyentuh langsung ruang privat Rina. Apa yang sedang dihadapi Adit di luar sana, dalam urusan pekerjaan atau tanggung jawab, sering kali masuk ke dalam rumah dan mewarnai suasana pribadi Rina.\",\n        \"Dalam praktiknya, Rina sering kali bisa merasakan tekanan atau kegelisahan yang sedang dipikul Adit bahkan sebelum Adit sempat menceritakannya. Ini menciptakan suasana di mana kalian berdua saling terhubung secara emosional, namun juga berarti bahwa stres di satu sisi bisa langsung memengaruhi ketenangan di sisi lainnya.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p2_day_pair\",\n        \"p5_pull_fit\"\n      ],\n      \"heading\": \"Menjaga Kedekatan dengan Pilihan\",\n      \"paragraphs\": [\n        \"Kursi pasangan kalian berjalan secara independen, yang berarti tidak ada tarikan otomatis yang membuat kalian selalu menempel. Hubungan ini tidak berjalan dengan sendirinya; ia membutuhkan komitmen sadar dan niat dari kalian berdua untuk terus terhubung.\",\n        \"Dalam kehidupan pernikahan, ini berarti kalian bisa saja sibuk dengan dunia masing-masing di rumah yang sama. Tanpa inisiatif untuk menjadwalkan waktu berdua atau berbagi kegiatan, jarak emosional dapat terasa cukup cepat. Kedekatan kalian adalah hasil dari keputusan untuk selalu memilih satu sama lain setiap harinya.\"\n      ]\n    }\n  ],\n  \"penutup\": \"Rina dan Adit adalah dua individu yang kokoh dengan cara masing-masing. Hubungan ini memiliki bahan untuk menjadi sebuah kemitraan yang seimbang, di mana kalian saling melengkapi melalui elemen yang dibawa dan saling memahami melalui inti diri yang serupa. Jika kalian terus memilih untuk menjembatani perbedaan sudut pandang dan menjaga ritme kebersamaan dengan sengaja, hubungan ini bisa menjadi rumah yang stabil bagi dua jiwa yang mandiri untuk saling bersandar dan tumbuh bersama.\"\n}"
+      ],
+      "reads": {
+        "verdict": [],
+        "fixed": [],
+        "money_health": [],
+        "clinical": [],
+        "penutup_advice": [],
+        "indonesian_title": [],
+        "bracketed_title": []
+      },
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Cermin yang Sama",
+            "fact_ids": [
+              "p1_stem_relation",
+              "p5_pull_fit"
+            ],
+            "text": "Rina dan Adit, keduanya adalah The Morning Dew dengan inti diri yang sama. Kalian memiliki cara pandang yang serupa, sebuah kejernihan yang membuat kalian bisa saling mengerti tanpa perlu banyak penjelasan. Namun, karena kalian dibangun dari elemen yang sama, tidak ada yang berdiri di luar pola untuk menjadi penyeimbang saat keadaan sedang sulit.\n\nDalam keseharian, ini berarti kalian sering kali merespons masalah dengan strategi yang sama. Saat tekanan datang, kalian berdua cenderung bertahan dengan cara yang identik, membuat suasana rumah bisa menjadi kaku karena tidak ada yang mencairkan kekakuan tersebut secara spontan."
+          },
+          {
+            "heading": "Dua Cara Memandang Dunia",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Kalian berada dalam Pola Kontras. Rina membawa Aspek Pendorong yang selalu ingin bergerak cepat dan menantang keadaan, sementara Adit membawa Aspek Pengatur yang lebih mengutamakan keteraturan dan tanggung jawab. Perbedaan ini bisa menjadi sumber gesekan, namun juga merupakan kekayaan perspektif jika kalian bersedia saling mendengarkan.\n\nIni sering muncul dalam pengambilan keputusan. Rina mungkin sudah ingin mengambil langkah baru, sementara Adit masih memikirkan konsekuensi dan struktur yang harus dijaga. Jika tidak dikomunikasikan, interpretasi kalian terhadap satu peristiwa bisa menjadi sangat berseberangan."
+          },
+          {
+            "heading": "Saling Menjadi Penyeimbang",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Hubungan kalian mendapatkan kekuatan dari elemen yang dibawa masing-masing. Adit membawa elemen Tanah yang memberikan pijakan bagi Rina, meredakan kegelisahan yang sering muncul dari sifat air yang terus mengalir. Sebaliknya, Rina membawa elemen Api yang menghangatkan bagan Adit, memberikan dorongan semangat saat Adit terjebak dalam rutinitas yang terlalu kaku.\n\nKehadiran satu sama lain menjadi penawar bagi area yang paling rentan dalam diri masing-masing. Ketika salah satu merasa tidak stabil, keberadaan pasangannya secara alami memberikan rasa tenang dan keseimbangan yang tidak bisa didapatkan dari tempat lain."
+          },
+          {
+            "heading": "Saat Tekanan dari Luar Terbawa ke Rumah",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Terdapat sebuah kerentanan unik di mana pilar kehidupan Adit menyentuh langsung ruang privat Rina. Apa yang sedang dihadapi Adit di luar sana, dalam urusan pekerjaan atau tanggung jawab, sering kali masuk ke dalam rumah dan mewarnai suasana pribadi Rina.\n\nDalam praktiknya, Rina sering kali bisa merasakan tekanan atau kegelisahan yang sedang dipikul Adit bahkan sebelum Adit sempat menceritakannya. Ini menciptakan suasana di mana kalian berdua saling terhubung secara emosional, namun juga berarti bahwa stres di satu sisi bisa langsung memengaruhi ketenangan di sisi lainnya."
+          },
+          {
+            "heading": "Menjaga Kedekatan dengan Pilihan",
+            "fact_ids": [
+              "p2_day_pair",
+              "p5_pull_fit"
+            ],
+            "text": "Kursi pasangan kalian berjalan secara independen, yang berarti tidak ada tarikan otomatis yang membuat kalian selalu menempel. Hubungan ini tidak berjalan dengan sendirinya; ia membutuhkan komitmen sadar dan niat dari kalian berdua untuk terus terhubung.\n\nDalam kehidupan pernikahan, ini berarti kalian bisa saja sibuk dengan dunia masing-masing di rumah yang sama. Tanpa inisiatif untuk menjadwalkan waktu berdua atau berbagi kegiatan, jarak emosional dapat terasa cukup cepat. Kedekatan kalian adalah hasil dari keputusan untuk selalu memilih satu sama lain setiap harinya."
+          }
+        ],
+        "penutup": "Rina dan Adit adalah dua individu yang kokoh dengan cara masing-masing. Hubungan ini memiliki bahan untuk menjadi sebuah kemitraan yang seimbang, di mana kalian saling melengkapi melalui elemen yang dibawa dan saling memahami melalui inti diri yang serupa. Jika kalian terus memilih untuk menjembatani perbedaan sudut pandang dan menjaga ritme kebersamaan dengan sengaja, hubungan ini bisa menjadi rumah yang stabil bagi dua jiwa yang mandiri untuk saling bersandar dan tumbuh bersama."
+      }
+    },
+    {
+      "pair": "rina",
+      "render": 2,
+      "status": "Menikah",
+      "nicknames": {
+        "a": "Rina",
+        "b": "Adit"
+      },
+      "temperature": 0.7,
+      "titles": {
+        "a": "The Morning Dew",
+        "b": "The Morning Dew"
+      },
+      "source": "gemini",
+      "floor": null,
+      "words": 770,
+      "regenerations": 0,
+      "chapters": 6,
+      "paragraphs_per_chapter": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "first_chapter_titles": {
+        "a": true,
+        "b": true
+      },
+      "findings": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null,
+          "draft": "### Pilihan yang Dibuat Bersama\n\nRina dan Adit adalah dua The Morning Dew yang sama-sama mandiri, namun hubungan kalian tidak tercipta secara otomatis. Dalam status menikah, kalian belajar bahwa kebersamaan bukanlah sesuatu yang datang dengan sendirinya, melainkan hasil dari keputusan sadar yang diperbarui setiap hari. Tanpa tarikan alami yang kuat, kalian membangun rumah ini dengan niat dan komitmen, bukan sekadar mengikuti arus perasaan.\n\nDi keseharian, ini berarti waktu berdua sering kali harus dijadwalkan secara sengaja di antara kesibukan masing-masing. Jika tidak ada inisiatif aktif untuk saling menyapa atau berbagi cerita, jarak bisa terasa melebar dengan cepat. Namun, justru dari sinilah kekuatan kalian muncul: kalian tidak bergantung pada impuls sesaat, melainkan pada keteguhan untuk terus memilih satu sama lain.\n\n### Cermin yang Saling Memahami\n\nSebagai sesama elemen Air, Rina dan Adit memiliki inti diri yang sama. Kalian tidak perlu banyak penjelasan untuk mengerti kenapa yang satu butuh waktu menyendiri atau bagaimana cara yang lain memandang sebuah masalah. Pemahaman ini datang instan, membuat kalian merasa sangat terlihat oleh pasangan. Namun, inti yang sama ini juga berarti kalian memiliki titik buta yang sama; saat ada masalah, kalian cenderung menggunakan strategi bertahan yang serupa sehingga tidak ada pihak yang menjadi penyeimbang yang mendinginkan suasana.\n\nSaat kalian sedang berdebat, misalnya, Rina dan Adit mungkin sama-sama akan menarik diri atau justru sama-sama keras kepala mempertahankan argumen. Kalian tidak memiliki perbedaan sudut pandang dasar yang bisa meredam ego masing-masing, sehingga terkadang kalian terjebak dalam pola yang berulang tanpa ada yang berinisiatif untuk mengalah.\n\n### Saling Melengkapi dalam Keseimbangan\n\nKeajaiban hubungan kalian terletak pada elemen yang dibawa masing-masing untuk menyeimbangkan bagan pasangannya. Adit membawa elemen Tanah yang memberikan rasa stabil bagi Rina, sementara Rina membawa elemen Api yang menghangatkan kegelisahan di dalam diri Adit. Elemen-elemen ini adalah penawar alami bagi bagian dari diri kalian yang sering merasa rapuh atau goyah.\n\nDalam kehidupan rumah tangga, kehadiran kalian menjadi jangkar bagi satu sama lain. Ketika Rina merasa terlalu banyak bergerak dan kehilangan arah, ketenangan Adit memberikan pijakan yang nyata. Sebaliknya, saat Adit merasa terlalu tertekan oleh tuntutan atau ekspektasi, semangat yang dibawa Rina mampu mencairkan ketegangan tersebut. Ketiadaan salah satu dari kalian akan segera terasa sebagai ketidakstabilan bagi yang lain.\n\n### Dua Perspektif dalam Satu Peristiwa\n\nPerbedaan mendasar antara Rina yang membawa Aspek Pendorong dan Adit yang membawa Aspek Pengatur menciptakan warna tersendiri dalam cara kalian melihat dunia. Rina cenderung bergerak cepat, berani mengambil risiko, dan mencari tantangan baru, sementara Adit lebih menghargai struktur, aturan, dan tanggung jawab. Pola kontras ini bisa menjadi sumber benturan jika kalian tidak saling berkomunikasi, tetapi bisa menjadi kekayaan perspektif jika kalian bersedia mendengarkan.\n\nDalam merencanakan masa depan, Rina mungkin ingin segera melompat ke peluang yang menarik, sementara Adit akan menanyakan tentang detail dan konsekuensinya. Seringkali, Rina melihat kehati-hatian Adit sebagai penghambat, dan Adit melihat inisiatif Rina sebagai sesuatu yang terburu-buru. Padahal, jika disatukan, keduanya adalah kombinasi yang memungkinkan kalian untuk bergerak maju dengan terukur.\n\n### Saat Tekanan Luar Masuk ke Rumah\n\nHubungan kalian memiliki sensitivitas tinggi karena pilar kehidupan Adit terhubung langsung dengan kursi pasangan Rina. Apa pun yang sedang dihadapi Adit di area kerja atau tanggung jawabnya tidak berhenti di depan pintu rumah; ia ikut masuk ke dalam ruang privat Rina. Kalian berdua sering kali merasakan gejolak satu sama lain sebelum ada kata-kata yang terucap.\n\nIni sering kali menjadi tantangan saat Adit sedang berada di bawah tekanan besar. Rina yang peka akan langsung merasakan perubahan suasana hati Adit, yang kemudian bisa membuat Rina ikut merasa tertekan. Begitu pula sebaliknya, ketika Rina membawa beban dari pekerjaannya, Adit akan langsung menyerap ketegangan tersebut. Menyadari bahwa suasana hati pasangan adalah refleksi dari apa yang mereka bawa dari luar, bukan cerminan dari hubungan kalian, akan sangat membantu menjaga kedamaian di rumah.\n\n### Ruang untuk Berdiri Sendiri\n\nKursi pasangan kalian berjalan sendiri-sendiri, yang berarti kalian berdua sangat menghargai ruang untuk tetap menjadi diri sendiri. Kalian bisa berada di ruangan yang sama, masing-masing sibuk dengan urusan pekerjaan atau hobi sendiri, tanpa merasa perlu untuk terus-menerus berinteraksi. Bagi kalian, kedekatan tidak berarti harus menempel setiap saat.\n\nNamun, kemandirian ini juga memiliki sisi yang perlu dijaga. Karena kalian tidak memiliki daya tarik otomatis yang memaksa kalian untuk selalu terikat, ada risiko kalian kehilangan ritme kebersamaan jika tidak ada kesadaran untuk meluangkan waktu. Menjadikan waktu berdua sebagai prioritas di tengah kesibukan masing-masing akan memastikan bahwa meski kalian kuat berdiri sendiri, kalian tetap tumbuh bersama sebagai satu kesatuan.\n\nRina dan Adit adalah dua individu yang kuat dan mandiri, yang memilih untuk membangun kehidupan bersama di atas komitmen sadar. Hubungan kalian adalah ruang di mana dua orang yang sama-sama tangguh bisa saling bersandar, saling menyeimbangkan, dan memperluas perspektif satu sama lain. Dengan saling memahami bahwa perbedaan pola pikir adalah pelengkap dan bukan penghalang, kalian punya bahan untuk menjadi pasangan yang tidak hanya mampu bertahan di tengah badai, tetapi juga terus berkembang dengan ritme yang kalian buat sendiri."
+        }
+      ],
+      "output_tokens": [
+        1308
+      ],
+      "raw_responses": [
+        "{\"blocks\":[{\"fact_ids\":[\"p5_pull_fit\"],\"heading\":\"Pilihan yang Dibuat Bersama\",\"paragraphs\":[\"Rina dan Adit adalah dua The Morning Dew yang sama-sama mandiri, namun hubungan kalian tidak tercipta secara otomatis. Dalam status menikah, kalian belajar bahwa kebersamaan bukanlah sesuatu yang datang dengan sendirinya, melainkan hasil dari keputusan sadar yang diperbarui setiap hari. Tanpa tarikan alami yang kuat, kalian membangun rumah ini dengan niat dan komitmen, bukan sekadar mengikuti arus perasaan.\",\"Di keseharian, ini berarti waktu berdua sering kali harus dijadwalkan secara sengaja di antara kesibukan masing-masing. Jika tidak ada inisiatif aktif untuk saling menyapa atau berbagi cerita, jarak bisa terasa melebar dengan cepat. Namun, justru dari sinilah kekuatan kalian muncul: kalian tidak bergantung pada impuls sesaat, melainkan pada keteguhan untuk terus memilih satu sama lain.\"]},{\"fact_ids\":[\"p1_stem_relation\"],\"heading\":\"Cermin yang Saling Memahami\",\"paragraphs\":[\"Sebagai sesama elemen Air, Rina dan Adit memiliki inti diri yang sama. Kalian tidak perlu banyak penjelasan untuk mengerti kenapa yang satu butuh waktu menyendiri atau bagaimana cara yang lain memandang sebuah masalah. Pemahaman ini datang instan, membuat kalian merasa sangat terlihat oleh pasangan. Namun, inti yang sama ini juga berarti kalian memiliki titik buta yang sama; saat ada masalah, kalian cenderung menggunakan strategi bertahan yang serupa sehingga tidak ada pihak yang menjadi penyeimbang yang mendinginkan suasana.\",\"Saat kalian sedang berdebat, misalnya, Rina dan Adit mungkin sama-sama akan menarik diri atau justru sama-sama keras kepala mempertahankan argumen. Kalian tidak memiliki perbedaan sudut pandang dasar yang bisa meredam ego masing-masing, sehingga terkadang kalian terjebak dalam pola yang berulang tanpa ada yang berinisiatif untuk mengalah.\"]},{\"fact_ids\":[\"p3_supply\"],\"heading\":\"Saling Melengkapi dalam Keseimbangan\",\"paragraphs\":[\"Keajaiban hubungan kalian terletak pada elemen yang dibawa masing-masing untuk menyeimbangkan bagan pasangannya. Adit membawa elemen Tanah yang memberikan rasa stabil bagi Rina, sementara Rina membawa elemen Api yang menghangatkan kegelisahan di dalam diri Adit. Elemen-elemen ini adalah penawar alami bagi bagian dari diri kalian yang sering merasa rapuh atau goyah.\",\"Dalam kehidupan rumah tangga, kehadiran kalian menjadi jangkar bagi satu sama lain. Ketika Rina merasa terlalu banyak bergerak dan kehilangan arah, ketenangan Adit memberikan pijakan yang nyata. Sebaliknya, saat Adit merasa terlalu tertekan oleh tuntutan atau ekspektasi, semangat yang dibawa Rina mampu mencairkan ketegangan tersebut. Ketiadaan salah satu dari kalian akan segera terasa sebagai ketidakstabilan bagi yang lain.\"]},{\"fact_ids\":[\"p4_temperament\"],\"heading\":\"Dua Perspektif dalam Satu Peristiwa\",\"paragraphs\":[\"Perbedaan mendasar antara Rina yang membawa Aspek Pendorong dan Adit yang membawa Aspek Pengatur menciptakan warna tersendiri dalam cara kalian melihat dunia. Rina cenderung bergerak cepat, berani mengambil risiko, dan mencari tantangan baru, sementara Adit lebih menghargai struktur, aturan, dan tanggung jawab. Pola kontras ini bisa menjadi sumber benturan jika kalian tidak saling berkomunikasi, tetapi bisa menjadi kekayaan perspektif jika kalian bersedia mendengarkan.\",\"Dalam merencanakan masa depan, Rina mungkin ingin segera melompat ke peluang yang menarik, sementara Adit akan menanyakan tentang detail dan konsekuensinya. Seringkali, Rina melihat kehati-hatian Adit sebagai penghambat, dan Adit melihat inisiatif Rina sebagai sesuatu yang terburu-buru. Padahal, jika disatukan, keduanya adalah kombinasi yang memungkinkan kalian untuk bergerak maju dengan terukur.\"]},{\"fact_ids\":[\"p2_palace_frame\"],\"heading\":\"Saat Tekanan Luar Masuk ke Rumah\",\"paragraphs\":[\"Hubungan kalian memiliki sensitivitas tinggi karena pilar kehidupan Adit terhubung langsung dengan kursi pasangan Rina. Apa pun yang sedang dihadapi Adit di area kerja atau tanggung jawabnya tidak berhenti di depan pintu rumah; ia ikut masuk ke dalam ruang privat Rina. Kalian berdua sering kali merasakan gejolak satu sama lain sebelum ada kata-kata yang terucap.\",\"Ini sering kali menjadi tantangan saat Adit sedang berada di bawah tekanan besar. Rina yang peka akan langsung merasakan perubahan suasana hati Adit, yang kemudian bisa membuat Rina ikut merasa tertekan. Begitu pula sebaliknya, ketika Rina membawa beban dari pekerjaannya, Adit akan langsung menyerap ketegangan tersebut. Menyadari bahwa suasana hati pasangan adalah refleksi dari apa yang mereka bawa dari luar, bukan cerminan dari hubungan kalian, akan sangat membantu menjaga kedamaian di rumah.\"]},{\"fact_ids\":[\"p2_day_pair\"],\"heading\":\"Ruang untuk Berdiri Sendiri\",\"paragraphs\":[\"Kursi pasangan kalian berjalan sendiri-sendiri, yang berarti kalian berdua sangat menghargai ruang untuk tetap menjadi diri sendiri. Kalian bisa berada di ruangan yang sama, masing-masing sibuk dengan urusan pekerjaan atau hobi sendiri, tanpa merasa perlu untuk terus-menerus berinteraksi. Bagi kalian, kedekatan tidak berarti harus menempel setiap saat.\",\"Namun, kemandirian ini juga memiliki sisi yang perlu dijaga. Karena kalian tidak memiliki daya tarik otomatis yang memaksa kalian untuk selalu terikat, ada risiko kalian kehilangan ritme kebersamaan jika tidak ada kesadaran untuk meluangkan waktu. Menjadikan waktu berdua sebagai prioritas di tengah kesibukan masing-masing akan memastikan bahwa meski kalian kuat berdiri sendiri, kalian tetap tumbuh bersama sebagai satu kesatuan.\"]}],\"penutup\":\"Rina dan Adit adalah dua individu yang kuat dan mandiri, yang memilih untuk membangun kehidupan bersama di atas komitmen sadar. Hubungan kalian adalah ruang di mana dua orang yang sama-sama tangguh bisa saling bersandar, saling menyeimbangkan, dan memperluas perspektif satu sama lain. Dengan saling memahami bahwa perbedaan pola pikir adalah pelengkap dan bukan penghalang, kalian punya bahan untuk menjadi pasangan yang tidak hanya mampu bertahan di tengah badai, tetapi juga terus berkembang dengan ritme yang kalian buat sendiri.\"}"
+      ],
+      "reads": {
+        "verdict": [],
+        "fixed": [],
+        "money_health": [],
+        "clinical": [],
+        "penutup_advice": [],
+        "indonesian_title": [],
+        "bracketed_title": []
+      },
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Pilihan yang Dibuat Bersama",
+            "fact_ids": [
+              "p5_pull_fit"
+            ],
+            "text": "Rina dan Adit adalah dua The Morning Dew yang sama-sama mandiri, namun hubungan kalian tidak tercipta secara otomatis. Dalam status menikah, kalian belajar bahwa kebersamaan bukanlah sesuatu yang datang dengan sendirinya, melainkan hasil dari keputusan sadar yang diperbarui setiap hari. Tanpa tarikan alami yang kuat, kalian membangun rumah ini dengan niat dan komitmen, bukan sekadar mengikuti arus perasaan.\n\nDi keseharian, ini berarti waktu berdua sering kali harus dijadwalkan secara sengaja di antara kesibukan masing-masing. Jika tidak ada inisiatif aktif untuk saling menyapa atau berbagi cerita, jarak bisa terasa melebar dengan cepat. Namun, justru dari sinilah kekuatan kalian muncul: kalian tidak bergantung pada impuls sesaat, melainkan pada keteguhan untuk terus memilih satu sama lain."
+          },
+          {
+            "heading": "Cermin yang Saling Memahami",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Sebagai sesama elemen Air, Rina dan Adit memiliki inti diri yang sama. Kalian tidak perlu banyak penjelasan untuk mengerti kenapa yang satu butuh waktu menyendiri atau bagaimana cara yang lain memandang sebuah masalah. Pemahaman ini datang instan, membuat kalian merasa sangat terlihat oleh pasangan. Namun, inti yang sama ini juga berarti kalian memiliki titik buta yang sama; saat ada masalah, kalian cenderung menggunakan strategi bertahan yang serupa sehingga tidak ada pihak yang menjadi penyeimbang yang mendinginkan suasana.\n\nSaat kalian sedang berdebat, misalnya, Rina dan Adit mungkin sama-sama akan menarik diri atau justru sama-sama keras kepala mempertahankan argumen. Kalian tidak memiliki perbedaan sudut pandang dasar yang bisa meredam ego masing-masing, sehingga terkadang kalian terjebak dalam pola yang berulang tanpa ada yang berinisiatif untuk mengalah."
+          },
+          {
+            "heading": "Saling Melengkapi dalam Keseimbangan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Keajaiban hubungan kalian terletak pada elemen yang dibawa masing-masing untuk menyeimbangkan bagan pasangannya. Adit membawa elemen Tanah yang memberikan rasa stabil bagi Rina, sementara Rina membawa elemen Api yang menghangatkan kegelisahan di dalam diri Adit. Elemen-elemen ini adalah penawar alami bagi bagian dari diri kalian yang sering merasa rapuh atau goyah.\n\nDalam kehidupan rumah tangga, kehadiran kalian menjadi jangkar bagi satu sama lain. Ketika Rina merasa terlalu banyak bergerak dan kehilangan arah, ketenangan Adit memberikan pijakan yang nyata. Sebaliknya, saat Adit merasa terlalu tertekan oleh tuntutan atau ekspektasi, semangat yang dibawa Rina mampu mencairkan ketegangan tersebut. Ketiadaan salah satu dari kalian akan segera terasa sebagai ketidakstabilan bagi yang lain."
+          },
+          {
+            "heading": "Dua Perspektif dalam Satu Peristiwa",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Perbedaan mendasar antara Rina yang membawa Aspek Pendorong dan Adit yang membawa Aspek Pengatur menciptakan warna tersendiri dalam cara kalian melihat dunia. Rina cenderung bergerak cepat, berani mengambil risiko, dan mencari tantangan baru, sementara Adit lebih menghargai struktur, aturan, dan tanggung jawab. Pola kontras ini bisa menjadi sumber benturan jika kalian tidak saling berkomunikasi, tetapi bisa menjadi kekayaan perspektif jika kalian bersedia mendengarkan.\n\nDalam merencanakan masa depan, Rina mungkin ingin segera melompat ke peluang yang menarik, sementara Adit akan menanyakan tentang detail dan konsekuensinya. Seringkali, Rina melihat kehati-hatian Adit sebagai penghambat, dan Adit melihat inisiatif Rina sebagai sesuatu yang terburu-buru. Padahal, jika disatukan, keduanya adalah kombinasi yang memungkinkan kalian untuk bergerak maju dengan terukur."
+          },
+          {
+            "heading": "Saat Tekanan Luar Masuk ke Rumah",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Hubungan kalian memiliki sensitivitas tinggi karena pilar kehidupan Adit terhubung langsung dengan kursi pasangan Rina. Apa pun yang sedang dihadapi Adit di area kerja atau tanggung jawabnya tidak berhenti di depan pintu rumah; ia ikut masuk ke dalam ruang privat Rina. Kalian berdua sering kali merasakan gejolak satu sama lain sebelum ada kata-kata yang terucap.\n\nIni sering kali menjadi tantangan saat Adit sedang berada di bawah tekanan besar. Rina yang peka akan langsung merasakan perubahan suasana hati Adit, yang kemudian bisa membuat Rina ikut merasa tertekan. Begitu pula sebaliknya, ketika Rina membawa beban dari pekerjaannya, Adit akan langsung menyerap ketegangan tersebut. Menyadari bahwa suasana hati pasangan adalah refleksi dari apa yang mereka bawa dari luar, bukan cerminan dari hubungan kalian, akan sangat membantu menjaga kedamaian di rumah."
+          },
+          {
+            "heading": "Ruang untuk Berdiri Sendiri",
+            "fact_ids": [
+              "p2_day_pair"
+            ],
+            "text": "Kursi pasangan kalian berjalan sendiri-sendiri, yang berarti kalian berdua sangat menghargai ruang untuk tetap menjadi diri sendiri. Kalian bisa berada di ruangan yang sama, masing-masing sibuk dengan urusan pekerjaan atau hobi sendiri, tanpa merasa perlu untuk terus-menerus berinteraksi. Bagi kalian, kedekatan tidak berarti harus menempel setiap saat.\n\nNamun, kemandirian ini juga memiliki sisi yang perlu dijaga. Karena kalian tidak memiliki daya tarik otomatis yang memaksa kalian untuk selalu terikat, ada risiko kalian kehilangan ritme kebersamaan jika tidak ada kesadaran untuk meluangkan waktu. Menjadikan waktu berdua sebagai prioritas di tengah kesibukan masing-masing akan memastikan bahwa meski kalian kuat berdiri sendiri, kalian tetap tumbuh bersama sebagai satu kesatuan."
+          }
+        ],
+        "penutup": "Rina dan Adit adalah dua individu yang kuat dan mandiri, yang memilih untuk membangun kehidupan bersama di atas komitmen sadar. Hubungan kalian adalah ruang di mana dua orang yang sama-sama tangguh bisa saling bersandar, saling menyeimbangkan, dan memperluas perspektif satu sama lain. Dengan saling memahami bahwa perbedaan pola pikir adalah pelengkap dan bukan penghalang, kalian punya bahan untuk menjadi pasangan yang tidak hanya mampu bertahan di tengah badai, tetapi juga terus berkembang dengan ritme yang kalian buat sendiri."
+      }
+    },
+    {
+      "pair": "PZ0t",
+      "render": 1,
+      "status": "Pacaran",
+      "nicknames": {
+        "a": "Sari",
+        "b": "Dimas"
+      },
+      "temperature": 0.7,
+      "titles": {
+        "a": "The Sun",
+        "b": "The Mountain"
+      },
+      "source": "gemini",
+      "floor": null,
+      "words": 649,
+      "regenerations": 0,
+      "chapters": 5,
+      "paragraphs_per_chapter": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "first_chapter_titles": {
+        "a": true,
+        "b": true
+      },
+      "findings": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null,
+          "draft": "### Tarikan Kuat dan Ruang Mandiri\n\nHubungan antara Sari, The Sun, dan Dimas, The Mountain, adalah perpaduan antara magnet yang sangat kuat dengan kebutuhan ruang yang sama besarnya. Ada tarikan alami yang membuat kalian sulit saling melepaskan, namun di saat yang sama, kalian memiliki ritme keseharian yang sering kali berjalan di jalur yang berbeda. Kalian berdua adalah individu yang terbiasa mandiri, sehingga kedekatan ini bukan sesuatu yang terjadi secara otomatis, melainkan sesuatu yang kalian bangun dengan sadar di tengah kesibukan masing-masing.\n\nDalam keseharian, ini terasa seperti kalian bisa berada di ruangan yang sama namun sibuk dengan dunia sendiri-sendiri tanpa merasa perlu terganggu. Namun, jika tidak ada kegiatan yang benar-benar dilakukan berdua, jarak emosional bisa terasa melebar dengan cepat. Tantangan bagi Sari dan Dimas adalah menemukan keseimbangan antara kemandirian yang kalian banggakan dan kebutuhan untuk benar-benar hadir bagi satu sama lain.\n\n### Saling Melengkapi dalam Ketenangan\n\nKalian berdua memiliki elemen yang secara alami saling menyeimbangkan satu sama lain. Sari membawa elemen Air yang memberikan ketenangan, sementara Dimas membawa elemen Kayu yang memberikan dorongan untuk tumbuh. Kehadiran Sari menjadi penawar bagi kegelisahan yang sering kali terpendam di balik sikap tenang Dimas, dan sebaliknya, Dimas memberikan pijakan yang dibutuhkan Sari agar tidak merasa lelah sendirian.\n\nSaat kalian sedang bersama, ada rasa stabil yang muncul. Bagi Dimas, Sari adalah suara yang meredakan badai di kepalanya. Bagi Sari, Dimas adalah tempat di mana ia bisa menurunkan beban yang biasanya ia pikul sendiri. Ketiadaan salah satu dari kalian akan segera membuat area tersebut terasa goyah, seolah ada bagian dari diri kalian yang hilang saat pasangan tidak berada di sisi.\n\n### Alur Inisiatif dan Rasa Aman\n\nDinamika antara Sari dan Dimas memiliki alur energi yang sangat jernih: Sari, sebagai elemen Api, secara alami menghidupi elemen Tanah yang dimiliki Dimas. Dalam hubungan, ini berarti Sari sering kali menjadi pemicu inisiatif, pemberi ide, atau pihak yang pertama kali membuka jalan. Dimas menyambut inisiatif itu dengan rasa aman, menjadikannya nyata, dan menjaga agar arah yang sudah dimulai tetap stabil.\n\nDalam praktiknya, Sari mungkin sering kali menjadi orang yang mencetuskan rencana atau langkah besar, sementara Dimas adalah sosok yang memastikan rencana tersebut berjalan dengan kokoh. Ini adalah pembagian peran yang sangat natural bagi kalian; Sari merasa dihargai karena idenya terwujud, dan Dimas merasa tenang karena bergerak dalam alur yang ia percayai.\n\n### Dua Sudut Pandang yang Berbeda\n\nSebagai pemegang Pola Kontras, Sari dan Dimas melihat dunia dengan kacamata yang berbeda total. Sari, dengan Aspek Pengelola, cenderung berfokus pada hasil dan kendali, sementara Dimas, dengan Aspek Pendamping, lebih mengutamakan kemandirian dan ketangguhan pribadi. Perbedaan ini bisa menjadi sumber gesekan jika tidak dikomunikasikan, namun juga menjadi pintu untuk memperluas perspektif satu sama lain jika kalian bersedia duduk bersama.\n\nSering kali, kalian merespons kabar atau kejadian yang sama dengan interpretasi yang berseberangan. Sari mungkin melihat sebuah masalah sebagai tugas yang harus diselesaikan dengan rapi, sementara Dimas melihatnya sebagai tantangan untuk dihadapi dengan keteguhan. Tanpa penjelasan, satu peristiwa bisa memicu dua reaksi yang terasa asing bagi pasangan.\n\n### Dampak Dunia Luar di Ruang Pribadi\n\nSalah satu pilar kehidupan Dimas terhubung langsung dengan kursi pasangan Sari. Apa yang sedang dihadapi Dimas di luar sana - entah itu tekanan pekerjaan atau tuntutan lingkungan - sering kali terbawa masuk ke dalam ruang privat kalian. Sari sering kali bisa merasakan perubahan suasana hati Dimas sebelum Dimas sendiri sempat menceritakan apa yang terjadi.\n\nIni menciptakan dinamika di mana Sari sering kali menjadi orang pertama yang merasakan beban yang sedang dibawa Dimas. Saat Dimas sedang mengalami tekanan, atmosfer di rumah atau di saat kalian berdua bisa berubah menjadi tegang. Sari tidak hanya berhadapan dengan Dimas, tetapi juga berhadapan dengan situasi yang dibawa Dimas pulang bersamanya.\n\nSari dan Dimas adalah dua individu yang kuat dan terbiasa berdiri di atas kaki sendiri, yang kini menemukan cara untuk saling menopang tanpa harus kehilangan jati diri. Hubungan ini punya bahan untuk menjadi tempat di mana kemandirian tidak lagi terasa seperti kesendirian, melainkan menjadi fondasi untuk saling melengkapi. Dengan terus menjaga komunikasi yang jujur di tengah perbedaan sudut pandang, kalian bisa menjadi pasangan yang saling menajamkan, menciptakan ritme yang meski sesekali bergesek, tetap terasa dalam dan bermakna."
+        }
+      ],
+      "output_tokens": [
+        1089
+      ],
+      "raw_responses": [
+        "{\"blocks\":[{\"fact_ids\":[\"p5_pull_fit\",\"p2_day_pair\"],\"heading\":\"Tarikan Kuat dan Ruang Mandiri\",\"paragraphs\":[\"Hubungan antara Sari, The Sun, dan Dimas, The Mountain, adalah perpaduan antara magnet yang sangat kuat dengan kebutuhan ruang yang sama besarnya. Ada tarikan alami yang membuat kalian sulit saling melepaskan, namun di saat yang sama, kalian memiliki ritme keseharian yang sering kali berjalan di jalur yang berbeda. Kalian berdua adalah individu yang terbiasa mandiri, sehingga kedekatan ini bukan sesuatu yang terjadi secara otomatis, melainkan sesuatu yang kalian bangun dengan sadar di tengah kesibukan masing-masing.\",\"Dalam keseharian, ini terasa seperti kalian bisa berada di ruangan yang sama namun sibuk dengan dunia sendiri-sendiri tanpa merasa perlu terganggu. Namun, jika tidak ada kegiatan yang benar-benar dilakukan berdua, jarak emosional bisa terasa melebar dengan cepat. Tantangan bagi Sari dan Dimas adalah menemukan keseimbangan antara kemandirian yang kalian banggakan dan kebutuhan untuk benar-benar hadir bagi satu sama lain.\"]},{\"fact_ids\":[\"p3_supply\"],\"heading\":\"Saling Melengkapi dalam Ketenangan\",\"paragraphs\":[\"Kalian berdua memiliki elemen yang secara alami saling menyeimbangkan satu sama lain. Sari membawa elemen Air yang memberikan ketenangan, sementara Dimas membawa elemen Kayu yang memberikan dorongan untuk tumbuh. Kehadiran Sari menjadi penawar bagi kegelisahan yang sering kali terpendam di balik sikap tenang Dimas, dan sebaliknya, Dimas memberikan pijakan yang dibutuhkan Sari agar tidak merasa lelah sendirian.\",\"Saat kalian sedang bersama, ada rasa stabil yang muncul. Bagi Dimas, Sari adalah suara yang meredakan badai di kepalanya. Bagi Sari, Dimas adalah tempat di mana ia bisa menurunkan beban yang biasanya ia pikul sendiri. Ketiadaan salah satu dari kalian akan segera membuat area tersebut terasa goyah, seolah ada bagian dari diri kalian yang hilang saat pasangan tidak berada di sisi.\"]},{\"fact_ids\":[\"p1_stem_relation\"],\"heading\":\"Alur Inisiatif dan Rasa Aman\",\"paragraphs\":[\"Dinamika antara Sari dan Dimas memiliki alur energi yang sangat jernih: Sari, sebagai elemen Api, secara alami menghidupi elemen Tanah yang dimiliki Dimas. Dalam hubungan, ini berarti Sari sering kali menjadi pemicu inisiatif, pemberi ide, atau pihak yang pertama kali membuka jalan. Dimas menyambut inisiatif itu dengan rasa aman, menjadikannya nyata, dan menjaga agar arah yang sudah dimulai tetap stabil.\",\"Dalam praktiknya, Sari mungkin sering kali menjadi orang yang mencetuskan rencana atau langkah besar, sementara Dimas adalah sosok yang memastikan rencana tersebut berjalan dengan kokoh. Ini adalah pembagian peran yang sangat natural bagi kalian; Sari merasa dihargai karena idenya terwujud, dan Dimas merasa tenang karena bergerak dalam alur yang ia percayai.\"]},{\"fact_ids\":[\"p4_temperament\"],\"heading\":\"Dua Sudut Pandang yang Berbeda\",\"paragraphs\":[\"Sebagai pemegang Pola Kontras, Sari dan Dimas melihat dunia dengan kacamata yang berbeda total. Sari, dengan Aspek Pengelola, cenderung berfokus pada hasil dan kendali, sementara Dimas, dengan Aspek Pendamping, lebih mengutamakan kemandirian dan ketangguhan pribadi. Perbedaan ini bisa menjadi sumber gesekan jika tidak dikomunikasikan, namun juga menjadi pintu untuk memperluas perspektif satu sama lain jika kalian bersedia duduk bersama.\",\"Sering kali, kalian merespons kabar atau kejadian yang sama dengan interpretasi yang berseberangan. Sari mungkin melihat sebuah masalah sebagai tugas yang harus diselesaikan dengan rapi, sementara Dimas melihatnya sebagai tantangan untuk dihadapi dengan keteguhan. Tanpa penjelasan, satu peristiwa bisa memicu dua reaksi yang terasa asing bagi pasangan.\"]},{\"fact_ids\":[\"p2_palace_frame\"],\"heading\":\"Dampak Dunia Luar di Ruang Pribadi\",\"paragraphs\":[\"Salah satu pilar kehidupan Dimas terhubung langsung dengan kursi pasangan Sari. Apa yang sedang dihadapi Dimas di luar sana—entah itu tekanan pekerjaan atau tuntutan lingkungan—sering kali terbawa masuk ke dalam ruang privat kalian. Sari sering kali bisa merasakan perubahan suasana hati Dimas sebelum Dimas sendiri sempat menceritakan apa yang terjadi.\",\"Ini menciptakan dinamika di mana Sari sering kali menjadi orang pertama yang merasakan beban yang sedang dibawa Dimas. Saat Dimas sedang mengalami tekanan, atmosfer di rumah atau di saat kalian berdua bisa berubah menjadi tegang. Sari tidak hanya berhadapan dengan Dimas, tetapi juga berhadapan dengan situasi yang dibawa Dimas pulang bersamanya.\"]}],\"penutup\":\"Sari dan Dimas adalah dua individu yang kuat dan terbiasa berdiri di atas kaki sendiri, yang kini menemukan cara untuk saling menopang tanpa harus kehilangan jati diri. Hubungan ini punya bahan untuk menjadi tempat di mana kemandirian tidak lagi terasa seperti kesendirian, melainkan menjadi fondasi untuk saling melengkapi. Dengan terus menjaga komunikasi yang jujur di tengah perbedaan sudut pandang, kalian bisa menjadi pasangan yang saling menajamkan, menciptakan ritme yang meski sesekali bergesek, tetap terasa dalam dan bermakna.\"}"
+      ],
+      "reads": {
+        "verdict": [],
+        "fixed": [],
+        "money_health": [],
+        "clinical": [
+          "Dinamika antara Sari dan Dimas memiliki alur energi yang sangat jernih: Sari, sebagai elemen Api, secara alami menghidupi elemen Tanah yang dimiliki Dimas.",
+          "Ini menciptakan dinamika di mana Sari sering kali menjadi orang pertama yang merasakan beban yang sedang dibawa Dimas.",
+          "Sari dan Dimas adalah dua individu yang kuat dan terbiasa berdiri di atas kaki sendiri, yang kini menemukan cara untuk saling menopang tanpa harus kehilangan jati diri."
+        ],
+        "penutup_advice": [
+          "Sari dan Dimas adalah dua individu yang kuat dan terbiasa berdiri di atas kaki sendiri, yang kini menemukan cara untuk saling menopang tanpa harus kehilangan jati diri."
+        ],
+        "indonesian_title": [],
+        "bracketed_title": []
+      },
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Tarikan Kuat dan Ruang Mandiri",
+            "fact_ids": [
+              "p5_pull_fit",
+              "p2_day_pair"
+            ],
+            "text": "Hubungan antara Sari, The Sun, dan Dimas, The Mountain, adalah perpaduan antara magnet yang sangat kuat dengan kebutuhan ruang yang sama besarnya. Ada tarikan alami yang membuat kalian sulit saling melepaskan, namun di saat yang sama, kalian memiliki ritme keseharian yang sering kali berjalan di jalur yang berbeda. Kalian berdua adalah individu yang terbiasa mandiri, sehingga kedekatan ini bukan sesuatu yang terjadi secara otomatis, melainkan sesuatu yang kalian bangun dengan sadar di tengah kesibukan masing-masing.\n\nDalam keseharian, ini terasa seperti kalian bisa berada di ruangan yang sama namun sibuk dengan dunia sendiri-sendiri tanpa merasa perlu terganggu. Namun, jika tidak ada kegiatan yang benar-benar dilakukan berdua, jarak emosional bisa terasa melebar dengan cepat. Tantangan bagi Sari dan Dimas adalah menemukan keseimbangan antara kemandirian yang kalian banggakan dan kebutuhan untuk benar-benar hadir bagi satu sama lain."
+          },
+          {
+            "heading": "Saling Melengkapi dalam Ketenangan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Kalian berdua memiliki elemen yang secara alami saling menyeimbangkan satu sama lain. Sari membawa elemen Air yang memberikan ketenangan, sementara Dimas membawa elemen Kayu yang memberikan dorongan untuk tumbuh. Kehadiran Sari menjadi penawar bagi kegelisahan yang sering kali terpendam di balik sikap tenang Dimas, dan sebaliknya, Dimas memberikan pijakan yang dibutuhkan Sari agar tidak merasa lelah sendirian.\n\nSaat kalian sedang bersama, ada rasa stabil yang muncul. Bagi Dimas, Sari adalah suara yang meredakan badai di kepalanya. Bagi Sari, Dimas adalah tempat di mana ia bisa menurunkan beban yang biasanya ia pikul sendiri. Ketiadaan salah satu dari kalian akan segera membuat area tersebut terasa goyah, seolah ada bagian dari diri kalian yang hilang saat pasangan tidak berada di sisi."
+          },
+          {
+            "heading": "Alur Inisiatif dan Rasa Aman",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Dinamika antara Sari dan Dimas memiliki alur energi yang sangat jernih: Sari, sebagai elemen Api, secara alami menghidupi elemen Tanah yang dimiliki Dimas. Dalam hubungan, ini berarti Sari sering kali menjadi pemicu inisiatif, pemberi ide, atau pihak yang pertama kali membuka jalan. Dimas menyambut inisiatif itu dengan rasa aman, menjadikannya nyata, dan menjaga agar arah yang sudah dimulai tetap stabil.\n\nDalam praktiknya, Sari mungkin sering kali menjadi orang yang mencetuskan rencana atau langkah besar, sementara Dimas adalah sosok yang memastikan rencana tersebut berjalan dengan kokoh. Ini adalah pembagian peran yang sangat natural bagi kalian; Sari merasa dihargai karena idenya terwujud, dan Dimas merasa tenang karena bergerak dalam alur yang ia percayai."
+          },
+          {
+            "heading": "Dua Sudut Pandang yang Berbeda",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Sebagai pemegang Pola Kontras, Sari dan Dimas melihat dunia dengan kacamata yang berbeda total. Sari, dengan Aspek Pengelola, cenderung berfokus pada hasil dan kendali, sementara Dimas, dengan Aspek Pendamping, lebih mengutamakan kemandirian dan ketangguhan pribadi. Perbedaan ini bisa menjadi sumber gesekan jika tidak dikomunikasikan, namun juga menjadi pintu untuk memperluas perspektif satu sama lain jika kalian bersedia duduk bersama.\n\nSering kali, kalian merespons kabar atau kejadian yang sama dengan interpretasi yang berseberangan. Sari mungkin melihat sebuah masalah sebagai tugas yang harus diselesaikan dengan rapi, sementara Dimas melihatnya sebagai tantangan untuk dihadapi dengan keteguhan. Tanpa penjelasan, satu peristiwa bisa memicu dua reaksi yang terasa asing bagi pasangan."
+          },
+          {
+            "heading": "Dampak Dunia Luar di Ruang Pribadi",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Salah satu pilar kehidupan Dimas terhubung langsung dengan kursi pasangan Sari. Apa yang sedang dihadapi Dimas di luar sana - entah itu tekanan pekerjaan atau tuntutan lingkungan - sering kali terbawa masuk ke dalam ruang privat kalian. Sari sering kali bisa merasakan perubahan suasana hati Dimas sebelum Dimas sendiri sempat menceritakan apa yang terjadi.\n\nIni menciptakan dinamika di mana Sari sering kali menjadi orang pertama yang merasakan beban yang sedang dibawa Dimas. Saat Dimas sedang mengalami tekanan, atmosfer di rumah atau di saat kalian berdua bisa berubah menjadi tegang. Sari tidak hanya berhadapan dengan Dimas, tetapi juga berhadapan dengan situasi yang dibawa Dimas pulang bersamanya."
+          }
+        ],
+        "penutup": "Sari dan Dimas adalah dua individu yang kuat dan terbiasa berdiri di atas kaki sendiri, yang kini menemukan cara untuk saling menopang tanpa harus kehilangan jati diri. Hubungan ini punya bahan untuk menjadi tempat di mana kemandirian tidak lagi terasa seperti kesendirian, melainkan menjadi fondasi untuk saling melengkapi. Dengan terus menjaga komunikasi yang jujur di tengah perbedaan sudut pandang, kalian bisa menjadi pasangan yang saling menajamkan, menciptakan ritme yang meski sesekali bergesek, tetap terasa dalam dan bermakna."
+      }
+    },
+    {
+      "pair": "PZ0t",
+      "render": 2,
+      "status": "Pacaran",
+      "nicknames": {
+        "a": "Sari",
+        "b": "Dimas"
+      },
+      "temperature": 0.7,
+      "titles": {
+        "a": "The Sun",
+        "b": "The Mountain"
+      },
+      "source": "gemini",
+      "floor": null,
+      "words": 724,
+      "regenerations": 0,
+      "chapters": 6,
+      "paragraphs_per_chapter": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "first_chapter_titles": {
+        "a": true,
+        "b": true
+      },
+      "findings": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null,
+          "draft": "### Ketertarikan yang Menantang\n\nSari si The Sun dan Dimas si The Mountain memiliki daya tarik yang sangat pekat. Sejak awal, hubungan kalian terasa intens, seolah ada magnet kuat yang membuat kalian sulit saling melepaskan. Namun, di balik rasa dekat itu, rutinitas kalian sering kali bergesek. Kalian memiliki ritme yang berbeda, dan kebersamaan ini menuntut kompromi yang tidak sedikit agar langkah kalian bisa berjalan beriringan.\n\nKalian bisa saja menghabiskan waktu berdua dengan sangat intim, namun tak jarang muncul gesekan teknis dalam keseharian. Misalnya, saat Sari ingin segera menyelesaikan rencana akhir pekan, Dimas mungkin masih perlu waktu untuk mencerna suasana. Ketegangan ini bukan karena kurangnya perasaan, melainkan karena cara kalian menjalani hari memang memiliki irama yang tidak selalu selaras.\n\n### Ruang Pribadi yang Berjalan Sendiri\n\nSecara mendasar, kursi pasangan kalian tidak memiliki ikatan otomatis. Sari dan Dimas cenderung menjalani ruang pribadinya masing-masing tanpa ada tarik-menarik atau dorongan bawaan dari pilar ini. Hal ini membuat hubungan kalian tidak memiliki ketergantungan yang instan; kedekatan yang kalian rasakan bukanlah sesuatu yang terjadi secara otomatis, melainkan sesuatu yang perlu kalian bangun dengan sengaja.\n\nDalam keseharian, ini berarti kalian bisa berada di ruang yang sama namun tenggelam dalam kesibukan masing-masing tanpa merasa terganggu. Namun, ada risiko jarak emosional yang cepat terasa jika kalian tidak menyempatkan waktu untuk benar-benar melakukan sesuatu bersama. Tanpa aktivitas yang disatukan, kalian bisa dengan mudah merasa seperti dua individu yang hidup di bawah satu atap tanpa benar-benar berbagi dunia.\n\n### Saling Melengkapi dalam Keseimbangan\n\nKeajaiban dalam hubungan ini terletak pada bagaimana kalian saling menyeimbangkan elemen yang kurang di bagan masing-masing. Sari membawa elemen Air yang memberikan ketenangan bagi Dimas, sementara Dimas membawa elemen Kayu yang menjadi dorongan bagi Sari. Kehadiran pasangan secara alami meredakan kegelisahan di area yang tadinya rawan rapuh bagi kalian berdua.\n\nSaat Dimas merasa beban hidupnya mengeras, keberadaan Sari memberikan rasa sejuk yang ia butuhkan. Sebaliknya, saat Sari merasa kehilangan arah, Dimas memberikan pijakan yang kokoh. Efeknya begitu nyata: ketiadaan satu sama lain membuat area tersebut terasa tidak stabil, sehingga keberadaan kalian satu sama lain menjadi semacam penawar yang menenangkan.\n\n### Alur Energi yang Mengayomi\n\nHubungan kalian memiliki pola Inti Menghidupi di mana energi mengalir searah dari Sari kepada Dimas. Sari secara alami menjadi pihak yang memberikan dorongan dan inisiatif, sementara Dimas menyambutnya dengan rasa aman. Arah ini konsisten dan jarang berbalik, menciptakan rasa aman bagi Dimas karena ia tahu ada pihak yang selalu siap memicu langkah baru.\n\nDalam keseharian, ini terlihat dari bagaimana keputusan atau rencana baru hampir selalu dipicu oleh Sari. Dimas sering kali menjadi pihak yang mengeksekusi rencana tersebut dengan tenang dan mantap. Alur ini berjalan harmonis karena masing-masing merasa nyaman dengan perannya, tanpa perlu berebut kendali atas siapa yang harus memulai.\n\n### Sudut Pandang yang Berseberangan\n\nSebagai individu dengan Pola Kontras, Sari dan Dimas memiliki cara pandang yang sangat berbeda terhadap dunia. Sari, dengan Aspek Pengelola, cenderung berfokus pada hasil dan kendali, sementara Dimas, dengan Aspek Pendamping, lebih mengutamakan kemandirian dan ketahanan diri. Perbedaan ini bisa memperluas perspektif kalian jika dikomunikasikan secara terbuka, namun juga rawan disalahartikan jika dibiarkan tanpa penjelasan.\n\nSebuah kejadian yang sama bisa direspons dengan fokus yang berbeda total. Saat menghadapi masalah, Sari mungkin melihatnya sebagai sesuatu yang harus dikelola dan diselesaikan, sementara Dimas melihatnya sebagai tantangan untuk dihadapi dengan keteguhan diri. Jika tidak saling bercerita tentang apa yang ada di kepala masing-masing, kalian berdua bisa sampai pada kesimpulan yang berseberangan dari satu peristiwa yang sama.\n\n### Dampak Kehidupan di Luar Hubungan\n\nSalah satu pilar kehidupan Dimas menyentuh langsung ruang privat Sari. Hal ini membuat apa yang sedang dihadapi Dimas di luar sana - entah itu tekanan pekerjaan atau tanggung jawab lainnya - ikut masuk dan mewarnai suasana hubungan kalian. Sari sering kali menjadi orang pertama yang merasakan beban tersebut, bahkan sebelum Dimas sempat menceritakannya.\n\nDalam praktiknya, saat Dimas sedang mengalami tekanan di pilar kerjanya, Sari akan merasakan hawa yang berbeda di rumah. Sari mungkin merasa suasana jadi lebih tegang atau berat tanpa tahu penyebab pastinya. Kesadaran bahwa tekanan tersebut bukan berasal dari hubungan kalian, melainkan dari apa yang dibawa Dimas dari luar, adalah kunci untuk menjaga kedamaian di antara kalian.\n\nSari dan Dimas adalah dua pribadi dengan ritme yang berbeda, yang entah bagaimana berhasil menemukan titik temu di antara segala perbedaan pola dan elemen. Hubungan ini punya bahan untuk menjadi tempat di mana Sari menemukan kepastian dan Dimas menemukan ruang untuk melunak. Dengan kesediaan untuk saling menerjemahkan bahasa masing-masing, kalian bisa menjadi pasangan yang saling menajamkan, di mana ketegangan yang ada justru menjadi pengingat akan seberapa berharganya waktu yang kalian luangkan untuk benar-benar hadir bagi satu sama lain."
+        }
+      ],
+      "output_tokens": [
+        1231
+      ],
+      "raw_responses": [
+        "{\"blocks\":[{\"fact_ids\":[\"p5_pull_fit\"],\"heading\":\"Ketertarikan yang Menantang\",\"paragraphs\":[\"Sari si The Sun dan Dimas si The Mountain memiliki daya tarik yang sangat pekat. Sejak awal, hubungan kalian terasa intens, seolah ada magnet kuat yang membuat kalian sulit saling melepaskan. Namun, di balik rasa dekat itu, rutinitas kalian sering kali bergesek. Kalian memiliki ritme yang berbeda, dan kebersamaan ini menuntut kompromi yang tidak sedikit agar langkah kalian bisa berjalan beriringan.\",\"Kalian bisa saja menghabiskan waktu berdua dengan sangat intim, namun tak jarang muncul gesekan teknis dalam keseharian. Misalnya, saat Sari ingin segera menyelesaikan rencana akhir pekan, Dimas mungkin masih perlu waktu untuk mencerna suasana. Ketegangan ini bukan karena kurangnya perasaan, melainkan karena cara kalian menjalani hari memang memiliki irama yang tidak selalu selaras.\"]},{\"fact_ids\":[\"p2_day_pair\"],\"heading\":\"Ruang Pribadi yang Berjalan Sendiri\",\"paragraphs\":[\"Secara mendasar, kursi pasangan kalian tidak memiliki ikatan otomatis. Sari dan Dimas cenderung menjalani ruang pribadinya masing-masing tanpa ada tarik-menarik atau dorongan bawaan dari pilar ini. Hal ini membuat hubungan kalian tidak memiliki ketergantungan yang instan; kedekatan yang kalian rasakan bukanlah sesuatu yang terjadi secara otomatis, melainkan sesuatu yang perlu kalian bangun dengan sengaja.\",\"Dalam keseharian, ini berarti kalian bisa berada di ruang yang sama namun tenggelam dalam kesibukan masing-masing tanpa merasa terganggu. Namun, ada risiko jarak emosional yang cepat terasa jika kalian tidak menyempatkan waktu untuk benar-benar melakukan sesuatu bersama. Tanpa aktivitas yang disatukan, kalian bisa dengan mudah merasa seperti dua individu yang hidup di bawah satu atap tanpa benar-benar berbagi dunia.\"]},{\"fact_ids\":[\"p3_supply\"],\"heading\":\"Saling Melengkapi dalam Keseimbangan\",\"paragraphs\":[\"Keajaiban dalam hubungan ini terletak pada bagaimana kalian saling menyeimbangkan elemen yang kurang di bagan masing-masing. Sari membawa elemen Air yang memberikan ketenangan bagi Dimas, sementara Dimas membawa elemen Kayu yang menjadi dorongan bagi Sari. Kehadiran pasangan secara alami meredakan kegelisahan di area yang tadinya rawan rapuh bagi kalian berdua.\",\"Saat Dimas merasa beban hidupnya mengeras, keberadaan Sari memberikan rasa sejuk yang ia butuhkan. Sebaliknya, saat Sari merasa kehilangan arah, Dimas memberikan pijakan yang kokoh. Efeknya begitu nyata: ketiadaan satu sama lain membuat area tersebut terasa tidak stabil, sehingga keberadaan kalian satu sama lain menjadi semacam penawar yang menenangkan.\"]},{\"fact_ids\":[\"p1_stem_relation\"],\"heading\":\"Alur Energi yang Mengayomi\",\"paragraphs\":[\"Hubungan kalian memiliki pola Inti Menghidupi di mana energi mengalir searah dari Sari kepada Dimas. Sari secara alami menjadi pihak yang memberikan dorongan dan inisiatif, sementara Dimas menyambutnya dengan rasa aman. Arah ini konsisten dan jarang berbalik, menciptakan rasa aman bagi Dimas karena ia tahu ada pihak yang selalu siap memicu langkah baru.\",\"Dalam keseharian, ini terlihat dari bagaimana keputusan atau rencana baru hampir selalu dipicu oleh Sari. Dimas sering kali menjadi pihak yang mengeksekusi rencana tersebut dengan tenang dan mantap. Alur ini berjalan harmonis karena masing-masing merasa nyaman dengan perannya, tanpa perlu berebut kendali atas siapa yang harus memulai.\"]},{\"fact_ids\":[\"p4_temperament\"],\"heading\":\"Sudut Pandang yang Berseberangan\",\"paragraphs\":[\"Sebagai individu dengan Pola Kontras, Sari dan Dimas memiliki cara pandang yang sangat berbeda terhadap dunia. Sari, dengan Aspek Pengelola, cenderung berfokus pada hasil dan kendali, sementara Dimas, dengan Aspek Pendamping, lebih mengutamakan kemandirian dan ketahanan diri. Perbedaan ini bisa memperluas perspektif kalian jika dikomunikasikan secara terbuka, namun juga rawan disalahartikan jika dibiarkan tanpa penjelasan.\",\"Sebuah kejadian yang sama bisa direspons dengan fokus yang berbeda total. Saat menghadapi masalah, Sari mungkin melihatnya sebagai sesuatu yang harus dikelola dan diselesaikan, sementara Dimas melihatnya sebagai tantangan untuk dihadapi dengan keteguhan diri. Jika tidak saling bercerita tentang apa yang ada di kepala masing-masing, kalian berdua bisa sampai pada kesimpulan yang berseberangan dari satu peristiwa yang sama.\"]},{\"fact_ids\":[\"p2_palace_frame\"],\"heading\":\"Dampak Kehidupan di Luar Hubungan\",\"paragraphs\":[\"Salah satu pilar kehidupan Dimas menyentuh langsung ruang privat Sari. Hal ini membuat apa yang sedang dihadapi Dimas di luar sana—entah itu tekanan pekerjaan atau tanggung jawab lainnya—ikut masuk dan mewarnai suasana hubungan kalian. Sari sering kali menjadi orang pertama yang merasakan beban tersebut, bahkan sebelum Dimas sempat menceritakannya.\",\"Dalam praktiknya, saat Dimas sedang mengalami tekanan di pilar kerjanya, Sari akan merasakan hawa yang berbeda di rumah. Sari mungkin merasa suasana jadi lebih tegang atau berat tanpa tahu penyebab pastinya. Kesadaran bahwa tekanan tersebut bukan berasal dari hubungan kalian, melainkan dari apa yang dibawa Dimas dari luar, adalah kunci untuk menjaga kedamaian di antara kalian.\"]}],\"penutup\":\"Sari dan Dimas adalah dua pribadi dengan ritme yang berbeda, yang entah bagaimana berhasil menemukan titik temu di antara segala perbedaan pola dan elemen. Hubungan ini punya bahan untuk menjadi tempat di mana Sari menemukan kepastian dan Dimas menemukan ruang untuk melunak. Dengan kesediaan untuk saling menerjemahkan bahasa masing-masing, kalian bisa menjadi pasangan yang saling menajamkan, di mana ketegangan yang ada justru menjadi pengingat akan seberapa berharganya waktu yang kalian luangkan untuk benar-benar hadir bagi satu sama lain.\"}"
+      ],
+      "reads": {
+        "verdict": [],
+        "fixed": [],
+        "money_health": [],
+        "clinical": [],
+        "penutup_advice": [],
+        "indonesian_title": [],
+        "bracketed_title": []
+      },
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Ketertarikan yang Menantang",
+            "fact_ids": [
+              "p5_pull_fit"
+            ],
+            "text": "Sari si The Sun dan Dimas si The Mountain memiliki daya tarik yang sangat pekat. Sejak awal, hubungan kalian terasa intens, seolah ada magnet kuat yang membuat kalian sulit saling melepaskan. Namun, di balik rasa dekat itu, rutinitas kalian sering kali bergesek. Kalian memiliki ritme yang berbeda, dan kebersamaan ini menuntut kompromi yang tidak sedikit agar langkah kalian bisa berjalan beriringan.\n\nKalian bisa saja menghabiskan waktu berdua dengan sangat intim, namun tak jarang muncul gesekan teknis dalam keseharian. Misalnya, saat Sari ingin segera menyelesaikan rencana akhir pekan, Dimas mungkin masih perlu waktu untuk mencerna suasana. Ketegangan ini bukan karena kurangnya perasaan, melainkan karena cara kalian menjalani hari memang memiliki irama yang tidak selalu selaras."
+          },
+          {
+            "heading": "Ruang Pribadi yang Berjalan Sendiri",
+            "fact_ids": [
+              "p2_day_pair"
+            ],
+            "text": "Secara mendasar, kursi pasangan kalian tidak memiliki ikatan otomatis. Sari dan Dimas cenderung menjalani ruang pribadinya masing-masing tanpa ada tarik-menarik atau dorongan bawaan dari pilar ini. Hal ini membuat hubungan kalian tidak memiliki ketergantungan yang instan; kedekatan yang kalian rasakan bukanlah sesuatu yang terjadi secara otomatis, melainkan sesuatu yang perlu kalian bangun dengan sengaja.\n\nDalam keseharian, ini berarti kalian bisa berada di ruang yang sama namun tenggelam dalam kesibukan masing-masing tanpa merasa terganggu. Namun, ada risiko jarak emosional yang cepat terasa jika kalian tidak menyempatkan waktu untuk benar-benar melakukan sesuatu bersama. Tanpa aktivitas yang disatukan, kalian bisa dengan mudah merasa seperti dua individu yang hidup di bawah satu atap tanpa benar-benar berbagi dunia."
+          },
+          {
+            "heading": "Saling Melengkapi dalam Keseimbangan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Keajaiban dalam hubungan ini terletak pada bagaimana kalian saling menyeimbangkan elemen yang kurang di bagan masing-masing. Sari membawa elemen Air yang memberikan ketenangan bagi Dimas, sementara Dimas membawa elemen Kayu yang menjadi dorongan bagi Sari. Kehadiran pasangan secara alami meredakan kegelisahan di area yang tadinya rawan rapuh bagi kalian berdua.\n\nSaat Dimas merasa beban hidupnya mengeras, keberadaan Sari memberikan rasa sejuk yang ia butuhkan. Sebaliknya, saat Sari merasa kehilangan arah, Dimas memberikan pijakan yang kokoh. Efeknya begitu nyata: ketiadaan satu sama lain membuat area tersebut terasa tidak stabil, sehingga keberadaan kalian satu sama lain menjadi semacam penawar yang menenangkan."
+          },
+          {
+            "heading": "Alur Energi yang Mengayomi",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Hubungan kalian memiliki pola Inti Menghidupi di mana energi mengalir searah dari Sari kepada Dimas. Sari secara alami menjadi pihak yang memberikan dorongan dan inisiatif, sementara Dimas menyambutnya dengan rasa aman. Arah ini konsisten dan jarang berbalik, menciptakan rasa aman bagi Dimas karena ia tahu ada pihak yang selalu siap memicu langkah baru.\n\nDalam keseharian, ini terlihat dari bagaimana keputusan atau rencana baru hampir selalu dipicu oleh Sari. Dimas sering kali menjadi pihak yang mengeksekusi rencana tersebut dengan tenang dan mantap. Alur ini berjalan harmonis karena masing-masing merasa nyaman dengan perannya, tanpa perlu berebut kendali atas siapa yang harus memulai."
+          },
+          {
+            "heading": "Sudut Pandang yang Berseberangan",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Sebagai individu dengan Pola Kontras, Sari dan Dimas memiliki cara pandang yang sangat berbeda terhadap dunia. Sari, dengan Aspek Pengelola, cenderung berfokus pada hasil dan kendali, sementara Dimas, dengan Aspek Pendamping, lebih mengutamakan kemandirian dan ketahanan diri. Perbedaan ini bisa memperluas perspektif kalian jika dikomunikasikan secara terbuka, namun juga rawan disalahartikan jika dibiarkan tanpa penjelasan.\n\nSebuah kejadian yang sama bisa direspons dengan fokus yang berbeda total. Saat menghadapi masalah, Sari mungkin melihatnya sebagai sesuatu yang harus dikelola dan diselesaikan, sementara Dimas melihatnya sebagai tantangan untuk dihadapi dengan keteguhan diri. Jika tidak saling bercerita tentang apa yang ada di kepala masing-masing, kalian berdua bisa sampai pada kesimpulan yang berseberangan dari satu peristiwa yang sama."
+          },
+          {
+            "heading": "Dampak Kehidupan di Luar Hubungan",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Salah satu pilar kehidupan Dimas menyentuh langsung ruang privat Sari. Hal ini membuat apa yang sedang dihadapi Dimas di luar sana - entah itu tekanan pekerjaan atau tanggung jawab lainnya - ikut masuk dan mewarnai suasana hubungan kalian. Sari sering kali menjadi orang pertama yang merasakan beban tersebut, bahkan sebelum Dimas sempat menceritakannya.\n\nDalam praktiknya, saat Dimas sedang mengalami tekanan di pilar kerjanya, Sari akan merasakan hawa yang berbeda di rumah. Sari mungkin merasa suasana jadi lebih tegang atau berat tanpa tahu penyebab pastinya. Kesadaran bahwa tekanan tersebut bukan berasal dari hubungan kalian, melainkan dari apa yang dibawa Dimas dari luar, adalah kunci untuk menjaga kedamaian di antara kalian."
+          }
+        ],
+        "penutup": "Sari dan Dimas adalah dua pribadi dengan ritme yang berbeda, yang entah bagaimana berhasil menemukan titik temu di antara segala perbedaan pola dan elemen. Hubungan ini punya bahan untuk menjadi tempat di mana Sari menemukan kepastian dan Dimas menemukan ruang untuk melunak. Dengan kesediaan untuk saling menerjemahkan bahasa masing-masing, kalian bisa menjadi pasangan yang saling menajamkan, di mana ketegangan yang ada justru menjadi pengingat akan seberapa berharganya waktu yang kalian luangkan untuk benar-benar hadir bagi satu sama lain."
+      }
+    },
+    {
+      "pair": "clash",
+      "render": 1,
+      "status": "PDKT",
+      "nicknames": {
+        "a": "Ayu",
+        "b": "Raka"
+      },
+      "temperature": 0.7,
+      "titles": {
+        "a": "The Sun",
+        "b": "The Teak"
+      },
+      "source": "gemini",
+      "floor": null,
+      "words": 619,
+      "regenerations": 0,
+      "chapters": 5,
+      "paragraphs_per_chapter": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "first_chapter_titles": {
+        "a": true,
+        "b": true
+      },
+      "findings": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null,
+          "draft": "### Tarikan yang Mengalir\n\nPertemuan antara Ayu sebagai The Sun dan Raka sebagai The Teak terasa begitu alami, seolah ada magnet yang menarik kalian sejak awal. Kalian berada dalam pola serumpun, di mana gelombang energi kalian seirama meski cara kalian bergerak di dunia nyata berbeda. Ketertarikan ini tidak terasa dipaksakan, melainkan sebuah ritme yang mengalir begitu saja, membuat waktu yang dihabiskan berdua terasa ringan dan mudah dinikmati.\n\nKalian sering kali sepakat dengan cepat mengenai tujuan besar atau apa yang ingin dicapai bersama. Namun, saat mulai merinci langkah demi langkah, di situlah perbedaan cara kalian muncul. Ayu cenderung bertindak dengan dorongan langsung, sementara Raka mungkin memiliki ritme yang lebih melingkar, yang justru membuat percakapan kalian menjadi hidup dan jarang terasa membosankan.\n\n### Saling Memberi Arah\n\nDalam hubungan ini, terdapat alur energi yang sangat stabil dari Raka kepada Ayu. Sebagai sosok yang membawa elemen Kayu, Raka secara alami menghidupi Ayu yang berelemen Api. Ini menciptakan dinamika di mana Raka sering menjadi sumber dorongan atau inspirasi bagi Ayu, sementara Ayu merasa diayomi dan lebih mantap dalam melangkah. Peran ini terasa sangat pas bagi kalian berdua, memberikan rasa aman yang konsisten.\n\nSaat kalian merencanakan sesuatu, Raka sering menjadi orang yang membuka ide atau memberikan bahan bakar awal agar rencana tersebut bisa berjalan. Ayu kemudian menyambutnya dengan semangat yang menyala, mengeksekusi rencana tersebut dengan keyakinan penuh. Kalian tidak perlu berebut kendali karena alur ini sudah terbentuk dengan sendirinya, membuat segalanya terasa lebih efisien.\n\n### Keseimbangan yang Menenangkan\n\nKalian berdua saling melengkapi di titik-titik di mana satu sama lain merasa kurang. Ayu membawa elemen Api yang sangat dibutuhkan Raka, memberikan kehangatan dan gairah yang sering kali membuat Raka merasa lebih hidup. Sebaliknya, Raka membawa elemen Kayu yang sangat dibutuhkan Ayu, memberikan dorongan untuk terus berkembang dan tidak terjebak dalam rutinitas yang monoton.\n\nKetiadaan elemen yang dibawa pasangan bisa membuat salah satu dari kalian merasa goyah atau tidak stabil. Bagi Raka, ketiadaan kehadiran Ayu bisa membuat hari-harinya terasa dingin dan kehilangan gairah. Bagi Ayu, ketiadaan Raka bisa membuatnya merasa jalan di tempat, karena dorongan untuk bertumbuh sering kali datang dari kehadiran Raka di sisinya.\n\n### Ruang Pribadi yang Bersinggungan\n\nKursi pasangan kalian berbenturan, yang berarti kebutuhan privat dan cara kalian menjaga ruang pribadi sering kali tidak sejalan. Apa yang bagi Ayu terasa sebagai hal biasa dalam hubungan, bisa saja bagi Raka terasa sangat tajam, dan sebaliknya. Gesekan ini bukan pertanda bahwa kalian tidak cocok, melainkan sebuah undangan untuk lebih sadar akan batasan masing-masing yang sering kali tidak terucapkan.\n\nSaat kalian sedang lelah, gesekan kecil di rumah bisa berubah menjadi adu argumen yang intens. Ayu mungkin merasa perlu mempertahankan ruangnya, sementara Raka merasa batasan pribadinya sedang diserang. Jika kalian berdua menyadari bahwa ini adalah bagian dari perbedaan karakter yang mendasar, gesekan ini bisa dibahas dengan kepala dingin alih-alih dipendam hingga meledak.\n\n### Jangkar di Luar Rumah\n\nDunia luar dan pencapaian masing-masing bukanlah penghalang, justru menjadi jangkar yang memperkuat ikatan kalian. Saat Raka melewati hari yang baik di luar sana, energi positif itu akan terbawa pulang dan membuat Ayu merasa lebih tenang. Demikian pula, saat Ayu merasa tenang dengan urusannya, Raka akan merasakan kenyamanan yang sama saat kalian akhirnya bertemu.\n\nKetika salah satu dari kalian pulang dengan membawa keberhasilan kecil, kehadirannya saja sudah cukup untuk melunturkan lelah yang dirasakan pasangan. Kalian tidak perlu saling bercerita panjang lebar untuk saling menularkan rasa lega. Cukup dengan duduk bersama setelah hari yang panjang, kehadiran kalian berdua sudah menjadi tempat pulang yang paling aman.\n\nHubungan antara Ayu dan Raka memiliki potensi besar untuk menjadi tempat di mana dua kekuatan yang berbeda bisa saling mengisi dan menajamkan. Dengan ritme yang seirama dan elemen yang saling menghidupi, kalian punya bahan untuk membangun sebuah ruang yang tidak hanya aman, tetapi juga terus berkembang. Saat kalian berdua belajar untuk merangkul gesekan sebagai bagian dari kedewasaan, ikatan ini bisa menjadi rumah yang stabil bagi kalian untuk terus tumbuh bersama."
+        }
+      ],
+      "output_tokens": [
+        1030
+      ],
+      "raw_responses": [
+        "{\"blocks\":[{\"fact_ids\":[\"p5_pull_fit\",\"p4_temperament\"],\"heading\":\"Tarikan yang Mengalir\",\"paragraphs\":[\"Pertemuan antara Ayu sebagai The Sun dan Raka sebagai The Teak terasa begitu alami, seolah ada magnet yang menarik kalian sejak awal. Kalian berada dalam pola serumpun, di mana gelombang energi kalian seirama meski cara kalian bergerak di dunia nyata berbeda. Ketertarikan ini tidak terasa dipaksakan, melainkan sebuah ritme yang mengalir begitu saja, membuat waktu yang dihabiskan berdua terasa ringan dan mudah dinikmati.\",\"Kalian sering kali sepakat dengan cepat mengenai tujuan besar atau apa yang ingin dicapai bersama. Namun, saat mulai merinci langkah demi langkah, di situlah perbedaan cara kalian muncul. Ayu cenderung bertindak dengan dorongan langsung, sementara Raka mungkin memiliki ritme yang lebih melingkar, yang justru membuat percakapan kalian menjadi hidup dan jarang terasa membosankan.\"]},{\"fact_ids\":[\"p1_stem_relation\"],\"heading\":\"Saling Memberi Arah\",\"paragraphs\":[\"Dalam hubungan ini, terdapat alur energi yang sangat stabil dari Raka kepada Ayu. Sebagai sosok yang membawa elemen Kayu, Raka secara alami menghidupi Ayu yang berelemen Api. Ini menciptakan dinamika di mana Raka sering menjadi sumber dorongan atau inspirasi bagi Ayu, sementara Ayu merasa diayomi dan lebih mantap dalam melangkah. Peran ini terasa sangat pas bagi kalian berdua, memberikan rasa aman yang konsisten.\",\"Saat kalian merencanakan sesuatu, Raka sering menjadi orang yang membuka ide atau memberikan bahan bakar awal agar rencana tersebut bisa berjalan. Ayu kemudian menyambutnya dengan semangat yang menyala, mengeksekusi rencana tersebut dengan keyakinan penuh. Kalian tidak perlu berebut kendali karena alur ini sudah terbentuk dengan sendirinya, membuat segalanya terasa lebih efisien.\"]},{\"fact_ids\":[\"p3_supply\"],\"heading\":\"Keseimbangan yang Menenangkan\",\"paragraphs\":[\"Kalian berdua saling melengkapi di titik-titik di mana satu sama lain merasa kurang. Ayu membawa elemen Api yang sangat dibutuhkan Raka, memberikan kehangatan dan gairah yang sering kali membuat Raka merasa lebih hidup. Sebaliknya, Raka membawa elemen Kayu yang sangat dibutuhkan Ayu, memberikan dorongan untuk terus berkembang dan tidak terjebak dalam rutinitas yang monoton.\",\"Ketiadaan elemen yang dibawa pasangan bisa membuat salah satu dari kalian merasa goyah atau tidak stabil. Bagi Raka, ketiadaan kehadiran Ayu bisa membuat hari-harinya terasa dingin dan kehilangan gairah. Bagi Ayu, ketiadaan Raka bisa membuatnya merasa jalan di tempat, karena dorongan untuk bertumbuh sering kali datang dari kehadiran Raka di sisinya.\"]},{\"fact_ids\":[\"p2_day_pair\",\"p2_reframe\"],\"heading\":\"Ruang Pribadi yang Bersinggungan\",\"paragraphs\":[\"Kursi pasangan kalian berbenturan, yang berarti kebutuhan privat dan cara kalian menjaga ruang pribadi sering kali tidak sejalan. Apa yang bagi Ayu terasa sebagai hal biasa dalam hubungan, bisa saja bagi Raka terasa sangat tajam, dan sebaliknya. Gesekan ini bukan pertanda bahwa kalian tidak cocok, melainkan sebuah undangan untuk lebih sadar akan batasan masing-masing yang sering kali tidak terucapkan.\",\"Saat kalian sedang lelah, gesekan kecil di rumah bisa berubah menjadi adu argumen yang intens. Ayu mungkin merasa perlu mempertahankan ruangnya, sementara Raka merasa batasan pribadinya sedang diserang. Jika kalian berdua menyadari bahwa ini adalah bagian dari perbedaan karakter yang mendasar, gesekan ini bisa dibahas dengan kepala dingin alih-alih dipendam hingga meledak.\"]},{\"fact_ids\":[\"p2_palace_frame\"],\"heading\":\"Jangkar di Luar Rumah\",\"paragraphs\":[\"Dunia luar dan pencapaian masing-masing bukanlah penghalang, justru menjadi jangkar yang memperkuat ikatan kalian. Saat Raka melewati hari yang baik di luar sana, energi positif itu akan terbawa pulang dan membuat Ayu merasa lebih tenang. Demikian pula, saat Ayu merasa tenang dengan urusannya, Raka akan merasakan kenyamanan yang sama saat kalian akhirnya bertemu.\",\"Ketika salah satu dari kalian pulang dengan membawa keberhasilan kecil, kehadirannya saja sudah cukup untuk melunturkan lelah yang dirasakan pasangan. Kalian tidak perlu saling bercerita panjang lebar untuk saling menularkan rasa lega. Cukup dengan duduk bersama setelah hari yang panjang, kehadiran kalian berdua sudah menjadi tempat pulang yang paling aman.\"]}],\"penutup\":\"Hubungan antara Ayu dan Raka memiliki potensi besar untuk menjadi tempat di mana dua kekuatan yang berbeda bisa saling mengisi dan menajamkan. Dengan ritme yang seirama dan elemen yang saling menghidupi, kalian punya bahan untuk membangun sebuah ruang yang tidak hanya aman, tetapi juga terus berkembang. Saat kalian berdua belajar untuk merangkul gesekan sebagai bagian dari kedewasaan, ikatan ini bisa menjadi rumah yang stabil bagi kalian untuk terus tumbuh bersama.\"}"
+      ],
+      "reads": {
+        "verdict": [
+          "Gesekan ini bukan pertanda bahwa kalian tidak cocok, melainkan sebuah undangan untuk lebih sadar akan batasan masing-masing yang sering kali tidak terucapkan."
+        ],
+        "fixed": [],
+        "money_health": [],
+        "clinical": [
+          "Ini menciptakan dinamika di mana Raka sering menjadi sumber dorongan atau inspirasi bagi Ayu, sementara Ayu merasa diayomi dan lebih mantap dalam melangkah."
+        ],
+        "penutup_advice": [],
+        "indonesian_title": [],
+        "bracketed_title": []
+      },
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Tarikan yang Mengalir",
+            "fact_ids": [
+              "p5_pull_fit",
+              "p4_temperament"
+            ],
+            "text": "Pertemuan antara Ayu sebagai The Sun dan Raka sebagai The Teak terasa begitu alami, seolah ada magnet yang menarik kalian sejak awal. Kalian berada dalam pola serumpun, di mana gelombang energi kalian seirama meski cara kalian bergerak di dunia nyata berbeda. Ketertarikan ini tidak terasa dipaksakan, melainkan sebuah ritme yang mengalir begitu saja, membuat waktu yang dihabiskan berdua terasa ringan dan mudah dinikmati.\n\nKalian sering kali sepakat dengan cepat mengenai tujuan besar atau apa yang ingin dicapai bersama. Namun, saat mulai merinci langkah demi langkah, di situlah perbedaan cara kalian muncul. Ayu cenderung bertindak dengan dorongan langsung, sementara Raka mungkin memiliki ritme yang lebih melingkar, yang justru membuat percakapan kalian menjadi hidup dan jarang terasa membosankan."
+          },
+          {
+            "heading": "Saling Memberi Arah",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Dalam hubungan ini, terdapat alur energi yang sangat stabil dari Raka kepada Ayu. Sebagai sosok yang membawa elemen Kayu, Raka secara alami menghidupi Ayu yang berelemen Api. Ini menciptakan dinamika di mana Raka sering menjadi sumber dorongan atau inspirasi bagi Ayu, sementara Ayu merasa diayomi dan lebih mantap dalam melangkah. Peran ini terasa sangat pas bagi kalian berdua, memberikan rasa aman yang konsisten.\n\nSaat kalian merencanakan sesuatu, Raka sering menjadi orang yang membuka ide atau memberikan bahan bakar awal agar rencana tersebut bisa berjalan. Ayu kemudian menyambutnya dengan semangat yang menyala, mengeksekusi rencana tersebut dengan keyakinan penuh. Kalian tidak perlu berebut kendali karena alur ini sudah terbentuk dengan sendirinya, membuat segalanya terasa lebih efisien."
+          },
+          {
+            "heading": "Keseimbangan yang Menenangkan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Kalian berdua saling melengkapi di titik-titik di mana satu sama lain merasa kurang. Ayu membawa elemen Api yang sangat dibutuhkan Raka, memberikan kehangatan dan gairah yang sering kali membuat Raka merasa lebih hidup. Sebaliknya, Raka membawa elemen Kayu yang sangat dibutuhkan Ayu, memberikan dorongan untuk terus berkembang dan tidak terjebak dalam rutinitas yang monoton.\n\nKetiadaan elemen yang dibawa pasangan bisa membuat salah satu dari kalian merasa goyah atau tidak stabil. Bagi Raka, ketiadaan kehadiran Ayu bisa membuat hari-harinya terasa dingin dan kehilangan gairah. Bagi Ayu, ketiadaan Raka bisa membuatnya merasa jalan di tempat, karena dorongan untuk bertumbuh sering kali datang dari kehadiran Raka di sisinya."
+          },
+          {
+            "heading": "Ruang Pribadi yang Bersinggungan",
+            "fact_ids": [
+              "p2_day_pair",
+              "p2_reframe"
+            ],
+            "text": "Kursi pasangan kalian berbenturan, yang berarti kebutuhan privat dan cara kalian menjaga ruang pribadi sering kali tidak sejalan. Apa yang bagi Ayu terasa sebagai hal biasa dalam hubungan, bisa saja bagi Raka terasa sangat tajam, dan sebaliknya. Gesekan ini bukan pertanda bahwa kalian tidak cocok, melainkan sebuah undangan untuk lebih sadar akan batasan masing-masing yang sering kali tidak terucapkan.\n\nSaat kalian sedang lelah, gesekan kecil di rumah bisa berubah menjadi adu argumen yang intens. Ayu mungkin merasa perlu mempertahankan ruangnya, sementara Raka merasa batasan pribadinya sedang diserang. Jika kalian berdua menyadari bahwa ini adalah bagian dari perbedaan karakter yang mendasar, gesekan ini bisa dibahas dengan kepala dingin alih-alih dipendam hingga meledak."
+          },
+          {
+            "heading": "Jangkar di Luar Rumah",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Dunia luar dan pencapaian masing-masing bukanlah penghalang, justru menjadi jangkar yang memperkuat ikatan kalian. Saat Raka melewati hari yang baik di luar sana, energi positif itu akan terbawa pulang dan membuat Ayu merasa lebih tenang. Demikian pula, saat Ayu merasa tenang dengan urusannya, Raka akan merasakan kenyamanan yang sama saat kalian akhirnya bertemu.\n\nKetika salah satu dari kalian pulang dengan membawa keberhasilan kecil, kehadirannya saja sudah cukup untuk melunturkan lelah yang dirasakan pasangan. Kalian tidak perlu saling bercerita panjang lebar untuk saling menularkan rasa lega. Cukup dengan duduk bersama setelah hari yang panjang, kehadiran kalian berdua sudah menjadi tempat pulang yang paling aman."
+          }
+        ],
+        "penutup": "Hubungan antara Ayu dan Raka memiliki potensi besar untuk menjadi tempat di mana dua kekuatan yang berbeda bisa saling mengisi dan menajamkan. Dengan ritme yang seirama dan elemen yang saling menghidupi, kalian punya bahan untuk membangun sebuah ruang yang tidak hanya aman, tetapi juga terus berkembang. Saat kalian berdua belajar untuk merangkul gesekan sebagai bagian dari kedewasaan, ikatan ini bisa menjadi rumah yang stabil bagi kalian untuk terus tumbuh bersama."
+      }
+    },
+    {
+      "pair": "clash",
+      "render": 2,
+      "status": "PDKT",
+      "nicknames": {
+        "a": "Ayu",
+        "b": "Raka"
+      },
+      "temperature": 0.7,
+      "titles": {
+        "a": "The Sun",
+        "b": "The Teak"
+      },
+      "source": "gemini",
+      "floor": null,
+      "words": 686,
+      "regenerations": 0,
+      "chapters": 6,
+      "paragraphs_per_chapter": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "first_chapter_titles": {
+        "a": true,
+        "b": true
+      },
+      "findings": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null,
+          "draft": "### Tarikan Awal yang Mengalir\n\nAyu sang The Sun dan Raka sang The Teak dipertemukan oleh arus yang terasa begitu alami sejak awal. Hubungan yang sedang berada di fase PDKT ini tidak terasa seperti upaya paksa atau pencarian yang melelahkan. Ada ritme yang seirama, sebuah kelancaran dalam berkomunikasi dan menghabiskan waktu bersama yang membuat kalian merasa sudah lama saling mengenal, meski sebenarnya baru saja mulai meniti jalan kebersamaan.\n\nHal ini muncul dalam keseharian yang sederhana: saat kalian sepakat untuk bertemu tanpa perlu banyak rencana, atau ketika percakapan mengalir begitu saja dari topik ringan ke hal yang lebih dalam tanpa terasa kaku. Kebersamaan kalian terasa seperti aliran air yang tenang, nyaman dinikmati, dan sering kali membuat kalian lupa bahwa ada proses pengenalan yang sedang terjadi.\n\n### Alur yang Memberi Arah\n\nDalam dinamika hubungan ini, terdapat alur yang sangat jelas: Raka menghidupi Ayu. Raka membawa elemen Kayu yang menjadi bahan bakar bagi api Ayu. Ini menciptakan pola di mana Raka secara alami menjadi pihak yang memberikan dorongan dan energi, sementara Ayu menerima dukungan tersebut untuk bersinar lebih terang. Arah ini sangat konsisten dan memberikan rasa aman bagi keduanya karena masing-masing tahu peran yang dijalani.\n\nDalam praktiknya, Ayu mungkin adalah sosok yang memicu ide-ide baru atau memulai rencana, dan Raka adalah orang yang mendukung langkah tersebut dengan memberikan ruang atau sumber daya yang diperlukan. Ayu merasa didukung, sementara Raka merasa memiliki peran penting dalam memastikan langkah Ayu berjalan dengan baik.\n\n### Saling Menyeimbangkan\n\nKalian saling membawa apa yang kurang dari diri satu sama lain. Ayu membawa elemen Api yang dibutuhkan Raka, sedangkan Raka membawa elemen Kayu yang melengkapi Ayu. Kehadiran Ayu memberikan kehangatan yang sering kali hilang dari keseharian Raka yang cenderung tenang, sementara Raka memberikan elemen pertumbuhan yang membuat Ayu merasa lebih stabil dalam melangkah.\n\nSaat Raka merasa buntu atau lelah, kehadiran Ayu sering kali menjadi pemicu semangat yang tidak terduga. Sebaliknya, saat Ayu merasa kehilangan fokus, Raka hadir dengan ketenangan dan dukungan yang membuat Ayu kembali merasa berpijak pada tujuan.\n\n### Serumpun dalam Berbeda\n\nAyu dan Raka memiliki pendekatan yang serumpun namun dengan cara yang berlainan. Keduanya memiliki dorongan kuat untuk maju, namun Ayu cenderung bergerak dengan cara yang lebih personal dan langsung, sementara Raka memiliki pendekatan yang lebih kompetitif dan berorientasi pada tantangan. Kalian berdua adalah orang yang terbiasa mandiri, yang membuat kalian saling menghargai kemandirian masing-masing.\n\nKetegangan sering muncul bukan karena tujuan yang berbeda, melainkan karena cara mencapai tujuan tersebut. Saat menghadapi satu masalah, kalian bisa dengan cepat sepakat pada solusinya, namun kemudian menghabiskan waktu berdebat panjang mengenai langkah demi langkah yang harus diambil untuk mencapai solusi tersebut.\n\n### Gesekan di Ruang Privat\n\nKursi pasangan Ayu dan Raka berbenturan langsung, yang berarti area paling privat dan sensitif dalam hubungan kalian sering kali menjadi tempat gesekan. Karena PDKT adalah masa di mana batasan-batasan pribadi sedang diuji, benturan ini bisa terasa tajam dan intens. Hal-hal sepele yang menyangkut kebiasaan atau cara pandang pribadi bisa memicu reaksi yang terasa berlebihan.\n\nBenturan ini bukanlah penanda bahwa hubungan kalian tidak layak, melainkan sebuah pengingat bahwa kalian membutuhkan kesadaran penuh saat sedang berinteraksi. Ketika lelah, hal-hal kecil bisa meledak menjadi perdebatan yang menguras emosi. Namun, saat kalian sadar akan pola ini, gesekan tersebut justru menjadi ruang untuk saling mengenal lebih dalam tentang apa yang sebenarnya mengganggu kalian.\n\n### Jangkar dari Luar\n\nDunianya Raka di luar sana tidak menjadi penghalang bagi hubungan kalian, melainkan justru menjadi jangkar yang menenangkan bagi Ayu. Setiap kali Raka berhasil menyelesaikan urusannya atau melewati hari yang produktif, energi positif itu ia bawa pulang dan dirasakan oleh Ayu. Keberhasilan Raka di luar menjadi tempat Ayu bersandar untuk merasa lebih tenang.\n\nDalam keseharian, ini berarti saat Raka sedang bersemangat dengan pekerjaannya, ia akan membagikan antusiasme itu kepada Ayu, membuat hubungan kalian terasa lebih hidup. Ayu tidak perlu merasa terancam dengan kesibukan Raka, karena ia tahu bahwa energi yang Raka dapatkan di luar akan berakhir dengan kebersamaan yang lebih nyaman bagi keduanya.\n\nHubungan Ayu dan Raka adalah pertemuan antara api yang menerangi dan kayu yang memberi kehidupan, sebuah ikatan yang punya bahan untuk berkembang menjadi kemitraan yang saling menguatkan. Dengan kesadaran akan gesekan yang muncul dari ruang pribadi dan kesediaan untuk saling mendukung dalam alur yang sudah terbentuk, kalian bisa menjadi dua orang yang tidak hanya berjalan beriringan, tetapi juga saling membesarkan kapasitas satu sama lain."
+        }
+      ],
+      "output_tokens": [
+        1327
+      ],
+      "raw_responses": [
+        "{\n  \"blocks\": [\n    {\n      \"fact_ids\": [\n        \"p5_pull_fit\"\n      ],\n      \"heading\": \"Tarikan Awal yang Mengalir\",\n      \"paragraphs\": [\n        \"Ayu sang The Sun dan Raka sang The Teak dipertemukan oleh arus yang terasa begitu alami sejak awal. Hubungan yang sedang berada di fase PDKT ini tidak terasa seperti upaya paksa atau pencarian yang melelahkan. Ada ritme yang seirama, sebuah kelancaran dalam berkomunikasi dan menghabiskan waktu bersama yang membuat kalian merasa sudah lama saling mengenal, meski sebenarnya baru saja mulai meniti jalan kebersamaan.\",\n        \"Hal ini muncul dalam keseharian yang sederhana: saat kalian sepakat untuk bertemu tanpa perlu banyak rencana, atau ketika percakapan mengalir begitu saja dari topik ringan ke hal yang lebih dalam tanpa terasa kaku. Kebersamaan kalian terasa seperti aliran air yang tenang, nyaman dinikmati, dan sering kali membuat kalian lupa bahwa ada proses pengenalan yang sedang terjadi.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p1_stem_relation\"\n      ],\n      \"heading\": \"Alur yang Memberi Arah\",\n      \"paragraphs\": [\n        \"Dalam dinamika hubungan ini, terdapat alur yang sangat jelas: Raka menghidupi Ayu. Raka membawa elemen Kayu yang menjadi bahan bakar bagi api Ayu. Ini menciptakan pola di mana Raka secara alami menjadi pihak yang memberikan dorongan dan energi, sementara Ayu menerima dukungan tersebut untuk bersinar lebih terang. Arah ini sangat konsisten dan memberikan rasa aman bagi keduanya karena masing-masing tahu peran yang dijalani.\",\n        \"Dalam praktiknya, Ayu mungkin adalah sosok yang memicu ide-ide baru atau memulai rencana, dan Raka adalah orang yang mendukung langkah tersebut dengan memberikan ruang atau sumber daya yang diperlukan. Ayu merasa didukung, sementara Raka merasa memiliki peran penting dalam memastikan langkah Ayu berjalan dengan baik.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p3_supply\"\n      ],\n      \"heading\": \"Saling Menyeimbangkan\",\n      \"paragraphs\": [\n        \"Kalian saling membawa apa yang kurang dari diri satu sama lain. Ayu membawa elemen Api yang dibutuhkan Raka, sedangkan Raka membawa elemen Kayu yang melengkapi Ayu. Kehadiran Ayu memberikan kehangatan yang sering kali hilang dari keseharian Raka yang cenderung tenang, sementara Raka memberikan elemen pertumbuhan yang membuat Ayu merasa lebih stabil dalam melangkah.\",\n        \"Saat Raka merasa buntu atau lelah, kehadiran Ayu sering kali menjadi pemicu semangat yang tidak terduga. Sebaliknya, saat Ayu merasa kehilangan fokus, Raka hadir dengan ketenangan dan dukungan yang membuat Ayu kembali merasa berpijak pada tujuan.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p4_temperament\"\n      ],\n      \"heading\": \"Serumpun dalam Berbeda\",\n      \"paragraphs\": [\n        \"Ayu dan Raka memiliki pendekatan yang serumpun namun dengan cara yang berlainan. Keduanya memiliki dorongan kuat untuk maju, namun Ayu cenderung bergerak dengan cara yang lebih personal dan langsung, sementara Raka memiliki pendekatan yang lebih kompetitif dan berorientasi pada tantangan. Kalian berdua adalah orang yang terbiasa mandiri, yang membuat kalian saling menghargai kemandirian masing-masing.\",\n        \"Ketegangan sering muncul bukan karena tujuan yang berbeda, melainkan karena cara mencapai tujuan tersebut. Saat menghadapi satu masalah, kalian bisa dengan cepat sepakat pada solusinya, namun kemudian menghabiskan waktu berdebat panjang mengenai langkah demi langkah yang harus diambil untuk mencapai solusi tersebut.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p2_day_pair\",\n        \"p2_reframe\"\n      ],\n      \"heading\": \"Gesekan di Ruang Privat\",\n      \"paragraphs\": [\n        \"Kursi pasangan Ayu dan Raka berbenturan langsung, yang berarti area paling privat dan sensitif dalam hubungan kalian sering kali menjadi tempat gesekan. Karena PDKT adalah masa di mana batasan-batasan pribadi sedang diuji, benturan ini bisa terasa tajam dan intens. Hal-hal sepele yang menyangkut kebiasaan atau cara pandang pribadi bisa memicu reaksi yang terasa berlebihan.\",\n        \"Benturan ini bukanlah penanda bahwa hubungan kalian tidak layak, melainkan sebuah pengingat bahwa kalian membutuhkan kesadaran penuh saat sedang berinteraksi. Ketika lelah, hal-hal kecil bisa meledak menjadi perdebatan yang menguras emosi. Namun, saat kalian sadar akan pola ini, gesekan tersebut justru menjadi ruang untuk saling mengenal lebih dalam tentang apa yang sebenarnya mengganggu kalian.\"\n      ]\n    },\n    {\n      \"fact_ids\": [\n        \"p2_palace_frame\"\n      ],\n      \"heading\": \"Jangkar dari Luar\",\n      \"paragraphs\": [\n        \"Dunianya Raka di luar sana tidak menjadi penghalang bagi hubungan kalian, melainkan justru menjadi jangkar yang menenangkan bagi Ayu. Setiap kali Raka berhasil menyelesaikan urusannya atau melewati hari yang produktif, energi positif itu ia bawa pulang dan dirasakan oleh Ayu. Keberhasilan Raka di luar menjadi tempat Ayu bersandar untuk merasa lebih tenang.\",\n        \"Dalam keseharian, ini berarti saat Raka sedang bersemangat dengan pekerjaannya, ia akan membagikan antusiasme itu kepada Ayu, membuat hubungan kalian terasa lebih hidup. Ayu tidak perlu merasa terancam dengan kesibukan Raka, karena ia tahu bahwa energi yang Raka dapatkan di luar akan berakhir dengan kebersamaan yang lebih nyaman bagi keduanya.\"\n      ]\n    }\n  ],\n  \"penutup\": \"Hubungan Ayu dan Raka adalah pertemuan antara api yang menerangi dan kayu yang memberi kehidupan, sebuah ikatan yang punya bahan untuk berkembang menjadi kemitraan yang saling menguatkan. Dengan kesadaran akan gesekan yang muncul dari ruang pribadi dan kesediaan untuk saling mendukung dalam alur yang sudah terbentuk, kalian bisa menjadi dua orang yang tidak hanya berjalan beriringan, tetapi juga saling membesarkan kapasitas satu sama lain.\"\n}"
+      ],
+      "reads": {
+        "verdict": [],
+        "fixed": [],
+        "money_health": [],
+        "clinical": [
+          "Dalam dinamika hubungan ini, terdapat alur yang sangat jelas: Raka menghidupi Ayu."
+        ],
+        "penutup_advice": [],
+        "indonesian_title": [],
+        "bracketed_title": []
+      },
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Tarikan Awal yang Mengalir",
+            "fact_ids": [
+              "p5_pull_fit"
+            ],
+            "text": "Ayu sang The Sun dan Raka sang The Teak dipertemukan oleh arus yang terasa begitu alami sejak awal. Hubungan yang sedang berada di fase PDKT ini tidak terasa seperti upaya paksa atau pencarian yang melelahkan. Ada ritme yang seirama, sebuah kelancaran dalam berkomunikasi dan menghabiskan waktu bersama yang membuat kalian merasa sudah lama saling mengenal, meski sebenarnya baru saja mulai meniti jalan kebersamaan.\n\nHal ini muncul dalam keseharian yang sederhana: saat kalian sepakat untuk bertemu tanpa perlu banyak rencana, atau ketika percakapan mengalir begitu saja dari topik ringan ke hal yang lebih dalam tanpa terasa kaku. Kebersamaan kalian terasa seperti aliran air yang tenang, nyaman dinikmati, dan sering kali membuat kalian lupa bahwa ada proses pengenalan yang sedang terjadi."
+          },
+          {
+            "heading": "Alur yang Memberi Arah",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Dalam dinamika hubungan ini, terdapat alur yang sangat jelas: Raka menghidupi Ayu. Raka membawa elemen Kayu yang menjadi bahan bakar bagi api Ayu. Ini menciptakan pola di mana Raka secara alami menjadi pihak yang memberikan dorongan dan energi, sementara Ayu menerima dukungan tersebut untuk bersinar lebih terang. Arah ini sangat konsisten dan memberikan rasa aman bagi keduanya karena masing-masing tahu peran yang dijalani.\n\nDalam praktiknya, Ayu mungkin adalah sosok yang memicu ide-ide baru atau memulai rencana, dan Raka adalah orang yang mendukung langkah tersebut dengan memberikan ruang atau sumber daya yang diperlukan. Ayu merasa didukung, sementara Raka merasa memiliki peran penting dalam memastikan langkah Ayu berjalan dengan baik."
+          },
+          {
+            "heading": "Saling Menyeimbangkan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Kalian saling membawa apa yang kurang dari diri satu sama lain. Ayu membawa elemen Api yang dibutuhkan Raka, sedangkan Raka membawa elemen Kayu yang melengkapi Ayu. Kehadiran Ayu memberikan kehangatan yang sering kali hilang dari keseharian Raka yang cenderung tenang, sementara Raka memberikan elemen pertumbuhan yang membuat Ayu merasa lebih stabil dalam melangkah.\n\nSaat Raka merasa buntu atau lelah, kehadiran Ayu sering kali menjadi pemicu semangat yang tidak terduga. Sebaliknya, saat Ayu merasa kehilangan fokus, Raka hadir dengan ketenangan dan dukungan yang membuat Ayu kembali merasa berpijak pada tujuan."
+          },
+          {
+            "heading": "Serumpun dalam Berbeda",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Ayu dan Raka memiliki pendekatan yang serumpun namun dengan cara yang berlainan. Keduanya memiliki dorongan kuat untuk maju, namun Ayu cenderung bergerak dengan cara yang lebih personal dan langsung, sementara Raka memiliki pendekatan yang lebih kompetitif dan berorientasi pada tantangan. Kalian berdua adalah orang yang terbiasa mandiri, yang membuat kalian saling menghargai kemandirian masing-masing.\n\nKetegangan sering muncul bukan karena tujuan yang berbeda, melainkan karena cara mencapai tujuan tersebut. Saat menghadapi satu masalah, kalian bisa dengan cepat sepakat pada solusinya, namun kemudian menghabiskan waktu berdebat panjang mengenai langkah demi langkah yang harus diambil untuk mencapai solusi tersebut."
+          },
+          {
+            "heading": "Gesekan di Ruang Privat",
+            "fact_ids": [
+              "p2_day_pair",
+              "p2_reframe"
+            ],
+            "text": "Kursi pasangan Ayu dan Raka berbenturan langsung, yang berarti area paling privat dan sensitif dalam hubungan kalian sering kali menjadi tempat gesekan. Karena PDKT adalah masa di mana batasan-batasan pribadi sedang diuji, benturan ini bisa terasa tajam dan intens. Hal-hal sepele yang menyangkut kebiasaan atau cara pandang pribadi bisa memicu reaksi yang terasa berlebihan.\n\nBenturan ini bukanlah penanda bahwa hubungan kalian tidak layak, melainkan sebuah pengingat bahwa kalian membutuhkan kesadaran penuh saat sedang berinteraksi. Ketika lelah, hal-hal kecil bisa meledak menjadi perdebatan yang menguras emosi. Namun, saat kalian sadar akan pola ini, gesekan tersebut justru menjadi ruang untuk saling mengenal lebih dalam tentang apa yang sebenarnya mengganggu kalian."
+          },
+          {
+            "heading": "Jangkar dari Luar",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Dunianya Raka di luar sana tidak menjadi penghalang bagi hubungan kalian, melainkan justru menjadi jangkar yang menenangkan bagi Ayu. Setiap kali Raka berhasil menyelesaikan urusannya atau melewati hari yang produktif, energi positif itu ia bawa pulang dan dirasakan oleh Ayu. Keberhasilan Raka di luar menjadi tempat Ayu bersandar untuk merasa lebih tenang.\n\nDalam keseharian, ini berarti saat Raka sedang bersemangat dengan pekerjaannya, ia akan membagikan antusiasme itu kepada Ayu, membuat hubungan kalian terasa lebih hidup. Ayu tidak perlu merasa terancam dengan kesibukan Raka, karena ia tahu bahwa energi yang Raka dapatkan di luar akan berakhir dengan kebersamaan yang lebih nyaman bagi keduanya."
+          }
+        ],
+        "penutup": "Hubungan Ayu dan Raka adalah pertemuan antara api yang menerangi dan kayu yang memberi kehidupan, sebuah ikatan yang punya bahan untuk berkembang menjadi kemitraan yang saling menguatkan. Dengan kesadaran akan gesekan yang muncul dari ruang pribadi dan kesediaan untuk saling mendukung dalam alur yang sudah terbentuk, kalian bisa menjadi dua orang yang tidak hanya berjalan beriringan, tetapi juga saling membesarkan kapasitas satu sama lain."
+      }
+    },
+    {
+      "pair": "nonames",
+      "render": 1,
+      "status": "Menikah",
+      "nicknames": {},
+      "temperature": 0.7,
+      "titles": {
+        "a": "The Morning Dew",
+        "b": "The Teak"
+      },
+      "source": "gemini",
+      "floor": null,
+      "words": 673,
+      "regenerations": 0,
+      "chapters": 5,
+      "paragraphs_per_chapter": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "first_chapter_titles": {
+        "a": true,
+        "b": true
+      },
+      "findings": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null,
+          "draft": "### Ruang yang Berjalan Beriringan\n\nKalian berdua, The Morning Dew dan The Teak, menjalani hubungan dengan cara yang sangat mandiri. Tidak ada tarikan magnetis yang menarik kalian secara otomatis ke dalam satu ritme yang sama. Hubungan ini tidak berjalan karena dorongan alamiah, melainkan karena kalian berdua secara sadar memilih untuk tetap berada di jalur yang sama setiap harinya. Ini adalah bentuk komitmen yang jujur, di mana kebersamaan bukan sesuatu yang terjadi begitu saja, melainkan sesuatu yang kalian bangun dengan sengaja.\n\nDi rumah, ini terlihat saat kalian mampu menghabiskan waktu di ruangan yang sama namun sibuk dengan dunia masing-masing tanpa merasa terganggu. Kalian tidak butuh validasi atau kehadiran fisik yang konstan untuk merasa aman. Namun, karena tidak adanya tarikan otomatis, kalian perlu menjaga komunikasi agar jarak emosional tidak perlahan melebar tanpa disadari. Menjadwalkan kegiatan berdua bukan sekadar rutinitas, tapi cara memastikan kalian tetap berada dalam satu tujuan yang sama.\n\n### Alur yang Menghidupi\n\nDalam interaksi kalian, ada pola yang cukup konsisten di mana The Morning Dew berperan sebagai sosok yang membawa elemen untuk menghidupi The Teak. Alur ini memberikan rasa aman bagi The Teak, sementara The Morning Dew merasa memiliki peran penting dalam mendorong inisiatif dan keputusan baru. Hubungan ini memiliki arah yang jelas karena The Morning Dew memberikan dorongan yang dibutuhkan The Teak untuk bergerak.\n\nDalam keputusan besar rumah tangga, The Morning Dew sering kali menjadi pihak yang memicu ide atau membuka jalan, sementara The Teak menyambut dan mengeksekusinya. Ini bukanlah bentuk ketergantungan, melainkan sebuah harmoni di mana satu pihak merasa tenang karena ada yang mengayomi, dan pihak lain merasa berguna karena bisa memberikan arah.\n\n### Satu Tujuan, Beda Cara\n\nSebagai pasangan, kalian berbagi pola yang sama: keduanya memiliki akar karakter yang berasal dari rumpun yang serupa. Kalian berdua memiliki kejelasan soal apa yang ingin dicapai dalam hubungan ini, sehingga tidak perlu waktu lama untuk sepakat mengenai target akhir. Namun, di sinilah letak tantangannya: cara kalian mengeksekusi langkah-langkah menuju tujuan tersebut sering kali bertolak belakang.\n\nSaat menghadapi masalah, kalian bisa sepakat bahwa masalah harus selesai, namun sering terjebak dalam perdebatan panjang mengenai langkah mana yang harus diambil lebih dulu. The Morning Dew cenderung lebih fleksibel dan mengalir, sedangkan The Teak memiliki dorongan kuat untuk terus maju dan tidak suka melambat. Keinginan untuk mencapai hasil yang sama sering kali tertutup oleh perbedaan ritme dalam prosesnya.\n\n### Ketenangan yang Saling Melengkapi\n\nThe Morning Dew membawa elemen Logam yang sangat dibutuhkan oleh The Teak. Di dalam bagan The Teak, elemen ini tidak hadir, yang membuatnya sering kali sulit untuk benar-benar berhenti atau mengakhiri sesuatu yang sudah selesai. Kehadiran The Morning Dew memberikan keseimbangan yang menenangkan bagi The Teak, meredakan ketegangan yang sering kali ia tanggung sendiri.\n\nKetika The Teak merasa terjebak dalam situasi yang melelahkan namun sulit untuk dilepaskan, keberadaan The Morning Dew secara alami membawa rasa tenang. Bagi The Teak, ketiadaan The Morning Dew membuat area hidupnya terasa tidak stabil, karena ia kehilangan jangkar yang selama ini membantunya untuk menyeimbangkan diri dan tahu kapan harus berhenti.\n\n### Gema dari Luar Rumah\n\nHubungan kalian tidak sepenuhnya terisolasi dari dunia luar. Ada bagian dari pilar kehidupan The Teak yang terhubung langsung dengan kursi pasangan The Morning Dew. Hal ini membuat apa pun yang sedang dihadapi The Teak di luar sana - entah itu tekanan pekerjaan atau masalah pribadi - dapat dirasakan langsung oleh The Morning Dew, bahkan sebelum The Teak sempat membuka mulut untuk bercerita.\n\nSaat The Teak sedang mengalami tekanan hebat, suasana di rumah akan langsung berubah dan The Morning Dew akan menangkapnya sebagai ketegangan. Ini bisa memicu kesalahpahaman jika The Morning Dew merasa itu adalah masalah di antara kalian, padahal sebenarnya itu adalah gema dari apa yang sedang dibawa The Teak dari luar. Kesadaran bahwa ini hanyalah pantulan dari beban yang ia bawa bisa membantu kalian tetap tenang saat badai datang.\n\nHubungan ini adalah sebuah pilihan sadar yang diperbarui setiap hari. Dengan memahami bahwa kalian memiliki ritme yang berbeda namun arah yang sama, kalian punya bahan untuk membangun sebuah rumah yang saling menyeimbangkan. Ketika The Teak belajar untuk melepaskan beban dengan bantuan ketenangan The Morning Dew, dan The Morning Dew menemukan pijakan yang lebih kokoh lewat dorongan The Teak, kalian bisa menjadi pasangan yang tumbuh dengan kemandirian yang tetap saling menguatkan."
+        }
+      ],
+      "output_tokens": [
+        1069
+      ],
+      "raw_responses": [
+        "{\"blocks\":[{\"fact_ids\":[\"p2_day_pair\",\"p5_pull_fit\"],\"heading\":\"Ruang yang Berjalan Beriringan\",\"paragraphs\":[\"Kalian berdua, The Morning Dew dan The Teak, menjalani hubungan dengan cara yang sangat mandiri. Tidak ada tarikan magnetis yang menarik kalian secara otomatis ke dalam satu ritme yang sama. Hubungan ini tidak berjalan karena dorongan alamiah, melainkan karena kalian berdua secara sadar memilih untuk tetap berada di jalur yang sama setiap harinya. Ini adalah bentuk komitmen yang jujur, di mana kebersamaan bukan sesuatu yang terjadi begitu saja, melainkan sesuatu yang kalian bangun dengan sengaja.\",\"Di rumah, ini terlihat saat kalian mampu menghabiskan waktu di ruangan yang sama namun sibuk dengan dunia masing-masing tanpa merasa terganggu. Kalian tidak butuh validasi atau kehadiran fisik yang konstan untuk merasa aman. Namun, karena tidak adanya tarikan otomatis, kalian perlu menjaga komunikasi agar jarak emosional tidak perlahan melebar tanpa disadari. Menjadwalkan kegiatan berdua bukan sekadar rutinitas, tapi cara memastikan kalian tetap berada dalam satu tujuan yang sama.\"]},{\"fact_ids\":[\"p1_stem_relation\"],\"heading\":\"Alur yang Menghidupi\",\"paragraphs\":[\"Dalam interaksi kalian, ada pola yang cukup konsisten di mana The Morning Dew berperan sebagai sosok yang membawa elemen untuk menghidupi The Teak. Alur ini memberikan rasa aman bagi The Teak, sementara The Morning Dew merasa memiliki peran penting dalam mendorong inisiatif dan keputusan baru. Hubungan ini memiliki arah yang jelas karena The Morning Dew memberikan dorongan yang dibutuhkan The Teak untuk bergerak.\",\"Dalam keputusan besar rumah tangga, The Morning Dew sering kali menjadi pihak yang memicu ide atau membuka jalan, sementara The Teak menyambut dan mengeksekusinya. Ini bukanlah bentuk ketergantungan, melainkan sebuah harmoni di mana satu pihak merasa tenang karena ada yang mengayomi, dan pihak lain merasa berguna karena bisa memberikan arah.\"]},{\"fact_ids\":[\"p4_temperament\"],\"heading\":\"Satu Tujuan, Beda Cara\",\"paragraphs\":[\"Sebagai pasangan, kalian berbagi pola yang sama: keduanya memiliki akar karakter yang berasal dari rumpun yang serupa. Kalian berdua memiliki kejelasan soal apa yang ingin dicapai dalam hubungan ini, sehingga tidak perlu waktu lama untuk sepakat mengenai target akhir. Namun, di sinilah letak tantangannya: cara kalian mengeksekusi langkah-langkah menuju tujuan tersebut sering kali bertolak belakang.\",\"Saat menghadapi masalah, kalian bisa sepakat bahwa masalah harus selesai, namun sering terjebak dalam perdebatan panjang mengenai langkah mana yang harus diambil lebih dulu. The Morning Dew cenderung lebih fleksibel dan mengalir, sedangkan The Teak memiliki dorongan kuat untuk terus maju dan tidak suka melambat. Keinginan untuk mencapai hasil yang sama sering kali tertutup oleh perbedaan ritme dalam prosesnya.\"]},{\"fact_ids\":[\"p3_supply\"],\"heading\":\"Ketenangan yang Saling Melengkapi\",\"paragraphs\":[\"The Morning Dew membawa elemen Logam yang sangat dibutuhkan oleh The Teak. Di dalam bagan The Teak, elemen ini tidak hadir, yang membuatnya sering kali sulit untuk benar-benar berhenti atau mengakhiri sesuatu yang sudah selesai. Kehadiran The Morning Dew memberikan keseimbangan yang menenangkan bagi The Teak, meredakan ketegangan yang sering kali ia tanggung sendiri.\",\"Ketika The Teak merasa terjebak dalam situasi yang melelahkan namun sulit untuk dilepaskan, keberadaan The Morning Dew secara alami membawa rasa tenang. Bagi The Teak, ketiadaan The Morning Dew membuat area hidupnya terasa tidak stabil, karena ia kehilangan jangkar yang selama ini membantunya untuk menyeimbangkan diri dan tahu kapan harus berhenti.\"]},{\"fact_ids\":[\"p2_palace_frame\"],\"heading\":\"Gema dari Luar Rumah\",\"paragraphs\":[\"Hubungan kalian tidak sepenuhnya terisolasi dari dunia luar. Ada bagian dari pilar kehidupan The Teak yang terhubung langsung dengan kursi pasangan The Morning Dew. Hal ini membuat apa pun yang sedang dihadapi The Teak di luar sana—entah itu tekanan pekerjaan atau masalah pribadi—dapat dirasakan langsung oleh The Morning Dew, bahkan sebelum The Teak sempat membuka mulut untuk bercerita.\",\"Saat The Teak sedang mengalami tekanan hebat, suasana di rumah akan langsung berubah dan The Morning Dew akan menangkapnya sebagai ketegangan. Ini bisa memicu kesalahpahaman jika The Morning Dew merasa itu adalah masalah di antara kalian, padahal sebenarnya itu adalah gema dari apa yang sedang dibawa The Teak dari luar. Kesadaran bahwa ini hanyalah pantulan dari beban yang ia bawa bisa membantu kalian tetap tenang saat badai datang.\"]}],\"penutup\":\"Hubungan ini adalah sebuah pilihan sadar yang diperbarui setiap hari. Dengan memahami bahwa kalian memiliki ritme yang berbeda namun arah yang sama, kalian punya bahan untuk membangun sebuah rumah yang saling menyeimbangkan. Ketika The Teak belajar untuk melepaskan beban dengan bantuan ketenangan The Morning Dew, dan The Morning Dew menemukan pijakan yang lebih kokoh lewat dorongan The Teak, kalian bisa menjadi pasangan yang tumbuh dengan kemandirian yang tetap saling menguatkan.\"}"
+      ],
+      "reads": {
+        "verdict": [],
+        "fixed": [],
+        "money_health": [],
+        "clinical": [],
+        "penutup_advice": [],
+        "indonesian_title": [],
+        "bracketed_title": []
+      },
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Ruang yang Berjalan Beriringan",
+            "fact_ids": [
+              "p2_day_pair",
+              "p5_pull_fit"
+            ],
+            "text": "Kalian berdua, The Morning Dew dan The Teak, menjalani hubungan dengan cara yang sangat mandiri. Tidak ada tarikan magnetis yang menarik kalian secara otomatis ke dalam satu ritme yang sama. Hubungan ini tidak berjalan karena dorongan alamiah, melainkan karena kalian berdua secara sadar memilih untuk tetap berada di jalur yang sama setiap harinya. Ini adalah bentuk komitmen yang jujur, di mana kebersamaan bukan sesuatu yang terjadi begitu saja, melainkan sesuatu yang kalian bangun dengan sengaja.\n\nDi rumah, ini terlihat saat kalian mampu menghabiskan waktu di ruangan yang sama namun sibuk dengan dunia masing-masing tanpa merasa terganggu. Kalian tidak butuh validasi atau kehadiran fisik yang konstan untuk merasa aman. Namun, karena tidak adanya tarikan otomatis, kalian perlu menjaga komunikasi agar jarak emosional tidak perlahan melebar tanpa disadari. Menjadwalkan kegiatan berdua bukan sekadar rutinitas, tapi cara memastikan kalian tetap berada dalam satu tujuan yang sama."
+          },
+          {
+            "heading": "Alur yang Menghidupi",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Dalam interaksi kalian, ada pola yang cukup konsisten di mana The Morning Dew berperan sebagai sosok yang membawa elemen untuk menghidupi The Teak. Alur ini memberikan rasa aman bagi The Teak, sementara The Morning Dew merasa memiliki peran penting dalam mendorong inisiatif dan keputusan baru. Hubungan ini memiliki arah yang jelas karena The Morning Dew memberikan dorongan yang dibutuhkan The Teak untuk bergerak.\n\nDalam keputusan besar rumah tangga, The Morning Dew sering kali menjadi pihak yang memicu ide atau membuka jalan, sementara The Teak menyambut dan mengeksekusinya. Ini bukanlah bentuk ketergantungan, melainkan sebuah harmoni di mana satu pihak merasa tenang karena ada yang mengayomi, dan pihak lain merasa berguna karena bisa memberikan arah."
+          },
+          {
+            "heading": "Satu Tujuan, Beda Cara",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Sebagai pasangan, kalian berbagi pola yang sama: keduanya memiliki akar karakter yang berasal dari rumpun yang serupa. Kalian berdua memiliki kejelasan soal apa yang ingin dicapai dalam hubungan ini, sehingga tidak perlu waktu lama untuk sepakat mengenai target akhir. Namun, di sinilah letak tantangannya: cara kalian mengeksekusi langkah-langkah menuju tujuan tersebut sering kali bertolak belakang.\n\nSaat menghadapi masalah, kalian bisa sepakat bahwa masalah harus selesai, namun sering terjebak dalam perdebatan panjang mengenai langkah mana yang harus diambil lebih dulu. The Morning Dew cenderung lebih fleksibel dan mengalir, sedangkan The Teak memiliki dorongan kuat untuk terus maju dan tidak suka melambat. Keinginan untuk mencapai hasil yang sama sering kali tertutup oleh perbedaan ritme dalam prosesnya."
+          },
+          {
+            "heading": "Ketenangan yang Saling Melengkapi",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "The Morning Dew membawa elemen Logam yang sangat dibutuhkan oleh The Teak. Di dalam bagan The Teak, elemen ini tidak hadir, yang membuatnya sering kali sulit untuk benar-benar berhenti atau mengakhiri sesuatu yang sudah selesai. Kehadiran The Morning Dew memberikan keseimbangan yang menenangkan bagi The Teak, meredakan ketegangan yang sering kali ia tanggung sendiri.\n\nKetika The Teak merasa terjebak dalam situasi yang melelahkan namun sulit untuk dilepaskan, keberadaan The Morning Dew secara alami membawa rasa tenang. Bagi The Teak, ketiadaan The Morning Dew membuat area hidupnya terasa tidak stabil, karena ia kehilangan jangkar yang selama ini membantunya untuk menyeimbangkan diri dan tahu kapan harus berhenti."
+          },
+          {
+            "heading": "Gema dari Luar Rumah",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Hubungan kalian tidak sepenuhnya terisolasi dari dunia luar. Ada bagian dari pilar kehidupan The Teak yang terhubung langsung dengan kursi pasangan The Morning Dew. Hal ini membuat apa pun yang sedang dihadapi The Teak di luar sana - entah itu tekanan pekerjaan atau masalah pribadi - dapat dirasakan langsung oleh The Morning Dew, bahkan sebelum The Teak sempat membuka mulut untuk bercerita.\n\nSaat The Teak sedang mengalami tekanan hebat, suasana di rumah akan langsung berubah dan The Morning Dew akan menangkapnya sebagai ketegangan. Ini bisa memicu kesalahpahaman jika The Morning Dew merasa itu adalah masalah di antara kalian, padahal sebenarnya itu adalah gema dari apa yang sedang dibawa The Teak dari luar. Kesadaran bahwa ini hanyalah pantulan dari beban yang ia bawa bisa membantu kalian tetap tenang saat badai datang."
+          }
+        ],
+        "penutup": "Hubungan ini adalah sebuah pilihan sadar yang diperbarui setiap hari. Dengan memahami bahwa kalian memiliki ritme yang berbeda namun arah yang sama, kalian punya bahan untuk membangun sebuah rumah yang saling menyeimbangkan. Ketika The Teak belajar untuk melepaskan beban dengan bantuan ketenangan The Morning Dew, dan The Morning Dew menemukan pijakan yang lebih kokoh lewat dorongan The Teak, kalian bisa menjadi pasangan yang tumbuh dengan kemandirian yang tetap saling menguatkan."
+      }
+    },
+    {
+      "pair": "nonames",
+      "render": 2,
+      "status": "Menikah",
+      "nicknames": {},
+      "temperature": 0.7,
+      "titles": {
+        "a": "The Morning Dew",
+        "b": "The Teak"
+      },
+      "source": "gemini",
+      "floor": null,
+      "words": 659,
+      "regenerations": 0,
+      "chapters": 5,
+      "paragraphs_per_chapter": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "first_chapter_titles": {
+        "a": true,
+        "b": true
+      },
+      "findings": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null,
+          "draft": "### Ruang yang Berjalan Masing-masing\n\nThe Morning Dew dan The Teak memiliki cara bergerak yang sangat mandiri. Dalam hubungan kalian, tidak ada tarikan magnetis yang menarik kalian secara otomatis untuk selalu bersama. Ini adalah hubungan yang tidak berjalan dengan sendirinya, melainkan sebuah pilihan sadar yang kalian perbarui setiap hari. Kebersamaan kalian tidak dibangun di atas kebutuhan untuk selalu menempel, melainkan atas komitmen yang kalian jaga dengan sengaja.\n\nKalian sering kali berada di ruang yang sama, tenggelam dalam kesibukan masing-masing tanpa merasa terganggu. Namun, karena tidak ada dorongan otomatis untuk melekat, jarak emosional bisa terasa jika kalian lupa menjadwalkan waktu khusus untuk berdua. Hubungan ini membutuhkan inisiatif aktif; tanpa itu, kalian bisa dengan mudah merasa seperti dua orang asing yang tinggal di bawah atap yang sama.\n\n### Alur Pengayoman yang Stabil\n\nDi balik kemandirian kalian, ada satu alur energi yang sangat konsisten: The Morning Dew menghidupi The Teak. Peran ini mengalir searah dan jarang sekali tertukar. The Morning Dew membawa unsur yang memberi rasa aman dan dorongan, sementara The Teak menyambutnya untuk bergerak maju. Inisiatif baru atau rencana besar hampir selalu lahir dari The Morning Dew, yang kemudian dijalankan dengan mantap oleh The Teak.\n\nDalam keseharian, ini terlihat saat ada keputusan penting yang harus diambil. The Morning Dew biasanya menjadi sosok yang membuka jalan, memberi ide, atau memberikan dukungan yang dibutuhkan agar The Teak merasa cukup tenang untuk melangkah. Begitu The Teak sudah bergerak, ia menuntaskannya dengan penuh keyakinan, dan The Morning Dew merasa lega karena arahnya sudah jelas.\n\n### Satu Tujuan, Berbeda Jalan\n\nKalian berdua memiliki akar karakter yang sama, namun dengan cara eksekusi yang sering bertolak belakang. Sebagai sesama pemilik pola pemikir dan pelindung, kalian sebenarnya memiliki gelombang yang sama soal target akhir hidup kalian. Kalian berdua tahu persis apa yang ingin dicapai, namun sering kali berdebat hebat tentang urutan langkah atau cara paling efisien untuk sampai ke sana.\n\nDi rumah, perdebatan ini sering muncul dalam hal-hal teknis. The Morning Dew lebih suka menyerap detail dan merenung, sementara The Teak cenderung ingin langsung melompat ke tindakan. Kalian sepakat tentang tujuan akhirnya, tetapi proses menuju ke sana sering menjadi arena gesekan karena masing-masing merasa cara beliaulah yang paling masuk akal.\n\n### Penyeimbang dalam Ketidakpastian\n\nThe Morning Dew membawa elemen Logam yang tidak dimiliki oleh The Teak. Di dalam bagan The Teak, elemen ini sangat minim, yang membuatnya sering kesulitan untuk tahu kapan harus berhenti atau melepaskan sesuatu. Kehadiran The Morning Dew memberikan rasa seimbang yang sangat dibutuhkan The Teak. Saat The Teak terjebak dalam situasi yang sebenarnya sudah selesai namun ia enggan melepasnya, The Morning Dew hadir sebagai pengingat yang menenangkan.\n\nBagi The Teak, ketiadaan The Morning Dew membuat hidup terasa sedikit lebih gelisah dan sulit untuk menemukan titik henti yang pas. Sebaliknya, kehadiran The Morning Dew secara alami meredakan tekanan di pundak The Teak, membuat area hidup The Teak yang tadinya rawan rapuh menjadi lebih stabil dan terukur.\n\n### Guncangan yang Terbawa Pulang\n\nPilar kehidupan The Teak memiliki hubungan langsung dengan ruang privat The Morning Dew. Apa pun yang sedang dihadapi The Teak di luar sana, terutama tekanan dalam karier atau tanggung jawab besar, akan masuk ke rumah dan mewarnai suasana hati The Morning Dew. The Morning Dew sering kali bisa merasakan ada masalah sebelum The Teak sendiri sempat menceritakan apa yang sedang terjadi.\n\nSituasi ini membuat The Morning Dew harus lebih peka terhadap perubahan suasana hati di rumah. Saat The Teak sedang mengalami guncangan di area kehidupannya, hawa dingin dari tekanan itu ikut terbawa masuk. The Morning Dew merasakannya secara langsung, dan jika tidak ada komunikasi yang jujur, ketegangan ini bisa berubah menjadi jarak yang tidak perlu.\n\nHubungan antara The Morning Dew dan The Teak adalah sebuah bangunan yang berdiri kokoh karena pilihan sadar dan komitmen yang dijaga terus-menerus. Dengan ritme yang mandiri namun saling menghidupi, kalian punya bahan untuk menjadi rumah yang stabil bagi satu sama lain. Saat kalian mampu memahami bahwa perbedaan cara pandang adalah alat untuk saling melengkapi, dan menyadari bahwa guncangan dari luar adalah bagian dari dinamika yang bisa kalian kelola bersama, hubungan ini bisa menjadi tempat di mana kalian berdua akhirnya bisa meletakkan beban dengan tenang."
+        }
+      ],
+      "output_tokens": [
+        1064
+      ],
+      "raw_responses": [
+        "{\"blocks\":[{\"fact_ids\":[\"p2_day_pair\",\"p5_pull_fit\"],\"heading\":\"Ruang yang Berjalan Masing-masing\",\"paragraphs\":[\"The Morning Dew dan The Teak memiliki cara bergerak yang sangat mandiri. Dalam hubungan kalian, tidak ada tarikan magnetis yang menarik kalian secara otomatis untuk selalu bersama. Ini adalah hubungan yang tidak berjalan dengan sendirinya, melainkan sebuah pilihan sadar yang kalian perbarui setiap hari. Kebersamaan kalian tidak dibangun di atas kebutuhan untuk selalu menempel, melainkan atas komitmen yang kalian jaga dengan sengaja.\",\"Kalian sering kali berada di ruang yang sama, tenggelam dalam kesibukan masing-masing tanpa merasa terganggu. Namun, karena tidak ada dorongan otomatis untuk melekat, jarak emosional bisa terasa jika kalian lupa menjadwalkan waktu khusus untuk berdua. Hubungan ini membutuhkan inisiatif aktif; tanpa itu, kalian bisa dengan mudah merasa seperti dua orang asing yang tinggal di bawah atap yang sama.\"]},{\"fact_ids\":[\"p1_stem_relation\"],\"heading\":\"Alur Pengayoman yang Stabil\",\"paragraphs\":[\"Di balik kemandirian kalian, ada satu alur energi yang sangat konsisten: The Morning Dew menghidupi The Teak. Peran ini mengalir searah dan jarang sekali tertukar. The Morning Dew membawa unsur yang memberi rasa aman dan dorongan, sementara The Teak menyambutnya untuk bergerak maju. Inisiatif baru atau rencana besar hampir selalu lahir dari The Morning Dew, yang kemudian dijalankan dengan mantap oleh The Teak.\",\"Dalam keseharian, ini terlihat saat ada keputusan penting yang harus diambil. The Morning Dew biasanya menjadi sosok yang membuka jalan, memberi ide, atau memberikan dukungan yang dibutuhkan agar The Teak merasa cukup tenang untuk melangkah. Begitu The Teak sudah bergerak, ia menuntaskannya dengan penuh keyakinan, dan The Morning Dew merasa lega karena arahnya sudah jelas.\"]},{\"fact_ids\":[\"p4_temperament\"],\"heading\":\"Satu Tujuan, Berbeda Jalan\",\"paragraphs\":[\"Kalian berdua memiliki akar karakter yang sama, namun dengan cara eksekusi yang sering bertolak belakang. Sebagai sesama pemilik pola pemikir dan pelindung, kalian sebenarnya memiliki gelombang yang sama soal target akhir hidup kalian. Kalian berdua tahu persis apa yang ingin dicapai, namun sering kali berdebat hebat tentang urutan langkah atau cara paling efisien untuk sampai ke sana.\",\"Di rumah, perdebatan ini sering muncul dalam hal-hal teknis. The Morning Dew lebih suka menyerap detail dan merenung, sementara The Teak cenderung ingin langsung melompat ke tindakan. Kalian sepakat tentang tujuan akhirnya, tetapi proses menuju ke sana sering menjadi arena gesekan karena masing-masing merasa cara beliaulah yang paling masuk akal.\"]},{\"fact_ids\":[\"p3_supply\"],\"heading\":\"Penyeimbang dalam Ketidakpastian\",\"paragraphs\":[\"The Morning Dew membawa elemen Logam yang tidak dimiliki oleh The Teak. Di dalam bagan The Teak, elemen ini sangat minim, yang membuatnya sering kesulitan untuk tahu kapan harus berhenti atau melepaskan sesuatu. Kehadiran The Morning Dew memberikan rasa seimbang yang sangat dibutuhkan The Teak. Saat The Teak terjebak dalam situasi yang sebenarnya sudah selesai namun ia enggan melepasnya, The Morning Dew hadir sebagai pengingat yang menenangkan.\",\"Bagi The Teak, ketiadaan The Morning Dew membuat hidup terasa sedikit lebih gelisah dan sulit untuk menemukan titik henti yang pas. Sebaliknya, kehadiran The Morning Dew secara alami meredakan tekanan di pundak The Teak, membuat area hidup The Teak yang tadinya rawan rapuh menjadi lebih stabil dan terukur.\"]},{\"fact_ids\":[\"p2_palace_frame\"],\"heading\":\"Guncangan yang Terbawa Pulang\",\"paragraphs\":[\"Pilar kehidupan The Teak memiliki hubungan langsung dengan ruang privat The Morning Dew. Apa pun yang sedang dihadapi The Teak di luar sana, terutama tekanan dalam karier atau tanggung jawab besar, akan masuk ke rumah dan mewarnai suasana hati The Morning Dew. The Morning Dew sering kali bisa merasakan ada masalah sebelum The Teak sendiri sempat menceritakan apa yang sedang terjadi.\",\"Situasi ini membuat The Morning Dew harus lebih peka terhadap perubahan suasana hati di rumah. Saat The Teak sedang mengalami guncangan di area kehidupannya, hawa dingin dari tekanan itu ikut terbawa masuk. The Morning Dew merasakannya secara langsung, dan jika tidak ada komunikasi yang jujur, ketegangan ini bisa berubah menjadi jarak yang tidak perlu.\"]}],\"penutup\":\"Hubungan antara The Morning Dew dan The Teak adalah sebuah bangunan yang berdiri kokoh karena pilihan sadar dan komitmen yang dijaga terus-menerus. Dengan ritme yang mandiri namun saling menghidupi, kalian punya bahan untuk menjadi rumah yang stabil bagi satu sama lain. Saat kalian mampu memahami bahwa perbedaan cara pandang adalah alat untuk saling melengkapi, dan menyadari bahwa guncangan dari luar adalah bagian dari dinamika yang bisa kalian kelola bersama, hubungan ini bisa menjadi tempat di mana kalian berdua akhirnya bisa meletakkan beban dengan tenang.\"}"
+      ],
+      "reads": {
+        "verdict": [],
+        "fixed": [],
+        "money_health": [],
+        "clinical": [
+          "Saat kalian mampu memahami bahwa perbedaan cara pandang adalah alat untuk saling melengkapi, dan menyadari bahwa guncangan dari luar adalah bagian dari dinamika yang bisa kalian kelola bersama, hubungan ini bisa menjadi tempat di mana kalian berdua akhirnya bisa meletakkan beban dengan tenang."
+        ],
+        "penutup_advice": [],
+        "indonesian_title": [],
+        "bracketed_title": []
+      },
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Ruang yang Berjalan Masing-masing",
+            "fact_ids": [
+              "p2_day_pair",
+              "p5_pull_fit"
+            ],
+            "text": "The Morning Dew dan The Teak memiliki cara bergerak yang sangat mandiri. Dalam hubungan kalian, tidak ada tarikan magnetis yang menarik kalian secara otomatis untuk selalu bersama. Ini adalah hubungan yang tidak berjalan dengan sendirinya, melainkan sebuah pilihan sadar yang kalian perbarui setiap hari. Kebersamaan kalian tidak dibangun di atas kebutuhan untuk selalu menempel, melainkan atas komitmen yang kalian jaga dengan sengaja.\n\nKalian sering kali berada di ruang yang sama, tenggelam dalam kesibukan masing-masing tanpa merasa terganggu. Namun, karena tidak ada dorongan otomatis untuk melekat, jarak emosional bisa terasa jika kalian lupa menjadwalkan waktu khusus untuk berdua. Hubungan ini membutuhkan inisiatif aktif; tanpa itu, kalian bisa dengan mudah merasa seperti dua orang asing yang tinggal di bawah atap yang sama."
+          },
+          {
+            "heading": "Alur Pengayoman yang Stabil",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Di balik kemandirian kalian, ada satu alur energi yang sangat konsisten: The Morning Dew menghidupi The Teak. Peran ini mengalir searah dan jarang sekali tertukar. The Morning Dew membawa unsur yang memberi rasa aman dan dorongan, sementara The Teak menyambutnya untuk bergerak maju. Inisiatif baru atau rencana besar hampir selalu lahir dari The Morning Dew, yang kemudian dijalankan dengan mantap oleh The Teak.\n\nDalam keseharian, ini terlihat saat ada keputusan penting yang harus diambil. The Morning Dew biasanya menjadi sosok yang membuka jalan, memberi ide, atau memberikan dukungan yang dibutuhkan agar The Teak merasa cukup tenang untuk melangkah. Begitu The Teak sudah bergerak, ia menuntaskannya dengan penuh keyakinan, dan The Morning Dew merasa lega karena arahnya sudah jelas."
+          },
+          {
+            "heading": "Satu Tujuan, Berbeda Jalan",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Kalian berdua memiliki akar karakter yang sama, namun dengan cara eksekusi yang sering bertolak belakang. Sebagai sesama pemilik pola pemikir dan pelindung, kalian sebenarnya memiliki gelombang yang sama soal target akhir hidup kalian. Kalian berdua tahu persis apa yang ingin dicapai, namun sering kali berdebat hebat tentang urutan langkah atau cara paling efisien untuk sampai ke sana.\n\nDi rumah, perdebatan ini sering muncul dalam hal-hal teknis. The Morning Dew lebih suka menyerap detail dan merenung, sementara The Teak cenderung ingin langsung melompat ke tindakan. Kalian sepakat tentang tujuan akhirnya, tetapi proses menuju ke sana sering menjadi arena gesekan karena masing-masing merasa cara beliaulah yang paling masuk akal."
+          },
+          {
+            "heading": "Penyeimbang dalam Ketidakpastian",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "The Morning Dew membawa elemen Logam yang tidak dimiliki oleh The Teak. Di dalam bagan The Teak, elemen ini sangat minim, yang membuatnya sering kesulitan untuk tahu kapan harus berhenti atau melepaskan sesuatu. Kehadiran The Morning Dew memberikan rasa seimbang yang sangat dibutuhkan The Teak. Saat The Teak terjebak dalam situasi yang sebenarnya sudah selesai namun ia enggan melepasnya, The Morning Dew hadir sebagai pengingat yang menenangkan.\n\nBagi The Teak, ketiadaan The Morning Dew membuat hidup terasa sedikit lebih gelisah dan sulit untuk menemukan titik henti yang pas. Sebaliknya, kehadiran The Morning Dew secara alami meredakan tekanan di pundak The Teak, membuat area hidup The Teak yang tadinya rawan rapuh menjadi lebih stabil dan terukur."
+          },
+          {
+            "heading": "Guncangan yang Terbawa Pulang",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Pilar kehidupan The Teak memiliki hubungan langsung dengan ruang privat The Morning Dew. Apa pun yang sedang dihadapi The Teak di luar sana, terutama tekanan dalam karier atau tanggung jawab besar, akan masuk ke rumah dan mewarnai suasana hati The Morning Dew. The Morning Dew sering kali bisa merasakan ada masalah sebelum The Teak sendiri sempat menceritakan apa yang sedang terjadi.\n\nSituasi ini membuat The Morning Dew harus lebih peka terhadap perubahan suasana hati di rumah. Saat The Teak sedang mengalami guncangan di area kehidupannya, hawa dingin dari tekanan itu ikut terbawa masuk. The Morning Dew merasakannya secara langsung, dan jika tidak ada komunikasi yang jujur, ketegangan ini bisa berubah menjadi jarak yang tidak perlu."
+          }
+        ],
+        "penutup": "Hubungan antara The Morning Dew dan The Teak adalah sebuah bangunan yang berdiri kokoh karena pilihan sadar dan komitmen yang dijaga terus-menerus. Dengan ritme yang mandiri namun saling menghidupi, kalian punya bahan untuk menjadi rumah yang stabil bagi satu sama lain. Saat kalian mampu memahami bahwa perbedaan cara pandang adalah alat untuk saling melengkapi, dan menyadari bahwa guncangan dari luar adalah bagian dari dinamika yang bisa kalian kelola bersama, hubungan ini bisa menjadi tempat di mana kalian berdua akhirnya bisa meletakkan beban dengan tenang."
+      }
+    }
+  ]
+}

@@ -49,7 +49,8 @@ function restatingWriter(captured) {
     // requires it to name both people: the writer names both English titles first.
     const names = `Kalian berdua, ${payload.core?.a?.archetype_name_en} dan ${payload.core?.b?.archetype_name_en}.`;
     const draft = {
-      blocks: [{ fact_ids: facts.map((f) => f.id), heading: 'Semua', text: `${names} ${text}\n\nKamu dan dia berjalan bersama.` }],
+      // A v2 pair answers in `paragraphs` since BC amendment 2c; same two paragraphs.
+      blocks: [{ fact_ids: facts.map((f) => f.id), heading: 'Semua', paragraphs: [`${names} ${text}`, 'Kamu dan dia berjalan bersama.'] }],
       penutup: 'Penutup yang cukup panjang untuk kalian berdua, dan untukmu.',
     };
     return ok(JSON.stringify(draft));

@@ -1,45 +1,15 @@
-EXAMPLES (written by Reyner, 2026-09-26). They come from OTHER people's charts. They show the
-experience a Katon reading gives: answer the curiosity, explain the why, make it recognisable, leave
-something worth exploring. Never reuse their facts, names or sentences; your JSON is the only source of
-facts for this reading. They are not a template: vary length and shape. Only the block text is shown.
+<!--
+STATUS: REYNER-APPROVED 2026-10-02. The gold-standard compatibility reading for Prompt BC.
+Reyner's rewrite with Cowork's fixes (clash direction per E13; the Api supply fact) and arc additions, approved by Reyner "in its entirety".
+Pair: A = Nadia, The Garden, 2005-02-14 07:00, perempuan. B = Bima, The Forge, 1999-07-07 17:00, laki-laki. Status: Menikah.
+Facts drawn on: p2_day_pair (Kursi Terikat, 巳-申 六合); p1_stem_relation (a_produces_b); p3_supply (Api, A to B, receiver_favourable_rank 1);
+p4_temperament (officer vs resource); p2_palace_frame a_hits_b (A month 寅 冲 B day 申; text p2_palace_frame_reader); p5_pull_fit (q1);
+mirror A: element_dominant_Earth, strength_weak, profile Aspek Pengatur; mirror B: element_dominant_Metal, strength_balanced,
+main_profile Aspek Pelindung, day_master_Metal gift, badge Mata Pisau.
+The reading text below the line is what goes into the pair examples.
+-->
 
-=== MIRROR EXAMPLES ===
-
---- Example 1. The reader's unspoken question: "What kind of person am I, really?"
-Facts it drew on: Day Master Air (The Ocean), label_meaning, salah_dikira, gift, cost; main profile Aspek
-Pengelola converging in Pilar Kerja and Pilar Diri, label_meaning, gift, cost.
-
-Sebagai The Ocean, elemen Air di dalam dirimu membuatmu menyesuaikan diri dengan keadaan tanpa pernah kehilangan arah tujuan. Orang sering salah mengira kamu plin-plan dan sulit ditebak, padahal arah tujuanmu sebenarnya selalu sama, hanya jalurnya saja yang berganti-ganti. Di saat orang lain menemui jalan buntu, kamu mampu menembus situasi tersebut dengan mencari celah. Sesuatu yang terus mengalir seperti dirimu tentu sulit untuk diikat; komitmen jangka panjang pada satu bentuk kaku akan selalu terasa amat berat bagimu.
-
-Di luar cara gerakmu, ada Aspek Pengelola yang sangat menonjol di pilar kerja dan kehidupan personalmu. Ini membuatmu sering dipercaya memegang hal penting dan merawatnya dengan rapi, sehingga apa yang kamu urus jarang berantakan. Kepercayaan datang sendiri tanpa perlu kamu minta, dan orang merasa tenang saat kamu yang memegang kendali. Sayangnya, ada konsekuensi yang harus dibayar: semakin banyak urusan yang kamu pegang, semakin sedikit energi yang tersisa untuk dirimu sendiri.
-
---- Example 2. The reader's unspoken question: "Why does the chart say that?"
-Facts it drew on: day stem Water -> The Ocean; strength Lemah (provenance: month branch Horse, season
-element Fire, Water controls Fire; favourable Metal, Water; unfavourable Earth, Fire, Wood); tension
-rule CR-1: main profile Aspek Pengelola is Fire, an unfavourable element, in Pilar Kerja and Pilar Diri.
-
-Kesimpulan ini berasal dari elemen intimu. Kamu adalah The Ocean karena batang hari lahirmu adalah Air. Namun, kapasitas energimu tergolong Lemah karena kamu lahir di bulan Kuda, yang musimnya berelemen Api. Dalam siklus elemen, Air bertugas mengontrol Api, sehingga energi musim kelahiranmu tidak mensuplai atau memberimu makan. Lemah di sini bukan berarti tidak mampu; ini hanya penanda bahwa sumber tenagamu murni berada di luar dirimu: kamu secara spesifik membutuhkan elemen Logam dan Air, sementara Tanah, Api, dan Kayu akan mengurasmu. Berada di tempat yang tepat akan membuatmu melesat cepat, dan tempat yang salah akan mengurasmu sampai habis.
-
-Tegangan terbesar dalam petamu juga bisa dijelaskan: Aspek Pengelola-mu yang menonjol itu berelemen Api. Ini berarti aspek terkuatmu, yang bersarang di Pilar Kerja dan Pilar Diri, secara konstan menarik tenaganya dari salah satu elemen yang pada dasarnya melelahkanmu. Peran-peran dominanmu sehari-hari justru memakan energi dari sumur yang kapasitasnya terbatas.
-
---- Example 3. The reaction it aims for: "That is so me."
-Facts it drew on: Setengah Gabungan of Horse and Dog across Pilar Kerja and Pilar
-Diri, combining toward Fire; label_meaning, cost.
-
-Di keseharian, ada interaksi Setengah Gabungan yang menarik elemen Api di antara Pilar Kerja dan Pilar Diri-mu. Artinya, dua dari tiga bagian sudah saling tarik. Arah geraknya sudah sangat jelas, meskipun kekuatannya belum sepenuhnya padu. Kondisi ini sering kali muncul dalam bentuk rasa "hampir pas": semuanya sudah jalan dan arahnya jelas, tapi kamu selalu merasa harus menambah atau membereskan satu hal lagi sebelum berani menyebutnya selesai.
-
---- Example 5. A revelation that leaves her wondering about someone else
-Facts it drew on: Fondasi Pasangan in Pilar Diri holding Aspek Penantang (palace meaning; Aspek
-Penantang label_meaning, gift, cost); Bintang Penolong in Pilar Arah.
-
-Fondasi Pasangan adalah tempat membaca dinamika hubungan paling dekatmu. Isinya menunjukkan tekstur relasi yang terasa wajar bagimu. Di fondasi ini bersarang Aspek Penantang, yang menjelaskan mengapa kamu tumbuh paling cepat saat berada di bawah tekanan. Kamu tidak pernah lumpuh saat situasi memburuk; justru di titik itulah pikiranmu paling jernih. Sebaliknya, keadaan yang terlalu aman justru membuatmu gelisah, memancingmu mencari tekanan yang sebenarnya tidak perlu karena beristirahat terasa seperti kehilangan arah.
-
-Namun, ritme bertekanan tinggi ini tidak berdiri sendiri. Di Pilar Arahmu terdapat Bintang Penolong; saat kamu benar-benar menemui jalan buntu, selalu ada orang yang tidak terduga muncul membantu di saat yang tepat.
-
-=== PAIR EXAMPLES ===
-
---- Example 4. Nadia and Bima, married (Menikah). Chapter headings are the lines starting "## ".
-Facts it drew on: Kursi Terikat (seats Ular and Monyet); Inti Menghidupi (Nadia's Tanah produces Bima's Logam); Penyeimbang Unsur (Nadia brings Api to Bima); Pola Kontras (Aspek Pengatur and Aspek Pelindung); Berseberangan (Nadia's Pilar Kerja reaches Bima's seat); Tarikan Kuat, Ritme Seirama; each person's chart (Nadia: Tanah dominant, Lemah, Aspek Pengatur; Bima: Logam dominant, Seimbang, Aspek Pelindung, Mata Pisau).
+# Nadia dan Bima
 
 ## Tarikan Alami dan Ritme Keseharian
 

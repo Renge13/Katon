@@ -97,3 +97,64 @@ test('THE SEMANTIC JSON carries core.status and each nickname, and they are part
   const wire = JSON.stringify(writerPayload(sj));
   assert.ok(wire.includes('"nickname":"Nadia"') && wire.includes('"status":"Menikah"'));
 });
+
+test('BC AMENDMENT 1 item 4: on a v2 pair, p3_supply names the element in Indonesian and both people, so the writer maps nothing (PZ0t)', () => {
+  // PZ0t floored at both temperatures in BC §3 on pair.supply_inverted: the writer wrote
+  // "Sari membawa elemen Api ..." (Sari's own Day Master element) where the engine says
+  // A supplies Water. The fact gave the element in English and the people as A/B only.
+  const pz = buildPairSemantic(
+    calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' }),
+    calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00', gender: 'male' }),
+    { voice: 'v2', status: 'Pacaran', nicknames: { a: 'Sari', b: 'Dimas' } },
+  );
+  const supplies = pz.facts.find((f) => f.id === 'p3_supply').provenance.supplies;
+  const pick = (s) => ({ from: s.from, element_id: s.element_id, supplier_name: s.supplier_name, receiver_name: s.receiver_name });
+  assert.deepEqual(supplies.map(pick), [
+    { from: 'a', element_id: 'Air', supplier_name: 'Sari', receiver_name: 'Dimas' },
+    { from: 'b', element_id: 'Kayu', supplier_name: 'Dimas', receiver_name: 'Sari' },
+  ]);
+  // It reaches the writer: provenance is not scrubbed.
+  const sent = writerPayload(pz).facts.find((f) => f.id === 'p3_supply').provenance.supplies;
+  assert.equal(sent[0].element_id, 'Air');
+
+  // No nickname: the person's English archetype title is their name, as the address mode says.
+  const anon = buildPairSemantic(
+    calculateBaziChart({ birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' }),
+    calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00', gender: 'male' }),
+    { voice: 'v2', status: 'Pacaran', nicknames: {} },
+  );
+  const s0 = anon.facts.find((f) => f.id === 'p3_supply').provenance.supplies[0];
+  assert.deepEqual([s0.supplier_name, s0.receiver_name], ['The Sun', 'The Mountain']);
+});
+
+test('BC AMENDMENT 1 item 7: Reyner\'s form labels and privacy sentences, ruled, exactly', async () => {
+  // Reyner, 2026-10-02 (docs/prompts/BC-amendment-1-adjustment-round.md item 7). The five
+  // form strings were PROPOSED() in BC §1 and are now ruled with the same words; the two
+  // privacy sentences are new.
+  const { PASANGAN_COPY, SITE_COPY, PROPOSED_SLOTS } = await import('../lib/site/copy.js');
+  assert.deepEqual(
+    ['nickname_label', 'nickname_help', 'status_label', 'nickname_invalid', 'status_invalid'].map((k) => PASANGAN_COPY[k]),
+    [
+      'Nama panggilan (opsional)',
+      'Dipakai untuk menyebut kalian di dalam bacaan.',
+      'Status hubungan kalian',
+      'Nama panggilan hanya boleh berisi huruf, spasi, tanda petik, atau tanda hubung, paling banyak 20 karakter.',
+      'Pilih status hubungan kalian.',
+    ],
+  );
+  assert.deepEqual(PROPOSED_SLOTS.filter((p) => p.slot.startsWith('pasangan.')), [], 'a ruled form string is still PROPOSED');
+
+  const q = SITE_COPY.privasi;
+  assert.equal(q.privasi_names, 'Nama panggilan yang kamu isi, untuk dirimu dan untuk orang kedua, beserta status hubungan kalian, disimpan bersama bacaan ini dan hanya dipakai untuk menyusunnya.');
+  const { readFileSync } = await import('node:fs');
+  assert.ok(readFileSync(new URL('../app/privasi/page.js', import.meta.url), 'utf8').includes('q.privasi_names'), 'the names disclosure is not rendered');
+  const gemini = q.processors.find((s) => s.includes('Gemini'));
+  assert.ok(gemini.endsWith('Yang dikirim ke penyedia ini hanya hasil hitungan bagan. Untuk bacaan kompatibilitas, ikut dikirim juga nama panggilan dan status hubungan yang kamu isi. Tanggal lahir mentah dan email tidak pernah dikirim.'), gemini);
+  assert.equal(gemini.includes('tanpa nama'), false, 'the processor line still says no name is sent');
+});
+
+test('BC AMENDMENT 2 item 1: the privacy note says Katon does not ask for a FULL name (the compat form asks for a nickname)', async () => {
+  const { SITE_COPY } = await import('../lib/site/copy.js');
+  assert.equal(SITE_COPY.privasi.collectNote,
+    'Katon tidak meminta nama lengkap, tidak memakai akun, dan tidak memasang cookie pelacak atau alat analitik pihak ketiga.');
+});
