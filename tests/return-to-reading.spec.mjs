@@ -1,0 +1,412 @@
+// ============================================================
+// tests/return-to-reading.spec.mjs — coming back to your reading (Prompt BF)
+// ============================================================
+// Run: npm run test:return-to-reading
+//
+// Reyner's walk on the #199 preview, 2026-10-06: after a free reading at
+// /r/<token> he opened /harga, then pressed the browser's back button or the
+// header's "Bacaan Diri". Both landed on the empty birth-date form.
+//
+// THE BACK BUTTON. The funnel creates the reading on `/` and swaps the address to
+// /r/<token> with `history.pushState` so the reading is bookmarkable without
+// remounting. Next 15 patches pushState (node_modules/next/dist/client/components/
+// app-router.js, `copyNextJsInternalHistoryState`) and copies the CURRENT entry's
+// router tree into the new one, so the /r/<token> entry carries the tree of `/`.
+// Back from /harga restores that tree: the home page mounts fresh at /r/<token>,
+// `phase` starts at 'input', and she sees the form. The fix: the funnel reads the
+// address it mounts at, and a fresh mount at /r/<token> opens that reading.
+//
+// Every "absent" assertion here is paired with a "present" one, so a page that lost
+// the whole block cannot pass (CLAUDE.md, 2026-08-26).
+// ============================================================
+
+import test, { beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { act } from 'react';
+
+import Funnel, { Reading } from '../components/Funnel.jsx';
+import { BirthFields } from '../components/BirthFields.jsx';
+import { calculateBaziChart } from '../lib/bazi/buildChart.js';
+import { buildSemanticJson } from '../lib/semantic/index.js';
+import { mirrorChartView } from '../lib/mirror/view.js';
+import { CHROME_COPY } from '../lib/site/copy.js';
+import { COMPAT_ROUTE } from '../lib/site/routes.js';
+import { rememberReading, recallReading, forgetReading, LAST_READING_KEY } from '../lib/site/lastReading.js';
+import { recallBirth, forgetBirth, rememberBirth } from '../lib/site/carryBirth.js';
+import GLOSSARY from '../docs/content/glossary.json' with { type: 'json' };
+import { makeSetField } from './helpers/setField.mjs';
+import hooksContext from 'next/dist/shared/lib/hooks-client-context.shared-runtime.js';
+
+const { PathnameContext } = hooksContext;
+
+// ── §4, VERBATIM AS REYNER CONFIRMED THEM ──────────────────
+const RULED = {
+  resume_line: 'Bacaanmu masih tersimpan di perangkat ini.', // R1
+  resume_open: 'Buka bacaanku', // R2
+  resume_new: 'Mulai bacaan baru', // R3
+  next_other_date: 'Baca tanggal lain', // R4
+  bagan_intro: 'Empat pilar dari tanggal lahirmu. Pilar yang bertanda Inti Diri adalah intinya.', // K1
+  hour_hint: 'Tidak tahu? Lewati saja.', // H1
+  hour_missing: 'Jam lahir belum diisi, jadi Pilar Arah belum dihitung.', // H2
+  hour_add: 'Tambahkan jam lahir', // H3
+};
+const OLD_BAGAN_INTRO = 'Empat lapisan energi dari tanggal lahirmu. Yang di tengah adalah intinya.';
+const KONSEPSI_MEANING = GLOSSARY.pilar.conception.label_meaning;
+
+const withHour = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '04:00' });
+const noHour = calculateBaziChart({ birthDate: '1989-09-13', birthTime: null });
+const viewOf = (c) => mirrorChartView(c, buildSemanticJson(c));
+const served = (chart, extra = {}) => ({
+  token: 'tok123abc',
+  chart,
+  blocks: [{ heading: 'Inti dirimu', paragraphs: ['Paragraf satu.'] }],
+  penutup: '',
+  pending: false,
+  card: null,
+  ...extra,
+});
+const SERVED = served(viewOf(withHour));
+const TITLE = SERVED.chart.archetype.name_en;
+
+const src = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
+const flush = () => act(async () => { for (let i = 0; i < 6; i += 1) await new Promise((r) => setTimeout(r, 0)); });
+
+/** `routes` maps a URL substring to a response; the first match wins. */
+function stubFetch(routes = {}) {
+  const prev = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, opts) => {
+    const u = String(url);
+    calls.push({ url: u, method: opts?.method || 'GET' });
+    const hit = Object.keys(routes).find((k) => u.includes(k));
+    const r = hit ? routes[hit] : { status: 200, body: {} };
+    return { ok: r.status < 400, status: r.status, json: async () => r.body };
+  };
+  return { calls, restore: () => { globalThis.fetch = prev; } };
+}
+
+async function mount(element) {
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  await act(async () => { root.render(element); });
+  return {
+    host,
+    text: () => host.textContent || '',
+    links: () => [...host.querySelectorAll('a')],
+    unmount: async () => { await act(async () => root.unmount()); host.remove(); },
+  };
+}
+
+beforeEach(() => {
+  forgetReading();
+  forgetBirth();
+  window.history.replaceState(null, '', '/');
+});
+
+// ── §4: THE STRINGS ────────────────────────────────────────
+
+test('§4: every new string is in CHROME_COPY verbatim, and the old Bagan line is gone', () => {
+  for (const [key, value] of Object.entries(RULED)) {
+    assert.equal(CHROME_COPY[key], value, `CHROME_COPY.${key}`);
+  }
+  assert.ok(!Object.values(CHROME_COPY).includes(OLD_BAGAN_INTRO), 'the "yang di tengah" line is replaced');
+});
+
+// ── §1a: THE BACK BUTTON ───────────────────────────────────
+
+test('§1a: a fresh funnel mount AT /r/<token> opens that reading, not the form', async () => {
+  window.history.replaceState(null, '', '/r/tok123abc');
+  const f = stubFetch({
+    '/api/mirror/tok123abc': { status: 200, body: SERVED },
+    '/api/deliver/tok123abc': { status: 200, body: { paid: false, items: [] } },
+  });
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    await flush();
+    assert.equal(ui.host.querySelector('form') === null, true, 'the birth-date form must not be what she sees');
+    assert.ok(ui.text().includes(TITLE), 'her reading, by its archetype title');
+    assert.ok(f.calls.some((c) => c.url.includes('/api/mirror/tok123abc')), 'the reading is fetched by its token');
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+// ── §1d: THE HEADER'S "Bacaan Diri" AFTER A RESTORE ─────────
+// Found by the browser walk, not by the first version of this file: a restored funnel
+// is the `/` page's component, so a client navigation to `/` keeps the instance, and
+// it went on showing the reading at `/`. `usePathname` is Next's PathnameContext; the
+// test provides it so the navigation can be expressed.
+test('§1d: a navigation from /r/<token> to / shows the front door with the resume card', async () => {
+  rememberReading({ token: 'tok123abc', title: TITLE });
+  window.history.replaceState(null, '', '/r/tok123abc');
+  const f = stubFetch({
+    '/api/mirror/tok123abc': { status: 200, body: SERVED },
+    '/api/deliver/tok123abc': { status: 200, body: { paid: false, items: [] } },
+  });
+  const at = (pathname) => React.createElement(PathnameContext.Provider, { value: pathname },
+    React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => { root.render(at('/r/tok123abc')); });
+    await flush();
+    assert.equal(host.querySelector('form') === null, true, 'restored: the reading, not the form');
+    assert.ok(host.textContent.includes(TITLE));
+
+    window.history.replaceState(null, '', '/');
+    await act(async () => { root.render(at('/')); });
+    await flush();
+    assert.ok(host.querySelector('form'), 'at / the front door shows');
+    assert.ok(host.querySelector('[data-resume-card]'), 'with the resume card for the reading just left');
+
+    window.history.replaceState(null, '', '/r/tok123abc');
+    await act(async () => { root.render(at('/r/tok123abc')); });
+    await flush();
+    assert.equal(host.querySelector('form') === null, true, 'forward again: the reading');
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    f.restore();
+  }
+});
+
+// The second half of the walk's finding: Next renders the new tree BEFORE it writes the
+// address, so a FRESH funnel mounted by a client navigation to `/` still finds
+// /r/<token> in `window.location`. The router's pathname is the truth.
+test('§1d: a fresh mount where the router says / and the window still says /r/<token> shows the form', async () => {
+  window.history.replaceState(null, '', '/r/tok123abc');
+  const f = stubFetch({ '/api/mirror/tok123abc': { status: 200, body: SERVED } });
+  const ui = await mount(React.createElement(PathnameContext.Provider, { value: '/' },
+    React.createElement(Funnel, { salesOpen: false, compatOpen: false })));
+  try {
+    await flush();
+    assert.ok(ui.host.querySelector('form'), 'the front door, as the router says');
+    assert.ok(!f.calls.some((c) => c.url.includes('/api/mirror/tok123abc')), 'the reading is not opened');
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+test('§1a: a funnel mount at / still shows the form (the control for the case above)', async () => {
+  const f = stubFetch();
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    await flush();
+    assert.ok(ui.host.querySelector('form'), 'the front door');
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+// ── §1b: THE MEMORY ────────────────────────────────────────
+
+test('§1b: the memory holds the token and the title, never a birth date, and survives storage throwing', () => {
+  assert.equal(rememberReading({ token: 'tok123abc', title: TITLE, birthDate: '1989-09-13', date: '1989-09-13' }), true);
+  const raw = window.localStorage.getItem(LAST_READING_KEY);
+  assert.deepEqual(JSON.parse(raw), { token: 'tok123abc', title: TITLE });
+  assert.ok(!/\d{4}-\d{2}-\d{2}/u.test(raw), 'no date-shaped value is stored');
+  assert.deepEqual(recallReading(), { token: 'tok123abc', title: TITLE });
+  forgetReading();
+  assert.equal(recallReading(), null);
+
+  const desc = Object.getOwnPropertyDescriptor(window, 'localStorage');
+  Object.defineProperty(window, 'localStorage', { configurable: true, get() { throw new Error('SecurityError'); } });
+  try {
+    assert.equal(rememberReading({ token: 'tok123abc', title: TITLE }), false);
+    assert.equal(recallReading(), null);
+    assert.doesNotThrow(() => forgetReading());
+  } finally { Object.defineProperty(window, 'localStorage', desc); }
+});
+
+test('§1b: creating a reading remembers its token and title on this device', async () => {
+  const f = stubFetch({
+    '/api/season-check': { status: 200, body: { needsHour: false } },
+    '/api/mirror/newtok999': { status: 200, body: { ...SERVED, token: 'newtok999' } },
+    '/api/mirror': { status: 201, body: { token: 'newtok999', chart: SERVED.chart } },
+  });
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    const setField = makeSetField(ui.host, act, window);
+    setField('input[type="date"]', '1989-09-13');
+    await act(async () => {
+      ui.host.querySelector('form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+    });
+    await flush();
+    assert.deepEqual(recallReading(), { token: 'newtok999', title: TITLE });
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+// ── §1c: THE RESUME CARD ───────────────────────────────────
+
+test('§1c: with a remembered reading, the front door shows the resume card above the form', async () => {
+  rememberReading({ token: 'tok123abc', title: TITLE });
+  const f = stubFetch({ '/api/deliver/tok123abc': { status: 200, body: { paid: false, items: [] } } });
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    await flush();
+    const card = ui.host.querySelector('[data-resume-card]');
+    assert.ok(card, 'the resume card renders');
+    assert.ok(card.textContent.includes(TITLE), 'it names the archetype');
+    assert.ok(card.textContent.includes(RULED.resume_line), 'R1');
+    const open = [...card.querySelectorAll('a')].find((a) => a.textContent.includes(RULED.resume_open));
+    assert.ok(open, 'R2');
+    assert.equal(open.getAttribute('href'), '/r/tok123abc');
+    const form = ui.host.querySelector('form');
+    assert.ok(form, 'the form is still there');
+    assert.ok(card.compareDocumentPosition(form) & window.Node.DOCUMENT_POSITION_FOLLOWING, 'the card sits ABOVE the form');
+
+    const fresh = [...card.querySelectorAll('button, a')].find((el) => el.textContent.includes(RULED.resume_new));
+    assert.ok(fresh, 'R3');
+    await act(async () => { fresh.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })); });
+    assert.equal(ui.host.querySelector('[data-resume-card]') === null, true, 'R3 hides the card');
+    assert.equal(recallReading(), null, 'R3 clears the memory');
+    assert.ok(ui.host.querySelector('form'), 'and the plain form remains');
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+test('§1c: a remembered token that no longer resolves is cleared silently', async () => {
+  rememberReading({ token: 'gonetok77', title: TITLE });
+  const f = stubFetch({ '/api/deliver/gonetok77': { status: 404, body: { error: 'not_found' } } });
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    await flush();
+    assert.equal(ui.host.querySelector('[data-resume-card]') === null, true);
+    assert.equal(recallReading(), null);
+    assert.ok(ui.host.querySelector('form'));
+    assert.ok(!ui.text().includes(RULED.resume_line));
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+test('§1c: nothing remembered, no resume card', async () => {
+  const f = stubFetch();
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    await flush();
+    assert.equal(ui.host.querySelector('[data-resume-card]') === null, true);
+    assert.ok(!f.calls.some((c) => c.url.includes('/api/deliver/')), 'no lookup without a memory');
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+// ── §2: THE END OF THE FREE READING ────────────────────────
+
+test('§2: the next block links R4 to / after the offer; compat appears in it only when compat is on sale', async () => {
+  const f = stubFetch();
+  try {
+    const off = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true, compatOpen: false }));
+    let block = off.host.querySelector('[data-next-block]');
+    assert.ok(block, 'compat closed: the next block renders');
+    const r4 = [...block.querySelectorAll('a')].find((a) => a.textContent.includes(RULED.next_other_date));
+    assert.ok(r4, 'R4');
+    assert.equal(r4.getAttribute('href'), '/');
+    assert.equal([...block.querySelectorAll('a')].some((a) => a.getAttribute('href') === COMPAT_ROUTE), false, 'compat closed: no compat entry');
+    assert.ok(!block.textContent.includes(CHROME_COPY.compat_cta));
+    const text = off.text();
+    assert.ok(text.indexOf('Ambil Complete Edition') > -1 && text.indexOf('Ambil Complete Edition') < text.indexOf(RULED.next_other_date), 'after the CE offer');
+    await off.unmount();
+
+    const on = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true, compatOpen: true }));
+    block = on.host.querySelector('[data-next-block]');
+    assert.ok(block);
+    const compat = [...block.querySelectorAll('a')].find((a) => a.getAttribute('href') === COMPAT_ROUTE);
+    assert.ok(compat, 'compat open: the compat entry is in the next block');
+    assert.ok(compat.textContent.includes(CHROME_COPY.compat_cta), 'reusing the existing compat CTA string');
+    await on.unmount();
+  } finally { f.restore(); }
+});
+
+// ── §3: BAGAN KELAHIRAN ────────────────────────────────────
+
+test('§3: K1 replaces the "yang di tengah" line; the Konsepsi caption is the glossary text, read not retyped', async () => {
+  assert.equal(SERVED.chart.conception_pillar.meaning, KONSEPSI_MEANING, 'the view carries the glossary meaning');
+  const f = stubFetch();
+  const ui = await mount(React.createElement(Reading, { reading: SERVED, onReset() {} }));
+  try {
+    assert.ok(ui.text().includes(RULED.bagan_intro), 'K1 renders');
+    assert.ok(!ui.text().includes(OLD_BAGAN_INTRO), 'the old line does not');
+    const cap = ui.host.querySelector('[data-conception-caption]');
+    assert.ok(cap, 'the caption renders under the Konsepsi card');
+    assert.equal(cap.textContent, KONSEPSI_MEANING);
+    assert.ok(ui.text().includes(SERVED.chart.conception_pillar.hanzi), 'Konsepsi itself stays (rule 4)');
+  } finally { await ui.unmount(); f.restore(); }
+  for (const file of ['components/Funnel.jsx', 'lib/mirror/view.js', 'lib/site/copy.js']) {
+    assert.ok(!src(file).includes('Dihitung dari perkiraan masa pembuahan'), `${file} retypes the glossary sentence`);
+  }
+});
+
+// ── §3b: THE BIRTH HOUR ────────────────────────────────────
+
+test('§3b: H1 sits under the hour field on the front door; the label is unchanged; compat does not get it', async () => {
+  const f = stubFetch();
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    assert.ok(ui.text().includes('Jam lahir · opsional'), 'label unchanged');
+    const hint = ui.host.querySelector('[data-hour-hint]');
+    assert.ok(hint, 'H1 renders');
+    assert.equal(hint.textContent, RULED.hour_hint);
+    const select = ui.host.querySelector('#mirror-time');
+    assert.ok(select.compareDocumentPosition(hint) & window.Node.DOCUMENT_POSITION_FOLLOWING, 'under the hour field');
+  } finally { await ui.unmount(); f.restore(); }
+
+  const compat = await mount(React.createElement(BirthFields, { value: { date: '', time: '', gender: '' }, onChange() {}, idPrefix: 'a' }));
+  try {
+    assert.ok(compat.text().includes('Jam lahir · opsional'), 'the shared fields render (control)');
+    assert.ok(!compat.text().includes(RULED.hour_hint), 'the compat form is not part of this change');
+  } finally { await compat.unmount(); }
+});
+
+test('§3b: no hour given, H2 and H3 under the Bagan cards; hour given, nothing extra', async () => {
+  const f = stubFetch();
+  try {
+    const reading = served(viewOf(noHour), { birthDate: '1989-09-13', gender: 'female' });
+    assert.equal(reading.chart.hour_known, false);
+    const without = await mount(React.createElement(Reading, { reading, onReset() {} }));
+    const line = without.host.querySelector('[data-hour-missing]');
+    assert.ok(line, 'H2 renders');
+    assert.ok(line.textContent.includes(RULED.hour_missing));
+    const add = [...line.querySelectorAll('a')].find((a) => a.textContent.includes(RULED.hour_add));
+    assert.ok(add, 'H3 renders');
+    const href = add.getAttribute('href');
+    assert.ok(href.startsWith('/'), 'to the front door');
+    assert.ok(!href.includes('1989'), 'no birth date in the address');
+    // Carried in this tab, the way lib/site/carryBirth.js already carries it to compat.
+    await act(async () => { add.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })); });
+    assert.deepEqual(recallBirth(), { date: '1989-09-13', time: '', gender: 'female' });
+    await without.unmount();
+
+    const withH = await mount(React.createElement(Reading, { reading: SERVED, onReset() {} }));
+    assert.equal(SERVED.chart.hour_known, true);
+    assert.equal(withH.host.querySelector('[data-hour-missing]') === null, true, 'hour given: nothing extra');
+    assert.ok(!withH.text().includes(RULED.hour_missing));
+    await withH.unmount();
+  } finally { f.restore(); }
+});
+
+test('§3b: H3 lands on the front door with the date and gender prefilled and the hour field focused', async () => {
+  const f = stubFetch();
+  // The address H3 actually links to, read off the rendered reading.
+  const page = await mount(React.createElement(Reading, { reading: served(viewOf(noHour), { birthDate: '1989-09-13', gender: 'female' }), onReset() {} }));
+  const add = [...page.host.querySelectorAll('[data-hour-missing] a')].find((a) => a.textContent.includes(RULED.hour_add));
+  assert.ok(add, 'H3 renders');
+  await act(async () => { add.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })); });
+  const h3 = add.getAttribute('href');
+  await page.unmount();
+  window.history.replaceState(null, '', h3);
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    await flush();
+    assert.equal(ui.host.querySelector('input[type="date"]').value, '1989-09-13', 'date prefilled');
+    assert.equal(ui.host.querySelector('#mirror-gender').value, 'female', 'gender prefilled');
+    assert.equal(document.activeElement?.id, 'mirror-time', 'the hour field is focused');
+    assert.equal(window.location.pathname + window.location.search, '/', 'the address is cleaned');
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+test('§3b: a plain front door visit does not prefill from the carry', async () => {
+  rememberBirth({ date: '1989-09-13', time: null, gender: 'female' });
+  const f = stubFetch();
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  try {
+    await flush();
+    assert.equal(ui.host.querySelector('input[type="date"]').value, '', 'a fresh visit starts empty');
+  } finally { await ui.unmount(); f.restore(); }
+});

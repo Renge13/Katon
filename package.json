@@ -146,6 +146,7 @@
     "test:ce-pdf-ready": "node --import ./scripts/jsx-register.mjs --test tests/ce-pdf-ready.spec.mjs",
     "test:front-door": "node --import ./scripts/jsx-register.mjs --test tests/front-door.spec.mjs",
     "test:result-page-ui": "node --import ./scripts/jsx-register.mjs --test tests/result-page-ui.spec.mjs",
+    "test:return-to-reading": "node --import ./scripts/jsx-register.mjs --test tests/return-to-reading.spec.mjs",
     "test:voice-cache": "node --conditions=react-server --test tests/voice-cache.spec.mjs",
     "test:voice-prompt": "node --test tests/voice-prompt.spec.mjs",
     "test:voice-engine": "node --test tests/voice-engine.spec.mjs",

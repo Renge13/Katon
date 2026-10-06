@@ -65,8 +65,11 @@ export function FieldLabel({ children }) {
  * @param {string} [personLabel] appended to each aria-label so a screen reader can
  *   tell the two people apart. The compat form has two of these and "Tanggal
  *   lahir" twice is unusable.
+ * @param {string|null} [hourHint] a grey line directly under the hour field. The
+ *   front door passes H1 (Prompt BF §3b, 2026-10-06); the compat form passes
+ *   nothing, because that prompt changed the front door only.
  */
-export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel = '' }) {
+export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel = '', hourHint = null }) {
   const set = (k) => (e) => onChange(k, e.target ? e.target.value : e);
   const aria = (base) => (personLabel ? `${base} ${personLabel}` : base);
 
@@ -133,7 +136,8 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
           <option key={h} value={`${pad(h)}:00`}>{`${pad(h)}.00`}</option>
         ))}
       </select>
-      <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>Tanpa jam tetap akurat, pakai jam jauh lebih presisi.</div>
+      {hourHint && <div data-hour-hint style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>{hourHint}</div>}
+      <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: hourHint ? 2 : 8, lineHeight: 1.5 }}>Tanpa jam tetap akurat, pakai jam jauh lebih presisi.</div>
 
       <div style={{ height: 16 }} />
       {/* GENDER CHANGES NOTHING THE READING RENDERS - `computePillars` `void`s it
