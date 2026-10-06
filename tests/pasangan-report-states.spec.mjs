@@ -646,3 +646,39 @@ test('I4: WITH chapter_headings THE WRITER\'S HEADINGS SHOW; WITHOUT IT THEY DO 
     } finally { restore(); }
   }
 });
+
+// ── PROMPT BE §3a (Reyner, 2026-10-06): BACK FROM CHECKOUT AND PAID, LAND ON THE DOWNLOAD ──
+// The same rule as the mirror (tests/post-purchase.spec.mjs): an anchor id on the download
+// section, and a scroll only once the page has confirmed paid - never on `?bayar=selesai` alone.
+function recordScrolls() {
+  const calls = [];
+  const prev = window.Element.prototype.scrollIntoView;
+  window.Element.prototype.scrollIntoView = function scrollIntoView() { calls.push(this.id || this.tagName); };
+  return { calls, restore: () => { window.Element.prototype.scrollIntoView = prev; } };
+}
+
+test('BE §3a: back from checkout on a PAID pair, the report lands on #unduh', async () => {
+  const restore = stub({ pair: { status: 'paid' }, reading: READING('render') });
+  const scrolls = recordScrolls();
+  const ui = await mount({ search: '?bayar=selesai' });
+  try {
+    assert.ok(ui.host.querySelector('#unduh'), 'the download section carries the anchor id');
+    assert.ok(scrolls.calls.includes('unduh'), `scrolled to #unduh; calls: ${JSON.stringify(scrolls.calls)}`);
+  } finally { ui.unmount(); scrolls.restore(); restore(); }
+});
+
+test('BE §3a: the marker on an UNPAID pair never scrolls; a paid pair reopened cold does not jump', async () => {
+  let restore = stub({ pair: { status: 'unpaid' } });
+  let scrolls = recordScrolls();
+  let ui = await mount({ search: '?bayar=selesai' });
+  try {
+    assert.equal(scrolls.calls.includes('unduh'), false, 'no scroll on the marker alone');
+  } finally { ui.unmount(); scrolls.restore(); restore(); }
+  restore = stub({ pair: { status: 'paid' }, reading: READING('render') });
+  scrolls = recordScrolls();
+  ui = await mount();
+  try {
+    assert.ok(ui.host.querySelector('#unduh'), 'precondition: the paid report is open');
+    assert.equal(scrolls.calls.includes('unduh'), false, 'no marker, no jump');
+  } finally { ui.unmount(); scrolls.restore(); restore(); }
+});

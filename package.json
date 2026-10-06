@@ -140,6 +140,7 @@
     "test:pair-reconcile-client": "node --import ./scripts/jsx-register.mjs --test tests/pair-reconcile-client.spec.mjs",
     "test:reading-reconcile": "node --conditions=react-server --test tests/reading-reconcile.spec.mjs",
     "test:reading-reconcile-client": "node --import ./scripts/jsx-register.mjs --test tests/reading-reconcile-client.spec.mjs",
+    "test:post-purchase": "node --import ./scripts/jsx-register.mjs --test tests/post-purchase.spec.mjs",
     "test:ce-pdf-ready": "node --import ./scripts/jsx-register.mjs --test tests/ce-pdf-ready.spec.mjs",
     "test:front-door": "node --import ./scripts/jsx-register.mjs --test tests/front-door.spec.mjs",
     "test:result-page-ui": "node --import ./scripts/jsx-register.mjs --test tests/result-page-ui.spec.mjs",

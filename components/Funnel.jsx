@@ -750,7 +750,7 @@ function prefersReducedMotion() {
   catch { return false; }
 }
 
-export function Reading({ reading, onReset, initialStage, salesOpen = false, compatOpen = false }) {
+export function Reading({ reading, onReset, initialStage, salesOpen = false, compatOpen = false, landOnDelivery = false }) {
   const chart = reading.chart;
   // ── THE PROSE HANDOFF ──────────────────────────────────
   //
@@ -1075,7 +1075,7 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
           buyer returning to her link (`delivered`) or back from checkout
           (`pending`), and closing sales is not revoking what she bought. */}
       {(salesOpen || initialStage) && (
-        <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
+        <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} landOnDelivery={landOnDelivery} /></div>
       )}
       {/* The Compatibility block (Prompt AY §2): directly after the offer, and only
           while COMPAT is on sale (K2, 2026-10-02: `compatOpen`, not the payment
@@ -1328,6 +1328,9 @@ export function ShareCardA({ data, token, capture = captureCard }) {
   );
 }
 
+/** The card and download section's anchor id (Prompt BE §3a). */
+const DELIVERY_ANCHOR = 'unduh';
+
 /* ---------------- The offer: Rp 19.000, card + PDF ---------------- */
 /**
  * AN UPSELL, NOT A GATE. Nothing above this point is hidden, and the closing line
@@ -1341,9 +1344,23 @@ export function ShareCardA({ data, token, capture = captureCard }) {
  * (`lib/deliver/handlers.js`): they are bought together, gated together, and
  * refused together.
  */
-function Offer({ reading, initialStage }) {
+function Offer({ reading, initialStage, landOnDelivery = false }) {
   // offer | pending | delivered
   const [stage, setStage] = useState(initialStage || 'offer');
+  // ── LAND ON THE DOWNLOAD SECTION (Prompt BE §3a, Reyner 2026-10-06) ──
+  // Back from checkout (`landOnDelivery`, the `?bayar=selesai` marker) or after waiting
+  // in the pending state in this tab, the page scrolls to the delivery (#unduh) - but
+  // only when the stage reaches `delivered`, which the server's paid manifest decides.
+  // The marker alone never scrolls, and a paid link reopened cold does not jump.
+  const wentThroughPending = useRef(false);
+  useEffect(() => { if (stage === 'pending') wentThroughPending.current = true; }, [stage]);
+  const landedRef = useRef(false);
+  useEffect(() => {
+    if (stage !== 'delivered' || landedRef.current) return;
+    if (!landOnDelivery && !wentThroughPending.current) return;
+    landedRef.current = true;
+    document.getElementById(DELIVERY_ANCHOR)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  }, [stage, landOnDelivery]);
   // `offer_seen` FIRES WHEN THE OFFER IS ACTUALLY OFFERED, not when the component
   // mounts in some other stage. A reader returning to a delivered reading is not
   // being shown an offer, and counting her would inflate the denominator that
@@ -1636,7 +1653,7 @@ function Delivery({ token, view = 'ready' }) {
   }
 
   return (
-    <div className="k-fade" style={{ background: SANCTUARY, borderRadius: 26, padding: '30px 22px 34px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
+    <div id={DELIVERY_ANCHOR} className="k-fade" style={{ background: SANCTUARY, borderRadius: 26, padding: '30px 22px 34px', color: LIGHT, boxShadow: 'var(--shadow-deep)', scrollMarginTop: 72 }}>
       <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.2em', textTransform: 'uppercase', color: GLOW }}>Complete Edition</div>
       <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 30, lineHeight: 1.1, color: '#fff', margin: '12px 0 0' }}>Sudah siap.</h2>
       <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, lineHeight: 1.7, color: 'rgba(234,241,242,.72)', margin: '12px 0 0' }}>Kartu dan PDF-mu bisa diunduh kapan saja dari tautan bacaan ini.</p>
@@ -1690,6 +1707,9 @@ function Delivery({ token, view = 'ready' }) {
               </a>
             )}
           </div>
+          {/* G1, Reyner's download guide (Prompt BE §3b). This whole section renders only
+              once paid, so the line is never shown before payment. */}
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, lineHeight: 1.6, color: 'rgba(234,241,242,.72)', margin: '16px 0 0' }}>{CHROME_COPY.delivery_guide}</p>
         </>
       )}
     </div>
@@ -1769,6 +1789,7 @@ export function ReadingByToken({ token, salesOpen = false, compatOpen = false })
       reading={reading}
       onReset={goHome}
       initialStage={delivered ? 'delivered' : (fromCheckout ? 'pending' : undefined)}
+      landOnDelivery={fromCheckout}
       salesOpen={salesOpen}
       compatOpen={compatOpen}
     />
