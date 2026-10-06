@@ -549,6 +549,13 @@ test('§3b + BG §5: no hour, four cells, the fourth an empty Pilar Arah with H3
     assert.ok(/^Pilar Arah/u.test(empty.textContent), 'labelled PILAR ARAH like the other cards (upper-cased by CSS)');
     assert.equal(/[一-鿿]/u.test(empty.textContent), false, 'no hanzi in the empty cell');
     assert.ok(cells.slice(0, 3).every((c) => !c.hasAttribute('data-pillar-empty')), 'the three computed cells are real cells');
+    // Reyner 2026-10-06 (on #203): the empty cell takes the other cards' FILL, keeps its
+    // dashed edge, and its border is the other cards' border colour. Compared with Pilar
+    // Akar, a plain computed card (Pilar Diri carries the Inti Diri treatment).
+    assert.equal(empty.style.background, cells[0].style.background, 'the empty cell has the other cards\' fill');
+    assert.ok(empty.style.border.includes('dashed'), 'and keeps its dashed edge');
+    assert.ok(empty.style.border.includes('var(--border)') && cells[0].style.border.includes('var(--border)'),
+      'in the other cards\' border colour');
     assert.ok(cells[2].textContent.includes(CHROME_COPY.pillar_core_pill), 'Inti Diri stays on Pilar Diri');
 
     const add = [...empty.querySelectorAll('a')].find((a) => a.textContent === RULED.hour_add);

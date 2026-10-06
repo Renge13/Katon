@@ -1,0 +1,6 @@
+== Reyner 2026-10-06 (on #203): the empty Pilar Arah cell takes the other cards' fill; dashed edge kept.
+== Shot: node scripts/bg-forms-shots.mjs http://localhost:3002 skip <scratch> (katon-be-mock, no Gemini: the FLOOR), bagan-no-hour-375.png copied here.
+== Before: docs/qa/2026-10-06-bg-journey-forms/bagan-no-hour-375.png (no fill).
+== Computed in the browser pane on reading wHjsg8PYkIv_uKVglfF1B (local, in-memory), getComputedStyle:
+empty Pilar Arah  background rgb(252, 250, 245)  border rgb(231, 221, 206) dashed
+Pilar Akar        background rgb(252, 250, 245)  border rgb(231, 221, 206) solid
