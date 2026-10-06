@@ -35,7 +35,7 @@
 // Nothing here writes a sentence about it.
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 // `.js` ON PURPOSE: `next` has no exports map, so plain Node (the jsdom specs) resolves
 // only the file name; Next resolves either spelling to the same module.
@@ -371,6 +371,20 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
    * screen for the whole of it rather than for a fixed 2.5s, because a miss is a
    * real render and it is not instant.
    */
+  // ── THE READING OPENS AT ITS TOP (Reyner, 2026-10-07) ──
+  // pushState and setPhase('result') swap the screen without a navigation, so the
+  // window kept the offset she had at the submit button and the reading opened around
+  // Bagan Kelahiran. Entering the result phase FROM THE FORM (or its season gate) now
+  // scrolls to the top, instantly, in a layout effect so the old offset is never painted.
+  // Only createReading sets the flag: the back-button restore, the "Tambahkan jam lahir"
+  // arrival and the paid arrival's scroll to #unduh are other paths and stay as they are.
+  const openedFromForm = useRef(false);
+  useLayoutEffect(() => {
+    if (phase !== 'result' || !openedFromForm.current) return;
+    openedFromForm.current = false;
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [phase]);
+
   async function createReading(birthDate, birthTime, resolution = {}) {
     const created = await fetch('/api/mirror', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -435,6 +449,7 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
     // router.push, which would mount the /r route and discard this state.
     if (typeof window !== 'undefined') window.history.pushState(null, '', `/r/${created.token}`);
     setSeason(null);
+    openedFromForm.current = true;
     setPhase('result');
 
     const served = await fetch(`/api/mirror/${created.token}`).then((r) => r.json());
