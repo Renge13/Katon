@@ -9,7 +9,10 @@
 // writer's own chapter headings), then reports, per document:
 //   stranded  a page whose LAST content line is a heading (a block heading, an eyebrow, a
 //             glossary group heading) - its body starts on the next page;
-//   lone row  the compat facts table ending on a page that holds a single facts row.
+//   lone row  the compat facts table ending on a page that holds a single facts row;
+//   lone group the glossary's last page opening with its last group's heading, so that group
+//             sits alone (amendment 1 to BE, Reyner 2026-10-06). The closing page follows the
+//             glossary and is not glossary: counting stops before it.
 // Report only. tests/pdf-page-breaks.spec.mjs holds the cases this found.
 // ============================================================
 
@@ -63,6 +66,21 @@ export function factsRowsPerPage(texts, semanticJson) {
   return out;
 }
 
+/**
+ * The glossary's last group alone on a page: the last glossary page (the one before the
+ * closing page) opens with that group's printed heading. Null when it does not.
+ */
+export function loneLastGroup(texts, appendix, groupLabels = {}) {
+  const last = appendix.groups.filter((g) => g.entries.length > 0).at(-1);
+  const label = groupLabels[last.group] ?? last.group;
+  const start = texts.findIndex((t) => t.includes(APPENDIX_HEADING));
+  const closing = texts.findIndex((t, i) => i > start && t.includes(RENDER_COPY.pdfClosingSections[0].label));
+  if (start < 0 || closing <= start) throw new Error(`no glossary/closing page (${start}, ${closing})`);
+  return lines(texts[closing - 1])[0] === label ? { page: closing, group: label } : null;
+}
+
+// The Complete Edition prints its Shio group under its own label (document.js completeEdition).
+const MIRROR_LABELS = { Shio: RENDER_COPY.pdfShioGroupMirror };
 const floor = (sj) => ({ ...assembleFallback(sj), prompt_version: 'p', stage6_version: 'g' });
 const report = [];
 
@@ -73,8 +91,29 @@ if (process.argv[1] && process.argv[1].endsWith('probe-page-breaks.mjs')) {
     const rendered = floor(sj);
     const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson: sj, rendered });
     const texts = pageTexts(buffer);
-    const s = strandedHeadings(texts, headingSet({ rendered, appendix: buildAppendix({ chart, semanticJson: sj }) }));
-    report.push({ doc: `CE chart ${c.id} ${c.date} ${c.time}`, pages: texts.length, stranded: s });
+    const appendix = buildAppendix({ chart, semanticJson: sj });
+    report.push({
+      doc: `CE chart ${c.id} ${c.date} ${c.time}`, pages: texts.length,
+      stranded: strandedHeadings(texts, headingSet({ rendered, appendix })),
+      loneGroup: loneLastGroup(texts, appendix, MIRROR_LABELS),
+    });
+  }
+  // The Complete Edition built from the 2c round's clash #1 prose: the document Reyner saw with
+  // the glossary's last group alone on page 8 (docs/qa/2026-10-06-be-pdf-page-breaks/ce-clash-08.png).
+  {
+    const clash = JSON.parse(fs.readFileSync('docs/qa/2026-10-04-bc-paragraphs-round/round.json', 'utf8'))
+      .records.find((r) => r.pair === 'clash' && r.render === 1);
+    const chart = calculateBaziChart({ birthDate: '1973-05-10', birthTime: '00:00' });
+    const sj = buildSemanticJson(chart);
+    const rendered = { blocks: clash.reading.blocks, penutup: clash.reading.penutup, prompt_version: 'p', stage6_version: 'g' };
+    const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson: sj, rendered, gender: 'female' });
+    const texts = pageTexts(buffer);
+    const appendix = buildAppendix({ chart, semanticJson: sj });
+    report.push({
+      doc: 'CE clash #1 prose', pages: texts.length,
+      stranded: strandedHeadings(texts, headingSet({ rendered, appendix })),
+      loneGroup: loneLastGroup(texts, appendix, MIRROR_LABELS),
+    });
   }
 
   const pairs = [];
@@ -96,10 +135,12 @@ if (process.argv[1] && process.argv[1].endsWith('probe-page-breaks.mjs')) {
     const rendered = { blocks: record.reading.blocks, penutup: record.reading.penutup, prompt_version: 'p', stage6_version: 'g', chapter_headings: true };
     const { buffer } = await buildPairPdf({ chartA, chartB, semanticJson: pj, rendered, pair: { a: { date: ad, gender: ag }, b: { date: bd, gender: bg } } });
     const texts = pageTexts(buffer);
+    const appendix = buildPairAppendix({ chartA, chartB, semanticJson: pj });
     report.push({
       doc: `compat ${label}`, pages: texts.length,
-      stranded: strandedHeadings(texts, headingSet({ rendered, appendix: buildPairAppendix({ chartA, chartB, semanticJson: pj }) })),
+      stranded: strandedHeadings(texts, headingSet({ rendered, appendix })),
       facts: factsRowsPerPage(texts, pj),
+      loneGroup: loneLastGroup(texts, appendix),
     });
   }
   for (const [x, y] of [[1, 2], [1, 6], [2, 6], [3, 7], [12, 6], [13, 11]]) {
@@ -111,15 +152,21 @@ if (process.argv[1] && process.argv[1].endsWith('probe-page-breaks.mjs')) {
     const rendered = floor(pj);
     const { buffer } = await buildPairPdf({ chartA, chartB, semanticJson: pj, rendered, pair: { a: { date: cx.date, gender: 'female' }, b: { date: cy.date, gender: 'male' } } });
     const texts = pageTexts(buffer);
+    const appendix = buildPairAppendix({ chartA, chartB, semanticJson: pj });
     report.push({
       doc: `compat floor ${x}x${y}`, pages: texts.length,
-      stranded: strandedHeadings(texts, headingSet({ rendered, appendix: buildPairAppendix({ chartA, chartB, semanticJson: pj }) })),
+      stranded: strandedHeadings(texts, headingSet({ rendered, appendix })),
       facts: factsRowsPerPage(texts, pj),
+      loneGroup: loneLastGroup(texts, appendix),
     });
   }
   for (const r of report) {
     const lone = (r.facts || []).filter((f, i) => i > 0 && f.rows === 1);
-    if (r.stranded.length || lone.length) console.log(`${r.doc} (${r.pages}p): stranded ${JSON.stringify(r.stranded)} ${lone.length ? `lone facts row ${JSON.stringify(lone)}` : ''}`);
+    if (r.stranded.length || lone.length || r.loneGroup) {
+      console.log(`${r.doc} (${r.pages}p): stranded ${JSON.stringify(r.stranded)}`
+        + `${lone.length ? ` lone facts row ${JSON.stringify(lone)}` : ''}`
+        + `${r.loneGroup ? ` lone last glossary group ${JSON.stringify(r.loneGroup)}` : ''}`);
+    }
   }
   console.log(`${report.length} documents checked`);
 }

@@ -58,7 +58,18 @@ const compatClash = await buildPairPdf({
 });
 const ceClash = await buildCompleteEditionPdf({ chart: clashA, semanticJson: buildSemanticJson(clashA), rendered: prose, gender: 'female' });
 
-for (const [name, buffer] of [['ce', ce.buffer], ['compat', compat.buffer], ['compat-clash', compatClash.buffer], ['ce-clash', ceClash.buffer]]) {
+// Amendment 1 (Reyner 2026-10-06, on #199): the glossary's last group alone on a page. ce-clash
+// p8 is the case Reyner saw; the floor compat PDF for fixture charts 12 x 6 is the compat case
+// scripts/probe-page-breaks.mjs found (Shio alone on p7). A FLOOR, not a render.
+const c12 = calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' });
+const c6 = calculateBaziChart({ birthDate: '1989-03-03', birthTime: '00:15' });
+const pj126 = buildPairSemantic(c12, c6);
+const compat126 = await buildPairPdf({
+  chartA: c12, chartB: c6, semanticJson: pj126, rendered: rendered(pj126),
+  pair: { a: { date: '1990-06-07', gender: 'female' }, b: { date: '1989-03-03', gender: 'male' } },
+});
+
+for (const [name, buffer] of [['ce', ce.buffer], ['compat', compat.buffer], ['compat-clash', compatClash.buffer], ['ce-clash', ceClash.buffer], ['compat-12x6', compat126.buffer]]) {
   fs.writeFileSync(path.join(out, `${name}.pdf`), buffer);
   const pages = await rasterPages(buffer, { dpi: 110 });
   for (const p of pages) fs.writeFileSync(path.join(out, `${name}-${String(p.page).padStart(2, '0')}.png`), p.png());

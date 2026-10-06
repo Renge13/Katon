@@ -1,5 +1,6 @@
 // ============================================================
-// tests/pdf-page-breaks.spec.mjs — no heading ends a page; the facts table's last row never stands alone
+// tests/pdf-page-breaks.spec.mjs — no heading ends a page; the facts table's last row and the
+// glossary's last group never stand alone
 // ============================================================
 // Run: npm run test:pdf-page-breaks
 //
@@ -13,6 +14,10 @@
 //     its paragraph began page 3. The same prose as a Complete Edition is the mirror's case.
 //   - the floor compat PDF for fixture charts 1 x 2: the facts table's last row (the P5
 //     quadrant) alone on page 5 - the page Reyner saw in the #199 PDFs.
+//   - amendment 1 (Reyner 2026-10-06): the glossary's last group never sits alone on a page.
+//     The clash prose's Complete Edition put "Shio (tahun lahirmu)" and its one row alone on
+//     page 8. The probe found the compat case: the floor PDF for fixture charts 12 x 6 put
+//     "Shio" and its rows alone on page 7.
 // ============================================================
 
 import assert from 'node:assert/strict';
@@ -90,4 +95,42 @@ test('THE COMPAT FACTS TABLE\'S LAST ROW NEVER STANDS ALONE ON A PAGE (floor 1 x
   const last = perPage.at(-1);
   assert.ok(perPage.length === 1 || last >= 2,
     `the table's last page holds ${last} row(s); rows per page: ${JSON.stringify(perPage)}`);
+});
+
+/**
+ * The glossary's pages: from its heading up to, not including, the closing page (which
+ * follows the glossary and is not glossary). Returns the LAST glossary page's content lines.
+ */
+function lastGlossaryPage(texts) {
+  const start = texts.findIndex((t) => t.includes(APPENDIX_HEADING));
+  const closing = texts.findIndex((t, i) => i > start && t.includes(RENDER_COPY.pdfClosingSections[0].label));
+  assert.ok(start > 0 && closing > start, `precondition: glossary at ${start}, closing page at ${closing}`);
+  return { page: closing, lines: contentLines(texts[closing - 1]) };
+}
+
+// Reyner, 2026-10-06 (amendment 1 to BE, on #199): "the glossary's last group never sits alone
+// on a page; it moves together with the group before it". The case: this Complete Edition, page
+// 8 held only "Shio (tahun lahirmu)" and its one row "Kerbau" (docs/qa/2026-10-06-be-pdf-page-
+// breaks/ce-clash-08.png). A last glossary page that OPENS with the last group's heading holds
+// nothing of the group before it.
+test('THE GLOSSARY\'S LAST GROUP NEVER SITS ALONE ON A PAGE (Complete Edition, clash prose)', async () => {
+  const sj = buildSemanticJson(clashA);
+  const { buffer } = await buildCompleteEditionPdf({ chart: clashA, semanticJson: sj, rendered: writerProse, gender: 'female' });
+  const { page, lines } = lastGlossaryPage(pageTexts(buffer));
+  assert.ok(lines.includes(RENDER_COPY.pdfShioGroupMirror), 'precondition: the last group is Shio');
+  assert.notEqual(lines[0], RENDER_COPY.pdfShioGroupMirror,
+    `glossary page ${page} opens with its last group and holds nothing else: ${JSON.stringify(lines)}`);
+});
+
+test('THE GLOSSARY\'S LAST GROUP NEVER SITS ALONE ON A PAGE (compat, floor 12 x 6)', async () => {
+  const chartA = calculateBaziChart({ birthDate: '1990-06-07', birthTime: '12:00' });
+  const chartB = calculateBaziChart({ birthDate: '1989-03-03', birthTime: '00:15' });
+  const pj = buildPairSemantic(chartA, chartB);
+  const { buffer } = await buildPairPdf({
+    chartA, chartB, semanticJson: pj, rendered: { ...assembleFallback(pj), prompt_version: 'p', stage6_version: 'g' },
+    pair: { a: { date: '1990-06-07', gender: 'female' }, b: { date: '1989-03-03', gender: 'male' } },
+  });
+  const { page, lines } = lastGlossaryPage(pageTexts(buffer));
+  assert.ok(lines.includes('Shio'), 'precondition: the last group is Shio');
+  assert.notEqual(lines[0], 'Shio', `glossary page ${page} opens with its last group: ${JSON.stringify(lines)}`);
 });
