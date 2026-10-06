@@ -30,6 +30,13 @@
 // A hand-written index is the only kind that can say what question an artifact
 // answers, and a hand-written index goes stale the first time somebody adds a file.
 // So the CONTENT is written by a person and the COVERAGE is checked by this.
+//
+// ── DIRECTORIES ARE ARTIFACTS TOO (2026-10-06) ──
+// Until 2026-10-06 the enumeration was top-level `.md` / `.json` files only, so no
+// screenshot directory was ever checked by either rule. That day the row for
+// `2026-10-06-bf-amendment-1/` was deleted from the README and this script still
+// printed OK with exit 0. A directory is now an artifact named `<name>/`, with the
+// trailing slash the README rows already use, and both checks apply to it.
 // ============================================================
 
 import fs from 'node:fs';
@@ -59,8 +66,35 @@ const GRANDFATHERED = [
   },
 ];
 
-/** Extension off, lowercased. The .md and .json of one artifact share this. */
-const stemOf = (name) => name.toLowerCase().replace(/\.(md|json)$/, '');
+/**
+ * Extension or trailing slash off, lowercased. The .md and .json of one artifact share
+ * this, and so does a directory holding that artifact's images.
+ */
+const stemOf = (name) => name.toLowerCase().replace(/(\.(md|json)|\/)$/, '');
+
+/**
+ * The artifacts in one directory: top-level `.md` / `.json` files, and top-level
+ * directories as `<name>/`. `superseded/` is the archive, not an artifact.
+ */
+function artifactsIn(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .filter((e) => (e.isDirectory() ? e.name !== 'superseded' : /\.(md|json)$/.test(e.name)))
+    .map((e) => (e.isDirectory() ? `${e.name}/` : e.name))
+    .filter((f) => f !== 'README.md')
+    .sort();
+}
+
+/**
+ * Does the README carry a ROW for this directory, not merely a mention of it?
+ *
+ * ── A SUBSTRING MATCH IS NOT ENOUGH FOR A DIRECTORY ──
+ * Directory rows cite each other in their prose: on 2026-10-06 the
+ * `2026-10-06-be-pdf-page-breaks/` row names `2026-10-06-be-pdf-pages/`. With
+ * `index.includes`, deleting the `be-pdf-pages/` row would still pass, which is the
+ * failure this check exists to catch. So the name must open a table row.
+ */
+const hasRow = (index, dirName) =>
+  new RegExp(`^\\|\\s*\`?${escape(dirName)}\`?\\s*\\|`, 'm').test(index);
 
 /**
  * Do these two names differ ONLY by a plural, a suffix letter, or a version digit?
@@ -108,9 +142,7 @@ const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  * two callers, and only one of them executes.
  */
 function main() {
-  const files = fs.readdirSync(QA)
-    .filter((f) => /\.(md|json)$/.test(f) && f !== 'README.md')
-    .sort();
+  const files = artifactsIn(QA);
 
   const problems = [];
 
@@ -121,8 +153,9 @@ function main() {
   for (const a of files) {
     for (const b of files) {
       if (a >= b) continue;
-      // A .md and its .json sibling are ONE artifact in two forms, not two artifacts.
-      // Sharing a stem is what makes the pair findable, so it is never a collision.
+      // A .md and its .json sibling are ONE artifact in two forms, not two artifacts,
+      // and so is a directory holding that .md's images. Sharing a stem is what makes
+      // them findable together, so it is never a collision.
       if (stemOf(a) === stemOf(b)) continue;
 
       const how = collides(a, b);
@@ -146,7 +179,7 @@ function main() {
       + 'question it answers, the prompt and gate it was made under, and what supersedes it.');
   } else {
     const index = fs.readFileSync(INDEX, 'utf8');
-    const missing = files.filter((f) => !index.includes(f));
+    const missing = files.filter((f) => (f.endsWith('/') ? !hasRow(index, f) : !index.includes(f)));
     if (missing.length) {
       problems.push(`INDEX: ${missing.length} artifact(s) are not in docs/qa/README.md:\n`
         + missing.map((f) => `          ${f}`).join('\n')
@@ -154,12 +187,13 @@ function main() {
         + 'if a successor exists.');
     }
     // And the reverse: a row for a file that is gone is a citation that cannot resolve.
-    const listed = [...index.matchAll(/`?(2026-\d\d-\d\d-[A-Za-z0-9._-]+\.(?:md|json))`?/g)]
+    // A directory is named with its trailing slash, so `<dir>/shot.png` cites `<dir>/`.
+    const listed = [...index.matchAll(/`?(2026-\d\d-\d\d-[A-Za-z0-9._-]+(?:\.(?:md|json)|\/))`?/g)]
       .map((m) => m[1]);
     const orphaned = [...new Set(listed)].filter((f) => !files.includes(f)
       && !fs.existsSync(path.join(QA, 'superseded', f)));
     if (orphaned.length) {
-      problems.push(`INDEX: ${orphaned.length} row(s) name a file that is in neither docs/qa/ nor `
+      problems.push(`INDEX: ${orphaned.length} row(s) name an artifact that is in neither docs/qa/ nor `
         + `docs/qa/superseded/:\n${orphaned.map((f) => `          ${f}`).join('\n')}`);
     }
   }
@@ -171,7 +205,7 @@ function main() {
   }
 
   const supersededCount = fs.existsSync(path.join(QA, 'superseded'))
-    ? fs.readdirSync(path.join(QA, 'superseded')).filter((f) => /\.(md|json)$/.test(f)).length
+    ? artifactsIn(path.join(QA, 'superseded')).length
     : 0;
   console.log(`OK ${files.length} artifact(s) indexed, ${supersededCount} superseded, `
     + `${GRANDFATHERED.length} grandfathered name collision(s).`);
