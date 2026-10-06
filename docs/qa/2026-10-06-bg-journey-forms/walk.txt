@@ -1,0 +1,32 @@
+== node scripts/bg-forms-shots.mjs http://localhost:3002 skip <out>   (katon-be-mock: compat CLOSED, mock payments, no Gemini, no Supabase; 2026-10-06; focus emulated)
+front door, empty: [{"id":"mirror-day","label":"Tanggal","filled":false,"labelPx":"14px","labelTop":"23px"},{"id":"mirror-month","label":"Bulan","filled":false,"labelPx":"14px","labelTop":"23px"},{"id":"mirror-year","label":"Tahun","filled":false,"labelPx":"14px","labelTop":"23px"},{"id":"mirror-time","label":"Jam lahir · opsional","filled":false,"labelPx":"14px","labelTop":"23px"},{"id":"mirror-gender","label":"Jenis kelamin · opsional","filled":false,"labelPx":"14px","labelTop":"23px"}]
+wrote fields-empty-375.png
+year focused: {"active":"mirror-year","yearLabel":"10.5px"}
+wrote fields-year-focused-375.png
+front door, filled: {"date":"1989-09-13","fields":[{"id":"mirror-day","label":"Tanggal","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"mirror-month","label":"Bulan","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"mirror-year","label":"Tahun","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"mirror-time","label":"Jam lahir · opsional","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"mirror-gender","label":"Jenis kelamin · opsional","filled":true,"labelPx":"10.5px","labelTop":"7px"}]}
+wrote fields-filled-375.png
+bagan no-hour: {"token":"/r/b6HnB78wTY_rKx6S6T5xG","cells":4,"columns":"repeat(4, 1fr)","empty":"PILAR ARAH\nTambahkan jam lahir","h2":"Jam lahir belum diisi, jadi Pilar Arah belum dihitung."}
+wrote bagan-no-hour-375.png
+wrote bagan-no-hour-desktop.png
+bagan with-hour: {"token":"/r/Oua6kJClsH0OZ5tA6bVCP","cells":4,"columns":"repeat(4, 1fr)","empty":null,"h2":null}
+wrote bagan-with-hour-375.png
+wrote bagan-with-hour-desktop.png
+/harga compat card, closed: {"text":"Bacaan Kompatibilitas\nRp 39.000\nBELUM TERSEDIA\n\nLihat bagaimana pola kalian saling bertemu, apa yang terasa alami, dan di mana hubungan ini mungkin membutuhkan lebih banyak pengertian.\n\nPembelian sedang ditutup sementara. Bacaan yang sudah dibayar tetap bisa dibuka lewat tautannya.","links":[]}
+wrote harga-compat-closed-375.png
+header, compat closed: ["KATON -> /","Bacaan Diri -> /"]
+wrote header-compat-closed-375.png
+
+== node scripts/bg-forms-shots.mjs skip http://localhost:3001 <out>   (katon-compat-mock: COMPAT_SALES=open, mock payments, no Gemini, no Supabase)
+header, compat open: ["KATON -> /","Bacaan Diri -> /","Kompatibilitas -> /kompatibilitas"]
+wrote header-compat-open-375.png
+compat step 1, filled: {"date":"1990-03-04","fields":[{"id":"a-day","label":"Tanggal","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"a-month","label":"Bulan","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"a-year","label":"Tahun","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"a-time","label":"Jam lahir · opsional","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"a-gender","label":"Jenis kelamin · opsional","filled":true,"labelPx":"10.5px","labelTop":"7px"},{"id":"a-nickname","label":"Nama panggilan (opsional)","filled":true,"labelPx":"10.5px","labelTop":"7px"}]}
+wrote compat-step1-filled-375.png
+
+== §5, the same no-hour reading under the old and new <Reading> (jsdom, one-off)
+old 1769 chars, new 1778 chars; identical prefix 236, identical suffix 1459
+context before: ..." UlarPilar Kerja癸酉Air · AyamInti diriPilar Diri丙子Api · Tikus"
+OLD differs:   "Jam lahir belum diisi, jadi Pilar Arah belum dihitung. Tambahkan jam lahir"
+NEW differs:   "Pilar ArahTambahkan jam lahirJam lahir belum diisi, jadi Pilar Arah belum dihitung."
+context after: "Sebaran UnsurSebaran visual, bukan ukuran kekuatan.Kayutumbu"...
+ℹ pass 1
+ℹ fail 0
