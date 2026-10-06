@@ -33,7 +33,7 @@ const paras = (t) => String(t || '').split(/\n\s*\n/u).map((p) => p.trim()).filt
 const { records } = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const out = records.map((r) => {
   const bodies = r.reading.blocks.map((b) => b.text || '');
-  let raw = null;
+  let raw;
   try { raw = JSON.parse(r.raw_responses?.at(-1) ?? 'null'); } catch { raw = null; }
   return {
     pair: r.pair,
