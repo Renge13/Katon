@@ -36,6 +36,7 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CardA, CardB, CARD_A, exportSize } from './cards/Card.js';
 import {
   downloadCard, captureCard, dataUrlToFile, canSharePngFiles, shareOrSave, SHARE_CANCELLED,
@@ -1381,6 +1382,45 @@ function Offer({ reading, initialStage, landOnDelivery = false }) {
   const [error, setError] = useState(null);
   const pollRef = useRef(null);
 
+  // ── THE PAY BAR, AFTER THE OFFER HAS BEEN SEEN (Prompt BE §4, Reyner 2026-10-06) ──
+  // The offer comes "AFTER the free reading lands. Never a gate" (CLAUDE.md PRODUCT), so
+  // the bar is a way BACK to an offer the reader has already reached, never a way to put
+  // it in front of her. It shows only once her viewport has reached the offer panel
+  // (remembered on this device, for this reading), hides while the panel or the site
+  // footer is on screen (it must not cover the footer links), and is not rendered in any
+  // stage but `offer` - so it is gone for good once paid. No IntersectionObserver, no bar.
+  const panelRef = useRef(null);
+  const [offerSeen, setOfferSeen] = useState(false);
+  const [panelOnScreen, setPanelOnScreen] = useState(false);
+  const [footerOnScreen, setFooterOnScreen] = useState(false);
+  const seenKey = `katon:offer-seen:${reading.token}`;
+  useEffect(() => {
+    if (stage !== 'offer' || typeof IntersectionObserver === 'undefined') return undefined;
+    const panel = panelRef.current;
+    if (!panel) return undefined;
+    const footer = document.querySelector('footer');
+    // An observer reports every target once as soon as it starts observing, so the
+    // remembered "seen" is read here, in its callback, rather than set from the effect.
+    const io = new IntersectionObserver((entries) => {
+      try { if (window.localStorage.getItem(seenKey) === '1') setOfferSeen(true); } catch { /* storage off */ }
+      for (const e of entries) {
+        if (e.target === panel) {
+          setPanelOnScreen(e.isIntersecting);
+          if (e.isIntersecting) {
+            setOfferSeen(true);
+            try { window.localStorage.setItem(seenKey, '1'); } catch { /* storage off */ }
+          }
+        } else {
+          setFooterOnScreen(e.isIntersecting);
+        }
+      }
+    });
+    io.observe(panel);
+    if (footer) io.observe(footer);
+    return () => io.disconnect();
+  }, [stage, seenKey]);
+  const showBar = stage === 'offer' && offerSeen && !panelOnScreen && !footerOnScreen && !closed;
+
   async function startCheckout() {
     if (busy) return;
     setBusy(true);
@@ -1433,8 +1473,9 @@ function Offer({ reading, initialStage, landOnDelivery = false }) {
   if (stage === 'pending') return <Pending invoiceUrl={invoiceUrl} />;
 
   return (
+    <>
     <Reveal>
-      <div style={{ position: 'relative', overflow: 'hidden', background: SANCTUARY, borderRadius: 26, padding: '30px 24px 26px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
+      <div ref={panelRef} data-offer-panel style={{ position: 'relative', overflow: 'hidden', background: SANCTUARY, borderRadius: 26, padding: '30px 24px 26px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.22em', textTransform: 'uppercase', color: GLOW, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Icon.sparkle size={14} /> Complete Edition
         </div>
@@ -1508,6 +1549,35 @@ function Offer({ reading, initialStage, landOnDelivery = false }) {
         </div>
       </div>
     </Reveal>
+    {showBar && typeof document !== 'undefined' && createPortal(
+      <PayBar price={formatIdr(priceFor('artifact'))} busy={busy} onBuy={startCheckout} />,
+      document.body,
+    )}
+    </>
+  );
+}
+
+/**
+ * THE PAY BAR (Prompt BE §4): slim, fixed to the bottom, the price and the offer's own
+ * button label - no new words. Rendered by Offer through a portal on document.body,
+ * because a transformed ancestor (Reveal) would turn `position: fixed` into "fixed to
+ * that ancestor". The bottom padding includes the iPhone home-indicator inset.
+ */
+function PayBar({ price, busy, onBuy }) {
+  return (
+    <div data-pay-bar style={{
+      position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 40,
+      background: SANCTUARY, color: LIGHT, boxShadow: '0 -8px 24px rgba(9,18,21,.22)',
+      padding: '10px 16px calc(10px + env(safe-area-inset-bottom, 0px))',
+    }}
+    >
+      <div style={{ maxWidth: 460, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: '#fff', whiteSpace: 'nowrap' }}>{price}</div>
+        <Button onClick={onBuy} disabled={busy} style={{ width: 'auto', padding: '11px 16px', fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+          {busy ? 'Menyiapkan pembayaran...' : <>Ambil Complete Edition <Icon.arrow size={16} /></>}
+        </Button>
+      </div>
+    </div>
   );
 }
 

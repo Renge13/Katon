@@ -130,3 +130,96 @@ test('§3b G1 IS NOT SHOWN BEFORE PAID', async () => {
     assert.equal(ui.host.textContent.includes(G1), false);
   } finally { ui.unmount(); restore(); }
 });
+
+// ── §4 THE PAY BAR, AFTER THE OFFER HAS BEEN SEEN ────────────
+// The ruled rule is that the offer comes "AFTER the free reading lands. Never a gate"
+// (CLAUDE.md PRODUCT). So the bar appears only after the reader's viewport has reached the
+// offer once (on this device, for this reading), hides while the offer or the footer is on
+// screen, and is gone for good once paid. jsdom has no IntersectionObserver; this fake is
+// driven by hand, so the test decides what is "on screen".
+const observers = [];
+class FakeIO {
+  constructor(cb) { this.cb = cb; this.els = []; observers.push(this); }
+  observe(el) { this.els.push(el); }
+  unobserve() {}
+  disconnect() { this.els = []; }
+}
+function installIO() {
+  const prev = window.IntersectionObserver;
+  observers.length = 0;
+  window.IntersectionObserver = FakeIO;
+  globalThis.IntersectionObserver = FakeIO;
+  return () => { window.IntersectionObserver = prev; globalThis.IntersectionObserver = prev; };
+}
+/** Report `el` as on or off screen to every observer watching it. */
+async function show(el, isIntersecting) {
+  await act(async () => {
+    for (const o of observers) if (o.els.includes(el)) o.cb([{ target: el, isIntersecting }]);
+  });
+}
+const bar = () => document.querySelector('[data-pay-bar]');
+const offerPanel = (host) => host.querySelector('[data-offer-panel]');
+const clearSeen = () => { try { window.localStorage.clear(); } catch { /* none */ } };
+
+test('§4 NO BAR BEFORE THE OFFER HAS BEEN SEEN', async () => {
+  clearSeen();
+  const unIO = installIO();
+  const restore = stub({ paid: false });
+  const ui = await mount();
+  try {
+    assert.ok(offerPanel(ui.host), 'precondition: the offer is on the page');
+    assert.equal(bar(), null, 'the bar must not appear before the offer was reached');
+  } finally { ui.unmount(); restore(); unIO(); }
+});
+
+test('§4 AFTER THE OFFER WAS SEEN, scrolling away shows the bar (price + the existing button label); the offer on screen hides it', async () => {
+  clearSeen();
+  const unIO = installIO();
+  const restore = stub({ paid: false });
+  const ui = await mount();
+  try {
+    const panel = offerPanel(ui.host);
+    await show(panel, true);
+    assert.equal(bar(), null, 'hidden while the offer itself is on screen');
+    await show(panel, false);
+    const b = bar();
+    assert.ok(b, 'shown once the offer has been seen and is off screen');
+    assert.ok(b.textContent.includes('Rp 19.000'), 'the price');
+    assert.ok(b.textContent.includes('Ambil Complete Edition'), 'the existing buy button label');
+    const footer = document.createElement('footer');
+    document.body.appendChild(footer);
+    // The footer is only observed if it exists when the observer is set up; this one
+    // is added later, so it is driven through the panel's observer list directly.
+    for (const o of observers) if (o.els.includes(panel)) o.els.push(footer);
+    await show(footer, true);
+    assert.equal(bar(), null, 'hidden while the footer is on screen (it must not cover the footer links)');
+    footer.remove();
+  } finally { ui.unmount(); restore(); unIO(); }
+});
+
+test('§4 SEEN ONCE, REMEMBERED: a reload scrolled to the top shows the bar for that reading', async () => {
+  clearSeen();
+  const unIO = installIO();
+  const restore = stub({ paid: false });
+  let ui = await mount();
+  try {
+    await show(offerPanel(ui.host), true);
+  } finally { ui.unmount(); }
+  ui = await mount();
+  try {
+    await show(offerPanel(ui.host), false);
+    assert.ok(bar(), 'the reading remembered the offer was seen on this device');
+  } finally { ui.unmount(); restore(); unIO(); }
+});
+
+test('§4 GONE FOR GOOD ONCE PAID', async () => {
+  clearSeen();
+  try { window.localStorage.setItem('katon:offer-seen:tok1', '1'); } catch { /* none */ }
+  const unIO = installIO();
+  const restore = stub({ paid: true });
+  const ui = await mount();
+  try {
+    assert.ok(ui.host.querySelector('#unduh'), 'precondition: paid, the delivery is open');
+    assert.equal(bar(), null);
+  } finally { ui.unmount(); restore(); unIO(); clearSeen(); }
+});
