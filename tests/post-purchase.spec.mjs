@@ -186,6 +186,9 @@ test('§4 AFTER THE OFFER WAS SEEN, scrolling away shows the bar (price + the ex
     assert.ok(b, 'shown once the offer has been seen and is off screen');
     assert.ok(b.textContent.includes('Rp 19.000'), 'the price');
     assert.ok(b.textContent.includes('Ambil Complete Edition'), 'the existing buy button label');
+    // It is portalled to document.body, outside the reading root that sets the theme
+    // variables; without its own copy its background resolves to nothing (2026-10-06).
+    assert.ok(b.style.getPropertyValue('--el-sanctuary'), 'the bar carries the theme variables');
     const footer = document.createElement('footer');
     document.body.appendChild(footer);
     // The footer is only observed if it exists when the observer is set up; this one

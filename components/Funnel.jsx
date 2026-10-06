@@ -1076,7 +1076,7 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
           buyer returning to her link (`delivered`) or back from checkout
           (`pending`), and closing sales is not revoking what she bought. */}
       {(salesOpen || initialStage) && (
-        <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} landOnDelivery={landOnDelivery} /></div>
+        <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} landOnDelivery={landOnDelivery} theme={themeVars(element)} /></div>
       )}
       {/* The Compatibility block (Prompt AY §2): directly after the offer, and only
           while COMPAT is on sale (K2, 2026-10-02: `compatOpen`, not the payment
@@ -1345,7 +1345,7 @@ const DELIVERY_ANCHOR = 'unduh';
  * (`lib/deliver/handlers.js`): they are bought together, gated together, and
  * refused together.
  */
-function Offer({ reading, initialStage, landOnDelivery = false }) {
+function Offer({ reading, initialStage, landOnDelivery = false, theme = {} }) {
   // offer | pending | delivered
   const [stage, setStage] = useState(initialStage || 'offer');
   // ── LAND ON THE DOWNLOAD SECTION (Prompt BE §3a, Reyner 2026-10-06) ──
@@ -1550,7 +1550,7 @@ function Offer({ reading, initialStage, landOnDelivery = false }) {
       </div>
     </Reveal>
     {showBar && typeof document !== 'undefined' && createPortal(
-      <PayBar price={formatIdr(priceFor('artifact'))} busy={busy} onBuy={startCheckout} />,
+      <PayBar price={formatIdr(priceFor('artifact'))} busy={busy} onBuy={startCheckout} theme={theme} />,
       document.body,
     )}
     </>
@@ -1563,9 +1563,13 @@ function Offer({ reading, initialStage, landOnDelivery = false }) {
  * because a transformed ancestor (Reveal) would turn `position: fixed` into "fixed to
  * that ancestor". The bottom padding includes the iPhone home-indicator inset.
  */
-function PayBar({ price, busy, onBuy }) {
+function PayBar({ price, busy, onBuy, theme }) {
   return (
+    // THE THEME VARIABLES COME WITH IT: they are set on the reading's root, and a portal
+    // on document.body is outside it - without them `var(--el-sanctuary)` is empty and the
+    // bar is transparent (seen in the 375px capture, 2026-10-06).
     <div data-pay-bar style={{
+      ...theme,
       position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 40,
       background: SANCTUARY, color: LIGHT, boxShadow: '0 -8px 24px rgba(9,18,21,.22)',
       padding: '10px 16px calc(10px + env(safe-area-inset-bottom, 0px))',
