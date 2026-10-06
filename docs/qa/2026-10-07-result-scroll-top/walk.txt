@@ -1,0 +1,10 @@
+== node scripts/result-scroll-walk.mjs http://localhost:3002 <out> <label>, 2026-10-07, headless Chrome 375x812, katon-be-mock (local dev, no Gemini: the FLOOR)
+== BEFORE: components/Funnel.jsx at 401c8ed swapped in under the same dev server
+[before] at the submit button: scrollY 191
+[before] reading opened: {"path":"/r/60D1EGdPvBz7LjrUtdjo4","scrollY":191,"title":"The Sun","titleTop":-39,"titleOnScreen":false}
+[before] wrote reading-opened-before-375.png
+
+== AFTER: this branch
+[after] at the submit button: scrollY 191
+[after] reading opened: {"path":"/r/5u16o77XfcHduQqAXKM46","scrollY":0,"title":"The Sun","titleTop":152,"titleOnScreen":true}
+[after] wrote reading-opened-after-375.png
