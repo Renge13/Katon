@@ -143,8 +143,10 @@ test('2c item 2b: "membawa elemen" only for what one partner brings the other', 
 
 test('2d: the Voice paragraph asks for native Indonesian, not translated pop-psychology (Reyner, 2026-10-06)', () => {
   const p = loadPrompt('pair', 'v2');
-  assert.ok(p.includes('Ground the emotion in vivid, real-world human situations. Do not use literal translations of English pop-psychology, therapy jargon, or Western relationship concepts (e.g., avoid unnatural translated phrases like kebersamaan yang disengaja, memegang ruang, or melakukan pekerjaan emosional). Express these ideas using natural, native Indonesian phrasing that people actually say in real life (e.g., menyempatkan waktu berdua, hadir sepenuhnya, menjaga komunikasi).'),
+  assert.ok(p.includes('Ground the emotion in vivid, real-world human situations. Do not use literal translations of English pop-psychology, therapy jargon, or Western relationship concepts (e.g., avoid unnatural translated phrases like kebersamaan yang disengaja, memegang ruang, or melakukan pekerjaan emosional). Express these ideas using natural, native Indonesian phrasing that people actually say in real life (e.g., menyempatkan waktu berdua, menjaga komunikasi).'),
     'the native-phrasing line is missing from Voice');
+  // Dropped by Reyner 2026-10-06: "hadir sepenuhnya" is itself a translation of "be fully present".
+  assert.equal(p.includes('hadir sepenuhnya'), false, 'the prompt still offers "hadir sepenuhnya" as an example');
 });
 
 // ── BC AMENDMENT 2c item 1 (Reyner, 2026-10-04): A v2 PAIR CHAPTER IS `paragraphs` ──
