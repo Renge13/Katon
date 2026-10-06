@@ -40,6 +40,9 @@ import { rememberReading, recallReading, forgetReading, LAST_READING_KEY } from 
 import { recallBirth, forgetBirth, rememberBirth } from '../lib/site/carryBirth.js';
 import GLOSSARY from '../docs/content/glossary.json' with { type: 'json' };
 import { makeSetField } from './helpers/setField.mjs';
+import { assembleFallback } from '../lib/render/fallback.js';
+import { buildCompleteEditionPdf, CHART_HEADING } from '../lib/pdf/build.js';
+import { pageTexts } from '../lib/pdf/inspect.js';
 import hooksContext from 'next/dist/shared/lib/hooks-client-context.shared-runtime.js';
 
 const { PathnameContext } = hooksContext;
@@ -319,21 +322,44 @@ test('§2: the next block is R4 only, after the offer, with compat closed AND op
 
 // ── §3: BAGAN KELAHIRAN ────────────────────────────────────
 
-test('§3: K1 replaces the "yang di tengah" line; the Konsepsi caption is the glossary text, read not retyped', async () => {
-  assert.equal(SERVED.chart.conception_pillar.meaning, KONSEPSI_MEANING, 'the view carries the glossary meaning');
+// AMENDMENT 2 §2 (Reyner, 2026-10-06): "Pilar Konsepsi off the web reading; stays in the
+// PDF chart page and glossary." The card and its BF §3 caption confused the reader and
+// nothing in the reading uses them (胎元 is display only, never in the semantic JSON).
+// The view model is SHARED with the PDF, so it still carries the cell; only the web
+// render drops it. The absent half is paired with the CE chart page printing it, so a
+// change that dropped 胎元 everywhere cannot pass.
+test('§3 + amendment 2 §2: K1 renders; no Pilar Konsepsi and no caption on the web reading; the CE chart page still prints it', async () => {
+  const cp = SERVED.chart.conception_pillar;
+  assert.equal(cp.label, GLOSSARY.pilar.conception.name_id, 'the shared view still carries the cell (the PDF reads it)');
+  assert.equal(SERVED.chart.pillars.some((p) => p.hanzi === cp.hanzi), false, 'precondition: no pillar shares 胎元\'s characters');
   const f = stubFetch();
   const ui = await mount(React.createElement(Reading, { reading: SERVED, onReset() {} }));
   try {
-    assert.ok(ui.text().includes(RULED.bagan_intro), 'K1 renders');
-    assert.ok(!ui.text().includes(OLD_BAGAN_INTRO), 'the old line does not');
-    const cap = ui.host.querySelector('[data-conception-caption]');
-    assert.ok(cap, 'the caption renders under the Konsepsi card');
-    assert.equal(cap.textContent, KONSEPSI_MEANING);
-    assert.ok(ui.text().includes(SERVED.chart.conception_pillar.hanzi), 'Konsepsi itself stays (rule 4)');
+    const text = ui.text();
+    assert.ok(text.includes(RULED.bagan_intro), 'K1 renders (the Bagan section is there)');
+    assert.ok(!text.includes(OLD_BAGAN_INTRO), 'the old line does not');
+    for (const p of SERVED.chart.pillars) assert.ok(text.includes(p.palace), `control: ${p.palace} renders`);
+    assert.ok(!/pilar konsepsi/iu.test(text), 'no Pilar Konsepsi on the web reading');
+    assert.ok(!text.includes(cp.hanzi), 'no 胎元 cell');
+    assert.equal(ui.host.querySelector('[data-conception-caption]') === null, true, 'no caption element');
+    assert.ok(!text.includes(KONSEPSI_MEANING), 'no caption text');
   } finally { await ui.unmount(); f.restore(); }
   for (const file of ['components/Funnel.jsx', 'lib/mirror/view.js', 'lib/site/copy.js']) {
     assert.ok(!src(file).includes('Dihitung dari perkiraan masa pembuahan'), `${file} retypes the glossary sentence`);
   }
+
+  // THE PRESENT HALF, on the chart page itself. "Pilar Konsepsi" also prints in the
+  // glossary appendix, so a whole-document match would pass with the chart cell gone.
+  const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '04:00' });
+  const semanticJson = buildSemanticJson(chart);
+  const rendered = { ...assembleFallback(semanticJson), prompt_version: 'testprompt00', stage6_version: '1.17.0' };
+  const { buffer } = await buildCompleteEditionPdf({ chart, semanticJson, rendered });
+  const pages = pageTexts(buffer);
+  const chartPage = pages.find((t) => t.includes(CHART_HEADING) && t.includes(RULED.bagan_intro));
+  assert.ok(chartPage, 'the CE has its chart page');
+  assert.match(chartPage, /pilar konsepsi/iu, 'the CE chart page prints Pilar Konsepsi');
+  assert.ok(chartPage.includes(cp.hanzi), 'with its 胎元 characters');
+  assert.ok(pages.some((t) => t !== chartPage && t.includes(KONSEPSI_MEANING.slice(0, 30))), 'and the glossary entry stays');
 });
 
 // ── §3b: THE BIRTH HOUR ────────────────────────────────────
@@ -419,6 +445,80 @@ test('amendment 1 §3: the target selector shares the select:focus rule in app/g
   assert.ok(/box-shadow:\s*0 0 0 3px var\(--emas-dim\)/u.test(focusRule.body), 'it is the gold ring rule');
   assert.ok(focusRule.selectors.includes(`select[${TARGET}]`), `select[${TARGET}] is in the same rule`);
   assert.equal(rules.filter((r) => r.selectors.some((s) => s.includes(TARGET))).length, 1, 'and in no other rule: no new treatment');
+});
+
+// ── AMENDMENT 2 §1: ARRIVING FROM H3, NO RESUME CARD ────────
+// Cowork's walk of the #200 preview at 375x812: after H3 the front door led with the
+// resume card, "Buka bacaanku" the dominant button and the marked hour field below the
+// fold. On that arrival only, the card is not rendered; the memory is not cleared.
+test('amendment 2 §1: the H3 arrival shows no resume card and keeps the memory; a plain visit to / shows the card', async () => {
+  rememberReading({ token: 'tok123abc', title: TITLE });
+  rememberBirth({ date: '1989-09-13', time: null, gender: 'female' });
+  window.history.replaceState(null, '', '/?jam=tambah');
+  const f = stubFetch({ '/api/deliver/tok123abc': { status: 200, body: { paid: false, items: [] } } });
+  const mounted = [];
+  try {
+    const arrival = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+    mounted.push(arrival);
+    await flush();
+    // The arrival happened (control): prefilled and marked, as before.
+    assert.equal(arrival.host.querySelector('input[type="date"]').value, '1989-09-13', 'date prefilled');
+    assert.equal(arrival.host.querySelector('#mirror-gender').value, 'female', 'gender prefilled');
+    assert.equal(arrival.host.querySelector('#mirror-time').hasAttribute(TARGET), true, 'hour field marked');
+    assert.equal(arrival.host.querySelector('[data-resume-card]') === null, true, 'no resume card on the H3 arrival');
+    assert.ok(!arrival.text().includes(RULED.resume_open), 'no "Buka bacaanku"');
+    assert.equal(recallReading()?.token, 'tok123abc', 'the remembered reading is NOT cleared');
+    await mounted.pop().unmount();
+
+    // The address is back to `/`; a later visit is a plain front door.
+    assert.equal(window.location.pathname + window.location.search, '/');
+    const later = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+    mounted.push(later);
+    await flush();
+    assert.ok(later.host.querySelector('[data-resume-card]'), 'a plain visit to / shows the card');
+    assert.ok(later.text().includes(RULED.resume_open), 'with R2');
+  } finally {
+    for (const ui of mounted) await ui.unmount();
+    f.restore();
+  }
+});
+
+// The header's "Bacaan Diri" is a client <Link>, so a later visit to `/` can be the SAME
+// funnel instance. The card must come back there too, not only on a fresh mount.
+test('amendment 2 §1: the same instance shows the card again once the address moves away and back to /', async () => {
+  rememberReading({ token: 'tok123abc', title: TITLE });
+  rememberBirth({ date: '1989-09-13', time: null, gender: 'female' });
+  window.history.replaceState(null, '', '/?jam=tambah');
+  const f = stubFetch({
+    '/api/mirror/tok123abc': { status: 200, body: SERVED },
+    '/api/deliver/tok123abc': { status: 200, body: { paid: false, items: [] } },
+  });
+  const at = (pathname) => React.createElement(PathnameContext.Provider, { value: pathname },
+    React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => { root.render(at('/')); });
+    await flush();
+    assert.ok(host.querySelector('form'), 'the arrival front door');
+    assert.equal(host.querySelector('[data-resume-card]') === null, true, 'no card on the arrival');
+
+    window.history.replaceState(null, '', '/r/tok123abc');
+    await act(async () => { root.render(at('/r/tok123abc')); });
+    await flush();
+    assert.equal(host.querySelector('form') === null, true, 'at /r/<token>: the reading');
+
+    window.history.replaceState(null, '', '/');
+    await act(async () => { root.render(at('/')); });
+    await flush();
+    assert.ok(host.querySelector('form'), 'back at / the front door');
+    assert.ok(host.querySelector('[data-resume-card]'), 'and the card is back');
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    f.restore();
+  }
 });
 
 test('§3b: no hour given, H2 and H3 under the Bagan cards; hour given, nothing extra', async () => {

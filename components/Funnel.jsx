@@ -336,9 +336,19 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
   // same `select:focus` rule, so the field shows that treatment either way. It goes as
   // soon as she picks an hour.
   const [hourTarget, setHourTarget] = useState(false);
+  // NO RESUME CARD ON THIS ARRIVAL (Prompt BF amendment 2 §1, Reyner 2026-10-06). She
+  // asked to add an hour, so the screen offers that one action: with the card above the
+  // form, "Buka bacaanku" was the dominant button and the marked hour field sat below
+  // the fold at 375x812. The memory is NOT cleared, only not shown here, and only on
+  // this arrival: a fresh mount of `/` starts without the flag, and the same instance
+  // drops it once the address moves or she submits (the header is a client `<Link>`,
+  // so a later visit to `/` can be this instance).
+  const [hideResume, setHideResume] = useState(false);
+  if (hideResume && (pathname !== seenPath || phase !== 'input')) setHideResume(false);
   if (arrival && arrival !== arrived) {
     setArrived(arrival);
     setHourTarget(true);
+    setHideResume(true);
     const carried = JSON.parse(arrival);
     if (carried.date) setForm({ date: carried.date, time: '', gender: carried.gender || '' });
   }
@@ -544,7 +554,7 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
   // here because a deletion this fresh reads like a botched merge otherwise.
 
   if (restored) return <ReadingByToken key={restored} token={restored} salesOpen={salesOpen} compatOpen={compatOpen} />;
-  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} compatOpen={compatOpen} resume={resume} onForgetResume={forgetReading} hourTarget={hourTarget} onHourPicked={() => setHourTarget(false)} />;
+  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} compatOpen={compatOpen} resume={hideResume ? null : resume} onForgetResume={forgetReading} hourTarget={hourTarget} onHourPicked={() => setHourTarget(false)} />;
   if (phase === 'season') return <SeasonGate season={season} onAnswer={onSeasonAnswer} />;
   return <Reading reading={reading} onReset={reset} salesOpen={salesOpen} compatOpen={compatOpen} />;
 }
@@ -1080,29 +1090,14 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
               </p>
             </Reveal>
           )}
-          {/* 胎元 — display only, no interpretation, and no invented label. Reyner
-              ruled `pilar.conception` carries NO label_meaning on purpose (2026-08-07;
-              LIFTED 2026-09-30, Prompt AX, and shown as the caption below since BF);
-              it prints because Joey prints it and a cross-checking reader notices its
-              absence. 命宮 is deliberately absent: two candidate conventions score
-              4/5 and 3/5 against Joey's own printed values, and in a block whose only
-              job is to be checkable a wrong value is worse than a missing one. */}
-          {chart.conception_pillar && (
-            <Reveal delay={0.24} style={{ marginTop: 14 }}>
-              <div style={{ textAlign: 'center', border: '1px solid var(--divider)', borderRadius: 12, padding: '10px 4px', background: 'var(--kertas-2)', maxWidth: 180, margin: '0 auto' }}>
-                <div style={{ fontSize: 9.5, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted-warm)' }}>{chart.conception_pillar.label}</div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--tinta)', margin: '5px 0 2px' }}>{chart.conception_pillar.hanzi}</div>
-                <div style={{ fontSize: 10.5, color: 'var(--muted-warm)' }}>{chart.conception_pillar.element} · {chart.conception_pillar.animal}</div>
-              </div>
-              {/* THE CAPTION (Prompt BF §3 item b): the glossary's ruled
-                  `pilar.conception.label_meaning`, sent by the server with the cell and
-                  never retyped here. It says what the pillar is and that it is not read
-                  on its own, which is why it may sit here without interpreting it. */}
-              {chart.conception_pillar.meaning && (
-                <p data-conception-caption style={{ fontSize: 12, color: 'var(--muted-warm)', textAlign: 'center', lineHeight: 1.55, maxWidth: 300, margin: '10px auto 0' }}>{chart.conception_pillar.meaning}</p>
-              )}
-            </Reveal>
-          )}
+          {/* NO 胎元 HERE (Prompt BF amendment 2 §2). Reyner 2026-10-06: "Pilar
+              Konsepsi off the web reading; stays in the PDF chart page and glossary."
+              The card and its BF §3 caption confused the reader, and nothing in the
+              reading uses them: 胎元 is display only and never in the semantic JSON.
+              `chart.conception_pillar` is still served, because the view is shared and
+              lib/pdf/document.js prints it on the Complete Edition chart page. The
+              engine is untouched (CLAUDE.md rule 4). 命宮 stays absent as before: two
+              candidate conventions score 4/5 and 3/5 against Joey's own values. */}
         </Section>
       )}
 
