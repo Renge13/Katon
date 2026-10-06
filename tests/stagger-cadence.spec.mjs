@@ -80,6 +80,7 @@ import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
 import Funnel from '../components/Funnel.jsx';
+import { CHROME_COPY } from '../lib/site/copy.js';
 
 const chart = calculateBaziChart({ birthDate: '1989-09-13', birthTime: '04:00' });
 const CHART_VIEW = mirrorChartView(chart, buildSemanticJson(chart));
@@ -152,7 +153,9 @@ test('PROPOSITION 1 and 2: persona is 0/120/240ms and Bagan matches at 0/120/240
     // Bagan: located by its own copy rather than by index, so an inserted block
     // above it does not silently repoint this assertion at something else.
     const nodes = [...ui.host.querySelectorAll('.k-rise')];
-    const lead = nodes.findIndex((n) => /Empat lapisan energi/.test(n.textContent || ''));
+    // Read from the bank, not retyped: Prompt BF (2026-10-06) replaced the line and a
+    // literal here went stale with it.
+    const lead = nodes.findIndex((n) => (n.textContent || '').includes(CHROME_COPY.bagan_intro));
     assert.ok(lead > 0, 'the Bagan Kelahiran block was not found by its copy');
     assert.deepEqual(
       [nodes[lead], nodes[lead + 1], nodes[lead + 2]].map((n) => n.style.animationDelay),
