@@ -482,11 +482,13 @@ test('R3 + AW: the mirror cover prints the profile line; the compat cover birthS
   assert.ok(joined(m.texts[0]).includes('PEREMPUAN | 13 SEP 1989 | 09.00'),
     `mirror cover: ${JSON.stringify(lines(m.texts[0]))}`);
   assert.equal(joined(m.texts[0]).includes('13 Sep 1989, 09.00, Perempuan'), false, 'the mirror cover no longer prints birthSummary');
-  const cover = joined(c.texts[0]);
-  assert.ok(cover.includes('13 Sep 1989, 09.00, Perempuan'), `compat cover, reader: ${cover}`);
-  assert.ok(cover.includes('4 Mar 1990, 14.00, Laki-laki'), `compat cover, partner: ${cover}`);
-  assert.equal(cover.includes(' dan Laki-laki'), false, 'the two people are not joined into one pairLine sentence');
-  assert.ok(cover.indexOf('13 Sep 1989') < cover.indexOf('4 Mar 1990'), 'the reader comes first');
+  // The compat births are uppercased by STYLE since Prompt BC §4 (the CE's profile-line
+  // format); the words are birthSummary's, so the comparison folds case.
+  const cover = joined(c.texts[0]).toUpperCase();
+  assert.ok(cover.includes('13 SEP 1989, 09.00, PEREMPUAN'), `compat cover, reader: ${cover}`);
+  assert.ok(cover.includes('4 MAR 1990, 14.00, LAKI-LAKI'), `compat cover, partner: ${cover}`);
+  assert.equal(cover.includes(' DAN LAKI-LAKI'), false, 'the two people are not joined into one pairLine sentence');
+  assert.ok(cover.indexOf('13 SEP 1989') < cover.indexOf('4 MAR 1990'), 'the reader comes first');
 });
 
 // ── ~~R4 (2026-09-24): Indonesian decimals on the bars~~ SUPERSEDED BY AW §3 item 3 ──
