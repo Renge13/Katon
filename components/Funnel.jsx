@@ -71,7 +71,7 @@ function fireEvent(token, event) {
     }).catch(() => {});
   } catch { /* a counter never breaks the page */ }
 }
-import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, Icon, elColor, alpha } from './kit.jsx';
+import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, EmptyPillarCell, Icon, elColor, alpha } from './kit.jsx';
 import { ELEMENT_GLOSS, presenceBars } from '../lib/site/elements.js';
 import { priceFor } from '../lib/pricing.js';
 import { SITE_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
@@ -1057,36 +1057,42 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
           <Reveal><p style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '-6px 0 16px', lineHeight: 1.55 }}>{CHROME_COPY.bagan_intro}</p></Reveal>
           {/* 0/120/240 to match the persona block above. Two different stagger
               rhythms inside one scroll is what this alignment prevents. */}
+          {/* ── NO HOUR GIVEN: AN EMPTY FOURTH CELL (Prompt BG §5, Reyner 2026-10-06) ──
+              Without an hour the engine sends three pillars, `hour_known: false` and
+              the missing pillar's name (lib/mirror/view.js). The row still shows four
+              cells: the fourth is Pilar Arah, empty, with H3 inside it, which takes her
+              to the front door with this birth prefilled and the hour field marked
+              (Prompt BF §3b; the birth travels in this tab's sessionStorage, never in
+              the address). H2 stays one line under the row, as its note. Deterministic
+              UI text, never writer prose (rule 14). An hour given: four computed cells
+              and nothing else, as before. */}
           <Reveal delay={0.12}>
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${chart.pillars.length},1fr)`, gap: 9 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${chart.pillars.length + (chart.missing_pillar ? 1 : 0)},1fr)`, gap: 9 }}>
               {chart.pillars.map((p) => (
                 <PillarCell key={p.position} label={p.palace} stem={p.stem} branch={p.branch}
                   elementId={p.element} element={p.element} polarity={p.animal} isDayMaster={p.is_day_master} />
               ))}
+              {chart.missing_pillar && (
+                <EmptyPillarCell label={chart.missing_pillar.palace}>
+                  <a
+                    href={ADD_HOUR_HREF}
+                    onClick={() => rememberBirth({
+                      date: profile.birth_date,
+                      time: null,
+                      gender: profile.gender,
+                    })}
+                    style={{ color: 'var(--tinta-soft)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3 }}
+                  >
+                    {CHROME_COPY.hour_add}
+                  </a>
+                </EmptyPillarCell>
+              )}
             </div>
           </Reveal>
-          {/* ── NO HOUR GIVEN: SAY WHAT THE HOUR DID (Prompt BF §3b, Reyner 2026-10-06) ──
-              Without an hour the engine sends three pillars and `hour_known: false`
-              (lib/mirror/view.js), so Pilar Arah is simply missing from the row. H2
-              says why, and H3 takes her to the front door with this birth prefilled
-              and the hour field focused. The birth travels in this tab's sessionStorage
-              (lib/site/carryBirth.js), never in the address. Deterministic UI text,
-              never writer prose (rule 14). An hour given: nothing here. */}
           {chart.hour_known === false && (
             <Reveal delay={0.12}>
               <p data-hour-missing style={{ fontSize: 13, color: 'var(--muted-warm)', margin: '14px 0 0', lineHeight: 1.55 }}>
-                {CHROME_COPY.hour_missing}{' '}
-                <a
-                  href={ADD_HOUR_HREF}
-                  onClick={() => rememberBirth({
-                    date: profile.birth_date,
-                    time: null,
-                    gender: profile.gender,
-                  })}
-                  style={{ color: 'var(--tinta-soft)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3, whiteSpace: 'nowrap' }}
-                >
-                  {CHROME_COPY.hour_add}
-                </a>
+                {CHROME_COPY.hour_missing}
               </p>
             </Reveal>
           )}
