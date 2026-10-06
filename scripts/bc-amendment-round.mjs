@@ -40,10 +40,13 @@ const { V2_PAIR_TEMPERATURE } = await import('../lib/render/config.js');
 const { sentences } = await import('../lib/validate/text.js');
 const { GLOSSARY } = await import('../lib/semantic/glossary.js');
 
-// BC §3's four pairs, unchanged (scripts/bc-round.mjs).
+// BC §3's four pairs (scripts/bc-round.mjs), except the first. BC amendment 2d (Reyner,
+// 2026-10-06) replaced the sample pair - the gold example's own charts and names, whose
+// renders copy the example - with a Menikah pair whose day pair, stem relation and supply
+// all differ from the example's.
 const PAIRS = [
-  { id: 'sample', status: 'Menikah', nicknames: { a: 'Nadia', b: 'Bima' },
-    a: { birthDate: '2005-02-14', birthTime: '07:00', gender: 'female' }, b: { birthDate: '1999-07-07', birthTime: '17:00', gender: 'male' } },
+  { id: 'rina', status: 'Menikah', nicknames: { a: 'Rina', b: 'Adit' },
+    a: { birthDate: '1992-11-23', birthTime: '10:00', gender: 'female' }, b: { birthDate: '1990-04-18', birthTime: '21:00', gender: 'male' } },
   { id: 'PZ0t', status: 'Pacaran', nicknames: { a: 'Sari', b: 'Dimas' },
     a: { birthDate: '1989-09-13', birthTime: '09:00', gender: 'female' }, b: { birthDate: '1990-03-04', birthTime: '14:00', gender: 'male' } },
   { id: 'clash', status: 'PDKT', nicknames: { a: 'Ayu', b: 'Raka' },
