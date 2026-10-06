@@ -130,6 +130,9 @@ UPDATED: 2026-10-06 (Prompt BE §0) — THE FIRST REAL PURCHASE SETTLED BY NOTIF
          section (the Complete Edition keeps #unduh). The PDF disclaimer stays on BOTH the cover and
          the closing page, by ruling. And two PDF page-break rules: a heading never ends a page
          apart from its body, and the compat facts table's last row never stands alone.
+         A THIRD PAGE-BREAK RULE THE SAME DAY (Reyner, amendment 1 to BE, on #199): the glossary's
+         last group never sits alone on a page; it moves together with the group before it. Both
+         editions (`keepLastGroupWithPrevious`, lib/pdf/document.js).
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
          For "what SHIPS", read LIVE STATE at the top — it is the only section that answers that, and
          it is the one a product argument needs first.
