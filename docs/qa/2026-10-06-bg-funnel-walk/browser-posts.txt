@@ -1,0 +1,20 @@
+== node scripts/offer-seen-walk.mjs http://localhost:3002   (2026-10-06, katon-be-mock: local dev, PAYMENTS_PROVIDER=mock, no Gemini)
+== AFTER (this branch)
+reading QopRH5mB8rBartEzU1iKz, offer panel on page: true
+1. at the top of the reading, offer not reached      offer_seen posts so far: 0
+2. scrolled to the offer panel                       offer_seen posts so far: 1
+3. away and back to the offer                        offer_seen posts so far: 1
+4. reloaded, at the top                              offer_seen posts so far: 1
+5. reloaded, scrolled to the offer again             offer_seen posts so far: 2
+   mock unlock: {"ok":true,"paid":true,"transitioned":true,"reason":null}
+6. paid, reloaded, scrolled to where the offer was   offer_seen posts so far: 2
+
+== BEFORE (components/Funnel.jsx at af033c2, swapped in under the same dev server)
+reading naNO7fHpEUgh_6Jbn8RDl, offer panel on page: true
+1. at the top of the reading, offer not reached      offer_seen posts so far: 1
+2. scrolled to the offer panel                       offer_seen posts so far: 1
+3. away and back to the offer                        offer_seen posts so far: 1
+4. reloaded, at the top                              offer_seen posts so far: 2
+5. reloaded, scrolled to the offer again             offer_seen posts so far: 2
+   mock unlock: {"ok":true,"paid":true,"transitioned":true,"reason":null}
+6. paid, reloaded, scrolled to where the offer was   offer_seen posts so far: 2

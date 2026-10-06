@@ -143,6 +143,17 @@ UPDATED: 2026-10-06 (Prompt BF amendment 2, on #200) — RULED: "Reyner 2026-10-
          the front door from "Tambahkan jam lahir", the resume card is not shown; the remembered
          reading is kept and any later visit to `/` shows the card. Watch row for the mirror writer
          prompt's "Pilar Konsepsi" line: MEASUREMENTS, "WATCH, NO FIX".
+UPDATED: 2026-10-06 (Prompt BG PR 1, #202) — THE FUNNEL BASELINE STARTS AT THIS MERGE (2026-10-06).
+         `offer_seen` rows written BEFORE #202's merge fired when the result page LOADED (the Offer
+         component's mount), not when the offer was seen, so they overstate that step and are NOT a
+         baseline. From the merge on, `offer_seen` fires when the offer panel first enters the
+         viewport, once per reading, never on a paid reading or with payments closed.
+         `docs/ops/funnel.sql` defaults `since` to 2026-10-07, the first full day after the merge.
+         ALSO RULED (Reyner, same day): the /privasi note reads "Katon tidak meminta nama lengkap,
+         tidak memakai akun, dan tidak memasang cookie pelacak. Kunjungan halaman hanya dihitung
+         secara anonim, tanpa cookie dan tanpa mencatat tautan bacaanmu." (Vercel Web Analytics,
+         page views only, reading tokens removed from every URL); and three test rows join KNOWN
+         TEST ROWS below and the query's exclusion list.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
          For "what SHIPS", read LIVE STATE at the top — it is the only section that answers that, and
          it is the one a product argument needs first.
@@ -326,6 +337,9 @@ in-memory harnesses (`scripts/qa-voice-v2-renders.mjs`, `probe:reconcile`) wrote
 | `ZVm4Aghlo9q1zVDjGFQXi`, `g8JgXk2w8TkNPRrDUrUXy` | reading | no | Readings named in QA docs |
 | `DzmirWSLSntmMTQm4PfMj`, `8sAU5yPVp2jQARUdexaJf`, `5qE-AePzQqw4MiggLzMHV`, `6Mr3rBIZPL-k8mYTE8zsq`, `nuQxfjOL4zZuwU6kaOh9i`, `l6BZTZrxQdXYVmIgpTYmA`, `8TQ7V4ksqXtmCHzt1FIaR`, `zklWIMLWpjKIiFA2Hg1mB`, `V--V4grHETwx5kMLh81Z2`, `2JsNyR3_koVUNjGbjoqEN`, `nBC65OQkfhuQ9gdyN-Rix` | reading | **yes** | **The 11 Xendit-paid readings, May to August 2026: Reyner's own test purchases, no real customers** (Reyner, 2026-09-30, answering Prompt AV §2.6's paid-row question; ids from the §2.6 SQL result). The round-6 switch re-keys them, so each gets new prose on its next open |
 | `UZ-HaCnzzi9mRX60Ekqyb`, `pqZObW6PAKOcuwYtvHzcg`, `qv9aqhEwOxvPreWwme6aH`, `SFSht0M3lhY950g0IZdEN`, `4fw6vRFT9iWNjQjVtMlOX`, `1jiZkq5gK5QhBpiH8isP-` | pair | - | **The 6 pairs with a `mock_` invoice**: test rows by definition, a `mock_` invoice was never money (Reyner, 2026-09-30, same ruling) |
+| `Zn-4VU2Ni2lLdcTO25aS2` | reading | **yes** | **Reyner's own Rp 19.000 production purchase**, 2026-10-06 (invoice `.muw4uwtc`, QRIS, settled by notification; the gate b verification in the header, Prompt BE §0). Real money, a self-test (Reyner, 2026-10-06) |
+| `zDK_PNEbwMDFHYhT_MI2k` | reading | no | Reyner's abandoned checkout, unpaid (Reyner, 2026-10-06) |
+| `WqocaFz1FTMYqLPRBrtnl` | reading | no | Cowork's preview walk, no birth hour (Prompt BF amendment 2 §1; Reyner, 2026-10-06) |
 
 **How a paid test row differs from a real one today: not by any column.** `reading` and `pair` carry
 `paid`, `paid_at`, `invoice_id`, `sku`, `created_at` and nothing that records the environment or provider

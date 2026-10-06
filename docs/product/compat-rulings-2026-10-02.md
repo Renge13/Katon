@@ -73,6 +73,7 @@ Recorded from `docs/prompts/BC-amendment-2-names-close-privacy.md` §0; Reyner's
 - **Length:** "Accept the approved gold sample as the practical target. I care about the reading feeling substantial and worth Rp39,000, not hitting a word-count target. Do not add padding just to reach 800 words."
 - **Harmony first:** "Start with what draws the two people together, then introduce the strain where both apply." (Already implemented in `433a98a`; this records the ruling.)
 - **Privacy:** "Katon tidak meminta nama lengkap, tidak memakai akun, dan tidak memasang cookie pelacak atau alat analitik pihak ketiga."
+  **SUPERSEDED 2026-10-06 (Reyner, Prompt BG §2.4, when Vercel Web Analytics arrived):** "Katon tidak meminta nama lengkap, tidak memakai akun, dan tidak memasang cookie pelacak. Kunjungan halaman hanya dihitung secara anonim, tanpa cookie dan tanpa mencatat tautan bacaanmu."
 - **Names:** "when facts say "kamu" or "dia", those are references to the two people, and the reading should address them by the names supplied to the writer." Fixed upstream in the prompt, not by a gate.
 - **The close:** the penutup "sets no conditions and gives no advice".
 - **Watch items, no gates or checks:** "Keep the wrong-direction sentence and the "Sari, dengan elemen Api yang dominan" issue as watch items for now. Do not add gates or extra checks for either." Both are rows in `docs/PROGRESS.md`'s WATCH list.

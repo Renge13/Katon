@@ -1574,16 +1574,15 @@ function Offer({ reading, initialStage, landOnDelivery = false, theme = {} }) {
   // `offer_seen` FIRES WHEN THE OFFER IS ACTUALLY OFFERED, not when the component
   // mounts in some other stage. A reader returning to a delivered reading is not
   // being shown an offer, and counting her would inflate the denominator that
-  // artifact conversion divides by. The ref keeps a re-render from re-firing;
-  // the unique index would dedupe it anyway, but a counter that spams its own
-  // endpoint is still wrong.
+  // artifact conversion divides by.
+  //
+  // AND ONLY ONCE THE PANEL IS ON HER SCREEN (Prompt BG §2.3, 2026-10-06). It used to
+  // fire on mount, which counted every reader who opened the page, including the ones
+  // who never scrolled to the offer. It now fires from the pay bar's observer below,
+  // the first time the panel intersects the viewport. The ref keeps a re-entry from
+  // re-firing; the server keeps one row per reading across reloads and devices, and
+  // records nothing on a paid reading or while payments are closed.
   const seenRef = useRef(false);
-  useEffect(() => {
-    if (seenRef.current) return;
-    if ((initialStage || 'offer') !== 'offer') return;
-    seenRef.current = true;
-    fireEvent(reading?.token, 'offer_seen');
-  }, [reading?.token, initialStage]);
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [busy, setBusy] = useState(false);
   // `closed`: the pay route refused on the fence. `error`: it failed otherwise.
@@ -1616,6 +1615,11 @@ function Offer({ reading, initialStage, landOnDelivery = false, theme = {} }) {
         if (e.target === panel) {
           setPanelOnScreen(e.isIntersecting);
           if (e.isIntersecting) {
+            // `offer_seen`, once per page load (the comment at seenRef says why here).
+            if (!seenRef.current && (initialStage || 'offer') === 'offer') {
+              seenRef.current = true;
+              fireEvent(reading?.token, 'offer_seen');
+            }
             setOfferSeen(true);
             try { window.localStorage.setItem(seenKey, '1'); } catch { /* storage off */ }
           }
@@ -1627,7 +1631,7 @@ function Offer({ reading, initialStage, landOnDelivery = false, theme = {} }) {
     io.observe(panel);
     if (footer) io.observe(footer);
     return () => io.disconnect();
-  }, [stage, seenKey]);
+  }, [stage, seenKey, initialStage, reading?.token]);
   const showBar = stage === 'offer' && offerSeen && !panelOnScreen && !footerOnScreen && !closed;
 
   async function startCheckout() {

@@ -1,0 +1,16 @@
+== docs/ops/funnel.sql against a seeded funnel_event (supabase/migrations/0009 schema) in PGlite, 2026-10-06
+== seed: r1 every step (hour), r2 to the offer (no hour), r3 created only (hour), a listed test row, a reading created before the range and bought inside it, a pair
+all 3 2 2 1 1
+hour given 2 1 1 1 1
+no hour 1 1 1 0 0
+MATCHES the expected counts
+
+== the same with the test-row exclusion removed (the check failing on purpose)
+(test-row exclusion removed)
+all 4 2 2 1 2
+hour given 3 1 1 1 2
+no hour 1 1 1 0 0
+MISMATCH, expected:
+all 3 2 2 1 1
+hour given 2 1 1 1 1
+no hour 1 1 1 0 0

@@ -120,6 +120,43 @@ console.log(`base        ${BASE}`);
 console.log(`client-id   ${redact(clientId)}`);
 console.log(`secret      ${secret ? 'set (never printed)' : '(unset)'}`);
 
+// ── --methods: ONE UNPAID CHECKOUT PER METHOD (Prompt BG §1, 2026-10-06) ──
+//   npm run probe:doku -- --methods                      Reyner's approved set
+//   npm run probe:doku -- --methods=QRIS,EMONEY_DANA     an explicit list
+// Each method is asked for alone, so one inactive channel cannot hide behind an
+// active one, and the exact DOKU answer is printed per method. Nothing is paid: a
+// Checkout session that is never paid expires. The approved set is READ from
+// lib/doku/methods.js. THIS ANSWERS FOR THE SANDBOX ACCOUNT ONLY (see the header):
+// activation on the production merchant account is a separate fact.
+const methodsArg = process.argv.slice(2).find((a) => a === '--methods' || a.startsWith('--methods='));
+if (methodsArg) {
+  const { APPROVED_PAYMENT_METHODS } = await import('../lib/doku/methods.js');
+  const list = methodsArg.includes('=')
+    ? methodsArg.split('=')[1].split(',').map((m) => m.trim()).filter(Boolean)
+    : [...APPROVED_PAYMENT_METHODS];
+  const verdicts = [];
+  for (const method of list) {
+    const r = await createCheckout(`method ${method}`, {
+      order: {
+        amount: 19000,
+        invoice_number: `probe-${stamp}-${method.toLowerCase()}`,
+        callback_url: 'https://katon.app/r/probe?bayar=selesai',
+        callback_url_result: 'https://katon.app/r/probe?bayar=selesai',
+      },
+      payment: { payment_method_types: [method] },
+    });
+    const url = r.json?.response?.payment?.url;
+    const message = Array.isArray(r.json?.message) ? r.json.message.join('; ')
+      : (r.json?.message ?? r.json?.error?.message ?? null);
+    verdicts.push({ method, status: r.status, accepted: Boolean(url) && r.status < 300, message: url ? null : message });
+  }
+  console.log('\n── methods verdict (SANDBOX) ──────────────');
+  for (const v of verdicts) {
+    console.log(`${v.method.padEnd(20)} ${String(v.status).padEnd(4)} ${v.accepted ? 'ACCEPTED (payment.url returned)' : `REFUSED: ${v.message ?? 'no message'}`}`);
+  }
+  process.exit(0);
+}
+
 // ── 2.1 and 2.3 ──
 // No `customer` block at all. If QRIS is enabled and customer is genuinely optional,
 // this returns a `payment.url`. If it fails, the message says WHICH of the two it was
