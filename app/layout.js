@@ -2,6 +2,7 @@ import { Spectral, Hanken_Grotesk, Archivo } from 'next/font/google';
 import './globals.css';
 import SiteFooter from '@/components/SiteFooter.jsx';
 import SiteHeader from '@/components/SiteHeader.jsx';
+import PageAnalytics from '@/components/PageAnalytics.jsx';
 import { compatCheckoutOpen } from '@/lib/paymentFence';
 import { GlossNamesProvider } from '@/components/GlossNames.jsx';
 import { GLOSS_NAMES_EN } from '@/lib/render/glossNames.js';
@@ -82,6 +83,9 @@ export default function RootLayout({ children }) {
             glossary itself; a list under 1KB rides in the page payload instead. */}
         <div style={{ flex: '1 0 auto' }}><GlossNamesProvider names={GLOSS_NAMES_EN}>{children}</GlossNamesProvider></div>
         <SiteFooter />
+        {/* Page views, cookieless, with the reading token taken out of the URL (Prompt
+            BG §2.4). Collects nothing until Web Analytics is enabled in Vercel. */}
+        <PageAnalytics />
       </body>
     </html>
   );
