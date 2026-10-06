@@ -89,3 +89,9 @@ Verbatim, from `docs/prompts/BC-amendment-2c-paragraphs.md` §0.
 - "Add the one prompt line for `membawa elemen`: use that wording only when describing what one partner brings to the other; describe a person's own element in another way."
 - "Keep the existing check. Do not create a new gate."
 - "Do not treat 800-1,000 words as a target. The objective is restoring the missing scene paragraph and the resulting reading depth."
+
+### Amendment 2d (Reyner, 2026-10-06)
+Verbatim, from `docs/prompts/BC-amendment-2d-native-phrasing.md`. A direction line in the pair prompt's Voice paragraph; no check and no blocklist entry (per `voice-constraint-rulings-2026-09-26.md` "REYNER-RULED 2026-10-01").
+
+- The line: "Do not use literal translations of English pop-psychology, therapy jargon, or Western relationship concepts (e.g., avoid unnatural translated phrases like kebersamaan yang disengaja, memegang ruang, or melakukan pekerjaan emosional). Express these ideas using natural, native Indonesian phrasing that people actually say in real life (e.g., menyempatkan waktu berdua, hadir sepenuhnya, menjaga komunikasi)."
+- Why: in the 2c round, "Mengubah rutinitas kecil menjadi momen kebersamaan yang disengaja adalah cara paling nyata..." (nonames render 1) "reads like a direct, clunky translation of the English pop-psychology phrase 'intentional moments of togetherness.'"
