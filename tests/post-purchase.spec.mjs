@@ -113,21 +113,56 @@ test('§3a A PAID READING REOPENED WITHOUT THE MARKER does not jump to the downl
 
 // ── §3b ──────────────────────────────────────────────────────
 
-test('§3b G1 IS UNDER THE DOWNLOAD BUTTONS, AFTER PAID, verbatim', async () => {
+// G1 IS REPLACED (Reyner, 2026-10-06, on #199): no standing paragraph. After the buyer taps
+// "Unduh PDF" or "Simpan Kartu", one line appears directly under the tapped button, and
+// nothing shows before a tap.
+const STARTED = 'Unduhan dimulai. Filenya biasanya ada di aplikasi Files, folder Downloads (iPhone), atau aplikasi File Manager, folder Unduhan (Android).';
+const buttonNamed = (host, label) => [...host.querySelectorAll('button')].find((b) => b.textContent.includes(label));
+/** The element right after the tapped control in its grid (the PDF button sits inside a link). */
+const nextAfter = (el) => (el.closest('a') || el).nextElementSibling;
+
+test('§3b G1 IS GONE, AND NOTHING SHOWS BEFORE A TAP', async () => {
   const restore = stub({ paid: true });
   const ui = await mount();
   try {
-    const text = ui.host.textContent;
-    assert.ok(text.includes(G1), 'the guide line is shown');
-    assert.ok(text.indexOf('Unduh PDF') > -1 && text.indexOf('Unduh PDF') < text.indexOf(G1), 'under the download buttons');
+    assert.ok(buttonNamed(ui.host, 'Unduh PDF') && buttonNamed(ui.host, 'Simpan Kartu'), 'precondition: both download buttons');
+    assert.equal(ui.host.textContent.includes(G1), false, 'the G1 paragraph is gone');
+    assert.equal(ui.host.textContent.includes(STARTED), false, 'nothing before a tap');
   } finally { ui.unmount(); restore(); }
 });
 
-test('§3b G1 IS NOT SHOWN BEFORE PAID', async () => {
+test('§3b TAPPING "Simpan Kartu" SHOWS THE LINE DIRECTLY UNDER IT, and only there', async () => {
+  const restore = stub({ paid: true });
+  const ui = await mount();
+  try {
+    await act(async () => { buttonNamed(ui.host, 'Simpan Kartu').click(); });
+    await act(async () => { await new Promise((r) => setTimeout(r, 20)); });
+    const after = nextAfter(buttonNamed(ui.host, 'Simpan Kartu'));
+    assert.equal(after?.textContent, STARTED, 'the line is the element right after the card button');
+    assert.equal(ui.host.textContent.split(STARTED).length - 1, 1, 'once, not under the PDF button too');
+  } finally { ui.unmount(); restore(); }
+});
+
+test('§3b TAPPING "Unduh PDF" SHOWS THE LINE DIRECTLY UNDER IT, and only there', async () => {
+  const restore = stub({ paid: true });
+  const ui = await mount();
+  try {
+    const link = buttonNamed(ui.host, 'Unduh PDF').closest('a');
+    // jsdom cannot navigate; the click still reaches React's handler.
+    link.addEventListener('click', (e) => e.preventDefault());
+    await act(async () => { buttonNamed(ui.host, 'Unduh PDF').click(); });
+    const after = nextAfter(buttonNamed(ui.host, 'Unduh PDF'));
+    assert.equal(after?.textContent, STARTED, 'the line is the element right after the PDF link');
+    assert.equal(ui.host.textContent.split(STARTED).length - 1, 1, 'once');
+  } finally { ui.unmount(); restore(); }
+});
+
+test('§3b NOTHING IS SHOWN BEFORE PAID', async () => {
   const restore = stub({ paid: false });
   const ui = await mount();
   try {
     assert.equal(ui.host.textContent.includes(G1), false);
+    assert.equal(ui.host.textContent.includes(STARTED), false);
   } finally { ui.unmount(); restore(); }
 });
 

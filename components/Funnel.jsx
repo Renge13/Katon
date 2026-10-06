@@ -1698,6 +1698,9 @@ function Delivery({ token, view = 'ready' }) {
   const [paidCard, setPaidCard] = useState(null);
   const [state, setState] = useState('loading'); // loading | ready | failed
   const [saving, setSaving] = useState(null); // 'card' | 'pdf' | null
+  // Which download the buyer last tapped: its line shows directly under that button
+  // (Reyner 2026-10-06, replacing G1). Nothing before a tap.
+  const [tapped, setTapped] = useState(null); // 'card' | 'pdf' | null
 
   useEffect(() => {
     let cancelled = false;
@@ -1720,6 +1723,7 @@ function Delivery({ token, view = 'ready' }) {
 
   async function saveCard() {
     setSaving('card');
+    setTapped('card');
     try {
       await downloadCard('download', 'B', { id: 'card-b', filename: `katon-${(paidCard?.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
     } catch { /* the button re-enables; the PDF is unaffected */ }
@@ -1761,6 +1765,7 @@ function Delivery({ token, view = 'ready' }) {
             <Button variant="gold" light onClick={saveCard} disabled={saving === 'card'} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <Icon.save size={17} /> {saving === 'card' ? 'Menyimpan...' : 'Simpan Kartu'}
             </Button>
+            {tapped === 'card' && <DownloadStarted />}
             {/* A PLAIN LINK, not a fetch-then-blob. The endpoint sets
                 Content-Disposition: attachment, so the browser saves it and the tab
                 keeps its state; building a blob would hold a whole PDF in memory to
@@ -1774,19 +1779,29 @@ function Delivery({ token, view = 'ready' }) {
                 choice is a hidden link or a broken one: hidden, no text in its place,
                 and a reload re-renders and brings it back. */}
             {view === 'ready' && (
-              <a href={`/api/deliver/${token}/pdf`} style={{ textDecoration: 'none' }}>
+              <a href={`/api/deliver/${token}/pdf`} onClick={() => setTapped('pdf')} style={{ textDecoration: 'none' }}>
                 <Button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                   <Icon.save size={17} /> Unduh PDF
                 </Button>
               </a>
             )}
+            {view === 'ready' && tapped === 'pdf' && <DownloadStarted />}
           </div>
-          {/* G1, Reyner's download guide (Prompt BE §3b). This whole section renders only
-              once paid, so the line is never shown before payment. */}
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, lineHeight: 1.6, color: 'rgba(234,241,242,.72)', margin: '16px 0 0' }}>{CHROME_COPY.delivery_guide}</p>
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * The line under a tapped download button (Reyner 2026-10-06, replacing G1, Prompt BE §3b):
+ * the download has started and where the file usually lands. Only after a tap.
+ */
+function DownloadStarted() {
+  return (
+    <p data-download-started role="status" style={{ fontFamily: 'var(--font-sans)', fontSize: 13, lineHeight: 1.6, color: 'rgba(234,241,242,.72)', margin: '-4px 0 0' }}>
+      {CHROME_COPY.delivery_started}
+    </p>
   );
 }
 
