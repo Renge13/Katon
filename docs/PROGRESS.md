@@ -122,6 +122,14 @@ UPDATED: 2026-10-06 (Prompt BE §0) — THE FIRST REAL PURCHASE SETTLED BY NOTIF
          "© 2026 PT Katon Digital Nusantara. All rights reserved. | katon.app" - two exceptions to rule
          20/23, scoped to THIS FOOTER ONLY: the "©" character (rule 20 is keyboard characters only) and
          English in a reader-facing string.
+         AMENDED THE SAME DAY (Reyner, on #199): G1, the standing download guide under the Complete
+         Edition's buttons, is REPLACED by a line shown directly under "Unduh PDF" or "Simpan Kartu"
+         only after the buyer taps it: "Unduhan dimulai. Filenya biasanya ada di aplikasi Files,
+         folder Downloads (iPhone), atau aplikasi File Manager, folder Unduhan (Android)." Compat,
+         back from a confirmed payment, lands on the START of the paid reading, not the download
+         section (the Complete Edition keeps #unduh). The PDF disclaimer stays on BOTH the cover and
+         the closing page, by ruling. And two PDF page-break rules: a heading never ends a page
+         apart from its body, and the compat facts table's last row never stands alone.
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
          For "what SHIPS", read LIVE STATE at the top — it is the only section that answers that, and
          it is the one a product argument needs first.
