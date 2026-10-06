@@ -133,6 +133,8 @@
     "test:paid-cta-fence": "node --import ./scripts/jsx-register.mjs --test tests/paid-cta-fence.spec.mjs",
     "test:gate-rulings-2026-10-02": "node --test tests/gate-rulings-2026-10-02.spec.mjs",
     "test:english-archetype-titles": "node --test tests/english-archetype-titles.spec.mjs",
+    "test:bc-writer": "node --conditions=react-server --test tests/bc-writer.spec.mjs",
+    "test:compat-names-status": "node --conditions=react-server --test tests/compat-names-status.spec.mjs",
     "test:compat-sales-switch": "node --import ./scripts/jsx-register.mjs --test tests/compat-sales-switch.spec.mjs",
     "test:pair-reconcile": "node --conditions=react-server --test tests/pair-reconcile.spec.mjs",
     "test:pair-reconcile-client": "node --import ./scripts/jsx-register.mjs --test tests/pair-reconcile-client.spec.mjs",

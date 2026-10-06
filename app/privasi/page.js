@@ -26,7 +26,7 @@ export default function PrivasiPage() {
           given a section of their own: a reader looking for what is stored
           should find all of it in one place, and a separate heading would read
           as a footnote about a product she may not have bought. */}
-      <Bullets items={[...q.collect, q.privasi_email, q.privasi_second_person]} />
+      <Bullets items={[...q.collect, q.privasi_email, q.privasi_second_person, q.privasi_names]} />
       <P>{q.collectNote}</P>
 
       <H2>{q.purposeHeading}</H2>

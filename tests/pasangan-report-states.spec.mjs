@@ -628,3 +628,21 @@ test('THE REPORT NAMES THE QUADRANT AS A TITLE, the same source the PDF uses', a
     }
   } finally { ui.unmount(); restore(); }
 });
+
+// ── I4: THE WRITER'S CHAPTER HEADINGS ON A v2 READING (Prompt BC §2.5, 2026-10-02) ──
+// Reyner: "un-hide the chapter headings". The server flags it (`chapter_headings`, true
+// for a v2 pair served by the writer); the report then shows each block's own heading,
+// as the PDF prints it. Without the flag (v1, or a floor) the engine labels stay.
+test('I4: WITH chapter_headings THE WRITER\'S HEADINGS SHOW; WITHOUT IT THEY DO NOT', async () => {
+  for (const [flag, shown] of [[true, true], [false, false], [undefined, false]]) {
+    const body = { ...READING('render'), chapter_headings: flag };
+    const restore = stub({ pair: { status: 'paid' }, reading: body });
+    try {
+      const ui = await mount();
+      for (const h of ['Model Heading Satu', 'Model Heading Tiga', 'Model Heading Lima']) {
+        assert.equal(ui.text().includes(h), shown, `chapter_headings=${flag}: "${h}"`);
+      }
+      ui.unmount();
+    } finally { restore(); }
+  }
+});

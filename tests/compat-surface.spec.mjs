@@ -111,6 +111,8 @@ test('compat is sellable, which is what makes the page reachable', () => {
 // ── THE COPY SLOTS ─────────────────────────────────────────
 
 const PASANGAN_SLOTS = [
+  // Prompt BC §1 (2026-10-02): nickname and status; ruled by Reyner 2026-10-02 (BC amendment 1 item 7).
+  'nickname_label', 'nickname_help', 'status_label', 'nickname_invalid', 'status_invalid',
   'page_title', 'page_lead',
   'includes_1', 'includes_2', 'includes_3', 'includes_4', 'includes_5',
   'price_note',
@@ -202,8 +204,9 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
   // comment above says whoever changes it should be able to write it: 22 (X-b3)
   // + 2 (sales closed) - 1 (paid_title) + 4 (section eyebrows) - 1 (link_keep,
   // moved to CHROME_COPY) + 5 (Y-3: four document slots and the download button)
-  // = 31.
-  assert.equal(Object.keys(PASANGAN_COPY).length, 31);
+  // = 31. PLUS Prompt BC §1's five (nickname_label, nickname_help, status_label,
+  // nickname_invalid, status_invalid; ruled in BC amendment 1 item 7) = 36.
+  assert.equal(Object.keys(PASANGAN_COPY).length, 36);
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {

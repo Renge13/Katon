@@ -30,6 +30,7 @@
 // ============================================================
 
 import { UNRULED_SOURCES } from '../lib/site/unruledScan.js';
+import { PROPOSED_SLOTS } from '../lib/site/copy.js';
 
 // ── THIS SCRIPT NO LONGER NAMES A SINGLE BANK, 2026-09-08 ──
 // It kept its own hand-written list, and that list was wrong three times in
@@ -94,7 +95,9 @@ const invoked = process.argv[1] && process.argv[1].endsWith('check-unruled-copy.
 if (invoked) {
   const strict = process.argv.includes('--strict') || process.env.VERCEL_ENV === 'production';
   const pending = Object.entries(UNRULED_SOURCES)
-    .flatMap(([name, bank]) => scanUnruled(bank, name));
+    .flatMap(([name, bank]) => scanUnruled(bank, name))
+    // PROPOSED() strings (lib/site/copy.js): displayed, but unruled until Reyner rules them.
+    .concat(PROPOSED_SLOTS.map((p) => ({ path: `PROPOSED ${p.slot}`, value: p.text })));
 
   if (pending.length === 0) {
     console.log(`OK No unruled copy in ${Object.keys(UNRULED_SOURCES).length} bank(s): ${Object.keys(UNRULED_SOURCES).join(', ')}.`);

@@ -32,7 +32,7 @@ import { formatIdr } from '../lib/site/format.js';
 import { recallBirth } from '../lib/site/carryBirth.js';
 
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
-const EMPTY = { date: '', time: '', gender: '' };
+const EMPTY = { date: '', time: '', gender: '', nickname: '' };
 
 /** The five inclusions, in the reading's own P1..P5 journey order. */
 const INCLUDES = [
@@ -53,6 +53,8 @@ function birthBody(form, extra = {}) {
     birthDate: form.date,
     birthTime: time,
     gender: form.gender || null,
+    // Raw: the server sanitises it and refuses anything but a name (lib/pair/names.js).
+    nickname: form.nickname || null,
     ...extra,
   };
 }
@@ -79,6 +81,8 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
   const [a, setA] = useState({ ...EMPTY, ...(recallBirth() || {}), ...(initialA || {}) });
   const [b, setB] = useState(EMPTY);
   const [email, setEmail] = useState('');
+  // PDKT / Pacaran / Menikah, required, asked once in step 2 (Prompt BC §1).
+  const [status, setStatus] = useState(null);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -130,6 +134,7 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
         a: birthBody(a, answers.a || {}),
         b: birthBody(b, answers.b || {}),
         a_reading_id: initialA?.readingId || null,
+        status,
       }),
     }).then((r) => r.json()).catch(() => null);
 
@@ -347,10 +352,11 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
             above is unchanged and still comes first: she reads what the thing is
             and what it costs before she is asked for anything. */}
         <PasanganSteps
-          value={{ a, b, email }}
+          value={{ a, b, email, status }}
           onChange={(key, next) => {
             if (key === 'a') setA(next);
             else if (key === 'b') setB(next);
+            else if (key === 'status') setStatus(next);
             else setEmail(next);
           }}
           onGate={gateFor}

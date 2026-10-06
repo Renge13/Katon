@@ -83,7 +83,8 @@ const flat = (t) => t.replace(/\s+/gu, ' ').trim();
 // The ruled line ends in its own full stop, and it is two sentences now, so it
 // wraps: a page is matched on its FLATTENED text, never line by line.
 const RULED_P0 = (() => {
-  const md = readFileSync(new URL('../docs/content/compat-glossary-rulings-2.md', import.meta.url), 'utf8')
+  // Re-ruled 2026-10-04 (BC amendment 2b): the opening's current ruling is in the newer file.
+  const md = readFileSync(new URL('../docs/content/glossary-voice-rulings-2026-10-04.md', import.meta.url), 'utf8')
     .replace(/\r\n?/g, '\n');
   return /^- label_meaning: "(.*)"$/mu.exec(md.slice(md.indexOf('## kompatibilitas.p0_opening')))[1];
 })();
@@ -410,8 +411,13 @@ test('A FRAME ROW SAYS WHAT THE FRAME IS, not what the day pair is', async () =>
 
   assert.equal(factsPage.includes(flat(K.p2_harmony.label_meaning)), false,
     'the day-pair variant\'s meaning is printed on a frame row');
-  assert.ok(factsPage.includes(flat(K.p2_palace_frame.label_meaning)),
+  // The frame's own meaning is its HARMONY sentence since BC amendment 1 item 5 (Reyner,
+  // 2026-10-02): this frame's only relation is a 六合, and the pressure sentence
+  // ("Salah satu pilar di bagan dia ...") is for clash, harm and punishment.
+  assert.ok(factsPage.includes(flat(K.p2_palace_frame_harmony.label_meaning)),
     'the frame row does not carry the frame\'s own meaning');
+  assert.equal(factsPage.includes(flat(K.p2_palace_frame.label_meaning)), false,
+    'a 六合-only frame still prints the pressure sentence');
   // The term is the relation's FRAME name, which is what makes the row findable
   // against the legend entry for it. The seat name must not be on the page at all:
   // this pair's seats are not bound (2026-09-26).

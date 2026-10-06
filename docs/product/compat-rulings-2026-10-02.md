@@ -62,3 +62,37 @@ Verbatim, from `docs/prompts/BC-compat-voice-rework.md` §0.2.
 - **Status:** "Status is REQUIRED. One tap, three options (PDKT / Pacaran / Menikah)."
 - **Sample:** "I approve v2 in its entirety, including all the [FIX] corrections ... and the [+COWORK] structural additions."
 - **Length:** "Keep the 800-1,000 word target as drafted in Prompt BC."
+- **Adjustment round:** "Temperature 0.7. Keep `pair.both_named`; the prompt asks for both titles in the first chapter. Six to eight chapters, each two or three paragraphs. Harmony frame hits get their own text; clash, harm and punishment keep the pressure text."
+- **Voice principle, product-wide:** "We can be premium by our design, but warm and use everyday voice for tone and manner." Plain, everyday Indonesian with no slang and no chat particles; never casual chat register (the "old friend" register stays dead, CLAUDE.md rule 20). Compat gets it in this round; the mirror gets it in the mirror round.
+
+Recorded verbatim from `docs/prompts/BC-amendment-1-adjustment-round.md` §0.
+
+### Amendment 2 (Reyner, 2026-10-04)
+Recorded from `docs/prompts/BC-amendment-2-names-close-privacy.md` §0; Reyner's words in quotes.
+
+- **Length:** "Accept the approved gold sample as the practical target. I care about the reading feeling substantial and worth Rp39,000, not hitting a word-count target. Do not add padding just to reach 800 words."
+- **Harmony first:** "Start with what draws the two people together, then introduce the strain where both apply." (Already implemented in `433a98a`; this records the ruling.)
+- **Privacy:** "Katon tidak meminta nama lengkap, tidak memakai akun, dan tidak memasang cookie pelacak atau alat analitik pihak ketiga."
+- **Names:** "when facts say "kamu" or "dia", those are references to the two people, and the reading should address them by the names supplied to the writer." Fixed upstream in the prompt, not by a gate.
+- **The close:** the penutup "sets no conditions and gives no advice".
+- **Watch items, no gates or checks:** "Keep the wrong-direction sentence and the "Sari, dengan elemen Api yang dominan" issue as watch items for now. Do not add gates or extra checks for either." Both are rows in `docs/PROGRESS.md`'s WATCH list.
+- **Pending, not in this round:** the compat glossary lines that hand the writer "dinamika" and "menopang". Reyner rules the rewrites first.
+
+### Amendment 2c (Reyner, 2026-10-04)
+Verbatim, from `docs/prompts/BC-amendment-2c-paragraphs.md` §0.
+
+- "Give each chapter 2 or 3 paragraph entries rather than one text field."
+- "The first paragraph explains the chart/fact in the reading's voice."
+- "The second paragraph is specifically a concrete, ordinary-life scene showing how that pattern can appear between the two people."
+- "A third paragraph is allowed only when it genuinely adds something; do not pad."
+- "Preserve the final rendered output format by joining the paragraphs downstream. Nothing else in the product should change."
+- "Add the one prompt line for `membawa elemen`: use that wording only when describing what one partner brings to the other; describe a person's own element in another way."
+- "Keep the existing check. Do not create a new gate."
+- "Do not treat 800-1,000 words as a target. The objective is restoring the missing scene paragraph and the resulting reading depth."
+
+### Amendment 2d (Reyner, 2026-10-06)
+Verbatim, from `docs/prompts/BC-amendment-2d-native-phrasing.md`. A direction line in the pair prompt's Voice paragraph; no check and no blocklist entry (per `voice-constraint-rulings-2026-09-26.md` "REYNER-RULED 2026-10-01").
+
+- The line: "Do not use literal translations of English pop-psychology, therapy jargon, or Western relationship concepts (e.g., avoid unnatural translated phrases like kebersamaan yang disengaja, memegang ruang, or melakukan pekerjaan emosional). Express these ideas using natural, native Indonesian phrasing that people actually say in real life (e.g., menyempatkan waktu berdua, hadir sepenuhnya, menjaga komunikasi)."
+- **Amended the same day (Reyner, 2026-10-06):** "hadir sepenuhnya" is dropped from the line's examples, because it is itself a translation of "be fully present". The line in the prompt now ends "(e.g., menyempatkan waktu berdua, menjaga komunikasi)." The line above is the prompt as first written. A render on that first wording (pair prompt `v2-9920f01ea60d7ffd`, not committed as evidence) wrote "Tanpa inisiatif untuk hadir sepenuhnya, ..." once in eight readings.
+- Why: in the 2c round, "Mengubah rutinitas kecil menjadi momen kebersamaan yang disengaja adalah cara paling nyata..." (nonames render 1) "reads like a direct, clunky translation of the English pop-psychology phrase 'intentional moments of togetherness.'"
