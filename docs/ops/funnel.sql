@@ -31,14 +31,18 @@
 -- funnel_event at all.
 --
 -- TEST ROWS: the ids listed in docs/PROGRESS.md, "KNOWN TEST ROWS IN THE SHARED DATABASE"
--- (listed 2026-09-25, updated 2026-09-30). Known, not exhaustive: that section says why.
--- NOT in that list and so NOT excluded below: `Zn-4VU2Ni2lLdcTO25aS2`, the 2026-10-06 Rp
--- 19.000 production purchase that verified gate b (PROGRESS header, Prompt BE §0). If it
--- was Reyner's own, add it to the list here AND in PROGRESS.
+-- (listed 2026-09-25, updated 2026-09-30 and 2026-10-06). Known, not exhaustive: that
+-- section says why. Add a new test row in BOTH places.
+--
+-- THE BASELINE STARTS WHEN offer_seen BEGAN MEANING "SEEN" (Prompt BG, PR #202's merge,
+-- 2026-10-06): before it, offer_seen fired on page load, so older rows overstate that step
+-- and are not a baseline. Set `since` no earlier than that date (docs/PROGRESS.md).
 -- ============================================================
 
 with params as (
-  select timestamptz '2026-10-01 00:00+07' as since,   -- inclusive, WIB
+  -- `since` defaults to the first full day after #202's merge (2026-10-06): rows from the
+  -- merge day itself mix load-fired and seen-fired offer_seen.
+  select timestamptz '2026-10-07 00:00+07' as since,   -- inclusive, WIB
          timestamptz '2026-11-01 00:00+07' as until    -- exclusive, WIB
 ),
 test_rows(id) as (
@@ -52,7 +56,9 @@ test_rows(id) as (
     ('8TQ7V4ksqXtmCHzt1FIaR'), ('zklWIMLWpjKIiFA2Hg1mB'), ('V--V4grHETwx5kMLh81Z2'),
     ('2JsNyR3_koVUNjGbjoqEN'), ('nBC65OQkfhuQ9gdyN-Rix'),
     ('UZ-HaCnzzi9mRX60Ekqyb'), ('pqZObW6PAKOcuwYtvHzcg'), ('qv9aqhEwOxvPreWwme6aH'),
-    ('SFSht0M3lhY950g0IZdEN'), ('4fw6vRFT9iWNjQjVtMlOX'), ('1jiZkq5gK5QhBpiH8isP-')
+    ('SFSht0M3lhY950g0IZdEN'), ('4fw6vRFT9iWNjQjVtMlOX'), ('1jiZkq5gK5QhBpiH8isP-'),
+    -- 2026-10-06 (Reyner): his own Rp 19.000 purchase, his abandoned checkout, Cowork's walk.
+    ('Zn-4VU2Ni2lLdcTO25aS2'), ('zDK_PNEbwMDFHYhT_MI2k'), ('WqocaFz1FTMYqLPRBrtnl')
 ),
 cohort as (
   select e.reading_id,
