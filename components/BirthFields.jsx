@@ -12,13 +12,79 @@
 // a second opinion about what a valid birth date is.
 // ============================================================
 
-import { GENDER_WORDS } from '../lib/site/birthSummary.js';
+import { useEffect, useRef, useState } from 'react';
+
+import { GENDER_WORDS, MONTHS_ID_LONG } from '../lib/site/birthSummary.js';
 import { CHROME_COPY } from '../lib/site/copy.js';
 
 const pad = (n) => String(n).padStart(2, '0');
 
 /** The engine's supported range starts here. */
 export const EARLIEST_BIRTH_DATE = '1900-01-01';
+
+/**
+ * The out-of-range message, ONE copy. It was a literal in Funnel.jsx's submit handler;
+ * since the date became three fields (Prompt BG §3) the year field also carries it, as
+ * its native validity message, so it lives here with the rule it explains.
+ */
+export const DATE_RANGE_ERROR = 'Periksa lagi tanggalnya. Katon menghitung kelahiran dari tahun 1900 sampai hari ini.';
+
+// ── THE DATE AS THREE FIELDS (Prompt BG §3, Reyner 2026-10-06) ──
+// Tanggal / Bulan / Tahun instead of the native picker. The STORED value is unchanged,
+// `YYYY-MM-DD`, so nothing downstream moves. These helpers are pure and exported so a
+// test pins the calendar rather than a rendered option count.
+
+const isLeap = (y) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+
+/**
+ * Days in a month. Before the year is known, Februari allows 29, so a 29 Februari
+ * birth can be entered in any order; the year then decides.
+ *
+ * @param {string|number} month 1-12, or '' when unchosen
+ * @param {string} year 4 digits, or anything shorter while being typed
+ */
+export function daysInMonth(month, year) {
+  const m = Number(month);
+  if (!m) return 31;
+  if (m === 2) return /^\d{4}$/.test(String(year)) ? (isLeap(Number(year)) ? 29 : 28) : 29;
+  return [4, 6, 9, 11].includes(m) ? 30 : 31;
+}
+
+/** `YYYY-MM-DD` -> { day, month, year } as the fields hold them; empty when malformed. */
+export function splitDate(date) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date || '');
+  if (!m) return { day: '', month: '', year: '' };
+  const parts = { day: String(Number(m[3])), month: String(Number(m[2])), year: m[1] };
+  return composeDate(parts) ? parts : { day: '', month: '', year: '' };
+}
+
+/**
+ * The fields -> `YYYY-MM-DD`, or '' while incomplete or impossible (31 Februari,
+ * 29 Februari outside a leap year). Range is NOT checked here: an out-of-range date is a
+ * real date, and the year field's validity and the submit handlers say so.
+ */
+export function composeDate({ day, month, year }) {
+  if (!day || !month || !/^\d{4}$/.test(year)) return '';
+  if (Number(day) > daysInMonth(month, year)) return '';
+  return `${year}-${pad(month)}-${pad(day)}`;
+}
+
+/** Inside the engine's range, from 1900 to today. */
+export const dateInRange = (date) => date >= EARLIEST_BIRTH_DATE && date <= today();
+
+/**
+ * A field whose label sits inside it and floats to the top-left when the field is
+ * focused or filled (Prompt BG §4). A real `<label>` always, never a placeholder; the
+ * styling is `.k-float` in app/globals.css, existing colours only.
+ */
+export function FloatField({ id, label, filled, children }) {
+  return (
+    <div className="k-float" data-float data-filled={filled ? '' : undefined}>
+      <label htmlFor={id}>{label}</label>
+      {children}
+    </div>
+  );
+}
 
 /**
  * 00 through 23. The hour picker's options, and the ONLY hour values the form
@@ -75,20 +141,74 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
   const set = (k) => (e) => onChange(k, e.target ? e.target.value : e);
   const aria = (base) => (personLabel ? `${base} ${personLabel}` : base);
 
+  // ── THE THREE DATE FIELDS HOLD THEIR OWN PARTS ──
+  // A half-entered date is not a `YYYY-MM-DD` yet, so the parts live here and the
+  // parent only ever receives a whole, real date or ''. When the parent's date changes
+  // from outside (H3's prefill, a reset), the parts are re-read from it, during render,
+  // the pattern `armed` uses in Funnel.jsx's <Reading>.
+  const [parts, setParts] = useState(() => splitDate(value.date));
+  const [seen, setSeen] = useState(value.date);
+  if (value.date !== seen) {
+    setSeen(value.date);
+    if (composeDate(parts) !== value.date) setParts(splitDate(value.date));
+  }
+  const setPart = (k) => (e) => {
+    const raw = e.target.value;
+    const next = { ...parts, [k]: k === 'year' ? raw.replace(/\D/gu, '').slice(0, 4) : raw };
+    // A day the month or year has just made impossible (31 then Februari, 29 Februari
+    // then a common year) is CLEARED, never clamped: a silently moved birth date is a
+    // wrong chart nobody notices, an empty field is asked for again.
+    if (next.day && Number(next.day) > daysInMonth(next.month, next.year)) next.day = '';
+    setParts(next);
+    const date = composeDate(next);
+    setSeen(date);
+    if (date !== value.date) onChange('date', date);
+  };
+  // THE RANGE RULE, AS THE NATIVE PICKER ENFORCED IT. Its `min`/`max` made the browser
+  // refuse to submit a date outside 1900-today, on both forms (neither sets noValidate).
+  // The year field now carries that refusal, with the existing message.
+  const yearRef = useRef(null);
+  useEffect(() => {
+    yearRef.current?.setCustomValidity(value.date && !dateInRange(value.date) ? DATE_RANGE_ERROR : '');
+  }, [value.date]);
+  const maxDay = daysInMonth(parts.month, parts.year);
+
   return (
     <>
-      {/* NATIVE PICKERS. `min` keeps it inside the engine's supported range and
-          `max` stops a birthdate in the future. */}
-      <FieldLabel>Tanggal lahir</FieldLabel>
-      <input
-        id={`${idPrefix}-date`}
-        type="date"
-        value={value.date}
-        onChange={set('date')}
-        min={EARLIEST_BIRTH_DATE}
-        max={today()}
-        aria-label={aria('Tanggal lahir')}
-      />
+      {/* ONE GROUP, "Tanggal lahir", for a screen reader; the three labels inside the
+          fields say which part is which. `data-value` is the composed date, for tests. */}
+      <div id={`${idPrefix}-date`} role="group" aria-labelledby={`${idPrefix}-date-label`} data-date-group data-value={value.date}>
+        <span id={`${idPrefix}-date-label`} className="k-sr-only">{aria('Tanggal lahir')}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.65fr 1.15fr', gap: 8 }}>
+          <FloatField id={`${idPrefix}-day`} label="Tanggal" filled={Boolean(parts.day)}>
+            <select id={`${idPrefix}-day`} value={parts.day} onChange={setPart('day')} autoComplete="bday-day">
+              <option value=""></option>
+              {Array.from({ length: maxDay }, (_, i) => i + 1).map((d) => <option key={d} value={String(d)}>{d}</option>)}
+            </select>
+          </FloatField>
+          <FloatField id={`${idPrefix}-month`} label="Bulan" filled={Boolean(parts.month)}>
+            <select id={`${idPrefix}-month`} value={parts.month} onChange={setPart('month')} autoComplete="bday-month">
+              <option value=""></option>
+              {MONTHS_ID_LONG.map((name, i) => <option key={name} value={String(i + 1)}>{name}</option>)}
+            </select>
+          </FloatField>
+          <FloatField id={`${idPrefix}-year`} label="Tahun" filled={Boolean(parts.year)}>
+            {/* TYPED, NOT PICKED: four keystrokes for a known year such as 1989, against
+                a scroll through 127 options. */}
+            <input
+              ref={yearRef}
+              id={`${idPrefix}-year`}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]{4}"
+              maxLength={4}
+              autoComplete="bday-year"
+              value={parts.year}
+              onChange={setPart('year')}
+            />
+          </FloatField>
+        </div>
+      </div>
 
       <div style={{ height: 16 }} />
       {/* HOUR, NOT HOUR AND MINUTE. Measured 2026-08-12 against
@@ -121,12 +241,12 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
           how close to an edge the birth was, so we cannot claim it is near one -
           and the SOLAR-TERM flag, which is the one that can move a month pillar,
           is untouched and still fires. */}
-      <FieldLabel>Jam lahir · opsional</FieldLabel>
+      <FloatField id={`${idPrefix}-time`} label="Jam lahir · opsional" filled={Boolean(value.time)}>
       <select
         id={`${idPrefix}-time`}
         value={value.time}
         onChange={set('time')}
-        aria-label={aria('Jam lahir')}
+        aria-label={personLabel ? aria('Jam lahir') : undefined}
         data-focus-target={hourTarget ? '' : undefined}
       >
         {/* Empty first, carrying no label, for the same reason the gender select
@@ -139,6 +259,7 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
           <option key={h} value={`${pad(h)}:00`}>{`${pad(h)}.00`}</option>
         ))}
       </select>
+      </FloatField>
       {/* ONE HINT, ON EVERY FORM (Prompt BF amendment 1 §1, Reyner 2026-10-06): H1 in
           the place and style of the accuracy line it replaced (ruled in
           docs/content/pasangan-copy-rulings.md, the "helper under Jam lahir" row), here
@@ -160,17 +281,18 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
           this the one control in the card that narrated its own empty state.
           `value=""` is unchanged, so `gender || null` at every call site still
           resolves an unanswered field to null. */}
-      <FieldLabel>Jenis kelamin · opsional</FieldLabel>
+      <FloatField id={`${idPrefix}-gender`} label="Jenis kelamin · opsional" filled={Boolean(value.gender)}>
       <select
         id={`${idPrefix}-gender`}
         value={value.gender}
         onChange={set('gender')}
-        aria-label={aria('Jenis kelamin')}
+        aria-label={personLabel ? aria('Jenis kelamin') : undefined}
       >
         <option value=""></option>
         <option value="female">{GENDER_WORDS.female}</option>
         <option value="male">{GENDER_WORDS.male}</option>
       </select>
+      </FloatField>
     </>
   );
 }

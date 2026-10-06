@@ -225,7 +225,7 @@ test('UBAH REOPENS THE STEP IT NAMES, AND DOES NOT SUBMIT THE FORM', async () =>
     assert.equal(f.calls.seasonCheck, before, 'Ubah asked nothing and advanced nothing');
 
     // The values survive: reopening to check a date must not clear it.
-    assert.equal(ui.host.querySelector('#a-date').value, '1989-09-13');
+    assert.equal(ui.host.querySelector('#a-date').getAttribute('data-value'), '1989-09-13');
     assert.equal(ui.host.querySelector('#a-time').value, '09:00');
   } finally { ui.unmount(); f.restore(); }
 });
@@ -281,7 +281,7 @@ test('`?dari` PREFILLS NOTHING, BECAUSE THERE IS NOTHING TO PREFILL', async () =
   const ui = mount({ initialA: { readingId: 'tok1' } });
   try {
     assert.ok(ui.host.querySelector('#a-date'), 'step 1 is open, not skipped');
-    assert.equal(ui.host.querySelector('#a-date').value, '', 'and it is empty');
+    assert.equal(ui.host.querySelector('#a-date').getAttribute('data-value'), '', 'and it is empty');
     assert.equal(ui.host.querySelector('#b-date'), null, 'step 2 has not been jumped to');
   } finally { ui.unmount(); f.restore(); }
 });

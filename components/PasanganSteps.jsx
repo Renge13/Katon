@@ -36,7 +36,7 @@
 
 import { useState } from 'react';
 
-import { BirthFields, FieldLabel, GENDER_WORDS } from './BirthFields.jsx';
+import { BirthFields, FieldLabel, FloatField, GENDER_WORDS } from './BirthFields.jsx';
 import { SeasonGate } from './Funnel.jsx';
 import { Reveal, Eyebrow, Button, Icon } from './kit.jsx';
 import { CHROME_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
@@ -201,16 +201,18 @@ export default function PasanganSteps({
                       {/* ── NICKNAME, OPTIONAL (Prompt BC §1) ── the server sanitises it
                           (lib/pair/names.js); maxLength is only a typing aid. */}
                       <div style={{ height: 16 }} />
-                      <FieldLabel>{PASANGAN_COPY.nickname_label}</FieldLabel>
-                      <input
-                        id={`${s.side}-nickname`}
-                        type="text"
-                        value={value[s.side].nickname || ''}
-                        maxLength={20}
-                        autoComplete="off"
-                        onChange={(e) => onChange(s.side, { ...value[s.side], nickname: e.target.value })}
-                        aria-label={`${PASANGAN_COPY.nickname_label} ${s.side.toUpperCase()}`}
-                      />
+                      {/* A floating label, as on every BirthFields field (Prompt BG §4). */}
+                      <FloatField id={`${s.side}-nickname`} label={PASANGAN_COPY.nickname_label} filled={Boolean(value[s.side].nickname)}>
+                        <input
+                          id={`${s.side}-nickname`}
+                          type="text"
+                          value={value[s.side].nickname || ''}
+                          maxLength={20}
+                          autoComplete="off"
+                          onChange={(e) => onChange(s.side, { ...value[s.side], nickname: e.target.value })}
+                          aria-label={`${PASANGAN_COPY.nickname_label} ${s.side.toUpperCase()}`}
+                        />
+                      </FloatField>
                       <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>
                         {PASANGAN_COPY.nickname_help}
                       </div>

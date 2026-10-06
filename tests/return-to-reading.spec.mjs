@@ -231,7 +231,7 @@ test('§1b: creating a reading remembers its token and title on this device', as
   const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
   try {
     const setField = makeSetField(ui.host, act, window);
-    setField('input[type="date"]', '1989-09-13');
+    setField('#mirror-date', '1989-09-13');
     await act(async () => {
       ui.host.querySelector('form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
     });
@@ -375,7 +375,9 @@ function assertOneHintPerHourField(host, where) {
   assert.ok(hourFields.length >= 1, `${where}: an hour field renders`);
   assert.equal(text.split(RULED.hour_hint).length - 1, hourFields.length, `${where}: H1 exactly once per hour field`);
   for (const select of hourFields) {
-    const next = select.nextElementSibling;
+    // The hint sits under the FIELD, which since Prompt BG §4 is the floating-label
+    // wrapper around the select.
+    const next = select.closest('[data-float]').nextElementSibling;
     assert.ok(next?.hasAttribute('data-hour-hint'), `${where}: H1 sits directly under #${select.id}`);
     assert.equal(next.textContent, RULED.hour_hint);
   }
@@ -462,7 +464,7 @@ test('amendment 2 §1: the H3 arrival shows no resume card and keeps the memory;
     mounted.push(arrival);
     await flush();
     // The arrival happened (control): prefilled and marked, as before.
-    assert.equal(arrival.host.querySelector('input[type="date"]').value, '1989-09-13', 'date prefilled');
+    assert.equal(arrival.host.querySelector('#mirror-date').getAttribute('data-value'), '1989-09-13', 'date prefilled');
     assert.equal(arrival.host.querySelector('#mirror-gender').value, 'female', 'gender prefilled');
     assert.equal(arrival.host.querySelector('#mirror-time').hasAttribute(TARGET), true, 'hour field marked');
     assert.equal(arrival.host.querySelector('[data-resume-card]') === null, true, 'no resume card on the H3 arrival');
@@ -561,7 +563,7 @@ test('§3b: H3 lands on the front door with the date and gender prefilled and th
   const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
   try {
     await flush();
-    assert.equal(ui.host.querySelector('input[type="date"]').value, '1989-09-13', 'date prefilled');
+    assert.equal(ui.host.querySelector('#mirror-date').getAttribute('data-value'), '1989-09-13', 'date prefilled');
     assert.equal(ui.host.querySelector('#mirror-gender').value, 'female', 'gender prefilled');
     assert.equal(document.activeElement?.id, 'mirror-time', 'the hour field is focused');
     assert.equal(window.location.pathname + window.location.search, '/', 'the address is cleaned');
@@ -574,6 +576,6 @@ test('§3b: a plain front door visit does not prefill from the carry', async () 
   const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
   try {
     await flush();
-    assert.equal(ui.host.querySelector('input[type="date"]').value, '', 'a fresh visit starts empty');
+    assert.equal(ui.host.querySelector('#mirror-date').getAttribute('data-value'), '', 'a fresh visit starts empty');
   } finally { await ui.unmount(); f.restore(); }
 });

@@ -82,7 +82,7 @@ import { COMPAT_ROUTE } from '../lib/site/routes.js';
 // importing this file pulls in a tree that cannot load. Callers are unchanged.
 export { readableError } from '../lib/site/readableError.js';
 import { readableError } from '../lib/site/readableError.js';
-import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, today } from './BirthFields.jsx';
+import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, DATE_RANGE_ERROR, today } from './BirthFields.jsx';
 import CopyLink from './CopyLink.jsx';
 import { CHROME_COPY } from '../lib/site/copy.js';
 import { ProseBlocks } from './ProseBlocks.jsx';
@@ -463,7 +463,7 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
     const birthDate = form.date;
     if (!birthDate) { setError('Isi tanggal lahirmu dulu.'); return; }
     if (birthDate < EARLIEST_BIRTH_DATE || birthDate > today()) {
-      setError('Periksa lagi tanggalnya. Katon menghitung kelahiran dari tahun 1900 sampai hari ini.');
+      setError(DATE_RANGE_ERROR);
       return;
     }
     // The hour, never the minute. Snapped rather than trusted: an <input type="time">

@@ -235,8 +235,13 @@ test('BirthFields IS ONE IMPLEMENTATION, used by both forms', () => {
   assert.equal(fields.includes('step="3600"'), false,
     'step is a validation hint, not an input mode; the hour picker is a select now');
   assert.match(fields, /HOURS\.map/u, 'whole hours only, one option each');
-  assert.match(fields, /min=\{EARLIEST_BIRTH_DATE\}/u);
-  assert.match(fields, /max=\{today\(\)\}/u);
+  // ── THE RANGE RULE, SINCE THE DATE BECAME THREE FIELDS (Prompt BG §3) ──
+  // This read `min={EARLIEST_BIRTH_DATE}` and `max={today()}`, the native picker's own
+  // refusal. The picker is gone; the year field now carries the same refusal as its
+  // validity message, from the same two bounds. Pinned on the code, not the comment.
+  assert.equal(fields.includes('type="date"'), false, 'no native date picker is left');
+  assert.match(fields, /dateInRange = \(date\) => date >= EARLIEST_BIRTH_DATE && date <= today\(\)/u);
+  assert.match(fields, /setCustomValidity\(value\.date && !dateInRange\(value\.date\) \? DATE_RANGE_ERROR : ''\)/u);
 
   // `PasanganSteps.jsx` since Y-2 commit 2: the compat form's three cards became
   // a stepper, and `BirthFields` moved into it with them. Pasangan.jsx still owns

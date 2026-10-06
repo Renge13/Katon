@@ -166,7 +166,7 @@ function mount() {
 
 /** Fill the front door with a date the engine accepts, and submit once. */
 async function submitBirthDate(ui, { date = '1989-09-13', time = '04:00' } = {}) {
-  ui.setField('input[type="date"]', date);
+  ui.setField('#mirror-date', date);
   // `#birth-time` rather than `input[type="time"]`: the hour picker is a
   // `<select>` since 2026-09-09 (Y-2 Addendum 2 item 4). Selecting by ID is also
   // what the two-person compat form needs, where `idPrefix` is the only thing
