@@ -30,6 +30,7 @@ import { act } from 'react';
 
 import Funnel, { Reading } from '../components/Funnel.jsx';
 import { BirthFields } from '../components/BirthFields.jsx';
+import Pasangan from '../components/Pasangan.jsx';
 import { calculateBaziChart } from '../lib/bazi/buildChart.js';
 import { buildSemanticJson } from '../lib/semantic/index.js';
 import { mirrorChartView } from '../lib/mirror/view.js';
@@ -289,28 +290,30 @@ test('§1c: nothing remembered, no resume card', async () => {
 
 // ── §2: THE END OF THE FREE READING ────────────────────────
 
-test('§2: the next block links R4 to / after the offer; compat appears in it only when compat is on sale', async () => {
+// AMENDMENT 1 §2 (Reyner, 2026-10-06): ONE next action. The block is R4 only, whatever
+// COMPAT_SALES says; the compat card elsewhere on the page is unchanged, and the
+// compat-open render below proves it is still there, so "absent" here cannot pass on a
+// page that lost every compat surface.
+test('§2: the next block is R4 only, after the offer, with compat closed AND open', async () => {
   const f = stubFetch();
   try {
-    const off = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true, compatOpen: false }));
-    let block = off.host.querySelector('[data-next-block]');
-    assert.ok(block, 'compat closed: the next block renders');
-    const r4 = [...block.querySelectorAll('a')].find((a) => a.textContent.includes(RULED.next_other_date));
-    assert.ok(r4, 'R4');
-    assert.equal(r4.getAttribute('href'), '/');
-    assert.equal([...block.querySelectorAll('a')].some((a) => a.getAttribute('href') === COMPAT_ROUTE), false, 'compat closed: no compat entry');
-    assert.ok(!block.textContent.includes(CHROME_COPY.compat_cta));
-    const text = off.text();
-    assert.ok(text.indexOf('Ambil Complete Edition') > -1 && text.indexOf('Ambil Complete Edition') < text.indexOf(RULED.next_other_date), 'after the CE offer');
-    await off.unmount();
-
-    const on = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true, compatOpen: true }));
-    block = on.host.querySelector('[data-next-block]');
-    assert.ok(block);
-    const compat = [...block.querySelectorAll('a')].find((a) => a.getAttribute('href') === COMPAT_ROUTE);
-    assert.ok(compat, 'compat open: the compat entry is in the next block');
-    assert.ok(compat.textContent.includes(CHROME_COPY.compat_cta), 'reusing the existing compat CTA string');
-    await on.unmount();
+    for (const compatOpen of [false, true]) {
+      const ui = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true, compatOpen }));
+      const state = compatOpen ? 'compat open' : 'compat closed';
+      const block = ui.host.querySelector('[data-next-block]');
+      assert.ok(block, `${state}: the next block renders`);
+      const links = [...block.querySelectorAll('a')];
+      assert.equal(links.length, 1, `${state}: one next action`);
+      assert.ok(links[0].textContent.includes(RULED.next_other_date), `${state}: it is R4`);
+      assert.equal(links[0].getAttribute('href'), '/');
+      assert.equal(links.some((a) => a.getAttribute('href') === COMPAT_ROUTE), false, `${state}: no compat link in the block`);
+      assert.ok(!block.textContent.includes(CHROME_COPY.compat_cta), `${state}: no compat CTA in the block`);
+      const text = ui.text();
+      assert.ok(text.indexOf('Ambil Complete Edition') > -1 && text.indexOf('Ambil Complete Edition') < text.indexOf(RULED.next_other_date), 'after the CE offer');
+      // The control: the compat card itself follows the switch, untouched.
+      assert.equal(text.includes(CHROME_COPY.compat_headline), compatOpen, `${state}: the compat card is unchanged`);
+      await ui.unmount();
+    }
   } finally { f.restore(); }
 });
 
@@ -335,23 +338,87 @@ test('§3: K1 replaces the "yang di tengah" line; the Konsepsi caption is the gl
 
 // ── §3b: THE BIRTH HOUR ────────────────────────────────────
 
-test('§3b: H1 sits under the hour field on the front door; the label is unchanged; compat does not get it', async () => {
+// AMENDMENT 1 §1 (Reyner, 2026-10-06): ONE hint under every hour field. The old accuracy
+// line goes from BOTH forms, and H1 takes its place on the compat form too.
+const OLD_HOUR_LINE = 'Tanpa jam tetap akurat, pakai jam jauh lebih presisi.';
+function assertOneHintPerHourField(host, where) {
+  const text = host.textContent || '';
+  assert.ok(text.includes('Jam lahir · opsional'), `${where}: the label is unchanged (and the fields rendered)`);
+  assert.ok(!text.includes(OLD_HOUR_LINE), `${where}: the old accuracy line is gone`);
+  const hourFields = [...host.querySelectorAll('select[id$="-time"]')];
+  assert.ok(hourFields.length >= 1, `${where}: an hour field renders`);
+  assert.equal(text.split(RULED.hour_hint).length - 1, hourFields.length, `${where}: H1 exactly once per hour field`);
+  for (const select of hourFields) {
+    const next = select.nextElementSibling;
+    assert.ok(next?.hasAttribute('data-hour-hint'), `${where}: H1 sits directly under #${select.id}`);
+    assert.equal(next.textContent, RULED.hour_hint);
+  }
+}
+
+test('§3b + amendment 1 §1: H1 is the only hint under the hour field, on the front door and the compat form', async () => {
+  const f = stubFetch();
+  try {
+    const front = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
+    assertOneHintPerHourField(front.host, 'front door');
+    await front.unmount();
+
+    const shared = await mount(React.createElement(BirthFields, { value: { date: '', time: '', gender: '' }, onChange() {}, idPrefix: 'a' }));
+    assertOneHintPerHourField(shared.host, 'BirthFields as compat mounts it');
+    await shared.unmount();
+
+    const compat = await mount(React.createElement(Pasangan, {}));
+    assertOneHintPerHourField(compat.host, 'compat form');
+    await compat.unmount();
+  } finally { f.restore(); }
+});
+
+// ── AMENDMENT 1 §3: THE HOUR FIELD IS VISIBLY THE TARGET ─────
+// Measured on #200's preview build in headless Chrome: after the H3 arrival
+// `document.activeElement` IS #mirror-time, but the window has no focus, Chrome does
+// not match `:focus` in an unfocused document, and the rule never paints. iOS Safari
+// ignores a programmatic focus() outright. So the field carries a mark that the same
+// CSS rule styles, independent of whether focus() was honoured.
+const TARGET = 'data-focus-target';
+
+test('amendment 1 §3: after the H3 arrival the hour field carries the target mark; picking an hour removes it', async () => {
+  rememberBirth({ date: '1989-09-13', time: null, gender: 'female' });
+  window.history.replaceState(null, '', '/?jam=tambah');
   const f = stubFetch();
   const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
   try {
-    assert.ok(ui.text().includes('Jam lahir · opsional'), 'label unchanged');
-    const hint = ui.host.querySelector('[data-hour-hint]');
-    assert.ok(hint, 'H1 renders');
-    assert.equal(hint.textContent, RULED.hour_hint);
-    const select = ui.host.querySelector('#mirror-time');
-    assert.ok(select.compareDocumentPosition(hint) & window.Node.DOCUMENT_POSITION_FOLLOWING, 'under the hour field');
+    await flush();
+    const select = () => ui.host.querySelector('#mirror-time');
+    assert.equal(select().hasAttribute(TARGET), true, 'marked after the H3 arrival');
+    makeSetField(ui.host, act, window)('#mirror-time', '09:00');
+    assert.equal(select().hasAttribute(TARGET), false, 'the mark goes once an hour is picked');
+    makeSetField(ui.host, act, window)('#mirror-time', '');
+    assert.equal(select().hasAttribute(TARGET), false, 'and does not come back');
   } finally { await ui.unmount(); f.restore(); }
+});
 
-  const compat = await mount(React.createElement(BirthFields, { value: { date: '', time: '', gender: '' }, onChange() {}, idPrefix: 'a' }));
+test('amendment 1 §3: a normal front door has no target mark', async () => {
+  const f = stubFetch();
+  const ui = await mount(React.createElement(Funnel, { salesOpen: false, compatOpen: false }));
   try {
-    assert.ok(compat.text().includes('Jam lahir · opsional'), 'the shared fields render (control)');
-    assert.ok(!compat.text().includes(RULED.hour_hint), 'the compat form is not part of this change');
-  } finally { await compat.unmount(); }
+    await flush();
+    const select = ui.host.querySelector('#mirror-time');
+    assert.ok(select, 'the hour field renders (control)');
+    assert.equal(select.hasAttribute(TARGET), false);
+    assert.equal(ui.host.querySelectorAll(`[${TARGET}]`).length, 0);
+  } finally { await ui.unmount(); f.restore(); }
+});
+
+test('amendment 1 §3: the target selector shares the select:focus rule in app/globals.css (source, not computed)', () => {
+  const css = src('app/globals.css');
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/gu)].map((m) => ({
+    selectors: m[1].replace(/\/\*[\s\S]*?\*\//gu, '').split(',').map((s) => s.trim()).filter(Boolean),
+    body: m[2],
+  }));
+  const focusRule = rules.find((r) => r.selectors.includes('select:focus'));
+  assert.ok(focusRule, 'the select:focus rule exists');
+  assert.ok(/box-shadow:\s*0 0 0 3px var\(--emas-dim\)/u.test(focusRule.body), 'it is the gold ring rule');
+  assert.ok(focusRule.selectors.includes(`select[${TARGET}]`), `select[${TARGET}] is in the same rule`);
+  assert.equal(rules.filter((r) => r.selectors.some((s) => s.includes(TARGET))).length, 1, 'and in no other rule: no new treatment');
 });
 
 test('§3b: no hour given, H2 and H3 under the Bagan cards; hour given, nothing extra', async () => {

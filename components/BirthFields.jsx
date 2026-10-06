@@ -13,6 +13,7 @@
 // ============================================================
 
 import { GENDER_WORDS } from '../lib/site/birthSummary.js';
+import { CHROME_COPY } from '../lib/site/copy.js';
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -65,11 +66,12 @@ export function FieldLabel({ children }) {
  * @param {string} [personLabel] appended to each aria-label so a screen reader can
  *   tell the two people apart. The compat form has two of these and "Tanggal
  *   lahir" twice is unusable.
- * @param {string|null} [hourHint] a grey line directly under the hour field. The
- *   front door passes H1 (Prompt BF §3b, 2026-10-06); the compat form passes
- *   nothing, because that prompt changed the front door only.
+ * @param {boolean} [hourTarget] marks the hour field as where the reader was sent
+ *   (`data-focus-target`, styled by the `select:focus` rule in app/globals.css). The
+ *   front door sets it after H3's arrival, until an hour is picked (Prompt BF
+ *   amendment 1 §3).
  */
-export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel = '', hourHint = null }) {
+export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel = '', hourTarget = false }) {
   const set = (k) => (e) => onChange(k, e.target ? e.target.value : e);
   const aria = (base) => (personLabel ? `${base} ${personLabel}` : base);
 
@@ -125,6 +127,7 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
         value={value.time}
         onChange={set('time')}
         aria-label={aria('Jam lahir')}
+        data-focus-target={hourTarget ? '' : undefined}
       >
         {/* Empty first, carrying no label, for the same reason the gender select
             does (ruled 2026-09-03): the fields around it are pickers with no
@@ -136,8 +139,11 @@ export function BirthFields({ value, onChange, idPrefix = 'birth', personLabel =
           <option key={h} value={`${pad(h)}:00`}>{`${pad(h)}.00`}</option>
         ))}
       </select>
-      {hourHint && <div data-hour-hint style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>{hourHint}</div>}
-      <div style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: hourHint ? 2 : 8, lineHeight: 1.5 }}>Tanpa jam tetap akurat, pakai jam jauh lebih presisi.</div>
+      {/* ONE HINT, ON EVERY FORM (Prompt BF amendment 1 §1, Reyner 2026-10-06): H1 in
+          the place and style of the accuracy line it replaced (ruled in
+          docs/content/pasangan-copy-rulings.md, the "helper under Jam lahir" row), here
+          and on the compat form alike, so no form carries the accuracy claim. */}
+      <div data-hour-hint style={{ fontSize: 12, color: 'var(--muted-warm)', marginTop: 8, lineHeight: 1.5 }}>{CHROME_COPY.hour_hint}</div>
 
       <div style={{ height: 16 }} />
       {/* GENDER CHANGES NOTHING THE READING RENDERS - `computePillars` `void`s it

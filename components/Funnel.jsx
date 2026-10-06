@@ -329,8 +329,16 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
   // the address back to `/`, so a reload is a plain front door.
   const arrival = useSyncExternalStore(subscribeNothing, arrivalSnapshot, noSnapshot);
   const [arrived, setArrived] = useState(null);
+  // THE HOUR FIELD IS MARKED AS THE TARGET (Prompt BF amendment 1 §3, Reyner 2026-10-06).
+  // focus() below stays, but it cannot be relied on: iOS Safari ignores a programmatic
+  // focus, and an unfocused window never matches `:focus` (measured in headless Chrome:
+  // `activeElement` was the select, `:focus` false, no ring). The mark is styled by the
+  // same `select:focus` rule, so the field shows that treatment either way. It goes as
+  // soon as she picks an hour.
+  const [hourTarget, setHourTarget] = useState(false);
   if (arrival && arrival !== arrived) {
     setArrived(arrival);
+    setHourTarget(true);
     const carried = JSON.parse(arrival);
     if (carried.date) setForm({ date: carried.date, time: '', gender: carried.gender || '' });
   }
@@ -536,7 +544,7 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
   // here because a deletion this fresh reads like a botched merge otherwise.
 
   if (restored) return <ReadingByToken key={restored} token={restored} salesOpen={salesOpen} compatOpen={compatOpen} />;
-  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} compatOpen={compatOpen} resume={resume} onForgetResume={forgetReading} />;
+  if (phase === 'input') return <Home form={form} setForm={setForm} error={error} onSubmit={onSubmit} busy={busy} compatOpen={compatOpen} resume={resume} onForgetResume={forgetReading} hourTarget={hourTarget} onHourPicked={() => setHourTarget(false)} />;
   if (phase === 'season') return <SeasonGate season={season} onAnswer={onSeasonAnswer} />;
   return <Reading reading={reading} onReset={reset} salesOpen={salesOpen} compatOpen={compatOpen} />;
 }
@@ -556,7 +564,7 @@ function Para({ children, style }) {
 }
 
 /* ---------------- Home (input) ---------------- */
-function Home({ form, setForm, error, onSubmit, busy, compatOpen = false, resume = null, onForgetResume }) {
+function Home({ form, setForm, error, onSubmit, busy, compatOpen = false, resume = null, onForgetResume, hourTarget = false, onHourPicked }) {
   return (
     <div style={wrap}>
       <div style={{ paddingTop: 60 }}>
@@ -628,9 +636,12 @@ function Home({ form, setForm, error, onSubmit, busy, compatOpen = false, resume
                   components/BirthFields.jsx with them. */}
               <BirthFields
                 value={form}
-                onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
+                onChange={(k, v) => {
+                  setForm((f) => ({ ...f, [k]: v }));
+                  if (k === 'time' && v) onHourPicked?.();
+                }}
                 idPrefix="mirror"
-                hourHint={CHROME_COPY.hour_hint}
+                hourTarget={hourTarget}
               />
             </div>
           </Reveal>
@@ -1325,20 +1336,14 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
       {/* ── WHAT NEXT (Prompt BF §2, Reyner 2026-10-06) ──────────
           The last thing on the free reading, after the offer and the card. R4 is a
           plain link to `/`: the memory stays, so the front door shows this reading's
-          resume card above an empty form ready for another date. The compat entry
-          is here ONLY while compat is on sale, with the existing CTA string and
-          route; closed, it is absent, like every other compat door (K2). */}
+          resume card above an empty form ready for another date.
+          ONE NEXT ACTION (amendment 1 §2, Reyner 2026-10-06): the compat link that sat
+          here while compat was on sale is removed, whatever COMPAT_SALES says. The
+          compat card above (CompatOffer) is unchanged. */}
       <div data-next-block style={{ marginTop: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
         <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, color: 'var(--tinta-soft)', textDecoration: 'none' }}>
           {CHROME_COPY.next_other_date} <Icon.arrow size={13} />
         </a>
-        {compatOpen && (
-          // NO EVENT: `compat_cta_click` counts the CompatOffer card's button, and a
-          // second source would blur the one number it exists to give.
-          <a href={COMPAT_ROUTE} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--muted-warm)', textDecoration: 'none' }}>
-            {CHROME_COPY.compat_cta} <Icon.arrow size={12} />
-          </a>
-        )}
       </div>
     </div>
   );

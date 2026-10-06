@@ -159,11 +159,18 @@ the block's primary fact, never a model heading. Chrome strings, PASANGAN_COPY.
 
 | Where | Was | Ruled string |
 |---|---|---|
-| `components/BirthFields.jsx:119` helper under Jam lahir | `Jamnya saja sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih dalam.` | `Tanpa jam tetap akurat, pakai jam jauh lebih presisi.` |
 | `components/PasanganSteps.jsx:224` under CTA (Home dropped out 2026-09-24: it prints `SITE_COPY.home_lock_line`, amendment k) | `Bersifat pribadi. Hanya untukmu.` | `Privat. Hanya bisa diakses via tautanmu.` |
 | `components/Funnel.jsx:664` helper under the season gate's hour | `Jamnya saja sudah cukup. Dengan ini kamu juga mendapat pilar keempat.` | `Jam lahir membuka pilar keempat.` |
 
-The third row is RULED 2026-09-09, after #112 flagged it as the one "Jamnya saja" the
+**SUPERSEDED 2026-10-06 (Reyner, Prompt BF amendment 1 §1), and moved out of the table above
+so `tests/pasangan-copy.spec.mjs` stops requiring it.** The helper under Jam lahir was ruled here
+2026-09-09 as `Tanpa jam tetap akurat, pakai jam jauh lebih presisi.` (it replaced `Jamnya saja
+sudah cukup. Bacaanmu tetap akurat tanpa ini, tapi kalau ada, beberapa lapisan jadi lebih
+dalam.`). Amendment 1 removes it from every form, so no form carries the accuracy claim, and
+H1 `Tidak tahu? Lewati saja.` (`CHROME_COPY.hour_hint`, Prompt BF §4) is the only hint under
+the hour field, on the front door and the compat form alike.
+
+The season-gate row is RULED 2026-09-09, after #112 flagged it as the one "Jamnya saja" the
 2026-09-09 sweep did not cover: a different sentence on a different surface, so no ruling reached
 it and #112 deliberately left it alone. With the hour-only picker (Y-2 Addendum 2 item 4) "jamnya
 saja sudah cukup" describes a constraint the field now enforces on its own, so it says nothing.
