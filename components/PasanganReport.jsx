@@ -34,6 +34,12 @@ import { viewFor } from '../lib/pair/reportView.js';
 
 /** The download section's anchor id (Prompt BE §3a), the same as the mirror's. */
 const DOWNLOAD_ANCHOR = 'unduh';
+/**
+ * The start of the paid reading, where a buyer back from checkout lands (Reyner 2026-10-06,
+ * on #199): for compat the reading IS what she bought, so she lands on it, not on the
+ * download section below it. The Complete Edition keeps #unduh.
+ */
+const READING_ANCHOR = 'bacaan';
 
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
 
@@ -421,8 +427,9 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
     </Reveal>
   ) : null;
 
-  // ── BACK FROM CHECKOUT, LAND ON THE DOWNLOAD (Prompt BE §3a, Reyner 2026-10-06) ──
-  // Scroll to the download section (#unduh) once, and only when the page has confirmed
+  // ── BACK FROM CHECKOUT, LAND ON THE READING (Prompt BE §3a, amended by Reyner
+  // 2026-10-06 on #199: the start of the paid reading, #bacaan, not #unduh) ──
+  // Scroll there once, and only when the page has confirmed
   // paid: the row says paid AND the reading is here, which is what renders that section.
   // `?bayar=selesai` alone never scrolls, and a paid report reopened cold does not jump.
   // Above the early return so the hook order never changes.
@@ -431,7 +438,7 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
     if (landedRef.current || !justPaid || !loaded) return;
     if (pair?.status !== 'paid' || !reading) return;
     landedRef.current = true;
-    document.getElementById(DOWNLOAD_ANCHOR)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    document.getElementById(READING_ANCHOR)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   }, [justPaid, loaded, pair?.status, reading]);
 
   // ── FIRST PAINT IS THE SKELETON, NEVER NOTHING (Addendum 2 item 3) ──
@@ -587,7 +594,7 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
 
   return (
     <div className="k-fade" style={wrap}>
-      <div style={{ paddingTop: 60 }}>
+      <div id={READING_ANCHOR} style={{ paddingTop: 60, scrollMarginTop: 72 }}>
         {/* ── THE HEADER: A TITLE AND THE TWO PEOPLE (Addendum 2 item 1) ──
             `paid_title` ("Bacaan Kalian Sudah Siap") was dropped in #112: it
             announced the report to the one reader already looking at it. This is

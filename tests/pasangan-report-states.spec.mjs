@@ -657,13 +657,17 @@ function recordScrolls() {
   return { calls, restore: () => { window.Element.prototype.scrollIntoView = prev; } };
 }
 
-test('BE §3a: back from checkout on a PAID pair, the report lands on #unduh', async () => {
+// AMENDED 2026-10-06 (Reyner, on #199): for compat the buyer lands on the START OF THE PAID
+// READING (#bacaan), not on the download section below it. The Complete Edition keeps #unduh.
+test('BE §3a: back from checkout on a PAID pair, the report lands on the START of the reading (#bacaan), not #unduh', async () => {
   const restore = stub({ pair: { status: 'paid' }, reading: READING('render') });
   const scrolls = recordScrolls();
   const ui = await mount({ search: '?bayar=selesai' });
   try {
-    assert.ok(ui.host.querySelector('#unduh'), 'the download section carries the anchor id');
-    assert.ok(scrolls.calls.includes('unduh'), `scrolled to #unduh; calls: ${JSON.stringify(scrolls.calls)}`);
+    const start = ui.host.querySelector('#bacaan');
+    assert.ok(start, 'the paid reading\'s start carries the anchor id');
+    assert.ok(start.textContent.includes(PASANGAN_COPY.page_title), 'it is the top of the report: its title');
+    assert.deepEqual(scrolls.calls, ['bacaan'], `scrolled once, to #bacaan; calls: ${JSON.stringify(scrolls.calls)}`);
   } finally { ui.unmount(); scrolls.restore(); restore(); }
 });
 
@@ -672,13 +676,14 @@ test('BE §3a: the marker on an UNPAID pair never scrolls; a paid pair reopened 
   let scrolls = recordScrolls();
   let ui = await mount({ search: '?bayar=selesai' });
   try {
-    assert.equal(scrolls.calls.includes('unduh'), false, 'no scroll on the marker alone');
+    // No scroll of any kind: checking only the old target would pass once the target moved.
+    assert.deepEqual(scrolls.calls, [], 'no scroll on the marker alone');
   } finally { ui.unmount(); scrolls.restore(); restore(); }
   restore = stub({ pair: { status: 'paid' }, reading: READING('render') });
   scrolls = recordScrolls();
   ui = await mount();
   try {
-    assert.ok(ui.host.querySelector('#unduh'), 'precondition: the paid report is open');
-    assert.equal(scrolls.calls.includes('unduh'), false, 'no marker, no jump');
+    assert.ok(ui.host.querySelector('#bacaan'), 'precondition: the paid report is open');
+    assert.deepEqual(scrolls.calls, [], 'no marker, no jump');
   } finally { ui.unmount(); scrolls.restore(); restore(); }
 });
