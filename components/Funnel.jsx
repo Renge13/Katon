@@ -36,6 +36,7 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CardA, CardB, CARD_A, exportSize } from './cards/Card.js';
 import {
   downloadCard, captureCard, dataUrlToFile, canSharePngFiles, shareOrSave, SHARE_CANCELLED,
@@ -750,7 +751,7 @@ function prefersReducedMotion() {
   catch { return false; }
 }
 
-export function Reading({ reading, onReset, initialStage, salesOpen = false, compatOpen = false }) {
+export function Reading({ reading, onReset, initialStage, salesOpen = false, compatOpen = false, landOnDelivery = false }) {
   const chart = reading.chart;
   // ── THE PROSE HANDOFF ──────────────────────────────────
   //
@@ -863,17 +864,9 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
         )}
       </Reveal>
 
-      {/* THE STATUS LINE (Prompt AU §2, Reyner's ruling 3, 2026-09-30): header, then
-          this, then Bagan Kelahiran. Tied to `pending` and nothing else, so it leaves
-          the same way on a render and on a floor, and a reopened reading never shows
-          it. role="status" makes it the polite announcement the skeleton's
-          aria-busy region does not carry. */}
-      {pending && (
-        <div data-status-line role="status" style={{ marginTop: 22 }}>
-          <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, lineHeight: 1.4, color: 'var(--tinta)', margin: 0 }}>{CHROME_COPY.status_writing}</p>
-          <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', margin: '4px 0 0' }}>{CHROME_COPY.status_writing_sub}</p>
-        </div>
-      )}
+      {/* THE STATUS LINE MOVED (Prompt BE §2, Reyner 2026-10-06): it no longer sits
+          here under the title; it is at the top of the prose skeleton below, where the
+          reading text appears. */}
 
       {/* Bagan Kelahiran — the legitimacy object. RULE 23's KEEP SIDE: the eight
           characters ARE the chart and they are what lets a reader cross-check Katon
@@ -1026,6 +1019,23 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
                 125 and 95 words, penutup 33), measured 2026-09-30 in Chrome:
                 median 2,248px at 375 and 1,853px at 1280, this skeleton
                 within a few percent of both (docs/qa/2026-09-30-result-page-au). */}
+            {/* THE STATUS LINE, WHERE THE READING WILL APPEAR (Prompt BE §2, Reyner
+                2026-10-06; wording AU §2, ruling 3, 2026-09-30). Tied to `pending` and
+                nothing else, so it leaves the same way on a render and on a floor, and a
+                reopened reading never shows it. role="status" makes it the polite
+                announcement the aria-busy region does not carry. THE SLOT KEEPS ITS
+                HEIGHT while the skeleton cross-fades out, so the fading bars do not jump
+                up when the line leaves; the text itself goes the moment the prose lands. */}
+            <div data-status-slot style={{ paddingTop: 34 }}>
+              <div style={{ minHeight: 48 }}>
+                {pending && (
+                  <div data-status-line role="status">
+                    <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, lineHeight: 1.4, color: 'var(--tinta)', margin: 0 }}>{CHROME_COPY.status_writing}</p>
+                    <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-warm)', margin: '4px 0 0' }}>{CHROME_COPY.status_writing_sub}</p>
+                  </div>
+                )}
+              </div>
+            </div>
             {SKELETON_SHAPE.blocks.map((paras, i) => (
               <div key={i} aria-hidden="true" style={{ marginTop: i ? 40 : 34, paddingTop: 34, borderTop: '1px solid var(--divider)' }}>
                 <Eyebrow style={{ marginBottom: 16 }}><span className="k-skel" style={{ color: 'transparent', display: 'inline-block', width: '38%' }}>x</span></Eyebrow>
@@ -1066,7 +1076,7 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
           buyer returning to her link (`delivered`) or back from checkout
           (`pending`), and closing sales is not revoking what she bought. */}
       {(salesOpen || initialStage) && (
-        <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} /></div>
+        <div style={{ marginTop: 52 }}><Offer reading={reading} initialStage={initialStage} landOnDelivery={landOnDelivery} theme={themeVars(element)} /></div>
       )}
       {/* The Compatibility block (Prompt AY §2): directly after the offer, and only
           while COMPAT is on sale (K2, 2026-10-02: `compatOpen`, not the payment
@@ -1319,6 +1329,9 @@ export function ShareCardA({ data, token, capture = captureCard }) {
   );
 }
 
+/** The card and download section's anchor id (Prompt BE §3a). */
+const DELIVERY_ANCHOR = 'unduh';
+
 /* ---------------- The offer: Rp 19.000, card + PDF ---------------- */
 /**
  * AN UPSELL, NOT A GATE. Nothing above this point is hidden, and the closing line
@@ -1332,9 +1345,23 @@ export function ShareCardA({ data, token, capture = captureCard }) {
  * (`lib/deliver/handlers.js`): they are bought together, gated together, and
  * refused together.
  */
-function Offer({ reading, initialStage }) {
+function Offer({ reading, initialStage, landOnDelivery = false, theme = {} }) {
   // offer | pending | delivered
   const [stage, setStage] = useState(initialStage || 'offer');
+  // ── LAND ON THE DOWNLOAD SECTION (Prompt BE §3a, Reyner 2026-10-06) ──
+  // Back from checkout (`landOnDelivery`, the `?bayar=selesai` marker) or after waiting
+  // in the pending state in this tab, the page scrolls to the delivery (#unduh) - but
+  // only when the stage reaches `delivered`, which the server's paid manifest decides.
+  // The marker alone never scrolls, and a paid link reopened cold does not jump.
+  const wentThroughPending = useRef(false);
+  useEffect(() => { if (stage === 'pending') wentThroughPending.current = true; }, [stage]);
+  const landedRef = useRef(false);
+  useEffect(() => {
+    if (stage !== 'delivered' || landedRef.current) return;
+    if (!landOnDelivery && !wentThroughPending.current) return;
+    landedRef.current = true;
+    document.getElementById(DELIVERY_ANCHOR)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  }, [stage, landOnDelivery]);
   // `offer_seen` FIRES WHEN THE OFFER IS ACTUALLY OFFERED, not when the component
   // mounts in some other stage. A reader returning to a delivered reading is not
   // being shown an offer, and counting her would inflate the denominator that
@@ -1354,6 +1381,45 @@ function Offer({ reading, initialStage }) {
   const [closed, setClosed] = useState(false);
   const [error, setError] = useState(null);
   const pollRef = useRef(null);
+
+  // ── THE PAY BAR, AFTER THE OFFER HAS BEEN SEEN (Prompt BE §4, Reyner 2026-10-06) ──
+  // The offer comes "AFTER the free reading lands. Never a gate" (CLAUDE.md PRODUCT), so
+  // the bar is a way BACK to an offer the reader has already reached, never a way to put
+  // it in front of her. It shows only once her viewport has reached the offer panel
+  // (remembered on this device, for this reading), hides while the panel or the site
+  // footer is on screen (it must not cover the footer links), and is not rendered in any
+  // stage but `offer` - so it is gone for good once paid. No IntersectionObserver, no bar.
+  const panelRef = useRef(null);
+  const [offerSeen, setOfferSeen] = useState(false);
+  const [panelOnScreen, setPanelOnScreen] = useState(false);
+  const [footerOnScreen, setFooterOnScreen] = useState(false);
+  const seenKey = `katon:offer-seen:${reading.token}`;
+  useEffect(() => {
+    if (stage !== 'offer' || typeof IntersectionObserver === 'undefined') return undefined;
+    const panel = panelRef.current;
+    if (!panel) return undefined;
+    const footer = document.querySelector('footer');
+    // An observer reports every target once as soon as it starts observing, so the
+    // remembered "seen" is read here, in its callback, rather than set from the effect.
+    const io = new IntersectionObserver((entries) => {
+      try { if (window.localStorage.getItem(seenKey) === '1') setOfferSeen(true); } catch { /* storage off */ }
+      for (const e of entries) {
+        if (e.target === panel) {
+          setPanelOnScreen(e.isIntersecting);
+          if (e.isIntersecting) {
+            setOfferSeen(true);
+            try { window.localStorage.setItem(seenKey, '1'); } catch { /* storage off */ }
+          }
+        } else {
+          setFooterOnScreen(e.isIntersecting);
+        }
+      }
+    });
+    io.observe(panel);
+    if (footer) io.observe(footer);
+    return () => io.disconnect();
+  }, [stage, seenKey]);
+  const showBar = stage === 'offer' && offerSeen && !panelOnScreen && !footerOnScreen && !closed;
 
   async function startCheckout() {
     if (busy) return;
@@ -1407,8 +1473,9 @@ function Offer({ reading, initialStage }) {
   if (stage === 'pending') return <Pending invoiceUrl={invoiceUrl} />;
 
   return (
+    <>
     <Reveal>
-      <div style={{ position: 'relative', overflow: 'hidden', background: SANCTUARY, borderRadius: 26, padding: '30px 24px 26px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
+      <div ref={panelRef} data-offer-panel style={{ position: 'relative', overflow: 'hidden', background: SANCTUARY, borderRadius: 26, padding: '30px 24px 26px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.22em', textTransform: 'uppercase', color: GLOW, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Icon.sparkle size={14} /> Complete Edition
         </div>
@@ -1482,6 +1549,39 @@ function Offer({ reading, initialStage }) {
         </div>
       </div>
     </Reveal>
+    {showBar && typeof document !== 'undefined' && createPortal(
+      <PayBar price={formatIdr(priceFor('artifact'))} busy={busy} onBuy={startCheckout} theme={theme} />,
+      document.body,
+    )}
+    </>
+  );
+}
+
+/**
+ * THE PAY BAR (Prompt BE §4): slim, fixed to the bottom, the price and the offer's own
+ * button label - no new words. Rendered by Offer through a portal on document.body,
+ * because a transformed ancestor (Reveal) would turn `position: fixed` into "fixed to
+ * that ancestor". The bottom padding includes the iPhone home-indicator inset.
+ */
+function PayBar({ price, busy, onBuy, theme }) {
+  return (
+    // THE THEME VARIABLES COME WITH IT: they are set on the reading's root, and a portal
+    // on document.body is outside it - without them `var(--el-sanctuary)` is empty and the
+    // bar is transparent (seen in the 375px capture, 2026-10-06).
+    <div data-pay-bar style={{
+      ...theme,
+      position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 40,
+      background: SANCTUARY, color: LIGHT, boxShadow: '0 -8px 24px rgba(9,18,21,.22)',
+      padding: '10px 16px calc(10px + env(safe-area-inset-bottom, 0px))',
+    }}
+    >
+      <div style={{ maxWidth: 460, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: '#fff', whiteSpace: 'nowrap' }}>{price}</div>
+        <Button onClick={onBuy} disabled={busy} style={{ width: 'auto', padding: '11px 16px', fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+          {busy ? 'Menyiapkan pembayaran...' : <>Ambil Complete Edition <Icon.arrow size={16} /></>}
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -1598,6 +1698,9 @@ function Delivery({ token, view = 'ready' }) {
   const [paidCard, setPaidCard] = useState(null);
   const [state, setState] = useState('loading'); // loading | ready | failed
   const [saving, setSaving] = useState(null); // 'card' | 'pdf' | null
+  // Which download the buyer last tapped: its line shows directly under that button
+  // (Reyner 2026-10-06, replacing G1). Nothing before a tap.
+  const [tapped, setTapped] = useState(null); // 'card' | 'pdf' | null
 
   useEffect(() => {
     let cancelled = false;
@@ -1620,6 +1723,7 @@ function Delivery({ token, view = 'ready' }) {
 
   async function saveCard() {
     setSaving('card');
+    setTapped('card');
     try {
       await downloadCard('download', 'B', { id: 'card-b', filename: `katon-${(paidCard?.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png` });
     } catch { /* the button re-enables; the PDF is unaffected */ }
@@ -1627,7 +1731,7 @@ function Delivery({ token, view = 'ready' }) {
   }
 
   return (
-    <div className="k-fade" style={{ background: SANCTUARY, borderRadius: 26, padding: '30px 22px 34px', color: LIGHT, boxShadow: 'var(--shadow-deep)' }}>
+    <div id={DELIVERY_ANCHOR} className="k-fade" style={{ background: SANCTUARY, borderRadius: 26, padding: '30px 22px 34px', color: LIGHT, boxShadow: 'var(--shadow-deep)', scrollMarginTop: 72 }}>
       <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.2em', textTransform: 'uppercase', color: GLOW }}>Complete Edition</div>
       <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 30, lineHeight: 1.1, color: '#fff', margin: '12px 0 0' }}>Sudah siap.</h2>
       <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, lineHeight: 1.7, color: 'rgba(234,241,242,.72)', margin: '12px 0 0' }}>Kartu dan PDF-mu bisa diunduh kapan saja dari tautan bacaan ini.</p>
@@ -1661,6 +1765,7 @@ function Delivery({ token, view = 'ready' }) {
             <Button variant="gold" light onClick={saveCard} disabled={saving === 'card'} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <Icon.save size={17} /> {saving === 'card' ? 'Menyimpan...' : 'Simpan Kartu'}
             </Button>
+            {tapped === 'card' && <DownloadStarted />}
             {/* A PLAIN LINK, not a fetch-then-blob. The endpoint sets
                 Content-Disposition: attachment, so the browser saves it and the tab
                 keeps its state; building a blob would hold a whole PDF in memory to
@@ -1674,16 +1779,29 @@ function Delivery({ token, view = 'ready' }) {
                 choice is a hidden link or a broken one: hidden, no text in its place,
                 and a reload re-renders and brings it back. */}
             {view === 'ready' && (
-              <a href={`/api/deliver/${token}/pdf`} style={{ textDecoration: 'none' }}>
+              <a href={`/api/deliver/${token}/pdf`} onClick={() => setTapped('pdf')} style={{ textDecoration: 'none' }}>
                 <Button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                   <Icon.save size={17} /> Unduh PDF
                 </Button>
               </a>
             )}
+            {view === 'ready' && tapped === 'pdf' && <DownloadStarted />}
           </div>
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * The line under a tapped download button (Reyner 2026-10-06, replacing G1, Prompt BE §3b):
+ * the download has started and where the file usually lands. Only after a tap.
+ */
+function DownloadStarted() {
+  return (
+    <p data-download-started role="status" style={{ fontFamily: 'var(--font-sans)', fontSize: 13, lineHeight: 1.6, color: 'rgba(234,241,242,.72)', margin: '-4px 0 0' }}>
+      {CHROME_COPY.delivery_started}
+    </p>
   );
 }
 
@@ -1760,6 +1878,7 @@ export function ReadingByToken({ token, salesOpen = false, compatOpen = false })
       reading={reading}
       onReset={goHome}
       initialStage={delivered ? 'delivered' : (fromCheckout ? 'pending' : undefined)}
+      landOnDelivery={fromCheckout}
       salesOpen={salesOpen}
       compatOpen={compatOpen}
     />

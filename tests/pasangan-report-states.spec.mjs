@@ -646,3 +646,44 @@ test('I4: WITH chapter_headings THE WRITER\'S HEADINGS SHOW; WITHOUT IT THEY DO 
     } finally { restore(); }
   }
 });
+
+// ── PROMPT BE §3a (Reyner, 2026-10-06): BACK FROM CHECKOUT AND PAID, LAND ON THE DOWNLOAD ──
+// The same rule as the mirror (tests/post-purchase.spec.mjs): an anchor id on the download
+// section, and a scroll only once the page has confirmed paid - never on `?bayar=selesai` alone.
+function recordScrolls() {
+  const calls = [];
+  const prev = window.Element.prototype.scrollIntoView;
+  window.Element.prototype.scrollIntoView = function scrollIntoView() { calls.push(this.id || this.tagName); };
+  return { calls, restore: () => { window.Element.prototype.scrollIntoView = prev; } };
+}
+
+// AMENDED 2026-10-06 (Reyner, on #199): for compat the buyer lands on the START OF THE PAID
+// READING (#bacaan), not on the download section below it. The Complete Edition keeps #unduh.
+test('BE §3a: back from checkout on a PAID pair, the report lands on the START of the reading (#bacaan), not #unduh', async () => {
+  const restore = stub({ pair: { status: 'paid' }, reading: READING('render') });
+  const scrolls = recordScrolls();
+  const ui = await mount({ search: '?bayar=selesai' });
+  try {
+    const start = ui.host.querySelector('#bacaan');
+    assert.ok(start, 'the paid reading\'s start carries the anchor id');
+    assert.ok(start.textContent.includes(PASANGAN_COPY.page_title), 'it is the top of the report: its title');
+    assert.deepEqual(scrolls.calls, ['bacaan'], `scrolled once, to #bacaan; calls: ${JSON.stringify(scrolls.calls)}`);
+  } finally { ui.unmount(); scrolls.restore(); restore(); }
+});
+
+test('BE §3a: the marker on an UNPAID pair never scrolls; a paid pair reopened cold does not jump', async () => {
+  let restore = stub({ pair: { status: 'unpaid' } });
+  let scrolls = recordScrolls();
+  let ui = await mount({ search: '?bayar=selesai' });
+  try {
+    // No scroll of any kind: checking only the old target would pass once the target moved.
+    assert.deepEqual(scrolls.calls, [], 'no scroll on the marker alone');
+  } finally { ui.unmount(); scrolls.restore(); restore(); }
+  restore = stub({ pair: { status: 'paid' }, reading: READING('render') });
+  scrolls = recordScrolls();
+  ui = await mount();
+  try {
+    assert.ok(ui.host.querySelector('#bacaan'), 'precondition: the paid report is open');
+    assert.deepEqual(scrolls.calls, [], 'no marker, no jump');
+  } finally { ui.unmount(); scrolls.restore(); restore(); }
+});

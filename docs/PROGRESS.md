@@ -109,6 +109,30 @@ UPDATED: 2026-09-21 (Prompt V) — THE DOKU CHECKOUT ADAPTER IS BUILT, AND QRIS 
          LITERAL, NEVER THE REQUEST'S OWN PATH`, which sends a request arriving at a rewritten path
          carrying a signature computed for that path. Found by the falsification pass, not by review.
          NOT DONE: the §5 sandbox walk and §4's captured fixture - both need QRIS. Four deferred rows.
+UPDATED: 2026-10-06 (Prompt BE §0) — THE FIRST REAL PURCHASE SETTLED BY NOTIFICATION, AND GATE i IS
+         VERIFIED. Gate b's production half for the COMPLETE EDITION is DONE: invoice
+         `Zn-4VU2Ni2lLdcTO25aS2.muw4uwtc`, Rp 19.000 QRIS, SUCCESS at DOKU 10:43:14 WIB, and Vercel logged
+           POST www.katon.app/api/doku/notify 200 [doku] reading Zn-4VU2Ni2lLdcTO25aS2: paid=true reason=ok
+         at 10:43:17. The notify path works in production. The COMPAT half (Rp 39.000) stays OPEN; compat
+         is off sale. Gate i: option A (Vercel Authentication on Preview, the `ops/doku-walk`
+         PAYMENTS_PROVIDER var deleted, both by Reyner), verified by Code the same day - two pre-cutoff
+         builds answer 401 "Protected by Vercel Authentication" to `POST /api/mock-pay/<nonexistent id>`,
+         and www.katon.app / katon.app still serve publicly. Rows b and i in docs/ops/doku-walk.md carry
+         the detail. ALSO RULED (Reyner, Prompt BE §6): the PDF running footer F1 is
+         "© 2026 PT Katon Digital Nusantara. All rights reserved. | katon.app" - two exceptions to rule
+         20/23, scoped to THIS FOOTER ONLY: the "©" character (rule 20 is keyboard characters only) and
+         English in a reader-facing string.
+         AMENDED THE SAME DAY (Reyner, on #199): G1, the standing download guide under the Complete
+         Edition's buttons, is REPLACED by a line shown directly under "Unduh PDF" or "Simpan Kartu"
+         only after the buyer taps it: "Unduhan dimulai. Filenya biasanya ada di aplikasi Files,
+         folder Downloads (iPhone), atau aplikasi File Manager, folder Unduhan (Android)." Compat,
+         back from a confirmed payment, lands on the START of the paid reading, not the download
+         section (the Complete Edition keeps #unduh). The PDF disclaimer stays on BOTH the cover and
+         the closing page, by ruling. And two PDF page-break rules: a heading never ends a page
+         apart from its body, and the compat facts table's last row never stands alone.
+         A THIRD PAGE-BREAK RULE THE SAME DAY (Reyner, amendment 1 to BE, on #199): the glossary's
+         last group never sits alone on a page; it moves together with the group before it. Both
+         editions (`keepLastGroupWithPrevious`, lib/pdf/document.js).
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
          For "what SHIPS", read LIVE STATE at the top — it is the only section that answers that, and
          it is the one a product argument needs first.

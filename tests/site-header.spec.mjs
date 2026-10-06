@@ -137,3 +137,22 @@ test('THE HEADER CARRIES THE LOGOMARK, AND THE PAGE CARRIES NO SECOND ONE', () =
   assert.equal(funnel.includes('Wordmark'), false,
     'the funnel still renders a logomark; with the header there, that is two');
 });
+
+test('PROMPT BE §1b: THE ADDRESS SHOWN IS "Tangerang Selatan, Banten" ONLY - no street anywhere a reader sees it', async () => {
+  // Reyner, 2026-10-06. ENTITY.address is the one source (/tentang renders it under
+  // kontakAddressLabel); the full NIB address stays as a record in lib/site/entity.js's comment.
+  const { ENTITY } = await import('../lib/site/entity.js');
+  assert.equal(ENTITY.address, 'Tangerang Selatan, Banten');
+  const tentang = readFileSync(new URL('../app/tentang/page.js', import.meta.url), 'utf8');
+  assert.ok(tentang.includes('{ENTITY.address}'), '/tentang renders the address from ENTITY');
+  assert.equal(JSON.stringify(ENTITY).includes('Oliander'), false, 'the street is still in a rendered value');
+});
+
+test('PROMPT BE §1a: THE STATIC PAGES CARRY NO SECOND LOGOMARK either (/harga /tentang /privasi /syarat /pengembalian)', () => {
+  // Reyner, 2026-10-06: "One logo." StaticPage drew its own dot + KATON above the title,
+  // under the header that already carries it. Same source assertion as above, same reason.
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/^\s*\/\/.*$/gmu, '');
+  const page = strip(readFileSync(new URL('../components/StaticPage.jsx', import.meta.url), 'utf8'));
+  assert.equal(/>\s*KATON\s*</u.test(page), false, 'StaticPage still renders the KATON mark');
+  assert.equal(page.includes("background: 'var(--clay)'"), false, 'StaticPage still draws the logomark dot');
+});

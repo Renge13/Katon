@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 // Shell + prose atoms for the five static compliance pages (/harga, /tentang,
 // /privasi, /syarat, /pengembalian).
 //
@@ -9,10 +7,9 @@ import Link from 'next/link';
 // because it is a client module and importing it would push these pages back
 // behind hydration for no benefit.
 //
-// The wordmark is re-declared here rather than imported from Funnel.jsx for the
-// same reason. Four lines of markup is a cheaper price than a client boundary.
-// It is a Link home, because the funnel is the product and a reader who arrives
-// on /syarat first needs a way in.
+// NO LOGOMARK HERE (Prompt BE §1a, Reyner 2026-10-06: "One logo."). This shell used
+// to draw its own dot + KATON, a Link home, above the title. The site header is on
+// every route and carries the mark and the way home, so the in-page one was a second.
 
 const WRAP = { maxWidth: 460, margin: '0 auto', padding: '0 22px 40px' };
 
@@ -20,24 +17,6 @@ export default function StaticPage({ title, lead, children }) {
   return (
     <div style={WRAP}>
       <div style={{ paddingTop: 44 }}>
-        <Link
-          href="/"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}
-        >
-          <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--clay)' }} />
-          <span
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontWeight: 600,
-              letterSpacing: '.28em',
-              fontSize: 13,
-              color: '#3c3226',
-            }}
-          >
-            KATON
-          </span>
-        </Link>
-
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
@@ -46,7 +25,7 @@ export default function StaticPage({ title, lead, children }) {
             lineHeight: 1.14,
             letterSpacing: '-.01em',
             color: 'var(--tinta)',
-            margin: '36px 0 0',
+            margin: 0,
           }}
         >
           {title}

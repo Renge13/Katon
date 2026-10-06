@@ -32,6 +32,15 @@ import { formatIdr } from '../lib/site/format.js';
 import { compatPairRoute } from '../lib/site/routes.js';
 import { viewFor } from '../lib/pair/reportView.js';
 
+/** The download section's anchor id (Prompt BE §3a), the same as the mirror's. */
+const DOWNLOAD_ANCHOR = 'unduh';
+/**
+ * The start of the paid reading, where a buyer back from checkout lands (Reyner 2026-10-06,
+ * on #199): for compat the reading IS what she bought, so she lands on it, not on the
+ * download section below it. The Complete Edition keeps #unduh.
+ */
+const READING_ANCHOR = 'bacaan';
+
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
 
 /** A sentinel `load()` returns for a transport failure, distinct from a 404 body. */
@@ -418,6 +427,20 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
     </Reveal>
   ) : null;
 
+  // ── BACK FROM CHECKOUT, LAND ON THE READING (Prompt BE §3a, amended by Reyner
+  // 2026-10-06 on #199: the start of the paid reading, #bacaan, not #unduh) ──
+  // Scroll there once, and only when the page has confirmed
+  // paid: the row says paid AND the reading is here, which is what renders that section.
+  // `?bayar=selesai` alone never scrolls, and a paid report reopened cold does not jump.
+  // Above the early return so the hook order never changes.
+  const landedRef = useRef(false);
+  useEffect(() => {
+    if (landedRef.current || !justPaid || !loaded) return;
+    if (pair?.status !== 'paid' || !reading) return;
+    landedRef.current = true;
+    document.getElementById(READING_ANCHOR)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  }, [justPaid, loaded, pair?.status, reading]);
+
   // ── FIRST PAINT IS THE SKELETON, NEVER NOTHING (Addendum 2 item 3) ──
   // This was `if (!loaded) return null`, and that null WAS the blank page Reyner
   // asked to be rid of: the route mounts, two fetches go out, and for as long as
@@ -571,7 +594,7 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
 
   return (
     <div className="k-fade" style={wrap}>
-      <div style={{ paddingTop: 60 }}>
+      <div id={READING_ANCHOR} style={{ paddingTop: 60, scrollMarginTop: 72 }}>
         {/* ── THE HEADER: A TITLE AND THE TWO PEOPLE (Addendum 2 item 1) ──
             `paid_title` ("Bacaan Kalian Sudah Siap") was dropped in #112: it
             announced the report to the one reader already looking at it. This is
@@ -642,7 +665,7 @@ export default function PasanganReport({ id, salesClosed = false, mockPayments =
             the URL on screen is the only way back - which is why it now has a
             COPY button beside it (ruling 2) rather than asking a reader on a
             phone to select a wrapped URL by hand. */}
-        <div style={{ marginTop: 44, paddingTop: 28, borderTop: '1px solid var(--divider)' }}>
+        <div id={DOWNLOAD_ANCHOR} style={{ marginTop: 44, paddingTop: 28, borderTop: '1px solid var(--divider)', scrollMarginTop: 72 }}>
           <Reveal>
             <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 13, color: 'var(--muted-warm)', lineHeight: 1.6 }}>
               <Icon.lock size={13} />

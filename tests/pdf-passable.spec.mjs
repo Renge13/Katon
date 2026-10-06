@@ -349,20 +349,25 @@ test('A2 NO COVER PRINTS AN ISO DATE OR AN ENGLISH GENDER WORD', async () => {
   // `birthSummary` unchanged, one line per person - asserted positively by R3 below.
 });
 
-test('B2 EVERY PAGE AFTER THE COVER CARRIES THE RUNNING FOOTER, and the cover does not', async () => {
+// B2's `Katon - <product>` footer, after-the-cover only, is SUPERSEDED by Prompt BE §5b
+// (Reyner 2026-10-06): F1 is the running footer on EVERY page, the cover included.
+test('BE §5b (was B2): EVERY PAGE CARRIES THE F1 RUNNING FOOTER, THE COVER INCLUDED', async () => {
+  const flatten = (t) => t.replace(/\s+/gu, ' ');
   for (const d of await docs()) {
-    const footer = `Katon - ${d.edition}`;
-    assert.equal(d.texts[0].includes(footer), false, `${d.name}: the cover carries the footer`);
-    d.texts.slice(1).forEach((t, i) => {
-      assert.ok(t.includes(footer), `${d.name}: page ${i + 2} has no running footer`);
+    d.texts.forEach((t, i) => {
+      assert.ok(flatten(t).includes(RENDER_COPY.pdfFooter), `${d.name}: page ${i + 1} has no F1 footer`);
+      assert.equal(t.includes(`Katon - ${d.edition}`), false, `${d.name}: page ${i + 1} still prints the B2 footer`);
     });
   }
 });
 
-test('A11 THE DISCLAIMER IS ON THE COVER AND ON NO OTHER PAGE', async () => {
+// A11 kept it on the cover alone. Prompt BE §5c (Reyner 2026-10-06) reuses it verbatim as
+// the closing page's first section, and did not move it off the cover: so, the cover and
+// the closing page, and no page in between.
+test('A11 + BE §5c: THE DISCLAIMER IS ON THE COVER AND THE CLOSING PAGE, AND NO OTHER PAGE', async () => {
   for (const d of await docs()) {
     const hits = d.texts.map((t, i) => (t.includes(RENDER_COPY.pdfDisclaimer) ? i + 1 : null)).filter(Boolean);
-    assert.deepEqual(hits, [1], `${d.name}: the disclaimer is on page(s) ${hits.join(', ')}`);
+    assert.deepEqual(hits, [1, d.texts.length], `${d.name}: the disclaimer is on page(s) ${hits.join(', ')}`);
   }
 });
 

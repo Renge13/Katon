@@ -580,10 +580,10 @@ test('THE QUADRANT NAME IS THE READING\'S TITLE LINE, after the P0 sentence', as
     const { texts, semanticJson } = await build(name);
     const q = semanticJson.core.quadrant;
     const title = GLOSSARY.kompatibilitas[`p5_${q}`].name_id;
-    // The running footer (B2) is drawn first on every page; it is chrome, not the
-    // reading, so it is not one of the reading's lines.
-    const footer = `Katon - ${RENDER_COPY.pdfEditionCompat}`;
-    const lines = texts[1].split('\n').map((l) => l.trim()).filter((l) => l && l !== footer);
+    // The running footer is drawn first on every page; it is chrome, not the reading, so
+    // it is not one of the reading's lines. F1 since Prompt BE §5b, and its text extracts
+    // in two runs ("© 2026" and the rest), so each run is dropped as a part of F1.
+    const lines = texts[1].split('\n').map((l) => l.trim()).filter((l) => l && !RENDER_COPY.pdfFooter.includes(l));
 
     const a = semanticJson.core.a.archetype_name_en;
     const b = semanticJson.core.b.archetype_name_en;

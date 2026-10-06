@@ -328,7 +328,9 @@ test('AU §2 STATUS LINE: the bank carries the two strings exactly as ruled', ()
   assert.equal(CHROME_COPY.status_writing_sub, 'Biasanya selesai dalam 20 detik.');
 });
 
-test('AU §2 STATUS LINE: a pending reading shows both lines, after the header and before Bagan Kelahiran', async () => {
+test('PROMPT BE §2 STATUS LINE: a pending reading shows both lines WHERE THE READING WILL APPEAR (inside the skeleton, after the cards)', async () => {
+  // Moved 2026-10-06 (Reyner, Prompt BE §2) from under the title, between the header and
+  // Bagan Kelahiran (AU §2), to the place the reading text arrives. Wording unchanged.
   const f = stubFetch();
   const m = await mount({ ...IN_SESSION, blocks: [], penutup: '', pending: true });
   try {
@@ -336,10 +338,10 @@ test('AU §2 STATUS LINE: a pending reading shows both lines, after the header a
     assert.ok(s, 'the status line renders while pending');
     assert.ok(s.textContent.includes(CHROME_COPY.status_writing), 'the main line');
     assert.ok(s.textContent.includes(CHROME_COPY.status_writing_sub), 'the smaller line under it');
+    assert.ok(s.closest('[data-prose-skeleton]'), 'it sits in the skeleton, where the reading text will appear');
     const all = m.host.textContent;
     const at = (x) => all.indexOf(x);
-    assert.ok(at('Refleksimu') < at(CHROME_COPY.status_writing), 'after the header');
-    assert.ok(at(CHROME_COPY.status_writing) < at('Bagan Kelahiran'), 'before Bagan Kelahiran');
+    assert.ok(at('Bagan Kelahiran') > -1 && at('Bagan Kelahiran') < at(CHROME_COPY.status_writing), 'after Bagan Kelahiran, no longer under the title');
   } finally { m.unmount(); f.restore(); }
 });
 
