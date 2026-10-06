@@ -141,6 +141,12 @@ test('2c item 2b: "membawa elemen" only for what one partner brings the other', 
     'b: the membawa elemen line is missing from Facts');
 });
 
+test('2d: the Voice paragraph asks for native Indonesian, not translated pop-psychology (Reyner, 2026-10-06)', () => {
+  const p = loadPrompt('pair', 'v2');
+  assert.ok(p.includes('Ground the emotion in vivid, real-world human situations. Do not use literal translations of English pop-psychology, therapy jargon, or Western relationship concepts (e.g., avoid unnatural translated phrases like kebersamaan yang disengaja, memegang ruang, or melakukan pekerjaan emosional). Express these ideas using natural, native Indonesian phrasing that people actually say in real life (e.g., menyempatkan waktu berdua, hadir sepenuhnya, menjaga komunikasi).'),
+    'the native-phrasing line is missing from Voice');
+});
+
 // ── BC AMENDMENT 2c item 1 (Reyner, 2026-10-04): A v2 PAIR CHAPTER IS `paragraphs` ──
 // "Give each chapter 2 or 3 paragraph entries rather than one text field." ... "Preserve
 // the final rendered output format by joining the paragraphs downstream." The schema is read
