@@ -794,3 +794,38 @@ Production keys, real settlement, real QRIS acquirer behaviour, or the statement
 buyer's bank shows. Those are §8.3–8.4 and they are Reyner's. **Production is off limits
 to this session: no production credential, no production env var, no production Back
 Office.**
+
+## Part 4 — The method probe, 2026-10-06 (Prompt BG §1)
+
+`npm run probe:doku -- --methods` (or `--methods=A,B`): one unpaid Checkout session per
+method, each method asked for ALONE, the exact DOKU answer printed. SANDBOX ONLY, like the
+rest of the probe. Run from a local `.env.local` sandbox pair, 2026-10-06 09:58 UTC; full
+bodies in the run, verdict lines here:
+
+```
+QRIS                 200  ACCEPTED (payment.url returned)
+EMONEY_DANA          200  ACCEPTED (payment.url returned)
+EMONEY_SHOPEE_PAY    200  ACCEPTED (payment.url returned)
+EMONEY_OVO           200  ACCEPTED (payment.url returned)
+```
+
+The control, the same day:
+
+```
+NOT_A_METHOD         400  REFUSED: PAYMENT CHANNEL IS INACTIVE
+VIRTUAL_ACCOUNT_BCA  200  ACCEPTED (payment.url returned)
+EMONEY_LINKAJA       200  ACCEPTED (payment.url returned)
+```
+
+**WHAT THIS DOES AND DOES NOT SAY.** The probe can refuse (an unknown method gets the
+business error), so its ACCEPTED is real for the SANDBOX. But the sandbox also accepts BCA VA
+and LinkAja, which Reyner's production dashboard ("Layanan") lists as NOT active. So sandbox
+acceptance says nothing about the production merchant account, and no method was added on
+it: `lib/doku/methods.js` OFFERED stays `['QRIS']`. Adding DANA, ShopeePay or OVO is one
+line there, after each is active on production.
+
+**THE PREREQUISITE THAT GOES WITH EACH ACTIVATION.** Notification URLs are registered PER
+CHANNEL (Part 3, "WHY NOTHING WAS DELIVERED"). Each e-wallet activated on production needs
+Katon's Notify URL saved on THAT channel in the production Back Office, or a buyer who pays
+with it is recorded SUCCESS at DOKU and never flips `paid` at Katon. Check it per channel,
+before the method is added to OFFERED.
