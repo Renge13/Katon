@@ -28,12 +28,12 @@ Shared strings come from the mirror (BirthFields / Funnel) and change for BOTH p
 | 3 | `home_compat_label` | Home card 2 title | Kompatibilitas | |
 | 4 | `home_compat_sub` | Home card 2 sub | Dinamika dua orang, dibaca dari dua tanggal lahir. | |
 | 5 | `page_title` | /kompatibilitas H1 | Bacaan Kompatibilitas | |
-| 6 | `page_lead` | header paragraph under H1 | Bacaan personal tentang bagaimana dua pola bertemu: tarikan, gesekan, unsur penyeimbang, ritme harian, dan dinamika hubungan kalian. | AMENDED, see rulings |
-| 7 | `includes_1` | check list 1 | Inti diri kalian berdua dan dinamika hubungannya | |
-| 8 | `includes_2` | check list 2 | Kursi pasangan di bagan masing-masing saat saling bertemu | |
-| 9 | `includes_3` | check list 3 | Elemen yang saling memengaruhi di antara kalian | |
-| 10 | `includes_4` | check list 4 | Pola hubungan: Cermin, Serumpun, atau Kontras | |
-| 11 | `includes_5` | check list 5 | Kuadran tarikan dan ritme, plus peta dinamika: poin penguat, area gesekan, dan komitmen masing-masing | |
+| 6 | `page_lead` | header paragraph under H1 | Bacaan personal tentang bagaimana dua pola bertemu: tarikan, gesekan, unsur penyeimbang, ritme harian, dan dinamika hubungan kalian. | AMENDED (a, 2026-09-09) and REPLACED again 2026-10-07 (amendment l), see rulings |
+| 7 | `includes_1` | check list 1 | Inti diri kalian berdua dan dinamika hubungannya | DROPPED 2026-10-07 (amendment l): four label + text items replace the five, see rulings |
+| 8 | `includes_2` | check list 2 | Kursi pasangan di bagan masing-masing saat saling bertemu | DROPPED 2026-10-07 (amendment l): four label + text items replace the five, see rulings |
+| 9 | `includes_3` | check list 3 | Elemen yang saling memengaruhi di antara kalian | DROPPED 2026-10-07 (amendment l): four label + text items replace the five, see rulings |
+| 10 | `includes_4` | check list 4 | Pola hubungan: Cermin, Serumpun, atau Kontras | DROPPED 2026-10-07 (amendment l): four label + text items replace the five, see rulings |
+| 11 | `includes_5` | check list 5 | Kuadran tarikan dan ritme, plus peta dinamika: poin penguat, area gesekan, dan komitmen masing-masing | DROPPED 2026-10-07 (amendment l): four label + text items replace the five, see rulings |
 | 12 | `price_note` | under Rp 39.000 | Sekali bayar. Hasil tersimpan dalam satu tautan yang bisa dibuka kapan saja. | |
 | 13 | `form_a_legend` | card 1 eyebrow | Kamu | |
 | 14 | `form_b_legend` | card 2 eyebrow | Dia | |
@@ -56,6 +56,11 @@ Shared strings come from the mirror (BirthFields / Funnel) and change for BOTH p
 | 30 | `sales_closed_body` | under it | Pembelian sedang ditutup sementara. Bacaan yang sudah dibayar tetap bisa dibuka lewat tautannya. | |
 
 Flagged by Reyner on the walk: #6 page_lead (wordy), #21 paid_title (dropped by Addendum 2).
+
+**2026-10-07, amendment l (Prompt BH):** #6 replaced and #7-#11 dropped; the new lead and the four
+label + text inclusion items (`includes_1_label` .. `includes_4_text`) live in
+docs/content/pasangan-copy-rulings.md, "## The compat page". The Live string column above is the
+2026-09-09 snapshot and is not kept current.
 
 **29 and 30 ADDED BY CODE, 2026-09-09, and they are not part of the ruled 28.** They are Cowork
 drafts from the Y-2 table that shipped EARLY in Y-1, because Y-1 is what closed sales and a closed

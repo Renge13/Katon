@@ -88,6 +88,21 @@ buyer whose payment did not update the page. Verbatim from the Cowork state doc 
 contact line"). Cowork swept it: 0 blocklist hits, control fired 3. It REPLACES the old second sentence
 ("Tidak perlu memuat ulang.") rather than appending to it - the ruled value is the whole string.
 
+AMENDMENT l, RULED 2026-10-07 (Reyner), Prompt BH (docs/prompts/BH-compat-sales-copy.md): the compat
+page's lead and inclusion list are rewritten on the day compat went on sale. The old list promised
+"Pola hubungan: Cermin, Serumpun, atau Kontras", and Kontras was retired by #206 (P4 option E).
+  - `page_lead` REPLACED.
+  - `includes_1..5` DROPPED. FOUR items replace them, each a bold LABEL followed by its TEXT, stored
+    as two slots per item (`includes_N_label`, `includes_N_text`, N = 1..4; Cowork's technical
+    ruling: never split one string on its colon at render time).
+  - Unchanged: `page_title`, the price, `price_note`, the form, /harga.
+  The nine strings are in "## The compat page" below. That section lands UNPARSED in the rulings
+  commit (the amendment-i precedent), so this file goes in green; the APPLYING commit adds the
+  section to tests/pasangan-copy.spec.mjs#worksheet(), records the five old rows DROPPED and the old
+  `page_lead` row AMENDED, and moves the slot count.
+  SWEPT by Cowork 2026-10-07 against main's blocklist compiled as lib/validate/style.js:63 does (18
+  patterns): clean, controls fired. No em-dash, no question mark.
+
 SWEEP 2026-09-14 (amendment i): the five strings compiled against the 70 live style patterns the way
 lib/validate/style.js compiles them (new RegExp(entry.pattern, entry.flags || 'iu'), objects carrying
 `pattern` only). 0 hits, 0 non-keyboard characters, 0 em-dash/curly/question mark, 0 `bukan X tapi Y`.
@@ -251,3 +266,29 @@ applying commit on, the shared-JSX row above lists the stepper only.
 |---|---|---|
 | SITE_COPY | `home_compat_link` | `Baca dinamika dua orang` |
 | SITE_COPY | `home_lock_line` | `Gratis dan privat. Hanya bisa diakses via tautanmu.` |
+
+## The compat page - RULED 2026-10-07 (Prompt BH, amendment l)
+
+Reyner rewrote the page lead and the inclusion list on the day compat went on sale. Copied into this
+file from docs/prompts/BH-compat-sales-copy.md by script, byte for byte. Each inclusion is a LABEL
+rendered bold, a space, then its TEXT in the normal weight; the two are separate slots so nothing
+splits a string on its colon at render time. Order on the page is 1 to 4.
+
+| Bank | Slot | Ruled string |
+|---|---|---|
+| PASANGAN_COPY | `page_lead` | `Pahami dinamika antara dua orang. Temukan di mana kalian mudah sejalan, di mana sering terjadi salah paham, dan bagaimana cara terbaik untuk saling melengkapi.` |
+| PASANGAN_COPY | `includes_1_label` | `Karakter Bawaan:` |
+| PASANGAN_COPY | `includes_1_text` | `Bagaimana sifat asli kalian berdua berpadu saat sedang bersama.` |
+| PASANGAN_COPY | `includes_2_label` | `Pola Interaksi:` |
+| PASANGAN_COPY | `includes_2_text` | `Apakah kalian sefrekuensi, saling memotivasi, melengkapi kekurangan, atau justru sering berdebat.` |
+| PASANGAN_COPY | `includes_3_label` | `Titik Gesekan:` |
+| PASANGAN_COPY | `includes_3_text` | `Mengetahui hal-hal spesifik yang berpotensi memicu konflik dan cara meredamnya.` |
+| PASANGAN_COPY | `includes_4_label` | `Dinamika Hubungan:` |
+| PASANGAN_COPY | `includes_4_text` | `Bagaimana kalian saling mendukung, menyeimbangkan peran, dan menyelaraskan langkah.` |
+
+**RULED SCOPE, recorded because the next session will be tempted to restore it.** Reyner's draft of
+`page_lead` ended with "baik sebagai pasangan, keluarga, sahabat, maupun rekan kerja". That clause is
+OUT for now, by his decision on Cowork's advice (2026-10-07): the product offers only PDKT / Pacaran /
+Menikah, and the reading's P2 seat (the day branch is the spouse palace), its P5 pull quadrant and
+Bunga Persik are romantic. It returns when a non-couple compat exists; the work that needs is a row in
+docs/PROGRESS.md's DEFERRED REGISTER ("Non-couple compat").
