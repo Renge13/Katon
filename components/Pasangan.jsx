@@ -34,11 +34,32 @@ import { recallBirth } from '../lib/site/carryBirth.js';
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
 const EMPTY = { date: '', time: '', gender: '', nickname: '' };
 
-/** The five inclusions, in the reading's own P1..P5 journey order. */
-const INCLUDES = [
-  PASANGAN_COPY.includes_1, PASANGAN_COPY.includes_2, PASANGAN_COPY.includes_3,
-  PASANGAN_COPY.includes_4, PASANGAN_COPY.includes_5,
-];
+/**
+ * The four inclusions, in the ruled order (amendment l, 2026-10-07). Label and text are
+ * separate slots, so the bold half is never found by splitting a string on its colon.
+ */
+const INCLUDES = [1, 2, 3, 4].map((n) => ({
+  label: PASANGAN_COPY[`includes_${n}_label`],
+  text: PASANGAN_COPY[`includes_${n}_text`],
+}));
+
+/** The inclusion list: a bold label, a space, then its text. Shown open and closed. */
+function IncludesList() {
+  return (
+    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 8 }}>
+      {INCLUDES.map(({ label, text }) => (
+        <li key={label} style={{ display: 'flex', gap: 9, alignItems: 'baseline', fontSize: 14, lineHeight: 1.55, color: 'var(--tinta-soft)' }}>
+          {/* flexShrink 0: every ruled item wraps at phone width, and a shrinking
+              flex child drew the 13px check at 5.8 to 7.8px, unevenly. */}
+          <Icon.check size={13} style={{ flexShrink: 0 }} />
+          <span>
+            <strong style={{ fontWeight: 600, color: 'var(--tinta)' }}>{label}</strong>{' '}{text}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 /**
  * One person's birth, in the shape `POST /api/pair` validates.
@@ -268,14 +289,7 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
           </Reveal>
 
           <Reveal delay={0.14} style={{ marginTop: 24 }}>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 8 }}>
-              {INCLUDES.map((line) => (
-                <li key={line} style={{ display: 'flex', gap: 9, alignItems: 'baseline', fontSize: 14, lineHeight: 1.55, color: 'var(--tinta-soft)' }}>
-                  <Icon.check size={13} />
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
+            <IncludesList />
           </Reveal>
 
           <Reveal delay={0.2} style={{ marginTop: 26 }}>
@@ -329,14 +343,7 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
         </Reveal>
 
         <Reveal delay={0.14} style={{ marginTop: 24 }}>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 8 }}>
-            {INCLUDES.map((line) => (
-              <li key={line} style={{ display: 'flex', gap: 9, alignItems: 'baseline', fontSize: 14, lineHeight: 1.55, color: 'var(--tinta-soft)' }}>
-                <Icon.check size={13} />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
+          <IncludesList />
         </Reveal>
 
         {/* THE PRICE IS NOT A STRING. It resolves from lib/pricing.js at render

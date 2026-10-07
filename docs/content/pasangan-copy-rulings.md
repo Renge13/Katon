@@ -132,12 +132,12 @@ promise of the same family: true while access is token-only and no email is sent
 | SITE_COPY | ~~`home_compat_label`~~ | DROPPED 2026-09-24 by Prompt AA (was `Kompatibilitas`): the two-card grid left the front door. Remove slot and render. |
 | SITE_COPY | ~~`home_compat_sub`~~ | DROPPED 2026-09-24 by Prompt AA (was `Dinamika dua orang, dibaca dari dua tanggal lahir.`): the two-card grid left the front door. Remove slot and render. |
 | PASANGAN_COPY | `page_title` | `Bacaan Kompatibilitas` |
-| PASANGAN_COPY | `page_lead` | `Peta dinamika dua pola: tarikan, titik gesekan, dan ritme harian kalian.` |
-| PASANGAN_COPY | `includes_1` | `Inti diri kalian berdua dan dinamika hubungannya` |
-| PASANGAN_COPY | `includes_2` | `Kursi pasangan di bagan masing-masing saat saling bertemu` |
-| PASANGAN_COPY | `includes_3` | `Elemen yang saling memengaruhi di antara kalian` |
-| PASANGAN_COPY | `includes_4` | `Pola hubungan: Cermin, Serumpun, atau Kontras` |
-| PASANGAN_COPY | `includes_5` | `Kuadran tarikan dan ritme, plus peta dinamika: poin penguat, area gesekan, dan komitmen masing-masing` |
+| PASANGAN_COPY | `page_lead` | AMENDED 2026-10-07 (amendment l): the ruled value is in "## The compat page" below. Was `Peta dinamika dua pola: tarikan, titik gesekan, dan ritme harian kalian.` |
+| PASANGAN_COPY | ~~`includes_1`~~ | DROPPED 2026-10-07 by Prompt BH, amendment l (was `Inti diri kalian berdua dan dinamika hubungannya`): four label + text items replace the five. Remove slot and render. |
+| PASANGAN_COPY | ~~`includes_2`~~ | DROPPED 2026-10-07 by Prompt BH, amendment l (was `Kursi pasangan di bagan masing-masing saat saling bertemu`): four label + text items replace the five. Remove slot and render. |
+| PASANGAN_COPY | ~~`includes_3`~~ | DROPPED 2026-10-07 by Prompt BH, amendment l (was `Elemen yang saling memengaruhi di antara kalian`): four label + text items replace the five. Remove slot and render. |
+| PASANGAN_COPY | ~~`includes_4`~~ | DROPPED 2026-10-07 by Prompt BH, amendment l (was `Pola hubungan: Cermin, Serumpun, atau Kontras`): four label + text items replace the five. Remove slot and render. |
+| PASANGAN_COPY | ~~`includes_5`~~ | DROPPED 2026-10-07 by Prompt BH, amendment l (was `Kuadran tarikan dan ritme, plus peta dinamika: poin penguat, area gesekan, dan komitmen masing-masing`): four label + text items replace the five. Remove slot and render. |
 | PASANGAN_COPY | `price_note` | `Sekali bayar. Hasil tersimpan dalam satu tautan yang bisa dibuka kapan saja.` |
 | PASANGAN_COPY | `form_a_legend` | `Kamu` |
 | PASANGAN_COPY | `form_b_legend` | `Dia` |
