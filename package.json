@@ -32,6 +32,7 @@
     "test:compat-complementarity": "node --test tests/compat-complementarity.spec.mjs",
     "test:compat-stem-relation": "node --test tests/compat-stem-relation.spec.mjs",
     "test:compat-temperament": "node --test tests/compat-temperament.spec.mjs",
+    "test:compat-p4-option-e": "node --test tests/compat-p4-option-e.spec.mjs",
     "test:compat-pull-fit": "node --test tests/compat-pull-fit.spec.mjs",
     "test:pair-route": "node --conditions=react-server --test tests/pair-route.spec.mjs",
     "test:pair-checkout": "node --conditions=react-server --test tests/pair-checkout.spec.mjs",

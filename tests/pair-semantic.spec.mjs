@@ -186,7 +186,8 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // The fourth file is the frame-hit tranche of 2026-09-26 (Prompt AD): four NEW
   // cells, `name_id` + `label_meaning` each, no seeds.
   const md = ['compat-glossary-rulings.md', 'compat-glossary-rulings-2.md', 'compat-seeds-rulings.md',
-    'compat-frame-rulings.md', 'compat-frame-direction-rulings.md', 'compat-frame-harmony-rulings.md']
+    'compat-frame-rulings.md', 'compat-frame-direction-rulings.md', 'compat-frame-harmony-rulings.md',
+    'compat-p4-option-e-rulings-2026-10-04.md']
     .map((f) => readFileSync(path.join(ROOT, 'docs', 'content', f), 'utf8'))
     .join('\n');
   const ruled = {};
@@ -207,6 +208,9 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
     if (m) ruled[heading].push(m[1]);
   }
 
+  // 37 since Prompt BD1 (P4 option E, Reyner 2026-10-04): the four directed P4 cells, ruled in
+  // compat-p4-option-e-rulings-2026-10-04.md. p4_contrasting is retired from the engine but
+  // its cell and its ruling stay until its last reader goes (see that file).
   // 33 since BC amendment 1 item 5 (Reyner 2026-10-02): `p2_palace_frame_harmony` and
   // `p2_palace_frame_reader_harmony`, ruled in compat-frame-harmony-rulings.md.
   // 31 since 2026-10-02 (Prompt BB §1.2, E13): `p2_palace_frame_reader`, the A->B
@@ -214,8 +218,8 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // 30 since 2026-09-28 (Prompt AM): `p3_reader_gives`, ruled in the first and
   // third files, is the only new cell. The amendment's own record sits under a
   // `###` heading so neither this parser nor scripts/apply-rulings.mjs reads it.
-  assert.equal(Object.keys(ruled).length, 33,
-    'the rulings files have 33 cells (25 + the 4 frame cells + p3_reader_gives + p2_palace_frame_reader + the 2 harmony frames)');
+  assert.equal(Object.keys(ruled).length, 37,
+    'the rulings files have 37 cells (25 + the 4 frame cells + p3_reader_gives + p2_palace_frame_reader + the 2 harmony frames + the 4 P4 option E cells)');
 
   const cells = Object.keys(GLOSSARY.kompatibilitas).filter((k) => !k.startsWith('_'));
   assert.deepEqual(cells.slice().sort(), Object.keys(ruled).sort(),
@@ -248,10 +252,13 @@ test('THE SECTION IS KEYED BY VARIANT, and its shape is the rulings file\'s', ()
   // Plus BC amendment 1 item 5, 2026-10-02: `p2_palace_frame_harmony` and
   // `p2_palace_frame_reader_harmony` x (label_meaning + meaning_seed + daily_seed) = 6.
   //
-  // 46 + 1 + 42 + 8 + 4 + 3 + 6 = 110, and the arithmetic is written out because this number
+  // Plus Prompt BD1, 2026-10-07: 4 P4 option E cells x (name_id + name_en + label_meaning +
+  // meaning_seed + daily_seed) = 20.
+  //
+  // 46 + 1 + 42 + 8 + 4 + 3 + 6 + 20 = 130, and the arithmetic is written out because this number
   // is the one a later tranche has to update deliberately rather than by reading a
   // failure and typing whatever the actual was.
-  assert.equal(total, 110, '110 assignments across the seven tranches');
+  assert.equal(total, 130, '130 assignments across the eight tranches');
 
   // NO SEEDS. Nothing was ruled for gift/cost/actionable, and a placeholder for a
   // string nobody has ruled is an invitation to invent one.

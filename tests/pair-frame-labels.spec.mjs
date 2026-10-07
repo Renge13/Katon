@@ -130,12 +130,22 @@ test('EVERY GLOSSARY LABEL IS UNIQUE', () => {
   // said from the reader's side. Neither risk this test names can arise: a reading
   // carries at most one of the two (lib/semantic/pair.js `p3SupplyKey` returns one
   // key), so no legend or facts page holds both, and appendix anchors are
-  // `section.key` (lib/pdf/appendix.js `anchorId`), never the label. Only this pair
-  // is exempt; any other shared label still fails.
-  const SAME_TERM = new Set(['kompatibilitas.p3_supplies', 'kompatibilitas.p3_reader_gives']);
+  // `section.key` (lib/pdf/appendix.js `anchorId`), never the label.
+  //
+  // ── AND THE TWO P4 OPTION E NAMES, SAME REASON (Reyner 2026-10-04, Prompt BD1) ──
+  // He ruled "two names, each in two directions": Pola Menyalakan for a_generates_b and
+  // b_generates_a, Pola Membentuk for a_controls_b and b_controls_a. Each is one term
+  // said from either side, and a reading carries exactly one P4 cell (compatTemperament
+  // returns one pattern), so no legend or facts page holds both. Only these three pairs
+  // are exempt, each only with its own partner; any other shared label still fails.
+  const SAME_TERM = [
+    new Set(['kompatibilitas.p3_supplies', 'kompatibilitas.p3_reader_gives']),
+    new Set(['kompatibilitas.p4_a_generates_b', 'kompatibilitas.p4_b_generates_a']),
+    new Set(['kompatibilitas.p4_a_controls_b', 'kompatibilitas.p4_b_controls_a']),
+  ];
   const seen = new Map();
   for (const [label, at] of labels) {
-    const bothVariants = SAME_TERM.has(at) && SAME_TERM.has(seen.get(label));
+    const bothVariants = SAME_TERM.some((group) => group.has(at) && group.has(seen.get(label)));
     assert.ok(!seen.has(label) || bothVariants, `"${label}" is the label of both ${seen.get(label)} and ${at}`);
     seen.set(label, at);
   }

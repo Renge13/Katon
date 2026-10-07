@@ -59,9 +59,14 @@ const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 // RE-PINNED the PAIR on BC amendment 2b (2026-10-04, Reyner-ruled): twelve kompatibilitas
 // strings lose "dinamika"/"menopang", and every pair carries p0_opening, so the v1 pair key
 // moves; it was 7a567f51.... The mirror key does not move: no mirror cell changed.
+// RE-PINNED the PAIR on Prompt BD1 (P4 option E, Reyner 2026-10-04): this pair (正財 wealth
+// x 比肩 companion) was `contrasting` and is now `b_controls_a`, so its P4 cell and the v1
+// pair key move, as BD1 §3 says a changed P4 cell must; it was f31d749d.... ENGINE_VERSION
+// is not bumped. The mirror key does not move. Matching and related pairs keep their
+// keys: tests/compat-p4-option-e.spec.mjs pins one of each.
 const V1_KEYS = {
   mirror: 'd8d3ffaa08954236ecb222a1c3f8b5fa834c776e2fb657cdf69eddb5016dba29',
-  pair: 'f31d749d6c952c44894562cca48f624c2579d172f966f6c6be23d65c5d748240',
+  pair: '0d068f3ee382fbaa8edc9784c2b9cc195e153427ae2c3708c4908ccc08d9740c',
 };
 
 const ENV = ['VOICE', 'VERCEL_ENV', 'GEMINI_API_KEY'];

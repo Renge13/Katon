@@ -29,7 +29,8 @@
 //   - q1 + q2 equals the pull-high count, q1 + q3 equals the fit-high count
 //   - pull is high exactly when >= 1 pull clause fired
 //   - fit is high exactly when all three fit clauses held
-//   - the three pattern counts sum to M, and each equals its relation count
+//   - the six pattern counts sum to M; matching and related each equal their
+//     relation count, and the four directed patterns sum to different_group
 // And `--selftest` re-runs the pairs whose quadrants the committed specs assert
 // by hand, so the pipeline here is checked against known answers, not only
 // against itself. **The selftest has been shown failing on purpose** - see the
@@ -130,7 +131,11 @@ const PULL_CLAUSES = ['2.1.a', '2.1.b', '2.1.c', '2.1.d'];
 // constant in its own file, which is the check working rather than a nuisance.
 const FIT_CLAUSES = ['2.2.b', '2.2.c'];
 const QUADRANTS = ['q1', 'q2', 'q3', 'q4'];
-const PATTERNS = ['matching', 'related', 'contrasting'];
+// Six since option E (2026-10-07, Prompt BD1): `contrasting` split four ways by directed
+// step. BB §1.3's run on seed 20260907 is the reference these must reproduce exactly:
+// 526 / 445 / 977 / 1001 / 1054 / 997.
+const PATTERNS = ['matching', 'related', 'a_generates_b', 'a_controls_b', 'b_controls_a', 'b_generates_a'];
+const DIRECTED_PATTERNS = PATTERNS.slice(2);
 const RELATIONS = ['same_god', 'same_group', 'different_group'];
 
 // ── the clause building blocks, over the tranche-1 fact objects ──
@@ -256,6 +261,11 @@ function tally({ charts, pairs, seed }) {
     // 2026-09-28), split so "both give" and "only the partner gives" - both
     // `p3_supplies` - stay distinguishable.
     p3: { both: 0, partner_only: 0, reader_only: 0, none: 0 },
+    // P1 x P4 overlap (Prompt BD1 §4.1, report only): pairs that get a P1 controls cell
+    // AND a P4 controls cell, or a P1 produces cell AND a P4 generates cell - the same
+    // kind of dynamic named twice in one reading. `same_dir` counts those whose two
+    // directions agree (both a_* or both b_*).
+    overlap: { controls: 0, controls_same_dir: 0, generates: 0, generates_same_dir: 0 },
   };
 
   // Variant tallies. The RNG is untouched by this - charts and pair indices are
@@ -329,6 +339,20 @@ function tally({ charts, pairs, seed }) {
     counts.pattern[temperament.pattern] += 1;
     counts.relation[temperament.relation] += 1;
 
+    // P1's cell as lib/semantic/pair.js P1_BY_CYCLE picks it: a 天干五合 pair is
+    // p1_combination whatever its cycle, so only a non-combination cycle counts.
+    const p1Cycle = facts.stems.combination ? null : facts.stems.cycle;
+    const p4 = temperament.pattern;
+    const dirOf = (id) => (id.startsWith('a_') ? 'a' : id.startsWith('b_') ? 'b' : null);
+    if (p1Cycle && /controls/.test(p1Cycle) && /controls/.test(p4)) {
+      counts.overlap.controls += 1;
+      if (dirOf(p1Cycle) === dirOf(p4)) counts.overlap.controls_same_dir += 1;
+    }
+    if (p1Cycle && /produces/.test(p1Cycle) && /generates/.test(p4)) {
+      counts.overlap.generates += 1;
+      if (dirOf(p1Cycle) === dirOf(p4)) counts.overlap.generates_same_dir += 1;
+    }
+
     const supplies = [
       facts.comp.aSupplies && { from: 'a' },
       facts.comp.bSupplies && { from: 'b' },
@@ -381,12 +405,17 @@ function assertInvariants(counts, pairs) {
   const minHeld = Math.min(...Object.values(counts.fitHeld));
   if (counts.fitHigh > minHeld) fail(`fit high=${counts.fitHigh} exceeds scarcest held clause=${minHeld}`);
 
-  // 1.1: pattern and relation are 1:1.
-  const pairsOf = [['matching', 'same_god'], ['related', 'same_group'], ['contrasting', 'different_group']];
+  // 1.1: matching and related are 1:1 with their relations, and the four directed
+  // patterns together are exactly `different_group` (option E, 2026-10-07).
+  const pairsOf = [['matching', 'same_god'], ['related', 'same_group']];
   for (const [pattern, relation] of pairsOf) {
     if (counts.pattern[pattern] !== counts.relation[relation]) {
       fail(`${pattern}=${counts.pattern[pattern]} but ${relation}=${counts.relation[relation]}`);
     }
+  }
+  const directed = DIRECTED_PATTERNS.reduce((n, p) => n + counts.pattern[p], 0);
+  if (directed !== counts.relation.different_group) {
+    fail(`directed patterns sum to ${directed} but different_group=${counts.relation.different_group}`);
   }
 }
 
@@ -477,6 +506,15 @@ function report({ counts }, { charts, pairs, seed }) {
   lines.push('P4 PATTERN                        count      rate');
   for (const p of PATTERNS) {
     lines.push(`  ${p}${' '.repeat(32 - p.length)}${String(counts.pattern[p]).padStart(6)}  ${pct(counts.pattern[p], pairs).padStart(8)}`);
+  }
+  lines.push('');
+  lines.push('P1 x P4 OVERLAP (report only)     count      rate');
+  const OVERLAP_ROWS = [
+    ['controls', 'p1_controls + p4_*_controls_*'], ['controls_same_dir', '  of which same direction'],
+    ['generates', 'p1_produces + p4_*_generates_*'], ['generates_same_dir', '  of which same direction'],
+  ];
+  for (const [k, label] of OVERLAP_ROWS) {
+    lines.push(`  ${label}${' '.repeat(Math.max(1, 32 - label.length))}${String(counts.overlap[k]).padStart(6)}  ${pct(counts.overlap[k], pairs).padStart(8)}`);
   }
   lines.push('');
   lines.push('P3 SUPPLY (the cell a reader gets) count      rate');

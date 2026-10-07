@@ -1,6 +1,10 @@
 <!--
 STATUS: RULED 2026-09-07 by Reyner. AMENDED 2026-09-08 (V6) - section 2 only; see the
-AMENDED block above 2.1. P4 (section 1) is untouched. Written by Cowork from the worksheet of the same day
+AMENDED block above 2.1. P4 (section 1) was untouched by V6.
+AMENDED 2026-10-07 (Prompt BD1, docs/prompts/BD1-compat-p4-option-e.md) - section 1.1 only: Reyner's
+option E (ruled 2026-10-04, evidence docs/qa/2026-10-02-bb-engine-scoping.md §1.3). `contrasting` is
+split four ways by directed family step; `matching` and `related` are unchanged. The four cells and
+their provenance: docs/content/compat-p4-option-e-rulings-2026-10-04.md. Written by Cowork from the worksheet of the same day
 (Claude project: KATON-compat-p4-p5-worksheet-2026-09-07.md) and Reyner's revision of P4.
 THIS FILE IS THE RULE. `lib/compat/temperament.js` and `lib/compat/pullFit.js` implement it and cite
 its section numbers; a change here is a behaviour change and ships with a red test first.
@@ -10,23 +14,39 @@ Every input named exists on `main` at db9e74c or later: `lib/semantic/index.js:2
 
 # Compat P4 / P5 — the ruled rules
 
-**Framing, ruled:** P4's three patterns and P5's 2x2 are **Katon's interpretive framework**. They are
+**Framing, ruled:** P4's patterns (three until 2026-10-07, six since) and P5's 2x2 are **Katon's interpretive framework**. They are
 deterministic and built only from classical facts the engine already computes, but they are NOT
 claims that classical BaZi defines these categories. Content must never say they are.
 
-## 1. P4 — temperament: Matching / Related / Contrasting
+## 1. P4 — temperament: Matching / Related / four directed steps
 
 Inputs: each person's `main_profile` (dominant Aspek, one of ten).
 
-| 1.1 relation | Definition | Pattern (Katon) | Label |
-|---|---|---|---|
-| `same_god` | both `main_profile` identical | **matching** | `@@UNRULED: p4_matching@@` |
-| `same_group` | different god, same element relation to the Day Master (polarity differs): 比肩/劫財, 食神/傷官, 正財/偏財, 正官/七殺, 正印/偏印 | **related** | `@@UNRULED: p4_related@@` |
-| `different_group` | different element relation | **contrasting** | `@@UNRULED: p4_contrasting@@` |
+**Family position and step (amended 2026-10-07, option E).** Each person's family is taken from
+their OWN Day Master, exactly as `tenGodRelation` derives it, and placed on the generating cycle:
+companion 0, output 1, wealth 2, officer 3, resource 4. The step is `d = (kB - kA) mod 5`, where A is
+the reader ("kamu") and B the partner ("ia"), as in `lib/semantic/pair.js`'s P3 cells.
+
+| 1.1 relation | d | Definition | Pattern (Katon) | Cell |
+|---|---|---|---|---|
+| `same_god` | | both `main_profile` identical | **matching** | `p4_matching` |
+| `same_group` | 0 | different god, same element relation to the Day Master (polarity differs): 比肩/劫財, 食神/傷官, 正財/偏財, 正官/七殺, 正印/偏印 | **related** | `p4_related` |
+| `different_group` | 1 | A's family generates B's | **a_generates_b** | `p4_a_generates_b` |
+| `different_group` | 2 | A's family controls B's | **a_controls_b** | `p4_a_controls_b` |
+| `different_group` | 3 | B's family controls A's | **b_controls_a** | `p4_b_controls_a` |
+| `different_group` | 4 | B's family generates A's | **b_generates_a** | `p4_b_generates_a` |
+
+`relation` keeps its three values; only `pattern` splits. **The pattern is no longer symmetric in A
+and B, on purpose:** swapping the two charts maps `a_generates_b <-> b_generates_a` and
+`a_controls_b <-> b_controls_a`, and leaves `matching`, `related` and `relation` alone.
+`contrasting` (`p4_contrasting`, "Pola Kontras") is RETIRED: the engine no longer emits it. Rates
+over random pairs, seed 20260907: matching 10.5%, related 8.9%, the four steps 19.5% to 21.1%
+(BB §1.3).
 
 1.2 The reader gets BOTH: each person's Aspek named (glossary `name_id`, English pair once, rule
-23) AND the pattern badge. The badge is not a fit verdict; "matching" is not "good" and
-"contrasting" is not "bad" (rule 25).
+23) AND the pattern badge. The badge is not a fit verdict; "matching" is not "good" and a
+"controls" step is not "bad" (rule 25). The family cycle is Katon's framework derivation, never
+presented as a classical 十神 生克 claim (rule 4).
 1.3 The five groups are not a new table: a Ten God is element-relation x polarity, so `same_group`
 is "same element relation, polarity ignored", derived from `lib/bazi/tenGods.js` (read-only).
 
@@ -136,5 +156,6 @@ candidate, sourcing required** (two authorities, same bar as 天干五合). Joey
 Destiny With BaZi*: checked 2026-09-07, does not state it. Not implemented.
 
 ## 4. Owed
-Seven Indonesian strings (three P4 badges `p4_*`, four P5 labels `p5_*`) — Reyner. Spouse-star sources (Cowork). Unreachable quadrants from the
+Seven Indonesian strings (three P4 badges `p4_*`, four P5 labels `p5_*`) — Reyner. *(2026-10-07: the
+P4 half is discharged - all six P4 cells are ruled and in the glossary, see §1.1.)* Spouse-star sources (Cowork). Unreachable quadrants from the
 fixture, if any, recorded as fixture gaps.
