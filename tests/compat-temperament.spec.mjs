@@ -156,43 +156,61 @@ test('same_group -> related (charts 1 x 6, 正財 vs 偏財)', () => {
   });
 });
 
-test('different_group -> contrasting (charts 1 x 3, wealth vs resource)', () => {
-  // Rule doc 1.1: "`different_group` | different element relation | **contrasting**".
-  // Both are 丙 Fire Day Masters, so this is the case where the CHARTS are closest
-  // and the groups still differ: 正財 (財, wealth) against 正印 (印, resource).
+test('different_group -> a directed pattern (charts 1 x 3, wealth vs resource)', () => {
+  // Rule doc 1.1 as amended 2026-10-07 (option E): `different_group` splits by the
+  // directed step d = (kB - kA) mod 5. Both are 丙 Fire Day Masters, so this is the
+  // case where the CHARTS are closest and the groups still differ: 正財 (財, wealth,
+  // position 2) against 正印 (印, resource, position 4), d = 2. One pair per directed
+  // pattern lives in tests/compat-p4-option-e.spec.mjs.
   const out = compatTemperament(fixture(1), fixture(3));
   assert.deepEqual(out, {
     kind: 'compat_temperament',
     a: { god: '正財', element_relation: 'wealth' },
     b: { god: '正印', element_relation: 'resource' },
     relation: 'different_group',
-    pattern: 'contrasting',
+    pattern: 'a_controls_b',
   });
 
-  // A second, further apart: chart 5 傷官 (食傷, output) vs chart 10 比肩 (比劫, companion).
+  // A second, further apart: chart 5 傷官 (食傷, output, 1) vs chart 10 比肩 (比劫,
+  // companion, 0), d = (0 - 1) mod 5 = 4.
   const far = compatTemperament(fixture(5), fixture(10));
   assert.equal(far.relation, 'different_group');
-  assert.equal(far.pattern, 'contrasting');
+  assert.equal(far.pattern, 'b_generates_a');
   assert.deepEqual(far.a, { god: '傷官', element_relation: 'output' });
   assert.deepEqual(far.b, { god: '比肩', element_relation: 'companion' });
 });
 
-test('relation and pattern are 1:1, and swapping the two people never changes them', () => {
-  // The three patterns are Katon's framework (rule doc's framing paragraph) and
-  // each names exactly one relation. A pattern that could arrive from two
-  // relations would make the badge unexplainable from the facts, which is what
-  // ruling P4 requires it to be derived from.
-  const PATTERN = { same_god: 'matching', same_group: 'related', different_group: 'contrasting' };
+test('pattern follows relation; swapping the people keeps relation and mirrors direction', () => {
+  // Each pattern names exactly one relation, so the badge stays explainable from the
+  // facts. Since option E (2026-10-07) the four directed patterns all name
+  // `different_group`, and the ORDER of the two people matters on purpose: A is the
+  // reader. The swap property over a wider sample is in tests/compat-p4-option-e.spec.mjs.
+  const RELATION_OF = {
+    matching: 'same_god',
+    related: 'same_group',
+    a_generates_b: 'different_group',
+    a_controls_b: 'different_group',
+    b_controls_a: 'different_group',
+    b_generates_a: 'different_group',
+  };
+  const MIRROR = {
+    matching: 'matching',
+    related: 'related',
+    a_generates_b: 'b_generates_a',
+    b_generates_a: 'a_generates_b',
+    a_controls_b: 'b_controls_a',
+    b_controls_a: 'a_controls_b',
+  };
   const ids = [1, 3, 4, 5, 6, 7, 9, 10];
 
   for (const x of ids) {
     for (const y of ids) {
       const out = compatTemperament(fixture(x), fixture(y));
-      assert.equal(out.pattern, PATTERN[out.relation], `${x}x${y} pattern follows relation`);
+      assert.equal(RELATION_OF[out.pattern], out.relation, `${x}x${y} pattern follows relation`);
 
-      // Symmetry: the classification is a property of the pair, not of the order.
       const swapped = compatTemperament(fixture(y), fixture(x));
       assert.equal(swapped.relation, out.relation, `${x}x${y} relation is symmetric`);
+      assert.equal(swapped.pattern, MIRROR[out.pattern], `${x}x${y} direction mirrors`);
       assert.deepEqual(swapped.a, out.b);
       assert.deepEqual(swapped.b, out.a);
     }
@@ -223,7 +241,7 @@ test('no family table, no glossary, no closed file written, no Indonesian string
   assert.ok(!code.includes('@@UNRULED'), 'no placeholder in lib/compat/');
   const allowed = new Set([
     'compat_temperament', 'same_god', 'same_group', 'different_group',
-    'matching', 'related', 'contrasting',
+    'matching', 'related', 'a_generates_b', 'a_controls_b', 'b_controls_a', 'b_generates_a',
     'companion', 'output', 'wealth', 'officer', 'resource',
   ]);
   const godHanzi = /^[一-鿿]+$/u;

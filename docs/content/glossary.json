@@ -869,8 +869,40 @@
    "meaning_seed": "Kalian berada di gelombang yang sama soal hasil akhir, tetapi ritme dan cara mencapainya sering bertolak belakang.",
    "daily_seed": "Cepat sepakat soal target akhir, tapi menghabiskan waktu berdebat soal urutan langkah dan cara mencapainya."
   },
+  "p4_a_generates_b": {
+   "_note": "temperament.pattern === a_generates_b: different_group, d = 1 (A's family generates B's). A is the reader (kamu), B the partner (ia). Ruled by Reyner 2026-10-04 (docs/content/compat-p4-option-e-rulings-2026-10-04.md). Katon's framework, never presented as classical, and it ranks nothing (rule 25).",
+   "name_id": "Pola Menyalakan",
+   "name_en": "Kindling Pattern",
+   "label_meaning": "Caramu melangkah menyalakan semangatnya. Hal yang membuatmu bergerak secara alami menjadi alasan untuknya ikut melangkah.",
+   "meaning_seed": "Dorongan alamimu adalah pemantik untuk caranya menjalani hidup. Ia tumbuh lebih cepat di dekatmu, namun kamu bisa merasa lelah jika harus selalu menjadi pihak yang memulai.",
+   "daily_seed": "Ide atau antusiasme yang kamu lontarkan di pagi hari sering kali sudah ia jalankan di sore hari, dengan caranya sendiri."
+  },
+  "p4_a_controls_b": {
+   "_note": "temperament.pattern === a_controls_b: different_group, d = 2 (A's family controls B's). A is the reader (kamu), B the partner (ia). Ruled by Reyner 2026-10-04 (docs/content/compat-p4-option-e-rulings-2026-10-04.md). Katon's framework, never presented as classical, and it ranks nothing (rule 25).",
+   "name_id": "Pola Membentuk",
+   "name_en": "Shaping Pattern",
+   "label_meaning": "Kehadiranmu memberi kejelasan pada pikirannya. Kamu secara alami menjadi pihak yang menimbang pilihan dan memperjelas tujuan.",
+   "meaning_seed": "Caramu memandang hidup memberi kepastian pada jalannya. Di hari baik, ia merasa lebih mantap dan terarah karenamu. Di hari berat, kejelasan yang sama bisa terasa menuntut untuknya.",
+   "daily_seed": "Saat ia datang dengan banyak pemikiran atau pilihan yang berserakan, kamu yang biasanya memilah dan membantunya mengambil satu keputusan pasti."
+  },
+  "p4_b_controls_a": {
+   "_note": "temperament.pattern === b_controls_a: different_group, d = 3 (B's family controls A's). A is the reader (kamu), B the partner (ia). Ruled by Reyner 2026-10-04 (docs/content/compat-p4-option-e-rulings-2026-10-04.md). Katon's framework, never presented as classical, and it ranks nothing (rule 25).",
+   "name_id": "Pola Membentuk",
+   "name_en": "Shaping Pattern",
+   "label_meaning": "Kehadirannya memberi kejelasan pada pikiranmu. Ia secara alami menjadi pihak yang menimbang pilihan dan memperjelas tujuan.",
+   "meaning_seed": "Caranya memandang hidup memberi kepastian pada jalanmu. Di hari baik, kamu merasa lebih mantap dan terarah karenanya. Di hari berat, kejelasan yang sama bisa terasa menuntut untukmu.",
+   "daily_seed": "Saat kamu datang dengan banyak pemikiran atau pilihan yang berserakan, ia yang biasanya memilah dan membantumu mengambil satu keputusan pasti."
+  },
+  "p4_b_generates_a": {
+   "_note": "temperament.pattern === b_generates_a: different_group, d = 4 (B's family generates A's). A is the reader (kamu), B the partner (ia). Ruled by Reyner 2026-10-04 (docs/content/compat-p4-option-e-rulings-2026-10-04.md). Katon's framework, never presented as classical, and it ranks nothing (rule 25).",
+   "name_id": "Pola Menyalakan",
+   "name_en": "Kindling Pattern",
+   "label_meaning": "Caranya melangkah menyalakan semangatmu. Hal yang membuatnya bergerak secara alami menjadi alasan untukmu ikut melangkah.",
+   "meaning_seed": "Dorongan alaminya adalah pemantik untuk caramu menjalani hidup. Kamu tumbuh lebih cepat di dekatnya, namun ia bisa merasa lelah jika harus selalu menjadi pihak yang memulai.",
+   "daily_seed": "Ide atau antusiasme yang ia lontarkan di pagi hari sering kali sudah kamu jalankan di sore hari, dengan caramu sendiri."
+  },
   "p4_contrasting": {
-   "_note": "pattern === contrasting.",
+   "_note": "RETIRED 2026-10-07 (Prompt BD1, P4 option E): the engine no longer emits contrasting. Kept only because tests/pair-report-render.spec.mjs reads it for a captured 2026-09-08 payload and tests/pair-semantic.spec.mjs parses it from compat-glossary-rulings.md; delete with those.",
    "name_id": "Pola Kontras",
    "name_en": "Contrasting Pattern",
    "label_meaning": "Karakter dominan kalian berasal dari kelompok berbeda. Cara pandang yang berbeda bisa memperluas perspektif jika dikomunikasikan terbuka.",
