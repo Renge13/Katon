@@ -114,7 +114,11 @@ const PASANGAN_SLOTS = [
   // Prompt BC §1 (2026-10-02): nickname and status; ruled by Reyner 2026-10-02 (BC amendment 1 item 7).
   'nickname_label', 'nickname_help', 'status_label', 'nickname_invalid', 'status_invalid',
   'page_title', 'page_lead',
-  'includes_1', 'includes_2', 'includes_3', 'includes_4', 'includes_5',
+  // Amendment l (Reyner, 2026-10-07, Prompt BH): four label + text items replace the five
+  // `includes_1..5`. The page renders each label bold; tests/compat-sales-copy.spec.mjs
+  // asserts that on the rendered page.
+  'includes_1_label', 'includes_1_text', 'includes_2_label', 'includes_2_text',
+  'includes_3_label', 'includes_3_text', 'includes_4_label', 'includes_4_text',
   'price_note',
   'form_a_legend', 'form_b_legend', 'form_email_label', 'form_email_help',
   'form_submit', 'season_gate_b_intro',
@@ -206,7 +210,9 @@ test('EVERY SLOT IS RULED, and the production build no longer refuses', () => {
   // moved to CHROME_COPY) + 5 (Y-3: four document slots and the download button)
   // = 31. PLUS Prompt BC §1's five (nickname_label, nickname_help, status_label,
   // nickname_invalid, status_invalid; ruled in BC amendment 1 item 7) = 36.
-  assert.equal(Object.keys(PASANGAN_COPY).length, 36);
+  // Amendment l (Prompt BH, 2026-10-07): MINUS the five `includes_1..5`, PLUS four
+  // label + text pairs (eight slots) = 36 - 5 + 8 = 39.
+  assert.equal(Object.keys(PASANGAN_COPY).length, 39);
 });
 
 test('NO PRICE-SHAPED NUMBER IS IN THE BANK', () => {

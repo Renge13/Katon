@@ -134,6 +134,13 @@ function worksheet() {
     const m = BANK_ROW.exec(line);
     if (m) raw.push({ bank: m[1], slot: m[2], value: m[3] });
   }
+  // ── AMENDMENT l's TABLE, READ FROM 2026-10-07 (Prompt BH) ───
+  // Same precedent: landed unparsed in its rulings commit, read from the APPLYING
+  // commit, where the nine strings reach the bank.
+  for (const line of section('The compat page').split(/\r?\n/u)) {
+    const m = BANK_ROW.exec(line);
+    if (m) raw.push({ bank: m[1], slot: m[2], value: m[3] });
+  }
 
   const rows = [];
   const seen = new Map();
@@ -166,15 +173,18 @@ function status() {
   return m[1];
 }
 
-test('THE WORKSHEET IS 32 RULED SLOTS AND FIVE DROPPED ONES', () => {
+test('THE WORKSHEET IS 37 RULED SLOTS AND TEN DROPPED ONES', () => {
   const rows = worksheet();
   // 31 + amendment i's 5 = 36, and the arithmetic is the tripwire on the parser:
   // if the compat-PDF section ever stops being read, this is what says so.
   // 36 -> 32 on 2026-09-24: Prompt AA deleted the front door's two-card grid, and
   // its four SITE_COPY rows are recorded DROPPED rather than removed. 32 -> 34 the
-  // same day: amendment k's two front-door strings.
-  assert.equal(rows.length, 34, 'the four ruled tables carry 34 slots between them');
-  assert.equal(new Set(rows.map((r) => `${r.bank}.${r.slot}`)).size, 34, 'and no slot twice');
+  // same day: amendment k's two front-door strings. 34 -> 37 on 2026-10-07
+  // (amendment l, Prompt BH): the preamble table loses `page_lead` (its row now
+  // points below) and `includes_1..5` (recorded DROPPED), and "## The compat page"
+  // adds `page_lead` plus four label + text pairs. 34 - 6 + 9 = 37.
+  assert.equal(rows.length, 37, 'the five ruled tables carry 37 slots between them');
+  assert.equal(new Set(rows.map((r) => `${r.bank}.${r.slot}`)).size, 37, 'and no slot twice');
 
   const byBank = {};
   for (const r of rows) byBank[r.bank] = (byBank[r.bank] || 0) + 1;
@@ -182,15 +192,16 @@ test('THE WORKSHEET IS 32 RULED SLOTS AND FIVE DROPPED ONES', () => {
   // and the total does not. A slot that changes banks must show up here, because
   // "moved, not aliased" is the whole point of the amendment.
   assert.deepEqual(byBank,
-    { PASANGAN_COPY: 29, 'SITE_COPY.privasi': 2, CHROME_COPY: 1, SITE_COPY: 2 });
+    { PASANGAN_COPY: 32, 'SITE_COPY.privasi': 2, CHROME_COPY: 1, SITE_COPY: 2 });
 
   // THE DROP IS AN ASSERTION, NOT A GAP. `paid_title` is recorded as deleted, so
   // the bank must not still carry it - otherwise the row reads as history while
   // the slot is live, which is the exact pair of states a file like this exists
   // to keep from drifting apart.
   assert.deepEqual(dropped(),
-    ['home_mirror_label', 'home_mirror_sub', 'home_compat_label', 'home_compat_sub', 'paid_title'],
-    'five slots are recorded as dropped, in file order');
+    ['home_mirror_label', 'home_mirror_sub', 'home_compat_label', 'home_compat_sub',
+      'includes_1', 'includes_2', 'includes_3', 'includes_4', 'includes_5', 'paid_title'],
+    'ten slots are recorded as dropped, in file order (includes_1..5 by amendment l)');
   for (const slot of dropped()) {
     assert.equal(slot in PASANGAN_COPY, false, `${slot} is recorded DROPPED but still in PASANGAN_COPY`);
     assert.equal(slot in SITE_COPY, false, `${slot} is recorded DROPPED but still in SITE_COPY`);
