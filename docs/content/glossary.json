@@ -723,8 +723,8 @@
    "_note": "cycle is a_produces_b or b_produces_a. Direction-neutral: the renderer names who.",
    "name_id": "Inti Menghidupi",
    "label_meaning": "Unsur salah satu dari kalian menghidupi unsur yang lain. Satu orang mengayomi, yang lain merasa diayomi, dan arah ini jarang berbalik.",
-   "meaning_seed": "Alur energi berjalan searah dan stabil dari satu pihak ke pihak lain. Yang memberi menjadi sumber dorongan, yang menerima mendapat rasa aman; peran ini konsisten dan jarang berbalik.",
-   "daily_seed": "Keputusan dan inisiatif baru hampir selalu dipicu oleh orang yang sama. Yang lain menyambut, mengeksekusi, dan merasa aman bergerak dalam alur tersebut."
+   "meaning_seed": "Kepedulian dan dukungan mengalir secara stabil dari satu arah. Salah satu dari kalian secara alami menjadi tempat bersandar, sementara yang lain merasa aman dan terlindungi. Peran ini konsisten dan jarang bertukar tempat.",
+   "daily_seed": "Ketika melewati hari yang berat, sosok yang sama selalu menjadi tempat berpulang. Kehadirannya memberi ketenangan, membuat yang dijaga merasa benar-benar diperhatikan tanpa harus meminta."
   },
   "p1_controls": {
    "_note": "cycle is a_controls_b or b_controls_a. Direction-neutral.",
