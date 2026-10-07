@@ -75,6 +75,8 @@ import { compatStemRelation } from '../lib/compat/stemRelation.js';
 import { compatTemperament } from '../lib/compat/temperament.js';
 import { compatPullFit } from '../lib/compat/pullFit.js';
 import { p3SupplyKey } from '../lib/semantic/pair.js';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const DEFAULTS = { charts: 2000, pairs: 5000, seed: 20260907 };
 
@@ -240,14 +242,36 @@ function evaluate(a, b) {
   };
 }
 
-function tally({ charts, pairs, seed }) {
+/**
+ * THE SAMPLE, exported so a spec can run over exactly the pairs this harness counts
+ * (Prompt BI PR 2) instead of keeping a second copy of the sampler. The draw order is
+ * unchanged: every chart first, then each pair's two indices in turn, and nothing else
+ * consumes the PRNG in between, so precomputing the indices yields the same sequence
+ * `tally` used to draw inline. The harness reproducing BB §1.3 exactly is the proof.
+ *
+ * @returns {{ built: Array<{birth: Object, chart: Object}>, pairIdx: Array<[number, number]> }}
+ */
+export function drawSample({ charts, pairs, seed }) {
   const rand = mulberry32(seed);
-
   const built = [];
   for (let i = 0; i < charts; i += 1) {
     const birth = randomBirth(rand);
     built.push({ birth, chart: calculateBaziChart(birth) });
   }
+  const pairIdx = [];
+  for (let n = 0; n < pairs; n += 1) {
+    const i = Math.floor(rand() * built.length);
+    let j = Math.floor(rand() * built.length);
+    // Ordered pairs of two DIFFERENT charts. A chart against itself is not a
+    // couple and would inflate same_god and 自刑 for free.
+    while (j === i) j = Math.floor(rand() * built.length);
+    pairIdx.push([i, j]);
+  }
+  return { built, pairIdx };
+}
+
+function tally({ charts, pairs, seed }) {
+  const { built, pairIdx } = drawSample({ charts, pairs, seed });
 
   const counts = {
     quadrant: Object.fromEntries(QUADRANTS.map((q) => [q, 0])),
@@ -288,11 +312,7 @@ function tally({ charts, pairs, seed }) {
   const soleClause = { '2.1.a alone': 0, '2.1.b alone': 0, '2.1.c alone': 0, '2.1.d alone': 0 };
 
   for (let n = 0; n < pairs; n += 1) {
-    let i = Math.floor(rand() * built.length);
-    let j = Math.floor(rand() * built.length);
-    // Ordered pairs of two DIFFERENT charts. A chart against itself is not a
-    // couple and would inflate same_god and 自刑 for free.
-    while (j === i) j = Math.floor(rand() * built.length);
+    const [i, j] = pairIdx[n];
 
     const { facts, pullFit, temperament } = evaluate(built[i].chart, built[j].chart);
 
@@ -589,7 +609,11 @@ function selftest() {
   process.exitCode = failures === 0 ? 0 : 1;
 }
 
-if (process.argv.includes('--selftest')) {
+// Run only as a script: tests import `drawSample` and must not trigger a tally.
+const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (!isMain) {
+  // imported: nothing runs
+} else if (process.argv.includes('--selftest')) {
   selftest();
 } else {
   const opts = {

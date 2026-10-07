@@ -205,12 +205,16 @@ test('every pattern the engine emits has a named cell, and contrasting is never 
 // before this change, with exactly this construction. A legitimate later change to
 // these pairs' cells, to the pair semantic shape or to ENGINE_VERSION moves them too:
 // re-pin with that reason in the commit, never to make this pass.
+// RE-PINNED related 1x6 on Prompt BI PR 2 (2026-10-07): the v2 pair semantic shape
+// changed - a directed P1 or P4 now carries `direction: { from, to }` - and 1x6's P1 is
+// p1_controls (Dimas gives), so its key moves; it was b18e3c61.... Matching 7x9's P1 is
+// p1_same (no direction), so its key does NOT move, which is still asserted.
 const INPUTS = { voice: 'v2', status: 'Pacaran', nicknames: { a: 'Rani', b: 'Dimas' } };
 const keyOf = (x, y) => cacheKey(buildPairSemantic(fixture(x), fixture(y), INPUTS));
 
 test('matching and related pairs keep their pre-change cache key', () => {
   assert.equal(keyOf(7, 9), 'ef3b5a948bdc546605c669c1f97c614d15880f266b1d590dc34322547a65d11c', 'matching 7x9');
-  assert.equal(keyOf(1, 6), 'b18e3c61f7b215849dd1c5532a07069ee71c4491d1b8a5e142d7298e306d4c4d', 'related 1x6');
+  assert.equal(keyOf(1, 6), '1732a102c960a7c67dc7ff8799c9003071e121f87e5eb79b236385168889ac70', 'related 1x6');
 });
 
 test('a formerly contrasting pair misses the old cache (the instrument can see a change)', () => {
