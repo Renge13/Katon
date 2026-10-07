@@ -276,7 +276,7 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
   if (salesClosed) {
     return (
       <div className="k-fade" style={wrap}>
-        <div style={{ paddingTop: 60 }}>
+        <div className="k-hero-top">
           <Reveal>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 32, lineHeight: 1.14, letterSpacing: '-.01em', color: 'var(--tinta)', margin: 0 }}>
               {PASANGAN_COPY.page_title}
@@ -328,9 +328,12 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
     );
   }
 
+  // `.k-hero-top` (app/globals.css) is the header-to-headline gap, ~48px desktop and
+  // ~40px phones, shared with the home hero (Prompt BK, Reyner 2026-10-07). It was
+  // `paddingTop: 60` here and in the sales-closed branch above.
   return (
     <div style={wrap}>
-      <div style={{ paddingTop: 60 }}>
+      <div className="k-hero-top">
         <Reveal>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 32, lineHeight: 1.14, letterSpacing: '-.01em', color: 'var(--tinta)', margin: 0 }}>
             {PASANGAN_COPY.page_title}
