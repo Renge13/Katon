@@ -154,6 +154,14 @@ UPDATED: 2026-10-06 (Prompt BG PR 1, #202) — THE FUNNEL BASELINE STARTS AT THI
          secara anonim, tanpa cookie dan tanpa mencatat tautan bacaanmu." (Vercel Web Analytics,
          page views only, reading tokens removed from every URL); and three test rows join KNOWN
          TEST ROWS below and the query's exclusion list.
+UPDATED: 2026-10-07 (Prompt BI PR 1) — GATE b's COMPAT HALF IS DONE, SO GATE b IS DONE. Compat went
+         on sale 2026-10-07 and Reyner bought one reading, Rp 39.000 QRIS, pair
+         `FpzdJClI11-giquyEpZBA`. Vercel logged (read by Cowork in the dashboard)
+           OCT 07 14:01:41.54 POST 200 www.katon.app /api/doku/notify [doku] pair FpzdJClI11-giquyEpZBA: paid=true reason=ok
+         The DOKU return landed on https://www.katon.app/kompatibilitas/FpzdJClI11-giquyEpZBA?bayar=selesai
+         (www, correct), and the paid report and its PDF were served. Row b of docs/ops/doku-walk.md
+         carries it. The pair joins KNOWN TEST ROWS (Reyner's own purchase, not demand); it does not
+         join docs/ops/funnel.sql's exclusion list, because that query is mirror-only (its lines 25-26).
 PURPOSE: single source of "what's decided / what's next". The SUPERSEDED section wins any conflict.
          For "what SHIPS", read LIVE STATE at the top — it is the only section that answers that, and
          it is the one a product argument needs first.
@@ -339,6 +347,7 @@ in-memory harnesses (`scripts/qa-voice-v2-renders.mjs`, `probe:reconcile`) wrote
 | `UZ-HaCnzzi9mRX60Ekqyb`, `pqZObW6PAKOcuwYtvHzcg`, `qv9aqhEwOxvPreWwme6aH`, `SFSht0M3lhY950g0IZdEN`, `4fw6vRFT9iWNjQjVtMlOX`, `1jiZkq5gK5QhBpiH8isP-` | pair | - | **The 6 pairs with a `mock_` invoice**: test rows by definition, a `mock_` invoice was never money (Reyner, 2026-09-30, same ruling) |
 | `Zn-4VU2Ni2lLdcTO25aS2` | reading | **yes** | **Reyner's own Rp 19.000 production purchase**, 2026-10-06 (invoice `.muw4uwtc`, QRIS, settled by notification; the gate b verification in the header, Prompt BE §0). Real money, a self-test (Reyner, 2026-10-06) |
 | `zDK_PNEbwMDFHYhT_MI2k` | reading | no | Reyner's abandoned checkout, unpaid (Reyner, 2026-10-06) |
+| `FpzdJClI11-giquyEpZBA` | pair | **yes** | **Reyner's own Rp 39.000 production purchase**, 2026-10-07, the day compat went on sale (QRIS, settled by notification 14:01:41; gate b's compat half, Prompt BI PR 1). A = Rey, B = Eta. Real money, a self-test, not demand |
 | `WqocaFz1FTMYqLPRBrtnl` | reading | no | Cowork's preview walk, no birth hour (Prompt BF amendment 2 §1; Reyner, 2026-10-06) |
 
 **How a paid test row differs from a real one today: not by any column.** `reading` and `pair` carry
