@@ -35,11 +35,12 @@ export default function TentangPage() {
         .
       </P>
 
-      {/* Contact block. Serves the "address, and contact number" line in Xendit's
-          second rejection (2026-08-05), which their first set of criteria did not
-          ask for. Deliberately NOT in the footer - see lib/site/entity.js. The id
-          is the anchor the footer's Kontak link points at. Plain <dl>, so all three
-          values are in the HTML document without JS, same as every other page here. */}
+      {/* Contact block. Added for the "address, and contact number" line in Xendit's
+          second rejection (2026-08-05); the WhatsApp number it carried was removed by
+          Reyner 2026-10-07, so it is email and address. Deliberately NOT in the footer -
+          see lib/site/entity.js. The id is the anchor the footer's Kontak link points
+          at. Plain <dl>, so both values are in the HTML document without JS, same as
+          every other page here. */}
       <H2 id="kontak">{q.kontakHeading}</H2>
       <P>{q.kontakLead}</P>
       <dl
@@ -51,16 +52,6 @@ export default function TentangPage() {
           margin: 0,
         }}
       >
-        <dt style={{ fontWeight: 600, color: 'var(--tinta)' }}>{q.kontakWhatsappLabel}</dt>
-        <dd style={{ margin: '0 0 12px' }}>
-          <a
-            href={`https://wa.me/${ENTITY.whatsappE164}`}
-            style={{ color: 'var(--clay)' }}
-          >
-            {ENTITY.whatsapp}
-          </a>
-        </dd>
-
         <dt style={{ fontWeight: 600, color: 'var(--tinta)' }}>{q.kontakEmailLabel}</dt>
         <dd style={{ margin: '0 0 12px' }}>
           <a href={`mailto:${ENTITY.email}`} style={{ color: 'var(--clay)' }}>
