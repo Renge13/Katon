@@ -64,9 +64,13 @@ const B = calculateBaziChart({ birthDate: '1990-03-04', birthTime: '14:00' });
 // pair key move, as BD1 §3 says a changed P4 cell must; it was f31d749d.... ENGINE_VERSION
 // is not bumped. The mirror key does not move. Matching and related pairs keep their
 // keys: tests/compat-p4-option-e.spec.mjs pins one of each.
+// RE-PINNED the PAIR on Prompt BJ §2 (Reyner 2026-10-07): this pair's P1 is p1_produces, and
+// Inti Menghidupi's meaning_seed and daily_seed were rewritten (care, not initiative), which
+// the pair semantic JSON carries, so the v1 pair key moves; it was 0d068f3e.... The mirror key
+// does not move: no mirror cell changed.
 const V1_KEYS = {
   mirror: 'd8d3ffaa08954236ecb222a1c3f8b5fa834c776e2fb657cdf69eddb5016dba29',
-  pair: '0d068f3ee382fbaa8edc9784c2b9cc195e153427ae2c3708c4908ccc08d9740c',
+  pair: '11cbef9a15261204bf4c94fa94c5699ed8f1ce964209a2fc85d5f103570cdbed',
 };
 
 const ENV = ['VOICE', 'VERCEL_ENV', 'GEMINI_API_KEY'];
