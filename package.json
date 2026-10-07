@@ -31,6 +31,7 @@
     "test:compat-branch-relations": "node --test tests/compat-branch-relations.spec.mjs",
     "test:compat-complementarity": "node --test tests/compat-complementarity.spec.mjs",
     "test:compat-stem-relation": "node --test tests/compat-stem-relation.spec.mjs",
+    "test:compat-direction": "node --test tests/compat-direction.spec.mjs",
     "test:compat-temperament": "node --test tests/compat-temperament.spec.mjs",
     "test:compat-p4-option-e": "node --test tests/compat-p4-option-e.spec.mjs",
     "test:compat-pull-fit": "node --test tests/compat-pull-fit.spec.mjs",
