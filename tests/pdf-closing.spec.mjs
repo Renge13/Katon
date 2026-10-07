@@ -19,7 +19,9 @@ import { buildSemanticJson } from '../lib/semantic/index.js';
 import { buildPairSemantic } from '../lib/semantic/pair.js';
 import { assembleFallback } from '../lib/render/fallback.js';
 import { buildCompleteEditionPdf, buildPairPdf, APPENDIX_HEADING } from '../lib/pdf/build.js';
-import { pageTexts, pdfObjects } from '../lib/pdf/inspect.js';
+import { pageTexts, pdfObjects, textBoxes } from '../lib/pdf/inspect.js';
+import { PDF_STYLES, PAGE_MARGIN_X } from '../lib/pdf/document.js';
+import { rasterPages, inkBox } from '../lib/pdf/raster.js';
 import { RENDER_COPY } from '../lib/render/copy.js';
 
 const F1 = '© 2026 PT Katon Digital Nusantara. All rights reserved. | katon.app';
@@ -124,5 +126,61 @@ test('§5c THE LAST PAGE IS THE CLOSING PAGE, AFTER THE GLOSSARY, WITH THE FOUR 
     const glossaryAt = d.texts.findIndex((t) => flat(t).includes(APPENDIX_HEADING));
     assert.ok(glossaryAt > -1 && glossaryAt < d.texts.length - 1, `${d.name}: the glossary comes before the closing page`);
     assert.equal(last.includes(APPENDIX_HEADING), false, `${d.name}: the closing page is its own page`);
+  }
+});
+
+// ── PROMPT BI PR 1 (Reyner, 2026-10-07): THE CLOSING PAGE ────────────
+// The four sections take the running footer's size and colour, read from the footer's
+// own style object; the labels keep their bold. The logomark (wordmark(), unchanged)
+// sits vertically centred on the page with its left edge on the text column. Measured
+// off the DRAWN document: sizes and fills from the content stream, the mark from ink.
+
+const PAGE_H_PT = 841.89;
+const FOOT = PDF_STYLES.runningFoot;
+
+test('BI: THE CLOSING SECTIONS ARE SET IN THE RUNNING FOOTER\'S SIZE AND COLOUR', async () => {
+  for (const d of await docs()) {
+    const runs = textBoxes(d.buffer).at(-1);
+    // The footer is the run(s) pinned `bottom: 34` from the page foot; KATON is the mark.
+    const footY = PAGE_H_PT - FOOT.bottom - 2 * FOOT.fontSize;
+    const footer = runs.filter((r) => r.y >= footY);
+    const sections = runs.filter((r) => r.y < footY && r.text.trim() !== 'KATON');
+    // Preconditions, so a parser that read nothing cannot pass: the footer is found and
+    // reads the style object's own values, and the sections are really there.
+    assert.ok(footer.length > 0, `${d.name}: the running footer is on the closing page`);
+    for (const r of footer) {
+      assert.equal(r.size, FOOT.fontSize, `${d.name}: the footer is drawn at its style's size`);
+      assert.equal(r.fill, FOOT.color.toUpperCase(), `${d.name}: the footer is drawn in its style's colour`);
+    }
+    assert.ok(sections.length >= 8, `${d.name}: the four sections are drawn (${sections.length} runs)`);
+    for (const r of sections) {
+      assert.equal(r.size, FOOT.fontSize, `${d.name}: "${r.text.slice(0, 30)}" is ${r.size}pt, the footer is ${FOOT.fontSize}pt`);
+      assert.equal(r.fill, FOOT.color.toUpperCase(), `${d.name}: "${r.text.slice(0, 30)}" is ${r.fill}, the footer is ${FOOT.color}`);
+    }
+    // THE LABELS KEEP THEIR BOLD: the label runs and the body runs are two faces.
+    assert.ok(new Set(sections.map((r) => r.font)).size >= 2, `${d.name}: the labels are set in a second (bold) face`);
+  }
+});
+
+test('BI: THE CLOSING PAGE CARRIES THE WORDMARK, VERTICALLY CENTRED, ON THE TEXT COLUMN', async () => {
+  const DPI = 200;
+  const px = (pt) => (pt * DPI) / 72;
+  // The clay accent and the warm ink, as tests/pdf-wordmark.spec.mjs reads them.
+  const isClay = (r, g, b) => r > 150 && g > 60 && g < 140 && b < 90 && r - b > 90;
+  const isInk = (r, g, b) => r < 140 && g < 130 && b < 120 && Math.abs(r - b) < 45;
+  for (const d of await docs()) {
+    const n = d.texts.length;
+    const [img] = await rasterPages(d.buffer, { dpi: DPI, pages: [n] });
+    const dot = inkBox(img, isClay);
+    assert.ok(dot, `${d.name}: the clay dot is on the closing page`);
+    assert.ok(Math.abs(dot.x0 - px(PAGE_MARGIN_X)) <= 2,
+      `${d.name}: the mark's left edge is at ${dot.x0}px, the text column at ${px(PAGE_MARGIN_X).toFixed(1)}px`);
+    assert.ok(Math.abs(dot.cy - img.height / 2) <= 2,
+      `${d.name}: the mark is centred at ${dot.cy}px of ${img.height}px, not ${img.height / 2}`);
+    // The word is the shared wordmark, beside the dot and cap-centred on it (AW §1's bar).
+    const word = inkBox(img, isInk, { x0: dot.x1 + 2, y0: dot.y0 - 40, x1: img.width, y1: dot.y1 + 40 });
+    assert.ok(word, `${d.name}: KATON is beside the dot`);
+    assert.ok(Math.abs(dot.cy - word.cy) <= 1, `${d.name}: the dot is ${dot.cy - word.cy}px off KATON's cap centre`);
+    assert.ok(textBoxes(d.buffer).at(-1).some((r) => r.text.trim() === 'KATON'), `${d.name}: KATON is drawn as text`);
   }
 });
