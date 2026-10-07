@@ -591,11 +591,19 @@ function Para({ children, style }) {
 /* ---------------- Home (input) ---------------- */
 function Home({ form, setForm, error, onSubmit, busy, compatOpen = false, resume = null, onForgetResume, hourTarget = false, onHourPicked }) {
   return (
-    <div style={wrap}>
-      <div style={{ paddingTop: 60 }}>
+    // HOME'S OWN BOTTOM PADDING (Prompt BK, Reyner 2026-10-07): 24px, plus the
+    // footer's 24px marginTop, is the ruled ~48px from the last hero element to the
+    // footer's border. Scoped by overriding `wrap` HERE rather than editing it:
+    // `wrap`'s 96px still protects the reading's end and the paid states.
+    <div style={{ ...wrap, paddingBottom: 24 }}>
+      <div className="k-hero-top">
         {/* THE HERO LOGOMARK IS GONE (Y-2b item 1). It moved into SiteHeader,
             which renders on every route, so a mark here would be the second one
-            on the page. The content below simply moves up by its height. */}
+            on the page. The content below simply moves up by its height.
+            THE SPACER THAT STAYED BEHIND IS GONE TOO (Prompt BK): `paddingTop: 60`
+            plus the headline's `marginTop: 44` put 104px under the header. The
+            gap is now `.k-hero-top` in app/globals.css, ~48px desktop, ~40px
+            phones, shared with the /kompatibilitas landing. */}
         {/* THE PROMISE, AND IT COMES BEFORE THE ASK. Reyner's ruled copy, applied
             verbatim 2026-08-13; swept against lib/validate/blocklist.json, the
             typography rule and the slang list on 2026-08-12.
@@ -604,7 +612,7 @@ function Home({ form, setForm, error, onSubmit, busy, compatOpen = false, resume
             ANYWHERE. The first promises a weekly cadence this product does not
             have; the second is a latency claim nothing measures. Both pass every
             automated gate, which is exactly why they are named in the code. */}
-        <Reveal style={{ marginTop: 44 }}>
+        <Reveal>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: 34, lineHeight: 1.12, letterSpacing: '-.01em', color: 'var(--tinta)', margin: 0 }}>Ada pola di balik setiap keputusanmu.</h1>
         </Reveal>
         <Reveal delay={0.06}>

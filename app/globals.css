@@ -338,3 +338,28 @@ input[type="number"]:focus {
 @media (prefers-reduced-motion: reduce) {
   .k-prose, .k-skel-exit { animation: none; }
 }
+
+/* ── THE HERO GAP AND THE DESKTOP FOOTER (Prompt BK, Reyner 2026-10-07, option B) ──
+   `.k-hero-top` is the space from the header's bottom to the headline's top on the
+   home hero and the /kompatibilitas landing: ~40px on phones, ~48px from 768px up.
+   It replaces `paddingTop: 60` (and, on home, a 44px marginTop on the headline),
+   the spacer left behind when the hero logomark moved into SiteHeader (Y-2b).
+
+   The footer's spacing lives here rather than inline in components/SiteFooter.jsx
+   because an inline style beats any class, so the desktop block below could not
+   override it. The top-level values ARE the phone footer and are today's numbers
+   exactly; only the 768px block changes anything. tests/hero-spacing.spec.mjs holds
+   both halves. */
+.k-hero-top { padding-top: 40px; }
+.k-footer { margin-top: 24px; padding: 30px 22px 40px; }
+.k-footer-nav { margin-bottom: 20px; }
+.k-footer-contact { margin-top: 8px; }
+.k-footer-mark { margin-top: 14px; }
+@media (min-width: 768px) {
+  .k-hero-top { padding-top: 48px; }
+  .k-footer { padding: 22px 22px 26px; }
+  .k-footer-nav { margin-bottom: 12px; }
+  .k-footer-ids { display: flex; flex-wrap: nowrap; gap: 0 18px; white-space: nowrap; }
+  .k-footer-contact { margin-top: 0; }
+  .k-footer-mark { margin-top: 8px; }
+}

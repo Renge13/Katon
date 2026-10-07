@@ -136,6 +136,7 @@
     "test:birth-fields": "node --import ./scripts/jsx-register.mjs --test tests/birth-fields.spec.mjs",
     "test:kontak-no-whatsapp": "node --import ./scripts/jsx-register.mjs --import ./scripts/alias-register.mjs --test tests/kontak-no-whatsapp.spec.mjs",
     "test:compat-sales-copy": "node --import ./scripts/jsx-register.mjs --test tests/compat-sales-copy.spec.mjs",
+    "test:hero-spacing": "node --import ./scripts/jsx-register.mjs --import ./scripts/alias-register.mjs --test tests/hero-spacing.spec.mjs",
     "test:compat-navigation": "node --import ./scripts/jsx-register.mjs --import ./scripts/alias-register.mjs --test tests/compat-navigation.spec.mjs",
     "probe:reconcile": "node --conditions=react-server --env-file-if-exists=.env.local scripts/probe-reconcile.mjs",
     "doku:status": "node --conditions=react-server --env-file-if-exists=.env.local scripts/doku-status.mjs",

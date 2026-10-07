@@ -1,0 +1,20 @@
+Prompt BK, scripts/hero-spacing-walk.mjs, headless Chrome, local dev with PAYMENTS_PROVIDER=mock COMPAT_SALES=open (the compat link shows, as on production).
+BEFORE ran against a dev server on the main checkout at b8e9ba8, which this branch's base equals; AFTER against a dev server in this worktree (served HTML checked: k-hero-top present, padding-top:60px absent).
+'last content bottom' is the lowest leaf element outside header/footer (on home, the 'Baca dinamika dua orang' link).
+
+| route | viewport | header bottom | h1 top | gap | CTA bottom | last content bottom | footer top | content->footer | footer height | page height | operator top | contact top |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| / | 1440x900 | 50 | 154 | 104 | 635 (Lihat Refleksiku) | 712 | 833 | 121 | 190 | 1022 (scrolls 122) | 904 | 931 |
+| /kompatibilitas | 1440x900 | 50 | 110 | 60 | 986 (Lanjut) | 1138 | 1279 | 141 | 190 | 1469 (scrolls 569) | 1350 | 1377 |
+| / | 375x812 | 50 | 154 | 104 | 629 (Lihat Refleksiku) | 706 | 827 | 121 | 220 | 1046 (scrolls 234) | 928 | 955 |
+| /kompatibilitas | 375x812 | 50 | 110 | 60 | 1067 (Lanjut) | 1219 | 1360 | 141 | 220 | 1580 (scrolls 768) | 1461 | 1489 |
+
+| route | viewport | header bottom | h1 top | gap | CTA bottom | last content bottom | footer top | content->footer | footer height | page height | operator top | contact top |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| / | 1440x900 | 50 | 98 | 48 | 579 (Lihat Refleksiku) | 656 | 774 | 118 | 126 | 900 | 829 | 829 |
+| /kompatibilitas | 1440x900 | 50 | 98 | 48 | 974 (Lanjut) | 1126 | 1267 | 141 | 126 | 1393 (scrolls 493) | 1322 | 1322 |
+| / | 375x812 | 50 | 90 | 40 | 565 (Lihat Refleksiku) | 642 | 691 | 49 | 220 | 910 (scrolls 98) | 792 | 819 |
+| /kompatibilitas | 375x812 | 50 | 90 | 40 | 1047 (Lanjut) | 1199 | 1340 | 141 | 220 | 1560 (scrolls 748) | 1441 | 1469 |
+
+SHORTER WINDOW, AFTER, browser pane at 1440x760, home: link bottom 656, footer top 705, gap 49, footer height 126, page height 831.
+At 1440x900 the gap reads 118 because the page (830px of content and footer) is shorter than the window, and app/layout.js flexes the content so the footer sits at the window's bottom edge. 48px is the minimum, reached whenever the window is shorter than the page.
