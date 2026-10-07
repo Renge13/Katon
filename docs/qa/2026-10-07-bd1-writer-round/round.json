@@ -1,0 +1,395 @@
+{
+  "meta": {
+    "date": "2026-10-07",
+    "stage6": "1.73.0",
+    "prompt_pair": "v2-4be5c646319c62ff",
+    "temperature": 0.7,
+    "models": [
+      "gemini-3.1-flash-lite"
+    ]
+  },
+  "records": [
+    {
+      "pattern": "a_generates_b",
+      "pair": "5x1",
+      "status": "Pacaran",
+      "nicknames": {
+        "a": "Laras",
+        "b": "Bagus"
+      },
+      "titles": {
+        "a": "The Sun",
+        "b": "The Sun"
+      },
+      "cell": "Pola Menyalakan",
+      "source": "gemini",
+      "floor": false,
+      "floor_reason": null,
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null
+        }
+      ],
+      "p4_blocks": [
+        {
+          "heading": "Saling Menyalakan Semangat",
+          "fact_ids": [
+            "p4_temperament"
+          ],
+          "text": "Pola Menyalakan menjadi dinamika yang paling mewarnai langkah kalian. Laras membawa ide-ide tajam dan antusiasme yang meledak-ledak, sementara Bagus adalah pihak yang memberikan bentuk pada energi tersebut. Saat Laras melontarkan pemikiran atau rencana, Bagus sering kali menjadi orang yang pertama kali menyambutnya dan mengubahnya menjadi langkah nyata.\n\nIni membuat kalian menjadi tim yang sangat produktif. Laras sering merasa lebih bersemangat saat ada Bagus yang menunggu untuk mengeksekusi idenya, dan Bagus merasa memiliki arah yang lebih jelas karena Laras. Namun, ini bisa melelahkan bagi Laras jika ia merasa harus selalu menjadi pihak yang memulai, dan Bagus perlu memastikan ia tidak sekadar menjadi pelaksana dari semua kemauan Laras tanpa memiliki ruang untuk inisiatifnya sendiri."
+        }
+      ],
+      "calls": [
+        {
+          "model": "gemini-3.1-flash-lite",
+          "status": 200,
+          "usage": {
+            "promptTokenCount": 12097,
+            "candidatesTokenCount": 1082,
+            "totalTokenCount": 13179,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 12097
+              }
+            ],
+            "serviceTier": "standard"
+          },
+          "cost_usd": 0.00464725
+        }
+      ],
+      "cost_usd": 0.00464725,
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Bukan Tarikan Magnet",
+            "fact_ids": [
+              "p2_day_pair",
+              "p5_pull_fit"
+            ],
+            "text": "Laras dan Bagus, kalian berdua adalah The Sun yang berdiri di atas fondasi yang sangat berbeda. Dalam hubungan ini, tidak ada tarik-menarik otomatis atau magnet yang membuat kalian tidak bisa jauh satu sama lain. Hubungan kalian tidak berjalan dengan sendirinya; ia adalah pilihan sadar yang kalian perbarui setiap hari. Jika kalian hanya menunggu suasana hati atau dorongan alamiah untuk merasa dekat, kalian akan mendapati jarak yang melebar tanpa disadari.\n\nKalian sering kali berada di ruang yang sama, tenggelam dalam kesibukan masing-masing, namun itu bukan berarti kalian sedang berbagi momen. Kedekatan yang terasa nyata bagi Laras dan Bagus harus dijadwalkan dan diusahakan. Tanpa inisiatif aktif untuk saling menyapa atau melakukan sesuatu bersama, kalian mudah sekali terperosok ke dalam rutinitas yang dingin, di mana kalian hidup berdampingan tetapi tidak benar-benar saling menyentuh."
+          },
+          {
+            "heading": "Cermin yang Saling Memahami",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Karena kalian berdua sama-sama memiliki inti diri Api, ada pemahaman instan yang jarang ditemukan pasangan lain. Laras dan Bagus mengerti tanpa perlu banyak penjelasan tentang kenapa masing-masing merasa gelisah saat ruangan sepi, atau mengapa kalian cenderung menghabiskan energi untuk hal-hal di luar diri sendiri. Kalian berbicara dengan bahasa yang sama, dan itu membuat banyak hal terasa lebih ringan.\n\nNamun, cermin ini juga membawa jebakan. Saat konflik muncul, kalian berdua cenderung memakai strategi pertahanan yang sama. Tidak ada yang menjadi pihak yang mendinginkan suasana karena keduanya sama-sama panas. Kalian berdua sama-sama memiliki kecenderungan untuk memendam atau bertahan, sehingga saat masalah datang, alih-alih saling menyeimbangkan, kalian justru bisa terjebak dalam pusaran yang sama."
+          },
+          {
+            "heading": "Saling Menyalakan Semangat",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Pola Menyalakan menjadi dinamika yang paling mewarnai langkah kalian. Laras membawa ide-ide tajam dan antusiasme yang meledak-ledak, sementara Bagus adalah pihak yang memberikan bentuk pada energi tersebut. Saat Laras melontarkan pemikiran atau rencana, Bagus sering kali menjadi orang yang pertama kali menyambutnya dan mengubahnya menjadi langkah nyata.\n\nIni membuat kalian menjadi tim yang sangat produktif. Laras sering merasa lebih bersemangat saat ada Bagus yang menunggu untuk mengeksekusi idenya, dan Bagus merasa memiliki arah yang lebih jelas karena Laras. Namun, ini bisa melelahkan bagi Laras jika ia merasa harus selalu menjadi pihak yang memulai, dan Bagus perlu memastikan ia tidak sekadar menjadi pelaksana dari semua kemauan Laras tanpa memiliki ruang untuk inisiatifnya sendiri."
+          },
+          {
+            "heading": "Penyeimbang yang Menenangkan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Kalian berdua membawa elemen yang sebenarnya sangat dibutuhkan satu sama lain. Laras membawa Kayu yang memberikan napas dan pertumbuhan bagi Bagus, sementara Bagus membawa Api yang menghangatkan ruang hidup Laras. Kehadiran kalian masing-masing secara alami meredakan kegelisahan yang sering muncul di dalam diri masing-masing.\n\nSaat Laras sedang merasa lelah karena terus-menerus mengeluarkan ide dan tenaga, kehadiran Bagus memberikan rasa aman yang menenangkan. Sebaliknya, saat Bagus merasa terbebani oleh tuntutan luar yang terus menekan, Laras membawa energi baru yang membuat dunia Bagus terasa lebih cerah. Ketiadaan salah satu dari kalian akan membuat area tersebut terasa rapuh dan goyah."
+          },
+          {
+            "heading": "Dunia Luar yang Menyusup ke Rumah",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Tantangan kalian muncul saat tekanan dari dunia luar masuk ke dalam hubungan. Pilar kehidupan Bagus memiliki hubungan yang menyentuh langsung kursi pasangan Laras, begitu pula sebaliknya. Apa yang sedang dihadapi Bagus di luar sana, entah itu tekanan pekerjaan atau tuntutan publik, sering kali tidak berhenti di pintu rumah. Laras bisa merasakan kegelisahan Bagus bahkan sebelum Bagus sempat menceritakan apa yang terjadi.\n\nHal yang sama berlaku bagi Bagus terhadap Laras. Saat Laras sedang bergulat dengan kekacauan di pekerjaannya, suasana hatinya akan langsung memengaruhi kenyamanan rumah kalian. Kalian berdua adalah dua orang yang sangat peka terhadap suasana; kalian tidak bisa berpura-pura semuanya baik-baik saja saat salah satu dari kalian sedang menanggung beban berat di luar hubungan."
+          }
+        ],
+        "penutup": "Laras dan Bagus adalah dua matahari yang memilih untuk tidak saling membakar, melainkan saling menerangi. Meskipun hubungan ini tidak memiliki tarikan magnetis yang mudah, kalian punya bahan untuk menjadi rumah yang sangat kokoh karena pemahaman mendalam tentang inti diri yang serupa. Dengan menyadari bahwa kebersamaan ini adalah pilihan yang harus dijaga, hubungan kalian bisa menjadi ruang di mana ide-ide liar menemukan bentuknya dan kelelahan dunia luar menemukan tempat untuk reda."
+      }
+    },
+    {
+      "pattern": "a_controls_b",
+      "pair": "7x3",
+      "status": "Menikah",
+      "nicknames": {
+        "a": "Sinta",
+        "b": "Arif"
+      },
+      "titles": {
+        "a": "The Teak",
+        "b": "The Sun"
+      },
+      "cell": "Pola Membentuk",
+      "source": "gemini",
+      "floor": false,
+      "floor_reason": null,
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null
+        }
+      ],
+      "p4_blocks": [
+        {
+          "heading": "Kejelasan di Tengah Kebingungan",
+          "fact_ids": [
+            "p4_temperament"
+          ],
+          "text": "Sinta memiliki cara pandang yang lugas dan terstruktur, yang pada hari-hari baik, menjadi penunjuk jalan bagi Arif. Saat Arif sedang dipenuhi oleh berbagai pilihan yang berserakan di kepalanya, Sinta mampu memilah mana yang penting dan mana yang bisa dikesampingkan. Sinta memberikan kepastian yang membuat Arif merasa lebih mantap dalam melangkah ke masa depan.\n\nNamun, pada hari-hari yang berat, ketegasan Sinta bisa terasa menuntut bagi Arif. Saat Arif hanya ingin didengarkan, Sinta mungkin cenderung langsung menawarkan solusi atau meminta keputusan yang pasti. Arif perlu memahami bahwa itu adalah cara Sinta menunjukkan kepedulian, sementara Sinta bisa melihat bahwa Arif terkadang membutuhkan ruang untuk memproses pilihannya tanpa harus langsung dipaksa untuk memilih."
+        }
+      ],
+      "calls": [
+        {
+          "model": "gemini-3.1-flash-lite",
+          "status": 200,
+          "usage": {
+            "promptTokenCount": 10117,
+            "candidatesTokenCount": 882,
+            "totalTokenCount": 10999,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 10117
+              }
+            ],
+            "serviceTier": "standard"
+          },
+          "cost_usd": 0.0038522499999999998
+        }
+      ],
+      "cost_usd": 0.0038522499999999998,
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Ketenangan dalam Ruang Masing-Masing",
+            "fact_ids": [
+              "p2_day_pair",
+              "p5_pull_fit"
+            ],
+            "text": "Hubungan Sinta dan Arif adalah sebuah perpaduan yang berjalan dengan ritme yang tenang namun pasti. Sebagai The Teak dan The Sun, kalian tidak memiliki tarikan magnetis yang dramatis sejak hari pertama, melainkan sebuah ikatan yang dibangun melalui konsistensi. Kalian adalah pasangan yang mampu menghabiskan waktu di ruangan yang sama namun tetap sibuk dengan dunia masing-masing, tanpa merasa perlu untuk terus-menerus saling memvalidasi kehadiran.\n\nDi rumah, ini sering berarti kalian memiliki meja kerja yang berdekatan namun terbagi oleh fokus yang berbeda. Sinta mungkin sedang tenggelam dalam urusan administratif yang membutuhkan ketelitian, sementara Arif sedang memikirkan arah proyek atau gagasan baru. Kalian tidak merasa terganggu oleh kesunyian itu; justru di situlah kalian merasa paling nyaman, karena kalian tahu bahwa pasangan tetap ada di sana, menjadi jangkar yang stabil saat kesibukan masing-masing mulai terasa melelahkan."
+          },
+          {
+            "heading": "Saling Melengkapi yang Menghangatkan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Kalian berdua membawa elemen yang secara alami mengisi kekosongan satu sama lain. Arif membawa elemen Kayu yang memberikan napas bagi Sinta, sementara Sinta membawa elemen Logam yang membantu Arif menemukan bentuk dari ide-idenya yang sering kali meluap. Kehadiran pasangan bukan sekadar pendamping, melainkan penyeimbang yang meredakan kegelisahan di area-area yang biasanya menjadi titik lemah kalian sendiri.\n\nKetika Sinta merasa lelah karena terus-menerus harus mengelola segalanya, kehadiran Arif sering kali memberikan dorongan semangat yang tak terduga. Sebaliknya, saat Arif merasa idenya terlalu luas dan kehilangan arah, sentuhan Sinta dalam mengatur prioritas membuat Arif merasa kembali berpijak pada bumi."
+          },
+          {
+            "heading": "Alur Dukungan yang Konsisten",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Dalam pola hidup kalian, terdapat sebuah alur energi yang stabil di mana Sinta berperan sebagai sumber inisiatif dan Arif sebagai pihak yang menyambut serta mewujudkannya. Ini bukanlah bentuk dominasi, melainkan sebuah pembagian peran yang terasa wajar dan jarang berbalik. Sinta membawa energi yang memicu langkah, dan Arif meresponsnya dengan kesiapan untuk mengeksekusi apa yang telah disepakati.\n\nDalam urusan rumah tangga, ini terlihat ketika Sinta menetapkan target atau arah baru bagi keluarga, dan Arif dengan sigap memastikan langkah-langkah menuju tujuan tersebut tersusun dengan baik. Arif merasa aman bergerak dalam arah yang Sinta buka, sementara Sinta merasa lega karena ada seseorang yang benar-benar bisa diandalkan untuk menindaklanjuti gagasannya."
+          },
+          {
+            "heading": "Kejelasan di Tengah Kebingungan",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Sinta memiliki cara pandang yang lugas dan terstruktur, yang pada hari-hari baik, menjadi penunjuk jalan bagi Arif. Saat Arif sedang dipenuhi oleh berbagai pilihan yang berserakan di kepalanya, Sinta mampu memilah mana yang penting dan mana yang bisa dikesampingkan. Sinta memberikan kepastian yang membuat Arif merasa lebih mantap dalam melangkah ke masa depan.\n\nNamun, pada hari-hari yang berat, ketegasan Sinta bisa terasa menuntut bagi Arif. Saat Arif hanya ingin didengarkan, Sinta mungkin cenderung langsung menawarkan solusi atau meminta keputusan yang pasti. Arif perlu memahami bahwa itu adalah cara Sinta menunjukkan kepedulian, sementara Sinta bisa melihat bahwa Arif terkadang membutuhkan ruang untuk memproses pilihannya tanpa harus langsung dipaksa untuk memilih."
+          }
+        ],
+        "penutup": "Sinta dan Arif telah menemukan ritme yang memungkinkan dua individu mandiri untuk tetap saling mengandalkan. Dengan kehangatan yang dibawa Arif dan ketegasan yang ditawarkan Sinta, kalian memiliki bahan untuk membangun sebuah rumah yang tidak hanya stabil, tetapi juga terus tumbuh karena masing-masing pihak merasa tenang untuk menjadi diri sendiri. Hubungan ini bisa menjadi tempat di mana kekuatan individu tidak saling meniadakan, melainkan justru saling menguatkan dalam perjalanan panjang ke depan."
+      }
+    },
+    {
+      "pattern": "b_controls_a",
+      "pair": "4x6",
+      "status": "PDKT",
+      "nicknames": {
+        "a": "Dewi",
+        "b": "Yoga"
+      },
+      "titles": {
+        "a": "The Morning Dew",
+        "b": "The Ocean"
+      },
+      "cell": "Pola Membentuk",
+      "source": "gemini",
+      "floor": false,
+      "floor_reason": null,
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null
+        }
+      ],
+      "p4_blocks": [
+        {
+          "heading": "Kejelasan dalam Kebingungan",
+          "fact_ids": [
+            "p4_temperament"
+          ],
+          "text": "Yoga secara alami berperan membantu Dewi memilah pikiran yang sering kali terlalu luas atau bercabang. Dengan Pola Membentuk yang dimilikinya, Yoga membantu Dewi mengubah ide-ide yang berserakan menjadi keputusan yang nyata dan terarah. Ini adalah bentuk dukungan yang sangat nyata bagi Dewi yang sering kali merasa terlalu banyak pilihan.\n\nSaat Dewi merasa bimbang atau kewalahan dengan berbagai rencana, Yoga hadir untuk menyederhanakan segalanya. Ia tidak sekadar mendengarkan, tapi membantu Dewi melihat mana yang benar-benar penting untuk diambil langkahnya saat itu juga."
+        }
+      ],
+      "calls": [
+        {
+          "model": "gemini-3.1-flash-lite",
+          "status": 200,
+          "usage": {
+            "promptTokenCount": 12075,
+            "candidatesTokenCount": 1189,
+            "totalTokenCount": 13264,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 12075
+              }
+            ],
+            "serviceTier": "standard"
+          },
+          "cost_usd": 0.00480225
+        }
+      ],
+      "cost_usd": 0.00480225,
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Ketertarikan yang Terasa Familier",
+            "fact_ids": [
+              "p5_pull_fit",
+              "p1_stem_relation"
+            ],
+            "text": "Dewi, The Morning Dew, dan Yoga, The Ocean, bertemu dengan cara yang terasa ringan namun mendalam. Karena keduanya dibangun dari elemen Air yang sama, ada pengenalan instan saat kalian pertama kali berinteraksi. Kalian tidak perlu banyak penjelasan untuk mengerti bagaimana yang lain berpikir, karena inti diri kalian bekerja dengan frekuensi yang serupa. Hubungan ini memiliki tarikan yang kuat dan ritme keseharian yang mengalir dengan sendirinya, membuat kalian merasa nyaman satu sama lain tanpa perlu banyak usaha.\n\nDalam masa PDKT ini, kemudahan tersebut terlihat dari bagaimana kalian bisa menghabiskan waktu berjam-jam tanpa merasa perlu mengisi keheningan dengan obrolan berat. Ada ritme yang seirama, di mana kalian sama-sama memahami kebutuhan untuk bergerak dengan cara kalian sendiri tanpa merasa harus terikat pada ekspektasi orang lain."
+          },
+          {
+            "heading": "Saling Menjaga Keseimbangan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Kehadiran satu sama lain membawa elemen yang selama ini kurang dalam bagan masing-masing. Yoga membawa elemen Logam yang memberikan struktur dan ketenangan bagi Dewi, sementara Dewi membawa elemen Air yang memberikan kelenturan bagi Yoga. Keseimbangan ini membuat kalian merasa lebih utuh saat sedang bersama.\n\nKalian bisa merasakan perbedaan itu saat sedang tidak berdekatan. Bagi Dewi, Yoga adalah titik yang membuat langkahnya terasa lebih mantap. Bagi Yoga, Dewi adalah sumber ketenangan yang meredakan ketegangan di hari-hari yang terasa penuh tekanan."
+          },
+          {
+            "heading": "Kejelasan dalam Kebingungan",
+            "fact_ids": [
+              "p4_temperament"
+            ],
+            "text": "Yoga secara alami berperan membantu Dewi memilah pikiran yang sering kali terlalu luas atau bercabang. Dengan Pola Membentuk yang dimilikinya, Yoga membantu Dewi mengubah ide-ide yang berserakan menjadi keputusan yang nyata dan terarah. Ini adalah bentuk dukungan yang sangat nyata bagi Dewi yang sering kali merasa terlalu banyak pilihan.\n\nSaat Dewi merasa bimbang atau kewalahan dengan berbagai rencana, Yoga hadir untuk menyederhanakan segalanya. Ia tidak sekadar mendengarkan, tapi membantu Dewi melihat mana yang benar-benar penting untuk diambil langkahnya saat itu juga."
+          },
+          {
+            "heading": "Jangkar di Luar Rumah",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Dunianya Yoga di luar sana tidak menjadi penghalang bagi waktu kalian berdua, melainkan justru menjadi jangkar yang menenangkan bagi Dewi. Pilar kehidupan Yoga terhubung langsung dengan kursi pasangan Dewi, yang berarti setiap pencapaian atau keberhasilan Yoga di luar sana akan membawa energi positif yang langsung terasa di ruang privat kalian.\n\nKalian akan menyadari bahwa suasana rumah atau tempat kalian bertemu sering kali bergantung pada bagaimana hari Yoga berjalan. Jika Yoga pulang dengan perasaan lega dan puas, Dewi akan langsung ikut merasa tenang, bahkan sebelum Yoga menceritakan apa pun yang terjadi di hari itu."
+          },
+          {
+            "heading": "Ruang Pribadi yang Mandiri",
+            "fact_ids": [
+              "p2_day_pair"
+            ],
+            "text": "Meskipun kalian memiliki chemistry yang kuat, kursi pasangan kalian bersifat independen. Kalian berdua adalah individu yang berdiri di atas kaki sendiri dan tidak memiliki ketergantungan yang sifatnya memaksa untuk selalu bersama. Ini adalah kekuatan sekaligus tantangan dalam hubungan kalian.\n\nKalian bisa berada di ruang yang sama namun sibuk dengan urusan masing-masing tanpa merasa terganggu. Namun, kebebasan ini juga berarti kalian perlu menyempatkan waktu berdua secara sadar agar jarak emosional tidak perlahan melebar karena terlalu asyik dengan dunia masing-masing."
+          },
+          {
+            "heading": "Cermin dari Inti yang Sama",
+            "fact_ids": [
+              "p1_stem_relation"
+            ],
+            "text": "Karena inti diri kalian sama-sama Air, kalian memiliki strategi bertahan yang mirip. Saat terjadi konflik, kalian berdua cenderung menarik diri atau mencoba mengalir mengikuti arus daripada menghadapinya secara langsung. Ini membuat suasana bisa terasa dingin atau menggantung jika tidak ada salah satu yang berani memulai pembicaraan.\n\nKalian sama-sama memahami perasaan satu sama lain saat dunia sedang tidak bersahabat, namun titik buta yang sama juga berarti kalian bisa terjebak dalam pola yang sama saat sedang tidak sepakat. Tidak ada yang berdiri di luar pola itu untuk mendinginkan keadaan, sehingga kesadaran untuk saling membuka diri menjadi sangat krusial."
+          }
+        ],
+        "penutup": "Dewi dan Yoga memiliki bahan untuk membangun hubungan yang seimbang antara kemandirian dan kebersamaan. Dengan ritme yang sudah seirama dan kemampuan untuk saling melengkapi elemen yang hilang, kalian bisa menjadi pasangan yang tumbuh bukan karena saling menuntut, melainkan karena saling memberi ruang untuk menjadi versi terbaik dari diri sendiri."
+      }
+    },
+    {
+      "pattern": "b_generates_a",
+      "pair": "12x8",
+      "status": "Pacaran",
+      "nicknames": {
+        "a": "Maya",
+        "b": "Rizky"
+      },
+      "titles": {
+        "a": "The Morning Dew",
+        "b": "The Forge"
+      },
+      "cell": "Pola Menyalakan",
+      "source": "gemini",
+      "floor": false,
+      "floor_reason": null,
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "error": null,
+          "rejecting": null
+        }
+      ],
+      "p4_blocks": [
+        {
+          "heading": "Alur Gerak dan Pemantik",
+          "fact_ids": [
+            "p1_stem_relation",
+            "p4_temperament"
+          ],
+          "text": "Di dalam hubungan ini, ada alur energi yang jelas. Rizky, dengan elemen Logam, secara alami menghidupi elemen Air milik Maya. Rizky menjadi sosok yang memberikan dorongan dan rasa aman, sementara Maya menyambutnya dengan cara yang membuat Rizky merasa tindakannya memiliki arti. Selain itu, cara Rizky melangkah - selalu tegas dan tidak suka bertele-tele - menjadi pemantik bagi Maya untuk ikut bergerak.\n\nSering kali, Rizky melontarkan ide atau antusiasme di pagi hari, dan sebelum hari berakhir, Maya sudah mewujudkannya dalam tindakan yang nyata. Maya tumbuh lebih cepat karena adanya dorongan dari Rizky. Namun, Rizky perlu menyadari bahwa jika ia selalu menjadi pihak yang memulai, ia bisa merasa lelah. Maya, yang sangat peka, bisa membantu dengan sesekali mengambil alih inisiatif agar Rizky bisa beristirahat dari beban menjadi penggerak utama."
+        }
+      ],
+      "calls": [
+        {
+          "model": "gemini-3.1-flash-lite",
+          "status": 200,
+          "usage": {
+            "promptTokenCount": 10786,
+            "candidatesTokenCount": 1294,
+            "totalTokenCount": 12080,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 10786
+              }
+            ],
+            "serviceTier": "standard"
+          },
+          "cost_usd": 0.004637499999999999
+        }
+      ],
+      "cost_usd": 0.004637499999999999,
+      "reading": {
+        "blocks": [
+          {
+            "heading": "Ketertarikan yang Disengaja",
+            "fact_ids": [
+              "p5_pull_fit"
+            ],
+            "text": "Maya, The Morning Dew, dan Rizky, The Forge, berada dalam hubungan yang tidak mengalir begitu saja. Kalian tidak bertemu dalam tarikan magnet yang memabukkan atau ritme yang otomatis menyatu. Hubungan kalian adalah pilihan sadar. Setiap hari, kebersamaan kalian adalah keputusan yang diperbarui, sebuah komitmen yang lahir karena kalian memang ingin saling ada, bukan karena takdir yang memaksa kalian untuk lekat.\n\nDalam keseharian, ini berarti kalian tidak bisa berharap suasana akan mencair dengan sendirinya jika sedang ada jarak. Jika kalian tidak menjadwalkan waktu berdua atau sengaja membuka percakapan, hubungan ini bisa terasa berjarak. Namun, justru di sanalah kekuatannya: kalian tidak terjebak dalam ekspektasi bahwa hubungan harus selalu mudah. Kalian membangun kedekatan dengan niat, dan itu membuat setiap momen berdua terasa lebih berharga karena memang diperjuangkan."
+          },
+          {
+            "heading": "Alur Gerak dan Pemantik",
+            "fact_ids": [
+              "p1_stem_relation",
+              "p4_temperament"
+            ],
+            "text": "Di dalam hubungan ini, ada alur energi yang jelas. Rizky, dengan elemen Logam, secara alami menghidupi elemen Air milik Maya. Rizky menjadi sosok yang memberikan dorongan dan rasa aman, sementara Maya menyambutnya dengan cara yang membuat Rizky merasa tindakannya memiliki arti. Selain itu, cara Rizky melangkah - selalu tegas dan tidak suka bertele-tele - menjadi pemantik bagi Maya untuk ikut bergerak.\n\nSering kali, Rizky melontarkan ide atau antusiasme di pagi hari, dan sebelum hari berakhir, Maya sudah mewujudkannya dalam tindakan yang nyata. Maya tumbuh lebih cepat karena adanya dorongan dari Rizky. Namun, Rizky perlu menyadari bahwa jika ia selalu menjadi pihak yang memulai, ia bisa merasa lelah. Maya, yang sangat peka, bisa membantu dengan sesekali mengambil alih inisiatif agar Rizky bisa beristirahat dari beban menjadi penggerak utama."
+          },
+          {
+            "heading": "Saling Melengkapi dalam Kebutuhan",
+            "fact_ids": [
+              "p3_supply"
+            ],
+            "text": "Kalian membawa elemen yang sangat dibutuhkan satu sama lain. Rizky sering kali menanggung beban pikiran yang tajam dan cenderung dingin, dan elemen Api yang dibawa Maya adalah kehangatan yang ia cari. Kehadiran Maya secara alami meredakan kegelisahan Rizky. Sebaliknya, Rizky membawa elemen Logam yang kokoh, memberikan stabilitas bagi Maya yang cenderung menyesuaikan diri dengan situasi, sehingga Maya merasa memiliki pijakan yang tidak mudah goyah.\n\nSaat Rizky sedang merasa penat dengan dunianya, keberadaan Maya di sampingnya mampu menenangkan badai di kepalanya. Begitu pula bagi Maya, saat ia merasa arah hidupnya sedang tidak menentu, ketegasan Rizky adalah jangkar yang membuatnya merasa aman kembali. Tanpa satu sama lain, area-area yang tadinya rapuh ini bisa terasa tidak stabil."
+          },
+          {
+            "heading": "Gesekan Halus di Ruang Pribadi",
+            "fact_ids": [
+              "p2_day_pair",
+              "p2_reframe"
+            ],
+            "text": "Kursi pasangan kalian memiliki gesekan alami. Ini bukan tentang konflik besar atau pertengkaran hebat yang meledak, melainkan ketidaknyamanan halus yang menumpuk dari detail-detail kecil. Mungkin itu cara Maya merapikan barang yang berbeda dengan keinginan Rizky, atau bagaimana Rizky memotong pembicaraan saat ia merasa tidak efisien. Jika dibiarkan, hal-hal sepele ini bisa menjadi tumpukan kekecewaan yang tidak disadari.\n\nIni bukanlah tanda bahwa hubungan kalian gagal. Justru, gesekan ini adalah undangan untuk memiliki kesadaran penuh. Saat kalian merasa tidak nyaman, jangan dipendam sampai menjadi percikan besar. Membahas hal kecil hari itu juga, tepat saat ia muncul, akan menjaga agar gesekan ini tidak merusak fondasi yang sudah kalian bangun."
+          },
+          {
+            "heading": "Saat Tekanan dari Luar Masuk ke Rumah",
+            "fact_ids": [
+              "p2_palace_frame"
+            ],
+            "text": "Salah satu pilar kehidupan Rizky terhubung langsung dengan kursi pasangan Maya. Artinya, apa yang sedang dihadapi Rizky di area pekerjaannya atau masalah hidup lainnya, sering kali terbawa masuk ke ruang privat kalian. Maya, dengan kepekaannya, sering kali bisa merasakan tekanan yang dibawa Rizky bahkan sebelum Rizky sempat bercerita.\n\nSaat Rizky sedang berada di bawah tekanan besar, suasana di rumah bisa ikut berubah menjadi tegang. Maya mungkin merasa terimbas oleh beban tersebut. Penting bagi kalian untuk memahami bahwa jika Rizky terlihat diam atau dingin, itu mungkin bukan karena Maya, melainkan beban dari dunianya yang terbawa pulang. Memberi ruang bagi satu sama lain saat salah satu sedang berada di bawah tekanan akan sangat membantu menjaga kehangatan rumah kalian."
+          }
+        ],
+        "penutup": "Maya dan Rizky adalah dua pribadi yang berdiri di atas kekuatan masing-masing, yang memilih untuk tidak berjalan sendiri. Hubungan ini memiliki bahan untuk menjadi tempat di mana Maya mendapatkan kestabilan yang ia butuhkan, dan Rizky mendapatkan kehangatan yang melembutkan ketegasannya. Dengan menyadari bahwa setiap hari adalah keputusan untuk tetap bersama, kalian bisa menjadi pasangan yang saling menajamkan, di mana gesekan kecil justru menjadi pengingat untuk terus saling mengerti dan berproses bersama."
+      }
+    }
+  ]
+}
