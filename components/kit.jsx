@@ -96,6 +96,31 @@ export function BalanceBar({ label, gloss, pct, element, isDominant, isMissing }
   );
 }
 
+// The pillar card's eyebrow size (PILAR AKAR ...). One value because the time header
+// above the card is ruled to be the same size, never larger (Prompt BL §5).
+const PILLAR_EYEBROW_PX = 9.5;
+
+/**
+ * One column of the Bagan row: the time header, then the card (Prompt BL, Reyner
+ * 2026-10-08). The header names which part of the birth the pillar comes from
+ * (Tahun, Bulan, Hari, Jam), read from the copy bank by the pillar's POSITION, so a
+ * reordered row cannot put the wrong word over a card. It sits outside the box, with
+ * room under it for the INTI DIRI pill that straddles the day card's top edge.
+ *
+ * ONE LINE, NEVER WIDER THAN THE CARD (§6). `minWidth: 0` keeps a long word from
+ * widening the grid column (and so its card) to fit; the browser walk measures it.
+ */
+export function PillarColumn({ position, children }) {
+  return (
+    <div data-pillar-col={position} style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div data-pillar-time style={{ fontSize: PILLAR_EYEBROW_PX, fontWeight: 600, lineHeight: 1.3, color: 'var(--muted-warm)', textAlign: 'center', whiteSpace: 'nowrap', marginBottom: 18 }}>
+        {CHROME_COPY.pillar_time_labels[position]}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 /**
  * The pillar that has not been computed yet: Pilar Arah when no birth hour was given
  * (Prompt BG §5, Reyner 2026-10-06). The same box and label as PillarCell, no hanzi,
@@ -106,12 +131,12 @@ export function BalanceBar({ label, gloss, pct, element, isDominant, isMissing }
 export function EmptyPillarCell({ label, children }) {
   return (
     <div data-pillar-empty style={{
-      position: 'relative', borderRadius: 16, padding: '15px 8px 13px', textAlign: 'center',
+      flex: '1 0 auto', position: 'relative', borderRadius: 16, padding: '15px 8px 13px', textAlign: 'center',
       // The other cards' fill (Reyner 2026-10-06, on #203); the border was already their colour.
       border: '1px dashed var(--border)', background: 'var(--kertas-2)',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
-      <div style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: PILLAR_EYEBROW_PX, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', marginBottom: 6 }}>{label}</div>
       <div style={{ flex: '1 0 auto', display: 'flex', alignItems: 'center', fontSize: 11, lineHeight: 1.35 }}>{children}</div>
     </div>
   );
@@ -122,13 +147,13 @@ export function PillarCell({ label, stem, branch, elementId, element, polarity, 
   const c = elColor(element || elementId);
   return (
     <div style={{
-      position: 'relative', borderRadius: 16, padding: '15px 8px 13px', textAlign: 'center',
+      flex: '1 0 auto', position: 'relative', borderRadius: 16, padding: '15px 8px 13px', textAlign: 'center',
       background: isDayMaster ? `linear-gradient(180deg, ${c.wash}, var(--kertas-2))` : 'var(--kertas-2)',
       border: `1px solid ${isDayMaster ? c.mid : 'var(--border)'}`,
       boxShadow: isDayMaster ? '0 10px 24px -14px rgba(60,42,24,.4)' : 'none',
     }}>
       {isDayMaster && <div style={{ position: 'absolute', top: -9, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 9, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#fff', background: c.mid, borderRadius: 999, padding: '3px 9px' }}>{CHROME_COPY.pillar_core_pill}</div>}
-      <div style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: PILLAR_EYEBROW_PX, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted-warm)', marginBottom: 6 }}>{label}</div>
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 30, lineHeight: 1, color: c.deep }}>{stem || '·'}</div>
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, lineHeight: 1, color: c.mid, marginTop: 3 }}>{branch || '·'}</div>
       <div style={{ fontSize: 10, color: 'var(--tinta-soft)', marginTop: 8 }}>{elementId ? `${elementId}${polarity ? ` · ${polarity}` : ''}` : 'belum diisi'}</div>

@@ -1,0 +1,38 @@
+
+== with-hour: /r/inHGr-kH2KblyGUbTax5R
+  intro: "Empat pilar dari tahun, bulan, hari, dan jam lahirmu. Inti dirimu dibaca dari hari lahir."
+  320px: Tahun[year] text 25.8/62.3 card, 1 line, 18.3px over card, 9.5px=9.5px | Bulan[month] text 24.2/62.3 card, 1 line, 18.3px over card, 9.5px=9.5px | Hari[day] text 18/62.3 card, 1 line, 10.3px over pill, 9.5px=9.5px | Jam[hour] text 18.4/62.3 card, 1 line, 18.3px over card, 9.5px=9.5px
+  OK 320px
+  CONTROL 320px, month header "Bulan kelahiran menurut kalender matahari": FIRED: month: text 186.8px wider than card 62.3px
+  wrote control-oversized-with-hour-320.png
+  restored to "Bulan": OK
+  wrote bagan-with-hour-320.png
+  375px: Tahun[year] text 25.8/76 card, 1 line, 18.3px over card, 9.5px=9.5px | Bulan[month] text 24.2/76 card, 1 line, 18.3px over card, 9.5px=9.5px | Hari[day] text 18/76 card, 1 line, 10.3px over pill, 9.5px=9.5px | Jam[hour] text 18.4/76 card, 1 line, 18.3px over card, 9.5px=9.5px
+  OK 375px
+  wrote bagan-with-hour-375.png
+  1280px: Tahun[year] text 25.8/97.3 card, 1 line, 18.3px over card, 9.5px=9.5px | Bulan[month] text 24.2/97.3 card, 1 line, 18.3px over card, 9.5px=9.5px | Hari[day] text 18/97.3 card, 1 line, 10.3px over pill, 9.5px=9.5px | Jam[hour] text 18.4/97.3 card, 1 line, 18.3px over card, 9.5px=9.5px
+  OK 1280px
+  wrote bagan-with-hour-1280.png
+
+== no-hour: /r/piM_rFB8bOB_vuFsZPlHL
+  intro: "Empat pilar dari tahun, bulan, hari, dan jam lahirmu. Inti dirimu dibaca dari hari lahir."
+  320px: Tahun[year] text 25.8/62.3 card, 1 line, 18.3px over card, 9.5px=9.5px | Bulan[month] text 24.2/62.3 card, 1 line, 18.3px over card, 9.5px=9.5px | Hari[day] text 18/62.3 card, 1 line, 10.3px over pill, 9.5px=9.5px | Jam[hour, empty] text 18.4/62.3 card, 1 line, 18.3px over card, 9.5px=9.5px
+  OK 320px
+  CONTROL 320px, month header "Bulan kelahiran menurut kalender matahari": FIRED: month: text 186.8px wider than card 62.3px
+  wrote control-oversized-no-hour-320.png
+  restored to "Bulan": OK
+  wrote bagan-no-hour-320.png
+  375px: Tahun[year] text 25.8/76 card, 1 line, 18.3px over card, 9.5px=9.5px | Bulan[month] text 24.2/76 card, 1 line, 18.3px over card, 9.5px=9.5px | Hari[day] text 18/76 card, 1 line, 10.3px over pill, 9.5px=9.5px | Jam[hour, empty] text 18.4/76 card, 1 line, 18.3px over card, 9.5px=9.5px
+  OK 375px
+  wrote bagan-no-hour-375.png
+  1280px: Tahun[year] text 25.8/97.3 card, 1 line, 18.3px over card, 9.5px=9.5px | Bulan[month] text 24.2/97.3 card, 1 line, 18.3px over card, 9.5px=9.5px | Hari[day] text 18/97.3 card, 1 line, 10.3px over pill, 9.5px=9.5px | Jam[hour, empty] text 18.4/97.3 card, 1 line, 18.3px over card, 9.5px=9.5px
+  OK 1280px
+  wrote bagan-no-hour-1280.png
+
+pdf-ce-chart: chart page 5, headers drawn: Tahun Bulan Hari Jam
+  wrote pdf-ce-chart-p05.png
+
+pdf-compat-chart: chart page 3, headers drawn: Tahun Bulan Hari Jam Tahun Bulan Hari Jam
+  wrote pdf-compat-chart-p03.png
+
+OK: every header one line, within its card, clear of the pill; the control fired

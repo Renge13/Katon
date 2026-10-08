@@ -527,11 +527,16 @@ test('amendment 2 §1: the same instance shows the card again once the address m
 // PROMPT BG §5 (Reyner, 2026-10-06), which replaced BF §3b's layout: with no hour, the row
 // still shows FOUR cells, the fourth an empty Pilar Arah cell (its label, no hanzi) with
 // H3 inside it; H2 stays one line under the row. Hour known: unchanged.
-/** The cells of the Bagan row, in order: the grid that holds the PillarCells. */
+/**
+ * The cells of the Bagan row, in order. Since Prompt BL each grid cell is a column
+ * (the Tahun / Bulan / Hari / Jam header, then the card), so a cell here is the column's
+ * card: its last child. tests/pillar-time-labels.spec.mjs owns the headers.
+ */
 const pillarRow = (host) => {
   const intro = [...host.querySelectorAll('p')].find((p) => p.textContent === RULED.bagan_intro);
   const grid = [...intro.closest('div').parentElement.querySelectorAll('div')].find((d) => d.style.display === 'grid');
-  return { grid, cells: [...grid.children] };
+  assert.ok([...grid.children].every((col) => col.hasAttribute('data-pillar-col')), 'every grid cell is a pillar column');
+  return { grid, cells: [...grid.children].map((col) => col.lastElementChild) };
 };
 
 test('§3b + BG §5: no hour, four cells, the fourth an empty Pilar Arah with H3 inside, H2 under the row; hour given, four computed cells', async () => {

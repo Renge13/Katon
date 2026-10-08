@@ -71,7 +71,7 @@ function fireEvent(token, event) {
     }).catch(() => {});
   } catch { /* a counter never breaks the page */ }
 }
-import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, EmptyPillarCell, Icon, elColor, alpha } from './kit.jsx';
+import { Reveal, Eyebrow, Button, Rule, BalanceBar, PillarCell, EmptyPillarCell, PillarColumn, Icon, elColor, alpha } from './kit.jsx';
 import { ELEMENT_GLOSS, presenceBars } from '../lib/site/elements.js';
 import { priceFor } from '../lib/pricing.js';
 import { SITE_COPY, PASANGAN_COPY } from '../lib/site/copy.js';
@@ -1091,24 +1091,30 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
               and nothing else, as before. */}
           <Reveal delay={0.12}>
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${chart.pillars.length + (chart.missing_pillar ? 1 : 0)},1fr)`, gap: 9 }}>
+              {/* Each card under its time header, Tahun / Bulan / Hari / Jam (Prompt BL,
+                  Reyner 2026-10-08), by the pillar's position, never its index. */}
               {chart.pillars.map((p) => (
-                <PillarCell key={p.position} label={p.palace} stem={p.stem} branch={p.branch}
-                  elementId={p.element} element={p.element} polarity={p.animal} isDayMaster={p.is_day_master} />
+                <PillarColumn key={p.position} position={p.position}>
+                  <PillarCell label={p.palace} stem={p.stem} branch={p.branch}
+                    elementId={p.element} element={p.element} polarity={p.animal} isDayMaster={p.is_day_master} />
+                </PillarColumn>
               ))}
               {chart.missing_pillar && (
-                <EmptyPillarCell label={chart.missing_pillar.palace}>
-                  <a
-                    href={ADD_HOUR_HREF}
-                    onClick={() => rememberBirth({
-                      date: profile.birth_date,
-                      time: null,
-                      gender: profile.gender,
-                    })}
-                    style={{ color: 'var(--tinta-soft)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3 }}
-                  >
-                    {CHROME_COPY.hour_add}
-                  </a>
-                </EmptyPillarCell>
+                <PillarColumn position={chart.missing_pillar.position}>
+                  <EmptyPillarCell label={chart.missing_pillar.palace}>
+                    <a
+                      href={ADD_HOUR_HREF}
+                      onClick={() => rememberBirth({
+                        date: profile.birth_date,
+                        time: null,
+                        gender: profile.gender,
+                      })}
+                      style={{ color: 'var(--tinta-soft)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3 }}
+                    >
+                      {CHROME_COPY.hour_add}
+                    </a>
+                  </EmptyPillarCell>
+                </PillarColumn>
               )}
             </div>
           </Reveal>
