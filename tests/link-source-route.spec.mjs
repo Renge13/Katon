@@ -66,6 +66,13 @@ test('BM rule 1 FALSIFICATION: a date-shaped code still records reading_created,
   assert.deepEqual(row.detail, { has_hour: true, k: null, ref: 'l.threads.com', landing: 'home' });
 });
 
+test('BM rule 1 applied to ref: a date-shaped referrer host still records reading_created, with ref null', async () => {
+  const token = await mirror({ src: { k: 'th-arch1', ref: '2026-10-08.example.com', landing: 'home' } });
+  const row = await eventFor(token, 'reading_created');
+  assert.ok(row, 'reading_created must exist: a bad ref may never cost the event');
+  assert.deepEqual(row.detail, { has_hour: true, k: 'th-arch1', ref: null, landing: 'home' });
+});
+
 test('BM 4: a mirror create with a valid src stores it on reading_created', async () => {
   const token = await mirror({ src: SRC });
   assert.deepEqual((await eventFor(token, 'reading_created')).detail,
