@@ -53,7 +53,8 @@ const RULED = {
   resume_open: 'Buka bacaanku', // R2
   resume_new: 'Mulai bacaan baru', // R3
   next_other_date: 'Baca tanggal lain', // R4
-  bagan_intro: 'Empat pilar dari tanggal lahirmu. Pilar yang bertanda Inti Diri adalah intinya.', // K1
+  // K1, REPLACED by Prompt BL §3 (Reyner 2026-10-08, verbatim).
+  bagan_intro: 'Empat pilar dari tahun, bulan, hari, dan jam lahirmu. Inti dirimu dibaca dari hari lahir.',
   hour_hint: 'Tidak tahu? Lewati saja.', // H1
   hour_missing: 'Jam lahir belum diisi, jadi Pilar Arah belum dihitung.', // H2
   hour_add: 'Tambahkan jam lahir', // H3
