@@ -229,29 +229,65 @@ test('AY §2: THE COMPATIBILITY BLOCK renders after the offer under an open fenc
   } finally { f.restore(); }
 });
 
-test('AZ §4: THE COMPAT BLOCK FIRES compat_cta_seen when displayed and compat_cta_click on its button; nothing when hidden', async () => {
+// ── compat_cta_seen IS "ON SCREEN", NOT "MOUNTED" (Prompt BM item 5, 2026-10-08) ──
+// It fired on mount until BM, while offer_seen fired on viewport intersection (BG §2.3),
+// so the two were not comparable. jsdom has no IntersectionObserver: this fake is driven
+// by hand, the pattern of tests/offer-seen.spec.mjs, so the test decides what is on screen.
+const observers = [];
+class FakeIO {
+  constructor(cb) { this.cb = cb; this.els = []; observers.push(this); }
+  observe(el) { this.els.push(el); }
+  unobserve() {}
+  disconnect() { this.els = []; }
+}
+async function show(el, isIntersecting) {
+  await act(async () => {
+    for (const o of observers) if (o.els.includes(el)) o.cb([{ target: el, isIntersecting }]);
+  });
+}
+
+test('AZ §4 + BM 5: compat_cta_seen fires when the block is ON SCREEN, once; compat_cta_click on its button; nothing when hidden', async () => {
   const prev = globalThis.fetch;
+  const prevIO = globalThis.IntersectionObserver;
+  observers.length = 0;
+  window.IntersectionObserver = FakeIO;
+  globalThis.IntersectionObserver = FakeIO;
   const sent = [];
   globalThis.fetch = async (url, init) => {
     if (String(url).endsWith('/event')) sent.push(JSON.parse(init.body).event);
     return { ok: true, status: 200, json: async () => ({}) };
   };
+  const seen = () => sent.filter((e) => e === 'compat_cta_seen').length;
   try {
     const open = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: true, compatOpen: true }));
-    assert.ok(sent.includes('compat_cta_seen'), `displayed: ${sent.join(', ')}`);
+    const block = open.host.querySelector('[data-compat-offer]');
+    assert.ok(block, 'precondition: the compat block is on the page');
+    assert.equal(seen(), 0, `mounted but not scrolled to: no seen event (${sent.join(', ')})`);
+
+    await show(block, false);
+    assert.equal(seen(), 0, 'an observer report that it is OFF screen does not count');
+    await show(block, true);
+    assert.equal(seen(), 1, `on screen: seen fires (${sent.join(', ')})`);
+    await show(block, false);
+    await show(block, true);
+    assert.equal(seen(), 1, 'a re-scroll does not fire it again');
+
     const link = [...open.host.querySelectorAll('a')].find((a) => a.textContent.includes(CHROME_COPY.compat_cta));
     // Stop jsdom navigating; the handler still runs.
     link.addEventListener('click', (e) => e.preventDefault());
     await act(async () => { link.click(); });
     assert.ok(sent.includes('compat_cta_click'), `clicked: ${sent.join(', ')}`);
-    assert.equal(sent.filter((e) => e === 'compat_cta_seen').length, 1, 'seen fires once');
     await open.unmount();
 
     sent.length = 0;
     const closed = await mount(React.createElement(Reading, { reading: SERVED, onReset() {}, salesOpen: false }));
     assert.ok(!sent.includes('compat_cta_seen'), 'hidden: no seen event');
     await closed.unmount();
-  } finally { globalThis.fetch = prev; }
+  } finally {
+    globalThis.fetch = prev;
+    window.IntersectionObserver = prevIO;
+    globalThis.IntersectionObserver = prevIO;
+  }
 });
 
 test('AZ §4: /harga\'s Complete Edition body IS the offer\'s copy-bank entries, not a duplicate', () => {
