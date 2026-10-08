@@ -1,0 +1,36 @@
+# Prompt BM: link-code source attribution + compat CTA seen-on-screen (Reyner approved 2026-10-08)
+Goes in the working tree as `docs/prompts/BM-source-attribution.md`. Untracked until you commit it: commit it in this PR.
+
+**Self-contained: you may be a fresh Code session.** Read `CLAUDE.md`. Work in your own worktree. Branch `feat/source-attribution` off `origin/main` (must contain #212, `4f3dc24`). Report the open-PR list first.
+
+Cite the four checks. No regex through a shell heredoc. No model-based judge. Red first. No engine, glossary, writer-prompt, PDF or Stage 6 change. No migration (`funnel_event.detail` is `jsonb`, `supabase/migrations/0009_demand_test.sql:31`). **Do not merge.**
+
+## Why
+Katon has no source attribution anywhere. `lib/analytics/events.js` records funnel steps per reading but not where the reader came from, and Vercel Web Analytics gets every URL through `lib/site/analyticsUrl.js`, which drops the query, so UTM tags never arrive there either. Reyner is starting tracked organic posts (Threads, own circle) and later small paid rounds, each link with its own code. Funnel read 2026-10-08 (baseline 2026-10-07): 8 readings created, 8 viewed, 5 offer_seen, 0 checkout; 0 non-test pairs; `compat_cta_seen` 5, `compat_cta_click` 0.
+
+## Ruled (Reyner 2026-10-08; technical shape ruled by Cowork, rule 9)
+1. **The link code is `?k=<code>`** on any katon.app URL. Valid code: lowercase, `^[a-z0-9][a-z0-9-]{0,23}$`, AND containing no `\d{4}-\d{2}-\d{2}` run. Anything else is stored as `k: null`. Reason for the date clause: `assertNoPii` (`lib/analytics/events.js`) throws on a date anywhere in `detail`, and `recordEvent` swallows the throw, so a code like `th-2026-10-08` would silently DROP the whole `reading_created` row. **A bad code may never cost the event.**
+2. **First touch per browser tab, session only, no cookie.** One client component mounted once in `app/layout.js` (next to `PageAnalytics`) reads the landing URL on the first page load of the tab session and writes `sessionStorage['katon:src'] = {k, ref, landing}` only if the key is absent (first write wins). Every storage call in try/catch; if storage is blocked keep the value in a module variable for this page load. No localStorage, no cookie (`/privasi` promises "tanpa cookie").
+   - `ref`: `document.referrer` HOSTNAME only, lowercased, `^[a-z0-9.-]{1,64}$`, null when empty or when it is katon.app, www.katon.app or any `*.vercel.app` host. Never the path or query.
+   - `landing`: the first path segment of the landing URL, mapped to one of `home`, `kompatibilitas`, `r`, `harga`, `tentang`, `privasi`, `other`. Never a token.
+3. **Strip `k` from the address bar** after capture with `history.replaceState`, keeping every other param and the hash (e.g. `?bayar=selesai` must survive). Reason: a reader who copies the URL into WhatsApp must not credit WhatsApp traffic to Reyner's Threads code; `ref` covers that visit instead.
+4. **Send it with the two creates.** The mirror form's `POST /api/mirror` and the compat form's `POST /api/pair` add `src: {k, ref, landing}` to the body. The server re-validates every field with the rules above (never trust the client) and:
+   - mirror: `recordEvent(id, 'reading_created', { has_hour, k, ref, landing })` (`lib/mirror/handlers.js:226`).
+   - pair: a NEW funnel event `pair_created`, keyed by the pair id, `{ k, ref, landing, from_mirror: Boolean(a_reading_id) }`, recorded in `createPairRow` (`lib/pair/handlers.js`) after the row is written, never awaited for correctness. Add it to `FUNNEL_EVENTS` with a header note like `pair_served`'s (pair-keyed, in no mirror denominator); check `scripts/demand-readout.mjs` still counts what it counted.
+   - **Do not copy the source onto `checkout_started` or `purchase_confirmed`.** They are keyed by the same reading/pair id, so the SQL joins them to the create event. One copy of the source, never two.
+5. **`compat_cta_seen` fires when the block is on screen, not on mount.** Today `CompatOffer` (`components/Funnel.jsx` ~1875) fires on mount while `offer_seen` fires on viewport intersection (BG §2.3), so the two are not comparable. Use an IntersectionObserver on the block, once per page load, same pattern as the offer panel. Event name unchanged. Note in the funnel SQL header: rows before this merge are mounts.
+6. **SQL, read-only, in `docs/ops/`:**
+   - `funnel.sql`: add `k` (coalesce `k`, then `'ref:' || ref`, then `'(none)'`) as a second split, as a separate section or a second query in the same file; keep the existing output unchanged.
+   - new `compat-funnel.sql`: pairs created in the window from `pair_created`, by source and `from_mirror`, then `checkout_started` and `paid` by join on the pair id; plus `compat_cta_seen` / `compat_cta_click` counts over the mirror cohort. Exclude test pairs from PROGRESS "KNOWN TEST ROWS" (the 6 `mock_` pairs and `FpzdJClI11-giquyEpZBA`) and mirror test rows.
+7. **Ledger:** new `docs/ops/link-codes.md`: a table Reyner fills by hand, columns `code | date posted | channel | angle | post URL | notes`, with the code rules from item 1 at the top. Empty table, header only.
+8. **`/privasi`: no copy change in this PR.** Reyner is ruling a sentence separately; if his ruled string arrives before the PR is ready, it goes in as its own commit to `PRIVASI_COPY.collectNote` (`lib/site/copy.js` ~451) with copy-bank counts updated.
+9. `analyticsUrl` stays as it is (query still dropped).
+10. **Record Reyner's hosting-trigger ruling in PROGRESS** (its own commit), as a dated line under the INTERIM REGISTER row "KATON RUNS A COMMERCIAL PRODUCT ON A NON-COMMERCIAL PLAN", verbatim: `RULED 2026-10-08 (Reyner): Threads comments are not meaningful promotion yet. Genuine participation in relevant conversations is still organic activity. The boundary is when I deliberately turn it into a distribution campaign: high-volume commenting, repeated links, templated replies, or systematic traffic acquisition. That counts as meaningful promotion and triggers the gate.` Add `docs/ops/link-codes.md` to the REPO CONVENTIONS or ops index if one lists `docs/ops/` files.
+
+## Validation and report
+Red first, shown failing on `main`:
+- unit: the validator accepts `th-arch1`, `ig1`; rejects `TH`, `a b`, 25 chars, `th-2026-10-08`, `../x`; ref host rejects a path, accepts `l.threads.com`, drops `www.katon.app`.
+- **the falsification for rule 1:** `POST /api/mirror` with `src.k = 'th-2026-10-08'` (in-memory backend) still records `reading_created`, with `k: null`. Show it failing first by temporarily passing the raw code through: the event must go missing, proving the test can see the drop.
+- route tests: a mirror create and a pair create with a valid `src` store it on `reading_created` / `pair_created`; a create with no `src` stores nulls and still records.
+- browser (local build, not a preview, no shared-DB rows): land on `/?k=th-arch1&x=1`, URL becomes `/?x=1`, sessionStorage holds the code; navigate to `/kompatibilitas`, a second `?k=other` does not overwrite; `compat_cta_seen` does not fire until the block is scrolled into view.
+`npm test`, `npm run check:qa`, CI green. Report the PR link and preview URL. Do not create readings on the preview (shared DB). **Do not merge.**
