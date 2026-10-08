@@ -181,3 +181,22 @@ test('AV §5: a pair_served row is not an anomaly, is counted as a pair, and mov
     assert.equal(after[k], before[k], `${k} moved`);
   }
 });
+
+// ── pair_created (Prompt BM item 4): KNOWN, COUNTED ON ITS OWN, IN NO MIRROR DENOMINATOR ──
+test('BM 4: a pair_created row is not an anomaly, is counted as a pair, and moves no mirror number', () => {
+  const base = [
+    { reading_id: 'a', event: 'reading_created', detail: { has_hour: true, k: 'th-arch1', ref: null, landing: 'home' }, count: 1, created_at: '2026-10-08T01:00:00.000Z' },
+    { reading_id: 'a', event: 'mirror_served', detail: { source: 'gemini' }, count: 1, created_at: '2026-10-08T01:00:10.000Z' },
+  ];
+  const pairs = [
+    { reading_id: 'p1', event: 'pair_created', detail: { k: 'th-arch1', ref: null, landing: 'kompatibilitas', from_mirror: false }, count: 1, created_at: '2026-10-08T02:00:00.000Z' },
+    { reading_id: 'p2', event: 'pair_created', detail: { k: null, ref: null, landing: 'r', from_mirror: true }, count: 1, created_at: '2026-10-08T02:00:00.000Z' },
+  ];
+  assert.deepEqual(anomalies([...base, ...pairs], []), []);
+  const before = summarise(base, []);
+  const after = summarise([...base, ...pairs], []);
+  assert.equal(after.pairsCreated, 2);
+  for (const k of ['created', 'completed', 'floored', 'downloaded', 'purchasedArtifact', 'upcomingSeen', 'pairsServed']) {
+    assert.equal(after[k], before[k], `${k} moved`);
+  }
+});

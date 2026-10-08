@@ -89,6 +89,7 @@ import { ProseBlocks } from './ProseBlocks.jsx';
 import { FENCE_REFUSALS } from '../lib/paymentFence.js';
 import { formatIdr } from '../lib/site/format.js';
 import { rememberBirth, recallBirth } from '../lib/site/carryBirth.js';
+import { readSource } from '../lib/site/linkSource.js';
 import {
   rememberReading, forgetReading, subscribeLastReading, lastReadingSnapshot, parseLastReading,
 } from '../lib/site/lastReading.js';
@@ -393,6 +394,9 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
         birthTime: resolution.birthTime ?? birthTime,
         termSide: resolution.termSide ?? null,
         gender: form.gender || null,
+        // The tab's first touch (Prompt BM): link code, referrer host, landing. The
+        // server re-validates it and records it on `reading_created`, once.
+        src: readSource(),
       }),
     }).then((r) => r.json());
     if (created.error || !created.token) {
