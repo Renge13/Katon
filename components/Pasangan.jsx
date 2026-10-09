@@ -30,6 +30,7 @@ import { compatPairRoute } from '../lib/site/routes.js';
 import { priceFor } from '../lib/pricing.js';
 import { formatIdr } from '../lib/site/format.js';
 import { recallBirth } from '../lib/site/carryBirth.js';
+import { readSource } from '../lib/site/linkSource.js';
 
 const wrap = { maxWidth: 460, margin: '0 auto', padding: '0 22px 96px' };
 const EMPTY = { date: '', time: '', gender: '', nickname: '' };
@@ -156,6 +157,9 @@ export default function Pasangan({ initialA = null, salesClosed = false }) {
         b: birthBody(b, answers.b || {}),
         a_reading_id: initialA?.readingId || null,
         status,
+        // The tab's first touch (Prompt BM). Re-validated server-side and recorded once,
+        // on `pair_created`.
+        src: readSource(),
       }),
     }).then((r) => r.json()).catch(() => null);
 

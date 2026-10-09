@@ -3,6 +3,7 @@ import './globals.css';
 import SiteFooter from '@/components/SiteFooter.jsx';
 import SiteHeader from '@/components/SiteHeader.jsx';
 import PageAnalytics from '@/components/PageAnalytics.jsx';
+import SourceCapture from '@/components/SourceCapture.jsx';
 import { compatCheckoutOpen } from '@/lib/paymentFence';
 import { GlossNamesProvider } from '@/components/GlossNames.jsx';
 import { GLOSS_NAMES_EN } from '@/lib/render/glossNames.js';
@@ -86,6 +87,9 @@ export default function RootLayout({ children }) {
         {/* Page views, cookieless, with the reading token taken out of the URL (Prompt
             BG §2.4). Collects nothing until Web Analytics is enabled in Vercel. */}
         <PageAnalytics />
+        {/* The link code (?k=) and referrer host of this tab's first page load, in
+            sessionStorage, sent with the two creates (Prompt BM). No cookie. */}
+        <SourceCapture />
       </body>
     </html>
   );

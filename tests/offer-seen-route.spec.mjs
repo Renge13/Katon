@@ -106,6 +106,10 @@ test('BG §2.2: reading_created says whether the hour was given, and carries no 
   const noHour = await readyReading({ birthDate: '1990-03-04', birthTime: null });
   const created = await rowsOf('reading_created');
   const byToken = Object.fromEntries(created.map((r) => [r.reading_id, r.detail]));
-  assert.deepEqual(byToken[withHour], { has_hour: true });
-  assert.deepEqual(byToken[noHour], { has_hour: false });
+  // Since Prompt BM (2026-10-08) it also carries the link source, all null here because
+  // these creates send no `src` (tests/link-source-route.spec.mjs covers the rest). The
+  // exact shape stays pinned, so a birth field added beside them still fails here.
+  const NO_SOURCE = { k: null, ref: null, landing: null };
+  assert.deepEqual(byToken[withHour], { has_hour: true, ...NO_SOURCE });
+  assert.deepEqual(byToken[noHour], { has_hour: false, ...NO_SOURCE });
 });

@@ -89,6 +89,7 @@ import { ProseBlocks } from './ProseBlocks.jsx';
 import { FENCE_REFUSALS } from '../lib/paymentFence.js';
 import { formatIdr } from '../lib/site/format.js';
 import { rememberBirth, recallBirth } from '../lib/site/carryBirth.js';
+import { readSource } from '../lib/site/linkSource.js';
 import {
   rememberReading, forgetReading, subscribeLastReading, lastReadingSnapshot, parseLastReading,
 } from '../lib/site/lastReading.js';
@@ -393,6 +394,9 @@ export default function Funnel({ salesOpen = false, compatOpen = false } = {}) {
         birthTime: resolution.birthTime ?? birthTime,
         termSide: resolution.termSide ?? null,
         gender: form.gender || null,
+        // The tab's first touch (Prompt BM): link code, referrer host, landing. The
+        // server re-validates it and records it on `reading_created`, once.
+        src: readSource(),
       }),
     }).then((r) => r.json());
     if (created.error || !created.token) {
@@ -1866,22 +1870,33 @@ function SalesItems({ items, dark = false }) {
  *
  * TWO EVENTS (Reyner, 2026-10-01, Prompt AZ §4), allowlisted server-side like the
  * other client events (lib/mirror/handlers.js CLIENT_EVENTS, FUNNEL_EVENTS):
- *   compat_cta_seen   when the block is displayed - it renders only while the fence
- *                     is open, so mounting IS being displayed; the ref keeps a
- *                     re-render from re-firing, as offer_seen's does.
+ *   compat_cta_seen   when the block is ON HER SCREEN (Prompt BM item 5, 2026-10-08):
+ *                     the first time it intersects the viewport, once per page load,
+ *                     the pattern offer_seen uses (BG §2.3). It fired on MOUNT until
+ *                     then, which counted every reader who opened the page, so the two
+ *                     were not comparable; docs/ops/funnel.sql says rows before BM's
+ *                     merge are mounts. No IntersectionObserver, no event.
  *   compat_cta_click  on the button. fireEvent sends with `keepalive`, so the
  *                     request outlives the navigation to /kompatibilitas.
  */
 function CompatOffer({ token }) {
   const seenRef = useRef(false);
+  const blockRef = useRef(null);
   useEffect(() => {
-    if (seenRef.current) return;
-    seenRef.current = true;
-    fireEvent(token, 'compat_cta_seen');
+    const block = blockRef.current;
+    if (seenRef.current || !block || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver((entries) => {
+      if (seenRef.current || !entries.some((e) => e.target === block && e.isIntersecting)) return;
+      seenRef.current = true;
+      fireEvent(token, 'compat_cta_seen');
+      io.disconnect();
+    });
+    io.observe(block);
+    return () => io.disconnect();
   }, [token]);
   return (
     <Reveal>
-      <div style={{ background: 'var(--kertas)', border: '1px solid var(--border)', borderRadius: 26, padding: '30px 24px 26px' }}>
+      <div ref={blockRef} data-compat-offer="" style={{ background: 'var(--kertas)', border: '1px solid var(--border)', borderRadius: 26, padding: '30px 24px 26px' }}>
         <Eyebrow>{CHROME_COPY.compat_eyebrow}</Eyebrow>
         <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, lineHeight: 1.5, color: 'var(--tinta)', margin: '16px 0 0' }}>{CHROME_COPY.compat_headline}</p>
         <SalesItems items={CHROME_COPY.compat_items} />

@@ -83,10 +83,11 @@ const num = (n) => String(n).padStart(6);
  * plain-node script cannot import that server-only module, so the copy is asserted
  * equal to it in tests/analytics-events.spec.mjs. `pair_served` (Prompt AV §5) is keyed
  * by a PAIR id and enters no mirror denominator below: those count readers by name.
+ * `pair_created` (Prompt BM, 2026-10-08) is pair-keyed the same way.
  */
 export const KNOWN_EVENTS = new Set(['reading_created', 'mirror_served', 'card_downloaded', 'offer_seen',
   'checkout_started', 'purchase_confirmed', 'upcoming_seen', 'interest_registered', 'pair_served',
-  'compat_cta_seen', 'compat_cta_click']);
+  'compat_cta_seen', 'compat_cta_click', 'pair_created']);
 
 /** Funnel rows only: `system:` rows (AK §3.4) are facts about the service, not a reader. */
 const funnelOnly = (events) => (events ?? []).filter((e) => !String(e.reading_id ?? '').startsWith('system:'));
@@ -167,7 +168,9 @@ export function summarise(allEvents, interest) {
     annual: byProduct('annual').size,
     interestSignals: interest.length,
     withContact: interest.filter((r) => r.contact).length,
-    // Compatibility serves (AV §5), by pair id: outside every mirror denominator.
+    // Compatibility creates (BM) and serves (AV §5), by pair id: outside every mirror
+    // denominator.
+    pairsCreated: readersWith(events, 'pair_created').size,
     pairsServed: readersWith(events, 'pair_served').size,
     pairsFloored: new Set(events
       .filter((e) => e.event === 'pair_served' && e.detail?.source === 'module_assembly')
@@ -208,6 +211,7 @@ if (invoked) {
   // different question and must never be read as demand.
   console.log(`contact capture                      ${num(s.withContact)}  of ${s.interestSignals} interest signals (NOT the interest metric)`);
   console.log('');
+  console.log(`compatibility pairs created          ${num(s.pairsCreated)}     (pair_created, by pair id; since BM, 2026-10-08)`);
   console.log(`compatibility pairs served           ${num(s.pairsServed)}     (pair_served, by pair id; no mirror denominator)`);
   console.log(`  of which floored (module_assembly) ${num(s.pairsFloored)}  ${pct(s.pairsFloored, s.pairsServed)}`);
 

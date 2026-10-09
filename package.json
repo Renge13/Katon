@@ -134,6 +134,8 @@
     "test:offer-seen-route": "node --conditions=react-server --test tests/offer-seen-route.spec.mjs",
     "test:offer-seen": "node --import ./scripts/jsx-register.mjs --test tests/offer-seen.spec.mjs",
     "test:page-analytics": "node --test tests/page-analytics.spec.mjs",
+    "test:link-source": "node --test tests/link-source.spec.mjs",
+    "test:link-source-route": "node --conditions=react-server --test tests/link-source-route.spec.mjs",
     "test:birth-fields": "node --import ./scripts/jsx-register.mjs --test tests/birth-fields.spec.mjs",
     "test:kontak-no-whatsapp": "node --import ./scripts/jsx-register.mjs --import ./scripts/alias-register.mjs --test tests/kontak-no-whatsapp.spec.mjs",
     "test:compat-sales-copy": "node --import ./scripts/jsx-register.mjs --test tests/compat-sales-copy.spec.mjs",
