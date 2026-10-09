@@ -32,7 +32,10 @@
 
 -- ── QUERY 1: pairs created, by source and from_mirror ──
 with params as (
-  select timestamptz '2026-10-08 00:00+07' as since,   -- inclusive, WIB; pair_created since BM
+  -- `since` defaults to the first full WIB day after BM's merge (PR #213, merged
+  -- 2026-10-09): `pair_created` does not exist before the merge, so the merge day itself
+  -- would count only the pairs created after it.
+  select timestamptz '2026-10-10 00:00+07' as since,   -- inclusive, WIB
          timestamptz '2026-11-01 00:00+07' as until    -- exclusive, WIB
 ),
 test_rows(id) as (
@@ -83,7 +86,10 @@ order by count(*) desc, source, from_mirror;
 
 -- ── QUERY 2: the Compatibility block on the mirror, by source. Select from here down. ──
 with params as (
-  select timestamptz '2026-10-08 00:00+07' as since,   -- inclusive, WIB; seen = on screen since BM
+  -- `since` defaults to the first full WIB day after BM's merge (PR #213, merged
+  -- 2026-10-09): rows from the merge day itself mix mount-fired and on-screen
+  -- compat_cta_seen, and readings with and without a recorded source.
+  select timestamptz '2026-10-10 00:00+07' as since,   -- inclusive, WIB
          timestamptz '2026-11-01 00:00+07' as until    -- exclusive, WIB
 ),
 test_rows(id) as (

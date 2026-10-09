@@ -113,7 +113,11 @@ order by case split when 'all' then 0 when 'hour given' then 1 when 'no hour' th
 -- and carry no source of their own (one copy, never two), so the join below is what
 -- credits a purchase to the code that brought the reader in.
 with params as (
-  select timestamptz '2026-10-08 00:00+07' as since,   -- inclusive, WIB; no source before BM
+  -- `since` defaults to the first full WIB day after BM's merge (PR #213, merged
+  -- 2026-10-09): rows from the merge day itself mix readings created before the source
+  -- was recorded (k/ref/landing absent, read as `(none)`) with readings created after.
+  -- Query 1 above keeps its own 2026-10-07 default.
+  select timestamptz '2026-10-10 00:00+07' as since,   -- inclusive, WIB
          timestamptz '2026-11-01 00:00+07' as until    -- exclusive, WIB
 ),
 test_rows(id) as (
