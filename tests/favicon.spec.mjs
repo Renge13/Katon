@@ -35,6 +35,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const NEXT_BIN = path.join(ROOT, 'node_modules', 'next', 'dist', 'bin', 'next');
@@ -171,15 +172,74 @@ test('/favicon.ico RESOLVES, WITH 16x16 AND 32x32 INSIDE (crawlers ask for it by
   assert.deepEqual(sizes.sort(), ['16x16', '32x32'], `favicon.ico holds ${sizes.join(', ') || 'nothing'}`);
 });
 
-test('THE MARK USES THE CURRENT --kertas AND --clay, read from app/globals.css', () => {
+// ── THE MARK, BY PIXEL (option A2, Reyner 2026-10-12) ────────
+// The tab icon is the --clay dot ALONE, about 80% of the canvas, on a transparent
+// background: option A's --kertas tile vanished against a white active tab and
+// left a 7px dot. The apple icon keeps option A unchanged - a full-bleed --kertas
+// square with the dot at 44% - because iOS draws its own tile and a transparent
+// icon would show black there. Asserted on the RENDERED files, not on the SVG
+// source, so a file that reads right and renders wrong cannot pass.
+
+function token(name) {
   const css = readFileSync(path.join(ROOT, 'app', 'globals.css'), 'utf8');
-  const token = (name) => {
-    const m = css.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, 'iu'));
-    assert.ok(m, `app/globals.css defines no --${name}`);
-    return m[1].toLowerCase();
-  };
-  const svg = readFileSync(path.join(ROOT, 'app', 'icon.svg'), 'utf8').toLowerCase();
-  for (const name of ['kertas', 'clay']) {
-    assert.ok(svg.includes(token(name)), `app/icon.svg does not use --${name} (${token(name)})`);
+  const m = css.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, 'iu'));
+  assert.ok(m, `app/globals.css defines no --${name}`);
+  return [1, 3, 5].map((i) => parseInt(m[1].slice(i, i + 2), 16));
+}
+
+async function pixels(buf, size) {
+  const img = await loadImage(buf);
+  const canvas = createCanvas(size, size);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, size, size);
+  const { data } = ctx.getImageData(0, 0, size, size);
+  return (x, y) => Array.from(data.subarray((y * size + x) * 4, (y * size + x) * 4 + 4));
+}
+
+const near = (px, rgb) => px[3] === 255 && rgb.every((c, i) => Math.abs(px[i] - c) <= 2);
+
+/** The dot's diameter as a share of the side, measured across the middle row. */
+function dotShare(at, size, clay) {
+  let n = 0;
+  for (let x = 0; x < size; x++) if (near(at(x, size >> 1), clay)) n++;
+  return n / size;
+}
+
+function assertTabMark(at, size, label) {
+  const clay = token('clay');
+  // The corner alone cannot see a tile: option A's rounded corners were
+  // transparent too, and that assertion passed on it. The middle of the left
+  // edge is inside any tile and outside an 80% dot.
+  for (const [x, y] of [[0, 0], [0, size >> 1]]) {
+    assert.equal(at(x, y)[3], 0, `${label}: pixel ${x},${y} is not transparent - the mark still sits on a tile`);
   }
+  assert.ok(near(at(size >> 1, size >> 1), clay), `${label}: the centre is ${at(size >> 1, size >> 1)}, not --clay ${clay}`);
+  const share = dotShare(at, size, clay);
+  assert.ok(Math.abs(share - 0.8) <= 0.1, `${label}: the dot is ${Math.round(share * 100)}% of the side, not about 80%`);
+}
+
+test('THE TAB MARK IS THE CLAY DOT ALONE, ~80%, ON TRANSPARENT (app/icon.svg, rendered)', async () => {
+  const svg = readFileSync(path.join(ROOT, 'app', 'icon.svg'));
+  assertTabMark(await pixels(svg, 100), 100, 'app/icon.svg');
+});
+
+test('THE .ico FOLLOWS THE SVG: each entry is the dot alone on transparent', async () => {
+  const ico = readFileSync(path.join(ROOT, 'app', 'favicon.ico'));
+  for (let i = 0; i < ico.readUInt16LE(4); i++) {
+    const at = 6 + i * 16;
+    const size = ico[at] || 256;
+    const png = ico.subarray(ico.readUInt32LE(at + 12), ico.readUInt32LE(at + 12) + ico.readUInt32LE(at + 8));
+    assertTabMark(await pixels(png, size), size, `favicon.ico ${size}x${size}`);
+  }
+});
+
+test('THE APPLE ICON KEEPS OPTION A: full-bleed --kertas, --clay dot at ~44%', async () => {
+  const at = await pixels(readFileSync(path.join(ROOT, 'app', 'apple-icon.png')), 180);
+  const kertas = token('kertas');
+  for (const [x, y] of [[0, 0], [179, 0], [0, 179], [179, 179]]) {
+    assert.ok(near(at(x, y), kertas), `apple-icon.png corner ${x},${y} is ${at(x, y)}, not opaque --kertas ${kertas}`);
+  }
+  assert.ok(near(at(90, 90), token('clay')), 'apple-icon.png centre is not --clay');
+  const share = dotShare(at, 180, token('clay'));
+  assert.ok(Math.abs(share - 0.44) <= 0.04, `apple-icon.png dot is ${Math.round(share * 100)}% of the side, not about 44%`);
 });

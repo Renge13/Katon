@@ -4,17 +4,19 @@
 // ============================================================
 //   npm run build:icons
 //
-// Prompt BO §1. `app/icon.svg` is the ONE source of the mark (option A, "clay
-// dot": a --kertas rounded square, a centred --clay circle, the dot from the
-// header logomark). The two raster files are rendered FROM it, so a change to
-// the mark is one edit and a re-run, never a second hand-drawn copy.
+// Prompt BO §1. `app/icon.svg` is the ONE source of the mark: option A2, the
+// --clay dot from the header logomark ALONE, about 80% of the canvas, on a
+// transparent background (Reyner, 2026-10-12, replacing option A's --kertas
+// tile, which vanished against a white active tab). The two raster files are
+// rendered FROM it, so a change to the mark is one edit and a re-run, never a
+// second hand-drawn copy.
 //
-// ── THE APPLE ICON IS FULL-BLEED, ON PURPOSE ──────────────
-// iOS masks a touch icon into its own rounded shape and fills any transparent
-// pixel with black. Rendered with the SVG's own rounded corners, the home-screen
-// icon would carry four black corners inside Apple's mask. So the apple icon is
-// rendered from the same SVG with the corner radius set to 0, and iOS supplies
-// the rounding. What a reader sees is the same mark.
+// ── THE APPLE ICON KEEPS OPTION A ─────────────────────────
+// A full-bleed --kertas square with the dot at 44% of the side, as ruled. iOS
+// masks a touch icon into its own rounded shape and fills any transparent pixel
+// with black, so the tab icon's transparent background cannot be reused there.
+// The SVG is drawn onto a --kertas canvas at 55% scale: 80% x 55% = 44%. The
+// colour is read from app/globals.css, never retyped here.
 //
 // ── THE .ico HOLDS PNG ENTRIES ────────────────────────────
 // 16x16 and 32x32, each a PNG inside the ICONDIR container. PNG-in-ICO is read
@@ -39,15 +41,19 @@ async function renderPng(source, size) {
   return canvas.toBuffer('image/png');
 }
 
-// Full-bleed variant for iOS. Refuses rather than silently rendering the
-// rounded mark if the SVG's corner radius is ever written differently.
-const RADIUS = /(<rect\b[^>]*\brx=")[^"]*(")/u;
-if (!RADIUS.test(svg)) {
-  throw new Error('build-icons: app/icon.svg has no <rect rx="..."> to square off for the apple icon');
-}
-const fullBleed = svg.replace(RADIUS, '$10$2');
+const css = readFileSync(path.join(ROOT, 'app', 'globals.css'), 'utf8');
+const KERTAS = css.match(/--kertas:\s*(#[0-9a-f]{6})/iu)?.[1];
+if (!KERTAS) throw new Error('build-icons: app/globals.css defines no --kertas');
 
-const apple = await renderPng(fullBleed, 180);
+const APPLE_SIZE = 180;
+const APPLE_SCALE = 0.55;
+const appleCanvas = createCanvas(APPLE_SIZE, APPLE_SIZE);
+const appleCtx = appleCanvas.getContext('2d');
+appleCtx.fillStyle = KERTAS;
+appleCtx.fillRect(0, 0, APPLE_SIZE, APPLE_SIZE);
+const markSide = APPLE_SIZE * APPLE_SCALE;
+appleCtx.drawImage(await loadImage(Buffer.from(svg)), (APPLE_SIZE - markSide) / 2, (APPLE_SIZE - markSide) / 2, markSide, markSide);
+const apple = appleCanvas.toBuffer('image/png');
 writeFileSync(path.join(ROOT, 'app', 'apple-icon.png'), apple);
 
 const entries = await Promise.all([16, 32].map(async (size) => ({ size, png: await renderPng(svg, size) })));
