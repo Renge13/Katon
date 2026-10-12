@@ -1,4 +1,6 @@
 <!--
+STALE 2026-10-12: written before BotID (package botid, used in app/api/mirror/route.js and lib/mirror/handlers.js) and Vercel Web Analytics (package @vercel/analytics, components/PageAnalytics.jsx) landed. Both are Vercel-only. Refresh this prompt before running it.
+
 STATUS: QUEUED, DO NOT START. Written by Cowork 2026-09-14, then HELD the same night on Reyner's correction:
 the ruled trigger (PROGRESS INTERIM REGISTER 2026-09-05; launch-plan state 2026-09-07) is "Vercel Hobby until
 first promotion BEYOND OWN NETWORK; then Render Singapore". Cowork had carried "U before promotion" forward
