@@ -192,6 +192,38 @@ is a CONSTRUCTION and fire on ordinary Indonesian.
 **The button now says what it does.** The fallback keeps `Simpan Gambar` because on that path it
 genuinely is a save - one capture, two destinations, two honest labels.
 
+### ADDED 2026-10-12 - COPY RULED BY REYNER FOR THE SAME SECTION (Prompt BP)
+
+Verbatim. They live in the copy bank (`CHROME_COPY` in `lib/site/copy.js`), not inline in the
+JSX the way the 2026-08-23 strings above do. `tests/invite-link.spec.mjs` locks them byte for byte.
+Swept by Cowork 2026-10-12: 0 hits on the live blocklist (controls fired: financial 2, code_leak 1).
+Re-swept by Code the same day: 0 hits on 70 compiled patterns, compiled as the gate does
+(`entry.flags || 'iu'`), with the same two controls firing.
+
+| slot | ships as |
+|---|---|
+| invite button, under `Bagikan Kartu` (`invite_label`) | **`Kirim tautan ke teman`** |
+| invite share text (`invite_text`) | **`Aku baru membaca pola diriku di Katon. Coba lihat pola dirimu, gratis: https://katon.app/?k=ajak`** |
+| text sent with a shared card (`card_share_text`) | **`Kartu pola diriku dari Katon. Lihat punyamu di https://katon.app/?k=kartu`** |
+| invite, copied state with no share sheet | **the existing `Tautan tersalin`** (`copy_link_done`), no new string |
+
+### ADDED 2026-10-12, LATER THE SAME DAY - REYNER'S SECOND RULING ON #216 (labels and behaviour)
+
+**Supersedes the card-button rows of the 2026-08-23 table (`Bagikan Kartu`, and `Simpan Gambar` on
+the fallback) and two rows of the BP table above (`invite_label`, `card_share_text`).** The eyebrow,
+the lead, `Menyiapkan...` and the error line stand.
+
+| slot | ships as | behaviour |
+|---|---|---|
+| card button (`card_save_label`) | **`Simpan kartu`**, on every platform; busy state stays `Menyiapkan...` | It SAVES the image. Android and desktop: a direct PNG download, no share sheet. iPhone / iPad: the share sheet with the image FILE ONLY (no text, no title), because a web download on iOS lands in Files, not Photos, and the sheet's "Save Image" is the route into Photos. iOS / iPadOS is detected explicitly (iPadOS reports as a Mac, so touch points decide), not by feature support. `card_downloaded` fires as before, never on AbortError. |
+| invite button (`invite_label`) | **`Bagikan`** | Unchanged: `navigator.share` with the ruled invite text and `https://katon.app/?k=ajak`, text only, no image; the copy fallback with `Tautan tersalin`; `invite_shared` as built. |
+| card caption (`card_share_text`) | **removed** from the copy bank and both call sites | `kartu` stays reserved in `docs/ops/link-codes.md`, marked unused since 2026-10-12. |
+
+Swept by Cowork: `Simpan kartu` and `Bagikan`, 0 hits on the 18 live patterns, controls fired.
+Re-swept by Code: 0 hits on 70 compiled patterns (`entry.flags || 'iu'`), controls fired
+(financial 2, code_leak 1). Locked by `tests/card-save.spec.mjs` (the platform matrix) and
+`tests/invite-link.spec.mjs` (the labels, and no caption slot).
+
 ---
 
 ## OUT OF SCOPE - CARD B KEEPS ITS DOWNLOAD

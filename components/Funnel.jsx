@@ -42,7 +42,7 @@ import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation.js';
 import { CardA, CardB, CARD_A, exportSize } from './cards/Card.js';
 import {
-  downloadCard, captureCard, dataUrlToFile, canSharePngFiles, shareOrSave, SHARE_CANCELLED,
+  downloadCard, captureCard, dataUrlToFile, saveCardImage, SHARE_CANCELLED,
 } from './cards/exportCards.js';
 
 /**
@@ -58,15 +58,17 @@ import {
  * `recordMirrorEvent`. This function does not need to know that list; it just
  * must not be relied upon.
  */
-function fireEvent(token, event) {
+function fireEvent(token, event, detail = null) {
   if (!token) return;
   try {
     fetch(`/api/mirror/${token}/event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // No payload. The one client event that carried one, `interest_registered`,
+      // One event carries a payload: `invite_shared` sends `{ via }` (Prompt BP §3).
+      // The server keeps only the fields it validates, so a stray key here is
+      // dropped there rather than stored. `interest_registered`, the other one,
       // left with the upcoming block (Prompt AQ §2, 2026-09-28).
-      body: JSON.stringify({ event }),
+      body: JSON.stringify(detail ? { event, ...detail } : { event }),
       keepalive: true,
     }).catch(() => {});
   } catch { /* a counter never breaks the page */ }
@@ -83,7 +85,7 @@ import { COMPAT_ROUTE } from '../lib/site/routes.js';
 export { readableError } from '../lib/site/readableError.js';
 import { readableError } from '../lib/site/readableError.js';
 import { BirthFields, FieldLabel, EARLIEST_BIRTH_DATE, DATE_RANGE_ERROR, today } from './BirthFields.jsx';
-import CopyLink from './CopyLink.jsx';
+import CopyLink, { COPIED_MS } from './CopyLink.jsx';
 import { CHROME_COPY } from '../lib/site/copy.js';
 import { ProseBlocks } from './ProseBlocks.jsx';
 import { FENCE_REFUSALS } from '../lib/paymentFence.js';
@@ -1459,26 +1461,18 @@ export function ShareCardA({ data, token, capture = captureCard }) {
   const stamp = useMemo(() => cardStamp(data), [data]);
   const filename = `katon-${(data.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png`;
 
-  // THE LABEL IS RIGHT FROM FIRST PAINT, which needs a detection that does not
-  // wait on the capture. Keying this off the eager File made the button read
-  // `Simpan Gambar` and then flip to `Bagikan Kartu` a second later, changing
-  // under the reader's eyes - seen in a browser, not predicted. `canSharePngFiles`
-  // asks the same question with a one-byte probe, because `canShare` is about the
-  // payload's TYPE rather than its bytes. The real file is still checked inside
-  // `shareOrSave` before anything is handed over.
-  //
-  // RESOLVED DURING RENDER, NOT IN AN EFFECT. There is no hydration hazard here:
-  // `reading` starts null and arrives from a client fetch, so the first render that
-  // contains this component is already on the client. An effect that setState'd the
-  // answer was written first and `react-hooks` refused it, correctly - it was a
-  // cascading render for a value that was available all along.
-  const shareSupported = useMemo(() => canSharePngFiles(), []);
+  // ONE LABEL ON EVERY PLATFORM (Reyner, 2026-10-12, #216): "Simpan kartu". Until
+  // then a share-support probe chose between `Bagikan Kartu` and `Simpan Gambar`;
+  // the button now always SAVES, and only the route differs (saveCardImage), so
+  // there is nothing left for a label to detect.
 
   // ── THE EAGER CAPTURE. APPROVED BY REYNER 2026-08-23. ──
   // `navigator.share` needs an active user activation, and the capture is not
   // instant (61 font requests measured for one card). On iOS Safari an await of
   // that length between the tap and `share()` consumes the activation: the sheet
   // never opens and nothing says why. So the File is in hand before she taps.
+  // Since 2026-10-12 only iOS / iPadOS takes the sheet (saveCardImage); everywhere
+  // else the same eager capture just makes the download immediate.
   //
   // CONDITION 1 - IT MUST NOT BLOCK OR DELAY THE READING. It is kicked off the
   // critical path in a timeout, and a failure here is swallowed: a reader who has
@@ -1513,7 +1507,10 @@ export function ShareCardA({ data, token, capture = captureCard }) {
       // NOTHING IS AWAITED BEFORE `share()` ON THIS PATH. That is the entire point
       // of the eager capture; adding an await here would restore the iOS bug it
       // was approved to prevent.
-      const result = await shareOrSave({ file: fresh.file, dataUrl: fresh.dataUrl, filename });
+      // THE IMAGE ONLY, NO TEXT (Reyner, 2026-10-12): the card's caption string with
+      // `?k=kartu` was removed the same day it was added. The link lives on the
+      // invite button below.
+      const result = await saveCardImage({ file: fresh.file, dataUrl: fresh.dataUrl, filename });
       if (result !== SHARE_CANCELLED) fireEvent(token, 'card_downloaded');
       return;
     }
@@ -1525,7 +1522,7 @@ export function ShareCardA({ data, token, capture = captureCard }) {
     try {
       const dataUrl = await capture('share', 'A', { id: 'card-a' });
       setReady({ dataUrl, file: dataUrlToFile(dataUrl, filename), stamp });
-      const result = await shareOrSave({ file: dataUrlToFile(dataUrl, filename), dataUrl, filename });
+      const result = await saveCardImage({ file: dataUrlToFile(dataUrl, filename), dataUrl, filename });
       // COUNTED ONLY ON SUCCESS, and cancelling is not success. A capture that
       // threw produced no file, and the share-rate denominator must not include
       // deliveries that did not happen - this button shipped BLANK once (#74),
@@ -1559,21 +1556,100 @@ export function ShareCardA({ data, token, capture = captureCard }) {
         </ScaledCard>
       </Reveal>
       <Reveal delay={0.12} style={{ marginTop: 20 }}>
-        {/* COPY RULED BY REYNER 2026-08-23, "SHIP AS PROPOSED". Exact bytes.
-            REYNER-APPROVED 2026-08-23: `Bagikan Kartu`, `Menyiapkan...`.
-            The label says what the button does; on the fallback path it genuinely
-            is a save, so that path keeps `Simpan Gambar` - one capture, two
-            destinations, two honest labels. `shareSupported` is resolved from the
-            EAGER FILE rather than from `navigator.share`, for the same reason the
-            detection is: a browser that has `share` and refuses files must read
-            the save label, not the share one. */}
+        {/* RULED BY REYNER 2026-10-12 (#216): `Simpan kartu` on every platform,
+            replacing the 2026-08-23 pair `Bagikan Kartu` / `Simpan Gambar`. The
+            button SAVES; saveCardImage picks the route (iOS: the share sheet, as the
+            way into Photos; everywhere else: a download). `Menyiapkan...` is the
+            2026-08-23 ruling, unchanged. Record: docs/prompts/S-share-sheet.md. */}
         <Button variant="gold" onClick={share} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <Icon.save size={17} /> {busy ? 'Menyiapkan...' : (shareSupported ? 'Bagikan Kartu' : 'Simpan Gambar')}
+          <Icon.save size={17} /> {busy ? 'Menyiapkan...' : CHROME_COPY.card_save_label}
         </Button>
         {/* REYNER-APPROVED, unchanged. A cancelled share sheet never reaches this. */}
         {failed && <div style={{ color: 'var(--red)', fontSize: 13, marginTop: 10 }}>Gambarnya gagal dibuat. Coba lagi.</div>}
+        <InviteButton token={token} />
       </Reveal>
     </>
+  );
+}
+
+/**
+ * Copy text without a visible field: the modern API, then `execCommand` on a
+ * throwaway textarea. The same two rungs as CopyLink, minus its third (leave the
+ * field selected), because there is no field here to leave. Brave refuses rung 1
+ * under its stricter gesture rule; rung 2 is what works there (CopyLink's header).
+ */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch { /* absent or refused: rung 2 */ }
+  if (typeof document === 'undefined' || typeof document.execCommand !== 'function') return false;
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly', '');
+  area.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+  document.body.appendChild(area);
+  area.select();
+  let ok;
+  try { ok = document.execCommand('copy'); } catch { ok = false; }
+  area.remove();
+  return ok;
+}
+
+/**
+ * ── THE INVITE (Prompt BP §1, RULED BY REYNER 2026-10-12) ──
+ * Sends a friend a link to HER OWN free reading: the ruled text with
+ * `https://katon.app/?k=ajak`, so a reading it brings in is credited to `ajak` in
+ * docs/ops/funnel.sql query 2. Every reader can bring the next one, which is the
+ * constraint the funnel read showed (8 readings, 2026-10-08).
+ *
+ * SECONDARY STYLE (`ghost`), under the card's own share control. The section keeps
+ * one main action; this is the second thing she can do there, not a rival to it.
+ *
+ * TWO PATHS:
+ *   - a share sheet: `navigator.share({ text })`. `invite_shared` {via: 'share'}
+ *     fires when it resolves. A dismissed sheet (AbortError) fires NOTHING: she sent
+ *     nothing. Any other refusal falls to the clipboard, so a tap never does nothing.
+ *   - no share sheet: the clipboard, then the button itself reads the EXISTING
+ *     `copy_link_done` ("Tautan tersalin") for COPIED_MS, and `invite_shared`
+ *     {via: 'copy'} fires. No new string. If both clipboard rungs refuse, the label
+ *     does not change and nothing fires: a confirmation of a copy that did not
+ *     happen would be false, and the prompt rules no string for that state.
+ *
+ * NOTHING IS AWAITED BEFORE `navigator.share`, for the same iOS user-activation
+ * reason ShareCardA's eager capture exists.
+ */
+function InviteButton({ token }) {
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef(null);
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  async function copyInvite() {
+    if (!(await copyText(CHROME_COPY.invite_text))) return;
+    setCopied(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setCopied(false), COPIED_MS);
+    fireEvent(token, 'invite_shared', { via: 'copy' });
+  }
+
+  async function invite() {
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ text: CHROME_COPY.invite_text });
+        fireEvent(token, 'invite_shared', { via: 'share' });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') return;
+      }
+    }
+    await copyInvite();
+  }
+
+  return (
+    <Button variant="ghost" onClick={invite} style={{ marginTop: 10 }}>
+      {/* `aria-live` so the swap to "Tautan tersalin" is announced, not only drawn. */}
+      <span aria-live="polite">{copied ? CHROME_COPY.copy_link_done : CHROME_COPY.invite_label}</span>
+    </Button>
   );
 }
 

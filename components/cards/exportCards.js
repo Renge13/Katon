@@ -273,26 +273,39 @@ export function canShareFile(file) {
 }
 
 /**
- * Can this browser share a PNG AT ALL, asked without a captured card in hand.
+ * iPhone, iPod or iPad, asked EXPLICITLY rather than by feature support.
  *
- * ── WHY A PROBE FILE RATHER THAN THE REAL ONE ──────────────
- * The button's label has to be right from first paint. Keying it off the eagerly
- * captured File made it read `Simpan Gambar` until the capture landed and then
- * flip to `Bagikan Kartu` a second later, changing under the reader's eyes -
- * caught in a browser, not reasoned about. `canShare` is a question about the
- * TYPE of payload, not its bytes, so a one-byte PNG answers the same question the
- * real card would.
+ * RULED BY REYNER 2026-10-12 (#216, docs/prompts/S-share-sheet.md). "Simpan kartu"
+ * routes iOS through the share sheet because a web download there lands in Files,
+ * not Photos. Feature support cannot answer that: Android Chrome and macOS Safari
+ * both share files and must still download. iPadOS 13+ sends the desktop Safari
+ * user agent ("Macintosh"), so a Macintosh with touch points is an iPad; a real
+ * Mac reports 0.
  *
- * IT IS NOT A SUBSTITUTE FOR `canShareFile`. `shareOrSave` still asks about the
- * ACTUAL file before sharing it, because that is the payload being handed over
- * and this one is not.
+ * (`canSharePngFiles` was deleted the same day. It existed only to choose between
+ * the `Bagikan Kartu` and `Simpan Gambar` labels, and the label is now constant.)
  */
-export function canSharePngFiles() {
-  try {
-    return canShareFile(new File([new Uint8Array([0])], 'probe.png', { type: 'image/png' }));
-  } catch {
-    return false;
-  }
+export function isAppleTouchDevice() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  if (/\b(iPhone|iPad|iPod)\b/u.test(ua)) return true;
+  return /\bMacintosh\b/u.test(ua) && (navigator.maxTouchPoints || 0) > 1;
+}
+
+/**
+ * SAVE THE CARD, the one destination switch for "Simpan kartu".
+ *
+ *   - iOS / iPadOS: the share sheet with the image FILE ONLY - no text, no title -
+ *     so "Save Image" puts it in Photos. `shareOrSave` keeps its degrade: a sheet
+ *     that refuses or fails for any reason but AbortError saves instead.
+ *   - everywhere else: a direct download, no sheet.
+ *
+ * @returns {Promise<string>} SHARE_SHARED, SHARE_CANCELLED or SHARE_SAVED.
+ */
+export async function saveCardImage({ file, dataUrl, filename }) {
+  if (isAppleTouchDevice()) return shareOrSave({ file, dataUrl, filename });
+  saveDataUrl(dataUrl, filename);
+  return SHARE_SAVED;
 }
 
 /**

@@ -47,6 +47,8 @@
 -- the same funnel BY SOURCE (Prompt BM): `reading_created.detail.k`, the link code of the
 -- tab's first touch; else `ref:<referrer host>`; else `(none)`. Recorded since BM's merge;
 -- older rows read `(none)`. Codes and what each was posted as: docs/ops/link-codes.md.
+-- Readings from the product's own links show here with no SQL change (Prompt BP, 2026-10-12):
+-- k = `ajak` from the free reading's invite. (`kartu` is reserved but unused since 2026-10-12.)
 -- ============================================================
 
 with params as (
