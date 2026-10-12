@@ -42,7 +42,7 @@ import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation.js';
 import { CardA, CardB, CARD_A, exportSize } from './cards/Card.js';
 import {
-  downloadCard, captureCard, dataUrlToFile, canSharePngFiles, shareOrSave, SHARE_CANCELLED,
+  downloadCard, captureCard, dataUrlToFile, saveCardImage, SHARE_CANCELLED,
 } from './cards/exportCards.js';
 
 /**
@@ -1461,26 +1461,18 @@ export function ShareCardA({ data, token, capture = captureCard }) {
   const stamp = useMemo(() => cardStamp(data), [data]);
   const filename = `katon-${(data.nameEn || 'kartu').toLowerCase().replace(/\s+/g, '-')}.png`;
 
-  // THE LABEL IS RIGHT FROM FIRST PAINT, which needs a detection that does not
-  // wait on the capture. Keying this off the eager File made the button read
-  // `Simpan Gambar` and then flip to `Bagikan Kartu` a second later, changing
-  // under the reader's eyes - seen in a browser, not predicted. `canSharePngFiles`
-  // asks the same question with a one-byte probe, because `canShare` is about the
-  // payload's TYPE rather than its bytes. The real file is still checked inside
-  // `shareOrSave` before anything is handed over.
-  //
-  // RESOLVED DURING RENDER, NOT IN AN EFFECT. There is no hydration hazard here:
-  // `reading` starts null and arrives from a client fetch, so the first render that
-  // contains this component is already on the client. An effect that setState'd the
-  // answer was written first and `react-hooks` refused it, correctly - it was a
-  // cascading render for a value that was available all along.
-  const shareSupported = useMemo(() => canSharePngFiles(), []);
+  // ONE LABEL ON EVERY PLATFORM (Reyner, 2026-10-12, #216): "Simpan kartu". Until
+  // then a share-support probe chose between `Bagikan Kartu` and `Simpan Gambar`;
+  // the button now always SAVES, and only the route differs (saveCardImage), so
+  // there is nothing left for a label to detect.
 
   // ── THE EAGER CAPTURE. APPROVED BY REYNER 2026-08-23. ──
   // `navigator.share` needs an active user activation, and the capture is not
   // instant (61 font requests measured for one card). On iOS Safari an await of
   // that length between the tap and `share()` consumes the activation: the sheet
   // never opens and nothing says why. So the File is in hand before she taps.
+  // Since 2026-10-12 only iOS / iPadOS takes the sheet (saveCardImage); everywhere
+  // else the same eager capture just makes the download immediate.
   //
   // CONDITION 1 - IT MUST NOT BLOCK OR DELAY THE READING. It is kicked off the
   // critical path in a timeout, and a failure here is swallowed: a reader who has
@@ -1515,10 +1507,10 @@ export function ShareCardA({ data, token, capture = captureCard }) {
       // NOTHING IS AWAITED BEFORE `share()` ON THIS PATH. That is the entire point
       // of the eager capture; adding an await here would restore the iOS bug it
       // was approved to prevent.
-      // THE CARD CARRIES ITS LINK (Prompt BP §2): ruled text with `?k=kartu`, so a
-      // shared card is tappable and attributed. The save fallback cannot carry
-      // text - a saved image is only pixels - and that was accepted in the ruling.
-      const result = await shareOrSave({ file: fresh.file, dataUrl: fresh.dataUrl, filename, text: CHROME_COPY.card_share_text });
+      // THE IMAGE ONLY, NO TEXT (Reyner, 2026-10-12): the card's caption string with
+      // `?k=kartu` was removed the same day it was added. The link lives on the
+      // invite button below.
+      const result = await saveCardImage({ file: fresh.file, dataUrl: fresh.dataUrl, filename });
       if (result !== SHARE_CANCELLED) fireEvent(token, 'card_downloaded');
       return;
     }
@@ -1530,7 +1522,7 @@ export function ShareCardA({ data, token, capture = captureCard }) {
     try {
       const dataUrl = await capture('share', 'A', { id: 'card-a' });
       setReady({ dataUrl, file: dataUrlToFile(dataUrl, filename), stamp });
-      const result = await shareOrSave({ file: dataUrlToFile(dataUrl, filename), dataUrl, filename, text: CHROME_COPY.card_share_text });
+      const result = await saveCardImage({ file: dataUrlToFile(dataUrl, filename), dataUrl, filename });
       // COUNTED ONLY ON SUCCESS, and cancelling is not success. A capture that
       // threw produced no file, and the share-rate denominator must not include
       // deliveries that did not happen - this button shipped BLANK once (#74),
@@ -1564,16 +1556,13 @@ export function ShareCardA({ data, token, capture = captureCard }) {
         </ScaledCard>
       </Reveal>
       <Reveal delay={0.12} style={{ marginTop: 20 }}>
-        {/* COPY RULED BY REYNER 2026-08-23, "SHIP AS PROPOSED". Exact bytes.
-            REYNER-APPROVED 2026-08-23: `Bagikan Kartu`, `Menyiapkan...`.
-            The label says what the button does; on the fallback path it genuinely
-            is a save, so that path keeps `Simpan Gambar` - one capture, two
-            destinations, two honest labels. `shareSupported` is resolved from the
-            EAGER FILE rather than from `navigator.share`, for the same reason the
-            detection is: a browser that has `share` and refuses files must read
-            the save label, not the share one. */}
+        {/* RULED BY REYNER 2026-10-12 (#216): `Simpan kartu` on every platform,
+            replacing the 2026-08-23 pair `Bagikan Kartu` / `Simpan Gambar`. The
+            button SAVES; saveCardImage picks the route (iOS: the share sheet, as the
+            way into Photos; everywhere else: a download). `Menyiapkan...` is the
+            2026-08-23 ruling, unchanged. Record: docs/prompts/S-share-sheet.md. */}
         <Button variant="gold" onClick={share} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <Icon.save size={17} /> {busy ? 'Menyiapkan...' : (shareSupported ? 'Bagikan Kartu' : 'Simpan Gambar')}
+          <Icon.save size={17} /> {busy ? 'Menyiapkan...' : CHROME_COPY.card_save_label}
         </Button>
         {/* REYNER-APPROVED, unchanged. A cancelled share sheet never reaches this. */}
         {failed && <div style={{ color: 'var(--red)', fontSize: 13, marginTop: 10 }}>Gambarnya gagal dibuat. Coba lagi.</div>}

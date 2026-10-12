@@ -176,6 +176,7 @@
     "build:icons": "node scripts/build-icons.mjs",
     "test:favicon": "node --test tests/favicon.spec.mjs",
     "test:invite-link": "node --import ./scripts/jsx-register.mjs --test tests/invite-link.spec.mjs",
+    "test:card-save": "node --import ./scripts/jsx-register.mjs --test tests/card-save.spec.mjs",
     "test:invite-link-route": "node --conditions=react-server --test tests/invite-link-route.spec.mjs"
   },
   "dependencies": {

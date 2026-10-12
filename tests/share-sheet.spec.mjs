@@ -150,6 +150,19 @@ function mount(data, capture) {
 
 const captureOk = async () => PNG;
 
+// ── SINCE 2026-10-12 ONLY iOS / iPadOS OPENS THE SHEET (#216) ──
+// Reyner's second BP ruling: the card button is `Simpan kartu` everywhere and only
+// iPhone / iPad route the save through the share sheet (into Photos); every other
+// platform downloads. So the component tests below that exercise the SHEET run as
+// an iPhone. The platform matrix itself is tests/card-save.spec.mjs.
+const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1';
+function asIphone() {
+  Object.defineProperty(navigator, 'userAgent', { value: IPHONE, configurable: true });
+  Object.defineProperty(navigator, 'maxTouchPoints', { value: 5, configurable: true });
+  return () => { delete navigator.userAgent; delete navigator.maxTouchPoints; };
+}
+const LABEL = 'Simpan kartu';
+
 // ── THE PURE HALF: detection and the destination switch ─────
 
 test('canShareFile detects on the FILES, so `share` alone is not enough', () => {
@@ -229,38 +242,40 @@ test('shareOrSave SAVES on a non-Abort share failure — degrade, never nothing'
 
 // ── PROPOSITION 1: THE FALLBACK FIRES, IN THE REAL COMPONENT ─
 
-test('THE FALLBACK FIRES WHEN canShare RETURNS FALSE', async () => {
+test('THE FALLBACK FIRES WHEN canShare RETURNS FALSE (an iPhone whose sheet refuses files)', async () => {
+  const undo = asIphone();
   const s = stubShare({ canShare: false });
   const ui = mount(DATA_A, captureOk);
   try {
     await ui.settle();                       // let the eager capture land
-    assert.equal(ui.button().textContent.trim(), 'Simpan Gambar',
-      'an unsupported browser must read the save label, not the share one');
+    assert.equal(ui.button().textContent.trim(), LABEL);
     ui.click();
     await ui.settle();
     assert.equal(s.shared.length, 0, 'share() must not be called');
     assert.equal(s.downloads.length, 1, 'the reader still gets her card');
     assert.ok(!ui.text().includes('Gambarnya gagal dibuat'), 'a fallback is not a failure');
-  } finally { ui.unmount(); s.restore(); }
+  } finally { ui.unmount(); s.restore(); undo(); }
 });
 
-test('the share label appears ONLY where files are actually shareable', async () => {
+test('ON AN iPHONE WITH A SHEET, the file is shared and not also downloaded', async () => {
+  const undo = asIphone();
   const s = stubShare({ canShare: true });
   const ui = mount(DATA_A, captureOk);
   try {
     await ui.settle();
-    assert.equal(ui.button().textContent.trim(), 'Bagikan Kartu');
+    assert.equal(ui.button().textContent.trim(), LABEL, 'one label on every platform (2026-10-12)');
     ui.click();
     await ui.settle();
     assert.equal(s.shared.length, 1);
     assert.equal(s.downloads.length, 0, 'a successful share must not also download');
     assert.equal(s.shared[0].files.length, 1);
-  } finally { ui.unmount(); s.restore(); }
+  } finally { ui.unmount(); s.restore(); undo(); }
 });
 
 // ── PROPOSITION 2: CANCEL IS NOT AN ERROR ───────────────────
 
 test('AbortError DOES NOT SURFACE THE ERROR STATE', async () => {
+  const undo = asIphone();
   const abort = Object.assign(new Error('cancelled'), { name: 'AbortError' });
   const s = stubShare({ canShare: true, onShare: () => { throw abort; } });
   const ui = mount(DATA_A, captureOk);
@@ -268,10 +283,11 @@ test('AbortError DOES NOT SURFACE THE ERROR STATE', async () => {
     await ui.settle();
     ui.click();
     await ui.settle();
+    assert.equal(s.shared.length, 1, 'precondition: the sheet opened');
     assert.ok(!ui.text().includes('Gambarnya gagal dibuat. Coba lagi.'),
       'dismissing a share sheet is the most likely outcome and must look like nothing happened');
     assert.equal(s.downloads.length, 0);
-  } finally { ui.unmount(); s.restore(); }
+  } finally { ui.unmount(); s.restore(); undo(); }
 });
 
 // ── PROPOSITION 3: A STALE FILE IS REJECTED ─────────────────
@@ -279,6 +295,7 @@ test('AbortError DOES NOT SURFACE THE ERROR STATE', async () => {
 test('A STALE FILE IS REJECTED RATHER THAN SHARED', async () => {
   // The footer merges the birth date AFTER mount. This is that: capture settles
   // against DATA_A, the data becomes DATA_B, and the tap must not ship the old one.
+  const undo = asIphone();
   const captured = [];
   const capture = async () => { const url = captured.length ? OTHER_PNG : PNG; captured.push(url); return url; };
   const s = stubShare({ canShare: true });
@@ -298,12 +315,13 @@ test('A STALE FILE IS REJECTED RATHER THAN SHARED', async () => {
       'the stale File must be discarded and a fresh capture taken, not reused');
     assert.equal(captured[captured.length - 1], OTHER_PNG,
       'what is shared must come from the capture taken against the CURRENT data');
-  } finally { ui.unmount(); s.restore(); }
+  } finally { ui.unmount(); s.restore(); undo(); }
 });
 
 test('a fresh File is reused — the eager capture is not pointless', async () => {
   // The complement, so "reject the stale one" cannot be satisfied by always
   // re-capturing, which would reintroduce the iOS activation bug.
+  const undo = asIphone();
   let calls = 0;
   const capture = async () => { calls++; return PNG; };
   const s = stubShare({ canShare: true });
@@ -315,7 +333,7 @@ test('a fresh File is reused — the eager capture is not pointless', async () =
     await ui.settle();
     assert.equal(calls, 1, 'unchanged data must reuse the eager File, never re-capture');
     assert.equal(s.shared.length, 1);
-  } finally { ui.unmount(); s.restore(); }
+  } finally { ui.unmount(); s.restore(); undo(); }
 });
 
 test('a failing eager capture never shows a reader an error she did not ask for', async () => {

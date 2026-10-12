@@ -6,8 +6,8 @@ product's own count.
 
 | code | where the product uses it |
 |---|---|
-| `ajak` | the "Kirim tautan ke teman" invite on the free reading (`CHROME_COPY.invite_text`) |
-| `kartu` | the text sent with a shared card from "Bagikan Kartu" (`CHROME_COPY.card_share_text`) |
+| `ajak` | the "Bagikan" invite on the free reading (`CHROME_COPY.invite_text`) |
+| `kartu` | **unused since 2026-10-12.** It was the caption sent with a shared card; Reyner's second ruling that day removed the caption (the card is saved, with no text). Still reserved: never reuse it for a post. |
 
 The ledger of tracked links. Reyner fills it by hand, one row per code, when the post goes up.
 Prompt BM, 2026-10-08. What the code does in the product: `lib/site/linkSource.js`. Where it is

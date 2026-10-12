@@ -15,8 +15,9 @@
 //      `invite_shared` {via: 'share'} on resolve, NOTHING on AbortError
 //   3. without one: the clipboard gets the ruled text, the button reads the
 //      EXISTING `Tautan tersalin`, and `invite_shared` {via: 'copy'} fires
-//   4. both card-share call sites hand `navigator.share` the ruled card text
-//   5. the copy bank holds the three ruled strings byte for byte
+//   4. both card call sites hand over the image ALONE, no text (second ruling,
+//      #216: the card's caption string was removed the same day)
+//   5. the copy bank holds the ruled strings byte for byte, and no caption slot
 //
 // `navigator.share` is stubbed throughout, as in tests/share-sheet.spec.mjs: this
 // asserts the branch taken and the payload, never that a real sheet opens.
@@ -39,12 +40,14 @@ import { mirrorChartView } from '../lib/mirror/view.js';
 import { CHROME_COPY } from '../lib/site/copy.js';
 import { Reading, ShareCardA } from '../components/Funnel.jsx';
 
-// RULED 2026-10-12 (Reyner), verbatim from docs/prompts/BP-invite-and-card-link.md.
+// RULED 2026-10-12 (Reyner): the invite text from docs/prompts/BP-invite-and-card-link.md,
+// and the two labels from the SECOND ruling the same day on #216 (record:
+// docs/prompts/S-share-sheet.md), which also removed the card's caption string.
 // The ONE copy of these bytes in tests; every behaviour test below reads it.
 const RULED = {
-  invite_label: 'Kirim tautan ke teman',
+  invite_label: 'Bagikan',
   invite_text: 'Aku baru membaca pola diriku di Katon. Coba lihat pola dirimu, gratis: https://katon.app/?k=ajak',
-  card_share_text: 'Kartu pola diriku dari Katon. Lihat punyamu di https://katon.app/?k=kartu',
+  card_save_label: 'Simpan kartu',
 };
 const COPIED = 'Tautan tersalin';
 
@@ -124,6 +127,12 @@ test('THE COPY BANK HOLDS THE THREE RULED STRINGS, BYTE FOR BYTE', () => {
   }
   // The confirmation is the EXISTING string, not a new one (Prompt BP §1).
   assert.equal(CHROME_COPY.copy_link_done, COPIED);
+  // The card's caption ("Kartu pola diriku dari Katon...", `?k=kartu`) was REMOVED by
+  // the second ruling: a saved card carries no text. No slot may hold it, by any name.
+  assert.equal(CHROME_COPY.card_share_text, undefined, 'the card caption slot must be gone');
+  for (const [slot, value] of Object.entries(CHROME_COPY)) {
+    assert.ok(!(typeof value === 'string' && value.includes('?k=kartu')), `CHROME_COPY.${slot} still carries ?k=kartu`);
+  }
 });
 
 // ── 1. WHERE IT IS ──────────────────────────────────────────
@@ -139,7 +148,7 @@ test('THE BAGIKAN SECTION RENDERS THE INVITE BUTTON, UNDER THE CARD SHARE CONTRO
     assert.ok(text.includes('Bagikan kartumu'), 'precondition: the Bagikan section is on the page');
     const invite = inviteButton(view.host);
     assert.ok(invite, `no button reads "${RULED.invite_label}" on the free reading`);
-    const card = buttons(view.host).find((b) => /Bagikan Kartu|Simpan Gambar/u.test(b.textContent));
+    const card = buttons(view.host).find((b) => b.textContent.trim() === RULED.card_save_label);
     assert.ok(card, 'precondition: the card share control is on the page');
     assert.ok(card.compareDocumentPosition(invite) & 4 /* DOCUMENT_POSITION_FOLLOWING */,
       'the invite button must come AFTER the card share control');
@@ -194,38 +203,50 @@ test('WITHOUT A SHARE SHEET: the clipboard gets the invite, the button reads Tau
   } finally { cb.restore(); ev.restore(); }
 });
 
-// ── 4. THE CARD CARRIES ITS LINK ────────────────────────────
+// ── 4. THE CARD CARRIES NO TEXT, AT EITHER CALL SITE ────────
+// Second ruling (#216): the card is saved, not captioned. On an iPhone, the one
+// platform that still opens a sheet for it (tests/card-save.spec.mjs), BOTH call
+// sites - the eager file and the re-capture - must hand over the file alone.
 
-test('CARD SHARE, EAGER FILE PATH: navigator.share gets the ruled card text', async () => {
+const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1';
+function asIphone() {
+  Object.defineProperty(navigator, 'userAgent', { value: IPHONE, configurable: true });
+  Object.defineProperty(navigator, 'maxTouchPoints', { value: 5, configurable: true });
+  return () => { delete navigator.userAgent; delete navigator.maxTouchPoints; };
+}
+
+test('CARD SAVE ON iPHONE, EAGER FILE PATH: the file alone, no text', async () => {
   const ev = stubEvents();
   const sh = stubShare();
+  const undo = asIphone();
   try {
     const view = await mount(React.createElement(ShareCardA, { data: DATA, token: 'tok', capture: async () => PNG }));
     await flush(); // the eager capture lands, so the tap takes the fresh-file branch
-    await act(async () => { byText(view.host, 'Bagikan Kartu').click(); });
+    await act(async () => { byText(view.host, RULED.card_save_label).click(); });
     await flush();
     const cards = sh.shared.filter((p) => p.files);
     assert.equal(cards.length, 1, `shared: ${JSON.stringify(sh.shared)}`);
-    assert.equal(cards[0].text, RULED.card_share_text);
+    assert.deepEqual(Object.keys(cards[0]), ['files']);
     await view.unmount();
-  } finally { sh.restore(); ev.restore(); }
+  } finally { undo(); sh.restore(); ev.restore(); }
 });
 
-test('CARD SHARE, RE-CAPTURE PATH: navigator.share gets the ruled card text', async () => {
+test('CARD SAVE ON iPHONE, RE-CAPTURE PATH: the file alone, no text', async () => {
   const ev = stubEvents();
   const sh = stubShare();
+  const undo = asIphone();
   let calls = 0;
   // The eager capture fails, so the tap has no fresh file and re-captures.
   const capture = async () => { calls += 1; if (calls === 1) throw new Error('eager capture failed'); return PNG; };
   try {
     const view = await mount(React.createElement(ShareCardA, { data: DATA, token: 'tok', capture }));
     await flush();
-    await act(async () => { byText(view.host, 'Bagikan Kartu').click(); });
+    await act(async () => { byText(view.host, RULED.card_save_label).click(); });
     await flush();
     assert.equal(calls, 2, 'precondition: the tap re-captured');
     const cards = sh.shared.filter((p) => p.files);
     assert.equal(cards.length, 1, `shared: ${JSON.stringify(sh.shared)}`);
-    assert.equal(cards[0].text, RULED.card_share_text);
+    assert.deepEqual(Object.keys(cards[0]), ['files']);
     await view.unmount();
-  } finally { sh.restore(); ev.restore(); }
+  } finally { undo(); sh.restore(); ev.restore(); }
 });
