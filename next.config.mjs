@@ -4,6 +4,11 @@ import { withBotId } from 'botid/next/config';
 const nextConfig = {
   // App Router. The shared `public/` directory serves static assets.
 
+  // `.next` everywhere except tests/favicon.spec.mjs, which builds into its own
+  // directory so it never tests a stale bundle or overwrites one `next dev` is
+  // serving. Nothing else sets this variable; Vercel builds `.next`.
+  distDir: process.env.KATON_DIST_DIR || '.next',
+
   // Stage 5 reads docs/content/renderer-prompt.txt at runtime (lib/render/prompt.js).
   // A `.txt` has no import form the bundler can follow the way `glossary.json` is
   // followed, so the file is traced explicitly. Without this the file is absent from
