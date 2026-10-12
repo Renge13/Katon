@@ -114,9 +114,11 @@ test('blank contact normalises to null, not to an empty string', async () => {
 
 // ── 5. THE EVENT LIST IS CLOSED ─────────────────────────────
 
-test('the twelve events are fixed, and a typo cannot invent a thirteenth', async () => {
+test('the thirteen events are fixed, and a typo cannot invent a fourteenth', async () => {
   // Nine since Prompt AV §5 (2026-09-30): pair_served, keyed by a pair id.
-  assert.equal(FUNNEL_EVENTS.length, 12);
+  assert.equal(FUNNEL_EVENTS.length, 13);
+  // Prompt BP §3 (Reyner, 2026-10-12): the free reading's invite button.
+  assert.ok(FUNNEL_EVENTS.includes('invite_shared'));
   assert.ok(FUNNEL_EVENTS.includes('pair_served'));
   // Prompt AZ §4 (Reyner, 2026-10-01): the Compatibility block's two events.
   assert.ok(FUNNEL_EVENTS.includes('compat_cta_seen') && FUNNEL_EVENTS.includes('compat_cta_click'));

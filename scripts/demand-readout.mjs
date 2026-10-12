@@ -83,11 +83,12 @@ const num = (n) => String(n).padStart(6);
  * plain-node script cannot import that server-only module, so the copy is asserted
  * equal to it in tests/analytics-events.spec.mjs. `pair_served` (Prompt AV §5) is keyed
  * by a PAIR id and enters no mirror denominator below: those count readers by name.
- * `pair_created` (Prompt BM, 2026-10-08) is pair-keyed the same way.
+ * `pair_created` (Prompt BM, 2026-10-08) is pair-keyed the same way. `invite_shared`
+ * (Prompt BP, 2026-10-12) is mirror-keyed, a step after `mirror_served`.
  */
 export const KNOWN_EVENTS = new Set(['reading_created', 'mirror_served', 'card_downloaded', 'offer_seen',
   'checkout_started', 'purchase_confirmed', 'upcoming_seen', 'interest_registered', 'pair_served',
-  'compat_cta_seen', 'compat_cta_click', 'pair_created']);
+  'compat_cta_seen', 'compat_cta_click', 'pair_created', 'invite_shared']);
 
 /** Funnel rows only: `system:` rows (AK §3.4) are facts about the service, not a reader. */
 const funnelOnly = (events) => (events ?? []).filter((e) => !String(e.reading_id ?? '').startsWith('system:'));
@@ -128,7 +129,7 @@ export function anomalies(allEvents, interest) {
 
   // 4. Any reader who did something later in the funnel than she ever completed.
   const completed = readersWith(events, 'mirror_served');
-  for (const name of ['card_downloaded', 'offer_seen', 'upcoming_seen', 'purchase_confirmed', 'compat_cta_seen', 'compat_cta_click']) {
+  for (const name of ['card_downloaded', 'offer_seen', 'upcoming_seen', 'purchase_confirmed', 'compat_cta_seen', 'compat_cta_click', 'invite_shared']) {
     for (const r of readersWith(events, name)) {
       if (!completed.has(r)) out.push(`${name.toUpperCase()} WITHOUT mirror_served: reading ${r} is missing from the primary denominator.`);
     }
