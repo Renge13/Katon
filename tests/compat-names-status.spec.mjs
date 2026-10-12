@@ -155,9 +155,10 @@ test('BC AMENDMENT 1 item 7: Reyner\'s form labels and privacy sentences, ruled,
 
 // The note was BC amendment 2's (2026-10-02); Reyner re-ruled it 2026-10-06 (Prompt BG
 // §2.4) when Vercel Web Analytics arrived, because "alat analitik pihak ketiga" became
-// false. The "nama lengkap" clause this test exists for is unchanged.
-test('BC AMENDMENT 2 item 1 + BG §2.4: the privacy note says no FULL name, and that visits are counted anonymously', async () => {
+// false. The "nama lengkap" clause this test exists for is unchanged. Reyner appended the
+// link-source sentence 2026-10-09 (Prompt BN; tests/privasi-source-line.spec.mjs).
+test('BC AMENDMENT 2 item 1 + BG §2.4 + BN: the privacy note says no FULL name, that visits are counted anonymously, and that the link source is recorded', async () => {
   const { SITE_COPY } = await import('../lib/site/copy.js');
   assert.equal(SITE_COPY.privasi.collectNote,
-    'Katon tidak meminta nama lengkap, tidak memakai akun, dan tidak memasang cookie pelacak. Kunjungan halaman hanya dihitung secara anonim, tanpa cookie dan tanpa mencatat tautan bacaanmu.');
+    'Katon tidak meminta nama lengkap, tidak memakai akun, dan tidak memasang cookie pelacak. Kunjungan halaman hanya dihitung secara anonim, tanpa cookie dan tanpa mencatat tautan bacaanmu. Kami juga mencatat dari tautan atau situs mana kamu datang, bersama bacaanmu, supaya tahu tautan mana yang berguna.');
 });
