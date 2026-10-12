@@ -349,3 +349,8 @@ A third item was numbered in that block under a heading that said "two divergenc
 archetype name sets disagreeing on five of ten. It also closes: the glossary's set is the one that
 survives, and `tests/mirror-route.spec.mjs` now asserts that a reading and its card name the same
 archetype rather than leaving it to a reader to notice.
+
+## SKILL ROUTING (pointer)
+
+The `katon` skill's session-start ritual runs first. Then the routing in `~/.claude/CLAUDE.md` applies with **Katon DS** in the DS slot (Cata DS rules do not apply here): Emil skills apply to craft, Katon DS wins on visual decisions; flag any conflict, never deviate silently.
+Project triggers: mobile web, the sharecard, sheets and touch flows → `mobile-native`; any motion edit → `review-animations` before done; reading/card layouts → `break-ui` with long Indonesian names and labels.
