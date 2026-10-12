@@ -192,6 +192,21 @@ is a CONSTRUCTION and fire on ordinary Indonesian.
 **The button now says what it does.** The fallback keeps `Simpan Gambar` because on that path it
 genuinely is a save - one capture, two destinations, two honest labels.
 
+### ADDED 2026-10-12 - COPY RULED BY REYNER FOR THE SAME SECTION (Prompt BP)
+
+Verbatim. They live in the copy bank (`CHROME_COPY` in `lib/site/copy.js`), not inline in the
+JSX the way the 2026-08-23 strings above do. `tests/invite-link.spec.mjs` locks them byte for byte.
+Swept by Cowork 2026-10-12: 0 hits on the live blocklist (controls fired: financial 2, code_leak 1).
+Re-swept by Code the same day: 0 hits on 70 compiled patterns, compiled as the gate does
+(`entry.flags || 'iu'`), with the same two controls firing.
+
+| slot | ships as |
+|---|---|
+| invite button, under `Bagikan Kartu` (`invite_label`) | **`Kirim tautan ke teman`** |
+| invite share text (`invite_text`) | **`Aku baru membaca pola diriku di Katon. Coba lihat pola dirimu, gratis: https://katon.app/?k=ajak`** |
+| text sent with a shared card (`card_share_text`) | **`Kartu pola diriku dari Katon. Lihat punyamu di https://katon.app/?k=kartu`** |
+| invite, copied state with no share sheet | **the existing `Tautan tersalin`** (`copy_link_done`), no new string |
+
 ---
 
 ## OUT OF SCOPE - CARD B KEEPS ITS DOWNLOAD
