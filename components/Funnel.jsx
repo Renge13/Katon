@@ -1023,13 +1023,12 @@ export function Reading({ reading, onReset, initialStage, salesOpen = false, com
   // serve payload's `profile` carries the stored row's three fields; the session's
   // own values stand in until it arrives. No values at all means no line, never an
   // empty one.
+  // ── NO HOUR, 2026-10-13 (Reyner): ruling 2 is reversed. The line is the card
+  // footer's words only, "PEREMPUAN | 14 FEB 2001", hour given or not.
   const profile = reading.profile
-    || { birth_date: reading.birthDate ?? null, birth_time: reading.birthTime ?? null, gender: reading.gender ?? null };
-  const hourSegment = typeof profile.birth_time === 'string' && /^\d{2}:\d{2}$/.test(profile.birth_time)
-    ? profile.birth_time.replace(':', '.')
-    : null;
+    || { birth_date: reading.birthDate ?? null, gender: reading.gender ?? null };
   const profileLine = (profile.birth_date || profile.gender)
-    ? [mergeFooter(null, profile.birth_date, profile.gender).left, hourSegment].filter(Boolean).join(' | ')
+    ? mergeFooter(null, profile.birth_date, profile.gender).left
     : '';
 
   return (
