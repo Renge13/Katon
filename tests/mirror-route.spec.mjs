@@ -218,7 +218,11 @@ test('AU §1: the SERVE carries the header profile from the row; the card footer
   // The page line only: the free card is an image shared publicly and stays date-less.
   const token = await createOk({ ...CHART_B, gender: 'female' });
   const body = await (await serve(token)).json();
-  assert.deepEqual(body.profile, { birth_date: CHART_B.birthDate, birth_time: CHART_B.birthTime, gender: 'female' });
+  // NO HOUR, 2026-10-13 (Reyner): the page no longer prints the hour, so the serve
+  // does not carry it. CHART_B has an hour, so a payload that still sent it fails here.
+  assert.ok(CHART_B.birthTime, 'precondition: the fixture row has an hour to leak');
+  assert.deepEqual(body.profile, { birth_date: CHART_B.birthDate, gender: 'female' });
+  assert.equal(JSON.stringify(body).includes(`"${CHART_B.birthTime}"`), false, 'the hour is nowhere in the payload');
   assert.equal(JSON.stringify(body.card).includes(CHART_B.birthDate), false, 'the free card footer stays date-less');
   const d = CHART_B.birthDate.split('-');
   assert.equal(JSON.stringify(body.card).includes(`${Number(d[2])} `), false, 'nor as "21 Nov 1994"');

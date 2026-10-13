@@ -484,14 +484,18 @@ test('R3 + AW: the mirror cover prints the profile line; the compat cover birthS
   const lines = (t) => t.split('\n').map((l) => l.trim());
   // Read with runs joined: react-pdf may split a line into runs at a digit.
   const joined = (t) => t.replace(/\s*\n\s*/gu, ' ');
-  assert.ok(joined(m.texts[0]).includes('PEREMPUAN | 13 SEP 1989 | 09.00'),
+  // NO HOUR, 2026-10-13 (Reyner): both covers drop the hour. Both fixture charts HAVE
+  // one (09:00, 14:00), so a cover that still printed it fails the `false` checks.
+  assert.ok(joined(m.texts[0]).includes('PEREMPUAN | 13 SEP 1989'),
     `mirror cover: ${JSON.stringify(lines(m.texts[0]))}`);
+  assert.equal(joined(m.texts[0]).includes('09.00'), false, `the mirror cover prints no hour: ${joined(m.texts[0])}`);
   assert.equal(joined(m.texts[0]).includes('13 Sep 1989, 09.00, Perempuan'), false, 'the mirror cover no longer prints birthSummary');
   // The compat births are uppercased by STYLE since Prompt BC §4 (the CE's profile-line
-  // format); the words are birthSummary's, so the comparison folds case.
+  // format), so the comparison folds case.
   const cover = joined(c.texts[0]).toUpperCase();
-  assert.ok(cover.includes('13 SEP 1989, 09.00, PEREMPUAN'), `compat cover, reader: ${cover}`);
-  assert.ok(cover.includes('4 MAR 1990, 14.00, LAKI-LAKI'), `compat cover, partner: ${cover}`);
+  assert.ok(cover.includes('13 SEP 1989, PEREMPUAN'), `compat cover, reader: ${cover}`);
+  assert.ok(cover.includes('4 MAR 1990, LAKI-LAKI'), `compat cover, partner: ${cover}`);
+  assert.equal(cover.includes('09.00') || cover.includes('14.00'), false, `the compat cover prints no hour: ${cover}`);
   assert.equal(cover.includes(' DAN LAKI-LAKI'), false, 'the two people are not joined into one pairLine sentence');
   assert.ok(cover.indexOf('13 SEP 1989') < cover.indexOf('4 MAR 1990'), 'the reader comes first');
 });

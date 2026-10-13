@@ -110,19 +110,24 @@ test('AU §1 RE-ACCESS: a served profile shows the line with no session', async 
   } finally { m.unmount(); f.restore(); }
 });
 
-test('AU §1: with an hour the line has three segments, "PEREMPUAN | 14 Feb 2001 | 13.00"', async () => {
+// ── NO HOUR, 2026-10-13 (Reyner reverses AU ruling 2) ──
+// The hour is never printed on the page. Both tests below hand the page an hour on
+// purpose; a line that printed it would read "... | 13.00" and fail.
+test('NO HOUR: a served profile that still carries an hour prints the date line only', async () => {
   const f = stubFetch();
   const m = await mount({ ...SERVED, profile: { birth_date: '2001-02-14', birth_time: '13:00', gender: 'female' } });
   try {
-    assert.equal(m.host.querySelector('[data-profile-line]')?.textContent, 'PEREMPUAN | 14 Feb 2001 | 13.00');
+    assert.equal(m.host.querySelector('[data-profile-line]')?.textContent, 'PEREMPUAN | 14 Feb 2001');
+    assert.equal(m.text().includes('13.00'), false, 'the hour appears nowhere on the page');
   } finally { m.unmount(); f.restore(); }
 });
 
-test('AU §1: in session, the hour she typed is the third segment too', async () => {
+test('NO HOUR: in session, the hour she typed is not printed', async () => {
   const f = stubFetch();
   const m = await mount({ ...IN_SESSION, birthTime: '07:00' });
   try {
-    assert.equal(m.host.querySelector('[data-profile-line]')?.textContent, 'PEREMPUAN | 14 Feb 2001 | 07.00');
+    assert.equal(m.host.querySelector('[data-profile-line]')?.textContent, 'PEREMPUAN | 14 Feb 2001');
+    assert.equal(m.text().includes('07.00'), false, 'the hour appears nowhere on the page');
   } finally { m.unmount(); f.restore(); }
 });
 
