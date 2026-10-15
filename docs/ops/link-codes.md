@@ -9,6 +9,17 @@ product's own count.
 | `ajak` | the "Bagikan" invite on the free reading (`CHROME_COPY.invite_text`) |
 | `kartu` | **unused since 2026-10-12.** It was the caption sent with a shared card; Reyner's second ruling that day removed the caption (the card is saved, with no text). Still reserved: never reuse it for a post. |
 
+**Banned: `wa`, `name`, `contact`. These pass the code rules below but lose the reading's
+analytics.** The analytics door (`assertNoPii` in `lib/analytics/events.js`) refuses any event
+whose JSON contains one of its blocked keys in quotes, and it matches a VALUE as well as a key.
+So `?k=wa` serializes as `"k":"wa"`, the door throws, and the whole `reading_created` or
+`pair_created` event is dropped, not only the code. The reading itself is still created. These
+three are the only blocked keys that are also valid codes; the other five (`birth_date`,
+`birthDate`, `birth_time`, `birthTime`, `wa_number`) have an underscore or a capital letter and
+are refused as codes already. Only the exact word drops the event: `wa1`, `wa-story` and `nama`
+are recorded. Probed 2026-10-15 against `recordEvent` in memory mode with the shape
+`lib/mirror/handlers.js` sends: `{ has_hour, ...cleanSource(src) }`.
+
 The ledger of tracked links. Reyner fills it by hand, one row per code, when the post goes up.
 Prompt BM, 2026-10-08. What the code does in the product: `lib/site/linkSource.js`. Where it is
 read: `docs/ops/funnel.sql` (query 2) and `docs/ops/compat-funnel.sql`.
@@ -36,3 +47,4 @@ read: `docs/ops/funnel.sql` (query 2) and `docs/ops/compat-funnel.sql`.
 
 | code | date posted | channel | angle | post URL | notes |
 |---|---|---|---|---|---|
+| `ig-bio` | 2026-10-15 | Instagram | bio link (whole profile) | https://www.instagram.com/katon.app/ | Standing link, not a post: `https://katon.app/?k=ig-bio`. Counts every visit through the profile, across all posts. Never put it in a post or caption. |
