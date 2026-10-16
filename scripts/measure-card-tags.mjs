@@ -26,7 +26,9 @@
 //
 //   FEWER THAN 3 TAGS   the cost of that dedupe, and the row to watch. It went
 //                       1 -> 2 of 13 when Bintang left the pool, because two of
-//                       chart 12's three tags had been Bintang. The ruling says
+//                       chart 12's three tags had been Bintang. It went 2 -> 4
+//                       of 13 on 2026-10-15 when the headline Aspek left the
+//                       pool too (charts 6 and 11). The ruling says
 //                       three; the card renders what exists rather than inventing
 //                       one (rule 14). If this climbs as the fixture grows, the
 //                       ruled "3 dynamic" is what is under pressure.
@@ -45,7 +47,8 @@ const PENOLONG = 'Bintang Penolong';
 const rows = VALIDATION_CHARTS.map((c) => {
   const chart = calculateBaziChart({ birthDate: c.date, birthTime: c.time });
   const sj = buildSemanticJson(chart);
-  const tags = dynamicTags(sj.facts, allBadges(sj.facts));
+  // Same arguments as buildCardData, or this measures a card that does not ship.
+  const tags = dynamicTags(sj.facts, allBadges(sj.facts), sj.core.main_profile_display);
   return { id: c.id, date: c.date, tags };
 });
 

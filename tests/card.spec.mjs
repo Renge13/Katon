@@ -1472,6 +1472,39 @@ test('NOTHING appears both as a dynamic tag and in the badge row', () => {
   }
 });
 
+test('THE HEADLINE ASPEK IS NOT ALSO A TAG (1990-05-22 10:30, perempuan)', () => {
+  // The defect Reyner caught 2026-10-15: Card B printed "Aspek Pengelola" as the
+  // headline axis and again as the first dynamic tag. Same shape as the 08-13
+  // Bintang repeat, one row up: the main profile is the top-ranked convergence
+  // fact, so it is usually the head of the tag list.
+  const d = cardFor('1990-05-22', { birthTime: '10:30', gender: 'female' });
+  assert.equal(d.aspek, 'Aspek Pengelola', 'the chart this test was written against has moved');
+  assert.ok(!d.tags.dynamic.includes(d.aspek), `tags repeat the headline: ${d.tags.dynamic.join(', ')}`);
+  // What the reader sees: the name once on Card B, not twice.
+  const b = renderToStaticMarkup(React.createElement(CardB, { data: d }));
+  assert.equal(b.split(d.aspek).length - 1, 1, 'Card B prints the headline Aspek more than once');
+});
+
+test('no fixture chart repeats its headline Aspek in the tag row', () => {
+  for (const c of VALIDATION_CHARTS) {
+    const d = cardFor(c.date, { birthTime: c.time });
+    assert.ok(!d.tags.dynamic.includes(d.aspek), `chart ${c.id} repeats ${d.aspek}`);
+  }
+});
+
+test('dynamicTags excludes the headline it is given, and only that', () => {
+  const facts = [
+    { type: 'convergence', label: 'Aspek Head' },
+    { type: 'convergence', label: 'Aspek Two' },
+    { type: 'badge', label: 'Shown' },
+    { type: 'convergence', label: 'Aspek Three' },
+    { type: 'convergence', label: 'Aspek Four' },
+  ];
+  assert.deepEqual(dynamicTags(facts, [{ label: 'Shown' }], 'Aspek Head'), ['Aspek Two', 'Aspek Three', 'Aspek Four']);
+  // No headline passed: nothing extra is dropped.
+  assert.deepEqual(dynamicTags(facts, [{ label: 'Shown' }]), ['Aspek Head', 'Aspek Two', 'Aspek Three']);
+});
+
 test('the exclusion reads the BADGE ROW, not the fact type', () => {
   // Equivalent today, because the badge row renders every badge. They stop being
   // equivalent the moment that row is capped, and the version that survives a cap
