@@ -90,6 +90,30 @@ test('detail REFUSES PII rather than trusting the call site', async () => {
   assert.equal(await recordEvent(R, 'mirror_served', { source: 'module_assembly' }), true);
 });
 
+test('the PII door matches KEYS, not values: ?k=wa keeps its reading_created', async () => {
+  // A link code is a VALUE. `wa`, `name` and `contact` pass cleanCode
+  // (lib/site/linkSource.js), and the door used to match `"wa"` anywhere in the
+  // JSON, so `"k":"wa"` dropped the whole event, has_hour and all. Probed 2026-10-15.
+  for (const k of ['wa', 'name', 'contact']) {
+    __resetAnalyticsMemForTest();
+    assert.equal(await recordEvent(R, 'reading_created', { has_hour: true, k, ref: null, landing: 'home' }), true,
+      `k=${k} is a value and must not trip the key check`);
+    const rows = await readEvents();
+    assert.equal(rows.length, 1);
+    assert.deepEqual(rows[0].detail, { has_hour: true, k, ref: null, landing: 'home' });
+  }
+
+  // The door is still blunt about KEYS, at any depth.
+  __resetAnalyticsMemForTest();
+  assert.equal(await recordEvent(R, 'reading_created', { birth_date: 'x' }), false,
+    'a blocked key is refused even when its value is not a date');
+  assert.equal(await recordEvent(R, 'reading_created', { a: { name: 'x' } }), false,
+    'a blocked key is refused when nested');
+  assert.equal(await recordEvent(R, 'reading_created', { a: [{ contact: 'x' }] }), false,
+    'a blocked key is refused inside an array');
+  assert.equal((await readEvents()).length, 0);
+});
+
 // ── 4. INTEREST ─────────────────────────────────────────────
 
 test('THE TAP IS THE METRIC — interest records with no contact', async () => {
