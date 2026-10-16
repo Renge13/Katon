@@ -9,6 +9,12 @@ product's own count.
 | `ajak` | the "Bagikan" invite on the free reading (`CHROME_COPY.invite_text`) |
 | `kartu` | **unused since 2026-10-12.** It was the caption sent with a shared card; Reyner's second ruling that day removed the caption (the card is saved, with no text). Still reserved: never reuse it for a post. |
 
+**`wa`, `name`, `contact` are usable codes since fcbb0da.** Until then the analytics door
+(`assertNoPii` in `lib/analytics/events.js`) matched a blocked key's name as a VALUE too, so
+`?k=wa` (`"k":"wa"`) dropped the whole `reading_created` or `pair_created` event. It now matches
+keys only (`"<key>":`). Probed 2026-10-15; fixed with the test "the PII door matches KEYS, not
+values".
+
 The ledger of tracked links. Reyner fills it by hand, one row per code, when the post goes up.
 Prompt BM, 2026-10-08. What the code does in the product: `lib/site/linkSource.js`. Where it is
 read: `docs/ops/funnel.sql` (query 2) and `docs/ops/compat-funnel.sql`.
@@ -36,3 +42,4 @@ read: `docs/ops/funnel.sql` (query 2) and `docs/ops/compat-funnel.sql`.
 
 | code | date posted | channel | angle | post URL | notes |
 |---|---|---|---|---|---|
+| `ig-bio` | 2026-10-15 | Instagram | bio link (whole profile) | https://www.instagram.com/katon.app/ | Standing link, not a post: `https://katon.app/?k=ig-bio`. Counts every visit through the profile, across all posts. Never put it in a post or caption. |
