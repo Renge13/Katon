@@ -575,6 +575,11 @@ failing with an error toast. Cowork repeated the sentence on 09-24 as a premise 
 Struck in place, marked CORRECTED. **A Back Office state is a fact only when someone read it on the
 screen, and the entry says who and when.**
 
+### 10-16 `test:favicon` failed in a worktree because the worktree had no `node_modules`, not because of the favicon (#220).
+
+`test:favicon` runs `next build` from `node_modules/next/dist/bin/next`, so in a worktree with no install it fails with `Cannot find module`. Fix: link the main checkout's install (`mklink /J node_modules D:\claude-projects\katon\node_modules`).
+The link is gitignored, so `git status` never shows it: **remove it first (`rmdir`, without `/s`), and only then the worktree**, so deleting the worktree never reaches the main install through the link.
+
 ### The correction to error 20, 2026-08-12. Read this one for WHERE the rule was, not for the lock.
 
 The row originally said the git prohibition was "foreseeable rather than prohibited". It was
